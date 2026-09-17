@@ -1,18 +1,26 @@
---!strict
 -- GameLoopManager : machine à états gérant le temps global du serveur.
 -- États : Feeding (60s) et Digesting (120s).
 -- Notifie les autres modules via un BindableEvent à chaque seconde et lors des changements d'état.
 
-local GameLoopManager = {}
+type GameLoopManagerModule = {
+	ServerEvent: BindableEvent,
+	GetState: (self: GameLoopManagerModule) -> string?,
+	GetTimeRemaining: (self: GameLoopManagerModule) -> number,
+	GetStateDuration: (self: GameLoopManagerModule, state: string) -> number?,
+	Start: (self: GameLoopManagerModule) -> (),
+	Stop: (self: GameLoopManagerModule) -> (),
+}
+
+local GameLoopManager: GameLoopManagerModule = {} :: GameLoopManagerModule
 
 -- Durées des états (en secondes)
-local STATE_DURATIONS = {
+local STATE_DURATIONS: { [string]: number } = {
 	Feeding = 60,
 	Digesting = 120,
 }
 
 -- Ordre de transition des états
-local STATE_ORDER = { "Feeding", "Digesting" }
+local STATE_ORDER: { string } = { "Feeding", "Digesting" }
 
 -- Événement utilisé pour notifier les autres modules
 local ServerEvent = Instance.new("BindableEvent")
@@ -48,7 +56,7 @@ local function getNextState(state: string): string
 	for index, name in ipairs(STATE_ORDER) do
 		if name == state then
 			local nextIndex = (index % #STATE_ORDER) + 1
-			return STATE_ORDER[nextIndex]
+			return STATE_ORDER[nextIndex] or STATE_ORDER[1]
 		end
 	end
 	return STATE_ORDER[1]

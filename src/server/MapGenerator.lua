@@ -1,4 +1,3 @@
---!strict
 -- MapGenerator : construit physiquement la Part centrale noire (trou noir)
 -- et les 4 bases grises disposées en cercle autour.
 
@@ -18,7 +17,7 @@ local BASE_HEIGHT = 1            -- hauteur Y des bases
 
 -- Crée une Part simple avec les propriétés de base
 local function createPart(name: string, size: Vector3, position: Vector3, color: Color3, parent: Instance): Part
-	local part = Instance.new("Part") :: Part
+	local part: Part = Instance.new("Part")
 	part.Name = name
 	part.Size = size
 	part.Position = position
@@ -50,7 +49,7 @@ end
 
 -- Crée une base grise avec ses sous-dossiers (ItemSpawns, zones)
 local function createBase(index: number, angle: number, parent: Instance): Model
-	local base = Instance.new("Model") :: Model
+	local base: Model = Instance.new("Model")
 	base.Name = "Base" .. index
 
 	-- Position de la base sur le cercle
