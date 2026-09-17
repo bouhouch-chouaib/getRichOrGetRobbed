@@ -16,8 +16,8 @@ local BASE_RADIUS = 150          -- distance du centre aux bases
 local BASE_HEIGHT = 1            -- hauteur Y des bases
 
 -- Crée une Part simple avec les propriétés de base
-local function createPart(name: string, size: Vector3, position: Vector3, color: Color3, parent: Instance): Part
-	local part: Part = Instance.new("Part")
+local function createPart(name, size, position, color, parent)
+	local part = Instance.new("Part")
 	part.Name = name
 	part.Size = size
 	part.Position = position
@@ -32,7 +32,7 @@ local function createPart(name: string, size: Vector3, position: Vector3, color:
 end
 
 -- Crée le trou noir central
-local function createBlackhole(parent: Instance): Part
+local function createBlackhole(parent)
 	local blackhole = createPart(
 		"Blackhole",
 		BLACKHOLE_SIZE,
@@ -48,8 +48,8 @@ local function createBlackhole(parent: Instance): Part
 end
 
 -- Crée une base grise avec ses sous-dossiers (ItemSpawns, zones)
-local function createBase(index: number, angle: number, parent: Instance): Model
-	local base: Model = Instance.new("Model")
+local function createBase(index, angle, parent)
+	local base = Instance.new("Model")
 	base.Name = "Base" .. index
 
 	-- Position de la base sur le cercle

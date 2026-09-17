@@ -2,25 +2,16 @@
 -- États : Feeding (60s) et Digesting (120s).
 -- Notifie les autres modules via un BindableEvent à chaque seconde et lors des changements d'état.
 
-type GameLoopManagerModule = {
-	ServerEvent: BindableEvent,
-	GetState: (self: GameLoopManagerModule) -> string?,
-	GetTimeRemaining: (self: GameLoopManagerModule) -> number,
-	GetStateDuration: (self: GameLoopManagerModule, state: string) -> number?,
-	Start: (self: GameLoopManagerModule) -> (),
-	Stop: (self: GameLoopManagerModule) -> (),
-}
-
-local GameLoopManager: GameLoopManagerModule = {} :: GameLoopManagerModule
+local GameLoopManager = {}
 
 -- Durées des états (en secondes)
-local STATE_DURATIONS: { [string]: number } = {
+local STATE_DURATIONS = {
 	Feeding = 60,
 	Digesting = 120,
 }
 
 -- Ordre de transition des états
-local STATE_ORDER: { string } = { "Feeding", "Digesting" }
+local STATE_ORDER = { "Feeding", "Digesting" }
 
 -- Événement utilisé pour notifier les autres modules
 local ServerEvent = Instance.new("BindableEvent")
@@ -28,31 +19,31 @@ ServerEvent.Name = "GameLoopServerEvent"
 ServerEvent.Parent = script
 
 -- État interne
-local currentState: string? = nil
-local timeRemaining: number = 0
-local isRunning: boolean = false
-local loopThread: thread? = nil
+local currentState = nil
+local timeRemaining = 0
+local isRunning = false
+local loopThread = nil
 
 -- Expose l'événement pour que les autres modules puissent s'y connecter
 GameLoopManager.ServerEvent = ServerEvent
 
 -- Retourne l'état actuel
-function GameLoopManager.GetState(): string?
+function GameLoopManager.GetState()
 	return currentState
 end
 
 -- Retourne le temps restant dans l'état actuel
-function GameLoopManager.GetTimeRemaining(): number
+function GameLoopManager.GetTimeRemaining()
 	return timeRemaining
 end
 
 -- Retourne la durée totale d'un état
-function GameLoopManager.GetStateDuration(state: string): number?
+function GameLoopManager.GetStateDuration(state)
 	return STATE_DURATIONS[state]
 end
 
 -- Retourne l'état suivant dans le cycle
-local function getNextState(state: string): string
+local function getNextState(state)
 	for index, name in ipairs(STATE_ORDER) do
 		if name == state then
 			local nextIndex = (index % #STATE_ORDER) + 1
@@ -63,7 +54,7 @@ local function getNextState(state: string): string
 end
 
 -- Change l'état courant et notifie les abonnés
-local function setState(newState: string)
+local function setState(newState)
 	currentState = newState
 	timeRemaining = STATE_DURATIONS[newState] or 0
 
