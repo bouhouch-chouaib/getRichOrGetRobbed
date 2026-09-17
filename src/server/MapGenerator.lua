@@ -31,19 +31,33 @@ local function createPart(name, size, position, color, parent)
 	return part
 end
 
--- Crée le trou noir central
+-- Crée le trou noir central (disque plat au sol)
 local function createBlackhole(parent)
 	local blackhole = createPart(
-		"Blackhole",
-		BLACKHOLE_SIZE,
-		BLACKHOLE_POSITION,
+		"BlackholeZone",
+		Vector3.new(80, 1, 80),
+		Vector3.new(0, 0.5, 0),
 		BLACKHOLE_COLOR,
 		parent
 	)
-	blackhole.Shape = Enum.PartType.Ball
 	blackhole.Material = Enum.Material.Neon
 	blackhole.CanCollide = false
 	blackhole:SetAttribute("CanConsume", false)
+
+	-- Disque plat au sol
+	local mesh = Instance.new("CylinderMesh")
+	mesh.Parent = blackhole
+
+	-- Aura violette
+	local aura = Instance.new("ParticleEmitter")
+	aura.Name = "Aura"
+	aura.Color = ColorSequence.new(Color3.fromRGB(150, 0, 255))
+	aura.Rate = 40
+	aura.Speed = NumberRange.new(5, 10)
+	aura.Lifetime = NumberRange.new(2, 4)
+	aura.EmissionDirection = Enum.NormalId.Top
+	aura.Parent = blackhole
+
 	return blackhole
 end
 

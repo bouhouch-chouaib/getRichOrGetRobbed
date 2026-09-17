@@ -14,6 +14,9 @@ local blackholeZone = nil
 local gameLoopManager = nil
 local connection = nil
 
+-- Score (nombre d'items avalés) par joueur
+local playerGauges = {}
+
 -- Récupère la BlackholeZone sous workspace.Map
 local function getBlackholeZone()
 	local map = Workspace:FindFirstChild("Map")
@@ -37,6 +40,10 @@ local function applyState(state)
 		blackholeZone.Color = FEEDING_COLOR
 		blackholeZone:SetAttribute("CanConsume", true)
 	elseif state == "Digesting" then
+		-- Distribution des récompenses RNG avant de passer en rouge
+		BlackholeController.CalculateRNGRewards(playerGauges)
+		playerGauges = {}
+
 		blackholeZone.Color = DIGESTING_COLOR
 		blackholeZone:SetAttribute("CanConsume", false)
 	end
@@ -51,9 +58,11 @@ local function onGameLoopEvent(eventName, state, timeRemaining)
 	end
 end
 
--- Fonction vide à implémenter plus tard : distribue les œufs selon les objets avalés
-function BlackholeController.CalculateRNGRewards(player)
-	-- TODO : calculer les récompenses RNG en fonction des objets avalés par le joueur
+-- Distribue les récompenses RNG selon les objets avalés par chaque joueur
+function BlackholeController.CalculateRNGRewards(gauges)
+	for playerName, score in pairs(gauges) do
+		print("[RNG] Le joueur " .. playerName .. " a nourri le trou noir avec " .. score .. " items !")
+	end
 end
 
 -- Initialise le contrôleur avec une référence au GameLoopManager
@@ -69,6 +78,21 @@ function BlackholeController.Init(manager)
 	-- Connexion à l'événement du GameLoopManager
 	if gameLoopManager and gameLoopManager.ServerEvent then
 		connection = gameLoopManager.ServerEvent.Event:Connect(onGameLoopEvent)
+	end
+
+	-- Absorption des items jetés dans le trou noir
+	if blackholeZone then
+		blackholeZone.Touched:Connect(function(hit)
+			if not blackholeZone:GetAttribute("CanConsume") then
+				return
+			end
+
+			if hit and hit.Name == "Item" and not hit.Anchored then
+				local ownerName = hit:GetAttribute("Owner") or "Unknown"
+				playerGauges[ownerName] = (playerGauges[ownerName] or 0) + 1
+				hit:Destroy()
+			end
+		end)
 	end
 
 	-- Applique immédiatement l'état courant si disponible
