@@ -3,6 +3,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Hello)
+local GameLoopManager = require(script.Parent.GameLoopManager)
 
 local function newPart(name, size, cframe, color, parent, material)
 	local part = Instance.new("Part")
@@ -139,3 +140,10 @@ local function buildMap()
 end
 
 buildMap()
+
+-- Démarrage de la boucle de jeu (Feeding / Digesting)
+GameLoopManager.PhaseChanged.Event:Connect(function(phase, duration)
+	print(string.format("[GameLoop] Nouvelle phase : %s (%d s)", phase, duration))
+end)
+
+GameLoopManager.start()
