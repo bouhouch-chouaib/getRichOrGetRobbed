@@ -74,11 +74,14 @@ local function runLoop()
 			break
 		end
 
-		timeRemaining -= 1
+		timeRemaining = timeRemaining - 1
 
 		if timeRemaining <= 0 then
-			local nextState = getNextState(currentState :: string)
-			setState(nextState)
+			local state = currentState
+			if state then
+				local nextState = getNextState(state)
+				setState(nextState)
+			end
 		end
 	end
 end
