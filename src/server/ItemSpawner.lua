@@ -1,4 +1,3 @@
---!strict
 -- ItemSpawner : fait apparaître périodiquement des objets de test au-dessus des bases joueurs.
 -- MVP / Greyboxing : Part rouge soumise à la physique, avec un ProximityPrompt "Ramasser".
 
@@ -8,20 +7,20 @@ local SPAWN_INTERVAL = 30
 local SPAWN_HEIGHT_OFFSET = 10
 
 -- Récupère toutes les bases (Models nommés "BaseN") parentées à Map.
-local function getBases(map: Instance): { Model }
-	local bases: { Model } = {}
+local function getBases(map)
+	local bases = {}
 	for _, child in ipairs(map:GetChildren()) do
 		if child:IsA("Model") and child.Name:match("^Base%d+$") then
-			table.insert(bases, child :: Model)
+			table.insert(bases, child)
 		end
 	end
 	return bases
 end
 
 -- Crée et parente un item de test au-dessus de la base donnée.
-local function spawnItem(base: Model)
-	local basePart = base:FindFirstChild("BasePart") :: BasePart?
-	if not basePart then
+local function spawnItem(base)
+	local basePart = base:FindFirstChild("BasePart")
+	if not basePart or not basePart:IsA("BasePart") then
 		return
 	end
 
