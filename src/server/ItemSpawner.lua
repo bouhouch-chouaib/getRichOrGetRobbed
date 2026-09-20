@@ -8,8 +8,8 @@ local SPAWN_INTERVAL = 2
 local SPAWN_HEIGHT_OFFSET = 10
 
 -- Récupère toutes les bases (Models nommés "BaseN") parentées à Map.
-local function getBases(map: Instance): { Instance }
-	local bases = {}
+local function getBases(map: Instance): { Model }
+	local bases: { Model } = {}
 	for _, child in ipairs(map:GetChildren()) do
 		if child:IsA("Model") and child.Name:match("^Base%d+$") then
 			table.insert(bases, child)
@@ -19,7 +19,7 @@ local function getBases(map: Instance): { Instance }
 end
 
 -- Crée et parente un item de test au-dessus de la base donnée.
-local function spawnItem(base: Instance)
+local function spawnItem(base: Model)
 	local basePart = base:FindFirstChild("BasePart")
 	if not basePart or not basePart:IsA("BasePart") then
 		return
@@ -51,17 +51,13 @@ function ItemSpawner.start()
 			task.wait(SPAWN_INTERVAL)
 
 			local map = workspace:FindFirstChild("Map")
-			if not map then
-				continue
+			if map then
+				local bases = getBases(map)
+				if #bases > 0 then
+					local base = bases[math.random(1, #bases)]
+					spawnItem(base)
+				end
 			end
-
-			local bases = getBases(map)
-			if #bases == 0 then
-				continue
-			end
-
-			local base = bases[math.random(1, #bases)]
-			spawnItem(base)
 		end
 	end)
 end
