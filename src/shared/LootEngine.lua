@@ -22,12 +22,12 @@ local rng = Random.new()
 local function rollSingle()
 	local totalWeight = 0
 	for _, weight in pairs(LOOT_TABLE) do
-		totalWeight += weight
+		totalWeight = totalWeight + weight
 	end
 
 	local roll = rng:NextInteger(1, totalWeight)
 	for rarity, weight in pairs(LOOT_TABLE) do
-		roll -= weight
+		roll = roll - weight
 		if roll <= 0 then
 			return rarity
 		end
