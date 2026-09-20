@@ -7,6 +7,7 @@ local ProximityPromptService = game:GetService("ProximityPromptService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 
@@ -228,6 +229,48 @@ local function updateTrajectory(chargeTime)
 		end
 	end
 end
+
+-- Lâche l'item tenu (sans le lancer) : utilisé lors d'un KO.
+local function dropItem()
+	if not heldItem or not heldWeld then
+		return
+	end
+
+	local item = heldItem
+	local weld = heldWeld
+
+	heldItem = nil
+	heldWeld = nil
+
+	weld:Destroy()
+
+	item.CanCollide = true
+
+	-- Réactive le prompt pour permettre de le ramasser à nouveau.
+	local prompt = item:FindFirstChildOfClass("ProximityPrompt")
+	if prompt then
+		prompt.Enabled = true
+	end
+end
+
+-- Réception du KO : le joueur lâche tout ce qu'il tient.
+local knockbackEvent = ReplicatedStorage:WaitForChild("KnockbackEvent")
+knockbackEvent.OnClientEvent:Connect(function()
+	-- Annule une éventuelle charge en cours.
+	if isCharging then
+		isCharging = false
+		if renderConnection then
+			renderConnection:Disconnect()
+			renderConnection = nil
+		end
+		for _, dot in ipairs(dots) do
+			dot.Transparency = 1
+		end
+		targetMarker.Parent = nil
+	end
+
+	dropItem()
+end)
 
 -- Écoute du déclenchement des ProximityPrompt.
 ProximityPromptService.PromptTriggered:Connect(function(prompt, triggeringPlayer)

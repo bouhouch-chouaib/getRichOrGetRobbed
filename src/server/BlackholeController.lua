@@ -4,6 +4,16 @@
 local BlackholeController = {}
 
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+-- RemoteEvent utilisé pour notifier le client qu'il doit lâcher son item (KO).
+local knockbackEvent = ReplicatedStorage:FindFirstChild("KnockbackEvent")
+if not knockbackEvent then
+	knockbackEvent = Instance.new("RemoteEvent")
+	knockbackEvent.Name = "KnockbackEvent"
+	knockbackEvent.Parent = ReplicatedStorage
+end
 
 -- Couleurs par état
 local FEEDING_COLOR = Color3.fromRGB(150, 0, 255)   -- violet
@@ -64,7 +74,8 @@ local function slapPlayer(character, domePosition)
 	end
 	stunnedPlayers[character] = true
 
-	-- Direction de projection : du centre du dôme vers le joueur, avec une poussée vers le haut.
+	-- Direction de projection : du centre du dôme vers le joueur (recul vers l'arrière),
+	-- avec une poussée vers le haut pour un effet "gifle".
 	local away = root.Position - domePosition
 	away = Vector3.new(away.X, 0, away.Z)
 	if away.Magnitude < 0.1 then
@@ -72,9 +83,15 @@ local function slapPlayer(character, domePosition)
 	end
 	away = away.Unit
 
-	-- Impulsion forte vers l'extérieur + vers le haut.
-	local impulse = (away + Vector3.new(0, 0.8, 0)).Unit * DOME_KNOCKBACK_FORCE
+	-- Impulsion forte vers l'arrière (extérieur du dôme) + vers le haut.
+	local impulse = (away + Vector3.new(0, 0.9, 0)).Unit * DOME_KNOCKBACK_FORCE
 	root:ApplyImpulse(impulse * root.AssemblyMass)
+
+	-- Notifie le client qu'il doit lâcher l'item qu'il tient.
+	local player = Players:GetPlayerFromCharacter(character)
+	if player then
+		knockbackEvent:FireClient(player)
+	end
 
 	-- Met le joueur KO : ragdoll (physique) + contrôle désactivé.
 	humanoid.WalkSpeed = 0
