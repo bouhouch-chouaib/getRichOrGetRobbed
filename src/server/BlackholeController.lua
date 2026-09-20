@@ -30,15 +30,36 @@ local function getBlackholeZone()
 	return nil
 end
 
+-- Récupère la BlackholeBarrier sous workspace.Map
+local function getBlackholeBarrier()
+	local map = Workspace:FindFirstChild("Map")
+	if not map then
+		return nil
+	end
+	local barrier = map:FindFirstChild("BlackholeBarrier")
+	if barrier and barrier:IsA("BasePart") then
+		return barrier
+	end
+	return nil
+end
+
 -- Applique la couleur et l'attribut CanConsume selon l'état
 local function applyState(state)
 	if not blackholeZone then
 		return
 	end
 
+	local barrier = getBlackholeBarrier()
+
 	if state == "Feeding" then
 		blackholeZone.Color = FEEDING_COLOR
 		blackholeZone:SetAttribute("CanConsume", true)
+
+		-- Le bouclier s'éteint : on peut jeter les objets.
+		if barrier then
+			barrier.CanCollide = false
+			barrier.Transparency = 1
+		end
 	elseif state == "Digesting" then
 		-- Distribution des récompenses RNG avant de passer en rouge
 		BlackholeController.CalculateRNGRewards(playerGauges)
@@ -46,6 +67,12 @@ local function applyState(state)
 
 		blackholeZone.Color = DIGESTING_COLOR
 		blackholeZone:SetAttribute("CanConsume", false)
+
+		-- Le bouclier s'allume : les objets rebondissent dessus.
+		if barrier then
+			barrier.CanCollide = true
+			barrier.Transparency = 0.5
+		end
 	end
 end
 
@@ -60,8 +87,8 @@ end
 
 -- Distribue les récompenses RNG selon les objets avalés par chaque joueur
 function BlackholeController.CalculateRNGRewards(gauges)
-	for playerName, score in pairs(gauges) do
-		print("[RNG] Le joueur " .. playerName .. " a nourri le trou noir avec " .. score .. " items !")
+	for player, score in pairs(gauges) do
+		print("[RNG] Calcul des récompenses pour " .. player .. " (Score final : " .. score .. ")")
 	end
 end
 
@@ -88,8 +115,9 @@ function BlackholeController.Init(manager)
 			end
 
 			if hit and hit.Name == "Item" and not hit.Anchored then
-				local ownerName = hit:GetAttribute("Owner") or "Unknown"
-				playerGauges[ownerName] = (playerGauges[ownerName] or 0) + 1
+				local owner = hit:GetAttribute("Owner") or "Unknown"
+				playerGauges[owner] = (playerGauges[owner] or 0) + 1
+				print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. playerGauges[owner] .. ")")
 				hit:Destroy()
 			end
 		end)
