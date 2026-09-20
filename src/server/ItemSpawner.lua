@@ -12,7 +12,7 @@ local function getBases(map: Instance): { Model }
 	local bases: { Model } = {}
 	for _, child in ipairs(map:GetChildren()) do
 		if child:IsA("Model") and child.Name:match("^Base%d+$") then
-			table.insert(bases, child)
+			table.insert(bases, child :: Model)
 		end
 	end
 	return bases
@@ -20,8 +20,8 @@ end
 
 -- Crée et parente un item de test au-dessus de la base donnée.
 local function spawnItem(base: Model)
-	local basePart = base:FindFirstChild("BasePart")
-	if not basePart or not basePart:IsA("BasePart") then
+	local basePart = base:FindFirstChild("BasePart") :: BasePart?
+	if not basePart then
 		return
 	end
 
