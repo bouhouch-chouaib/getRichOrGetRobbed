@@ -17,8 +17,16 @@ local function getBases(map)
 	return bases
 end
 
+-- Offsets des 4 coins d'une base (50x50, marge de 5 studs avec les murs).
+local CORNER_OFFSETS = {
+	Vector3.new(-20, 0, -20),
+	Vector3.new(20, 0, -20),
+	Vector3.new(-20, 0, 20),
+	Vector3.new(20, 0, 20),
+}
+
 -- Crée et parente un item de test au-dessus de la base donnée.
-local function spawnItem(base)
+local function spawnItem(base, offset)
 	local basePart = base:FindFirstChild("BasePart")
 	if not basePart or not basePart:IsA("BasePart") then
 		return
@@ -35,9 +43,7 @@ local function spawnItem(base)
 	item.Color = Color3.fromRGB(255, 0, 0)
 	item.Anchored = false
 	item.CanCollide = true
-	local randomX = math.random(-20, 20)
-	local randomZ = math.random(-20, 20)
-	item.Position = basePart.Position + Vector3.new(randomX, SPAWN_HEIGHT_OFFSET, randomZ)
+	item.Position = basePart.Position + Vector3.new(offset.X, SPAWN_HEIGHT_OFFSET, offset.Z)
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ramasser"
@@ -55,8 +61,8 @@ function ItemSpawner.start()
 		if map then
 			local bases = getBases(map)
 			for _, base in ipairs(bases) do
-				for _ = 1, 5 do
-					spawnItem(base)
+				for _, offset in ipairs(CORNER_OFFSETS) do
+					spawnItem(base, offset)
 				end
 			end
 		end
@@ -68,7 +74,9 @@ function ItemSpawner.start()
 			if currentMap then
 				local bases = getBases(currentMap)
 				for _, base in ipairs(bases) do
-					spawnItem(base)
+					for _, offset in ipairs(CORNER_OFFSETS) do
+						spawnItem(base, offset)
+					end
 				end
 			end
 		end
