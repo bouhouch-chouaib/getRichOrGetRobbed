@@ -7,6 +7,8 @@ local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
+
 -- RemoteEvent utilisé pour notifier le client qu'il doit lâcher son item (KO).
 local knockbackEvent = ReplicatedStorage:FindFirstChild("KnockbackEvent")
 if not knockbackEvent then
@@ -189,8 +191,23 @@ end
 
 -- Distribue les récompenses RNG selon les objets avalés par chaque joueur
 function BlackholeController.CalculateRNGRewards(gauges)
-	for player, score in pairs(gauges) do
-		print("[RNG] Calcul des récompenses pour " .. player .. " (Score final : " .. score .. ")")
+	for playerName, score in pairs(gauges) do
+		local results, pulls = LootEngine.processRewards(score)
+
+		if pulls > 0 then
+			-- Formate les gains en ignorant les raretés à 0.
+			local parts = {}
+			for rarity, amount in pairs(results) do
+				if amount > 0 then
+					table.insert(parts, rarity .. ": " .. amount)
+				end
+			end
+			local rewardString = table.concat(parts, ", ")
+
+			print("[RNG] 🎰 " .. playerName .. " a fait " .. pulls .. " tirages (Score: " .. score .. ") et a obtenu -> " .. rewardString)
+		else
+			print("[RNG] " .. playerName .. " n'a rien mis dans le trou noir.")
+		end
 	end
 end
 
