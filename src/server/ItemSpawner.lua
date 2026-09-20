@@ -3,7 +3,9 @@
 
 local ItemSpawner = {}
 
-local SPAWN_INTERVAL = 60
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GameLoopManager = require(ReplicatedStorage.Shared.GameLoopManager)
+
 local SPAWN_HEIGHT_OFFSET = 10
 
 -- Récupère toutes les bases (Models nommés "BaseN") parentées à Map.
@@ -55,25 +57,12 @@ local function spawnItem(base, offset)
 end
 
 function ItemSpawner.start()
-	task.spawn(function()
-		-- Stock initial : 5 items par base au lancement.
-		local map = workspace:FindFirstChild("Map")
-		if map then
-			local bases = getBases(map)
-			for _, base in ipairs(bases) do
-				for _, offset in ipairs(CORNER_OFFSETS) do
-					spawnItem(base, offset)
-				end
-			end
-		end
-
-		while true do
-			task.wait(SPAWN_INTERVAL)
-
-			local currentMap = workspace:FindFirstChild("Map")
-			if currentMap then
-				local bases = getBases(currentMap)
-				for _, base in ipairs(bases) do
+	-- Synchronise l'apparition des objets avec la phase de Feeding.
+	GameLoopManager.ServerEvent.Event:Connect(function(eventName, state)
+		if eventName == "StateChanged" and state == "Feeding" then
+			local map = workspace:FindFirstChild("Map")
+			if map then
+				for _, base in ipairs(getBases(map)) do
 					for _, offset in ipairs(CORNER_OFFSETS) do
 						spawnItem(base, offset)
 					end
@@ -81,6 +70,18 @@ function ItemSpawner.start()
 			end
 		end
 	end)
+
+	-- Premier spawn au cas où le serveur démarre directement en phase Feeding.
+	if GameLoopManager.GetState() == "Feeding" then
+		local map = workspace:FindFirstChild("Map")
+		if map then
+			for _, base in ipairs(getBases(map)) do
+				for _, offset in ipairs(CORNER_OFFSETS) do
+					spawnItem(base, offset)
+				end
+			end
+		end
+	end
 end
 
 return ItemSpawner
