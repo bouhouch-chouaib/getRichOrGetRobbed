@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
@@ -100,8 +101,8 @@ local function throwItem(chargeTime)
 
 	local camera = workspace.CurrentCamera
 	if camera then
-		local direction = camera.CFrame.LookVector
-		item:ApplyImpulse(direction * item.AssemblyMass * (40 + chargeTime * 60))
+		local direction = (camera.CFrame.LookVector + Vector3.new(0, 0.8, 0)).Unit
+		item:ApplyImpulse(direction * item.AssemblyMass * (50 + chargeTime * 100))
 	end
 end
 
@@ -133,6 +134,21 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if heldItem then
 			isCharging = true
 			chargeStartTime = os.clock()
+
+			-- Ralentit le joueur pour simuler l'effort de charge.
+			local character = player.Character
+			if character then
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				if humanoid then
+					humanoid.WalkSpeed = 8
+				end
+			end
+
+			-- Zoom caméra progressif sur 2 secondes.
+			local camera = workspace.CurrentCamera
+			if camera then
+				TweenService:Create(camera, TweenInfo.new(2), { FieldOfView = 50 }):Play()
+			end
 		end
 	end
 end)
@@ -146,6 +162,22 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and isCharging then
 		isCharging = false
 		local chargeTime = math.clamp(os.clock() - chargeStartTime, 0, 2)
+
+		-- Rétablit la vitesse du joueur.
+		local character = player.Character
+		if character then
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid.WalkSpeed = 16
+			end
+		end
+
+		-- Annule le zoom rapidement.
+		local camera = workspace.CurrentCamera
+		if camera then
+			TweenService:Create(camera, TweenInfo.new(0.2), { FieldOfView = 70 }):Play()
+		end
+
 		throwItem(chargeTime)
 	end
 end)
