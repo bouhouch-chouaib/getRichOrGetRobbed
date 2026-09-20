@@ -4,7 +4,7 @@
 
 local ItemSpawner = {}
 
-local SPAWN_INTERVAL = 2
+local SPAWN_INTERVAL = 30
 local SPAWN_HEIGHT_OFFSET = 10
 
 -- Récupère toutes les bases (Models nommés "BaseN") parentées à Map.
@@ -47,14 +47,24 @@ end
 
 function ItemSpawner.start()
 	task.spawn(function()
+		-- Stock initial : 5 items par base au lancement.
+		local map = workspace:FindFirstChild("Map")
+		if map then
+			local bases = getBases(map)
+			for _, base in ipairs(bases) do
+				for _ = 1, 5 do
+					spawnItem(base)
+				end
+			end
+		end
+
 		while true do
 			task.wait(SPAWN_INTERVAL)
 
-			local map = workspace:FindFirstChild("Map")
-			if map then
-				local bases = getBases(map)
-				if #bases > 0 then
-					local base = bases[math.random(1, #bases)]
+			local currentMap = workspace:FindFirstChild("Map")
+			if currentMap then
+				local bases = getBases(currentMap)
+				for _, base in ipairs(bases) do
 					spawnItem(base)
 				end
 			end
