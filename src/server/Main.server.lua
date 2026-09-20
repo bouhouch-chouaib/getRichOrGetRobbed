@@ -8,9 +8,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MapGenerator = require(script.Parent.MapGenerator)
 local BlackholeController = require(script.Parent.BlackholeController)
 local ItemSpawner = require(script.Parent.ItemSpawner)
+local SessionData = require(script.Parent.SessionData)
 
 -- Module partagé
 local GameLoopManager = require(ReplicatedStorage.Shared.GameLoopManager)
+
+-- 0. Initialisation de l'inventaire de session (avant tout le reste)
+SessionData.Init()
 
 -- 1. Génération de la map (trou noir + 4 bases)
 MapGenerator.generate()
