@@ -6,7 +6,7 @@ local MapGenerator = {}
 local Workspace = game:GetService("Workspace")
 
 -- Paramètres de génération
-local BLACKHOLE_SIZE = Vector3.new(160, 1, 160)
+local BLACKHOLE_SIZE = Vector3.new(200, 1, 200)
 local BLACKHOLE_POSITION = Vector3.new(0, 30, 0)
 local BLACKHOLE_COLOR = Color3.fromRGB(20, 20, 20)
 
