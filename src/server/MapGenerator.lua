@@ -58,6 +58,19 @@ local function createBlackhole(parent)
 	aura.EmissionDirection = Enum.NormalId.Top
 	aura.Parent = blackhole
 
+	-- Barrière physique sphérique autour du trou noir.
+	local blackholeBarrier = createPart(
+		"BlackholeBarrier",
+		BLACKHOLE_SIZE + Vector3.new(2, 2, 2),
+		BLACKHOLE_POSITION,
+		Color3.fromRGB(255, 0, 0),
+		parent
+	)
+	blackholeBarrier.Shape = Enum.PartType.Ball
+	blackholeBarrier.Material = Enum.Material.ForceField
+	blackholeBarrier.Transparency = 0.5
+	blackholeBarrier.CanCollide = true
+
 	return blackhole
 end
 
