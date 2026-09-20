@@ -10,6 +10,39 @@ local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
+-- Dossier contenant les points de l'arc de prédiction.
+local trajectoryFolder = Instance.new("Folder")
+trajectoryFolder.Name = "Trajectory"
+trajectoryFolder.Parent = workspace
+
+-- Points de l'arc de prédiction (petits cubes Neon).
+local dots = {}
+for i = 1, 15 do
+	local dot = Instance.new("Part")
+	dot.Name = "Dot" .. i
+	dot.Size = Vector3.new(0.4, 0.4, 0.4)
+	dot.Anchored = true
+	dot.CanCollide = false
+	dot.Transparency = 1
+	dot.Material = Enum.Material.Neon
+	dot.Parent = trajectoryFolder
+	dots[i] = dot
+end
+
+-- Marqueur de cible affiché à l'impact prévu.
+local targetMarker = Instance.new("Part")
+targetMarker.Name = "TargetMarker"
+targetMarker.Shape = Enum.PartType.Cylinder
+targetMarker.Size = Vector3.new(0.2, 4, 4)
+targetMarker.Material = Enum.Material.Neon
+targetMarker.Color = Color3.fromRGB(255, 0, 0)
+targetMarker.Anchored = true
+targetMarker.CanCollide = false
+targetMarker.Parent = nil
+
+-- Connexion de rendu de l'arc (nil si inactif).
+local renderConnection = nil
+
 -- Référence vers l'item actuellement tenu par le joueur (nil si aucun).
 local heldItem = nil
 local heldWeld = nil
@@ -106,6 +139,50 @@ local function throwItem(chargeTime)
 	end
 end
 
+-- Met à jour l'arc de prédiction et le marqueur de cible selon la charge actuelle.
+local function updateTrajectory(chargeTime)
+	if not heldItem then
+		return
+	end
+
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+	raycastParams.FilterDescendantsInstances = {
+		player.Character,
+		heldItem,
+		targetMarker,
+		workspace:FindFirstChild("Trajectory"),
+	}
+
+	local v0 = (workspace.CurrentCamera.CFrame.LookVector + Vector3.new(0, 0.8, 0)).Unit
+		* (50 + chargeTime * 100)
+	local gravity = Vector3.new(0, -workspace.Gravity, 0)
+	local currentPos = heldItem.Position
+
+	-- Réinitialise l'affichage.
+	targetMarker.Parent = nil
+	for _, dot in ipairs(dots) do
+		dot.Transparency = 1
+	end
+
+	for i = 1, 15 do
+		local t = i * 0.15
+		local nextPos = heldItem.Position + (v0 * t) + (0.5 * gravity * t * t)
+
+		local rayResult = workspace:Raycast(currentPos, nextPos - currentPos, raycastParams)
+		if rayResult then
+			targetMarker.CFrame = CFrame.new(rayResult.Position, rayResult.Position + rayResult.Normal)
+				* CFrame.Angles(math.pi / 2, 0, 0)
+			targetMarker.Parent = workspace
+			break
+		else
+			dots[i].Position = nextPos
+			dots[i].Transparency = 0
+			currentPos = nextPos
+		end
+	end
+end
+
 -- Écoute du déclenchement des ProximityPrompt.
 ProximityPromptService.PromptTriggered:Connect(function(prompt, triggeringPlayer)
 	if triggeringPlayer ~= player then
@@ -149,6 +226,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			if camera then
 				TweenService:Create(camera, TweenInfo.new(2), { FieldOfView = 50 }):Play()
 			end
+
+			-- Met à jour l'arc de prédiction à chaque image.
+			renderConnection = RunService.RenderStepped:Connect(function()
+				local ct = math.clamp(os.clock() - chargeStartTime, 0, 2)
+				updateTrajectory(ct)
+			end)
 		end
 	end
 end)
@@ -177,6 +260,16 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 		if camera then
 			TweenService:Create(camera, TweenInfo.new(0.2), { FieldOfView = 70 }):Play()
 		end
+
+		-- Nettoie l'affichage de l'arc de prédiction.
+		if renderConnection then
+			renderConnection:Disconnect()
+			renderConnection = nil
+		end
+		for _, dot in ipairs(dots) do
+			dot.Transparency = 1
+		end
+		targetMarker.Parent = nil
 
 		throwItem(chargeTime)
 	end
