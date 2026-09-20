@@ -13,13 +13,13 @@ local SessionData = require(script.Parent.SessionData)
 -- RemoteEvent utilisé pour notifier le client qu'il doit lâcher son item (KO).
 local knockbackEvent = ReplicatedStorage:FindFirstChild("KnockbackEvent")
 if not knockbackEvent then
-	knockbackEvent = Instance.new("RemoteEvent")
-	knockbackEvent.Name = "KnockbackEvent"
-	knockbackEvent.Parent = ReplicatedStorage
+    knockbackEvent = Instance.new("RemoteEvent")
+    knockbackEvent.Name = "KnockbackEvent"
+    knockbackEvent.Parent = ReplicatedStorage
 end
 
 -- Couleurs par état
-local FEEDING_COLOR = Color3.fromRGB(150, 0, 255)   -- violet
+local FEEDING_COLOR = Color3.fromRGB(150, 0, 255)   -- violet
 local DIGESTING_COLOR = Color3.fromRGB(255, 30, 30) -- rouge
 
 -- Références internes
@@ -32,28 +32,28 @@ local playerGauges = {}
 
 -- Récupère la BlackholeZone sous workspace.Map
 local function getBlackholeZone()
-	local map = Workspace:FindFirstChild("Map")
-	if not map then
-		return nil
-	end
-	local zone = map:FindFirstChild("BlackholeZone")
-	if zone and zone:IsA("BasePart") then
-		return zone
-	end
-	return nil
+    local map = Workspace:FindFirstChild("Map")
+    if not map then
+        return nil
+    end
+    local zone = map:FindFirstChild("BlackholeZone")
+    if zone and zone:IsA("BasePart") then
+        return zone
+    end
+    return nil
 end
 
 -- Récupère la BlackholeBarrier sous workspace.Map
 local function getBlackholeBarrier()
-	local map = Workspace:FindFirstChild("Map")
-	if not map then
-		return nil
-	end
-	local barrier = map:FindFirstChild("BlackholeBarrier")
-	if barrier and barrier:IsA("BasePart") then
-		return barrier
-	end
-	return nil
+    local map = Workspace:FindFirstChild("Map")
+    if not map then
+        return nil
+    end
+    local barrier = map:FindFirstChild("BlackholeBarrier")
+    if barrier and barrier:IsA("BasePart") then
+        return barrier
+    end
+    return nil
 end
 
 -- Paramètres de l'effet "gifle" infligé par le dôme.
@@ -65,288 +65,257 @@ local stunnedPlayers = {}
 
 -- Applique un effet de gifle : projette le joueur et le met KO au sol.
 local function slapPlayer(character, domePosition)
-	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	local root = character:FindFirstChild("HumanoidRootPart")
-	if not humanoid or not root then
-		return
-	end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not root then
+        return
+    end
 
-	-- Anti-spam : ignore si le joueur est déjà étourdi.
-	if stunnedPlayers[character] then
-		return
-	end
-	stunnedPlayers[character] = true
+    -- Anti-spam : ignore si le joueur est déjà étourdi.
+    if stunnedPlayers[character] then
+        return
+    end
+    stunnedPlayers[character] = true
 
-	-- Direction de projection : du centre du dôme vers le joueur (recul vers l'arrière),
-	-- avec une poussée vers le haut pour un effet "gifle".
-	local away = root.Position - domePosition
-	away = Vector3.new(away.X, 0, away.Z)
-	if away.Magnitude < 0.1 then
-		away = Vector3.new(1, 0, 0)
-	end
-	away = away.Unit
+    -- Direction de projection : du centre du dôme vers le joueur (recul vers l'arrière),
+    -- avec une poussée vers le haut pour un effet "gifle".
+    local away = root.Position - domePosition
+    away = Vector3.new(away.X, 0, away.Z)
+    if away.Magnitude < 0.1 then
+        away = Vector3.new(1, 0, 0)
+    end
+    away = away.Unit
 
-	-- Impulsion forte vers l'arrière (extérieur du dôme) + vers le haut.
-	local impulse = (away + Vector3.new(0, 0.9, 0)).Unit * DOME_KNOCKBACK_FORCE
-	root:ApplyImpulse(impulse * root.AssemblyMass)
+    -- Impulsion forte vers l'arrière (extérieur du dôme) + vers le haut.
+    local impulse = (away + Vector3.new(0, 0.9, 0)).Unit * DOME_KNOCKBACK_FORCE
+    root:ApplyImpulse(impulse * root.AssemblyMass)
 
-	-- Notifie le client qu'il doit lâcher l'item qu'il tient.
-	local player = Players:GetPlayerFromCharacter(character)
-	if player then
-		knockbackEvent:FireClient(player)
-	end
+    -- Notifie le client qu'il doit lâcher l'item qu'il tient.
+    local player = Players:GetPlayerFromCharacter(character)
+    if player then
+        knockbackEvent:FireClient(player)
+    end
 
-	-- Met le joueur KO : ragdoll (physique) + contrôle désactivé.
-	humanoid.WalkSpeed = 0
-	humanoid.JumpPower = 0
-	humanoid.JumpHeight = 0
-	humanoid.AutoRotate = false
-	humanoid.PlatformStand = true
-	humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+    -- Met le joueur KO : ragdoll (physique) + contrôle désactivé.
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+    humanoid.JumpHeight = 0
+    humanoid.AutoRotate = false
+    humanoid.PlatformStand = true
+    humanoid:ChangeState(Enum.HumanoidStateType.Physics)
 
-	-- Réveille le joueur après la durée de KO.
-	task.delay(DOME_STUN_DURATION, function()
-		if humanoid and humanoid.Parent then
-			humanoid.PlatformStand = false
-			humanoid.AutoRotate = true
-			humanoid.WalkSpeed = 16
-			humanoid.JumpPower = 50
-			humanoid.JumpHeight = 7.2
-			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-		end
-		stunnedPlayers[character] = nil
-	end)
+    -- Réveille le joueur après la durée de KO.
+    task.delay(DOME_STUN_DURATION, function()
+        if humanoid and humanoid.Parent then
+            humanoid.PlatformStand = false
+            humanoid.AutoRotate = true
+            humanoid.WalkSpeed = 16
+            humanoid.JumpPower = 50
+            humanoid.JumpHeight = 7.2
+            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+        stunnedPlayers[character] = nil
+    end)
 end
 
 -- Récupère le BlackholeDome sous workspace.Map
 local function getBlackholeDome()
-	local map = Workspace:FindFirstChild("Map")
-	if not map then
-		return nil
-	end
-	local dome = map:FindFirstChild("BlackholeDome")
-	if dome and dome:IsA("BasePart") then
-		return dome
-	end
-	return nil
+    local map = Workspace:FindFirstChild("Map")
+    if not map then
+        return nil
+    end
+    local dome = map:FindFirstChild("BlackholeDome")
+    if dome and dome:IsA("BasePart") then
+        return dome
+    end
+    return nil
 end
 
 -- Applique la couleur et l'attribut CanConsume selon l'état
 local function applyState(state)
-	if not blackholeZone then
-		return
-	end
+    if not blackholeZone then
+        return
+    end
 
-	local barrier = getBlackholeBarrier()
-	local dome = getBlackholeDome()
+    local barrier = getBlackholeBarrier()
+    local dome = getBlackholeDome()
 
-	if state == "Feeding" then
-		blackholeZone.Color = FEEDING_COLOR
-		blackholeZone:SetAttribute("CanConsume", true)
+    if state == "Feeding" then
+        blackholeZone.Color = FEEDING_COLOR
+        blackholeZone:SetAttribute("CanConsume", true)
 
-		-- Le bouclier s'éteint : on peut jeter les objets.
-		if barrier then
-			barrier.CanCollide = false
-			barrier.Transparency = 1
-		end
+        -- Le bouclier s'éteint : on peut jeter les objets.
+        if barrier then
+            barrier.CanCollide = false
+            barrier.Transparency = 1
+        end
 
-		-- Le dôme s'éteint : les joueurs peuvent viser le trou noir.
-		if dome then
-			dome.CanCollide = false
-			dome.Transparency = 1
-			dome.CanTouch = false
-		end
-	elseif state == "Digesting" then
-		-- Distribution des récompenses RNG avant de passer en rouge
-		BlackholeController.CalculateRNGRewards(playerGauges)
-		playerGauges = {}
+        -- Le dôme s'éteint : les joueurs peuvent viser le trou noir.
+        if dome then
+            dome.CanCollide = false
+            dome.Transparency = 1
+            dome.CanTouch = false
+        end
+    elseif state == "Digesting" then
+        -- Distribution des récompenses RNG avant de passer en rouge
+        BlackholeController.CalculateRNGRewards(playerGauges)
+        playerGauges = {}
 
-		blackholeZone.Color = DIGESTING_COLOR
-		blackholeZone:SetAttribute("CanConsume", false)
+        blackholeZone.Color = DIGESTING_COLOR
+        blackholeZone:SetAttribute("CanConsume", false)
 
-		-- Le bouclier s'allume : les objets rebondissent dessus.
-		if barrier then
-			barrier.CanCollide = true
-			barrier.Transparency = 0.5
-		end
+        -- Le bouclier s'allume : les objets rebondissent dessus.
+        if barrier then
+            barrier.CanCollide = true
+            barrier.Transparency = 0.5
+        end
 
-		-- Le dôme s'allume : impossible de jeter des items dans le trou noir.
-		-- CanCollide reste false pour éviter que les joueurs l'escaladent,
-		-- mais CanTouch = true permet de détecter et gifler les joueurs.
-		if dome then
-			dome.CanCollide = false
-			dome.CanTouch = true
-			dome.Transparency = 0.85
-		end
-	end
+        -- Le dôme s'allume : impossible de jeter des items dans le trou noir.
+        -- CanCollide reste false pour éviter que les joueurs l'escaladent,
+        -- mais CanTouch = true permet de détecter et gifler les joueurs.
+        if dome then
+            dome.CanCollide = false
+            dome.CanTouch = true
+            dome.Transparency = 0.85
+        end
+    end
 end
 
 -- Gestionnaire d'événements du GameLoopManager
 local function onGameLoopEvent(eventName, state, timeRemaining)
-	if eventName == "StateChanged" and state then
-		applyState(state)
-	elseif eventName == "Tick" then
-		-- Réagir au tick si nécessaire (ex: mise à jour UI)
-	end
+    if eventName == "StateChanged" and state then
+        applyState(state)
+    elseif eventName == "Tick" then
+        -- Réagir au tick si nécessaire (ex: mise à jour UI)
+    end
 end
 
 -- Distribue les récompenses RNG selon les objets avalés par chaque joueur
 function BlackholeController.CalculateRNGRewards(gauges)
-	for playerName, score in pairs(gauges) do
-		local results, pulls = LootEngine.processRewards(score)
+    for playerName, score in pairs(gauges) do
+        local results, pulls = LootEngine.processRewards(score)
 
-		if pulls > 0 then
-			-- Formate les gains en ignorant les raretés à 0.
-			local parts = {}
-			for rarity, amount in pairs(results) do
-				if amount > 0 then
-					table.insert(parts, rarity .. ": " .. amount)
-				end
-			end
-			local rewardString = table.concat(parts, ", ")
+        if pulls > 0 then
+            -- Formate les gains en ignorant les raretés à 0.
+            local parts = {}
+            for rarity, amount in pairs(results) do
+                if amount > 0 then
+                    table.insert(parts, rarity .. ": " .. amount)
+                end
+            end
+            local rewardString = table.concat(parts, ", ")
 
-			print("[RNG] 🎰 " .. playerName .. " a fait " .. pulls .. " tirages (Score: " .. score .. ") et a obtenu -> " .. rewardString)
+            print("[RNG] 🎰 " .. playerName .. " a fait " .. pulls .. " tirages (Score: " .. score .. ") et a obtenu -> " .. rewardString)
 
-			-- Sauvegarde les pets gagnés dans l'inventaire du joueur.
-			SessionData.AddPets(playerName, results)
+            -- Sauvegarde les pets gagnés dans l'inventaire du joueur.
+            SessionData.AddPets(playerName, results)
 
-			-- Affiche l'inventaire total mis à jour.
-			local data = SessionData.GetPlayerData(playerName)
-			if data then
-				print("🎒 Inventaire total de " .. playerName .. " -> Commun: " .. data.pets.Commun .. " | Rare: " .. data.pets.Rare .. " | Epique: " .. data.pets.Epique .. " | Sigma: " .. data.pets.Sigma)
-			end
-		else
-			print("[RNG] " .. playerName .. " n'a rien mis dans le trou noir.")
-		end
-	end
+            -- Affiche l'inventaire total mis à jour.
+            local data = SessionData.GetPlayerData(playerName)
+            if data then
+                print("🎒 Inventaire total de " .. playerName .. " -> Commun: " .. data.pets.Commun .. " | Rare: " .. data.pets.Rare .. " | Epique: " .. data.pets.Epique .. " | Sigma: " .. data.pets.Sigma)
+            end
+        else
+            print("[RNG] " .. playerName .. " n'a rien mis dans le trou noir.")
+        end
+    end
 end
 
 -- Initialise le contrôleur avec une référence au GameLoopManager
 function BlackholeController.Init(manager)
-	gameLoopManager = manager
-	blackholeZone = getBlackholeZone()
+    local map = workspace:FindFirstChild("Map")
+    local barrier = map and map:FindFirstChild("BlackholeBarrier")
+    local blackholeZone = map and map:FindFirstChild("BlackholeZone")
 
-	-- État initial par défaut
-	if blackholeZone then
-		blackholeZone:SetAttribute("CanConsume", false)
-	end
+    -- 1. LE BOUCLIER RÉPULSIF (Anti-Tunneling & Network Ownership)
+    if barrier and barrier:IsA("BasePart") then
+        barrier.Touched:Connect(function(hit)
+            -- On ne repousse que pendant la digestion
+            if manager.GetState() ~= "Digesting" then return end
 
-	-- Connexion à l'événement du GameLoopManager
-	if gameLoopManager and gameLoopManager.ServerEvent then
-		connection = gameLoopManager.ServerEvent.Event:Connect(onGameLoopEvent)
-	end
+            -- Calcul de la direction depuis le centre (aplatie sur X et Z pour un beau vol plané)
+            local direction = (hit.Position - barrier.Position)
+            direction = Vector3.new(direction.X, 0, direction.Z).Unit
+            local pushForce = (direction * 180) + Vector3.new(0, 60, 0) -- Force massive
 
-	-- Effet "gifle" : le dôme projette et met KO les joueurs qui le touchent.
-	-- Le dôme n'est pas solide (CanCollide = false) mais Touched reste actif.
-	local dome = getBlackholeDome()
-	if dome then
-		dome.Touched:Connect(function(hit)
-			-- La gifle n'est active que pendant la digestion (dôme "allumé").
-			if dome.Transparency >= 1 then
-				return
-			end
+            -- CAS A : L'objet jeté
+            if hit.Name == "Item" and not hit.Anchored then
+                -- 🚨 FORCER LE CONTRÔLE SERVEUR (Évite que le client force le passage)
+                if hit:CanSetNetworkOwnership() then
+                    hit:SetNetworkOwner(nil)
+                end
+                
+                -- Stopper sa course et le reculer physiquement d'un cran (Anti-Tunneling)
+                hit.AssemblyLinearVelocity = Vector3.zero
+                hit.CFrame = hit.CFrame + (direction * 2) 
+                
+                -- Le propulser violemment
+                hit:ApplyImpulse(pushForce * hit.AssemblyMass)
+                return
+            end
 
-			local character = hit:FindFirstAncestorOfClass("Model")
-			if not character then
-				return
-			end
+            -- CAS B : Le Joueur
+            local character = hit.Parent
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                local hrp = character:FindFirstChild("HumanoidRootPart")
 
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
-			if not humanoid then
-				return
-			end
+                if humanoid and hrp and humanoid.Health > 0 then
+                    if character:GetAttribute("KO") then return end
+                    character:SetAttribute("KO", true)
 
-			slapPlayer(character, dome.Position)
-		end)
-	end
+                    -- Mettre KO
+                    humanoid.Sit = true
+                    
+                    -- 🚨 SOULEVER LE JOUEUR (Annule la friction du sol pour garantir l'éjection)
+                    hrp.CFrame = hrp.CFrame + Vector3.new(0, 1, 0)
+                    hrp.AssemblyLinearVelocity = pushForce
 
-	-- Champ de force actif (Bumper) : repousse violemment les objets et
-	-- met les joueurs KO pendant la phase de Digestion.
-	local map = Workspace:FindFirstChild("Map")
-	local barrier = map and map:FindFirstChild("BlackholeBarrier")
-	if barrier and barrier:IsA("BasePart") then
-		barrier.Touched:Connect(function(hit)
-			-- Le bumper n'est actif que pendant la digestion.
-			if not gameLoopManager or gameLoopManager.GetState() ~= "Digesting" then
-				return
-			end
+                    -- Se relever après 1.5s
+                    task.delay(1.5, function()
+                        if character and character.Parent then
+                            character:SetAttribute("KO", nil)
+                            if humanoid and humanoid.Parent then
+                                humanoid.Sit = false
+                            end
+                        end
+                    end)
+                end
+            end
+        end)
+    end
 
-			-- Direction d'éjection : du centre de la barrière vers l'objet.
-			local direction = (hit.Position - barrier.Position).Unit
-			local pushForce = (direction * 150) + Vector3.new(0, 50, 0)
+    -- 2. L'ABSORPTION DES POINTS (Phase Feeding)
+    if blackholeZone then
+        blackholeZone.Touched:Connect(function(hit)
+            -- On ne mange que si le script du Trou Noir l'autorise (géré par applyState)
+            if not blackholeZone:GetAttribute("CanConsume") then return end
+            
+            if hit.Name == "Item" and not hit.Anchored then
+                local owner = hit:GetAttribute("Owner") or "Unknown"
+                
+                -- Si l'objet n'a pas de propriétaire valide (ex: un bug), on le détruit sans donner de point
+                if owner == "Unknown" then
+                    hit:Destroy()
+                    return
+                end
 
-			-- Cas des items : on annule leur vélocité (anti-tunneling) puis on les renvoie.
-			if hit.Name == "Item" and not hit.Anchored then
-				hit.AssemblyLinearVelocity = Vector3.zero
-				hit:ApplyImpulse(pushForce * hit.AssemblyMass)
-				return
-			end
-
-			-- Cas des joueurs : on les met KO et on les projette.
-			local character = hit.Parent
-			if not character then
-				return
-			end
-
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
-			local hrp = character:FindFirstChild("HumanoidRootPart")
-			if humanoid and hrp and humanoid.Health > 0 then
-				-- Debounce : ignore si le joueur est déjà KO.
-				if character:GetAttribute("KO") then
-					return
-				end
-				character:SetAttribute("KO", true)
-
-				-- Met le joueur au sol (KO basique Roblox).
-				humanoid.Sit = true
-
-				-- Applique la force d'éjection directement sur le joueur.
-				hrp.AssemblyLinearVelocity = pushForce
-
-				-- Relève le joueur après 1.5 secondes.
-				task.delay(1.5, function()
-					if character and character.Parent then
-						character:SetAttribute("KO", nil)
-						if humanoid and humanoid.Parent then
-							humanoid.Sit = false
-						end
-					end
-				end)
-			end
-		end)
-	end
-
-	-- Absorption des items jetés dans le trou noir
-	if blackholeZone then
-		blackholeZone.Touched:Connect(function(hit)
-			if not blackholeZone:GetAttribute("CanConsume") then
-				return
-			end
-
-			if hit and hit.Name == "Item" and not hit.Anchored then
-				local owner = hit:GetAttribute("Owner") or "Unknown"
-				playerGauges[owner] = (playerGauges[owner] or 0) + 1
-				print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. playerGauges[owner] .. ")")
-				hit:Destroy()
-			end
-		end)
-	end
-
-	-- Applique immédiatement l'état courant si disponible
-	if gameLoopManager and gameLoopManager.GetState then
-		local currentState = gameLoopManager.GetState()
-		if currentState then
-			applyState(currentState)
-		end
-	end
+                -- Enregistre les scores (utilise le système de gauges de ton script actuel)
+                BlackholeController.PlayerGauges[owner] = (BlackholeController.PlayerGauges[owner] or 0) + 1
+                print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. BlackholeController.PlayerGauges[owner] .. ")")
+                
+                hit:Destroy()
+            end
+        end)
+    end
 end
 
 -- Nettoie la connexion
 function BlackholeController.Destroy()
-	if connection then
-		connection:Disconnect()
-		connection = nil
-	end
+    if connection then
+        connection:Disconnect()
+        connection = nil
+    end
 end
 
 return BlackholeController
