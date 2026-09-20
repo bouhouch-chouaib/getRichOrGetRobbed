@@ -43,6 +43,43 @@ local function getBlackholeBarrier()
 	return nil
 end
 
+-- Paramètres de l'effet "gifle" infligé par le dôme.
+local DOME_KNOCKBACK_FORCE = 120
+local DOME_STUN_DURATION = 2
+
+-- Applique un effet de gifle : étourdit et projette le joueur touché par le dôme.
+local function slapPlayer(character, domePosition)
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local root = character:FindFirstChild("HumanoidRootPart")
+	if not humanoid or not root then
+		return
+	end
+
+	-- Direction de projection : du centre du dôme vers le joueur, avec une poussée vers le haut.
+	local away = root.Position - domePosition
+	away = Vector3.new(away.X, 0, away.Z)
+	if away.Magnitude < 0.1 then
+		away = Vector3.new(1, 0, 0)
+	end
+	away = away.Unit
+
+	local impulse = (away + Vector3.new(0, 0.6, 0)).Unit * DOME_KNOCKBACK_FORCE
+	root:ApplyImpulse(impulse * root.AssemblyMass)
+
+	-- Étourdit le joueur : vitesse nulle et saut bloqué.
+	humanoid.WalkSpeed = 0
+	humanoid.JumpPower = 0
+	humanoid.JumpHeight = 0
+
+	task.delay(DOME_STUN_DURATION, function()
+		if humanoid and humanoid.Parent then
+			humanoid.WalkSpeed = 16
+			humanoid.JumpPower = 50
+			humanoid.JumpHeight = 7.2
+		end
+	end)
+end
+
 -- Récupère le BlackholeDome sous workspace.Map
 local function getBlackholeDome()
 	local map = Workspace:FindFirstChild("Map")
@@ -131,6 +168,28 @@ function BlackholeController.Init(manager)
 	-- Connexion à l'événement du GameLoopManager
 	if gameLoopManager and gameLoopManager.ServerEvent then
 		connection = gameLoopManager.ServerEvent.Event:Connect(onGameLoopEvent)
+	end
+
+	-- Effet "gifle" : le dôme projette et étourdit les joueurs qui le touchent.
+	local dome = getBlackholeDome()
+	if dome then
+		dome.Touched:Connect(function(hit)
+			if not dome.CanCollide then
+				return
+			end
+
+			local character = hit:FindFirstAncestorOfClass("Model")
+			if not character then
+				return
+			end
+
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if not humanoid then
+				return
+			end
+
+			slapPlayer(character, dome.Position)
+		end)
 	end
 
 	-- Absorption des items jetés dans le trou noir

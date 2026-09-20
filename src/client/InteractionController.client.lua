@@ -114,10 +114,56 @@ local function grabItem(item)
 	heldWeld = weld
 end
 
+-- Vérifie si le joueur se trouve actuellement sur sa propre base.
+-- Retourne true si le joueur est au-dessus de sa BasePart.
+local function isOnOwnBase()
+	local character = player.Character
+	if not character then
+		return false
+	end
+
+	local root = character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return false
+	end
+
+	local map = workspace:FindFirstChild("Map")
+	if not map then
+		return false
+	end
+
+	for _, base in ipairs(map:GetChildren()) do
+		if base:IsA("Model") and base.Name:match("^Base%d+$") then
+			local basePart = base:FindFirstChild("BasePart")
+			if basePart and basePart:IsA("BasePart") then
+				-- Vérifie si le joueur est au-dessus de la base (marge verticale).
+				local localPos = basePart.CFrame:PointToObjectSpace(root.Position)
+				local halfX = basePart.Size.X / 2
+				local halfZ = basePart.Size.Z / 2
+				if math.abs(localPos.X) <= halfX
+					and math.abs(localPos.Z) <= halfZ
+					and localPos.Y >= 0
+					and localPos.Y <= 30
+				then
+					return true
+				end
+			end
+		end
+	end
+
+	return false
+end
+
 -- Relâche et propulse l'item tenu devant le joueur.
 -- chargeTime : durée de maintien du clic (0 à 2 secondes), influence la force du lancer.
 local function throwItem(chargeTime)
 	if not heldItem or not heldWeld then
+		return
+	end
+
+	-- Interdit de jeter un item depuis sa propre base.
+	if isOnOwnBase() then
+		print("[Interaction] Impossible de jeter un item depuis sa propre base.")
 		return
 	end
 
