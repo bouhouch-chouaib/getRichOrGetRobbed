@@ -44,16 +44,25 @@ local function getBlackholeBarrier()
 end
 
 -- Paramètres de l'effet "gifle" infligé par le dôme.
-local DOME_KNOCKBACK_FORCE = 120
-local DOME_STUN_DURATION = 2
+local DOME_KNOCKBACK_FORCE = 250
+local DOME_STUN_DURATION = 3
 
--- Applique un effet de gifle : étourdit et projette le joueur touché par le dôme.
+-- Anti-spam : empêche de re-déclencher la gifle sur un joueur déjà KO.
+local stunnedPlayers = {}
+
+-- Applique un effet de gifle : projette le joueur et le met KO au sol.
 local function slapPlayer(character, domePosition)
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	local root = character:FindFirstChild("HumanoidRootPart")
 	if not humanoid or not root then
 		return
 	end
+
+	-- Anti-spam : ignore si le joueur est déjà étourdi.
+	if stunnedPlayers[character] then
+		return
+	end
+	stunnedPlayers[character] = true
 
 	-- Direction de projection : du centre du dôme vers le joueur, avec une poussée vers le haut.
 	local away = root.Position - domePosition
@@ -63,20 +72,29 @@ local function slapPlayer(character, domePosition)
 	end
 	away = away.Unit
 
-	local impulse = (away + Vector3.new(0, 0.6, 0)).Unit * DOME_KNOCKBACK_FORCE
+	-- Impulsion forte vers l'extérieur + vers le haut.
+	local impulse = (away + Vector3.new(0, 0.8, 0)).Unit * DOME_KNOCKBACK_FORCE
 	root:ApplyImpulse(impulse * root.AssemblyMass)
 
-	-- Étourdit le joueur : vitesse nulle et saut bloqué.
+	-- Met le joueur KO : ragdoll (physique) + contrôle désactivé.
 	humanoid.WalkSpeed = 0
 	humanoid.JumpPower = 0
 	humanoid.JumpHeight = 0
+	humanoid.AutoRotate = false
+	humanoid.PlatformStand = true
+	humanoid:ChangeState(Enum.HumanoidStateType.Physics)
 
+	-- Réveille le joueur après la durée de KO.
 	task.delay(DOME_STUN_DURATION, function()
 		if humanoid and humanoid.Parent then
+			humanoid.PlatformStand = false
+			humanoid.AutoRotate = true
 			humanoid.WalkSpeed = 16
 			humanoid.JumpPower = 50
 			humanoid.JumpHeight = 7.2
+			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 		end
+		stunnedPlayers[character] = nil
 	end)
 end
 
@@ -116,6 +134,7 @@ local function applyState(state)
 		if dome then
 			dome.CanCollide = false
 			dome.Transparency = 1
+			dome.CanTouch = false
 		end
 	elseif state == "Digesting" then
 		-- Distribution des récompenses RNG avant de passer en rouge
@@ -132,8 +151,11 @@ local function applyState(state)
 		end
 
 		-- Le dôme s'allume : impossible de jeter des items dans le trou noir.
+		-- CanCollide reste false pour éviter que les joueurs l'escaladent,
+		-- mais CanTouch = true permet de détecter et gifler les joueurs.
 		if dome then
-			dome.CanCollide = true
+			dome.CanCollide = false
+			dome.CanTouch = true
 			dome.Transparency = 0.85
 		end
 	end
@@ -170,11 +192,13 @@ function BlackholeController.Init(manager)
 		connection = gameLoopManager.ServerEvent.Event:Connect(onGameLoopEvent)
 	end
 
-	-- Effet "gifle" : le dôme projette et étourdit les joueurs qui le touchent.
+	-- Effet "gifle" : le dôme projette et met KO les joueurs qui le touchent.
+	-- Le dôme n'est pas solide (CanCollide = false) mais Touched reste actif.
 	local dome = getBlackholeDome()
 	if dome then
 		dome.Touched:Connect(function(hit)
-			if not dome.CanCollide then
+			-- La gifle n'est active que pendant la digestion (dôme "allumé").
+			if dome.Transparency >= 1 then
 				return
 			end
 

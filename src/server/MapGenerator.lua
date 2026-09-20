@@ -84,9 +84,11 @@ local function createBlackhole(parent)
 	blackholeDome.Shape = Enum.PartType.Ball
 	blackholeDome.Material = Enum.Material.ForceField
 	blackholeDome.Transparency = 0.85
+	-- Pas de collision solide (sinon on peut l'escalader), mais Touched actif
+	-- pour détecter l'entrée du joueur dans la zone.
 	blackholeDome.CanCollide = false
-	blackholeDome.CanTouch = false
-	blackholeDome.CanQuery = false
+	blackholeDome.CanTouch = true
+	blackholeDome.CanQuery = true
 
 	return blackhole
 end
