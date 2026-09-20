@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Modules locaux (même dossier que ce script)
 local MapGenerator = require(script.Parent.MapGenerator)
 local BlackholeController = require(script.Parent.BlackholeController)
+local ItemSpawner = require(script.Parent.ItemSpawner)
 
 -- Module partagé
 local GameLoopManager = require(ReplicatedStorage.Shared.GameLoopManager)
@@ -19,3 +20,6 @@ BlackholeController.Init(GameLoopManager)
 
 -- 3. Démarrage du game loop (Feeding -> Digesting -> ...)
 GameLoopManager.Start()
+
+-- 4. Démarrage du spawner d'objets
+ItemSpawner.start()
