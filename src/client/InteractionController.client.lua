@@ -13,6 +13,10 @@ local player = Players.LocalPlayer
 local heldItem = nil
 local heldWeld = nil
 
+-- État de la charge du lancer.
+local chargeStartTime = 0
+local isCharging = false
+
 -- Retourne la main droite du personnage selon le rig (R6 ou R15).
 local function getRightHand(character)
 	if not character then
@@ -77,7 +81,8 @@ local function grabItem(item)
 end
 
 -- Relâche et propulse l'item tenu devant le joueur.
-local function throwItem()
+-- chargeTime : durée de maintien du clic (0 à 2 secondes), influence la force du lancer.
+local function throwItem(chargeTime)
 	if not heldItem or not heldWeld then
 		return
 	end
@@ -96,7 +101,7 @@ local function throwItem()
 	local camera = workspace.CurrentCamera
 	if camera then
 		local direction = camera.CFrame.LookVector
-		item:ApplyImpulse(direction * item.AssemblyMass * 50)
+		item:ApplyImpulse(direction * item.AssemblyMass * (40 + chargeTime * 60))
 	end
 end
 
@@ -118,13 +123,29 @@ ProximityPromptService.PromptTriggered:Connect(function(prompt, triggeringPlayer
 	grabItem(item)
 end)
 
--- Écoute du clic gauche pour lancer l'item tenu.
+-- Écoute du clic gauche : démarre la charge si un item est tenu.
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then
 		return
 	end
 
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		throwItem()
+		if heldItem then
+			isCharging = true
+			chargeStartTime = os.clock()
+		end
+	end
+end)
+
+-- Écoute du relâchement du clic gauche : lance l'item avec la force chargée.
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+	if gameProcessed then
+		return
+	end
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1 and isCharging then
+		isCharging = false
+		local chargeTime = math.clamp(os.clock() - chargeStartTime, 0, 2)
+		throwItem(chargeTime)
 	end
 end)
