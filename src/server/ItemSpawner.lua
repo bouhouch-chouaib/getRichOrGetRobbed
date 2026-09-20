@@ -3,7 +3,7 @@
 
 local ItemSpawner = {}
 
-local SPAWN_INTERVAL = 30
+local SPAWN_INTERVAL = 60
 local SPAWN_HEIGHT_OFFSET = 10
 
 -- Récupère toutes les bases (Models nommés "BaseN") parentées à Map.
@@ -35,7 +35,9 @@ local function spawnItem(base)
 	item.Color = Color3.fromRGB(255, 0, 0)
 	item.Anchored = false
 	item.CanCollide = true
-	item.Position = basePart.Position + Vector3.new(0, SPAWN_HEIGHT_OFFSET, 0)
+	local randomX = math.random(-20, 20)
+	local randomZ = math.random(-20, 20)
+	item.Position = basePart.Position + Vector3.new(randomX, SPAWN_HEIGHT_OFFSET, randomZ)
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ramasser"
