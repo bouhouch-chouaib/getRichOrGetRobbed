@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
+local SessionData = require(script.Parent.SessionData)
 
 -- RemoteEvent utilisé pour notifier le client qu'il doit lâcher son item (KO).
 local knockbackEvent = ReplicatedStorage:FindFirstChild("KnockbackEvent")
@@ -205,6 +206,15 @@ function BlackholeController.CalculateRNGRewards(gauges)
 			local rewardString = table.concat(parts, ", ")
 
 			print("[RNG] 🎰 " .. playerName .. " a fait " .. pulls .. " tirages (Score: " .. score .. ") et a obtenu -> " .. rewardString)
+
+			-- Sauvegarde les pets gagnés dans l'inventaire du joueur.
+			SessionData.AddPets(playerName, results)
+
+			-- Affiche l'inventaire total mis à jour.
+			local data = SessionData.GetPlayerData(playerName)
+			if data then
+				print("🎒 Inventaire total de " .. playerName .. " -> Commun: " .. data.pets.Commun .. " | Rare: " .. data.pets.Rare .. " | Epique: " .. data.pets.Epique .. " | Sigma: " .. data.pets.Sigma)
+			end
 		else
 			print("[RNG] " .. playerName .. " n'a rien mis dans le trou noir.")
 		end
