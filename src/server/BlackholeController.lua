@@ -260,6 +260,62 @@ function BlackholeController.Init(manager)
 		end)
 	end
 
+	-- Champ de force actif (Bumper) : repousse violemment les objets et
+	-- met les joueurs KO pendant la phase de Digestion.
+	local map = Workspace:FindFirstChild("Map")
+	local barrier = map and map:FindFirstChild("BlackholeBarrier")
+	if barrier and barrier:IsA("BasePart") then
+		barrier.Touched:Connect(function(hit)
+			-- Le bumper n'est actif que pendant la digestion.
+			if not gameLoopManager or gameLoopManager.GetState() ~= "Digesting" then
+				return
+			end
+
+			-- Direction d'éjection : du centre de la barrière vers l'objet.
+			local direction = (hit.Position - barrier.Position).Unit
+			local pushForce = (direction * 150) + Vector3.new(0, 50, 0)
+
+			-- Cas des items : on annule leur vélocité (anti-tunneling) puis on les renvoie.
+			if hit.Name == "Item" and not hit.Anchored then
+				hit.AssemblyLinearVelocity = Vector3.zero
+				hit:ApplyImpulse(pushForce * hit.AssemblyMass)
+				return
+			end
+
+			-- Cas des joueurs : on les met KO et on les projette.
+			local character = hit.Parent
+			if not character then
+				return
+			end
+
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			local hrp = character:FindFirstChild("HumanoidRootPart")
+			if humanoid and hrp and humanoid.Health > 0 then
+				-- Debounce : ignore si le joueur est déjà KO.
+				if character:GetAttribute("KO") then
+					return
+				end
+				character:SetAttribute("KO", true)
+
+				-- Met le joueur au sol (KO basique Roblox).
+				humanoid.Sit = true
+
+				-- Applique la force d'éjection directement sur le joueur.
+				hrp.AssemblyLinearVelocity = pushForce
+
+				-- Relève le joueur après 1.5 secondes.
+				task.delay(1.5, function()
+					if character and character.Parent then
+						character:SetAttribute("KO", nil)
+						if humanoid and humanoid.Parent then
+							humanoid.Sit = false
+						end
+					end
+				end)
+			end
+		end)
+	end
+
 	-- Absorption des items jetés dans le trou noir
 	if blackholeZone then
 		blackholeZone.Touched:Connect(function(hit)
