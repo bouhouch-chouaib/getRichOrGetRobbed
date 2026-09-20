@@ -71,6 +71,23 @@ local function createBlackhole(parent)
 	blackholeBarrier.Transparency = 0.5
 	blackholeBarrier.CanCollide = true
 
+	-- Dôme de protection : empêche les joueurs de jeter des items
+	-- dans le trou noir pendant la phase de digestion.
+	local domeRadius = 120
+	local blackholeDome = createPart(
+		"BlackholeDome",
+		Vector3.new(domeRadius * 2, domeRadius * 2, domeRadius * 2),
+		Vector3.new(0, 0, 0),
+		Color3.fromRGB(255, 60, 60),
+		parent
+	)
+	blackholeDome.Shape = Enum.PartType.Ball
+	blackholeDome.Material = Enum.Material.ForceField
+	blackholeDome.Transparency = 0.85
+	blackholeDome.CanCollide = false
+	blackholeDome.CanTouch = false
+	blackholeDome.CanQuery = false
+
 	return blackhole
 end
 

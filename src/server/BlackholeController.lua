@@ -43,6 +43,19 @@ local function getBlackholeBarrier()
 	return nil
 end
 
+-- Récupère le BlackholeDome sous workspace.Map
+local function getBlackholeDome()
+	local map = Workspace:FindFirstChild("Map")
+	if not map then
+		return nil
+	end
+	local dome = map:FindFirstChild("BlackholeDome")
+	if dome and dome:IsA("BasePart") then
+		return dome
+	end
+	return nil
+end
+
 -- Applique la couleur et l'attribut CanConsume selon l'état
 local function applyState(state)
 	if not blackholeZone then
@@ -50,6 +63,7 @@ local function applyState(state)
 	end
 
 	local barrier = getBlackholeBarrier()
+	local dome = getBlackholeDome()
 
 	if state == "Feeding" then
 		blackholeZone.Color = FEEDING_COLOR
@@ -59,6 +73,12 @@ local function applyState(state)
 		if barrier then
 			barrier.CanCollide = false
 			barrier.Transparency = 1
+		end
+
+		-- Le dôme s'éteint : les joueurs peuvent viser le trou noir.
+		if dome then
+			dome.CanCollide = false
+			dome.Transparency = 1
 		end
 	elseif state == "Digesting" then
 		-- Distribution des récompenses RNG avant de passer en rouge
@@ -72,6 +92,12 @@ local function applyState(state)
 		if barrier then
 			barrier.CanCollide = true
 			barrier.Transparency = 0.5
+		end
+
+		-- Le dôme s'allume : impossible de jeter des items dans le trou noir.
+		if dome then
+			dome.CanCollide = true
+			dome.Transparency = 0.85
 		end
 	end
 end
