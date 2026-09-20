@@ -53,10 +53,15 @@ local function grabItem(item)
 		heldWeld = nil
 	end
 
+	-- Aligne parfaitement l'objet sur la main avant de le souder.
+	item.CFrame = hand.CFrame
+
 	local weld = Instance.new("WeldConstraint")
 	weld.Part0 = item
 	weld.Part1 = hand
 	weld.Parent = item
+
+	-- TODO: Jouer l'AnimationTrack de levée du bras ici
 
 	-- Désactive le prompt pour éviter un double ramassage.
 	local prompt = item:FindFirstChildOfClass("ProximityPrompt")

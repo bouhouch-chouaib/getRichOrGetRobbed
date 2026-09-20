@@ -39,6 +39,8 @@ local function spawnItem(base)
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ramasser"
+	prompt.RequiresLineOfSight = false
+	prompt.MaxActivationDistance = 15
 	prompt.Parent = item
 
 	item.Parent = itemSpawns
