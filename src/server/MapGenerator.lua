@@ -6,13 +6,13 @@ local MapGenerator = {}
 local Workspace = game:GetService("Workspace")
 
 -- Paramètres de génération
-local BLACKHOLE_SIZE = Vector3.new(60, 60, 60)
+local BLACKHOLE_SIZE = Vector3.new(120, 1, 120)
 local BLACKHOLE_POSITION = Vector3.new(0, 30, 0)
 local BLACKHOLE_COLOR = Color3.fromRGB(20, 20, 20)
 
 local BASE_SIZE = Vector3.new(50, 2, 50)
 local BASE_COLOR = Color3.fromRGB(120, 120, 120)
-local BASE_RADIUS = 150          -- distance du centre aux bases
+local BASE_RADIUS = 250          -- distance du centre aux bases
 local BASE_HEIGHT = 1            -- hauteur Y des bases
 
 -- Crée une Part simple avec les propriétés de base
@@ -151,8 +151,8 @@ function MapGenerator.generate()
 	-- Trou noir central
 	createBlackhole(mapFolder)
 
-	-- 4 bases réparties en cercle
-	local baseCount = 4
+	-- 8 bases réparties en cercle
+	local baseCount = 8
 	for i = 1, baseCount do
 		local angle = (i - 1) * (math.pi * 2 / baseCount)
 		createBase(i, angle, mapFolder)
