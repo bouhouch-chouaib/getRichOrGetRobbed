@@ -35,7 +35,7 @@ end
 local function createBlackhole(parent)
 	local blackhole = createPart(
 		"BlackholeZone",
-		Vector3.new(80, 1, 80),
+		Vector3.new(100, 1, 100),
 		Vector3.new(0, 0.5, 0),
 		BLACKHOLE_COLOR,
 		parent
