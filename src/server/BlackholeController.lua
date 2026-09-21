@@ -13,9 +13,9 @@ local SessionData = require(script.Parent.SessionData)
 -- RemoteEvent utilisé pour notifier le client qu'il doit lâcher son item (KO).
 local knockbackEvent = ReplicatedStorage:FindFirstChild("KnockbackEvent")
 if not knockbackEvent then
-    knockbackEvent = Instance.new("RemoteEvent")
-    knockbackEvent.Name = "KnockbackEvent"
-    knockbackEvent.Parent = ReplicatedStorage
+    knockbackEvent = Instance.new("RemoteEvent")
+    knockbackEvent.Name = "KnockbackEvent"
+    knockbackEvent.Parent = ReplicatedStorage
 end
 
 -- Couleurs par état
@@ -290,8 +290,8 @@ function BlackholeController.Init(manager)
                     return
                 end
 
-                -- Enregistre les scores dans la table module-level playerGauges.
-                playerGauges[owner] = (playerGauges[owner] or 0) + 1
+                -- Enregistre les scores dans la table module-level playerGauges.
+                playerGauges[owner] = (playerGauges[owner] or 0) + 1
                 print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. playerGauges[owner] .. ")")
 
                 hit:Destroy()
