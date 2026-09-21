@@ -234,6 +234,23 @@ function BlackholeController.Init(manager)
     blackholeZone = map and map:FindFirstChild("BlackholeZone")
     gameLoopManager = manager
 
+    -- 0. LE DÔME EXTÉRIEUR (gifle les joueurs qui s'approchent trop du trou noir en Digestion)
+    local dome = map and map:FindFirstChild("BlackholeDome")
+    if dome and dome:IsA("BasePart") then
+        table.insert(connections, dome.Touched:Connect(function(hit)
+            -- La gifle du dôme n'est active que pendant la digestion.
+            if manager.GetState() ~= "Digesting" then return end
+
+            local character = hit.Parent
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    slapPlayer(character, dome.Position)
+                end
+            end
+        end))
+    end
+
     -- 1. LE BOUCLIER RÉPULSIF (Anti-Tunneling & Network Ownership)
     if barrier and barrier:IsA("BasePart") then
         table.insert(connections, barrier.Touched:Connect(function(hit)
