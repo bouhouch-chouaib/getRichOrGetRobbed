@@ -236,7 +236,7 @@ function BlackholeController.Init(manager)
 
     -- 1. LE BOUCLIER RÉPULSIF (Anti-Tunneling & Network Ownership)
     if barrier and barrier:IsA("BasePart") then
-        connection = barrier.Touched:Connect(function(hit)
+        table.insert(connections, barrier.Touched:Connect(function(hit)
             -- On ne repousse que pendant la digestion
             if manager.GetState() ~= "Digesting" then return end
 
@@ -261,22 +261,22 @@ function BlackholeController.Init(manager)
                 return
             end
 
-            -- CAS B : Le Joueur
-            -- On réutilise exactement la même logique que slapPlayer (ragdoll + debounce
-            -- via stunnedPlayers + knockbackEvent:FireClient) pour unifier les deux KO.
-            local character = hit.Parent
-            if character then
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                if humanoid and humanoid.Health > 0 then
-                    slapPlayer(character, barrier.Position)
-                end
-            end
-        end)
+            -- CAS B : Le Joueur
+            -- On réutilise exactement la même logique que slapPlayer (ragdoll + debounce
+            -- via stunnedPlayers + knockbackEvent:FireClient) pour unifier les deux KO.
+            local character = hit.Parent
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    slapPlayer(character, barrier.Position)
+                end
+            end
+        end))
     end
 
     -- 2. L'ABSORPTION DES POINTS (Phase Feeding)
     if blackholeZone then
-        connection = blackholeZone.Touched:Connect(function(hit)
+        table.insert(connections, blackholeZone.Touched:Connect(function(hit)
             -- On ne mange que si le script du Trou Noir l'autorise (géré par applyState)
             if not blackholeZone:GetAttribute("CanConsume") then return end
             
