@@ -247,10 +247,11 @@ function BlackholeController.Init(manager)
 
             -- CAS A : L'objet jeté
             if hit.Name == "Item" and not hit.Anchored then
-                -- 🚨 FORCER LE CONTRÔLE SERVEUR (Évite que le client force le passage)
-                if hit:CanSetNetworkOwnership() then
-                    hit:SetNetworkOwner(nil)
-                end
+                -- 🚨 FORCER LE CONTRÔLE SERVEUR (Évite que le client force le passage)
+                -- SetNetworkOwner échoue si la part est ancrée ou non éligible : on protège l'appel.
+                pcall(function()
+                    hit:SetNetworkOwner(nil)
+                end)
                 
                 -- Stopper sa course et le reculer physiquement d'un cran (Anti-Tunneling)
                 hit.AssemblyLinearVelocity = Vector3.zero
@@ -291,8 +292,8 @@ function BlackholeController.Init(manager)
 
                 -- Enregistre les scores dans la table module-level playerGauges.
                 playerGauges[owner] = (playerGauges[owner] or 0) + 1
-                print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. playerGauges[owner] .. ")")
-                
+                print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. playerGauges[owner] .. ")")
+
                 hit:Destroy()
             end
         end))
