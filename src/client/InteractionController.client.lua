@@ -11,6 +11,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 
+-- ID de l'animation de levée du bras jouée lors du ramassage d'un item.
+-- Remplace "rbxassetid://0" par l'ID réel de ton animation.
+local GRAB_ANIMATION_ID = "rbxassetid://0"
+
 -- Dossier contenant les points de l'arc de prédiction.
 local trajectoryFolder = Instance.new("Folder")
 trajectoryFolder.Name = "Trajectory"
@@ -47,6 +51,9 @@ local renderConnection = nil
 -- Référence vers l'item actuellement tenu par le joueur (nil si aucun).
 local heldItem = nil
 local heldWeld = nil
+
+-- Piste d'animation de ramassage en cours (nil si aucune).
+local grabAnimationTrack = nil
 
 -- État de la charge du lancer.
 local chargeStartTime = 0
@@ -100,7 +107,23 @@ local function grabItem(item)
 	weld.Part1 = hand
 	weld.Parent = item
 
-	-- TODO: Jouer l'AnimationTrack de levée du bras ici
+	-- Joue l'animation de levée du bras.
+	local animator = character:FindFirstChildOfClass("Animator")
+		or (character:FindFirstChildOfClass("Humanoid") and character.Humanoid:FindFirstChildOfClass("Animator"))
+	if animator then
+		-- Stoppe une éventuelle animation de ramassage précédente.
+		if grabAnimationTrack then
+			grabAnimationTrack:Stop()
+			grabAnimationTrack = nil
+		end
+
+		local animation = Instance.new("Animation")
+		animation.AnimationId = GRAB_ANIMATION_ID
+
+		local track = animator:LoadAnimation(animation)
+		track:Play()
+		grabAnimationTrack = track
+	end
 
 	-- Désactive le prompt pour éviter un double ramassage.
 	local prompt = item:FindFirstChildOfClass("ProximityPrompt")
