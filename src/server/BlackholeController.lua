@@ -57,7 +57,7 @@ local function getBlackholeBarrier()
 end
 
 -- Paramètres de l'effet "gifle" infligé par le dôme.
-local DOME_KNOCKBACK_FORCE = 250
+local DOME_KNOCKBACK_FORCE = 350
 local DOME_STUN_DURATION = 3
 
 -- Anti-spam : empêche de re-déclencher la gifle sur un joueur déjà KO.
@@ -85,6 +85,10 @@ local function slapPlayer(character, domePosition)
         away = Vector3.new(1, 0, 0)
     end
     away = away.Unit
+
+    -- Annule toute vélocité résiduelle (le joueur peut courir vers le dôme ou tomber)
+    -- pour garantir que la projection soit entièrement contrôlée par l'impulsion.
+    root.AssemblyLinearVelocity = Vector3.zero
 
     -- Impulsion forte vers l'arrière (extérieur du dôme) + vers le haut.
     local impulse = (away + Vector3.new(0, 0.9, 0)).Unit * DOME_KNOCKBACK_FORCE
