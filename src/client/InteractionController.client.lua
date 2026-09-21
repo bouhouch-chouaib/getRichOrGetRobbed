@@ -276,25 +276,6 @@ local function dropItem()
 	end
 end
 
--- Réception du KO : le joueur lâche tout ce qu'il tient.
-local knockbackEvent = ReplicatedStorage:WaitForChild("KnockbackEvent")
-knockbackEvent.OnClientEvent:Connect(function()
-	-- Annule une éventuelle charge en cours.
-	if isCharging then
-		isCharging = false
-		if renderConnection then
-			renderConnection:Disconnect()
-			renderConnection = nil
-		end
-		for _, dot in ipairs(dots) do
-			dot.Transparency = 1
-		end
-		targetMarker.Parent = nil
-	end
-
-	dropItem()
-end)
-
 -- Écoute du déclenchement des ProximityPrompt.
 ProximityPromptService.PromptTriggered:Connect(function(prompt, triggeringPlayer)
 	if triggeringPlayer ~= player then
@@ -386,3 +367,28 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 		throwItem(chargeTime)
 	end
 end)
+
+-- Réception du KO : le joueur lâche tout ce qu'il tient.
+-- On utilise un timeout pour ne pas bloquer le reste du script si l'événement
+-- n'existe pas encore (ex: BlackholeController a planté côté serveur).
+local knockbackEvent = ReplicatedStorage:WaitForChild("KnockbackEvent", 10)
+if knockbackEvent then
+	knockbackEvent.OnClientEvent:Connect(function()
+		-- Annule une éventuelle charge en cours.
+		if isCharging then
+			isCharging = false
+			if renderConnection then
+				renderConnection:Disconnect()
+				renderConnection = nil
+			end
+			for _, dot in ipairs(dots) do
+				dot.Transparency = 1
+			end
+			targetMarker.Parent = nil
+		end
+
+		dropItem()
+	end)
+else
+	warn("[Interaction] ⚠️ KnockbackEvent introuvable après 10s : le lâcher d'item sur KO sera désactivé, mais le ramassage et le lancer restent fonctionnels.")
+end
