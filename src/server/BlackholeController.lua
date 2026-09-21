@@ -232,7 +232,7 @@ function BlackholeController.Init(manager)
 
     -- 1. LE BOUCLIER RÉPULSIF (Anti-Tunneling & Network Ownership)
     if barrier and barrier:IsA("BasePart") then
-        barrier.Touched:Connect(function(hit)
+        connection = barrier.Touched:Connect(function(hit)
             -- On ne repousse que pendant la digestion
             if manager.GetState() ~= "Digesting" then return end
 
@@ -272,7 +272,7 @@ function BlackholeController.Init(manager)
 
     -- 2. L'ABSORPTION DES POINTS (Phase Feeding)
     if blackholeZone then
-        blackholeZone.Touched:Connect(function(hit)
+        connection = blackholeZone.Touched:Connect(function(hit)
             -- On ne mange que si le script du Trou Noir l'autorise (géré par applyState)
             if not blackholeZone:GetAttribute("CanConsume") then return end
             
