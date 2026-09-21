@@ -25,7 +25,7 @@ local DIGESTING_COLOR = Color3.fromRGB(255, 30, 30) -- rouge
 -- Références internes
 local blackholeZone = nil
 local gameLoopManager = nil
-local connection = nil
+local connections = {}
 
 -- Score (nombre d'items avalés) par joueur
 local playerGauges = {}
@@ -293,18 +293,18 @@ function BlackholeController.Init(manager)
                 playerGauges[owner] = (playerGauges[owner] or 0) + 1
                 print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. playerGauges[owner] .. ")")
                 
-                hit:Destroy()
-            end
-        end)
-    end
+                hit:Destroy()
+            end
+        end))
+    end
 end
 
--- Nettoie la connexion
+-- Nettoie toutes les connexions
 function BlackholeController.Destroy()
-    if connection then
-        connection:Disconnect()
-        connection = nil
-    end
+    for _, conn in ipairs(connections) do
+        conn:Disconnect()
+    end
+    connections = {}
 end
 
 return BlackholeController
