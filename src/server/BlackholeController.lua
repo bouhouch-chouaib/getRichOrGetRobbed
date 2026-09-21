@@ -223,9 +223,12 @@ end
 
 -- Initialise le contrôleur avec une référence au GameLoopManager
 function BlackholeController.Init(manager)
-    local map = workspace:FindFirstChild("Map")
-    local barrier = map and map:FindFirstChild("BlackholeBarrier")
-    local blackholeZone = map and map:FindFirstChild("BlackholeZone")
+    local map = workspace:FindFirstChild("Map")
+    local barrier = map and map:FindFirstChild("BlackholeBarrier")
+    -- On assigne la variable module-level (et non une locale) pour que applyState
+    -- puisse la voir et mettre à jour CanConsume / la couleur.
+    blackholeZone = map and map:FindFirstChild("BlackholeZone")
+    gameLoopManager = manager
 
     -- 1. LE BOUCLIER RÉPULSIF (Anti-Tunneling & Network Ownership)
     if barrier and barrier:IsA("BasePart") then
@@ -282,9 +285,9 @@ function BlackholeController.Init(manager)
                     return
                 end
 
-                -- Enregistre les scores (utilise le système de gauges de ton script actuel)
-                BlackholeController.PlayerGauges[owner] = (BlackholeController.PlayerGauges[owner] or 0) + 1
-                print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. BlackholeController.PlayerGauges[owner] .. ")")
+                -- Enregistre les scores dans la table module-level playerGauges.
+                playerGauges[owner] = (playerGauges[owner] or 0) + 1
+                print("[Blackhole] Miam ! +1 point pour " .. owner .. " (Total: " .. playerGauges[owner] .. ")")
                 
                 hit:Destroy()
             end
