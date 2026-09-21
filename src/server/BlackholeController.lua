@@ -255,32 +255,14 @@ function BlackholeController.Init(manager)
             end
 
             -- CAS B : Le Joueur
+            -- On réutilise exactement la même logique que slapPlayer (ragdoll + debounce
+            -- via stunnedPlayers + knockbackEvent:FireClient) pour unifier les deux KO.
             local character = hit.Parent
             if character then
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                local hrp = character:FindFirstChild("HumanoidRootPart")
-
-                if humanoid and hrp and humanoid.Health > 0 then
-                    if character:GetAttribute("KO") then return end
-                    character:SetAttribute("KO", true)
-
-                    -- Mettre KO
-                    humanoid.Sit = true
-                    
-                    -- 🚨 SOULEVER LE JOUEUR (Annule la friction du sol pour garantir l'éjection)
-                    hrp.CFrame = hrp.CFrame + Vector3.new(0, 1, 0)
-                    hrp.AssemblyLinearVelocity = pushForce
-
-                    -- Se relever après 1.5s
-                    task.delay(1.5, function()
-                        if character and character.Parent then
-                            character:SetAttribute("KO", nil)
-                            if humanoid and humanoid.Parent then
-                                humanoid.Sit = false
-                            end
-                        end
-                    end)
-                end
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    slapPlayer(character, barrier.Position)
+                end
             end
         end)
     end
