@@ -1,87 +1,119 @@
--- ItemSpawner : fait apparaître périodiquement des objets de test au-dessus des bases joueurs.
--- MVP / Greyboxing : Part rouge soumise à la physique, avec un ProximityPrompt "Ramasser".
+--!strict
+-- ItemSpawner : fait apparaître des objets géométriques dans les bases occupées pendant le Feeding.
+-- Au début du Feeding : remplit chaque base. Ensuite : un objet toutes les SpawnInterval secondes.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local BaseManager = require(script.Parent.BaseManager)
+local GameLoopManager = require(script.Parent.GameLoopManager)
+local ItemInteraction = require(script.Parent.ItemInteraction)
 
 local ItemSpawner = {}
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local GameLoopManager = require(ReplicatedStorage.Shared.GameLoopManager)
+local SHAPES = { Enum.PartType.Ball, Enum.PartType.Block, Enum.PartType.Cylinder }
+local rng = Random.new()
 
-local SPAWN_HEIGHT_OFFSET = 10
-
--- Récupère toutes les bases (Models nommés "BaseN") parentées à Map.
-local function getBases(map)
-	local bases = {}
-	for _, child in ipairs(map:GetChildren()) do
-		if child:IsA("Model") and child.Name:match("^Base%d+$") then
-			table.insert(bases, child)
-		end
-	end
-	return bases
-end
-
--- Offsets des 4 coins d'une base (50x50, marge de 5 studs avec les murs).
-local CORNER_OFFSETS = {
-	Vector3.new(-20, 0, -20),
-	Vector3.new(20, 0, -20),
-	Vector3.new(-20, 0, 20),
-	Vector3.new(20, 0, 20),
-}
-
--- Crée et parente un item de test au-dessus de la base donnée.
-local function spawnItem(base, offset)
-	local basePart = base:FindFirstChild("BasePart")
-	if not basePart or not basePart:IsA("BasePart") then
-		return
-	end
-
-	local itemSpawns = base:FindFirstChild("ItemSpawns")
-	if not itemSpawns then
-		return
-	end
-
+local function createItem(cframe: CFrame): Part
 	local item = Instance.new("Part")
 	item.Name = "Item"
-	item.Size = Vector3.new(2, 2, 2)
-	item.Color = Color3.fromRGB(255, 0, 0)
+	item.Shape = SHAPES[rng:NextInteger(1, #SHAPES)]
+	item.Size = Vector3.one * Config.Items.Size
+	item.Color = Config.ItemColors[rng:NextInteger(1, #Config.ItemColors)]
+	item.Material = Enum.Material.Neon
+	item.CFrame = cframe * CFrame.Angles(rng:NextNumber() * math.pi, rng:NextNumber() * math.pi, 0)
 	item.Anchored = false
-	item.CanCollide = true
-	item.Position = basePart.Position + Vector3.new(offset.X, SPAWN_HEIGHT_OFFSET, offset.Z)
+	item:SetAttribute("IsItem", true)
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ramasser"
+	prompt.ObjectText = "Objet"
+	prompt.KeyboardKeyCode = Enum.KeyCode.E
+	prompt.HoldDuration = 0
+	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false
-	prompt.MaxActivationDistance = 15
 	prompt.Parent = item
 
-	item.Parent = itemSpawns
+	return item
 end
 
-function ItemSpawner.start()
-	-- Synchronise l'apparition des objets avec la phase de Feeding.
-	GameLoopManager.ServerEvent.Event:Connect(function(eventName, state)
+-- pointIndex : coin précis à utiliser (sinon un coin au hasard).
+local function spawnInBase(base: Model, pointIndex: number?)
+	local itemSpawns = base:FindFirstChild("ItemSpawns")
+	local spawnPoints = base:FindFirstChild("SpawnPoints")
+	if not itemSpawns or not spawnPoints or #itemSpawns:GetChildren() >= Config.Items.MaxPerBase then
+		return
+	end
+
+	local points = spawnPoints:GetChildren()
+	local point = points[pointIndex or rng:NextInteger(1, #points)]
+	if not point or not point:IsA("BasePart") then
+		return
+	end
+
+	local item = createItem(point.CFrame)
+	item.Parent = itemSpawns
+	ItemInteraction.Register(item)
+end
+
+-- Évite l'accumulation infinie d'objets abandonnés sur la map.
+local function cleanupLooseItems()
+	local map = Workspace:FindFirstChild("Map")
+	local loose = map and map:FindFirstChild("LooseItems")
+	if not loose then
+		return
+	end
+	local items = loose:GetChildren()
+	local excess = #items - Config.Items.MaxLooseItems
+	for _, item in ipairs(items) do
+		if excess <= 0 then
+			break
+		end
+		if item:IsA("BasePart") and not ItemInteraction.IsHeld(item) then
+			item:Destroy()
+			excess -= 1
+		end
+	end
+end
+
+-- Pose un objet sur chaque coin de la base.
+local function fillBase(base: Model)
+	for index = 1, Config.Items.InitialPerBase do
+		spawnInBase(base, (index - 1) % 4 + 1)
+	end
+end
+
+local function isEmpty(base: Model): boolean
+	local itemSpawns = base:FindFirstChild("ItemSpawns")
+	return itemSpawns ~= nil and #itemSpawns:GetChildren() == 0
+end
+
+function ItemSpawner.Init()
+	GameLoopManager.ServerEvent.Event:Connect(function(eventName: string, state: string)
 		if eventName == "StateChanged" and state == "Feeding" then
-			local map = workspace:FindFirstChild("Map")
-			if map then
-				for _, base in ipairs(getBases(map)) do
-					for _, offset in ipairs(CORNER_OFFSETS) do
-						spawnItem(base, offset)
+			cleanupLooseItems()
+			for _, base in ipairs(BaseManager.GetOccupiedBases()) do
+				fillBase(base)
+			end
+		end
+	end)
+
+	task.spawn(function()
+		while true do
+			task.wait(Config.Items.SpawnInterval)
+			if GameLoopManager.GetState() == "Feeding" then
+				for _, base in ipairs(BaseManager.GetOccupiedBases()) do
+					-- Base vidée (ou joueur arrivé en cours de manche) : on la remplit d'un coup.
+					if isEmpty(base) then
+						fillBase(base)
+					else
+						spawnInBase(base)
 					end
 				end
 			end
 		end
 	end)
-
-	-- Premier spawn au cas où le serveur démarre directement en phase Feeding.
-	if GameLoopManager.GetState() == "Feeding" then
-		local map = workspace:FindFirstChild("Map")
-		if map then
-			for _, base in ipairs(getBases(map)) do
-				for _, offset in ipairs(CORNER_OFFSETS) do
-					spawnItem(base, offset)
-				end
-			end
-		end
-	end
 end
 
 return ItemSpawner
