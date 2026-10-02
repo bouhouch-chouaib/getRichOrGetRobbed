@@ -6,6 +6,13 @@
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/shared"
+      },
+      "Remotes": {
+        "$className": "Folder",
+        "ItemGrabbed": { "$className": "RemoteEvent" },
+        "ThrowItem": { "$className": "RemoteEvent" },
+        "Knockback": { "$className": "RemoteEvent" },
+        "RewardsGranted": { "$className": "RemoteEvent" }
       }
     },
 
@@ -26,43 +33,15 @@
     "Workspace": {
       "$properties": {
         "FilteringEnabled": true
-      },
-      "Baseplate": {
-        "$className": "Part",
-        "$properties": {
-          "Anchored": true,
-          "Color": [
-            0.38823,
-            0.37254,
-            0.38823
-          ],
-          "Locked": true,
-          "Position": [
-            0,
-            -10,
-            0
-          ],
-          "Size": [
-            512,
-            20,
-            512
-          ]
-        }
       }
     },
+
     "Lighting": {
       "$properties": {
-        "Ambient": [
-          0,
-          0,
-          0
-        ],
-        "Brightness": 2,
-        "GlobalShadows": true,
-        "Outlines": false,
-        "Technology": "Voxel"
+        "Technology": "Future"
       }
     },
+
     "SoundService": {
       "$properties": {
         "RespectFilteringEnabled": true

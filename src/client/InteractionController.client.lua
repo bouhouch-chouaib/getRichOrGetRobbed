@@ -1,394 +1,298 @@
--- InteractionController : gère le ramassage et le lancer d'objets "Item" côté client.
--- Ramassage : ProximityPromptService.PromptTriggered -> WeldConstraint sur la main droite.
--- Lancer : UserInputService.InputBegan (MouseButton1) -> ApplyImpulse via la caméra.
+--!strict
+-- InteractionController : tenir et lancer un objet.
+--   [E] sur un objet -> le serveur valide et répond ItemGrabbed -> on soude l'objet à la main.
+--   Clic gauche maintenu -> charge (ralentissement + zoom + arc de prédiction).
+--   Relâchement -> on détruit le weld, on réactive les collisions et on propulse via ApplyImpulse.
 
 local Players = game:GetService("Players")
-local ProximityPromptService = game:GetService("ProximityPromptService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
+
+local THROW = Config.Throw
+local DOT_COUNT = 20
+local DOT_STEP = 0.08 -- secondes simulées entre deux points de l'arc
 
 local player = Players.LocalPlayer
 
--- ID de l'animation de levée du bras jouée lors du ramassage d'un item.
--- Remplace "rbxassetid://0" par l'ID réel de ton animation.
-local GRAB_ANIMATION_ID = "rbxassetid://0"
+local heldItem: BasePart? = nil
+local heldWeld: WeldConstraint? = nil
+local heldConnections: { RBXScriptConnection } = {}
+local isCharging = false
+local chargeStart = 0
 
--- Dossier contenant les points de l'arc de prédiction.
-local trajectoryFolder = Instance.new("Folder")
-trajectoryFolder.Name = "Trajectory"
-trajectoryFolder.Parent = workspace
+----------------------------------------------------------------------
+-- Arc de prédiction (local au client)
+----------------------------------------------------------------------
 
--- Points de l'arc de prédiction (petits cubes Neon).
-local dots = {}
-for i = 1, 15 do
+local trajectory = Instance.new("Folder")
+trajectory.Name = "Trajectory"
+trajectory.Parent = Workspace
+
+local dots: { Part } = {}
+for index = 1, DOT_COUNT do
 	local dot = Instance.new("Part")
-	dot.Name = "Dot" .. i
-	dot.Size = Vector3.new(0.4, 0.4, 0.4)
+	dot.Name = "Dot"
+	dot.Shape = Enum.PartType.Ball
+	dot.Size = Vector3.one * 0.5
+	dot.Material = Enum.Material.Neon
+	dot.Color = Color3.fromRGB(255, 255, 255)
 	dot.Anchored = true
 	dot.CanCollide = false
+	dot.CanQuery = false
+	dot.CanTouch = false
 	dot.Transparency = 1
-	dot.Material = Enum.Material.Neon
-	dot.Parent = trajectoryFolder
-	dots[i] = dot
+	dot.Parent = trajectory
+	dots[index] = dot
 end
 
--- Marqueur de cible affiché à l'impact prévu.
-local targetMarker = Instance.new("Part")
-targetMarker.Name = "TargetMarker"
-targetMarker.Shape = Enum.PartType.Cylinder
-targetMarker.Size = Vector3.new(0.2, 4, 4)
-targetMarker.Material = Enum.Material.Neon
-targetMarker.Color = Color3.fromRGB(255, 0, 0)
-targetMarker.Anchored = true
-targetMarker.CanCollide = false
-targetMarker.Parent = nil
+local marker = Instance.new("Part")
+marker.Name = "TargetMarker"
+marker.Shape = Enum.PartType.Cylinder
+marker.Size = Vector3.new(0.2, 5, 5)
+marker.Material = Enum.Material.Neon
+marker.Color = Color3.fromRGB(255, 60, 60)
+marker.Anchored = true
+marker.CanCollide = false
+marker.CanQuery = false
+marker.CanTouch = false
+marker.Transparency = 1
+marker.Parent = trajectory
 
--- Connexion de rendu de l'arc (nil si inactif).
-local renderConnection = nil
-
--- Référence vers l'item actuellement tenu par le joueur (nil si aucun).
-local heldItem = nil
-local heldWeld = nil
-
--- Piste d'animation de ramassage en cours (nil si aucune).
-local grabAnimationTrack = nil
-
--- État de la charge du lancer.
-local chargeStartTime = 0
-local isCharging = false
-
--- Retourne la main droite du personnage selon le rig (R6 ou R15).
-local function getRightHand(character)
-	if not character then
-		return nil
+local function hideTrajectory()
+	for _, dot in ipairs(dots) do
+		dot.Transparency = 1
 	end
+	marker.Transparency = 1
+end
 
-	-- R15
-	local rightHand = character:FindFirstChild("RightHand")
-	if rightHand then
-		return rightHand
+----------------------------------------------------------------------
+-- Utilitaires
+----------------------------------------------------------------------
+
+local function notify(text: string)
+	pcall(function()
+		StarterGui:SetCore("SendNotification", { Title = "Get Rich Or Get Robbed", Text = text, Duration = 2 })
+	end)
+end
+
+local function getHumanoid(): Humanoid?
+	local character = player.Character
+	return character and character:FindFirstChildOfClass("Humanoid")
+end
+
+local function getHand(character: Model): BasePart?
+	local hand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+	if hand and hand:IsA("BasePart") then
+		return hand
 	end
-
-	-- R6
-	local rightArm = character:FindFirstChild("Right Arm")
-	if rightArm then
-		return rightArm
-	end
-
 	return nil
 end
 
--- Soude l'item à la main droite du joueur.
-local function grabItem(item)
+local function chargeRatio(): number
+	return math.clamp((os.clock() - chargeStart) / THROW.MaxChargeTime, 0, 1)
+end
+
+local function throwVelocity(ratio: number): Vector3
+	local camera = Workspace.CurrentCamera
+	local direction = (camera.CFrame.LookVector + Vector3.new(0, THROW.UpBias, 0)).Unit
+	return direction * (THROW.MinSpeed + (THROW.MaxSpeed - THROW.MinSpeed) * ratio)
+end
+
+local function isOnOwnBase(): boolean
 	local character = player.Character
-	if not character then
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local index = player:GetAttribute("BaseIndex")
+	local map = Workspace:FindFirstChild("Map")
+	local base = map and index and map:FindFirstChild("Base_" .. tostring(index))
+	local platform = base and base:FindFirstChild("BasePart")
+	if not root or not root:IsA("BasePart") or not platform or not platform:IsA("BasePart") then
+		return false
+	end
+	local localPosition = platform.CFrame:PointToObjectSpace(root.Position)
+	local half = platform.Size / 2
+	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y < 30
+end
+
+----------------------------------------------------------------------
+-- Charge
+----------------------------------------------------------------------
+
+local function stopCharging()
+	if not isCharging then
+		return
+	end
+	isCharging = false
+	hideTrajectory()
+
+	local humanoid = getHumanoid()
+	if humanoid then
+		local speed = player:GetAttribute("Speed")
+		humanoid.WalkSpeed = if type(speed) == "number" then speed else Config.Speed.Base
+	end
+	TweenService:Create(Workspace.CurrentCamera, TweenInfo.new(0.2), { FieldOfView = THROW.DefaultFov }):Play()
+end
+
+local function startCharging()
+	isCharging = true
+	chargeStart = os.clock()
+
+	local humanoid = getHumanoid()
+	if humanoid then
+		humanoid.WalkSpeed = THROW.ChargeWalkSpeed
+	end
+	TweenService:Create(Workspace.CurrentCamera, TweenInfo.new(THROW.MaxChargeTime), { FieldOfView = THROW.ChargeFov }):Play()
+end
+
+local function updateTrajectory()
+	local item = heldItem
+	if not isCharging or not item then
 		return
 	end
 
-	local hand = getRightHand(character)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { player.Character :: Instance, item, trajectory }
+
+	local origin = item.Position
+	local velocity = throwVelocity(chargeRatio())
+	local gravity = Vector3.new(0, -Workspace.Gravity, 0)
+	local previous = origin
+
+	hideTrajectory()
+	for index = 1, DOT_COUNT do
+		local t = index * DOT_STEP
+		local point = origin + velocity * t + 0.5 * gravity * t * t
+		local hit = Workspace:Raycast(previous, point - previous, params)
+		if hit then
+			marker.CFrame = CFrame.new(hit.Position) * CFrame.Angles(0, 0, math.pi / 2)
+			marker.Transparency = 0.2
+			break
+		end
+		dots[index].Position = point
+		dots[index].Transparency = 0.2
+		previous = point
+	end
+end
+
+----------------------------------------------------------------------
+-- Tenir / lâcher / lancer
+----------------------------------------------------------------------
+
+-- Oublie l'objet tenu (sans le propulser).
+local function releaseLocal()
+	stopCharging()
+	for _, connection in ipairs(heldConnections) do
+		connection:Disconnect()
+	end
+	heldConnections = {}
+	if heldWeld then
+		heldWeld:Destroy()
+	end
+	local item = heldItem
+	if item and item.Parent then
+		item.CanCollide = true
+		item.Massless = false
+	end
+	heldItem = nil
+	heldWeld = nil
+end
+
+local function grab(item: BasePart)
+	local character = player.Character
+	local hand = character and getHand(character)
 	if not hand then
 		return
 	end
+	releaseLocal()
 
-	-- Si un item est déjà tenu, on le relâche d'abord.
-	if heldItem and heldWeld then
-		heldWeld:Destroy()
-		heldItem = nil
-		heldWeld = nil
-	end
-
-	-- Aligne parfaitement l'objet sur la main avant de le souder.
-	item.CFrame = hand.CFrame
+	item.CanCollide = false
+	item.Massless = true
+	item.CFrame = hand.CFrame * CFrame.new(0, -1.5, 0)
 
 	local weld = Instance.new("WeldConstraint")
 	weld.Part0 = item
 	weld.Part1 = hand
 	weld.Parent = item
 
-	-- Joue l'animation de levée du bras.
-	local animator = character:FindFirstChildOfClass("Animator")
-		or (character:FindFirstChildOfClass("Humanoid") and character.Humanoid:FindFirstChildOfClass("Animator"))
-	if animator then
-		-- Stoppe une éventuelle animation de ramassage précédente.
-		if grabAnimationTrack then
-			grabAnimationTrack:Stop()
-			grabAnimationTrack = nil
-		end
-
-		local animation = Instance.new("Animation")
-		animation.AnimationId = GRAB_ANIMATION_ID
-
-		local track = animator:LoadAnimation(animation)
-		track:Play()
-		grabAnimationTrack = track
-	end
-
-	-- Désactive le prompt pour éviter un double ramassage.
-	local prompt = item:FindFirstChildOfClass("ProximityPrompt")
-	if prompt then
-		prompt.Enabled = false
-	end
-
-	-- Désactive la collision pendant la prise en main.
-	item.CanCollide = false
-
 	heldItem = item
 	heldWeld = weld
+
+	-- Le serveur efface "Holder" quand il force le lâcher (KO, mort) : on suit.
+	table.insert(heldConnections, item:GetAttributeChangedSignal("Holder"):Connect(function()
+		if item:GetAttribute("Holder") ~= player.Name then
+			releaseLocal()
+		end
+	end))
+	table.insert(heldConnections, item.AncestryChanged:Connect(function()
+		if not item:IsDescendantOf(Workspace) then
+			releaseLocal()
+		end
+	end))
 end
 
--- Vérifie si le joueur se trouve actuellement sur sa propre base.
--- Retourne true si le joueur est au-dessus de sa BasePart.
-local function isOnOwnBase()
+local function throw()
+	local item = heldItem
+	if not item then
+		return
+	end
+	local velocity = throwVelocity(chargeRatio())
+
+	releaseLocal()
+	Remotes.ThrowItem:FireServer(item)
+	-- Après la destruction du weld, l'item est seul dans son assemblage : GetMass() = sa masse.
+	item:ApplyImpulse(velocity * item:GetMass())
+end
+
+----------------------------------------------------------------------
+-- Connexions
+----------------------------------------------------------------------
+
+Remotes.ItemGrabbed.OnClientEvent:Connect(function(item: Instance)
+	if item:IsA("BasePart") then
+		grab(item)
+	end
+end)
+
+Remotes.Knockback.OnClientEvent:Connect(function(velocity: Vector3)
+	releaseLocal()
 	local character = player.Character
-	if not character then
-		return false
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if root and root:IsA("BasePart") then
+		root.AssemblyLinearVelocity = Vector3.zero
+		root:ApplyImpulse(velocity * root.AssemblyMass)
 	end
-
-	local root = character:FindFirstChild("HumanoidRootPart")
-	if not root then
-		return false
-	end
-
-	local map = workspace:FindFirstChild("Map")
-	if not map then
-		return false
-	end
-
-	for _, base in ipairs(map:GetChildren()) do
-		if base:IsA("Model") and base.Name:match("^Base%d+$") then
-			local basePart = base:FindFirstChild("BasePart")
-			if basePart and basePart:IsA("BasePart") then
-				-- Vérifie si le joueur est au-dessus de la base (marge verticale).
-				local localPos = basePart.CFrame:PointToObjectSpace(root.Position)
-				local halfX = basePart.Size.X / 2
-				local halfZ = basePart.Size.Z / 2
-				if math.abs(localPos.X) <= halfX
-					and math.abs(localPos.Z) <= halfZ
-					and localPos.Y >= 0
-					and localPos.Y <= 30
-				then
-					return true
-				end
-			end
-		end
-	end
-
-	return false
-end
-
--- Relâche et propulse l'item tenu devant le joueur.
--- chargeTime : durée de maintien du clic (0 à 2 secondes), influence la force du lancer.
-local function throwItem(chargeTime)
-	if not heldItem or not heldWeld then
-		return
-	end
-
-	-- Interdit de jeter un item depuis sa propre base.
-	if isOnOwnBase() then
-		print("[Interaction] Impossible de jeter un item depuis sa propre base.")
-		return
-	end
-
-	local item = heldItem
-	local weld = heldWeld
-
-	heldItem = nil
-	heldWeld = nil
-
-	weld:Destroy()
-
-	item.CanCollide = true
-	item:SetAttribute("Owner", player.Name)
-
-	local camera = workspace.CurrentCamera
-	if camera then
-		local direction = (camera.CFrame.LookVector + Vector3.new(0, 0.8, 0)).Unit
-		item:ApplyImpulse(direction * item.AssemblyMass * (50 + chargeTime * 100))
-	end
-end
-
--- Met à jour l'arc de prédiction et le marqueur de cible selon la charge actuelle.
-local function updateTrajectory(chargeTime)
-	if not heldItem then
-		return
-	end
-
-	local raycastParams = RaycastParams.new()
-	raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-	raycastParams.FilterDescendantsInstances = {
-		player.Character,
-		heldItem,
-		targetMarker,
-		workspace:FindFirstChild("Trajectory"),
-	}
-
-	local v0 = (workspace.CurrentCamera.CFrame.LookVector + Vector3.new(0, 0.8, 0)).Unit
-		* (50 + chargeTime * 100)
-	local gravity = Vector3.new(0, -workspace.Gravity, 0)
-	local currentPos = heldItem.Position
-
-	-- Réinitialise l'affichage.
-	targetMarker.Parent = nil
-	for _, dot in ipairs(dots) do
-		dot.Transparency = 1
-	end
-
-	for i = 1, 15 do
-		local t = i * 0.15
-		local nextPos = heldItem.Position + (v0 * t) + (0.5 * gravity * t * t)
-
-		local rayResult = workspace:Raycast(currentPos, nextPos - currentPos, raycastParams)
-		if rayResult then
-			targetMarker.CFrame = CFrame.new(rayResult.Position, rayResult.Position + rayResult.Normal)
-				* CFrame.Angles(math.pi / 2, 0, 0)
-			targetMarker.Parent = workspace
-			break
-		else
-			dots[i].Position = nextPos
-			dots[i].Transparency = 0
-			currentPos = nextPos
-		end
-	end
-end
-
--- Lâche l'item tenu (sans le lancer) : utilisé lors d'un KO.
-local function dropItem()
-	if not heldItem or not heldWeld then
-		return
-	end
-
-	local item = heldItem
-	local weld = heldWeld
-
-	heldItem = nil
-	heldWeld = nil
-
-	weld:Destroy()
-
-	item.CanCollide = true
-
-	-- Réactive le prompt pour permettre de le ramasser à nouveau.
-	local prompt = item:FindFirstChildOfClass("ProximityPrompt")
-	if prompt then
-		prompt.Enabled = true
-	end
-end
-
--- Écoute du déclenchement des ProximityPrompt.
-ProximityPromptService.PromptTriggered:Connect(function(prompt, triggeringPlayer)
-	if triggeringPlayer ~= player then
-		return
-	end
-
-	local item = prompt.Parent
-	if not item or item.Name ~= "Item" then
-		return
-	end
-
-	if not item:IsA("BasePart") then
-		return
-	end
-
-	grabItem(item)
 end)
 
--- Écoute du clic gauche : démarre la charge si un item est tenu.
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then
+	if gameProcessed or input.UserInputType ~= Enum.UserInputType.MouseButton1 then
 		return
 	end
-
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		if heldItem then
-			isCharging = true
-			chargeStartTime = os.clock()
-
-			-- Ralentit le joueur pour simuler l'effort de charge.
-			local character = player.Character
-			if character then
-				local humanoid = character:FindFirstChildOfClass("Humanoid")
-				if humanoid then
-					humanoid.WalkSpeed = 8
-				end
-			end
-
-			-- Zoom caméra progressif sur 2 secondes.
-			local camera = workspace.CurrentCamera
-			if camera then
-				TweenService:Create(camera, TweenInfo.new(2), { FieldOfView = 50 }):Play()
-			end
-
-			-- Met à jour l'arc de prédiction à chaque image.
-			renderConnection = RunService.RenderStepped:Connect(function()
-				local ct = math.clamp(os.clock() - chargeStartTime, 0, 2)
-				updateTrajectory(ct)
-			end)
-		end
+	if heldItem then
+		startCharging()
 	end
 end)
 
--- Écoute du relâchement du clic gauche : lance l'item avec la force chargée.
-UserInputService.InputEnded:Connect(function(input, gameProcessed)
-	if gameProcessed then
+UserInputService.InputEnded:Connect(function(input)
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 or not isCharging then
 		return
 	end
-
-	if input.UserInputType == Enum.UserInputType.MouseButton1 and isCharging then
-		isCharging = false
-		local chargeTime = math.clamp(os.clock() - chargeStartTime, 0, 2)
-
-		-- Rétablit la vitesse du joueur.
-		local character = player.Character
-		if character then
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
-			if humanoid then
-				humanoid.WalkSpeed = 16
-			end
-		end
-
-		-- Annule le zoom rapidement.
-		local camera = workspace.CurrentCamera
-		if camera then
-			TweenService:Create(camera, TweenInfo.new(0.2), { FieldOfView = 70 }):Play()
-		end
-
-		-- Nettoie l'affichage de l'arc de prédiction.
-		if renderConnection then
-			renderConnection:Disconnect()
-			renderConnection = nil
-		end
-		for _, dot in ipairs(dots) do
-			dot.Transparency = 1
-		end
-		targetMarker.Parent = nil
-
-		throwItem(chargeTime)
+	if isOnOwnBase() then
+		stopCharging()
+		notify("Sors de ta base pour lancer !")
+		return
 	end
+	throw()
 end)
 
--- Réception du KO : le joueur lâche tout ce qu'il tient.
--- On utilise un timeout pour ne pas bloquer le reste du script si l'événement
--- n'existe pas encore (ex: BlackholeController a planté côté serveur).
-local knockbackEvent = ReplicatedStorage:WaitForChild("KnockbackEvent", 10)
-if knockbackEvent then
-	knockbackEvent.OnClientEvent:Connect(function()
-		-- Annule une éventuelle charge en cours.
-		if isCharging then
-			isCharging = false
-			if renderConnection then
-				renderConnection:Disconnect()
-				renderConnection = nil
-			end
-			for _, dot in ipairs(dots) do
-				dot.Transparency = 1
-			end
-			targetMarker.Parent = nil
-		end
+RunService.RenderStepped:Connect(updateTrajectory)
 
-		dropItem()
-	end)
-else
-	warn("[Interaction] ⚠️ KnockbackEvent introuvable après 10s : le lâcher d'item sur KO sera désactivé, mais le ramassage et le lancer restent fonctionnels.")
-end
+player.CharacterAdded:Connect(function()
+	releaseLocal()
+end)

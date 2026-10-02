@@ -1,22 +1,65 @@
-# Feed The Blackhole - Game Design & Architecture
+# Get Rich Or Get Robbed — Game Design & Architecture
 
 ## Concept
 
-Jeu multijoueur frénétique (méta "Brainrot / Steal"). Les joueurs apparaissent dans leurs bases, volent des objets aléatoires (Items) et les jettent dans un trou noir géant au centre de la carte. À la fin du chrono, le trou noir digère les objets et donne des familiers/récompenses RNG basés sur le score.
+Jeu multijoueur (jusqu'à 8 joueurs, une base chacun) autour d'un trou noir central.
+Les joueurs ramassent des objets (dans leur base ou en volant ceux des autres), les jettent dans
+le trou noir pendant le **Feeding**, puis le trou noir **digère** et convertit les points en familiers (RNG).
 
-## Architecture Technique (Rojo)
+## Boucle de jeu (`GameLoopManager`, serveur)
 
-- `src/server` &rarr; `ServerScriptService.Server`
-- `src/client` &rarr; `StarterPlayerScripts.Client`
-- `src/shared` &rarr; `ReplicatedStorage.Shared`
+| Phase | Durée (Studio) | Trou noir | Joueurs |
+|---|---|---|---|
+| **Feeding** | 60 s (30 s) | Violet, `CanConsume = true` | Ramassent [E] et lancent (clic gauche maintenu) des objets dans le trou. 1 objet = 1 point. |
+| **Digesting** | 120 s (20 s) | Rouge, dôme répulsif actif | Récompenses distribuées au début de la phase. Les joueurs s'entraînent sur le tapis de course de leur base (+Speed). |
 
-## Game Loop (GameLoopManager)
+Les durées Studio raccourcies se désactivent avec `Config.UseStudioDurations = false`.
 
-- **Feeding (60s) :** Le trou noir est violet, `CanConsume = true`. Les joueurs jettent des objets dedans.
-- **Digesting (120s) :** Le trou noir est rouge, `CanConsume = false`. Calcul des scores et distribution de la RNG.
+## Règles physiques / réseau (ne pas régresser)
 
-## Entités
+1. **Ramassage autoritaire serveur** : le `ProximityPrompt.Triggered` est traité par le serveur
+   (`ItemInteraction`), qui écrit `Owner` + `Holder`, désactive le prompt et fait
+   `SetNetworkOwner(player)`, puis envoie `Remotes.ItemGrabbed` au client.
+   Sans la propriété réseau, tout ce que fait le client sur l'item (weld, impulsion) reste invisible au serveur.
+2. **Tenir / lancer côté client** : le client soude l'item à la main (`WeldConstraint` local), coupe les collisions.
+   Au relâchement : destruction du weld, collisions réactivées, `ApplyImpulse`, puis `Remotes.ThrowItem` au serveur.
+3. **Lâcher forcé** : le serveur efface l'attribut `Holder` (KO, mort, départ). Le client écoute ce changement et lâche.
+4. **Détection par distance, pas par `.Touched`** (`BlackholeController`, chaque Heartbeat) :
+   - Feeding : item libre à moins de `HoleRadius` (à plat) et sous `HoleConsumeHeight` → avalé, +1 point à `Owner`.
+   - Digesting, items dans le dôme : `SetNetworkOwner(nil)`, vélocité à zéro, replacé hors du dôme, `ApplyImpulse` vers l'extérieur.
+   - Digesting, joueurs dans le dôme : lâcher forcé, `humanoid.Sit = true`, soulevé d'1 stud, puis
+     `Remotes.Knockback` → **le client** applique l'impulsion (il est propriétaire réseau de son personnage ;
+     une impulsion appliquée par le serveur sur un personnage n'est pas fiable).
 
-- **BlackholeZone :** Le trou noir physique (CylinderMesh plat au sol + Aura ParticleEmitter). Écoute l'événement `.Touched` pour absorber les Items.
-- **Item :** Objets physiques jetables. Possèdent un attribut "Owner" pour savoir à qui donner le point.
-- **PlayerBases :** 4 bases contenant chacune SafeZone, TreadmillZone, IncubatorZone, et ItemSpawns.
+## Architecture (Rojo)
+
+- `src/shared` → `ReplicatedStorage.Shared`
+  - `Config` : toutes les valeurs d'équilibrage (durées, tailles, lancer, loot, couleurs).
+  - `Remotes` : accès typé aux RemoteEvents (déclarés dans `default.project.json` sous `ReplicatedStorage.Remotes`).
+  - `LootEngine` : `processRewards(score) -> (results, pulls)`. 1 tirage / `PointsPerPull` points (min 1 si score > 0) ;
+    plus le score est haut, plus les raretés hautes ont de poids.
+- `src/server` → `ServerScriptService.Server`
+  - `Main.server.lua` : initialise tout, démarre la boucle en dernier.
+  - `GameLoopManager` : timer + `ServerEvent` (`"StateChanged"`, `"Tick"`) ; publie `GameState` / `TimeRemaining` en attributs de `ReplicatedStorage`.
+  - `MapGenerator` : arène, trou noir, dôme, 8 bases, éclairage.
+  - `BaseManager` : une base par joueur (`BaseIndex` sur le Player, `OwnerName` sur la base), spawn sur sa base.
+  - `ItemSpawner` : objets dans les bases occupées pendant le Feeding.
+  - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
+  - `BlackholeController` : consommation, dôme répulsif, récompenses.
+  - `TrainingController` : tapis de course (convoyeur) → +Speed pendant la Digestion.
+  - `SessionData` : données en mémoire (speed, roundScore, pets) → attributs Player + leaderstats.
+- `src/client` → `StarterPlayerScripts.Client`
+  - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
+  - `HUD` : phase + chrono, points, vitesse, familiers, popup de récompenses.
+
+## Carte (`Workspace.Map`, générée)
+
+- Trou noir centré en (0, 0, 0) : `BlackholeZone` (disque 80x80), `HoleRing`, `BlackholeCore`, `BlackholeHalo`, `BlackholeDome`.
+- `LooseItems` : objets ramassés ou lancés.
+- `Base_1` … `Base_8` en cercle (rayon 175) : `BasePart`, `SpawnLocation`, `SafeZone` (visuel), `TreadmillZone`,
+  `SpawnPoints` (4 coins), `ItemSpawns`, `Lane` (bande lumineuse vers le trou).
+
+## Pas encore dans le MVP
+
+- Œufs + `IncubatorZone`, `SafeZone` fonctionnelle (invulnérabilité), vol d'un objet dans les mains d'un autre joueur.
+- Sauvegarde DataStore, familiers visibles / équipables, support mobile du lancer.
