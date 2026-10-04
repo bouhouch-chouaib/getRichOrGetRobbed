@@ -5,6 +5,7 @@
 
 local BaseManager = require(script.Parent.BaseManager)
 local BlackholeController = require(script.Parent.BlackholeController)
+local DayNightController = require(script.Parent.DayNightController)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local ItemSpawner = require(script.Parent.ItemSpawner)
@@ -20,6 +21,7 @@ ItemInteraction.Init()
 BlackholeController.Init()
 ItemSpawner.Init()
 TrainingController.Init(bases)
+DayNightController.Init()
 
 GameLoopManager.Start()
 print("[Main] Serveur prêt.")

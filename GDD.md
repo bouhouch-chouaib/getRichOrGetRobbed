@@ -41,7 +41,8 @@ Les durées Studio raccourcies se désactivent avec `Config.UseStudioDurations =
 - `src/server` → `ServerScriptService.Server`
   - `Main.server.lua` : initialise tout, démarre la boucle en dernier.
   - `GameLoopManager` : timer + `ServerEvent` (`"StateChanged"`, `"Tick"`) ; publie `GameState` / `TimeRemaining` en attributs de `ReplicatedStorage`.
-  - `MapGenerator` : arène, trou noir, dôme, 8 bases, éclairage.
+  - `MapGenerator` : prairie, chemins de terre, arbres, trou noir, dôme, 8 bases clôturées en bois.
+  - `DayNightController` : nuit pendant le Feeding, jour pendant la Digestion (transition de 4 s).
   - `BaseManager` : une base par joueur (`BaseIndex` sur le Player, `OwnerName` sur la base), spawn sur sa base.
   - `ItemSpawner` : objets dans les bases occupées pendant le Feeding.
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
@@ -57,7 +58,7 @@ Les durées Studio raccourcies se désactivent avec `Config.UseStudioDurations =
 - Trou noir centré en (0, 0, 0) : `BlackholeZone` (disque 80x80), `HoleRing`, `BlackholeCore`, `BlackholeHalo`, `BlackholeDome`.
 - `LooseItems` : objets ramassés ou lancés.
 - `Base_1` … `Base_8` en cercle (rayon 175) : `BasePart`, `SpawnLocation`, `SafeZone` (visuel), `TreadmillZone`,
-  `SpawnPoints` (4 coins), `ItemSpawns`, `Lane` (bande lumineuse vers le trou).
+  `SpawnPoints` (4 coins), `ItemSpawns`, `Fence` (clôture en bois, entrée côté trou noir). Un chemin de terre (`Map.Paths`) relie chaque base au trou.
 
 ## Pas encore dans le MVP
 
