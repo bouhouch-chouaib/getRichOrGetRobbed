@@ -1,20 +1,52 @@
 --!strict
--- Remotes : accès typé aux RemoteEvents déclarés dans default.project.json
--- (ReplicatedStorage.Remotes). Fonctionne côté client et serveur.
+-- Remotes : accès typé aux RemoteEvents de ReplicatedStorage.Remotes. Fonctionne côté client et serveur.
+-- Ils sont déclarés dans default.project.json, mais le serveur crée aussi ceux qui manqueraient
+-- (ex : remote ajouté au projet pendant que "rojo serve" tournait déjà). Le client les attend.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
-local folder = ReplicatedStorage:WaitForChild("Remotes")
+local IS_SERVER = RunService:IsServer()
+
+local function getFolder(): Instance
+	local folder = ReplicatedStorage:FindFirstChild("Remotes")
+	if folder then
+		return folder
+	end
+	if IS_SERVER then
+		local created = Instance.new("Folder")
+		created.Name = "Remotes"
+		created.Parent = ReplicatedStorage
+		return created
+	end
+	return ReplicatedStorage:WaitForChild("Remotes")
+end
+
+local folder = getFolder()
+
+local function remote(name: string): RemoteEvent
+	local existing = folder:FindFirstChild(name)
+	if existing and existing:IsA("RemoteEvent") then
+		return existing
+	end
+	if IS_SERVER then
+		local created = Instance.new("RemoteEvent")
+		created.Name = name
+		created.Parent = folder
+		return created
+	end
+	return folder:WaitForChild(name) :: RemoteEvent
+end
 
 return {
 	-- Serveur -> client : (item: BasePart) le serveur a validé le ramassage, le client peut souder l'item.
-	ItemGrabbed = folder:WaitForChild("ItemGrabbed") :: RemoteEvent,
+	ItemGrabbed = remote("ItemGrabbed"),
 	-- Client -> serveur : (item: BasePart) le client vient de lancer l'item qu'il tenait.
-	ThrowItem = folder:WaitForChild("ThrowItem") :: RemoteEvent,
+	ThrowItem = remote("ThrowItem"),
 	-- Serveur -> client : (velocity: Vector3) éjection par le dôme, appliquée par le client propriétaire du personnage.
-	Knockback = folder:WaitForChild("Knockback") :: RemoteEvent,
+	Knockback = remote("Knockback"),
 	-- Serveur -> client : (score: number, pulls: number, results: { [string]: number }, money: number)
-	RewardsGranted = folder:WaitForChild("RewardsGranted") :: RemoteEvent,
+	RewardsGranted = remote("RewardsGranted"),
 	-- Client -> serveur : (itemId: string) achat d'une amélioration de Config.Shop.
-	BuyUpgrade = folder:WaitForChild("BuyUpgrade") :: RemoteEvent,
+	BuyUpgrade = remote("BuyUpgrade"),
 }
