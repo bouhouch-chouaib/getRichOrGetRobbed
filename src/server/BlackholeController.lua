@@ -15,6 +15,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
+local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
@@ -79,7 +80,8 @@ local function consume(item: BasePart)
 	local ownerName = item:GetAttribute("Owner")
 	local owner = if type(ownerName) == "string" then Players:FindFirstChild(ownerName) else nil
 	if owner and owner:IsA("Player") then
-		SessionData.AddScore(owner, 1)
+		-- 1 objet = 1 point × multiplicateur des familiers équipés.
+		SessionData.AddScore(owner, SessionData.GetMultiplier(owner))
 	end
 
 	local prompt = item:FindFirstChildOfClass("ProximityPrompt")
@@ -181,15 +183,24 @@ end
 
 local function distributeRewards()
 	for _, player in ipairs(Players:GetPlayers()) do
-		local score = SessionData.GetRoundScore(player)
-		local results, pulls = LootEngine.processRewards(score)
-		local money = score * Config.Economy.MoneyPerPoint
-		if pulls > 0 then
-			SessionData.AddPets(player, results)
+		local score = math.floor(SessionData.GetRoundScore(player) * 10) / 10
+		local outcome = LootEngine.roll(score, SessionData.GetPity(player))
+		local money = math.floor(score * Config.Economy.MoneyPerPoint)
+		SessionData.SetPity(player, outcome.pity)
+		if outcome.pulls > 0 then
+			SessionData.AddPets(player, outcome.results)
 			SessionData.AddMoney(player, money)
 		end
-		print(string.format("[Blackhole] %s : %d points -> %d tirage(s), +%d$", player.Name, score, pulls, money))
-		Remotes.RewardsGranted:FireClient(player, score, pulls, results, money)
+		print(string.format("[Blackhole] %s : %.1f points -> %d tirage(s), +%d$", player.Name, score, outcome.pulls, money))
+		Remotes.RewardsGranted:FireClient(player, score, outcome.pulls, outcome.results, money)
+
+		-- Gros drop : annonce à tout le serveur.
+		for _, petId in ipairs(outcome.drops) do
+			local entry = PetCatalog.ById[petId]
+			if entry and (Config.RarityIndex[entry.Rarity] or 0) >= Config.Loot.AnnounceMinRarity then
+				Remotes.Announcement:FireAllClients(player.DisplayName, petId)
+			end
+		end
 	end
 	SessionData.ResetRoundScores()
 end

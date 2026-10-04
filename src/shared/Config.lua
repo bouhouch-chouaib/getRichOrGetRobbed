@@ -67,23 +67,31 @@ Config.Speed = {
 	BeltSpeed = 14, -- vitesse du tapis roulant qui repousse le joueur
 }
 
--- Loot : 1 objet avalé = 1 point.
+-- Tirages : 1 objet avalé = 1 point × multiplicateur des familiers équipés.
+-- Le coût d'un tirage augmente à chaque tirage de la même manche (évite l'emballement).
 Config.Loot = {
-	PointsPerPull = 5, -- un tirage tous les 5 points (minimum 1 tirage si score > 0)
-	LuckPerPoint = 0.04, -- chaque point augmente le poids des raretés hautes
-	MaxLuck = 3, -- multiplicateur max = 1 + MaxLuck
+	PullCost = 5, -- coût du 1er tirage (minimum 1 tirage si score > 0)
+	PullCostGrowth = 0.08, -- +8 % de coût à chaque tirage suivant
+	LuckPerPoint = 0.01, -- chaque point augmente un peu le poids des raretés hautes
+	MaxLuck = 1, -- au maximum, poids des raretés hautes ×2
+	PityPulls = 60, -- au plus tard au 60e tirage sans Épique+, un Épique+ est garanti
+	PityMinRarity = 4, -- index de rareté garanti par la pitié (4 = Épique)
+	AnnounceMinRarity = 5, -- annonce serveur à partir de cet index (5 = Légendaire)
 }
+
+-- Familiers.
+Config.Pets = {
+	EquipSlots = 1, -- familiers équipés (multiplicateur + suivent le joueur)
+	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
+}
+
+-- Test : dans Roblox Studio uniquement, chaque joueur reçoit 1 exemplaire de chaque familier
+-- (pour voir tous les modèles). Mettre à false pour tester la vraie progression.
+Config.StudioGiveAllPets = true
 
 -- Argent : revenu passif des familiers + bonus de fin de digestion.
 Config.Economy = {
-	MoneyPerPoint = 10, -- chaque objet avalé rapporte aussi de l'argent à la digestion
-	-- Revenu par seconde de chaque familier possédé, par rareté.
-	PetIncome = {
-		Commun = 1,
-		Rare = 5,
-		Epique = 25,
-		Sigma = 200,
-	} :: { [string]: number },
+	MoneyPerPoint = 10, -- chaque point marqué rapporte aussi de l'argent à la digestion
 }
 
 -- Verrouillage de base (bouton au sol, comme Steal a Brainrot).
@@ -110,18 +118,31 @@ Config.Shop = {
 Config.StrongArmMultiplier = 1.25
 
 export type Rarity = {
-	Name: string,
-	Weight: number,
+	Id: string, -- clé sans accent (attributs)
+	Name: string, -- nom affiché
+	Weight: number, -- poids de tirage (total = 1000)
 	Color: Color3,
+	Multiplier: number, -- bonus de points quand le familier est équipé
+	Income: number, -- $/s quand le familier est dans la base
 }
 
--- Ordre = du plus commun au plus rare. Poids entiers (total de base = 1000).
+-- Ordre = du plus commun au plus rare.
 Config.Rarities = {
-	{ Name = "Commun", Weight = 800, Color = Color3.fromRGB(200, 200, 200) },
-	{ Name = "Rare", Weight = 150, Color = Color3.fromRGB(80, 170, 255) },
-	{ Name = "Epique", Weight = 49, Color = Color3.fromRGB(190, 90, 255) },
-	{ Name = "Sigma", Weight = 1, Color = Color3.fromRGB(255, 200, 40) },
+	{ Id = "Commun", Name = "Commun", Weight = 500, Color = Color3.fromRGB(200, 200, 200), Multiplier = 1.1, Income = 1 },
+	{ Id = "Inhabituel", Name = "Inhabituel", Weight = 250, Color = Color3.fromRGB(100, 220, 90), Multiplier = 1.2, Income = 3 },
+	{ Id = "Rare", Name = "Rare", Weight = 120, Color = Color3.fromRGB(70, 160, 255), Multiplier = 1.35, Income = 8 },
+	{ Id = "Epique", Name = "Épique", Weight = 70, Color = Color3.fromRGB(180, 80, 255), Multiplier = 1.6, Income = 20 },
+	{ Id = "Legendaire", Name = "Légendaire", Weight = 40, Color = Color3.fromRGB(255, 170, 30), Multiplier = 2, Income = 50 },
+	{ Id = "Mythique", Name = "Mythique", Weight = 15, Color = Color3.fromRGB(255, 70, 120), Multiplier = 3, Income = 150 },
+	{ Id = "Divin", Name = "Divin", Weight = 4, Color = Color3.fromRGB(120, 255, 245), Multiplier = 5, Income = 500 },
+	{ Id = "Sigma", Name = "Sigma", Weight = 1, Color = Color3.fromRGB(255, 230, 60), Multiplier = 10, Income = 2000 },
 } :: { Rarity }
+
+-- Accès rapide : Config.RarityIndex["Epique"] = 4
+Config.RarityIndex = {} :: { [string]: number }
+for index, rarity in ipairs(Config.Rarities) do
+	Config.RarityIndex[rarity.Id] = index
+end
 
 Config.BaseColors = {
 	Color3.fromRGB(255, 90, 90),

@@ -1,18 +1,23 @@
 --!strict
 -- SessionData : données de session en mémoire par joueur (pas de DataStore pour le MVP).
 -- Chaque valeur est recopiée en attribut sur le Player (lu par le HUD) et dans les leaderstats :
---   Speed, RoundScore, Money, Pets_<Rareté>, Unlock_<Id>
+--   Speed, RoundScore, Money, Unlock_<Id>,
+--   Pet_<PetId> (quantité possédée), Equipped ("id1,id2"), Multiplier, EquipSlots
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 
 export type PlayerData = {
 	speed: number,
 	roundScore: number,
 	money: number,
-	pets: { [string]: number },
+	pets: { [string]: number }, -- petId -> quantité
+	equipped: { string }, -- petIds équipés (un même Id peut apparaître plusieurs fois si possédé en plusieurs exemplaires)
+	equipSlots: number,
+	pity: number,
 	unlocks: { [string]: boolean },
 }
 
@@ -48,9 +53,12 @@ local function sync(player: Player)
 	player:SetAttribute("RoundScore", data.roundScore)
 	player:SetAttribute("Money", data.money)
 
-	for name, count in pairs(data.pets) do
-		player:SetAttribute("Pets_" .. name, count)
+	for petId, count in pairs(data.pets) do
+		player:SetAttribute("Pet_" .. petId, count)
 	end
+	player:SetAttribute("Equipped", table.concat(data.equipped, ","))
+	player:SetAttribute("EquipSlots", data.equipSlots)
+	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
 	for id in pairs(data.unlocks) do
 		player:SetAttribute("Unlock_" .. id, true)
 	end
@@ -61,16 +69,21 @@ local function sync(player: Player)
 	end
 	local points = getStat(player, "Points")
 	if points then
-		points.Value = data.roundScore
+		points.Value = math.floor(data.roundScore)
 	end
 end
 
 local function onPlayerAdded(player: Player)
-	local pets = {}
-	for _, rarity in ipairs(Config.Rarities) do
-		pets[rarity.Name] = 0
-	end
-	storage[player] = { speed = Config.Speed.Base, roundScore = 0, money = 0, pets = pets, unlocks = {} }
+	storage[player] = {
+		speed = Config.Speed.Base,
+		roundScore = 0,
+		money = 0,
+		pets = {},
+		equipped = {},
+		equipSlots = Config.Pets.EquipSlots,
+		pity = 0,
+		unlocks = {},
+	}
 
 	local leaderstats = Instance.new("Folder")
 	leaderstats.Name = "leaderstats"
@@ -131,10 +144,78 @@ function SessionData.AddPets(player: Player, newPets: { [string]: number })
 	if not data then
 		return
 	end
-	for name, count in pairs(newPets) do
-		data.pets[name] = (data.pets[name] or 0) + count
+	for petId, count in pairs(newPets) do
+		if PetCatalog.ById[petId] then
+			data.pets[petId] = (data.pets[petId] or 0) + count
+		end
 	end
 	sync(player)
+end
+
+-- Multiplicateur de points : 1 + somme des bonus des familiers équipés (additif, pas multiplicatif).
+function SessionData.GetMultiplier(player: Player): number
+	local data = storage[player]
+	if not data then
+		return 1
+	end
+	local multiplier = 1
+	for _, petId in ipairs(data.equipped) do
+		local entry = PetCatalog.ById[petId]
+		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
+		if rarity then
+			multiplier += rarity.Multiplier - 1
+		end
+	end
+	return multiplier
+end
+
+local function countEquipped(data: PlayerData, petId: string): number
+	local count = 0
+	for _, id in ipairs(data.equipped) do
+		if id == petId then
+			count += 1
+		end
+	end
+	return count
+end
+
+-- Équipe un exemplaire de petId. Retourne false si impossible (pas possédé, plus de place).
+function SessionData.Equip(player: Player, petId: string): boolean
+	local data = storage[player]
+	if not data or #data.equipped >= data.equipSlots then
+		return false
+	end
+	if countEquipped(data, petId) >= (data.pets[petId] or 0) then
+		return false
+	end
+	table.insert(data.equipped, petId)
+	sync(player)
+	return true
+end
+
+-- Déséquipe un exemplaire de petId.
+function SessionData.Unequip(player: Player, petId: string)
+	local data = storage[player]
+	if not data then
+		return
+	end
+	local index = table.find(data.equipped, petId)
+	if index then
+		table.remove(data.equipped, index)
+		sync(player)
+	end
+end
+
+function SessionData.GetPity(player: Player): number
+	local data = storage[player]
+	return if data then data.pity else 0
+end
+
+function SessionData.SetPity(player: Player, pity: number)
+	local data = storage[player]
+	if data then
+		data.pity = pity
+	end
 end
 
 function SessionData.AddSpeed(player: Player, delta: number)

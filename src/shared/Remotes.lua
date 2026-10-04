@@ -49,4 +49,8 @@ return {
 	RewardsGranted = remote("RewardsGranted"),
 	-- Client -> serveur : (itemId: string) achat d'une amélioration de Config.Shop.
 	BuyUpgrade = remote("BuyUpgrade"),
+	-- Client -> serveur : (petId: string, equip: boolean) équiper / déséquiper un familier.
+	EquipPet = remote("EquipPet"),
+	-- Serveur -> tous les clients : (playerName: string, petId: string) gros drop annoncé à tout le serveur.
+	Announcement = remote("Announcement"),
 }

@@ -12,6 +12,8 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local Toast = require(script.Parent.Toast)
 
 local player = Players.LocalPlayer
@@ -118,6 +120,11 @@ local function formatMoney(value: number): string
 		formatted = formatted:sub(2)
 	end
 	return "$" .. formatted
+end
+
+local function numberAttribute(name: string): number
+	local value = player:GetAttribute(name)
+	return if type(value) == "number" then value else 0
 end
 
 ----------------------------------------------------------------------
@@ -350,31 +357,182 @@ end
 -- Fenêtre Familiers
 ----------------------------------------------------------------------
 
-local petsWindow = makeWindow("FAMILIERS", Vector2.new(480, 420), Color3.fromRGB(120, 215, 255), Color3.fromRGB(50, 110, 240))
-local petsList = makeList(petsWindow.content, 10)
+local petsWindow = makeWindow("FAMILIERS", Vector2.new(720, 520), Color3.fromRGB(120, 215, 255), Color3.fromRGB(50, 110, 240))
 
-local petCounts: { [string]: TextLabel } = {}
-for index, rarity in ipairs(Config.Rarities) do
-	local cardFrame = makeCard(petsList, 70, index)
-	cardFrame.BackgroundColor3 = WHITE
-	gradient(cardFrame, rarity.Color:Lerp(WHITE, 0.35), rarity.Color)
+-- Bandeau : places d'équipement, multiplicateur, collection.
+local petsHeader = text(petsWindow.content, "", 22)
+petsHeader.Size = UDim2.new(1, 0, 0, 28)
+petsHeader.Position = UDim2.fromOffset(0, 6)
 
-	local name = text(cardFrame, rarity.Name:upper(), 30)
-	name.Position = UDim2.fromOffset(16, 6)
-	name.Size = UDim2.new(0.6, 0, 0, 34)
-	name.TextXAlignment = Enum.TextXAlignment.Left
+local petsGrid = Instance.new("ScrollingFrame")
+petsGrid.Position = UDim2.fromOffset(0, 40)
+petsGrid.Size = UDim2.new(1, 0, 1, -40)
+petsGrid.BackgroundTransparency = 1
+petsGrid.BorderSizePixel = 0
+petsGrid.ScrollBarThickness = 8
+petsGrid.ScrollBarImageColor3 = BLACK
+petsGrid.AutomaticCanvasSize = Enum.AutomaticSize.Y
+petsGrid.CanvasSize = UDim2.new()
+petsGrid.Parent = petsWindow.content
+local gridLayout = Instance.new("UIGridLayout")
+gridLayout.CellSize = UDim2.fromOffset(122, 160)
+gridLayout.CellPadding = UDim2.fromOffset(10, 10)
+gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+gridLayout.Parent = petsGrid
+local gridPadding = Instance.new("UIPadding")
+gridPadding.PaddingTop = UDim.new(0, 6)
+gridPadding.PaddingLeft = UDim.new(0, 6)
+gridPadding.Parent = petsGrid
 
-	local income = text(cardFrame, string.format("+$%d/s chacun", Config.Economy.PetIncome[rarity.Name] or 0), 18, MONEY)
-	income.Position = UDim2.fromOffset(16, 40)
-	income.Size = UDim2.new(0.6, 0, 0, 22)
-	income.TextXAlignment = Enum.TextXAlignment.Left
+-- Aperçu 3D d'un familier dans un ViewportFrame (silhouette noire si non obtenu).
+local function petViewport(parent: Instance, petId: string, silhouette: boolean): ViewportFrame
+	local viewport = Instance.new("ViewportFrame")
+	viewport.BackgroundTransparency = 1
+	viewport.Ambient = Color3.fromRGB(200, 200, 200)
+	viewport.LightColor = WHITE
+	viewport.Parent = parent
+	local model = PetModelBuilder.Build(petId)
+	if model then
+		for _, descendant in ipairs(model:GetDescendants()) do
+			if descendant:IsA("ParticleEmitter") then
+				descendant:Destroy()
+			elseif silhouette and descendant:IsA("BasePart") then
+				descendant.Color = Color3.fromRGB(20, 20, 30)
+				descendant.Material = Enum.Material.SmoothPlastic
+			end
+		end
+		model:PivotTo(CFrame.new())
+		model.Parent = viewport
+		local extent = model:GetExtentsSize().Magnitude
+		local camera = Instance.new("Camera")
+		camera.FieldOfView = 40
+		camera.CFrame = CFrame.lookAt(Vector3.new(0.6, 0.45, -1).Unit * extent * 1.45, Vector3.zero)
+		camera.Parent = viewport
+		viewport.CurrentCamera = camera
+	end
+	return viewport
+end
 
-	local count = text(cardFrame, "x0", 40)
-	count.AnchorPoint = Vector2.new(1, 0.5)
-	count.Position = UDim2.new(1, -16, 0.5, 0)
-	count.Size = UDim2.fromOffset(140, 44)
+type PetCard = {
+	frame: Frame,
+	viewport: ViewportFrame?,
+	owned: boolean,
+	count: TextLabel,
+	badge: TextLabel,
+	name: TextLabel,
+}
+
+local petCards: { [string]: PetCard } = {}
+
+local function equippedList(): { string }
+	local list = {}
+	local equipped = player:GetAttribute("Equipped")
+	if type(equipped) == "string" then
+		for petId in string.gmatch(equipped, "[^,]+") do
+			table.insert(list, petId)
+		end
+	end
+	return list
+end
+
+for order, entry in ipairs(PetCatalog.List) do
+	local rarityIndex = Config.RarityIndex[entry.Rarity]
+	local rarity = Config.Rarities[rarityIndex]
+
+	local button = Instance.new("TextButton")
+	button.Text = ""
+	button.AutoButtonColor = false
+	button.BackgroundColor3 = WHITE
+	button.LayoutOrder = rarityIndex * 100 + order
+	corner(button, 14)
+	stroke(button, 3, BLACK, true)
+	gradient(button, rarity.Color:Lerp(WHITE, 0.45), rarity.Color)
+	button.Parent = petsGrid
+	bounce(button)
+
+	local name = text(button, "???", 15)
+	name.Position = UDim2.new(0, 4, 1, -44)
+	name.Size = UDim2.new(1, -8, 0, 22)
+	name.TextScaled = true
+
+	local rarityLabel = text(button, rarity.Name:upper(), 14, rarity.Color:Lerp(WHITE, 0.3))
+	rarityLabel.Position = UDim2.new(0, 4, 1, -22)
+	rarityLabel.Size = UDim2.new(1, -8, 0, 18)
+
+	local count = text(button, "", 20)
+	count.AnchorPoint = Vector2.new(1, 0)
+	count.Position = UDim2.new(1, -6, 0, 2)
+	count.Size = UDim2.fromOffset(60, 24)
 	count.TextXAlignment = Enum.TextXAlignment.Right
-	petCounts[rarity.Name] = count
+	count.ZIndex = 2
+
+	local badge = text(button, "ÉQUIPÉ", 16, Color3.fromRGB(120, 255, 90))
+	badge.Position = UDim2.fromOffset(6, 4)
+	badge.Size = UDim2.fromOffset(70, 20)
+	badge.TextXAlignment = Enum.TextXAlignment.Left
+	badge.ZIndex = 2
+	badge.Visible = false
+
+	local card: PetCard = { frame = button :: any, viewport = nil, owned = false, count = count, badge = badge, name = name }
+	petCards[entry.Id] = card
+
+	button.Activated:Connect(function()
+		if not card.owned then
+			Toast.show("PAS ENCORE OBTENU !", Color3.fromRGB(255, 90, 90))
+			return
+		end
+		local list = equippedList()
+		local equippedCount = 0
+		for _, id in ipairs(list) do
+			if id == entry.Id then
+				equippedCount += 1
+			end
+		end
+		local owned = numberAttribute("Pet_" .. entry.Id)
+		local slots = numberAttribute("EquipSlots")
+		if equippedCount < owned and #list < slots then
+			Remotes.EquipPet:FireServer(entry.Id, true)
+		elseif equippedCount > 0 then
+			Remotes.EquipPet:FireServer(entry.Id, false)
+		else
+			Toast.show("PLUS DE PLACE ! DÉSÉQUIPE UN FAMILIER", Color3.fromRGB(255, 90, 90))
+		end
+	end)
+end
+
+local function updatePets()
+	local list = equippedList()
+	local collected = 0
+	for _, entry in ipairs(PetCatalog.List) do
+		local card = petCards[entry.Id]
+		local owned = numberAttribute("Pet_" .. entry.Id)
+		if owned > 0 then
+			collected += 1
+		end
+		local nowOwned = owned > 0
+		if nowOwned ~= card.owned or card.viewport == nil then
+			card.owned = nowOwned
+			if card.viewport then
+				card.viewport:Destroy()
+			end
+			local viewport = petViewport(card.frame, entry.Id, not nowOwned)
+			viewport.Position = UDim2.fromOffset(6, 22)
+			viewport.Size = UDim2.new(1, -12, 1, -68)
+			card.viewport = viewport
+		end
+		card.name.Text = if nowOwned then entry.Name else "???"
+		card.count.Text = if nowOwned then "x" .. owned else ""
+		card.badge.Visible = table.find(list, entry.Id) ~= nil
+	end
+	local multiplier = player:GetAttribute("Multiplier")
+	petsHeader.Text = string.format(
+		"ÉQUIPÉS %d/%d   •   POINTS x%.2f   •   COLLECTION %d/%d",
+		#list,
+		numberAttribute("EquipSlots"),
+		if type(multiplier) == "number" then multiplier else 1,
+		collected,
+		#PetCatalog.List
+	)
 end
 
 shopButton.Activated:Connect(shopWindow.toggle)
@@ -384,11 +542,11 @@ petsButton.Activated:Connect(petsWindow.toggle)
 -- Popup de récompenses (fin de manche)
 ----------------------------------------------------------------------
 
-local rewardWindow = makeWindow("DIGESTION !", Vector2.new(420, 300), Color3.fromRGB(200, 130, 255), Color3.fromRGB(110, 40, 200))
+local rewardWindow = makeWindow("DIGESTION !", Vector2.new(460, 380), Color3.fromRGB(200, 130, 255), Color3.fromRGB(110, 40, 200))
 local rewardHeadline = text(rewardWindow.content, "", 28)
 rewardHeadline.Size = UDim2.new(1, 0, 0, 36)
 rewardHeadline.Position = UDim2.fromOffset(0, 8)
-local rewardBody = text(rewardWindow.content, "", 28)
+local rewardBody = text(rewardWindow.content, "", 24)
 rewardBody.Size = UDim2.new(1, 0, 1, -56)
 rewardBody.Position = UDim2.fromOffset(0, 50)
 rewardBody.RichText = true
@@ -398,10 +556,6 @@ rewardBody.TextYAlignment = Enum.TextYAlignment.Top
 -- Mise à jour
 ----------------------------------------------------------------------
 
-local function numberAttribute(name: string): number
-	local value = player:GetAttribute(name)
-	return if type(value) == "number" then value else 0
-end
 
 local function updatePhase()
 	local state = ReplicatedStorage:GetAttribute("GameState")
@@ -445,9 +599,7 @@ local function updateStats()
 	pointsLabel.Text = string.format("POINTS : %d", numberAttribute("RoundScore"))
 	updateShop(money)
 
-	for _, rarity in ipairs(Config.Rarities) do
-		petCounts[rarity.Name].Text = "x" .. numberAttribute("Pets_" .. rarity.Name)
-	end
+	updatePets()
 end
 
 -- Petit "pop" du compteur d'argent quand il augmente.
@@ -472,13 +624,26 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 		rewardHeadline.Text = "IL A ENCORE FAIM..."
 		rewardBody.Text = "0 POINT CETTE MANCHE"
 	else
-		rewardHeadline.Text = string.format("%d POINTS  •  %d TIRAGE%s", score, pulls, if pulls > 1 then "S" else "")
-		local lines = {}
-		for _, rarity in ipairs(Config.Rarities) do
-			local count = results[rarity.Name] or 0
-			if count > 0 then
-				table.insert(lines, string.format('<font color="#%s">+%d %s</font>', rarity.Color:ToHex(), count, rarity.Name:upper()))
+		rewardHeadline.Text = string.format("%.1f POINTS  •  %d TIRAGE%s", score, pulls, if pulls > 1 then "S" else "")
+		-- Familiers gagnés, du plus rare au plus commun (6 lignes max).
+		local drops = {}
+		for petId, count in pairs(results) do
+			local entry = PetCatalog.ById[petId]
+			if entry then
+				table.insert(drops, { entry = entry, count = count, rank = Config.RarityIndex[entry.Rarity] })
 			end
+		end
+		table.sort(drops, function(a, b)
+			return a.rank > b.rank
+		end)
+		local lines = {}
+		for index, drop in ipairs(drops) do
+			if index > 6 then
+				table.insert(lines, string.format("+ %d AUTRES...", #drops - 6))
+				break
+			end
+			local rarity = Config.Rarities[drop.rank]
+			table.insert(lines, string.format('<font color="#%s">+%d %s</font>', rarity.Color:ToHex(), drop.count, drop.entry.Name:upper()))
 		end
 		if money and money > 0 then
 			table.insert(lines, string.format('<font color="#%s">+%s</font>', MONEY:ToHex(), formatMoney(money)))
@@ -487,12 +652,22 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 	end
 
 	rewardWindow.open()
-	task.delay(6, function()
+	task.delay(7, function()
 		if token == rewardToken then
 			rewardWindow.close()
 		end
 	end)
 end
+
+-- Gros drop d'un joueur du serveur.
+Remotes.Announcement.OnClientEvent:Connect(function(playerName: string, petId: string)
+	local entry = PetCatalog.ById[petId]
+	if not entry then
+		return
+	end
+	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
+	Toast.show(string.format("%s A OBTENU %s (%s) !", playerName:upper(), entry.Name:upper(), rarity.Name:upper()), rarity.Color)
+end)
 
 ReplicatedStorage:GetAttributeChangedSignal("GameState"):Connect(updatePhase)
 ReplicatedStorage:GetAttributeChangedSignal("TimeRemaining"):Connect(updatePhase)

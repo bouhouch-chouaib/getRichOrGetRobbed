@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local SessionData = require(script.Parent.SessionData)
 
@@ -16,15 +17,28 @@ for _, item in ipairs(Config.Shop) do
 	shopById[item.Id] = item
 end
 
--- Revenu par seconde d'un joueur selon ses familiers.
+-- Revenu par seconde : seuls les Config.Pets.IncomeSlots meilleurs familiers de la base rapportent.
 function EconomyController.GetIncome(player: Player): number
 	local data = SessionData.Get(player)
 	if not data then
 		return 0
 	end
+	local incomes = {}
+	for petId, count in pairs(data.pets) do
+		local entry = PetCatalog.ById[petId]
+		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
+		if rarity then
+			for _ = 1, math.min(count, Config.Pets.IncomeSlots) do
+				table.insert(incomes, rarity.Income)
+			end
+		end
+	end
+	table.sort(incomes, function(a, b)
+		return a > b
+	end)
 	local income = 0
-	for rarity, count in pairs(data.pets) do
-		income += (Config.Economy.PetIncome[rarity] or 0) * count
+	for index = 1, math.min(#incomes, Config.Pets.IncomeSlots) do
+		income += incomes[index]
 	end
 	return income
 end

@@ -15,9 +15,23 @@ le trou noir pendant le **Feeding**, puis le trou noir **digère** et convertit 
 
 Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées de `Config.StudioDurations`).
 
+## Familiers (75, 8 raretés)
+
+- Catalogue : `PetCatalog` (5 catégories x 15 : Animaux, Fantastiques, Plantes, Hybrides, Brainrot).
+- Raretés (`Config.Rarities`) : Commun 50 %, Inhabituel 25 %, Rare 12 %, Épique 7 %, Légendaire 4 %, Mythique 1,5 %, Divin 0,4 %, Sigma 0,1 %.
+- **Équipé** (1 place de base) : le familier suit le joueur et ajoute un bonus de points, additif :
+  ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus).
+- **Dans la base** : les 10 meilleurs familiers rapportent de l'argent chaque seconde (1 → 2000 $/s selon la rareté).
+- **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
+  Chance légèrement augmentée par le score. **Pitié** : Épique+ garanti au 60e tirage sans Épique+.
+- **Annonce serveur** pour tout drop Légendaire ou mieux.
+- Modèles : `PetModelBuilder` construit un modèle de remplacement en formes de base ; un Model nommé comme l'Id
+  dans `ReplicatedStorage.PetModels` le remplace automatiquement.
+- Test : `Config.StudioGiveAllPets = true` donne les 75 familiers dans Studio.
+
 ## Économie et base
 
-- **Argent** : chaque familier rapporte de l'argent chaque seconde (`Config.Economy.PetIncome`), et chaque point marqué rapporte `MoneyPerPoint` $ à la digestion.
+- **Argent** : revenu passif des 10 meilleurs familiers + `MoneyPerPoint` $ par point à la digestion.
 - **Boutique** (`Config.Shop`) : déblocages permanents pour la session. Achat validé par le serveur, enregistré en attribut `Unlock_<Id>`.
   - `Treadmill` : tapis de course à l'extérieur de la base (+Speed pendant la Digestion).
   - `StrongArm` : lancers 25 % plus puissants.
