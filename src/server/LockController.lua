@@ -89,7 +89,7 @@ local function update(entry: BaseParts, now: number)
 	end
 
 	if entry.label and untilTime then
-		entry.label.Text = string.format("FERMÉE  %ds", math.ceil(untilTime - now))
+		entry.label.Text = string.format("FERMÉE : %ds", math.ceil(untilTime - now))
 	end
 
 	-- Expulse les intrus devant l'entrée.

@@ -62,7 +62,8 @@ Les durées Studio raccourcies se désactivent avec `Config.UseStudioDurations =
   - `SessionData` : données en mémoire (speed, roundScore, money, pets, unlocks) → attributs Player + leaderstats.
 - `src/client` → `StarterPlayerScripts.Client`
   - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
-  - `HUD` : phase + chrono, argent et revenu, points, vitesse, familiers, popup de récompenses, boutique.
+  - `HUD` : style cartoon (police LuckiestGuy, contours noirs épais, boutons en dégradé) : phase + chrono, argent et revenu, points, vitesse, boutons BOUTIQUE / FAMILIERS (fenêtres), popup de récompenses.
+  - `Toast` (ModuleScript) : gros message temporaire au centre de l'écran (`Toast.show(texte, couleur)`).
 
 ## Carte (`Workspace.Map`, générée)
 

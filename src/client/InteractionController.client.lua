@@ -7,13 +7,13 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Toast = require(script.Parent.Toast)
 
 local THROW = Config.Throw
 local DOT_COUNT = 20
@@ -75,12 +75,6 @@ end
 ----------------------------------------------------------------------
 -- Utilitaires
 ----------------------------------------------------------------------
-
-local function notify(text: string)
-	pcall(function()
-		StarterGui:SetCore("SendNotification", { Title = "Get Rich Or Get Robbed", Text = text, Duration = 2 })
-	end)
-end
 
 local function getHumanoid(): Humanoid?
 	local character = player.Character
@@ -286,7 +280,7 @@ UserInputService.InputEnded:Connect(function(input)
 	end
 	if isOnOwnBase() then
 		stopCharging()
-		notify("Sors de ta base pour lancer !")
+		Toast.show("SORS DE TA BASE POUR LANCER !", Color3.fromRGB(255, 90, 90))
 		return
 	end
 	throw()

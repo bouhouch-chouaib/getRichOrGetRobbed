@@ -58,6 +58,18 @@ local function makeGhost(part: BasePart)
 	part.CanQuery = false
 end
 
+-- Texte des panneaux dans le décor : police cartoon + gros contour noir (style Steal a Brainrot).
+local function styleSignText(label: TextLabel, color: Color3)
+	label.Font = Enum.Font.LuckiestGuy
+	label.TextScaled = true
+	label.TextColor3 = color
+	label.TextStrokeTransparency = 1
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 3
+	stroke.Color = Color3.new(0, 0, 0)
+	stroke.Parent = label
+end
+
 local function makeDisc(name: string, radius: number, thickness: number, topY: number, color: Color3, parent: Instance): Part
 	local disc = makePart(
 		name,
@@ -322,10 +334,7 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	lockLabel.Name = "Label"
 	lockLabel.Size = UDim2.fromScale(1, 1)
 	lockLabel.BackgroundTransparency = 1
-	lockLabel.Font = Enum.Font.FredokaOne
-	lockLabel.TextScaled = true
-	lockLabel.TextColor3 = Color3.new(1, 1, 1)
-	lockLabel.TextStrokeTransparency = 0.2
+	styleSignText(lockLabel, Color3.new(1, 1, 1))
 	lockLabel.Text = "FERMER LA BASE"
 	lockLabel.Parent = lockSign
 	lockSign.Parent = base
@@ -379,10 +388,7 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	label.Name = "Label"
 	label.Size = UDim2.fromScale(1, 1)
 	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.FredokaOne
-	label.TextScaled = true
-	label.TextColor3 = color
-	label.TextStrokeTransparency = 0.3
+	styleSignText(label, color)
 	label.Text = "Base libre"
 	label.Parent = sign
 	sign.Parent = base
