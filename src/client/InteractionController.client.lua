@@ -102,7 +102,8 @@ end
 local function throwVelocity(ratio: number): Vector3
 	local camera = Workspace.CurrentCamera
 	local direction = (camera.CFrame.LookVector + Vector3.new(0, THROW.UpBias, 0)).Unit
-	return direction * (THROW.MinSpeed + (THROW.MaxSpeed - THROW.MinSpeed) * ratio)
+	local power = if player:GetAttribute("Unlock_StrongArm") then Config.StrongArmMultiplier else 1
+	return direction * (THROW.MinSpeed + (THROW.MaxSpeed - THROW.MinSpeed) * ratio) * power
 end
 
 local function isOnOwnBase(): boolean

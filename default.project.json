@@ -12,7 +12,8 @@
         "ItemGrabbed": { "$className": "RemoteEvent" },
         "ThrowItem": { "$className": "RemoteEvent" },
         "Knockback": { "$className": "RemoteEvent" },
-        "RewardsGranted": { "$className": "RemoteEvent" }
+        "RewardsGranted": { "$className": "RemoteEvent" },
+        "BuyUpgrade": { "$className": "RemoteEvent" }
       }
     },
 

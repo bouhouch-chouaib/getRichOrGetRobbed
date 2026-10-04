@@ -13,6 +13,8 @@ return {
 	ThrowItem = folder:WaitForChild("ThrowItem") :: RemoteEvent,
 	-- Serveur -> client : (velocity: Vector3) éjection par le dôme, appliquée par le client propriétaire du personnage.
 	Knockback = folder:WaitForChild("Knockback") :: RemoteEvent,
-	-- Serveur -> client : (score: number, pulls: number, results: { [string]: number })
+	-- Serveur -> client : (score: number, pulls: number, results: { [string]: number }, money: number)
 	RewardsGranted = folder:WaitForChild("RewardsGranted") :: RemoteEvent,
+	-- Client -> serveur : (itemId: string) achat d'une amélioration de Config.Shop.
+	BuyUpgrade = folder:WaitForChild("BuyUpgrade") :: RemoteEvent,
 }

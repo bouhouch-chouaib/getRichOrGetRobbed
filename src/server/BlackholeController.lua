@@ -183,11 +183,13 @@ local function distributeRewards()
 	for _, player in ipairs(Players:GetPlayers()) do
 		local score = SessionData.GetRoundScore(player)
 		local results, pulls = LootEngine.processRewards(score)
+		local money = score * Config.Economy.MoneyPerPoint
 		if pulls > 0 then
 			SessionData.AddPets(player, results)
+			SessionData.AddMoney(player, money)
 		end
-		print(string.format("[Blackhole] %s : %d points -> %d tirage(s)", player.Name, score, pulls))
-		Remotes.RewardsGranted:FireClient(player, score, pulls, results)
+		print(string.format("[Blackhole] %s : %d points -> %d tirage(s), +%d$", player.Name, score, pulls, money))
+		Remotes.RewardsGranted:FireClient(player, score, pulls, results, money)
 	end
 	SessionData.ResetRoundScores()
 end

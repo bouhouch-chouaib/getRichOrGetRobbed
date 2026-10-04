@@ -74,6 +74,41 @@ Config.Loot = {
 	MaxLuck = 3, -- multiplicateur max = 1 + MaxLuck
 }
 
+-- Argent : revenu passif des familiers + bonus de fin de digestion.
+Config.Economy = {
+	MoneyPerPoint = 10, -- chaque objet avalé rapporte aussi de l'argent à la digestion
+	-- Revenu par seconde de chaque familier possédé, par rareté.
+	PetIncome = {
+		Commun = 1,
+		Rare = 5,
+		Epique = 25,
+		Sigma = 200,
+	} :: { [string]: number },
+}
+
+-- Verrouillage de base (bouton au sol, comme Steal a Brainrot).
+Config.Lock = {
+	Duration = 60,
+	LongDuration = 90, -- avec l'amélioration "LongLock"
+	ButtonRadius = 4,
+}
+
+export type ShopItem = {
+	Id: string,
+	Name: string,
+	Description: string,
+	Price: number,
+}
+
+-- Catalogue de la boutique (ordre d'affichage). Chaque achat écrit l'attribut "Unlock_<Id>" sur le Player.
+Config.Shop = {
+	{ Id = "Treadmill", Name = "Tapis de course", Description = "Apparaît derrière ta base. Cours dessus pendant la digestion : +vitesse.", Price = 250 },
+	{ Id = "StrongArm", Name = "Bras musclé", Description = "Lancers 25% plus puissants.", Price = 750 },
+	{ Id = "LongLock", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", Price = 1500 },
+} :: { ShopItem }
+
+Config.StrongArmMultiplier = 1.25
+
 export type Rarity = {
 	Name: string,
 	Weight: number,

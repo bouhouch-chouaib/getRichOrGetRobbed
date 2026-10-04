@@ -34,6 +34,10 @@ function BaseManager.GetBase(player: Player): Model?
 	return nil
 end
 
+function BaseManager.GetOwner(base: Model): Player?
+	return owners[base]
+end
+
 function BaseManager.GetOccupiedBases(): { Model }
 	local result = {}
 	for _, base in ipairs(bases) do

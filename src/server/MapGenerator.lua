@@ -8,7 +8,8 @@
 --   ArenaFloor, HoleDirt, HoleRing, BlackholeZone (+ Aura), BlackholeCore (+ Light), BlackholeHalo, BlackholeDome
 --   Paths (Folder), Trees (Folder)
 --   LooseItems (Folder) : objets ramassés / lancés
---   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), SpawnLocation, SafeZone (invisible), TreadmillZone,
+--   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation,
+--                              SafeZone (invisible), Treadmill (Model, à l'extérieur, caché tant que non acheté),
 --                              SpawnPoints (Folder), ItemSpawns (Folder)
 
 local Lighting = game:GetService("Lighting")
@@ -302,13 +303,57 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	safeZone.Transparency = 1
 	makeGhost(safeZone)
 
-	-- Tapis de course : la vitesse du tapis (AssemblyLinearVelocity) est réglée par TrainingController.
-	local treadmill = makePart("TreadmillZone", Vector3.new(10, 0.6, 20), origin * CFrame.new(-16, top + 0.3, 2), Color3.fromRGB(70, 70, 75), base)
-	treadmill.Material = Enum.Material.DiamondPlate
+	-- Bouton de verrouillage au sol (géré par LockController) + portail affiché quand la base est fermée.
+	local buttonCFrame = origin * CFrame.new(-16, top, -14)
+	local buttonBase = makePart("LockButtonBase", Vector3.new(0.4, 10, 10), buttonCFrame * CFrame.new(0, 0.2, 0) * FLAT, Color3.fromRGB(60, 60, 65), base)
+	buttonBase.Shape = Enum.PartType.Cylinder
+	local button = makePart("LockButton", Vector3.new(0.6, 8, 8), buttonCFrame * CFrame.new(0, 0.5, 0) * FLAT, Color3.fromRGB(220, 50, 50), base)
+	button.Shape = Enum.PartType.Cylinder
+	button.CanCollide = false
+
+	local lockSign = Instance.new("BillboardGui")
+	lockSign.Name = "LockSign"
+	lockSign.Adornee = button
+	lockSign.Size = UDim2.fromScale(12, 3)
+	lockSign.StudsOffsetWorldSpace = Vector3.new(0, 5, 0)
+	lockSign.LightInfluence = 0
+	lockSign.MaxDistance = 120
+	local lockLabel = Instance.new("TextLabel")
+	lockLabel.Name = "Label"
+	lockLabel.Size = UDim2.fromScale(1, 1)
+	lockLabel.BackgroundTransparency = 1
+	lockLabel.Font = Enum.Font.FredokaOne
+	lockLabel.TextScaled = true
+	lockLabel.TextColor3 = Color3.new(1, 1, 1)
+	lockLabel.TextStrokeTransparency = 0.2
+	lockLabel.Text = "FERMER LA BASE"
+	lockLabel.Parent = lockSign
+	lockSign.Parent = base
+
+	local half = size.X / 2 - 0.5
+	local gate = makePart("Gate", Vector3.new(FENCE_GAP, FENCE_HEIGHT - 0.5, 0.6), origin * CFrame.new(0, top + (FENCE_HEIGHT - 0.5) / 2, -half), COLORS.WoodRail, base)
+	gate.Material = Enum.Material.WoodPlanks
+	gate.Transparency = 1
+	makeGhost(gate)
+
+	-- Tapis de course : à l'extérieur, contre la clôture gauche. Caché tant que le propriétaire
+	-- ne l'a pas acheté (TrainingController gère l'affichage et la vitesse du tapis).
+	local treadmill = Instance.new("Model")
+	treadmill.Name = "Treadmill"
+	local treadmillCFrame = origin * CFrame.new(-half - 9, 0, -6)
+	local belt = makePart("TreadmillZone", Vector3.new(10, 0.6, 20), treadmillCFrame * CFrame.new(0, 0.3, 0), Color3.fromRGB(70, 70, 75), treadmill)
+	belt.Material = Enum.Material.DiamondPlate
 	for _, side in ipairs({ -5.5, 5.5 }) do
-		local edge = makePart("TreadmillEdge", Vector3.new(1, 1, 20), origin * CFrame.new(-16 + side, top + 0.5, 2), COLORS.WoodPost, base)
+		local edge = makePart("TreadmillEdge", Vector3.new(1, 1, 20), treadmillCFrame * CFrame.new(side, 0.5, 0), COLORS.WoodPost, treadmill)
 		edge.Material = Enum.Material.Wood
 	end
+	for _, part in ipairs(treadmill:GetChildren()) do
+		if part:IsA("BasePart") then
+			part.Transparency = 1
+			makeGhost(part)
+		end
+	end
+	treadmill.Parent = base
 
 	local spawnPoints = Instance.new("Folder")
 	spawnPoints.Name = "SpawnPoints"

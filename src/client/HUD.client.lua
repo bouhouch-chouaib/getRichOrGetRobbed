@@ -1,5 +1,5 @@
 --!strict
--- HUD : phase + chrono, score de la manche, vitesse, inventaire de familiers, popup de récompenses.
+-- HUD : phase + chrono, argent, score, vitesse, familiers, popup de récompenses, boutique (BuyUpgrade).
 -- Tout est lu depuis des attributs répliqués (ReplicatedStorage et Player), aucun appel serveur.
 
 local Players = game:GetService("Players")
@@ -19,7 +19,7 @@ local PHASES = {
 	},
 	Digesting = {
 		Title = "DIGESTION",
-		Hint = "Le dôme repousse tout ! Cours sur le tapis de ta base pour gagner de la vitesse",
+		Hint = "Le dôme repousse tout ! Ferme ta base et dépense ton argent dans la boutique",
 		Color = Config.Colors.Digesting,
 	},
 }
@@ -85,15 +85,93 @@ hintLabel.Position = UDim2.new(0.5, 0, 0, 102)
 hintLabel.TextStrokeTransparency = 0.4
 
 -- Stats joueur (gauche)
-local statsCard = card("Stats", UDim2.fromOffset(200, 80), UDim2.new(0, 10, 0.5, 0), Vector2.new(0, 0.5))
-local scoreLabel = label(statsCard, "", 22, Enum.Font.FredokaOne)
-scoreLabel.Size = UDim2.new(1, -20, 0, 34)
-scoreLabel.Position = UDim2.fromOffset(10, 6)
-scoreLabel.TextXAlignment = Enum.TextXAlignment.Left
-local speedLabel = label(statsCard, "", 18, Enum.Font.GothamMedium)
-speedLabel.Size = UDim2.new(1, -20, 0, 28)
-speedLabel.Position = UDim2.fromOffset(10, 42)
-speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+local MONEY_COLOR = Color3.fromRGB(120, 230, 90)
+local statsCard = card("Stats", UDim2.fromOffset(220, 150), UDim2.new(0, 10, 0.5, 0), Vector2.new(0, 0.5))
+local function statRow(y: number, size: number, font: Enum.Font): TextLabel
+	local row = label(statsCard, "", size, font)
+	row.Size = UDim2.new(1, -20, 0, size + 8)
+	row.Position = UDim2.fromOffset(10, y)
+	row.TextXAlignment = Enum.TextXAlignment.Left
+	return row
+end
+local moneyLabel = statRow(6, 26, Enum.Font.FredokaOne)
+moneyLabel.TextColor3 = MONEY_COLOR
+local incomeLabel = statRow(40, 16, Enum.Font.GothamMedium)
+incomeLabel.TextColor3 = MONEY_COLOR
+local scoreLabel = statRow(70, 20, Enum.Font.FredokaOne)
+local speedLabel = statRow(104, 18, Enum.Font.GothamMedium)
+
+-- Boutique : bouton (gauche, sous les stats) + panneau central.
+local shopButton = Instance.new("TextButton")
+shopButton.Name = "ShopButton"
+shopButton.Size = UDim2.fromOffset(220, 48)
+shopButton.Position = UDim2.new(0, 10, 0.5, 85)
+shopButton.BackgroundColor3 = Color3.fromRGB(255, 190, 40)
+shopButton.Font = Enum.Font.FredokaOne
+shopButton.TextSize = 24
+shopButton.TextColor3 = Color3.fromRGB(60, 35, 0)
+shopButton.Text = "BOUTIQUE"
+corner(shopButton, 12)
+shopButton.Parent = gui
+
+local shopCard = card("Shop", UDim2.fromOffset(460, 70 + #Config.Shop * 92), UDim2.fromScale(0.5, 0.5), Vector2.new(0.5, 0.5))
+shopCard.Visible = false
+local shopTitle = label(shopCard, "BOUTIQUE", 26, Enum.Font.FredokaOne)
+shopTitle.Size = UDim2.new(1, 0, 0, 40)
+shopTitle.Position = UDim2.fromOffset(0, 8)
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.fromOffset(36, 36)
+closeButton.Position = UDim2.new(1, -44, 0, 8)
+closeButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+closeButton.Font = Enum.Font.FredokaOne
+closeButton.TextSize = 22
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.Text = "X"
+corner(closeButton, 8)
+closeButton.Parent = shopCard
+
+local buyButtons: { [string]: TextButton } = {}
+for index, item in ipairs(Config.Shop) do
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, -24, 0, 82)
+	row.Position = UDim2.fromOffset(12, 56 + (index - 1) * 92)
+	row.BackgroundColor3 = Color3.fromRGB(40, 32, 60)
+	corner(row, 10)
+	row.Parent = shopCard
+
+	local name = label(row, item.Name, 20, Enum.Font.FredokaOne)
+	name.Size = UDim2.new(1, -150, 0, 26)
+	name.Position = UDim2.fromOffset(12, 8)
+	name.TextXAlignment = Enum.TextXAlignment.Left
+	local description = label(row, item.Description, 14, Enum.Font.GothamMedium)
+	description.Size = UDim2.new(1, -150, 0, 40)
+	description.Position = UDim2.fromOffset(12, 34)
+	description.TextXAlignment = Enum.TextXAlignment.Left
+	description.TextYAlignment = Enum.TextYAlignment.Top
+	description.TextWrapped = true
+	description.TextColor3 = Color3.fromRGB(200, 200, 220)
+
+	local buy = Instance.new("TextButton")
+	buy.Size = UDim2.fromOffset(124, 44)
+	buy.AnchorPoint = Vector2.new(1, 0.5)
+	buy.Position = UDim2.new(1, -10, 0.5, 0)
+	buy.Font = Enum.Font.FredokaOne
+	buy.TextSize = 20
+	buy.TextColor3 = Color3.new(1, 1, 1)
+	corner(buy, 10)
+	buy.Parent = row
+	buy.Activated:Connect(function()
+		Remotes.BuyUpgrade:FireServer(item.Id)
+	end)
+	buyButtons[item.Id] = buy
+end
+
+shopButton.Activated:Connect(function()
+	shopCard.Visible = not shopCard.Visible
+end)
+closeButton.Activated:Connect(function()
+	shopCard.Visible = false
+end)
 
 -- Inventaire de familiers (droite)
 local petsCard = card("Pets", UDim2.fromOffset(200, 40 + #Config.Rarities * 30), UDim2.new(1, -10, 0.5, 0), Vector2.new(1, 0.5))
@@ -111,7 +189,7 @@ for index, rarity in ipairs(Config.Rarities) do
 end
 
 -- Popup de récompenses (centre)
-local rewardCard = card("Rewards", UDim2.fromOffset(360, 80 + #Config.Rarities * 28), UDim2.fromScale(0.5, 0.42), Vector2.new(0.5, 0.5))
+local rewardCard = card("Rewards", UDim2.fromOffset(360, 108 + #Config.Rarities * 28), UDim2.fromScale(0.5, 0.42), Vector2.new(0.5, 0.5))
 rewardCard.Visible = false
 local rewardTitle = label(rewardCard, "", 24, Enum.Font.FredokaOne)
 rewardTitle.Size = UDim2.new(1, 0, 0, 36)
@@ -140,7 +218,32 @@ local function updatePhase()
 	timerLabel.Text = string.format("%d:%02d", seconds // 60, seconds % 60)
 end
 
+local function numberAttribute(name: string): number
+	local value = player:GetAttribute(name)
+	return if type(value) == "number" then value else 0
+end
+
+local function updateShop(money: number)
+	for _, item in ipairs(Config.Shop) do
+		local buy = buyButtons[item.Id]
+		if player:GetAttribute("Unlock_" .. item.Id) then
+			buy.Text = "ACQUIS"
+			buy.BackgroundColor3 = Color3.fromRGB(80, 80, 90)
+			buy.AutoButtonColor = false
+		else
+			buy.Text = string.format("%d $", item.Price)
+			buy.BackgroundColor3 = if money >= item.Price then Color3.fromRGB(60, 180, 70) else Color3.fromRGB(120, 60, 60)
+			buy.AutoButtonColor = true
+		end
+	end
+end
+
 local function updateStats()
+	local money = numberAttribute("Money")
+	moneyLabel.Text = string.format("%d $", math.floor(money))
+	incomeLabel.Text = string.format("+%d $/s (familiers)", numberAttribute("Income"))
+	updateShop(money)
+
 	local score = player:GetAttribute("RoundScore")
 	local speed = player:GetAttribute("Speed")
 	scoreLabel.Text = "Points : " .. tostring(if type(score) == "number" then score else 0)
@@ -153,7 +256,7 @@ local function updateStats()
 end
 
 local rewardToken = 0
-local function showRewards(score: number, pulls: number, results: { [string]: number })
+local function showRewards(score: number, pulls: number, results: { [string]: number }, money: number?)
 	rewardToken += 1
 	local token = rewardToken
 
@@ -169,13 +272,16 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 				table.insert(lines, string.format('<font color="#%s">+%d %s</font>', rarity.Color:ToHex(), count, rarity.Name))
 			end
 		end
+		if money and money > 0 then
+			table.insert(lines, string.format('<font color="#%s">+%d $</font>', MONEY_COLOR:ToHex(), money))
+		end
 		rewardBody.Text = table.concat(lines, "\n")
 	end
 
 	rewardCard.Visible = true
 	rewardCard.Size = UDim2.fromOffset(0, 0)
 	TweenService:Create(rewardCard, TweenInfo.new(0.35, Enum.EasingStyle.Back), {
-		Size = UDim2.fromOffset(360, 80 + #Config.Rarities * 28),
+		Size = UDim2.fromOffset(360, 108 + #Config.Rarities * 28),
 	}):Play()
 
 	task.delay(5, function()

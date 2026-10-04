@@ -11,9 +11,18 @@ le trou noir pendant le **Feeding**, puis le trou noir **digère** et convertit 
 | Phase | Durée (Studio) | Trou noir | Joueurs |
 |---|---|---|---|
 | **Feeding** | 60 s (30 s) | Violet, `CanConsume = true` | Ramassent [E] et lancent (clic gauche maintenu) des objets dans le trou. 1 objet = 1 point. |
-| **Digesting** | 120 s (20 s) | Rouge, dôme répulsif actif | Récompenses distribuées au début de la phase. Les joueurs s'entraînent sur le tapis de course de leur base (+Speed). |
+| **Digesting** | 120 s (20 s) | Rouge, dôme répulsif actif | Récompenses (familiers + argent) distribuées au début de la phase. Les joueurs ferment leur base, achètent des améliorations, s'entraînent sur leur tapis (s'il est acheté). |
 
 Les durées Studio raccourcies se désactivent avec `Config.UseStudioDurations = false`.
+
+## Économie et base
+
+- **Argent** : chaque familier rapporte de l'argent chaque seconde (`Config.Economy.PetIncome`), et chaque point marqué rapporte `MoneyPerPoint` $ à la digestion.
+- **Boutique** (`Config.Shop`) : déblocages permanents pour la session. Achat validé par le serveur, enregistré en attribut `Unlock_<Id>`.
+  - `Treadmill` : tapis de course à l'extérieur de la base (+Speed pendant la Digestion).
+  - `StrongArm` : lancers 25 % plus puissants.
+  - `LongLock` : base fermée 90 s au lieu de 60 s.
+- **Bouton de verrouillage** (comme Steal a Brainrot) : le propriétaire marche sur le gros bouton rouge de sa base → portail fermé pendant 60 s, tout autre joueur à l'intérieur est expulsé devant l'entrée.
 
 ## Règles physiques / réseau (ne pas régresser)
 
@@ -47,11 +56,13 @@ Les durées Studio raccourcies se désactivent avec `Config.UseStudioDurations =
   - `ItemSpawner` : objets dans les bases occupées pendant le Feeding.
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
   - `BlackholeController` : consommation, dôme répulsif, récompenses.
-  - `TrainingController` : tapis de course (convoyeur) → +Speed pendant la Digestion.
-  - `SessionData` : données en mémoire (speed, roundScore, pets) → attributs Player + leaderstats.
+  - `TrainingController` : tapis de course déblocable (convoyeur) → +Speed pendant la Digestion.
+  - `LockController` : bouton de verrouillage, portail, expulsion des intrus.
+  - `EconomyController` : revenu passif des familiers, achats de la boutique (`Remotes.BuyUpgrade`).
+  - `SessionData` : données en mémoire (speed, roundScore, money, pets, unlocks) → attributs Player + leaderstats.
 - `src/client` → `StarterPlayerScripts.Client`
   - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
-  - `HUD` : phase + chrono, points, vitesse, familiers, popup de récompenses.
+  - `HUD` : phase + chrono, argent et revenu, points, vitesse, familiers, popup de récompenses, boutique.
 
 ## Carte (`Workspace.Map`, générée)
 
@@ -62,5 +73,5 @@ Les durées Studio raccourcies se désactivent avec `Config.UseStudioDurations =
 
 ## Pas encore dans le MVP
 
-- Œufs + `IncubatorZone`, `SafeZone` fonctionnelle (invulnérabilité), vol d'un objet dans les mains d'un autre joueur.
+- Familiers visibles physiquement dans la base, œufs + incubateur, vol d'un objet dans les mains d'un autre joueur.
 - Sauvegarde DataStore, familiers visibles / équipables, support mobile du lancer.

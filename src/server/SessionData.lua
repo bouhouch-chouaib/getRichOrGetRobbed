@@ -1,6 +1,7 @@
 --!strict
 -- SessionData : données de session en mémoire par joueur (pas de DataStore pour le MVP).
--- Chaque valeur est recopiée en attribut sur le Player (lu par le HUD) et dans les leaderstats.
+-- Chaque valeur est recopiée en attribut sur le Player (lu par le HUD) et dans les leaderstats :
+--   Speed, RoundScore, Money, Pets_<Rareté>, Unlock_<Id>
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,7 +11,9 @@ local Config = require(ReplicatedStorage.Shared.Config)
 export type PlayerData = {
 	speed: number,
 	roundScore: number,
+	money: number,
 	pets: { [string]: number },
+	unlocks: { [string]: boolean },
 }
 
 local SessionData = {}
@@ -43,20 +46,22 @@ local function sync(player: Player)
 
 	player:SetAttribute("Speed", data.speed)
 	player:SetAttribute("RoundScore", data.roundScore)
+	player:SetAttribute("Money", data.money)
 
-	local totalPets = 0
 	for name, count in pairs(data.pets) do
 		player:SetAttribute("Pets_" .. name, count)
-		totalPets += count
+	end
+	for id in pairs(data.unlocks) do
+		player:SetAttribute("Unlock_" .. id, true)
 	end
 
+	local money = getStat(player, "Argent")
+	if money then
+		money.Value = math.floor(data.money)
+	end
 	local points = getStat(player, "Points")
 	if points then
 		points.Value = data.roundScore
-	end
-	local pets = getStat(player, "Pets")
-	if pets then
-		pets.Value = totalPets
 	end
 end
 
@@ -65,16 +70,15 @@ local function onPlayerAdded(player: Player)
 	for _, rarity in ipairs(Config.Rarities) do
 		pets[rarity.Name] = 0
 	end
-	storage[player] = { speed = Config.Speed.Base, roundScore = 0, pets = pets }
+	storage[player] = { speed = Config.Speed.Base, roundScore = 0, money = 0, pets = pets, unlocks = {} }
 
 	local leaderstats = Instance.new("Folder")
 	leaderstats.Name = "leaderstats"
-	local points = Instance.new("IntValue")
-	points.Name = "Points"
-	points.Parent = leaderstats
-	local petsStat = Instance.new("IntValue")
-	petsStat.Name = "Pets"
-	petsStat.Parent = leaderstats
+	for _, name in ipairs({ "Argent", "Points" }) do
+		local stat = Instance.new("IntValue")
+		stat.Name = name
+		stat.Parent = leaderstats
+	end
 	leaderstats.Parent = player
 
 	player.CharacterAdded:Connect(function()
@@ -141,6 +145,38 @@ function SessionData.AddSpeed(player: Player, delta: number)
 	data.speed = math.min(data.speed + delta, Config.Speed.Max)
 	applySpeed(player, data.speed)
 	sync(player)
+end
+
+function SessionData.AddMoney(player: Player, amount: number)
+	local data = storage[player]
+	if data then
+		data.money += amount
+		sync(player)
+	end
+end
+
+-- Retire l'argent si le joueur en a assez. Retourne true si le paiement a réussi.
+function SessionData.SpendMoney(player: Player, amount: number): boolean
+	local data = storage[player]
+	if not data or data.money < amount then
+		return false
+	end
+	data.money -= amount
+	sync(player)
+	return true
+end
+
+function SessionData.HasUnlock(player: Player, id: string): boolean
+	local data = storage[player]
+	return data ~= nil and data.unlocks[id] == true
+end
+
+function SessionData.GiveUnlock(player: Player, id: string)
+	local data = storage[player]
+	if data then
+		data.unlocks[id] = true
+		sync(player)
+	end
 end
 
 return SessionData
