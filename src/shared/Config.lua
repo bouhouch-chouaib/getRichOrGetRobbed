@@ -6,13 +6,13 @@ local Config = {}
 
 -- Durées des phases (secondes).
 Config.Durations = {
-	Feeding = 60,
-	Digesting = 120,
+	Feeding = 45, -- trou noir ouvert
+	Digesting = 60, -- trou noir fermé
 }
 
 -- Dans Roblox Studio, on raccourcit les phases pour tester vite.
 -- Mettre à false pour tester avec les vraies durées.
-Config.UseStudioDurations = true
+Config.UseStudioDurations = false
 Config.StudioDurations = {
 	Feeding = 30,
 	Digesting = 20,

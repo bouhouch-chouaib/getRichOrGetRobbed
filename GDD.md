@@ -8,12 +8,12 @@ le trou noir pendant le **Feeding**, puis le trou noir **digère** et convertit 
 
 ## Boucle de jeu (`GameLoopManager`, serveur)
 
-| Phase | Durée (Studio) | Trou noir | Joueurs |
+| Phase | Durée | Trou noir | Joueurs |
 |---|---|---|---|
-| **Feeding** | 60 s (30 s) | Violet, `CanConsume = true` | Ramassent [E] et lancent (clic gauche maintenu) des objets dans le trou. 1 objet = 1 point. |
-| **Digesting** | 120 s (20 s) | Rouge, dôme répulsif actif | Récompenses (familiers + argent) distribuées au début de la phase. Les joueurs ferment leur base, achètent des améliorations, s'entraînent sur leur tapis (s'il est acheté). |
+| **Feeding** | 45 s | Violet, `CanConsume = true` | Ramassent [E] et lancent (clic gauche maintenu) des objets dans le trou. 1 objet = 1 point. |
+| **Digesting** | 60 s | Rouge, dôme répulsif actif | Récompenses (familiers + argent) distribuées au début de la phase. Les joueurs ferment leur base, achètent des améliorations, s'entraînent sur leur tapis (s'il est acheté). |
 
-Les durées Studio raccourcies se désactivent avec `Config.UseStudioDurations = false`.
+Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées de `Config.StudioDurations`).
 
 ## Économie et base
 
