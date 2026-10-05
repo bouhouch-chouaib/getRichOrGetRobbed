@@ -55,16 +55,15 @@ rojo build -o test.rbxlx
 
 ## État actuel (fait)
 
-Boucle Feeding 45 s (nuit) / Digesting 60 s (jour) • map prairie (herbe, chemins de terre, clôtures bois, arbres) •
-8 bases, bouton de verrouillage 60 s (expulsion des intrus) • tapis de course déblocable hors base • argent +
-boutique (Treadmill, StrongArm, LongLock) • HUD style cartoon (LuckiestGuy, contours noirs, fenêtres, Toast) •
-75 familiers / 8 raretés (`PetCatalog`), modèles de remplacement procéduraux (`PetModelBuilder`, surchargeables
-par `ReplicatedStorage.PetModels.<Id>`) • tirages à coût croissant + pitié (`LootEngine`) • 1 familier équipé =
+Boucle Feeding 45 s (nuit éclaircie) / Digesting 60 s (jour) • map prairie (herbe, chemins de terre, clôtures bois, arbres) •
+8 bases, bouton de verrouillage 60 s (expulsion des intrus) • argent + boutique à niveaux (Treadmill, Bench,
+ItemQuality, Backpack, LongLock) • entraînement Vitesse/Force par niveaux (XP ×1,12/niveau) sur stations hors base •
+objets à valeur (6 types, kit de départ 5 objets, 1 objet/2 s en Feeding) • sac à dos (plusieurs objets portés) •
+HUD style cartoon (LuckiestGuy, contours noirs, fenêtres, Toast, barres d'XP) • 75 familiers / 8 raretés
+(`PetCatalog`), modèles de remplacement procéduraux (`PetModelBuilder`, surchargeables par
+`ReplicatedStorage.PetModels.<Id>`) • tirages à coût croissant + pitié (`LootEngine`) • 1 familier équipé =
 multiplicateur additif + suit le joueur (`PetFollow`) • revenu = 10 meilleurs familiers • fenêtre collection 3D •
 annonces serveur Légendaire+ • `Config.StudioGiveAllPets = true` (donne les 75 en Studio pour tester).
-
-Dernier commit au moment de la passation : `0ab9516`. L'utilisateur n'a pas encore fait de retour sur
-l'étape familiers (modèles, erreurs éventuelles) : **commencer par lui demander ce qu'il a vu en jeu**.
 
 ## Prochaines étapes prévues (dans cet ordre, validé avec l'utilisateur)
 

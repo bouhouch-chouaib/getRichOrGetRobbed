@@ -1,89 +1,129 @@
 --!strict
--- TrainingController : tapis de course (déblocable en boutique, Id "Treadmill").
--- Le tapis est posé à l'extérieur de chaque base par MapGenerator mais reste caché tant que
--- le propriétaire de la base ne l'a pas acheté. Pendant la Digestion, le tapis roule (il
--- repousse le joueur) et chaque seconde passée dessus augmente la statistique Speed.
+-- TrainingController : stations d'entraînement de chaque base (achetées en boutique).
+--   Tapis de course (Upgrade "Treadmill") -> XP de Vitesse ; le tapis roule et repousse le joueur.
+--   Banc de muscu  (Upgrade "Bench")     -> XP de Force (puissance de lancer).
+-- La station est cachée tant que le propriétaire de la base ne l'a pas achetée. Son niveau (1 à 5)
+-- change sa matière (bois -> diamant) et multiplie l'XP gagnée (Config.Training.StationRates).
+-- Seul le propriétaire de la base peut s'entraîner sur ses stations, à tout moment.
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local BaseManager = require(script.Parent.BaseManager)
-local GameLoopManager = require(script.Parent.GameLoopManager)
 local SessionData = require(script.Parent.SessionData)
 
 local TrainingController = {}
 
 local TICK = 0.25
-local UNLOCK_ID = "Treadmill"
 
-local bases: { Model } = {}
+type StationKind = { model: string, upgrade: string, stat: SessionData.Stat, title: string }
 
-local function getTreadmill(base: Model): (Model?, BasePart?)
-	local model = base:FindFirstChild("Treadmill")
-	local belt = model and model:FindFirstChild("TreadmillZone")
-	if model and model:IsA("Model") and belt and belt:IsA("BasePart") then
-		return model, belt
+local KINDS: { StationKind } = {
+	{ model = "Treadmill", upgrade = "Treadmill", stat = "Speed", title = "TAPIS DE COURSE" },
+	{ model = "Bench", upgrade = "Bench", stat = "Strength", title = "BANC DE MUSCU" },
+}
+
+type Station = {
+	base: Model,
+	kind: StationKind,
+	model: Model,
+	zone: BasePart,
+	label: TextLabel?,
+	sign: BillboardGui?,
+	shownLevel: number, -- niveau actuellement affiché (0 = caché)
+}
+
+local stations: { Station } = {}
+
+local function getRoot(player: Player): BasePart?
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if root and root:IsA("BasePart") then
+		return root
 	end
-	return nil, nil
+	return nil
 end
 
-local function isUnlocked(base: Model): boolean
-	local owner = BaseManager.GetOwner(base)
-	return owner ~= nil and SessionData.HasUnlock(owner, UNLOCK_ID)
+local function isOnZone(root: BasePart, zone: BasePart): boolean
+	local localPosition = zone.CFrame:PointToObjectSpace(root.Position)
+	local half = zone.Size / 2
+	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -1 and localPosition.Y < 8
 end
 
-local function setVisible(model: Model, visible: boolean)
-	for _, part in ipairs(model:GetChildren()) do
+-- Affiche / cache la station et applique la matière de son niveau.
+local function render(station: Station, level: number)
+	if station.shownLevel == level then
+		return
+	end
+	station.shownLevel = level
+	local visible = level > 0
+	local look = Config.Training.StationMaterials[math.clamp(level, 1, #Config.Training.StationMaterials)]
+	for _, part in ipairs(station.model:GetDescendants()) do
 		if part:IsA("BasePart") then
 			part.Transparency = if visible then 0 else 1
 			part.CanCollide = visible
 			part.CanQuery = visible
-		end
-	end
-end
-
-local function isOnTreadmill(root: BasePart, belt: BasePart): boolean
-	local localPosition = belt.CFrame:PointToObjectSpace(root.Position)
-	local half = belt.Size / 2
-	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > 0 and localPosition.Y < 6
-end
-
--- Met à jour l'affichage et la vitesse de chaque tapis selon l'achat et la phase.
-local function refreshTreadmills()
-	local digesting = GameLoopManager.GetState() == "Digesting"
-	for _, base in ipairs(bases) do
-		local model, belt = getTreadmill(base)
-		if model and belt then
-			local unlocked = isUnlocked(base)
-			if (belt.Transparency == 0) ~= unlocked then
-				setVisible(model, unlocked)
+			if part:GetAttribute("Tint") then
+				part.Color = look.Color
+				part.Material = look.Material
 			end
-			-- Un tapis ancré avec une AssemblyLinearVelocity agit comme un convoyeur (vers l'arrière de la base).
-			local running = unlocked and digesting
-			belt.AssemblyLinearVelocity = if running then belt.CFrame.LookVector * -Config.Speed.BeltSpeed else Vector3.zero
+		end
+	end
+	if station.sign then
+		station.sign.Enabled = visible
+	end
+	if station.label then
+		station.label.Text = string.format("%s\nNIVEAU %d • %s • XP x%s", station.kind.title, level, look.Name:upper(), tostring(Config.Training.StationRates[level] or 1))
+	end
+	-- Le tapis roule en permanence quand il existe (convoyeur vers l'arrière de la base).
+	if station.kind.model == "Treadmill" then
+		station.zone.AssemblyLinearVelocity = if visible then station.zone.CFrame.LookVector * -Config.Training.BeltSpeed else Vector3.zero
+	end
+end
+
+local function update()
+	for _, station in ipairs(stations) do
+		local owner = BaseManager.GetOwner(station.base)
+		local level = if owner then SessionData.GetUpgradeLevel(owner, station.kind.upgrade) else 0
+		render(station, level)
+
+		if owner and level > 0 then
+			local root = getRoot(owner)
+			if root and isOnZone(root, station.zone) then
+				local rate = Config.Training.StationRates[level] or 1
+				SessionData.AddTrainingXP(owner, station.kind.stat, rate * TICK)
+			end
 		end
 	end
 end
 
-function TrainingController.Init(generatedBases: { Model })
-	bases = generatedBases
+function TrainingController.Init(bases: { Model })
+	for _, base in ipairs(bases) do
+		for _, kind in ipairs(KINDS) do
+			local model = base:FindFirstChild(kind.model)
+			local zone = model and model:FindFirstChild("Zone")
+			if model and model:IsA("Model") and zone and zone:IsA("BasePart") then
+				local sign = model:FindFirstChild("StationSign")
+				local label = sign and sign:FindFirstChild("Label")
+				table.insert(stations, {
+					base = base,
+					kind = kind,
+					model = model,
+					zone = zone,
+					sign = if sign and sign:IsA("BillboardGui") then sign else nil,
+					label = if label and label:IsA("TextLabel") then label else nil,
+					shownLevel = 0,
+				})
+			else
+				warn("[TrainingController] Station " .. kind.model .. " introuvable dans " .. base.Name)
+			end
+		end
+	end
 
 	task.spawn(function()
 		while true do
 			task.wait(TICK)
-			refreshTreadmills()
-			if GameLoopManager.GetState() == "Digesting" then
-				for _, player in ipairs(Players:GetPlayers()) do
-					local base = BaseManager.GetBase(player)
-					local _, belt = if base then getTreadmill(base) else nil, nil
-					local character = player.Character
-					local root = character and character:FindFirstChild("HumanoidRootPart")
-					if base and belt and isUnlocked(base) and root and root:IsA("BasePart") and isOnTreadmill(root, belt) then
-						SessionData.AddSpeed(player, Config.Speed.GainPerSecond * TICK)
-					end
-				end
-			end
+			update()
 		end
 	end)
 end

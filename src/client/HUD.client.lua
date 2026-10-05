@@ -32,7 +32,7 @@ local PHASES = {
 	},
 	Digesting = {
 		Title = "LE TROU NOIR DIGÈRE...",
-		Hint = "Ferme ta base et dépense ton argent dans la boutique !",
+		Hint = "Ferme ta base, entraîne-toi et dépense ton argent dans la boutique !",
 		Color = Color3.fromRGB(255, 90, 70),
 	},
 }
@@ -282,7 +282,7 @@ leftColumn.Name = "Left"
 leftColumn.BackgroundTransparency = 1
 leftColumn.AnchorPoint = Vector2.new(0, 0.5)
 leftColumn.Position = UDim2.new(0, 16, 0.5, 0)
-leftColumn.Size = UDim2.fromOffset(240, 360)
+leftColumn.Size = UDim2.fromOffset(240, 400)
 leftColumn.Parent = gui
 
 local moneyLabel = text(leftColumn, "$0", 48, MONEY)
@@ -294,10 +294,29 @@ incomeLabel.Position = UDim2.fromOffset(0, 52)
 incomeLabel.Size = UDim2.new(1, 0, 0, 28)
 incomeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local speedLabel = text(leftColumn, "", 22, Color3.fromRGB(120, 210, 255))
-speedLabel.Position = UDim2.fromOffset(0, 82)
-speedLabel.Size = UDim2.new(1, 0, 0, 26)
-speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+-- Ligne de stat d'entraînement : "⚡ VITESSE NV 3" + barre d'XP.
+type StatRow = { label: TextLabel, fill: Frame }
+local function statRow(y: number, color: Color3): StatRow
+	local label = text(leftColumn, "", 20, color)
+	label.Position = UDim2.fromOffset(0, y)
+	label.Size = UDim2.new(1, 0, 0, 24)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	local bar = Instance.new("Frame")
+	bar.Position = UDim2.fromOffset(0, y + 26)
+	bar.Size = UDim2.fromOffset(200, 12)
+	bar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+	corner(bar, 6)
+	stroke(bar, 2, BLACK, true)
+	bar.Parent = leftColumn
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.fromScale(0, 1)
+	fill.BackgroundColor3 = color
+	corner(fill, 6)
+	fill.Parent = bar
+	return { label = label, fill = fill }
+end
+local speedRow = statRow(84, Color3.fromRGB(120, 210, 255))
+local strengthRow = statRow(130, Color3.fromRGB(255, 150, 80))
 
 -- Bouton de menu carré : grosse icône + nom en dessous.
 local function menuButton(icon: string, name: string, y: number, top: Color3, bottom: Color3): TextButton
@@ -312,8 +331,8 @@ local function menuButton(icon: string, name: string, y: number, top: Color3, bo
 	return button
 end
 
-local shopButton = menuButton("🛒", "BOUTIQUE", 124, Color3.fromRGB(255, 220, 70), Color3.fromRGB(255, 140, 20))
-local petsButton = menuButton("🐾", "FAMILIERS", 232, Color3.fromRGB(110, 210, 255), Color3.fromRGB(40, 120, 255))
+local shopButton = menuButton("🛒", "BOUTIQUE", 180, Color3.fromRGB(255, 220, 70), Color3.fromRGB(255, 140, 20))
+local petsButton = menuButton("🐾", "FAMILIERS", 288, Color3.fromRGB(110, 210, 255), Color3.fromRGB(40, 120, 255))
 
 ----------------------------------------------------------------------
 -- Fenêtre Boutique
@@ -323,13 +342,22 @@ local shopWindow = makeWindow("BOUTIQUE", Vector2.new(560, 440), Color3.fromRGB(
 local shopList = makeList(shopWindow.content, 10)
 
 local buyButtons: { [string]: TextButton } = {}
+local shopLevels: { [string]: TextLabel } = {}
 for index, item in ipairs(Config.Shop) do
 	local cardFrame = makeCard(shopList, 96, index)
 
-	local name = text(cardFrame, item.Name:upper(), 26, Color3.fromRGB(255, 200, 50))
+	local name = text(cardFrame, item.Icon .. " " .. item.Name:upper(), 24, Color3.fromRGB(255, 200, 50))
 	name.Position = UDim2.fromOffset(14, 8)
 	name.Size = UDim2.new(1, -180, 0, 30)
 	name.TextXAlignment = Enum.TextXAlignment.Left
+
+	local levelLabel = text(cardFrame, "", 16, Color3.fromRGB(120, 210, 255))
+	levelLabel.Name = "Level"
+	levelLabel.AnchorPoint = Vector2.new(1, 0)
+	levelLabel.Position = UDim2.new(1, -12, 0, 4)
+	levelLabel.Size = UDim2.fromOffset(140, 18)
+	levelLabel.ZIndex = 2
+	shopLevels[item.Id] = levelLabel
 
 	local description = Instance.new("TextLabel")
 	description.BackgroundTransparency = 1
@@ -346,7 +374,7 @@ for index, item in ipairs(Config.Shop) do
 
 	local buy = chunkyButton(cardFrame, "", UDim2.fromOffset(140, 56), Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40), 26)
 	buy.AnchorPoint = Vector2.new(1, 0.5)
-	buy.Position = UDim2.new(1, -12, 0.5, 0)
+	buy.Position = UDim2.new(1, -12, 0.5, 8)
 	buy.Activated:Connect(function()
 		Remotes.BuyUpgrade:FireServer(item.Id)
 	end)
@@ -578,14 +606,17 @@ local function updateShop(money: number)
 		local buy = buyButtons[item.Id]
 		local caption = buy:FindFirstChild("Caption") :: TextLabel
 		local buyGradient = buy:FindFirstChildOfClass("UIGradient") :: UIGradient
-		if player:GetAttribute("Unlock_" .. item.Id) then
-			caption.Text = "ACQUIS"
+		local level = numberAttribute("Upgrade_" .. item.Id)
+		local price = Config.GetUpgradePrice(item, level)
+		shopLevels[item.Id].Text = if item.MaxLevel > 1 then string.format("NIVEAU %d/%d", level, item.MaxLevel) else ""
+		if not price then
+			caption.Text = if item.MaxLevel > 1 then "MAX" else "ACQUIS"
 			buyGradient.Color = ColorSequence.new(Color3.fromRGB(190, 190, 190), Color3.fromRGB(120, 120, 120))
-		elseif money >= item.Price then
-			caption.Text = formatMoney(item.Price)
+		elseif money >= price then
+			caption.Text = formatMoney(price)
 			buyGradient.Color = ColorSequence.new(Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40))
 		else
-			caption.Text = formatMoney(item.Price)
+			caption.Text = formatMoney(price)
 			buyGradient.Color = ColorSequence.new(Color3.fromRGB(255, 110, 110), Color3.fromRGB(190, 40, 40))
 		end
 	end
@@ -595,8 +626,13 @@ local function updateStats()
 	local money = numberAttribute("Money")
 	moneyLabel.Text = formatMoney(money)
 	incomeLabel.Text = string.format("+%s/s", formatMoney(numberAttribute("Income")))
-	speedLabel.Text = string.format("⚡ VITESSE %.1f", if player:GetAttribute("Speed") then numberAttribute("Speed") else Config.Speed.Base)
-	pointsLabel.Text = string.format("POINTS : %d", numberAttribute("RoundScore"))
+	for _, row in ipairs({ { stat = "Speed", ui = speedRow, title = "⚡ VITESSE" }, { stat = "Strength", ui = strengthRow, title = "💪 FORCE" } }) do
+		local level = numberAttribute(row.stat .. "Level")
+		local needed = numberAttribute(row.stat .. "XPNeeded")
+		row.ui.label.Text = string.format("%s  NV %d", row.title, level)
+		row.ui.fill.Size = UDim2.fromScale(if needed > 0 then math.clamp(numberAttribute(row.stat .. "XP") / needed, 0, 1) else 1, 1)
+	end
+	pointsLabel.Text = string.format("POINTS : %.1f", numberAttribute("RoundScore"))
 	updateShop(money)
 
 	updatePets()
@@ -673,19 +709,42 @@ ReplicatedStorage:GetAttributeChangedSignal("GameState"):Connect(updatePhase)
 ReplicatedStorage:GetAttributeChangedSignal("TimeRemaining"):Connect(updatePhase)
 player.AttributeChanged:Connect(updateStats)
 
--- Confirmation d'achat : le serveur écrit "Unlock_<Id>" quand l'achat est validé.
+-- Confirmation d'achat : le serveur écrit "Upgrade_<Id>" (niveau) quand l'achat est validé.
+local STATION_HINTS: { [string]: string } = {
+	Treadmill = " : À GAUCHE DE TA BASE !",
+	Bench = " : À DROITE DE TA BASE !",
+}
 for _, item in ipairs(Config.Shop) do
-	player:GetAttributeChangedSignal("Unlock_" .. item.Id):Connect(function()
-		if player:GetAttribute("Unlock_" .. item.Id) then
-			Toast.show(item.Name:upper() .. " DÉBLOQUÉ !", Color3.fromRGB(110, 240, 70))
+	player:GetAttributeChangedSignal("Upgrade_" .. item.Id):Connect(function()
+		local level = numberAttribute("Upgrade_" .. item.Id)
+		if level <= 0 then
+			return
 		end
+		local message = if item.MaxLevel > 1 then string.format("%s NIVEAU %d !", item.Name:upper(), level) else item.Name:upper() .. " DÉBLOQUÉ !"
+		if level == 1 and STATION_HINTS[item.Id] then
+			message = item.Name:upper() .. STATION_HINTS[item.Id]
+		end
+		Toast.show(message, Color3.fromRGB(110, 240, 70))
+	end)
+end
+
+-- Passage de niveau d'entraînement.
+for _, stat in ipairs({ { id = "Speed", name = "VITESSE" }, { id = "Strength", name = "FORCE" } }) do
+	local last = numberAttribute(stat.id .. "Level")
+	player:GetAttributeChangedSignal(stat.id .. "Level"):Connect(function()
+		local level = numberAttribute(stat.id .. "Level")
+		if level > last then
+			Toast.show(string.format("%s NIVEAU %d !", stat.name, level), Color3.fromRGB(255, 220, 60))
+		end
+		last = level
 	end)
 end
 
 -- Achat refusé faute d'argent : retour immédiat côté client.
 for _, item in ipairs(Config.Shop) do
 	buyButtons[item.Id].Activated:Connect(function()
-		if not player:GetAttribute("Unlock_" .. item.Id) and numberAttribute("Money") < item.Price then
+		local price = Config.GetUpgradePrice(item, numberAttribute("Upgrade_" .. item.Id))
+		if price and numberAttribute("Money") < price then
 			Toast.show("PAS ASSEZ D'ARGENT !", Color3.fromRGB(255, 90, 90))
 		end
 	end)

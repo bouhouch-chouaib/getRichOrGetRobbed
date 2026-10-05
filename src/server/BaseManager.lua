@@ -6,6 +6,10 @@ local Players = game:GetService("Players")
 
 local BaseManager = {}
 
+-- Déclenché (player, base) quand un joueur reçoit une base.
+local baseAssigned = Instance.new("BindableEvent")
+BaseManager.BaseAssigned = baseAssigned.Event
+
 local bases: { Model } = {}
 local owners: { [Model]: Player } = {}
 
@@ -72,6 +76,7 @@ local function onPlayerAdded(player: Player)
 				player.RespawnLocation = spawn
 			end
 			setSign(base, player.DisplayName)
+			baseAssigned:Fire(player, base)
 			break
 		end
 	end

@@ -17,20 +17,23 @@ type Preset = {
 	Brightness: number,
 	Ambient: Color3,
 	OutdoorAmbient: Color3,
+	Exposure: number,
 }
 
 local PRESETS: { [string]: Preset } = {
-	Feeding = { -- nuit
+	Feeding = { -- nuit : ciel étoilé mais arène bien lisible (lumière lunaire bleutée forte)
 		ClockTime = 0,
-		Brightness = 1,
-		Ambient = Color3.fromRGB(70, 75, 110),
-		OutdoorAmbient = Color3.fromRGB(95, 100, 140),
+		Brightness = 2.2,
+		Ambient = Color3.fromRGB(150, 155, 190),
+		OutdoorAmbient = Color3.fromRGB(165, 170, 210),
+		Exposure = 0.4,
 	},
 	Digesting = { -- jour
 		ClockTime = 14,
 		Brightness = 2.5,
 		Ambient = Color3.fromRGB(120, 120, 120),
 		OutdoorAmbient = Color3.fromRGB(140, 140, 140),
+		Exposure = 0,
 	},
 }
 
@@ -46,6 +49,7 @@ local function apply(preset: Preset)
 	local startBrightness = Lighting.Brightness
 	local startAmbient = Lighting.Ambient
 	local startOutdoor = Lighting.OutdoorAmbient
+	local startExposure = Lighting.ExposureCompensation
 	local elapsed = 0
 
 	local connection: RBXScriptConnection
@@ -60,6 +64,7 @@ local function apply(preset: Preset)
 		Lighting.Brightness = startBrightness + (preset.Brightness - startBrightness) * alpha
 		Lighting.Ambient = startAmbient:Lerp(preset.Ambient, alpha)
 		Lighting.OutdoorAmbient = startOutdoor:Lerp(preset.OutdoorAmbient, alpha)
+		Lighting.ExposureCompensation = startExposure + (preset.Exposure - startExposure) * alpha
 		if alpha >= 1 then
 			connection:Disconnect()
 		end
@@ -73,6 +78,7 @@ function DayNightController.Init()
 	Lighting.Brightness = night.Brightness
 	Lighting.Ambient = night.Ambient
 	Lighting.OutdoorAmbient = night.OutdoorAmbient
+	Lighting.ExposureCompensation = night.Exposure
 
 	GameLoopManager.ServerEvent.Event:Connect(function(eventName: string, state: string)
 		local preset = PRESETS[state]

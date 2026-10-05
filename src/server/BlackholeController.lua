@@ -80,8 +80,9 @@ local function consume(item: BasePart)
 	local ownerName = item:GetAttribute("Owner")
 	local owner = if type(ownerName) == "string" then Players:FindFirstChild(ownerName) else nil
 	if owner and owner:IsA("Player") then
-		-- 1 objet = 1 point × multiplicateur des familiers équipés.
-		SessionData.AddScore(owner, SessionData.GetMultiplier(owner))
+		-- Points = valeur de l'objet (Config.ItemTiers) × multiplicateur des familiers équipés.
+		local value = item:GetAttribute("Value")
+		SessionData.AddScore(owner, (if type(value) == "number" then value else 1) * SessionData.GetMultiplier(owner))
 	end
 
 	local prompt = item:FindFirstChildOfClass("ProximityPrompt")

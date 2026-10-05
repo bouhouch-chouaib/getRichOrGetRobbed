@@ -8,16 +8,18 @@
 --      réseau de l'item, la position qu'il simule est répliquée à tout le monde.
 --   3. Au lancer, le client détruit le weld, applique l'impulsion et prévient le serveur (ThrowItem).
 --   4. Lâcher forcé (KO, mort, départ) : le serveur efface "Holder", le client le détecte et lâche.
+-- Sac à dos : un joueur peut porter 1 + niveau "Backpack" objets (le 1er en main, les autres dans le dos).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local SessionData = require(script.Parent.SessionData)
 
 local ItemInteraction = {}
 
-local held: { [Player]: BasePart } = {}
+local held: { [Player]: { BasePart } } = {}
 
 local function getLooseFolder(): Instance
 	local map = Workspace:FindFirstChild("Map")
@@ -39,13 +41,21 @@ local function free(item: BasePart)
 	setPromptEnabled(item, true)
 end
 
--- Lâche (sans lancer) l'item tenu par le joueur, s'il y en a un.
+-- Lâche (sans lancer) tous les objets portés par le joueur.
 function ItemInteraction.ReleaseHeld(player: Player)
-	local item = held[player]
+	local items = held[player]
 	held[player] = nil
-	if item and item.Parent then
-		free(item)
+	if items then
+		for _, item in ipairs(items) do
+			if item.Parent then
+				free(item)
+			end
+		end
 	end
+end
+
+local function getCapacity(player: Player): number
+	return 1 + SessionData.GetUpgradeLevel(player, "Backpack")
 end
 
 function ItemInteraction.IsHeld(item: BasePart): boolean
@@ -53,7 +63,8 @@ function ItemInteraction.IsHeld(item: BasePart): boolean
 end
 
 local function onPromptTriggered(item: BasePart, player: Player)
-	if item:GetAttribute("Holder") or item:GetAttribute("Consumed") or held[player] then
+	local items = held[player] or {}
+	if item:GetAttribute("Holder") or item:GetAttribute("Consumed") or #items >= getCapacity(player) then
 		return
 	end
 	local character = player.Character
@@ -62,7 +73,8 @@ local function onPromptTriggered(item: BasePart, player: Player)
 		return
 	end
 
-	held[player] = item
+	table.insert(items, item)
+	held[player] = items
 	item:SetAttribute("Holder", player.Name)
 	item:SetAttribute("Owner", player.Name)
 	item.CanCollide = false
@@ -88,14 +100,15 @@ end
 
 function ItemInteraction.Init()
 	Remotes.ThrowItem.OnServerEvent:Connect(function(player: Player, item: unknown)
-		if typeof(item) ~= "Instance" or held[player] ~= item then
+		local items = held[player]
+		local index = if items and typeof(item) == "Instance" then table.find(items, item :: any) else nil
+		if not items or not index then
 			return
 		end
-		held[player] = nil
+		local part = table.remove(items, index) :: BasePart
 		-- Owner reste en place : c'est lui qui marquera le point.
 		-- La propriété réseau reste au lanceur pour que la trajectoire soit fluide de son côté.
-		item:SetAttribute("Holder", nil)
-		local part = item :: BasePart
+		part:SetAttribute("Holder", nil)
 		part.CanCollide = true
 		part.Massless = false
 	end)

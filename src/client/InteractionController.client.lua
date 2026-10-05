@@ -1,6 +1,7 @@
 --!strict
--- InteractionController : tenir et lancer un objet.
---   [E] sur un objet -> le serveur valide et répond ItemGrabbed -> on soude l'objet à la main.
+-- InteractionController : tenir et lancer des objets.
+--   [E] sur un objet -> le serveur valide et répond ItemGrabbed -> on soude l'objet à la main
+--   (ou dans le dos si la main est déjà prise : sac à dos).
 --   Clic gauche maintenu -> charge (ralentissement + zoom + arc de prédiction).
 --   Relâchement -> on détruit le weld, on réactive les collisions et on propulse via ApplyImpulse.
 
@@ -21,9 +22,8 @@ local DOT_STEP = 0.08 -- secondes simulées entre deux points de l'arc
 
 local player = Players.LocalPlayer
 
-local heldItem: BasePart? = nil
-local heldWeld: WeldConstraint? = nil
-local heldConnections: { RBXScriptConnection } = {}
+type Held = { item: BasePart, weld: WeldConstraint?, connections: { RBXScriptConnection } }
+local stack: { Held } = {} -- objets portés : stack[1] en main, les autres dans le dos
 local isCharging = false
 local chargeStart = 0
 
@@ -96,8 +96,10 @@ end
 local function throwVelocity(ratio: number): Vector3
 	local camera = Workspace.CurrentCamera
 	local direction = (camera.CFrame.LookVector + Vector3.new(0, THROW.UpBias, 0)).Unit
-	local power = if player:GetAttribute("Unlock_StrongArm") then Config.StrongArmMultiplier else 1
-	return direction * (THROW.MinSpeed + (THROW.MaxSpeed - THROW.MinSpeed) * ratio) * power
+	-- La vitesse max dépend de la Force du joueur (attribut "ThrowPower" calculé par le serveur).
+	local power = player:GetAttribute("ThrowPower")
+	local maxSpeed = if type(power) == "number" then power else Config.Training.Strength.Base
+	return direction * maxSpeed * (THROW.MinRatio + (1 - THROW.MinRatio) * ratio)
 end
 
 local function isOnOwnBase(): boolean
@@ -129,7 +131,7 @@ local function stopCharging()
 	local humanoid = getHumanoid()
 	if humanoid then
 		local speed = player:GetAttribute("Speed")
-		humanoid.WalkSpeed = if type(speed) == "number" then speed else Config.Speed.Base
+		humanoid.WalkSpeed = if type(speed) == "number" then speed else Config.Training.Speed.Base
 	end
 	TweenService:Create(Workspace.CurrentCamera, TweenInfo.new(0.2), { FieldOfView = THROW.DefaultFov }):Play()
 end
@@ -146,10 +148,11 @@ local function startCharging()
 end
 
 local function updateTrajectory()
-	local item = heldItem
-	if not isCharging or not item then
+	local entry = stack[1]
+	if not isCharging or not entry then
 		return
 	end
+	local item = entry.item
 
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -177,69 +180,103 @@ local function updateTrajectory()
 end
 
 ----------------------------------------------------------------------
--- Tenir / lâcher / lancer
+-- Tenir / lâcher / lancer (pile : stack[1] en main, les suivants dans le dos)
 ----------------------------------------------------------------------
 
--- Oublie l'objet tenu (sans le propulser).
-local function releaseLocal()
-	stopCharging()
-	for _, connection in ipairs(heldConnections) do
+local function getTorso(character: Model): BasePart?
+	local torso = character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso")
+	if torso and torso:IsA("BasePart") then
+		return torso
+	end
+	return nil
+end
+
+-- Soude chaque objet à sa place : le premier dans la main, les autres empilés dans le dos.
+local function relayout()
+	local character = player.Character
+	if not character then
+		return
+	end
+	local hand = getHand(character)
+	local torso = getTorso(character)
+	for index, entry in ipairs(stack) do
+		local anchor = if index == 1 then hand else torso
+		if anchor then
+			if entry.weld then
+				entry.weld:Destroy()
+			end
+			entry.item.CFrame = if index == 1
+				then anchor.CFrame * CFrame.new(0, -1.5, 0)
+				else anchor.CFrame * CFrame.new(0, (index - 2) * 2.4 - 0.3, 1.8)
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0 = entry.item
+			weld.Part1 = anchor
+			weld.Parent = entry.item
+			entry.weld = weld
+		end
+	end
+end
+
+-- Retire un objet de la pile (sans le propulser) et lui rend la physique normale.
+local function removeEntry(entry: Held)
+	local index = table.find(stack, entry)
+	if not index then
+		return
+	end
+	table.remove(stack, index)
+	for _, connection in ipairs(entry.connections) do
 		connection:Disconnect()
 	end
-	heldConnections = {}
-	if heldWeld then
-		heldWeld:Destroy()
+	if entry.weld then
+		entry.weld:Destroy()
+		entry.weld = nil
 	end
-	local item = heldItem
-	if item and item.Parent then
-		item.CanCollide = true
-		item.Massless = false
+	if entry.item.Parent then
+		entry.item.CanCollide = true
+		entry.item.Massless = false
 	end
-	heldItem = nil
-	heldWeld = nil
+	if #stack == 0 then
+		stopCharging()
+	end
+	relayout()
+end
+
+local function releaseAll()
+	while #stack > 0 do
+		removeEntry(stack[1])
+	end
 end
 
 local function grab(item: BasePart)
-	local character = player.Character
-	local hand = character and getHand(character)
-	if not hand then
-		return
-	end
-	releaseLocal()
-
 	item.CanCollide = false
 	item.Massless = true
-	item.CFrame = hand.CFrame * CFrame.new(0, -1.5, 0)
 
-	local weld = Instance.new("WeldConstraint")
-	weld.Part0 = item
-	weld.Part1 = hand
-	weld.Parent = item
-
-	heldItem = item
-	heldWeld = weld
-
+	local entry: Held = { item = item, weld = nil, connections = {} }
 	-- Le serveur efface "Holder" quand il force le lâcher (KO, mort) : on suit.
-	table.insert(heldConnections, item:GetAttributeChangedSignal("Holder"):Connect(function()
+	table.insert(entry.connections, item:GetAttributeChangedSignal("Holder"):Connect(function()
 		if item:GetAttribute("Holder") ~= player.Name then
-			releaseLocal()
+			removeEntry(entry)
 		end
 	end))
-	table.insert(heldConnections, item.AncestryChanged:Connect(function()
+	table.insert(entry.connections, item.AncestryChanged:Connect(function()
 		if not item:IsDescendantOf(Workspace) then
-			releaseLocal()
+			removeEntry(entry)
 		end
 	end))
+	table.insert(stack, entry)
+	relayout()
 end
 
 local function throw()
-	local item = heldItem
-	if not item then
+	local entry = stack[1]
+	if not entry then
 		return
 	end
+	local item = entry.item
 	local velocity = throwVelocity(chargeRatio())
 
-	releaseLocal()
+	stopCharging()
+	removeEntry(entry) -- l'objet suivant passe automatiquement dans la main
 	Remotes.ThrowItem:FireServer(item)
 	-- Après la destruction du weld, l'item est seul dans son assemblage : GetMass() = sa masse.
 	item:ApplyImpulse(velocity * item:GetMass())
@@ -256,7 +293,7 @@ Remotes.ItemGrabbed.OnClientEvent:Connect(function(item: Instance)
 end)
 
 Remotes.Knockback.OnClientEvent:Connect(function(velocity: Vector3)
-	releaseLocal()
+	releaseAll()
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	if root and root:IsA("BasePart") then
@@ -269,7 +306,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed or input.UserInputType ~= Enum.UserInputType.MouseButton1 then
 		return
 	end
-	if heldItem then
+	if #stack > 0 then
 		startCharging()
 	end
 end)
@@ -289,5 +326,5 @@ end)
 RunService.RenderStepped:Connect(updateTrajectory)
 
 player.CharacterAdded:Connect(function()
-	releaseLocal()
+	releaseAll()
 end)

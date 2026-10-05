@@ -9,7 +9,7 @@
 --   Paths (Folder), Trees (Folder)
 --   LooseItems (Folder) : objets ramassés / lancés
 --   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation,
---                              SafeZone (invisible), Treadmill (Model, à l'extérieur, caché tant que non acheté),
+--                              SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
 --                              SpawnPoints (Folder), ItemSpawns (Folder)
 
 local Lighting = game:GetService("Lighting")
@@ -278,6 +278,78 @@ local function createTrees(map: Folder)
 	end
 end
 
+-- Panneau au-dessus d'une station d'entraînement (texte mis à jour par TrainingController).
+local function createStationSign(model: Model, adornee: BasePart, title: string)
+	local sign = Instance.new("BillboardGui")
+	sign.Name = "StationSign"
+	sign.Adornee = adornee
+	sign.Size = UDim2.fromScale(16, 4)
+	sign.StudsOffsetWorldSpace = Vector3.new(0, 9, 0)
+	sign.LightInfluence = 0
+	sign.MaxDistance = 250
+	sign.Enabled = false
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = title
+	styleSignText(label, Color3.fromRGB(255, 230, 90))
+	label.Parent = sign
+	sign.Parent = model
+end
+
+-- Les pièces marquées "Tint" prennent la couleur/matière du niveau de la station.
+local function tint(part: BasePart)
+	part:SetAttribute("Tint", true)
+end
+
+local function hideStation(model: Model)
+	for _, part in ipairs(model:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Transparency = 1
+			makeGhost(part)
+		end
+	end
+end
+
+local function createTreadmill(cframe: CFrame, base: Model)
+	local model = Instance.new("Model")
+	model.Name = "Treadmill"
+	local belt = makePart("Zone", Vector3.new(10, 0.6, 20), cframe * CFrame.new(0, 0.3, 0), Color3.fromRGB(45, 45, 50), model)
+	belt.Material = Enum.Material.Fabric
+	for _, side in ipairs({ -5.5, 5.5 }) do
+		tint(makePart("Rail", Vector3.new(1, 1.2, 20), cframe * CFrame.new(side, 0.6, 0), COLORS.WoodPost, model))
+		tint(makePart("Handle", Vector3.new(0.6, 3.5, 0.6), cframe * CFrame.new(side, 2.3, -9), COLORS.WoodPost, model))
+	end
+	tint(makePart("Console", Vector3.new(11.6, 1.2, 1.2), cframe * CFrame.new(0, 4, -9), COLORS.WoodPost, model))
+	createStationSign(model, belt, "TAPIS DE COURSE")
+	hideStation(model)
+	model.Parent = base
+end
+
+local function createBench(cframe: CFrame, base: Model)
+	local model = Instance.new("Model")
+	model.Name = "Bench"
+	local mat = makePart("Zone", Vector3.new(12, 0.3, 16), cframe * CFrame.new(0, 0.15, 0), Color3.fromRGB(45, 45, 50), model)
+	mat.Material = Enum.Material.Fabric
+	tint(makePart("Seat", Vector3.new(3, 1, 9), cframe * CFrame.new(0, 2, 1), COLORS.WoodPost, model))
+	for _, z in ipairs({ -2.5, 4.5 }) do
+		tint(makePart("Leg", Vector3.new(2.4, 1.6, 1), cframe * CFrame.new(0, 0.8, z), COLORS.WoodPost, model))
+	end
+	for _, side in ipairs({ -2.2, 2.2 }) do
+		tint(makePart("Upright", Vector3.new(0.6, 5, 0.6), cframe * CFrame.new(side, 2.5, -3.2), COLORS.WoodPost, model))
+	end
+	local bar = makePart("Bar", Vector3.new(10, 0.35, 0.35), cframe * CFrame.new(0, 5, -3.2), Color3.fromRGB(200, 200, 205), model)
+	bar.Shape = Enum.PartType.Cylinder
+	for _, side in ipairs({ -4.4, 4.4 }) do
+		local plate = makePart("Plate", Vector3.new(0.6, 2.6, 2.6), cframe * CFrame.new(side, 5, -3.2), Color3.fromRGB(35, 35, 40), model)
+		plate.Shape = Enum.PartType.Cylinder
+	end
+	createStationSign(model, mat, "BANC DE MUSCU")
+	hideStation(model)
+	model.Parent = base
+end
+
 local function createBase(index: number, map: Folder, paths: Folder): Model
 	local angle = (index - 1) * (math.pi * 2 / ARENA.BaseCount)
 	local position = Vector3.new(math.cos(angle) * ARENA.BaseRingRadius, 0, math.sin(angle) * ARENA.BaseRingRadius)
@@ -345,24 +417,11 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	gate.Transparency = 1
 	makeGhost(gate)
 
-	-- Tapis de course : à l'extérieur, contre la clôture gauche. Caché tant que le propriétaire
-	-- ne l'a pas acheté (TrainingController gère l'affichage et la vitesse du tapis).
-	local treadmill = Instance.new("Model")
-	treadmill.Name = "Treadmill"
-	local treadmillCFrame = origin * CFrame.new(-half - 9, 0, -6)
-	local belt = makePart("TreadmillZone", Vector3.new(10, 0.6, 20), treadmillCFrame * CFrame.new(0, 0.3, 0), Color3.fromRGB(70, 70, 75), treadmill)
-	belt.Material = Enum.Material.DiamondPlate
-	for _, side in ipairs({ -5.5, 5.5 }) do
-		local edge = makePart("TreadmillEdge", Vector3.new(1, 1, 20), treadmillCFrame * CFrame.new(side, 0.5, 0), COLORS.WoodPost, treadmill)
-		edge.Material = Enum.Material.Wood
-	end
-	for _, part in ipairs(treadmill:GetChildren()) do
-		if part:IsA("BasePart") then
-			part.Transparency = 1
-			makeGhost(part)
-		end
-	end
-	treadmill.Parent = base
+	-- Stations d'entraînement à l'extérieur de la base (cachées tant qu'elles ne sont pas achetées) :
+	-- tapis de course à gauche (Vitesse), banc de développé couché à droite (Force).
+	-- TrainingController gère l'affichage, la matière selon le niveau et l'XP.
+	createTreadmill(origin * CFrame.new(-half - 10, 0, -4), base)
+	createBench(origin * CFrame.new(half + 10, 0, -4), base)
 
 	local spawnPoints = Instance.new("Folder")
 	spawnPoints.Name = "SpawnPoints"

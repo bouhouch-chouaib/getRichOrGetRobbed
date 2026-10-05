@@ -48,12 +48,14 @@ local function onBuy(player: Player, itemId: unknown)
 		return
 	end
 	local item = shopById[itemId]
-	if not item or SessionData.HasUnlock(player, item.Id) then
+	if not item then
 		return
 	end
-	if SessionData.SpendMoney(player, item.Price) then
-		SessionData.GiveUnlock(player, item.Id)
-		print(string.format("[Shop] %s a acheté %s", player.Name, item.Name))
+	local level = SessionData.GetUpgradeLevel(player, item.Id)
+	local price = Config.GetUpgradePrice(item, level)
+	if price and SessionData.SpendMoney(player, price) then
+		SessionData.SetUpgradeLevel(player, item.Id, level + 1)
+		print(string.format("[Shop] %s a acheté %s niveau %d", player.Name, item.Name, level + 1))
 	end
 end
 

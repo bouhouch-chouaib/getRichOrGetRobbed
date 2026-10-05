@@ -31,17 +31,38 @@ Config.Arena = {
 
 -- Apparition des objets (par base occupée).
 Config.Items = {
-	Size = 2.5,
-	SpawnInterval = 4, -- secondes entre deux apparitions dans une base
-	InitialPerBase = 4, -- objets posés d'un coup au début du Feeding
-	MaxPerBase = 6,
+	StarterCount = 5, -- objets offerts dans la base à l'arrivée d'un joueur
+	SpawnInterval = 2, -- pendant le Feeding, un objet apparaît toutes les 2 s dans chaque base occupée
+	MaxPerBase = 12,
 	MaxLooseItems = 80, -- au-delà, les plus vieux objets abandonnés sont nettoyés
+	QualityBoost = 0.35, -- par niveau de "Objets de qualité" : poids des objets précieux ×(1 + 0.35 × niveau)^rang
 }
 
--- Lancer (côté client).
+export type ItemTier = {
+	Id: string,
+	Name: string,
+	Value: number, -- points rapportés quand il est avalé (× multiplicateur des familiers)
+	Weight: number, -- chance d'apparition
+	Color: Color3,
+	Shape: Enum.PartType,
+	Size: number,
+	Material: Enum.Material,
+	Glow: boolean?, -- particules brillantes
+}
+
+-- Du moins au plus précieux.
+Config.ItemTiers = {
+	{ Id = "Caillou", Name = "Caillou", Value = 0.25, Weight = 1000, Color = Color3.fromRGB(150, 150, 155), Shape = Enum.PartType.Ball, Size = 1.8, Material = Enum.Material.Slate },
+	{ Id = "Brique", Name = "Brique", Value = 0.5, Weight = 350, Color = Color3.fromRGB(200, 85, 60), Shape = Enum.PartType.Block, Size = 2.1, Material = Enum.Material.Brick },
+	{ Id = "Cristal", Name = "Cristal", Value = 1, Weight = 100, Color = Color3.fromRGB(80, 220, 255), Shape = Enum.PartType.Block, Size = 2, Material = Enum.Material.Neon },
+	{ Id = "Lingot", Name = "Lingot d'or", Value = 2.5, Weight = 25, Color = Color3.fromRGB(255, 200, 40), Shape = Enum.PartType.Block, Size = 2.2, Material = Enum.Material.Foil, Glow = true },
+	{ Id = "Diamant", Name = "Diamant", Value = 6, Weight = 6, Color = Color3.fromRGB(200, 250, 255), Shape = Enum.PartType.Ball, Size = 2.2, Material = Enum.Material.Neon, Glow = true },
+	{ Id = "Meteorite", Name = "Météorite", Value = 15, Weight = 1, Color = Color3.fromRGB(170, 60, 255), Shape = Enum.PartType.Ball, Size = 2.8, Material = Enum.Material.Neon, Glow = true },
+} :: { ItemTier }
+
+-- Lancer (côté client). La vitesse max dépend de la Force (attribut "ThrowPower").
 Config.Throw = {
-	MinSpeed = 45,
-	MaxSpeed = 165,
+	MinRatio = 0.35, -- lancer sans charge = 35 % de la vitesse max
 	MaxChargeTime = 1.5,
 	UpBias = 0.6, -- ajouté au LookVector de la caméra avant normalisation
 	ChargeWalkSpeed = 8,
@@ -59,18 +80,30 @@ Config.Knockback = {
 	SitDuration = 1.5,
 }
 
--- Statistique de vitesse (entraînement sur le tapis de course).
-Config.Speed = {
-	Base = 16,
-	Max = 50,
-	GainPerSecond = 1,
+-- Entraînement : Vitesse (tapis de course) et Force (banc de développé couché).
+-- XP pour passer du niveau L au niveau L+1 = XPBase × XPGrowth^L (progression longue).
+-- XP gagnée par seconde sur la station = StationRates[niveau de la station].
+export type StatConfig = { Base: number, PerLevel: number, MaxLevel: number }
+Config.Training = {
+	Speed = { Base = 16, PerLevel = 0.5, MaxLevel = 60 } :: StatConfig, -- WalkSpeed
+	Strength = { Base = 70, PerLevel = 3, MaxLevel = 60 } :: StatConfig, -- vitesse de lancer max
+	XPBase = 5,
+	XPGrowth = 1.12,
+	StationRates = { 1, 2, 3.5, 6, 10 },
+	StationMaterials = {
+		{ Name = "Bois", Color = Color3.fromRGB(150, 100, 55), Material = Enum.Material.Wood },
+		{ Name = "Pierre", Color = Color3.fromRGB(140, 140, 145), Material = Enum.Material.Slate },
+		{ Name = "Fer", Color = Color3.fromRGB(180, 185, 195), Material = Enum.Material.DiamondPlate },
+		{ Name = "Or", Color = Color3.fromRGB(255, 200, 40), Material = Enum.Material.Foil },
+		{ Name = "Diamant", Color = Color3.fromRGB(120, 230, 255), Material = Enum.Material.Glass },
+	},
 	BeltSpeed = 14, -- vitesse du tapis roulant qui repousse le joueur
 }
 
--- Tirages : 1 objet avalé = 1 point × multiplicateur des familiers équipés.
+-- Tirages : un objet avalé rapporte sa valeur (Config.ItemTiers) × multiplicateur des familiers équipés.
 -- Le coût d'un tirage augmente à chaque tirage de la même manche (évite l'emballement).
 Config.Loot = {
-	PullCost = 5, -- coût du 1er tirage (minimum 1 tirage si score > 0)
+	PullCost = 2, -- coût du 1er tirage (minimum 1 tirage si score > 0)
 	PullCostGrowth = 0.08, -- +8 % de coût à chaque tirage suivant
 	LuckPerPoint = 0.01, -- chaque point augmente un peu le poids des raretés hautes
 	MaxLuck = 1, -- au maximum, poids des raretés hautes ×2
@@ -103,19 +136,35 @@ Config.Lock = {
 
 export type ShopItem = {
 	Id: string,
+	Icon: string,
 	Name: string,
 	Description: string,
-	Price: number,
+	MaxLevel: number,
+	BasePrice: number,
+	PriceGrowth: number, -- prix du niveau L+1 = BasePrice × PriceGrowth^L
 }
 
--- Catalogue de la boutique (ordre d'affichage). Chaque achat écrit l'attribut "Unlock_<Id>" sur le Player.
+-- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Name = "Tapis de course", Description = "Apparaît derrière ta base. Cours dessus pendant la digestion : +vitesse.", Price = 250 },
-	{ Id = "StrongArm", Name = "Bras musclé", Description = "Lancers 25% plus puissants.", Price = 750 },
-	{ Id = "LongLock", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", Price = 1500 },
+	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Cours dessus : +vitesse. Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 150, PriceGrowth = 4 },
+	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Monte dessus : +force (lancers plus loin). Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 150, PriceGrowth = 4 },
+	{ Id = "ItemQuality", Icon = "💎", Name = "Objets de qualité", Description = "Des objets plus précieux apparaissent dans ta base.", MaxLevel = 10, BasePrice = 200, PriceGrowth = 2.2 },
+	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 400, PriceGrowth = 3 },
+	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", MaxLevel = 1, BasePrice = 1500, PriceGrowth = 1 },
 } :: { ShopItem }
 
-Config.StrongArmMultiplier = 1.25
+-- Prix du prochain niveau (nil si niveau max atteint).
+function Config.GetUpgradePrice(item: ShopItem, currentLevel: number): number?
+	if currentLevel >= item.MaxLevel then
+		return nil
+	end
+	return math.floor(item.BasePrice * item.PriceGrowth ^ currentLevel)
+end
+
+-- XP nécessaire pour passer du niveau "level" au suivant.
+function Config.GetXPNeeded(level: number): number
+	return math.floor(Config.Training.XPBase * Config.Training.XPGrowth ^ level)
+end
 
 export type Rarity = {
 	Id: string, -- clé sans accent (attributs)

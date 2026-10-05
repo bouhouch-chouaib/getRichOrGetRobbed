@@ -1,7 +1,8 @@
 --!strict
 -- SessionData : données de session en mémoire par joueur (pas de DataStore pour le MVP).
 -- Chaque valeur est recopiée en attribut sur le Player (lu par le HUD) et dans les leaderstats :
---   Speed, RoundScore, Money, Unlock_<Id>,
+--   RoundScore, Money, Upgrade_<Id> (niveau), Capacity (objets portables),
+--   SpeedLevel/SpeedXP/SpeedXPNeeded/Speed (WalkSpeed), StrengthLevel/StrengthXP/StrengthXPNeeded/ThrowPower,
 --   Pet_<PetId> (quantité possédée), Equipped ("id1,id2"), Multiplier, EquipSlots
 
 local Players = game:GetService("Players")
@@ -10,15 +11,18 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 
+export type Stat = "Speed" | "Strength"
+
 export type PlayerData = {
-	speed: number,
+	levels: { [string]: number }, -- Stat -> niveau
+	xp: { [string]: number }, -- Stat -> XP vers le prochain niveau
 	roundScore: number,
 	money: number,
 	pets: { [string]: number }, -- petId -> quantité
 	equipped: { string }, -- petIds équipés (un même Id peut apparaître plusieurs fois si possédé en plusieurs exemplaires)
 	equipSlots: number,
 	pity: number,
-	unlocks: { [string]: boolean },
+	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 }
 
 local SessionData = {}
@@ -32,6 +36,11 @@ local function getStat(player: Player, name: string): IntValue?
 		return stat
 	end
 	return nil
+end
+
+local function statValue(stat: string, level: number): number
+	local statConfig = if stat == "Speed" then Config.Training.Speed else Config.Training.Strength
+	return statConfig.Base + statConfig.PerLevel * level
 end
 
 local function applySpeed(player: Player, speed: number)
@@ -49,7 +58,15 @@ local function sync(player: Player)
 		return
 	end
 
-	player:SetAttribute("Speed", data.speed)
+	for _, stat in ipairs({ "Speed", "Strength" }) do
+		local level = data.levels[stat]
+		player:SetAttribute(stat .. "Level", level)
+		player:SetAttribute(stat .. "XP", data.xp[stat])
+		player:SetAttribute(stat .. "XPNeeded", Config.GetXPNeeded(level))
+	end
+	player:SetAttribute("Speed", statValue("Speed", data.levels.Speed))
+	player:SetAttribute("ThrowPower", statValue("Strength", data.levels.Strength))
+	player:SetAttribute("Capacity", 1 + (data.upgrades.Backpack or 0))
 	player:SetAttribute("RoundScore", data.roundScore)
 	player:SetAttribute("Money", data.money)
 
@@ -59,8 +76,8 @@ local function sync(player: Player)
 	player:SetAttribute("Equipped", table.concat(data.equipped, ","))
 	player:SetAttribute("EquipSlots", data.equipSlots)
 	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
-	for id in pairs(data.unlocks) do
-		player:SetAttribute("Unlock_" .. id, true)
+	for id, level in pairs(data.upgrades) do
+		player:SetAttribute("Upgrade_" .. id, level)
 	end
 
 	local money = getStat(player, "Argent")
@@ -75,14 +92,15 @@ end
 
 local function onPlayerAdded(player: Player)
 	storage[player] = {
-		speed = Config.Speed.Base,
+		levels = { Speed = 0, Strength = 0 },
+		xp = { Speed = 0, Strength = 0 },
 		roundScore = 0,
 		money = 0,
 		pets = {},
 		equipped = {},
 		equipSlots = Config.Pets.EquipSlots,
 		pity = 0,
-		unlocks = {},
+		upgrades = {},
 	}
 
 	local leaderstats = Instance.new("Folder")
@@ -98,7 +116,7 @@ local function onPlayerAdded(player: Player)
 		local data = storage[player]
 		if data then
 			-- Le Humanoid est créé avec le personnage : on attend la frame suivante par sécurité.
-			task.defer(applySpeed, player, data.speed)
+			task.defer(applySpeed, player, statValue("Speed", data.levels.Speed))
 		end
 	end)
 
@@ -218,14 +236,29 @@ function SessionData.SetPity(player: Player, pity: number)
 	end
 end
 
-function SessionData.AddSpeed(player: Player, delta: number)
+-- Ajoute de l'XP d'entraînement. Gère les passages de niveau (plusieurs d'un coup si besoin).
+-- Retourne le nombre de niveaux gagnés.
+function SessionData.AddTrainingXP(player: Player, stat: Stat, amount: number): number
 	local data = storage[player]
 	if not data then
-		return
+		return 0
 	end
-	data.speed = math.min(data.speed + delta, Config.Speed.Max)
-	applySpeed(player, data.speed)
+	local statConfig = if stat == "Speed" then Config.Training.Speed else Config.Training.Strength
+	local gained = 0
+	data.xp[stat] += amount
+	while data.levels[stat] < statConfig.MaxLevel and data.xp[stat] >= Config.GetXPNeeded(data.levels[stat]) do
+		data.xp[stat] -= Config.GetXPNeeded(data.levels[stat])
+		data.levels[stat] += 1
+		gained += 1
+	end
+	if data.levels[stat] >= statConfig.MaxLevel then
+		data.xp[stat] = 0
+	end
+	if stat == "Speed" and gained > 0 then
+		applySpeed(player, statValue("Speed", data.levels.Speed))
+	end
 	sync(player)
+	return gained
 end
 
 function SessionData.AddMoney(player: Player, amount: number)
@@ -247,15 +280,19 @@ function SessionData.SpendMoney(player: Player, amount: number): boolean
 	return true
 end
 
-function SessionData.HasUnlock(player: Player, id: string): boolean
+function SessionData.GetUpgradeLevel(player: Player, id: string): number
 	local data = storage[player]
-	return data ~= nil and data.unlocks[id] == true
+	return if data then data.upgrades[id] or 0 else 0
 end
 
-function SessionData.GiveUnlock(player: Player, id: string)
+function SessionData.HasUnlock(player: Player, id: string): boolean
+	return SessionData.GetUpgradeLevel(player, id) >= 1
+end
+
+function SessionData.SetUpgradeLevel(player: Player, id: string, level: number)
 	local data = storage[player]
 	if data then
-		data.unlocks[id] = true
+		data.upgrades[id] = level
 		sync(player)
 	end
 end

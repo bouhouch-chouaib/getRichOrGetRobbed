@@ -29,12 +29,29 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   dans `ReplicatedStorage.PetModels` le remplace automatiquement.
 - Test : `Config.StudioGiveAllPets = true` donne les 75 familiers dans Studio.
 
+## Objets à jeter
+
+- Kit de départ : 5 objets au hasard dans la base à l'arrivée du joueur.
+- Pendant le Feeding : 1 objet toutes les 2 s dans chaque base occupée (max 12).
+- 6 types (`Config.ItemTiers`) : Caillou 0,25 • Brique 0,5 • Cristal 1 • Lingot 2,5 • Diamant 6 • Météorite 15 points.
+- Points marqués = valeur de l'objet × multiplicateur des familiers équipés.
+- Amélioration "Objets de qualité" : poids des objets précieux ×(1 + 0,35 × niveau)^rang.
+
+## Entraînement (progression longue)
+
+- Deux stats à niveaux : **Vitesse** (WalkSpeed 16 + 0,5/niveau) et **Force** (vitesse de lancer max 70 + 3/niveau), max niveau 60.
+- XP pour passer au niveau suivant = 5 × 1,12^niveau (niveau 10 en ~1,5 min, niveau 30 en ~20 min, niveau 60 en plusieurs heures).
+- Stations achetées en boutique, posées hors de la base : **tapis de course** (gauche, Vitesse) et **banc de muscu** (droite, Force).
+  5 niveaux chacune (bois → pierre → fer → or → diamant) = XP ×1 / ×2 / ×3,5 / ×6 / ×10. Utilisables à tout moment par le propriétaire.
+- Lancer : vitesse = ThrowPower × (35 % + 65 % × charge). Au départ, portée ~22 studs : il faut s'approcher du trou.
+
 ## Économie et base
 
 - **Argent** : revenu passif des 10 meilleurs familiers + `MoneyPerPoint` $ par point à la digestion.
-- **Boutique** (`Config.Shop`) : déblocages permanents pour la session. Achat validé par le serveur, enregistré en attribut `Unlock_<Id>`.
-  - `Treadmill` : tapis de course à l'extérieur de la base (+Speed pendant la Digestion).
-  - `StrongArm` : lancers 25 % plus puissants.
+- **Boutique** (`Config.Shop`) : améliorations à niveaux, prix = BasePrice × PriceGrowth^niveau, attribut `Upgrade_<Id>`.
+  - `Treadmill` (5 niv.), `Bench` (5 niv.) : stations d'entraînement.
+  - `ItemQuality` (10 niv.) : objets plus précieux.
+  - `Backpack` (4 niv.) : +1 objet porté par niveau (le 1er en main, les autres empilés dans le dos, lancés un par un).
   - `LongLock` : base fermée 90 s au lieu de 60 s.
 - **Bouton de verrouillage** (comme Steal a Brainrot) : le propriétaire marche sur le gros bouton rouge de sa base → portail fermé pendant 60 s, tout autre joueur à l'intérieur est expulsé devant l'entrée.
 
@@ -70,10 +87,10 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `ItemSpawner` : objets dans les bases occupées pendant le Feeding.
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
   - `BlackholeController` : consommation, dôme répulsif, récompenses.
-  - `TrainingController` : tapis de course déblocable (convoyeur) → +Speed pendant la Digestion.
+  - `TrainingController` : stations tapis (Vitesse) et banc (Force), niveaux, XP.
   - `LockController` : bouton de verrouillage, portail, expulsion des intrus.
   - `EconomyController` : revenu passif des familiers, achats de la boutique (`Remotes.BuyUpgrade`).
-  - `SessionData` : données en mémoire (speed, roundScore, money, pets, unlocks) → attributs Player + leaderstats.
+  - `SessionData` : données en mémoire (niveaux/XP Vitesse et Force, roundScore, money, pets, upgrades) → attributs Player + leaderstats.
 - `src/client` → `StarterPlayerScripts.Client`
   - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
   - `HUD` : style cartoon (police LuckiestGuy, contours noirs épais, boutons en dégradé) : phase + chrono, argent et revenu, points, vitesse, boutons BOUTIQUE / FAMILIERS (fenêtres), popup de récompenses.
