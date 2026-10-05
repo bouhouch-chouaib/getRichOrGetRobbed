@@ -118,6 +118,14 @@ Config.Pets = {
 	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
 }
 
+-- Machine de fusion : Count familiers d'une même rareté -> 1 familier aléatoire de la rareté au-dessus.
+-- Possible jusqu'à MaxFromRarity (6 = Mythique -> Divin). Le Sigma ne s'obtient que par chance.
+Config.Fusion = {
+	Count = 5,
+	MaxFromRarity = 6,
+	Costs = { 50, 150, 500, 1500, 5000, 15000 }, -- prix en $ selon la rareté fusionnée (index de rareté)
+}
+
 -- Test : dans Roblox Studio uniquement, chaque joueur reçoit 1 exemplaire de chaque familier
 -- (pour voir tous les modèles). Mettre à false pour tester la vraie progression.
 Config.StudioGiveAllPets = false

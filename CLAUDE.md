@@ -72,7 +72,7 @@ annonces serveur Légendaire+ • familiers exposés sur 10 socles dans la base 
 ## Prochaines étapes prévues (dans cet ordre, validé avec l'utilisateur)
 
 1. (fait : socles) Idée : slots de socles supplémentaires achetables, vol de familiers sur les socles adverses.
-2. Machine de fusion : 5 familiers de même rareté → 1 familier aléatoire de la rareté au-dessus (Sigma non fusionnable).
+2. (fait : machine de fusion, `FusionController` + fenêtre FUSION)
 3. (fait : sauvegarde DataStore)
 4. Monétisation : gamepass "Equip +2" (800 R$), "Lucky Luck" (400 R$, `luckBonus` déjà prévu dans `LootEngine.roll`),
    produits développeur "points de tirage" (afficher les probabilités : règle Roblox sur les objets aléatoires payants).

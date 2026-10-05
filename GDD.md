@@ -26,6 +26,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
   Chance légèrement augmentée par le score. **Pitié** : Épique+ garanti au 60e tirage sans Épique+.
 - **Annonce serveur** pour tout drop Légendaire ou mieux.
+- **Machine de fusion** (`FusionController`, bouton 🧪) : 5 familiers non équipés d'une rareté + un coût
+  (50 / 150 / 500 / 1500 / 5000 / 15000 $) = 1 familier aléatoire de la rareté au-dessus, de Commun jusqu'à Mythique → Divin.
+  Doublons consommés en priorité. Le Sigma ne s'obtient que par chance.
 - Modèles : `PetModelBuilder` construit un modèle de remplacement en formes de base ; un Model nommé comme l'Id
   dans `ReplicatedStorage.PetModels` le remplace automatiquement.
 - Test : `Config.StudioGiveAllPets = true` donne les 75 familiers dans Studio (désactivé par défaut : fausse l'économie).

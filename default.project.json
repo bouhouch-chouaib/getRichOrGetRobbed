@@ -15,7 +15,9 @@
         "RewardsGranted": { "$className": "RemoteEvent" },
         "BuyUpgrade": { "$className": "RemoteEvent" },
         "EquipPet": { "$className": "RemoteEvent" },
-        "Announcement": { "$className": "RemoteEvent" }
+        "Announcement": { "$className": "RemoteEvent" },
+        "Fuse": { "$className": "RemoteEvent" },
+        "FusionResult": { "$className": "RemoteEvent" }
       }
     },
 

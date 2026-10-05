@@ -282,7 +282,7 @@ leftColumn.Name = "Left"
 leftColumn.BackgroundTransparency = 1
 leftColumn.AnchorPoint = Vector2.new(0, 0.5)
 leftColumn.Position = UDim2.new(0, 16, 0.5, 0)
-leftColumn.Size = UDim2.fromOffset(240, 400)
+leftColumn.Size = UDim2.fromOffset(240, 500)
 leftColumn.Parent = gui
 
 local moneyLabel = text(leftColumn, "$0", 48, MONEY)
@@ -333,6 +333,7 @@ end
 
 local shopButton = menuButton("🛒", "BOUTIQUE", 180, Color3.fromRGB(255, 220, 70), Color3.fromRGB(255, 140, 20))
 local petsButton = menuButton("🐾", "FAMILIERS", 288, Color3.fromRGB(110, 210, 255), Color3.fromRGB(40, 120, 255))
+local fusionButton = menuButton("🧪", "FUSION", 396, Color3.fromRGB(230, 130, 255), Color3.fromRGB(140, 40, 220))
 
 ----------------------------------------------------------------------
 -- Fenêtre Boutique
@@ -567,6 +568,132 @@ shopButton.Activated:Connect(shopWindow.toggle)
 petsButton.Activated:Connect(petsWindow.toggle)
 
 ----------------------------------------------------------------------
+-- Fenêtre Fusion
+----------------------------------------------------------------------
+
+local fusionWindow = makeWindow("FUSION", Vector2.new(640, 520), Color3.fromRGB(235, 150, 255), Color3.fromRGB(120, 40, 210))
+fusionButton.Activated:Connect(fusionWindow.toggle)
+
+local fusionInfo = text(fusionWindow.content, string.format("%d FAMILIERS DE MÊME RARETÉ = 1 DE LA RARETÉ AU-DESSUS", Config.Fusion.Count), 18)
+fusionInfo.Size = UDim2.new(1, 0, 0, 24)
+fusionInfo.Position = UDim2.fromOffset(0, 6)
+
+local fusionList = makeList(fusionWindow.content, 8)
+fusionList.Position = UDim2.fromOffset(0, 34)
+fusionList.Size = UDim2.new(1, -170, 1, -34)
+
+-- Aperçu du dernier familier obtenu par fusion.
+local resultCard = makeCard(fusionWindow.content, 0, 0)
+resultCard.Size = UDim2.fromOffset(156, 210)
+resultCard.AnchorPoint = Vector2.new(1, 0)
+resultCard.Position = UDim2.new(1, 0, 0, 40)
+local resultTitle = text(resultCard, "RÉSULTAT", 18, Color3.fromRGB(255, 220, 60))
+resultTitle.Size = UDim2.new(1, 0, 0, 24)
+resultTitle.Position = UDim2.fromOffset(0, 4)
+local resultName = text(resultCard, "?", 16)
+resultName.Size = UDim2.new(1, -8, 0, 40)
+resultName.Position = UDim2.new(0, 4, 1, -44)
+resultName.TextWrapped = true
+local resultViewport: ViewportFrame? = nil
+
+type FusionRow = { rarityIndex: number, count: TextLabel, button: TextButton }
+local fusionRows: { FusionRow } = {}
+
+for rarityIndex = 1, Config.Fusion.MaxFromRarity do
+	local from = Config.Rarities[rarityIndex]
+	local to = Config.Rarities[rarityIndex + 1]
+	local cardFrame = makeCard(fusionList, 64, rarityIndex)
+	cardFrame.BackgroundColor3 = WHITE
+	gradient(cardFrame, from.Color:Lerp(WHITE, 0.4), to.Color:Lerp(WHITE, 0.2))
+
+	local title = text(cardFrame, string.format("%s → %s", from.Name:upper(), to.Name:upper()), 20)
+	title.Position = UDim2.fromOffset(12, 4)
+	title.Size = UDim2.new(1, -150, 0, 28)
+	title.TextXAlignment = Enum.TextXAlignment.Left
+
+	local count = text(cardFrame, "", 16)
+	count.Position = UDim2.fromOffset(12, 34)
+	count.Size = UDim2.new(1, -150, 0, 22)
+	count.TextXAlignment = Enum.TextXAlignment.Left
+
+	local button = chunkyButton(cardFrame, "", UDim2.fromOffset(130, 48), Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40), 20)
+	button.AnchorPoint = Vector2.new(1, 0.5)
+	button.Position = UDim2.new(1, -8, 0.5, 0)
+	button.Activated:Connect(function()
+		Remotes.Fuse:FireServer(rarityIndex)
+	end)
+	table.insert(fusionRows, { rarityIndex = rarityIndex, count = count, button = button })
+end
+
+-- Exemplaires non équipés d'une rareté (calcul identique au serveur).
+local function spareOfRarity(rarityId: string): number
+	local equipped = equippedList()
+	local total = 0
+	for _, entry in ipairs(PetCatalog.ByRarity[rarityId] or {}) do
+		local owned = numberAttribute("Pet_" .. entry.Id)
+		local used = 0
+		for _, id in ipairs(equipped) do
+			if id == entry.Id then
+				used += 1
+			end
+		end
+		total += math.max(0, owned - used)
+	end
+	return total
+end
+
+local function updateFusion(money: number)
+	for _, row in ipairs(fusionRows) do
+		local rarity = Config.Rarities[row.rarityIndex]
+		local spare = spareOfRarity(rarity.Id)
+		local cost = Config.Fusion.Costs[row.rarityIndex]
+		row.count.Text = string.format("TU EN AS %d / %d (HORS ÉQUIPÉS)", spare, Config.Fusion.Count)
+		local caption = row.button:FindFirstChild("Caption") :: TextLabel
+		local buttonGradient = row.button:FindFirstChildOfClass("UIGradient") :: UIGradient
+		caption.Text = formatMoney(cost)
+		if spare >= Config.Fusion.Count and money >= cost then
+			buttonGradient.Color = ColorSequence.new(Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40))
+		else
+			buttonGradient.Color = ColorSequence.new(Color3.fromRGB(255, 110, 110), Color3.fromRGB(190, 40, 40))
+		end
+		row.button:SetAttribute("Ready", spare >= Config.Fusion.Count)
+		row.button:SetAttribute("Affordable", money >= cost)
+	end
+end
+
+for _, row in ipairs(fusionRows) do
+	row.button.Activated:Connect(function()
+		if not row.button:GetAttribute("Ready") then
+			Toast.show(string.format("IL TE FAUT %d FAMILIERS LIBRES DE CETTE RARETÉ !", Config.Fusion.Count), Color3.fromRGB(255, 90, 90))
+		elseif not row.button:GetAttribute("Affordable") then
+			Toast.show("PAS ASSEZ D'ARGENT !", Color3.fromRGB(255, 90, 90))
+		end
+	end)
+end
+
+Remotes.FusionResult.OnClientEvent:Connect(function(petId: string)
+	local entry = PetCatalog.ById[petId]
+	if not entry then
+		return
+	end
+	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
+	if resultViewport then
+		resultViewport:Destroy()
+	end
+	local viewport = petViewport(resultCard, petId, false)
+	viewport.Position = UDim2.fromOffset(6, 30)
+	viewport.Size = UDim2.new(1, -12, 1, -78)
+	resultViewport = viewport
+	resultName.Text = entry.Name:upper()
+	resultName.TextColor3 = rarity.Color
+	local scale = resultCard:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
+	scale.Parent = resultCard
+	scale.Scale = 0.6
+	TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	Toast.show(string.format("FUSION : %s (%s) !", entry.Name:upper(), rarity.Name:upper()), rarity.Color)
+end)
+
+----------------------------------------------------------------------
 -- Popup de récompenses (fin de manche)
 ----------------------------------------------------------------------
 
@@ -637,6 +764,7 @@ local function updateStats()
 	updateShop(money)
 
 	updatePets()
+	updateFusion(money)
 end
 
 -- Petit "pop" du compteur d'argent quand il augmente.

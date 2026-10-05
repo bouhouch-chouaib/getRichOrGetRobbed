@@ -335,6 +335,45 @@ function SessionData.AddPets(player: Player, newPets: { [string]: number })
 	sync(player)
 end
 
+-- Nombre d'exemplaires de petId non équipés (utilisables pour une fusion).
+function SessionData.GetSpareCount(player: Player, petId: string): number
+	local data = storage[player]
+	if not data then
+		return 0
+	end
+	local equipped = 0
+	for _, id in ipairs(data.equipped) do
+		if id == petId then
+			equipped += 1
+		end
+	end
+	return math.max(0, (data.pets[petId] or 0) - equipped)
+end
+
+-- Retire des familiers (jamais plus que les exemplaires non équipés). Retourne false si impossible.
+function SessionData.RemovePets(player: Player, toRemove: { [string]: number }): boolean
+	local data = storage[player]
+	if not data then
+		return false
+	end
+	for petId, count in pairs(toRemove) do
+		if SessionData.GetSpareCount(player, petId) < count then
+			return false
+		end
+	end
+	for petId, count in pairs(toRemove) do
+		local remaining = (data.pets[petId] or 0) - count
+		if remaining > 0 then
+			data.pets[petId] = remaining
+		else
+			data.pets[petId] = nil
+			player:SetAttribute("Pet_" .. petId, 0)
+		end
+	end
+	sync(player)
+	return true
+end
+
 -- Multiplicateur de points : 1 + somme des bonus des familiers équipés (additif, pas multiplicatif).
 function SessionData.GetMultiplier(player: Player): number
 	local data = storage[player]

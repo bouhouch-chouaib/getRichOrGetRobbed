@@ -53,4 +53,8 @@ return {
 	EquipPet = remote("EquipPet"),
 	-- Serveur -> tous les clients : (playerName: string, petId: string) gros drop annoncé à tout le serveur.
 	Announcement = remote("Announcement"),
+	-- Client -> serveur : (rarityIndex: number) fusionner Config.Fusion.Count familiers de cette rareté.
+	Fuse = remote("Fuse"),
+	-- Serveur -> client : (petId: string) résultat de la fusion.
+	FusionResult = remote("FusionResult"),
 }
