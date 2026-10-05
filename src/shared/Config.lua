@@ -33,9 +33,9 @@ Config.Arena = {
 Config.Items = {
 	StarterCount = 5, -- objets offerts dans la base à l'arrivée d'un joueur
 	SpawnInterval = 2, -- pendant le Feeding, un objet apparaît toutes les 2 s dans chaque base occupée
-	MaxPerBase = 12,
+	MaxPerBase = 12, -- 4 cagettes : ~3 objets par cagette
 	MaxLooseItems = 80, -- au-delà, les plus vieux objets abandonnés sont nettoyés
-	QualityBoost = 0.35, -- par niveau de "Objets de qualité" : poids des objets précieux ×(1 + 0.35 × niveau)^rang
+	QualityBoost = 0.5, -- par niveau de "Chance" : poids des objets précieux ×(1 + 0.5 × niveau)^rang
 }
 
 export type ItemTier = {
@@ -156,7 +156,7 @@ export type ShopItem = {
 Config.Shop = {
 	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Cours dessus : +vitesse. Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 500, PriceGrowth = 120 },
 	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Monte dessus : +force (lancers plus loin). Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 500, PriceGrowth = 120 },
-	{ Id = "ItemQuality", Icon = "💎", Name = "Objets de qualité", Description = "Des objets plus précieux apparaissent dans ta base.", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
+	{ Id = "ItemQuality", Icon = "🍀", Name = "Chance", Description = "Plus de lingots, diamants et météorites dans tes cagettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
 	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
 	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 } :: { ShopItem }

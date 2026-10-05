@@ -2,8 +2,8 @@
 -- ItemSpawner : objets à jeter dans le trou noir, posés dans les bases occupées.
 --   - À l'arrivée d'un joueur : Config.Items.StarterCount objets au hasard dans sa base.
 --   - Pendant le Feeding : un objet toutes les SpawnInterval secondes dans chaque base (max MaxPerBase).
--- Le type d'objet (Config.ItemTiers) est tiré au hasard ; l'amélioration "ItemQuality" du propriétaire
--- rend les objets précieux plus fréquents. Chaque objet porte l'attribut "Value" (points rapportés).
+-- Les objets apparaissent dans les 4 cagettes de la base. Le type (Config.ItemTiers) est tiré au hasard ;
+-- l'amélioration "ItemQuality" (affichée "Chance") du propriétaire rend les objets précieux plus fréquents. Chaque objet porte l'attribut "Value" (points rapportés).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -99,8 +99,8 @@ local function spawnInBase(base: Model)
 
 	local owner = BaseManager.GetOwner(base)
 	local quality = if owner then SessionData.GetUpgradeLevel(owner, "ItemQuality") else 0
-	-- Petit décalage aléatoire autour du coin pour ne pas empiler les objets.
-	local offset = CFrame.new(rng:NextNumber(-4, 4), 0, rng:NextNumber(-4, 4))
+	-- Petit décalage aléatoire pour ne pas empiler les objets (ils restent dans la cagette).
+	local offset = CFrame.new(rng:NextNumber(-1.8, 1.8), rng:NextNumber(0, 2), rng:NextNumber(-1.8, 1.8))
 	local item = createItem(rollTier(quality), point.CFrame * offset)
 	item.Parent = itemSpawns
 	ItemInteraction.Register(item)

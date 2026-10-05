@@ -21,7 +21,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Raretés (`Config.Rarities`) : Commun 50 %, Inhabituel 25 %, Rare 12 %, Épique 7 %, Légendaire 4 %, Mythique 1,5 %, Divin 0,4 %, Sigma 0,1 %.
 - **Équipé** (1 place de base) : le familier suit le joueur et ajoute un bonus de points, additif :
   ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus).
-- **Dans la base** : les 10 meilleurs familiers sont exposés sur des socles (`PedestalController`) et rapportent de l'argent chaque seconde
+- **Dans la base** : les 10 meilleurs familiers se baladent librement dans la base (`BasePetsController` → attribut `BasePets`,
+  animés côté client par `client/BasePets` : marche, sautille, ondule, plane, se balance, tourne) et rapportent de l'argent chaque seconde
   (base 2 / 25 / 400 / 8K / 200K / 6M / 250M / 25B $/s de Commun à Sigma,
   +15 % par rang du familier dans sa rareté : `PetCatalog.GetIncome`).
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
@@ -41,7 +42,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - 6 types (`Config.ItemTiers`) : Caillou 0,25 • Brique 0,5 • Cristal 1 • Lingot 2,5 • Diamant 6 • Météorite 15 points.
 - Points marqués = valeur de l'objet × multiplicateur des familiers équipés.
 - Physique : frottement maximal, aucun rebond, aucune forme ronde : un objet s'arrête où il tombe (la Force compte).
-- Amélioration "Objets de qualité" : poids des objets précieux ×(1 + 0,35 × niveau)^rang.
+- Les objets apparaissent dans **4 cagettes en bois** aux coins de la base.
+- Amélioration "🍀 Chance" (Id `ItemQuality`) : poids des objets précieux ×(1 + 0,5 × niveau)^rang.
 
 ## Entraînement (progression longue)
 
@@ -97,7 +99,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
   - `BlackholeController` : consommation, dôme répulsif, récompenses.
   - `TrainingController` : stations tapis (Vitesse) et banc (Force), niveaux, XP.
-  - `PedestalController` : familiers exposés sur les 10 socles de la base.
+  - `BasePetsController` : liste des familiers qui vivent dans chaque base (animés côté client).
   - `LockController` : bouton de verrouillage, portail, expulsion des intrus.
   - `EconomyController` : revenu passif des familiers, achats de la boutique (`Remotes.BuyUpgrade`).
   - `SessionData` : données joueur (niveaux/XP Vitesse et Force, money, pets, équipés, pitié, upgrades) → attributs Player + leaderstats.

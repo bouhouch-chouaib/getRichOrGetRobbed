@@ -65,7 +65,8 @@ HUD style cartoon (LuckiestGuy, contours noirs, fenêtres, Toast, barres d'XP) �
 (`PetCatalog`), modèles de remplacement procéduraux (`PetModelBuilder`, surchargeables par
 `ReplicatedStorage.PetModels.<Id>`) • tirages à coût croissant + pitié (`LootEngine`) • 1 familier équipé =
 multiplicateur additif + suit le joueur (`PetFollow`) • revenu = 10 meilleurs familiers • fenêtre collection 3D •
-annonces serveur Légendaire+ • familiers exposés sur 10 socles dans la base (`PedestalController`) •
+annonces serveur Légendaire+ • familiers qui se baladent dans la base (`BasePetsController` + `client/BasePets`, plus de socles) •
+cagettes à objets + amélioration Chance • plaque d'apparition invisible •
 économie rééquilibrée (revenus bas, prix hauts) • objets non roulants (frottement max) • map agrandie (bases à 215) •
 `Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester) • sauvegarde DataStore •
 machine de fusion + boutique physiques dans 4 kiosques entre les bases • économie en grands nombres (K/M/B/T, `NumberFormat`) •

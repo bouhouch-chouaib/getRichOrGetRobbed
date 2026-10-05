@@ -8,7 +8,7 @@
 --   ArenaFloor, HoleDirt, HoleRing, BlackholeZone (+ Aura), BlackholeCore (+ Light), BlackholeHalo, BlackholeDome
 --   Paths (Folder), Trees (Folder), Kiosks (Folder : boutique + machine de fusion entre deux bases)
 --   LooseItems (Folder) : objets ramassés / lancés
---   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation,
+--   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Crates,
 --                              SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
 --                              SpawnPoints (Folder), ItemSpawns (Folder)
 
@@ -525,6 +525,31 @@ local function createKiosks(map: Folder)
 	end
 end
 
+-- Cagette en bois à claire-voie (dessus ouvert) où apparaissent les objets à jeter.
+local CRATE_SIZE = 7
+local function createCrate(cframe: CFrame, parent: Instance)
+	local model = Instance.new("Model")
+	model.Name = "Crate"
+	local light = COLORS.WoodRail
+	local dark = COLORS.WoodPost
+	local half = CRATE_SIZE / 2
+	makePart("Bottom", Vector3.new(CRATE_SIZE, 0.4, CRATE_SIZE), cframe * CFrame.new(0, 0.2, 0), dark, model).Material = Enum.Material.WoodPlanks
+	-- Deux lattes horizontales par côté (avec un jour entre elles), comme une vraie cagette.
+	for _, y in ipairs({ 0.9, 2.2 }) do
+		for _, side in ipairs({ -1, 1 }) do
+			makePart("Slat", Vector3.new(CRATE_SIZE, 0.8, 0.35), cframe * CFrame.new(0, y, side * (half - 0.175)), light, model).Material = Enum.Material.Wood
+			makePart("Slat", Vector3.new(0.35, 0.8, CRATE_SIZE), cframe * CFrame.new(side * (half - 0.175), y, 0), light, model).Material = Enum.Material.Wood
+		end
+	end
+	-- Montants aux quatre coins.
+	for _, x in ipairs({ -1, 1 }) do
+		for _, z in ipairs({ -1, 1 }) do
+			makePart("Corner", Vector3.new(0.6, 2.8, 0.6), cframe * CFrame.new(x * (half - 0.3), 1.4, z * (half - 0.3)), dark, model).Material = Enum.Material.Wood
+		end
+	end
+	model.Parent = parent
+end
+
 local function createBase(index: number, map: Folder, paths: Folder): Model
 	local angle = (index - 1) * (math.pi * 2 / ARENA.BaseCount)
 	local position = Vector3.new(math.cos(angle) * ARENA.BaseRingRadius, 0, math.sin(angle) * ARENA.BaseRingRadius)
@@ -553,6 +578,11 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	spawn.CFrame = origin * CFrame.new(0, top + 0.5, 18)
 	spawn.Color = color
 	spawn.Material = Enum.Material.SmoothPlastic
+	-- Invisible : elle sert seulement de point d'apparition (le nom du joueur flotte au-dessus).
+	spawn.Transparency = 1
+	spawn.CanCollide = false
+	spawn.CanQuery = false
+	spawn.CanTouch = false
 	spawn.Neutral = true
 	spawn.Duration = 0
 	spawn.Parent = base
@@ -599,54 +629,17 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	createTreadmill(origin * CFrame.new(-half - 10, 0, -4), base)
 	createBench(origin * CFrame.new(half + 10, 0, -4), base)
 
-	-- Socles des familiers : 5 de chaque côté de la base (PedestalController y pose les meilleurs familiers).
-	local pedestals = Instance.new("Folder")
-	pedestals.Name = "Pedestals"
-	pedestals.Parent = base
-	local pedestalIndex = 0
-	for _, x in ipairs({ -23, 23 }) do
-		for _, z in ipairs({ -10, -4, 2, 8, 14 }) do
-			pedestalIndex += 1
-			local pedestal = makePart("Pedestal", Vector3.new(1.2, 4.4, 4.4), origin * CFrame.new(x, top + 0.6, z) * FLAT, Color3.fromRGB(235, 225, 205), pedestals)
-			pedestal.Shape = Enum.PartType.Cylinder
-			pedestal.Material = Enum.Material.Marble
-			pedestal:SetAttribute("Index", pedestalIndex)
-			-- Le familier regarde vers le centre de la base.
-			pedestal:SetAttribute("Facing", if x < 0 then 1 else -1)
-
-			local sign = Instance.new("BillboardGui")
-			sign.Name = "PetSign"
-			sign.Adornee = pedestal
-			sign.Size = UDim2.fromScale(8, 2.6)
-			sign.StudsOffsetWorldSpace = Vector3.new(0, 6.5, 0) -- recalé selon la taille du familier
-			sign.AlwaysOnTop = true
-			sign.LightInfluence = 0
-			sign.MaxDistance = 90
-			sign.Enabled = false
-			local nameLabel = Instance.new("TextLabel")
-			nameLabel.Name = "PetName"
-			nameLabel.Size = UDim2.fromScale(1, 0.55)
-			nameLabel.BackgroundTransparency = 1
-			nameLabel.Text = ""
-			styleSignText(nameLabel, Color3.new(1, 1, 1))
-			nameLabel.Parent = sign
-			local incomeLabel = Instance.new("TextLabel")
-			incomeLabel.Name = "PetIncome"
-			incomeLabel.Position = UDim2.fromScale(0, 0.55)
-			incomeLabel.Size = UDim2.fromScale(1, 0.45)
-			incomeLabel.BackgroundTransparency = 1
-			incomeLabel.Text = ""
-			styleSignText(incomeLabel, Color3.fromRGB(110, 240, 70))
-			incomeLabel.Parent = sign
-			sign.Parent = pedestal
-		end
-	end
-
 	local spawnPoints = Instance.new("Folder")
 	spawnPoints.Name = "SpawnPoints"
 	spawnPoints.Parent = base
-	for _, offset in ipairs({ Vector2.new(-21, -21), Vector2.new(21, -21), Vector2.new(-21, 21), Vector2.new(21, 21) }) do
-		local point = makePart("SpawnPoint", Vector3.new(1, 1, 1), origin * CFrame.new(offset.X, top + 4, offset.Y), color, spawnPoints)
+	local crates = Instance.new("Folder")
+	crates.Name = "Crates"
+	crates.Parent = base
+	for _, offset in ipairs({ Vector2.new(-19, -19), Vector2.new(19, -19), Vector2.new(-19, 19), Vector2.new(19, 19) }) do
+		local crateCFrame = origin * CFrame.new(offset.X, top, offset.Y)
+		createCrate(crateCFrame, crates)
+		-- Point d'apparition au-dessus du centre de la cagette : l'objet tombe dedans.
+		local point = makePart("SpawnPoint", Vector3.new(1, 1, 1), crateCFrame * CFrame.new(0, 4, 0), color, spawnPoints)
 		point.Transparency = 1
 		makeGhost(point)
 	end
