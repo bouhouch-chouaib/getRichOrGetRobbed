@@ -20,12 +20,12 @@ Config.StudioDurations = {
 
 -- Géométrie de l'arène (studs). Le trou noir est centré en (0, 0, 0), sol à Y = 0.
 Config.Arena = {
-	FloorRadius = 260,
+	FloorRadius = 315,
 	HoleRadius = 40, -- rayon de la BlackholeZone (disque 80x80)
 	HoleConsumeHeight = 20, -- un item doit être sous cette hauteur au-dessus du trou pour être avalé
 	DomeRadius = 55, -- rayon du dôme répulsif pendant la digestion
 	BaseCount = 8,
-	BaseRingRadius = 175, -- distance du centre au centre des bases
+	BaseRingRadius = 215, -- distance du centre au centre des bases (~150 studs entre l'entrée et le trou)
 	BaseSize = Vector3.new(56, 1, 56),
 }
 
@@ -52,12 +52,12 @@ export type ItemTier = {
 
 -- Du moins au plus précieux.
 Config.ItemTiers = {
-	{ Id = "Caillou", Name = "Caillou", Value = 0.25, Weight = 1000, Color = Color3.fromRGB(150, 150, 155), Shape = Enum.PartType.Ball, Size = 1.8, Material = Enum.Material.Slate },
+	{ Id = "Caillou", Name = "Caillou", Value = 0.25, Weight = 1000, Color = Color3.fromRGB(150, 150, 155), Shape = Enum.PartType.Block, Size = 1.8, Material = Enum.Material.Slate },
 	{ Id = "Brique", Name = "Brique", Value = 0.5, Weight = 350, Color = Color3.fromRGB(200, 85, 60), Shape = Enum.PartType.Block, Size = 2.1, Material = Enum.Material.Brick },
 	{ Id = "Cristal", Name = "Cristal", Value = 1, Weight = 100, Color = Color3.fromRGB(80, 220, 255), Shape = Enum.PartType.Block, Size = 2, Material = Enum.Material.Neon },
 	{ Id = "Lingot", Name = "Lingot d'or", Value = 2.5, Weight = 25, Color = Color3.fromRGB(255, 200, 40), Shape = Enum.PartType.Block, Size = 2.2, Material = Enum.Material.Foil, Glow = true },
-	{ Id = "Diamant", Name = "Diamant", Value = 6, Weight = 6, Color = Color3.fromRGB(200, 250, 255), Shape = Enum.PartType.Ball, Size = 2.2, Material = Enum.Material.Neon, Glow = true },
-	{ Id = "Meteorite", Name = "Météorite", Value = 15, Weight = 1, Color = Color3.fromRGB(170, 60, 255), Shape = Enum.PartType.Ball, Size = 2.8, Material = Enum.Material.Neon, Glow = true },
+	{ Id = "Diamant", Name = "Diamant", Value = 6, Weight = 6, Color = Color3.fromRGB(200, 250, 255), Shape = Enum.PartType.Block, Size = 2, Material = Enum.Material.Neon, Glow = true },
+	{ Id = "Meteorite", Name = "Météorite", Value = 15, Weight = 1, Color = Color3.fromRGB(170, 60, 255), Shape = Enum.PartType.Block, Size = 2.6, Material = Enum.Material.Neon, Glow = true },
 } :: { ItemTier }
 
 -- Lancer (côté client). La vitesse max dépend de la Force (attribut "ThrowPower").
@@ -120,11 +120,11 @@ Config.Pets = {
 
 -- Test : dans Roblox Studio uniquement, chaque joueur reçoit 1 exemplaire de chaque familier
 -- (pour voir tous les modèles). Mettre à false pour tester la vraie progression.
-Config.StudioGiveAllPets = true
+Config.StudioGiveAllPets = false
 
 -- Argent : revenu passif des familiers + bonus de fin de digestion.
 Config.Economy = {
-	MoneyPerPoint = 10, -- chaque point marqué rapporte aussi de l'argent à la digestion
+	MoneyPerPoint = 4, -- chaque point marqué rapporte aussi de l'argent à la digestion
 }
 
 -- Verrouillage de base (bouton au sol, comme Steal a Brainrot).
@@ -146,11 +146,11 @@ export type ShopItem = {
 
 -- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Cours dessus : +vitesse. Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 150, PriceGrowth = 4 },
-	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Monte dessus : +force (lancers plus loin). Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 150, PriceGrowth = 4 },
-	{ Id = "ItemQuality", Icon = "💎", Name = "Objets de qualité", Description = "Des objets plus précieux apparaissent dans ta base.", MaxLevel = 10, BasePrice = 200, PriceGrowth = 2.2 },
-	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 400, PriceGrowth = 3 },
-	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", MaxLevel = 1, BasePrice = 1500, PriceGrowth = 1 },
+	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Cours dessus : +vitesse. Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 300, PriceGrowth = 4 },
+	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Monte dessus : +force (lancers plus loin). Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 300, PriceGrowth = 4 },
+	{ Id = "ItemQuality", Icon = "💎", Name = "Objets de qualité", Description = "Des objets plus précieux apparaissent dans ta base.", MaxLevel = 10, BasePrice = 400, PriceGrowth = 2.2 },
+	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 1000, PriceGrowth = 3 },
+	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", MaxLevel = 1, BasePrice = 5000, PriceGrowth = 1 },
 } :: { ShopItem }
 
 -- Prix du prochain niveau (nil si niveau max atteint).
@@ -177,14 +177,14 @@ export type Rarity = {
 
 -- Ordre = du plus commun au plus rare.
 Config.Rarities = {
-	{ Id = "Commun", Name = "Commun", Weight = 500, Color = Color3.fromRGB(200, 200, 200), Multiplier = 1.1, Income = 1 },
-	{ Id = "Inhabituel", Name = "Inhabituel", Weight = 250, Color = Color3.fromRGB(100, 220, 90), Multiplier = 1.2, Income = 3 },
-	{ Id = "Rare", Name = "Rare", Weight = 120, Color = Color3.fromRGB(70, 160, 255), Multiplier = 1.35, Income = 8 },
-	{ Id = "Epique", Name = "Épique", Weight = 70, Color = Color3.fromRGB(180, 80, 255), Multiplier = 1.6, Income = 20 },
-	{ Id = "Legendaire", Name = "Légendaire", Weight = 40, Color = Color3.fromRGB(255, 170, 30), Multiplier = 2, Income = 50 },
-	{ Id = "Mythique", Name = "Mythique", Weight = 15, Color = Color3.fromRGB(255, 70, 120), Multiplier = 3, Income = 150 },
-	{ Id = "Divin", Name = "Divin", Weight = 4, Color = Color3.fromRGB(120, 255, 245), Multiplier = 5, Income = 500 },
-	{ Id = "Sigma", Name = "Sigma", Weight = 1, Color = Color3.fromRGB(255, 230, 60), Multiplier = 10, Income = 2000 },
+	{ Id = "Commun", Name = "Commun", Weight = 500, Color = Color3.fromRGB(200, 200, 200), Multiplier = 1.1, Income = 0.1 },
+	{ Id = "Inhabituel", Name = "Inhabituel", Weight = 250, Color = Color3.fromRGB(100, 220, 90), Multiplier = 1.2, Income = 0.25 },
+	{ Id = "Rare", Name = "Rare", Weight = 120, Color = Color3.fromRGB(70, 160, 255), Multiplier = 1.35, Income = 0.6 },
+	{ Id = "Epique", Name = "Épique", Weight = 70, Color = Color3.fromRGB(180, 80, 255), Multiplier = 1.6, Income = 1.5 },
+	{ Id = "Legendaire", Name = "Légendaire", Weight = 40, Color = Color3.fromRGB(255, 170, 30), Multiplier = 2, Income = 4 },
+	{ Id = "Mythique", Name = "Mythique", Weight = 15, Color = Color3.fromRGB(255, 70, 120), Multiplier = 3, Income = 10 },
+	{ Id = "Divin", Name = "Divin", Weight = 4, Color = Color3.fromRGB(120, 255, 245), Multiplier = 5, Income = 30 },
+	{ Id = "Sigma", Name = "Sigma", Weight = 1, Color = Color3.fromRGB(255, 230, 60), Multiplier = 10, Income = 100 },
 } :: { Rarity }
 
 -- Accès rapide : Config.RarityIndex["Epique"] = 4

@@ -17,31 +17,48 @@ for _, item in ipairs(Config.Shop) do
 	shopById[item.Id] = item
 end
 
--- Revenu par seconde : seuls les Config.Pets.IncomeSlots meilleurs familiers de la base rapportent.
-function EconomyController.GetIncome(player: Player): number
+local function petIncome(petId: string): number
+	local entry = PetCatalog.ById[petId]
+	local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
+	return if rarity then rarity.Income else 0
+end
+
+-- Les Config.Pets.IncomeSlots meilleurs familiers du joueur (exposés sur les socles de sa base).
+function EconomyController.GetTopPets(player: Player): { string }
 	local data = SessionData.Get(player)
 	if not data then
-		return 0
+		return {}
 	end
-	local incomes = {}
+	local list = {}
 	for petId, count in pairs(data.pets) do
-		local entry = PetCatalog.ById[petId]
-		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
-		if rarity then
-			for _ = 1, math.min(count, Config.Pets.IncomeSlots) do
-				table.insert(incomes, rarity.Income)
-			end
+		for _ = 1, math.min(count, Config.Pets.IncomeSlots) do
+			table.insert(list, petId)
 		end
 	end
-	table.sort(incomes, function(a, b)
-		return a > b
+	table.sort(list, function(a, b)
+		local incomeA, incomeB = petIncome(a), petIncome(b)
+		if incomeA ~= incomeB then
+			return incomeA > incomeB
+		end
+		return a < b
 	end)
+	local top = {}
+	for index = 1, math.min(#list, Config.Pets.IncomeSlots) do
+		top[index] = list[index]
+	end
+	return top
+end
+
+-- Revenu par seconde : seuls les familiers exposés sur les socles rapportent.
+function EconomyController.GetIncome(player: Player): number
 	local income = 0
-	for index = 1, math.min(#incomes, Config.Pets.IncomeSlots) do
-		income += incomes[index]
+	for _, petId in ipairs(EconomyController.GetTopPets(player)) do
+		income += petIncome(petId)
 	end
 	return income
 end
+
+EconomyController.GetPetIncome = petIncome
 
 local function onBuy(player: Player, itemId: unknown)
 	if type(itemId) ~= "string" then

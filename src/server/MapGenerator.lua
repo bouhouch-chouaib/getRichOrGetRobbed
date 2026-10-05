@@ -271,7 +271,7 @@ local function createTrees(map: Folder)
 	local step = math.pi * 2 / ARENA.BaseCount
 	for index = 0, ARENA.BaseCount - 1 do
 		-- Entre deux bases, puis derrière chaque base.
-		for _, spot in ipairs({ { angle = (index + 0.5) * step, radius = 205 }, { angle = index * step, radius = 242 } }) do
+		for _, spot in ipairs({ { angle = (index + 0.5) * step, radius = ARENA.BaseRingRadius + 30 }, { angle = index * step, radius = ARENA.BaseRingRadius + 67 } }) do
 			local position = Vector3.new(math.cos(spot.angle) * spot.radius, 0, math.sin(spot.angle) * spot.radius)
 			createTree(position, rng:NextNumber(0.9, 1.3), folder)
 		end
@@ -422,6 +422,48 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	-- TrainingController gère l'affichage, la matière selon le niveau et l'XP.
 	createTreadmill(origin * CFrame.new(-half - 10, 0, -4), base)
 	createBench(origin * CFrame.new(half + 10, 0, -4), base)
+
+	-- Socles des familiers : 5 de chaque côté de la base (PedestalController y pose les meilleurs familiers).
+	local pedestals = Instance.new("Folder")
+	pedestals.Name = "Pedestals"
+	pedestals.Parent = base
+	local pedestalIndex = 0
+	for _, x in ipairs({ -23, 23 }) do
+		for _, z in ipairs({ -10, -4, 2, 8, 14 }) do
+			pedestalIndex += 1
+			local pedestal = makePart("Pedestal", Vector3.new(1.2, 4.4, 4.4), origin * CFrame.new(x, top + 0.6, z) * FLAT, Color3.fromRGB(235, 225, 205), pedestals)
+			pedestal.Shape = Enum.PartType.Cylinder
+			pedestal.Material = Enum.Material.Marble
+			pedestal:SetAttribute("Index", pedestalIndex)
+			-- Le familier regarde vers le centre de la base.
+			pedestal:SetAttribute("Facing", if x < 0 then 1 else -1)
+
+			local sign = Instance.new("BillboardGui")
+			sign.Name = "PetSign"
+			sign.Adornee = pedestal
+			sign.Size = UDim2.fromScale(8, 2.6)
+			sign.StudsOffsetWorldSpace = Vector3.new(0, 6.5, 0)
+			sign.LightInfluence = 0
+			sign.MaxDistance = 90
+			sign.Enabled = false
+			local nameLabel = Instance.new("TextLabel")
+			nameLabel.Name = "PetName"
+			nameLabel.Size = UDim2.fromScale(1, 0.55)
+			nameLabel.BackgroundTransparency = 1
+			nameLabel.Text = ""
+			styleSignText(nameLabel, Color3.new(1, 1, 1))
+			nameLabel.Parent = sign
+			local incomeLabel = Instance.new("TextLabel")
+			incomeLabel.Name = "PetIncome"
+			incomeLabel.Position = UDim2.fromScale(0, 0.55)
+			incomeLabel.Size = UDim2.fromScale(1, 0.45)
+			incomeLabel.BackgroundTransparency = 1
+			incomeLabel.Text = ""
+			styleSignText(incomeLabel, Color3.fromRGB(110, 240, 70))
+			incomeLabel.Parent = sign
+			sign.Parent = pedestal
+		end
+	end
 
 	local spawnPoints = Instance.new("Folder")
 	spawnPoints.Name = "SpawnPoints"

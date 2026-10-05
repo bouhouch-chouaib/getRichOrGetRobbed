@@ -625,7 +625,8 @@ end
 local function updateStats()
 	local money = numberAttribute("Money")
 	moneyLabel.Text = formatMoney(money)
-	incomeLabel.Text = string.format("+%s/s", formatMoney(numberAttribute("Income")))
+	local income = numberAttribute("Income")
+	incomeLabel.Text = if income < 10 then string.format("+$%.2f/s", income) else string.format("+%s/s", formatMoney(income))
 	for _, row in ipairs({ { stat = "Speed", ui = speedRow, title = "⚡ VITESSE" }, { stat = "Strength", ui = strengthRow, title = "💪 FORCE" } }) do
 		local level = numberAttribute(row.stat .. "Level")
 		local needed = numberAttribute(row.stat .. "XPNeeded")

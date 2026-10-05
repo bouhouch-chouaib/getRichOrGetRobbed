@@ -63,11 +63,13 @@ HUD style cartoon (LuckiestGuy, contours noirs, fenêtres, Toast, barres d'XP) �
 (`PetCatalog`), modèles de remplacement procéduraux (`PetModelBuilder`, surchargeables par
 `ReplicatedStorage.PetModels.<Id>`) • tirages à coût croissant + pitié (`LootEngine`) • 1 familier équipé =
 multiplicateur additif + suit le joueur (`PetFollow`) • revenu = 10 meilleurs familiers • fenêtre collection 3D •
-annonces serveur Légendaire+ • `Config.StudioGiveAllPets = true` (donne les 75 en Studio pour tester).
+annonces serveur Légendaire+ • familiers exposés sur 10 socles dans la base (`PedestalController`) •
+économie rééquilibrée (revenus bas, prix hauts) • objets non roulants (frottement max) • map agrandie (bases à 215) •
+`Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester).
 
 ## Prochaines étapes prévues (dans cet ordre, validé avec l'utilisateur)
 
-1. Familiers exposés physiquement sur des socles dans la base (style Steal a Brainrot) ; slots de base achetables.
+1. (fait : socles) Idée : slots de socles supplémentaires achetables, vol de familiers sur les socles adverses.
 2. Machine de fusion : 5 familiers de même rareté → 1 familier aléatoire de la rareté au-dessus (Sigma non fusionnable).
 3. Sauvegarde DataStore (OBLIGATOIRE avant toute monétisation).
 4. Monétisation : gamepass "Equip +2" (800 R$), "Lucky Luck" (400 R$, `luckBonus` déjà prévu dans `LootEngine.roll`),

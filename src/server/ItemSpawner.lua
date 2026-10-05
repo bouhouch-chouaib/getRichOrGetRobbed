@@ -48,6 +48,8 @@ local function createItem(tier: Config.ItemTier, cframe: CFrame): Part
 	item.Material = tier.Material
 	item.CFrame = cframe * CFrame.Angles(0, rng:NextNumber() * math.pi * 2, 0)
 	item.Anchored = false
+	-- Frottement maximal, aucun rebond : l'objet s'arrête là où il tombe (il ne glisse pas jusqu'au trou).
+	item.CustomPhysicalProperties = PhysicalProperties.new(2, 2, 0, 100, 100)
 	item:SetAttribute("IsItem", true)
 	item:SetAttribute("Tier", tier.Id)
 	item:SetAttribute("Value", tier.Value)

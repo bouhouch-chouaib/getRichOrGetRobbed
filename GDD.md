@@ -21,13 +21,14 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Raretés (`Config.Rarities`) : Commun 50 %, Inhabituel 25 %, Rare 12 %, Épique 7 %, Légendaire 4 %, Mythique 1,5 %, Divin 0,4 %, Sigma 0,1 %.
 - **Équipé** (1 place de base) : le familier suit le joueur et ajoute un bonus de points, additif :
   ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus).
-- **Dans la base** : les 10 meilleurs familiers rapportent de l'argent chaque seconde (1 → 2000 $/s selon la rareté).
+- **Dans la base** : les 10 meilleurs familiers sont exposés sur des socles (`PedestalController`) et rapportent de l'argent chaque seconde
+  (0,1 / 0,25 / 0,6 / 1,5 / 4 / 10 / 30 / 100 $/s de Commun à Sigma).
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
   Chance légèrement augmentée par le score. **Pitié** : Épique+ garanti au 60e tirage sans Épique+.
 - **Annonce serveur** pour tout drop Légendaire ou mieux.
 - Modèles : `PetModelBuilder` construit un modèle de remplacement en formes de base ; un Model nommé comme l'Id
   dans `ReplicatedStorage.PetModels` le remplace automatiquement.
-- Test : `Config.StudioGiveAllPets = true` donne les 75 familiers dans Studio.
+- Test : `Config.StudioGiveAllPets = true` donne les 75 familiers dans Studio (désactivé par défaut : fausse l'économie).
 
 ## Objets à jeter
 
@@ -35,6 +36,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Pendant le Feeding : 1 objet toutes les 2 s dans chaque base occupée (max 12).
 - 6 types (`Config.ItemTiers`) : Caillou 0,25 • Brique 0,5 • Cristal 1 • Lingot 2,5 • Diamant 6 • Météorite 15 points.
 - Points marqués = valeur de l'objet × multiplicateur des familiers équipés.
+- Physique : frottement maximal, aucun rebond, aucune forme ronde : un objet s'arrête où il tombe (la Force compte).
 - Amélioration "Objets de qualité" : poids des objets précieux ×(1 + 0,35 × niveau)^rang.
 
 ## Entraînement (progression longue)
@@ -47,7 +49,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 ## Économie et base
 
-- **Argent** : revenu passif des 10 meilleurs familiers + `MoneyPerPoint` $ par point à la digestion.
+- **Argent** : revenu passif des 10 familiers exposés + 4 $ par point à la digestion. Prix boutique : tapis/banc 300 $ (×4 par niveau),
+  objets de qualité 400 $ (×2,2), sac à dos 1000 $ (×3), verrou renforcé 5000 $.
 - **Boutique** (`Config.Shop`) : améliorations à niveaux, prix = BasePrice × PriceGrowth^niveau, attribut `Upgrade_<Id>`.
   - `Treadmill` (5 niv.), `Bench` (5 niv.) : stations d'entraînement.
   - `ItemQuality` (10 niv.) : objets plus précieux.
@@ -88,6 +91,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
   - `BlackholeController` : consommation, dôme répulsif, récompenses.
   - `TrainingController` : stations tapis (Vitesse) et banc (Force), niveaux, XP.
+  - `PedestalController` : familiers exposés sur les 10 socles de la base.
   - `LockController` : bouton de verrouillage, portail, expulsion des intrus.
   - `EconomyController` : revenu passif des familiers, achats de la boutique (`Remotes.BuyUpgrade`).
   - `SessionData` : données en mémoire (niveaux/XP Vitesse et Force, roundScore, money, pets, upgrades) → attributs Player + leaderstats.
@@ -100,7 +104,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 - Trou noir centré en (0, 0, 0) : `BlackholeZone` (disque 80x80), `HoleRing`, `BlackholeCore`, `BlackholeHalo`, `BlackholeDome`.
 - `LooseItems` : objets ramassés ou lancés.
-- `Base_1` … `Base_8` en cercle (rayon 175) : `BasePart`, `SpawnLocation`, `SafeZone` (visuel), `TreadmillZone`,
+- `Base_1` … `Base_8` en cercle (rayon 215, ~150 studs entre l'entrée et le trou) : `BasePart`, `SpawnLocation`, `SafeZone` (visuel), `TreadmillZone`,
   `SpawnPoints` (4 coins), `ItemSpawns`, `Fence` (clôture en bois, entrée côté trou noir). Un chemin de terre (`Map.Paths`) relie chaque base au trou.
 
 ## Pas encore dans le MVP
