@@ -1,10 +1,13 @@
 --!strict
--- SessionData : données de session en mémoire par joueur (pas de DataStore pour le MVP).
+-- SessionData : données de chaque joueur, sauvegardées dans un DataStore (progression conservée).
+-- Chargement à la connexion, sauvegarde à la déconnexion, toutes les AUTOSAVE secondes et à l'arrêt du serveur.
+-- Si le chargement échoue, on ne sauvegarde JAMAIS ce joueur (pour ne pas écraser sa vraie progression).
 -- Chaque valeur est recopiée en attribut sur le Player (lu par le HUD) et dans les leaderstats :
 --   RoundScore, Money, Upgrade_<Id> (niveau), Capacity (objets portables),
 --   SpeedLevel/SpeedXP/SpeedXPNeeded/Speed (WalkSpeed), StrengthLevel/StrengthXP/StrengthXPNeeded/ThrowPower,
 --   Pet_<PetId> (quantité possédée), Equipped ("id1,id2"), Multiplier, EquipSlots
 
+local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -23,11 +26,119 @@ export type PlayerData = {
 	equipSlots: number,
 	pity: number,
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
+	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
 }
 
 local SessionData = {}
 
 local storage: { [Player]: PlayerData } = {}
+
+----------------------------------------------------------------------
+-- Sauvegarde (DataStore)
+----------------------------------------------------------------------
+
+local STORE_NAME = "PlayerData_v1" -- changer le nom remet toutes les progressions à zéro
+local AUTOSAVE = 60
+local RETRIES = 3
+
+local store: DataStore? = nil
+do
+	local ok, result = pcall(function()
+		return DataStoreService:GetDataStore(STORE_NAME)
+	end)
+	if ok then
+		store = result
+	else
+		warn("[SessionData] DataStore indisponible : la progression ne sera PAS sauvegardée. " .. tostring(result))
+	end
+end
+
+local function storeKey(player: Player): string
+	return "u_" .. player.UserId
+end
+
+-- Ce qui est écrit dans le DataStore (le score de manche n'est pas sauvegardé).
+local function serialize(data: PlayerData): { [string]: any }
+	return {
+		version = 1,
+		levels = data.levels,
+		xp = data.xp,
+		money = data.money,
+		pets = data.pets,
+		equipped = data.equipped,
+		pity = data.pity,
+		upgrades = data.upgrades,
+	}
+end
+
+local function withRetries<T>(action: () -> T): (boolean, T | string)
+	local lastError = ""
+	for attempt = 1, RETRIES do
+		local ok, result = pcall(action)
+		if ok then
+			return true, result
+		end
+		lastError = tostring(result)
+		task.wait(attempt)
+	end
+	return false, lastError
+end
+
+local function savePlayer(player: Player)
+	local data = storage[player]
+	if not data or not data.loaded or not store then
+		return
+	end
+	local payload = serialize(data)
+	local currentStore = store :: DataStore
+	local ok, err = withRetries(function()
+		currentStore:SetAsync(storeKey(player), payload, { player.UserId })
+		return true
+	end)
+	if not ok then
+		warn(string.format("[SessionData] Échec de sauvegarde pour %s : %s", player.Name, tostring(err)))
+	end
+end
+
+local function numberOr(value: any, default: number): number
+	return if type(value) == "number" then value else default
+end
+
+-- Applique une sauvegarde lue sur les données du joueur (en validant chaque champ).
+local function applySaved(data: PlayerData, saved: { [string]: any })
+	if type(saved.levels) == "table" then
+		data.levels.Speed = numberOr(saved.levels.Speed, 0)
+		data.levels.Strength = numberOr(saved.levels.Strength, 0)
+	end
+	if type(saved.xp) == "table" then
+		data.xp.Speed = numberOr(saved.xp.Speed, 0)
+		data.xp.Strength = numberOr(saved.xp.Strength, 0)
+	end
+	data.money = numberOr(saved.money, 0) + data.money
+	data.pity = numberOr(saved.pity, 0)
+	if type(saved.pets) == "table" then
+		for petId, count in pairs(saved.pets) do
+			if type(petId) == "string" and PetCatalog.ById[petId] and type(count) == "number" and count > 0 then
+				data.pets[petId] = (data.pets[petId] or 0) + math.floor(count)
+			end
+		end
+	end
+	if type(saved.upgrades) == "table" then
+		for id, level in pairs(saved.upgrades) do
+			if type(id) == "string" and type(level) == "number" then
+				data.upgrades[id] = math.max(data.upgrades[id] or 0, math.floor(level))
+			end
+		end
+	end
+	if type(saved.equipped) == "table" then
+		data.equipped = {}
+		for _, petId in ipairs(saved.equipped) do
+			if type(petId) == "string" and #data.equipped < data.equipSlots and (data.pets[petId] or 0) > 0 then
+				table.insert(data.equipped, petId)
+			end
+		end
+	end
+end
 
 local function getStat(player: Player, name: string): IntValue?
 	local leaderstats = player:FindFirstChild("leaderstats")
@@ -101,6 +212,7 @@ local function onPlayerAdded(player: Player)
 		equipSlots = Config.Pets.EquipSlots,
 		pity = 0,
 		upgrades = {},
+		loaded = false,
 	}
 
 	local leaderstats = Instance.new("Folder")
@@ -121,16 +233,69 @@ local function onPlayerAdded(player: Player)
 	end)
 
 	sync(player)
+
+	-- Chargement de la sauvegarde (asynchrone : le joueur peut déjà bouger pendant ce temps).
+	task.spawn(function()
+		if not store then
+			return
+		end
+		local currentStore = store :: DataStore
+		local ok, result = withRetries(function()
+			return currentStore:GetAsync(storeKey(player))
+		end)
+		local data = storage[player]
+		if not data then
+			return -- le joueur est déjà parti
+		end
+		if not ok then
+			warn(string.format("[SessionData] Chargement impossible pour %s : sa progression ne sera pas sauvegardée cette session. %s", player.Name, tostring(result)))
+			return
+		end
+		if type(result) == "table" then
+			applySaved(data, result)
+		end
+		data.loaded = true
+		applySpeed(player, statValue("Speed", data.levels.Speed))
+		sync(player)
+		player:SetAttribute("DataLoaded", true)
+	end)
 end
 
 function SessionData.Init()
 	Players.PlayerAdded:Connect(onPlayerAdded)
 	Players.PlayerRemoving:Connect(function(player)
+		savePlayer(player)
 		storage[player] = nil
 	end)
 	for _, player in ipairs(Players:GetPlayers()) do
 		onPlayerAdded(player)
 	end
+
+	-- Sauvegarde automatique régulière (en cas de crash du serveur).
+	task.spawn(function()
+		while true do
+			task.wait(AUTOSAVE)
+			for _, player in ipairs(Players:GetPlayers()) do
+				task.spawn(savePlayer, player)
+			end
+		end
+	end)
+
+	-- Arrêt du serveur : on sauvegarde tout le monde avant la fermeture.
+	game:BindToClose(function()
+		local pending = 0
+		for _, player in ipairs(Players:GetPlayers()) do
+			pending += 1
+			task.spawn(function()
+				savePlayer(player)
+				pending -= 1
+			end)
+		end
+		local started = os.clock()
+		while pending > 0 and os.clock() - started < 25 do
+			task.wait(0.2)
+		end
+	end)
 end
 
 function SessionData.Get(player: Player): PlayerData?

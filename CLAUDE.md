@@ -50,7 +50,9 @@ rojo build -o test.rbxlx
 - Knockback : serveur `Sit = true` + soulève 1 stud, **le client** applique l'impulsion (`Remotes.Knockback`).
 - RemoteEvents : déclarés dans `default.project.json` **et** créés par le serveur s'ils manquent (`Remotes.lua`) —
   `rojo serve` ne recharge pas les nouveaux remotes du project.json en cours de session.
-- État des joueurs : `SessionData` (mémoire) → attributs Player (lus par le HUD) + leaderstats. Pas de DataStore.
+- État des joueurs : `SessionData` → attributs Player (lus par le HUD) + leaderstats, **sauvegardé en DataStore**
+  (`PlayerData_v1`). Ne jamais sauvegarder si le chargement a échoué (`data.loaded`). Dans Studio il faut que le jeu
+  soit publié et que "Enable Studio Access to API Services" soit coché (Game Settings > Security).
 - Toute valeur d'équilibrage va dans `src/shared/Config.lua`.
 
 ## État actuel (fait)
@@ -71,7 +73,7 @@ annonces serveur Légendaire+ • familiers exposés sur 10 socles dans la base 
 
 1. (fait : socles) Idée : slots de socles supplémentaires achetables, vol de familiers sur les socles adverses.
 2. Machine de fusion : 5 familiers de même rareté → 1 familier aléatoire de la rareté au-dessus (Sigma non fusionnable).
-3. Sauvegarde DataStore (OBLIGATOIRE avant toute monétisation).
+3. (fait : sauvegarde DataStore)
 4. Monétisation : gamepass "Equip +2" (800 R$), "Lucky Luck" (400 R$, `luckBonus` déjà prévu dans `LootEngine.roll`),
    produits développeur "points de tirage" (afficher les probabilités : règle Roblox sur les objets aléatoires payants).
    Il faudra que l'utilisateur crée les gamepasses/produits et fournisse leurs IDs.

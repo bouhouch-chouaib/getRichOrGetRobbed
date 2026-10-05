@@ -60,13 +60,25 @@ local function rebuild(display: Display, top: { string })
 		if petId then
 			local model = PetModelBuilder.Build(petId)
 			if model then
-				local height = model:GetExtentsSize().Y
 				-- Dessus du socle (cylindre couché : sa hauteur est sur l'axe X local).
-				local position = pedestal.Position + Vector3.new(0, pedestal.Size.X / 2 + height / 2, 0)
+				local pedestalTop = pedestal.Position.Y + pedestal.Size.X / 2
 				local facing = pedestal:GetAttribute("Facing")
 				local direction = display.platform.CFrame.RightVector * (if type(facing) == "number" then facing else 1)
-				model:PivotTo(CFrame.lookAt(position, position + direction))
+				model:PivotTo(CFrame.lookAt(pedestal.Position, pedestal.Position + direction))
+				-- On pose le bas réel du modèle (sa boîte englobante) sur le socle, centré.
+				local box, size = model:GetBoundingBox()
+				local shift = Vector3.new(
+					pedestal.Position.X - box.Position.X,
+					pedestalTop - (box.Position.Y - size.Y / 2),
+					pedestal.Position.Z - box.Position.Z
+				)
+				model:PivotTo(model:GetPivot() + shift)
 				model.Parent = display.folder
+				-- Le panneau (nom + revenu) se cale juste au-dessus de la tête du familier, selon sa taille.
+				local sign = pedestal:FindFirstChild("PetSign")
+				if sign and sign:IsA("BillboardGui") then
+					sign.StudsOffsetWorldSpace = Vector3.new(0, pedestalTop + size.Y - pedestal.Position.Y + 1.6, 0)
+				end
 			end
 		end
 	end

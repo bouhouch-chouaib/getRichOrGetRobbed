@@ -74,6 +74,9 @@ local function createItem(tier: Config.ItemTier, cframe: CFrame): Part
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false
+	-- La bulle s'affiche au centre de l'objet : on la remonte à l'écran pour qu'elle soit juste au-dessus
+	-- (un décalage écran marche quelle que soit l'orientation de l'objet tombé).
+	prompt.UIOffset = Vector2.new(0, -55)
 	prompt.Parent = item
 
 	return item

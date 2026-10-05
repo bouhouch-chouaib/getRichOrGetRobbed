@@ -442,7 +442,8 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 			sign.Name = "PetSign"
 			sign.Adornee = pedestal
 			sign.Size = UDim2.fromScale(8, 2.6)
-			sign.StudsOffsetWorldSpace = Vector3.new(0, 6.5, 0)
+			sign.StudsOffsetWorldSpace = Vector3.new(0, 6.5, 0) -- recalé selon la taille du familier
+			sign.AlwaysOnTop = true
 			sign.LightInfluence = 0
 			sign.MaxDistance = 90
 			sign.Enabled = false

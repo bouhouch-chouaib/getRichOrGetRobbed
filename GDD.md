@@ -22,7 +22,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - **Équipé** (1 place de base) : le familier suit le joueur et ajoute un bonus de points, additif :
   ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus).
 - **Dans la base** : les 10 meilleurs familiers sont exposés sur des socles (`PedestalController`) et rapportent de l'argent chaque seconde
-  (0,1 / 0,25 / 0,6 / 1,5 / 4 / 10 / 30 / 100 $/s de Commun à Sigma).
+  (0,2 / 0,5 / 1,2 / 3 / 8 / 20 / 60 / 200 $/s de Commun à Sigma).
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
   Chance légèrement augmentée par le score. **Pitié** : Épique+ garanti au 60e tirage sans Épique+.
 - **Annonce serveur** pour tout drop Légendaire ou mieux.
@@ -94,7 +94,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `PedestalController` : familiers exposés sur les 10 socles de la base.
   - `LockController` : bouton de verrouillage, portail, expulsion des intrus.
   - `EconomyController` : revenu passif des familiers, achats de la boutique (`Remotes.BuyUpgrade`).
-  - `SessionData` : données en mémoire (niveaux/XP Vitesse et Force, roundScore, money, pets, upgrades) → attributs Player + leaderstats.
+  - `SessionData` : données joueur (niveaux/XP Vitesse et Force, money, pets, équipés, pitié, upgrades) → attributs Player + leaderstats.
+    **Sauvegardées** dans le DataStore `PlayerData_v1` (clé `u_<UserId>`) : chargement à la connexion, sauvegarde à la
+    déconnexion, toutes les 60 s et à l'arrêt du serveur. Échec de chargement = aucune sauvegarde (protection anti-écrasement).
 - `src/client` → `StarterPlayerScripts.Client`
   - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
   - `HUD` : style cartoon (police LuckiestGuy, contours noirs épais, boutons en dégradé) : phase + chrono, argent et revenu, points, vitesse, boutons BOUTIQUE / FAMILIERS (fenêtres), popup de récompenses.
