@@ -8,7 +8,7 @@
 --   ArenaFloor, HoleDirt, HoleRing, BlackholeZone (+ Aura), BlackholeCore (+ Light), BlackholeHalo, BlackholeDome
 --   Paths (Folder), Trees (Folder), Kiosks (Folder : boutique + machine de fusion entre deux bases)
 --   LooseItems (Folder) : objets ramassés / lancés
---   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Crates,
+--   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Pallets,
 --                              SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
 --                              SpawnPoints (Folder), ItemSpawns (Folder)
 
@@ -525,27 +525,28 @@ local function createKiosks(map: Folder)
 	end
 end
 
--- Cagette en bois à claire-voie (dessus ouvert) où apparaissent les objets à jeter.
-local CRATE_SIZE = 7
-local function createCrate(cframe: CFrame, parent: Instance)
+-- Palette en bois basse : plateau de lattes sur 3 chevrons, avec un petit rebord pour que les objets
+-- ne roulent pas par terre. Les objets restent bien accessibles (pas de parois hautes).
+local PALLET_SIZE = 8
+local function createPallet(cframe: CFrame, parent: Instance)
 	local model = Instance.new("Model")
-	model.Name = "Crate"
+	model.Name = "Pallet"
 	local light = COLORS.WoodRail
 	local dark = COLORS.WoodPost
-	local half = CRATE_SIZE / 2
-	makePart("Bottom", Vector3.new(CRATE_SIZE, 0.4, CRATE_SIZE), cframe * CFrame.new(0, 0.2, 0), dark, model).Material = Enum.Material.WoodPlanks
-	-- Deux lattes horizontales par côté (avec un jour entre elles), comme une vraie cagette.
-	for _, y in ipairs({ 0.9, 2.2 }) do
-		for _, side in ipairs({ -1, 1 }) do
-			makePart("Slat", Vector3.new(CRATE_SIZE, 0.8, 0.35), cframe * CFrame.new(0, y, side * (half - 0.175)), light, model).Material = Enum.Material.Wood
-			makePart("Slat", Vector3.new(0.35, 0.8, CRATE_SIZE), cframe * CFrame.new(side * (half - 0.175), y, 0), light, model).Material = Enum.Material.Wood
-		end
+	local half = PALLET_SIZE / 2
+	for _, x in ipairs({ -half + 0.5, 0, half - 0.5 }) do
+		makePart("Runner", Vector3.new(1, 0.5, PALLET_SIZE), cframe * CFrame.new(x, 0.25, 0), dark, model).Material = Enum.Material.Wood
 	end
-	-- Montants aux quatre coins.
-	for _, x in ipairs({ -1, 1 }) do
-		for _, z in ipairs({ -1, 1 }) do
-			makePart("Corner", Vector3.new(0.6, 2.8, 0.6), cframe * CFrame.new(x * (half - 0.3), 1.4, z * (half - 0.3)), dark, model).Material = Enum.Material.Wood
-		end
+	for index = 0, 4 do
+		local z = -half + 0.8 + index * (PALLET_SIZE - 1.6) / 4
+		makePart("Board", Vector3.new(PALLET_SIZE, 0.3, 1.4), cframe * CFrame.new(0, 0.65, z), light, model).Material = Enum.Material.WoodPlanks
+	end
+	-- Plateau plein (sous les lattes) pour que les petits objets ne passent pas entre elles.
+	makePart("Deck", Vector3.new(PALLET_SIZE - 0.2, 0.2, PALLET_SIZE - 0.2), cframe * CFrame.new(0, 0.55, 0), dark, model).Material = Enum.Material.Wood
+	-- Petit rebord.
+	for _, side in ipairs({ -1, 1 }) do
+		makePart("Lip", Vector3.new(PALLET_SIZE, 0.45, 0.3), cframe * CFrame.new(0, 1, side * (half - 0.15)), dark, model).Material = Enum.Material.Wood
+		makePart("Lip", Vector3.new(0.3, 0.45, PALLET_SIZE), cframe * CFrame.new(side * (half - 0.15), 1, 0), dark, model).Material = Enum.Material.Wood
 	end
 	model.Parent = parent
 end
@@ -632,14 +633,14 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	local spawnPoints = Instance.new("Folder")
 	spawnPoints.Name = "SpawnPoints"
 	spawnPoints.Parent = base
-	local crates = Instance.new("Folder")
-	crates.Name = "Crates"
-	crates.Parent = base
+	local pallets = Instance.new("Folder")
+	pallets.Name = "Pallets"
+	pallets.Parent = base
 	for _, offset in ipairs({ Vector2.new(-19, -19), Vector2.new(19, -19), Vector2.new(-19, 19), Vector2.new(19, 19) }) do
-		local crateCFrame = origin * CFrame.new(offset.X, top, offset.Y)
-		createCrate(crateCFrame, crates)
-		-- Point d'apparition au-dessus du centre de la cagette : l'objet tombe dedans.
-		local point = makePart("SpawnPoint", Vector3.new(1, 1, 1), crateCFrame * CFrame.new(0, 4, 0), color, spawnPoints)
+		local palletCFrame = origin * CFrame.new(offset.X, top, offset.Y)
+		createPallet(palletCFrame, pallets)
+		-- Point d'apparition au-dessus du centre de la palette : l'objet tombe dessus.
+		local point = makePart("SpawnPoint", Vector3.new(1, 1, 1), palletCFrame * CFrame.new(0, 3.5, 0), color, spawnPoints)
 		point.Transparency = 1
 		makeGhost(point)
 	end
@@ -696,6 +697,10 @@ function MapGenerator.generate(): { Model }
 	local looseItems = Instance.new("Folder")
 	looseItems.Name = "LooseItems"
 	looseItems.Parent = map
+
+	local wildItems = Instance.new("Folder")
+	wildItems.Name = "WildItems" -- objets qui apparaissent dans l'arène, hors des bases
+	wildItems.Parent = map
 
 	local bases = {}
 	for index = 1, ARENA.BaseCount do

@@ -33,7 +33,13 @@ Config.Arena = {
 Config.Items = {
 	StarterCount = 5, -- objets offerts dans la base à l'arrivée d'un joueur
 	SpawnInterval = 2, -- pendant le Feeding, un objet apparaît toutes les 2 s dans chaque base occupée
-	MaxPerBase = 12, -- 4 cagettes : ~3 objets par cagette
+	MaxPerBase = 12, -- 4 palettes : ~3 objets par palette
+	-- Objets "sauvages" dans l'arène (hors des bases), ramassables par tout le monde pendant le Feeding.
+	WildInterval = 4, -- un objet sauvage toutes les 4 s
+	WildMax = 25,
+	WildQuality = 2, -- équivaut à 2 niveaux de Chance : un peu plus précieux que dans les bases
+	WildMinRadius = 70, -- hors du dôme
+	WildMaxRadius = 170, -- avant les bases et les kiosques
 	MaxLooseItems = 80, -- au-delà, les plus vieux objets abandonnés sont nettoyés
 	QualityBoost = 0.5, -- par niveau de "Chance" : poids des objets précieux ×(1 + 0.5 × niveau)^rang
 }
@@ -137,8 +143,8 @@ Config.Economy = {
 
 -- Verrouillage de base (bouton au sol, comme Steal a Brainrot).
 Config.Lock = {
-	Duration = 60,
-	LongDuration = 90, -- avec l'amélioration "LongLock"
+	Duration = 5, -- relancé à chaque fois que le propriétaire repasse sur le bouton
+	LongDuration = 10, -- avec l'amélioration "LongLock"
 	ButtonRadius = 4,
 }
 
@@ -156,9 +162,9 @@ export type ShopItem = {
 Config.Shop = {
 	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Cours dessus : +vitesse. Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 500, PriceGrowth = 120 },
 	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Monte dessus : +force (lancers plus loin). Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 500, PriceGrowth = 120 },
-	{ Id = "ItemQuality", Icon = "🍀", Name = "Chance", Description = "Plus de lingots, diamants et météorites dans tes cagettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
+	{ Id = "ItemQuality", Icon = "🍀", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
 	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
-	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
+	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 } :: { ShopItem }
 
 -- Prix du prochain niveau (nil si niveau max atteint).

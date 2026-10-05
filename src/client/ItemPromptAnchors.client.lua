@@ -39,10 +39,12 @@ RunService.RenderStepped:Connect(function()
 	end
 	local origin = root.Position
 
-	local loose = map:FindFirstChild("LooseItems")
-	if loose then
-		for _, item in ipairs(loose:GetChildren()) do
-			updateItem(item, origin)
+	for _, folderName in ipairs({ "LooseItems", "WildItems" }) do
+		local itemFolder = map:FindFirstChild(folderName)
+		if itemFolder then
+			for _, item in ipairs(itemFolder:GetChildren()) do
+				updateItem(item, origin)
+			end
 		end
 	end
 	for _, base in ipairs(map:GetChildren()) do

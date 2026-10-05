@@ -259,8 +259,9 @@ timerLabel.Position = UDim2.new(0.5, 0, 0, 50)
 timerLabel.Size = UDim2.fromOffset(300, 56)
 
 local hintLabel = text(gui, "", 18, WHITE, BODY_FONT)
-hintLabel.AnchorPoint = Vector2.new(0.5, 0)
-hintLabel.Position = UDim2.new(0.5, 0, 0, 108)
+-- En bas de l'écran pour ne pas gêner la vue.
+hintLabel.AnchorPoint = Vector2.new(0.5, 1)
+hintLabel.Position = UDim2.new(0.5, 0, 1, -18)
 hintLabel.Size = UDim2.fromOffset(760, 24)
 
 local pointsLabel = text(gui, "", 30, Color3.fromRGB(255, 220, 60))

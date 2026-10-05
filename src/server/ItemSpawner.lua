@@ -2,7 +2,8 @@
 -- ItemSpawner : objets à jeter dans le trou noir, posés dans les bases occupées.
 --   - À l'arrivée d'un joueur : Config.Items.StarterCount objets au hasard dans sa base.
 --   - Pendant le Feeding : un objet toutes les SpawnInterval secondes dans chaque base (max MaxPerBase).
--- Les objets apparaissent dans les 4 cagettes de la base. Le type (Config.ItemTiers) est tiré au hasard ;
+-- Les objets apparaissent sur les 4 palettes de la base, et aussi dans l'arène (objets "sauvages",
+-- ramassables par tout le monde et un peu plus précieux en moyenne). Le type (Config.ItemTiers) est tiré au hasard ;
 -- l'amélioration "ItemQuality" (affichée "Chance") du propriétaire rend les objets précieux plus fréquents. Chaque objet porte l'attribut "Value" (points rapportés).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -99,8 +100,8 @@ local function spawnInBase(base: Model)
 
 	local owner = BaseManager.GetOwner(base)
 	local quality = if owner then SessionData.GetUpgradeLevel(owner, "ItemQuality") else 0
-	-- Petit décalage aléatoire pour ne pas empiler les objets (ils restent dans la cagette).
-	local offset = CFrame.new(rng:NextNumber(-1.8, 1.8), rng:NextNumber(0, 2), rng:NextNumber(-1.8, 1.8))
+	-- Petit décalage aléatoire pour ne pas empiler les objets (ils restent sur la palette).
+	local offset = CFrame.new(rng:NextNumber(-2.5, 2.5), rng:NextNumber(0, 1.5), rng:NextNumber(-2.5, 2.5))
 	local item = createItem(rollTier(quality), point.CFrame * offset)
 	item.Parent = itemSpawns
 	ItemInteraction.Register(item)
@@ -126,6 +127,21 @@ local function cleanupLooseItems()
 	end
 end
 
+-- Objet sauvage : position au hasard dans l'arène, entre le dôme et les bases.
+local function spawnWild()
+	local map = Workspace:FindFirstChild("Map")
+	local wild = map and map:FindFirstChild("WildItems")
+	if not wild or #wild:GetChildren() >= Config.Items.WildMax then
+		return
+	end
+	local angle = rng:NextNumber(0, math.pi * 2)
+	local radius = rng:NextNumber(Config.Items.WildMinRadius, Config.Items.WildMaxRadius)
+	local position = Vector3.new(math.cos(angle) * radius, 6, math.sin(angle) * radius)
+	local item = createItem(rollTier(Config.Items.WildQuality), CFrame.new(position))
+	item.Parent = wild
+	ItemInteraction.Register(item)
+end
+
 function ItemSpawner.Init()
 	-- Kit de départ : quelques objets pour marquer ses premiers points.
 	BaseManager.BaseAssigned:Connect(function(_player: Player, base: Model)
@@ -146,11 +162,17 @@ function ItemSpawner.Init()
 	end)
 
 	task.spawn(function()
+		local wildTimer = 0
 		while true do
 			task.wait(Config.Items.SpawnInterval)
 			if GameLoopManager.GetState() == "Feeding" then
 				for _, base in ipairs(BaseManager.GetOccupiedBases()) do
 					spawnInBase(base)
+				end
+				wildTimer += Config.Items.SpawnInterval
+				if wildTimer >= Config.Items.WildInterval then
+					wildTimer = 0
+					spawnWild()
 				end
 			end
 		end

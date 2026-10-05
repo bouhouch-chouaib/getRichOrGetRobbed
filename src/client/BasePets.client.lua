@@ -1,6 +1,6 @@
 --!strict
 -- BasePets : les familiers de chaque base s'y baladent librement (style Steal an Egg).
--- Le serveur écrit sur chaque base l'attribut "BasePets" ("id1,id2,...") ; ici, chaque client construit
+-- Le serveur écrit sur chaque base l'attribut "BasePets" ("id:quantité,...") ; ici, chaque client construit
 -- les modèles et les anime localement (aucune réplication réseau). Chaque familier a une façon de bouger
 -- selon sa silhouette : marche, sautille, ondule, plane, se balance sur place, tourne sur lui-même.
 
@@ -94,7 +94,7 @@ local function randomSpot(): Vector2
 	return Vector2.zero
 end
 
-local function addLabel(model: Model, petId: string, topOffset: number)
+local function addLabel(model: Model, petId: string, count: number, topOffset: number)
 	local entry = PetCatalog.ById[petId]
 	local root = model.PrimaryPart
 	if not entry or not root then
@@ -123,15 +123,18 @@ local function addLabel(model: Model, petId: string, topOffset: number)
 		outline.Parent = label
 		label.Parent = sign
 	end
-	line(entry.Name:upper(), rarity.Color, 0, 0.55)
+	line(entry.Name:upper() .. (if count > 1 then " x" .. count else ""), rarity.Color, 0, 0.55)
 	line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.55, 0.45)
 	sign.Parent = model
 end
 
-local function rebuild(display: BaseDisplay, petIds: { string })
+type PetEntry = { id: string, count: number }
+
+local function rebuild(display: BaseDisplay, petIds: { PetEntry })
 	display.folder:ClearAllChildren()
 	display.pets = {}
-	for _, petId in ipairs(petIds) do
+	for _, petEntry in ipairs(petIds) do
+		local petId = petEntry.id
 		local model = PetModelBuilder.Build(petId)
 		if model then
 			-- Mesures du modèle à l'origine : bas et haut par rapport à son pivot.
@@ -139,7 +142,7 @@ local function rebuild(display: BaseDisplay, petIds: { string })
 			local box, size = model:GetBoundingBox()
 			local bottomOffset = -(box.Position.Y - size.Y / 2)
 			local topOffset = box.Position.Y + size.Y / 2
-			addLabel(model, petId, topOffset)
+			addLabel(model, petId, petEntry.count, topOffset)
 			model.Parent = display.folder
 			local styleName = styleFor(petId)
 			local start = randomSpot()
@@ -179,8 +182,11 @@ local function syncBase(base: Model)
 	end
 	current.signature = signature
 	local ids = {}
-	for petId in string.gmatch(signature, "[^,]+") do
-		table.insert(ids, petId)
+	for chunk in string.gmatch(signature, "[^,]+") do
+		local petId, count = string.match(chunk, "^([^:]+):?(%d*)$")
+		if petId then
+			table.insert(ids, { id = petId, count = tonumber(count) or 1 })
+		end
 	end
 	rebuild(current, ids)
 end

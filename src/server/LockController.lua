@@ -1,6 +1,7 @@
 --!strict
 -- LockController : bouton au sol de chaque base (comme Steal a Brainrot).
--- Le propriétaire marche sur le bouton -> la base est fermée pendant Config.Lock.Duration secondes :
+-- Le propriétaire marche sur le bouton -> la base est fermée pendant Config.Lock.Duration secondes
+-- (compte à rebours relancé à chaque passage sur le bouton) :
 -- le portail apparaît et tout autre joueur à l'intérieur est expulsé devant l'entrée.
 -- Attributs écrits sur la base : "Locked" (bool) et "LockedUntil" (temps serveur).
 
@@ -70,21 +71,25 @@ local function update(entry: BaseParts, now: number)
 		return
 	end
 
-	if not untilTime then
-		-- Le propriétaire marche sur le bouton ?
-		local root = getRoot(owner)
-		if root then
-			local offset = entry.button.CFrame:PointToObjectSpace(root.Position)
-			-- Le bouton est un cylindre couché : son axe (hauteur) est l'axe X local.
-			local flat = Vector2.new(offset.Y, offset.Z).Magnitude
-			if flat <= Config.Lock.ButtonRadius and offset.X > -1 and offset.X < 6 then
-				local duration = if SessionData.HasUnlock(owner, "LongLock") then Config.Lock.LongDuration else Config.Lock.Duration
-				untilTime = now + duration
-				lockedUntil[entry.base] = untilTime
-				entry.base:SetAttribute("LockedUntil", untilTime)
+	-- Le propriétaire marche sur le bouton : (re)lance le compte à rebours.
+	local ownerRoot = getRoot(owner)
+	if ownerRoot then
+		local offset = entry.button.CFrame:PointToObjectSpace(ownerRoot.Position)
+		-- Le bouton est un cylindre couché : son axe (hauteur) est l'axe X local.
+		local flat = Vector2.new(offset.Y, offset.Z).Magnitude
+		if flat <= Config.Lock.ButtonRadius and offset.X > -1 and offset.X < 6 then
+			local duration = if SessionData.HasUnlock(owner, "LongLock") then Config.Lock.LongDuration else Config.Lock.Duration
+			local wasLocked = untilTime ~= nil
+			local newUntil = now + duration
+			untilTime = newUntil
+			lockedUntil[entry.base] = newUntil
+			entry.base:SetAttribute("LockedUntil", newUntil)
+			if not wasLocked then
 				setLocked(entry, true)
 			end
 		end
+	end
+	if not untilTime then
 		return
 	end
 
