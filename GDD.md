@@ -22,7 +22,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - **Équipé** (1 place de base) : le familier suit le joueur et ajoute un bonus de points, additif :
   ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus).
 - **Dans la base** : les 10 meilleurs familiers se baladent librement dans la base (`BasePetsController` → attribut `BasePets`,
-  animés côté client par `client/BasePets` : marche, sautille, ondule, plane, se balance, tourne) et rapportent de l'argent chaque seconde
+  animés côté client par `client/BasePets` : marche, sautille, ondule, plane, se balance, tourne ; une seule créature par
+  espèce avec "x2" si plusieurs exemplaires) et rapportent de l'argent chaque seconde
   (base 2 / 25 / 400 / 8K / 200K / 6M / 250M / 25B $/s de Commun à Sigma,
   +15 % par rang du familier dans sa rareté : `PetCatalog.GetIncome`).
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
@@ -42,7 +43,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - 6 types (`Config.ItemTiers`) : Caillou 0,25 • Brique 0,5 • Cristal 1 • Lingot 2,5 • Diamant 6 • Météorite 15 points.
 - Points marqués = valeur de l'objet × multiplicateur des familiers équipés.
 - Physique : frottement maximal, aucun rebond, aucune forme ronde : un objet s'arrête où il tombe (la Force compte).
-- Les objets apparaissent dans **4 cagettes en bois** aux coins de la base.
+- Les objets apparaissent sur **4 palettes en bois** (basses, petit rebord) aux coins de la base.
+- **Objets sauvages** : 1 toutes les 4 s pendant le Feeding dans l'arène (entre le dôme et les bases, max 25),
+  ramassables par tout le monde, qualité équivalente à Chance niveau 2.
 - Amélioration "🍀 Chance" (Id `ItemQuality`) : poids des objets précieux ×(1 + 0,5 × niveau)^rang.
 
 ## Entraînement (progression longue)
@@ -63,8 +66,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `Treadmill` (5 niv.), `Bench` (5 niv.) : stations d'entraînement.
   - `ItemQuality` (10 niv.) : objets plus précieux.
   - `Backpack` (4 niv.) : +1 objet porté par niveau (le 1er en main, les autres empilés dans le dos, lancés un par un).
-  - `LongLock` : base fermée 90 s au lieu de 60 s.
-- **Bouton de verrouillage** (comme Steal a Brainrot) : au centre de la base devant la porte ; le propriétaire marche sur le gros bouton rouge → portail fermé pendant 60 s, tout autre joueur à l'intérieur est expulsé devant l'entrée.
+  - `LongLock` : base fermée 10 s au lieu de 5 s.
+- **Bouton de verrouillage** (comme Steal a Brainrot) : au centre de la base devant la porte ; le propriétaire marche sur le gros bouton rouge → portail fermé pendant 5 s
+  (relancé à chaque passage sur le bouton), tout autre joueur à l'intérieur est expulsé devant l'entrée.
 
 ## Règles physiques / réseau (ne pas régresser)
 
