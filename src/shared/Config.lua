@@ -123,7 +123,7 @@ Config.Pets = {
 Config.Fusion = {
 	Count = 5,
 	MaxFromRarity = 6,
-	Costs = { 50, 150, 500, 1500, 5000, 15000 }, -- prix en $ selon la rareté fusionnée (index de rareté)
+	Costs = { 250, 15e3, 750e3, 40e6, 2.5e9, 250e9 }, -- prix en $ selon la rareté fusionnée (index de rareté)
 }
 
 -- Test : dans Roblox Studio uniquement, chaque joueur reçoit 1 exemplaire de chaque familier
@@ -132,7 +132,7 @@ Config.StudioGiveAllPets = false
 
 -- Argent : revenu passif des familiers + bonus de fin de digestion.
 Config.Economy = {
-	MoneyPerPoint = 4, -- chaque point marqué rapporte aussi de l'argent à la digestion
+	MoneyPerPoint = 15, -- chaque point marqué rapporte aussi de l'argent à la digestion
 }
 
 -- Verrouillage de base (bouton au sol, comme Steal a Brainrot).
@@ -154,11 +154,11 @@ export type ShopItem = {
 
 -- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Cours dessus : +vitesse. Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 300, PriceGrowth = 4 },
-	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Monte dessus : +force (lancers plus loin). Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 300, PriceGrowth = 4 },
-	{ Id = "ItemQuality", Icon = "💎", Name = "Objets de qualité", Description = "Des objets plus précieux apparaissent dans ta base.", MaxLevel = 10, BasePrice = 400, PriceGrowth = 2.2 },
-	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 1000, PriceGrowth = 3 },
-	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", MaxLevel = 1, BasePrice = 5000, PriceGrowth = 1 },
+	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Cours dessus : +vitesse. Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 500, PriceGrowth = 120 },
+	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Monte dessus : +force (lancers plus loin). Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 500, PriceGrowth = 120 },
+	{ Id = "ItemQuality", Icon = "💎", Name = "Objets de qualité", Description = "Des objets plus précieux apparaissent dans ta base.", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
+	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
+	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 90 s au lieu de 60 s.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 } :: { ShopItem }
 
 -- Prix du prochain niveau (nil si niveau max atteint).
@@ -180,19 +180,19 @@ export type Rarity = {
 	Weight: number, -- poids de tirage (total = 1000)
 	Color: Color3,
 	Multiplier: number, -- bonus de points quand le familier est équipé
-	Income: number, -- $/s quand le familier est dans la base
+	Income: number, -- $/s de base quand le familier est sur un socle (chaque familier a un bonus de 0 à +45 %, cf. PetCatalog.GetIncome)
 }
 
 -- Ordre = du plus commun au plus rare.
 Config.Rarities = {
-	{ Id = "Commun", Name = "Commun", Weight = 500, Color = Color3.fromRGB(200, 200, 200), Multiplier = 1.1, Income = 0.2 },
-	{ Id = "Inhabituel", Name = "Inhabituel", Weight = 250, Color = Color3.fromRGB(100, 220, 90), Multiplier = 1.2, Income = 0.5 },
-	{ Id = "Rare", Name = "Rare", Weight = 120, Color = Color3.fromRGB(70, 160, 255), Multiplier = 1.35, Income = 1.2 },
-	{ Id = "Epique", Name = "Épique", Weight = 70, Color = Color3.fromRGB(180, 80, 255), Multiplier = 1.6, Income = 3 },
-	{ Id = "Legendaire", Name = "Légendaire", Weight = 40, Color = Color3.fromRGB(255, 170, 30), Multiplier = 2, Income = 8 },
-	{ Id = "Mythique", Name = "Mythique", Weight = 15, Color = Color3.fromRGB(255, 70, 120), Multiplier = 3, Income = 20 },
-	{ Id = "Divin", Name = "Divin", Weight = 4, Color = Color3.fromRGB(120, 255, 245), Multiplier = 5, Income = 60 },
-	{ Id = "Sigma", Name = "Sigma", Weight = 1, Color = Color3.fromRGB(255, 230, 60), Multiplier = 10, Income = 200 },
+	{ Id = "Commun", Name = "Commun", Weight = 500, Color = Color3.fromRGB(200, 200, 200), Multiplier = 1.1, Income = 2 },
+	{ Id = "Inhabituel", Name = "Inhabituel", Weight = 250, Color = Color3.fromRGB(100, 220, 90), Multiplier = 1.2, Income = 25 },
+	{ Id = "Rare", Name = "Rare", Weight = 120, Color = Color3.fromRGB(70, 160, 255), Multiplier = 1.35, Income = 400 },
+	{ Id = "Epique", Name = "Épique", Weight = 70, Color = Color3.fromRGB(180, 80, 255), Multiplier = 1.6, Income = 8e3 },
+	{ Id = "Legendaire", Name = "Légendaire", Weight = 40, Color = Color3.fromRGB(255, 170, 30), Multiplier = 2, Income = 200e3 },
+	{ Id = "Mythique", Name = "Mythique", Weight = 15, Color = Color3.fromRGB(255, 70, 120), Multiplier = 3, Income = 6e6 },
+	{ Id = "Divin", Name = "Divin", Weight = 4, Color = Color3.fromRGB(120, 255, 245), Multiplier = 5, Income = 250e6 },
+	{ Id = "Sigma", Name = "Sigma", Weight = 1, Color = Color3.fromRGB(255, 230, 60), Multiplier = 10, Income = 25e9 },
 } :: { Rarity }
 
 -- Accès rapide : Config.RarityIndex["Epique"] = 4

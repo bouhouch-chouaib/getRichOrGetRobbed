@@ -22,12 +22,13 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - **Équipé** (1 place de base) : le familier suit le joueur et ajoute un bonus de points, additif :
   ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus).
 - **Dans la base** : les 10 meilleurs familiers sont exposés sur des socles (`PedestalController`) et rapportent de l'argent chaque seconde
-  (0,2 / 0,5 / 1,2 / 3 / 8 / 20 / 60 / 200 $/s de Commun à Sigma).
+  (base 2 / 25 / 400 / 8K / 200K / 6M / 250M / 25B $/s de Commun à Sigma,
+  +15 % par rang du familier dans sa rareté : `PetCatalog.GetIncome`).
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
   Chance légèrement augmentée par le score. **Pitié** : Épique+ garanti au 60e tirage sans Épique+.
 - **Annonce serveur** pour tout drop Légendaire ou mieux.
-- **Machine de fusion** (`FusionController`, bouton 🧪) : 5 familiers non équipés d'une rareté + un coût
-  (50 / 150 / 500 / 1500 / 5000 / 15000 $) = 1 familier aléatoire de la rareté au-dessus, de Commun jusqu'à Mythique → Divin.
+- **Machine de fusion** (`FusionController`, bâtiment physique dans chaque kiosque) : 5 familiers non équipés d'une rareté + un coût
+  (250 / 15K / 750K / 40M / 2.5B / 250B $) = 1 familier aléatoire de la rareté au-dessus, de Commun jusqu'à Mythique → Divin.
   Doublons consommés en priorité. Le Sigma ne s'obtient que par chance.
 - Modèles : `PetModelBuilder` construit un modèle de remplacement en formes de base ; un Model nommé comme l'Id
   dans `ReplicatedStorage.PetModels` le remplace automatiquement.
@@ -52,14 +53,16 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 ## Économie et base
 
-- **Argent** : revenu passif des 10 familiers exposés + 4 $ par point à la digestion. Prix boutique : tapis/banc 300 $ (×4 par niveau),
-  objets de qualité 400 $ (×2,2), sac à dos 1000 $ (×3), verrou renforcé 5000 $.
+- **Argent** : nombres « astronomiques » (affichage K/M/B/T/Qa via `NumberFormat`). Revenu passif des 10 familiers exposés
+  + 15 $ par point à la digestion. Prix boutique : tapis/banc 500 $ (×120/niveau → 104B), objets de qualité 2K (×18 → ~400T),
+  sac à dos 25K (×400 → 1.6T), verrou renforcé 5M.
+- **Kiosques** : entre chaque paire de bases, une échoppe BOUTIQUE et une machine de FUSION (prompt [E] → fenêtre, fermée en s'éloignant).
 - **Boutique** (`Config.Shop`) : améliorations à niveaux, prix = BasePrice × PriceGrowth^niveau, attribut `Upgrade_<Id>`.
   - `Treadmill` (5 niv.), `Bench` (5 niv.) : stations d'entraînement.
   - `ItemQuality` (10 niv.) : objets plus précieux.
   - `Backpack` (4 niv.) : +1 objet porté par niveau (le 1er en main, les autres empilés dans le dos, lancés un par un).
   - `LongLock` : base fermée 90 s au lieu de 60 s.
-- **Bouton de verrouillage** (comme Steal a Brainrot) : le propriétaire marche sur le gros bouton rouge de sa base → portail fermé pendant 60 s, tout autre joueur à l'intérieur est expulsé devant l'entrée.
+- **Bouton de verrouillage** (comme Steal a Brainrot) : au centre de la base devant la porte ; le propriétaire marche sur le gros bouton rouge → portail fermé pendant 60 s, tout autre joueur à l'intérieur est expulsé devant l'entrée.
 
 ## Règles physiques / réseau (ne pas régresser)
 

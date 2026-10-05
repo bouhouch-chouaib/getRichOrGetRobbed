@@ -7,10 +7,12 @@
 -- Seul appel serveur : Remotes.BuyUpgrade (le serveur valide le prix).
 
 local Players = game:GetService("Players")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
@@ -113,14 +115,7 @@ local function chunkyButton(parent: Instance, label: string, size: UDim2, top: C
 	return button
 end
 
-local function formatMoney(value: number): string
-	local digits = tostring(math.floor(value))
-	local formatted = digits:reverse():gsub("(%d%d%d)", "%1,"):reverse()
-	if formatted:sub(1, 1) == "," then
-		formatted = formatted:sub(2)
-	end
-	return "$" .. formatted
-end
+local formatMoney = NumberFormat.money
 
 local function numberAttribute(name: string): number
 	local value = player:GetAttribute(name)
@@ -282,7 +277,7 @@ leftColumn.Name = "Left"
 leftColumn.BackgroundTransparency = 1
 leftColumn.AnchorPoint = Vector2.new(0, 0.5)
 leftColumn.Position = UDim2.new(0, 16, 0.5, 0)
-leftColumn.Size = UDim2.fromOffset(240, 500)
+leftColumn.Size = UDim2.fromOffset(240, 400)
 leftColumn.Parent = gui
 
 local moneyLabel = text(leftColumn, "$0", 48, MONEY)
@@ -333,7 +328,6 @@ end
 
 local shopButton = menuButton("🛒", "BOUTIQUE", 180, Color3.fromRGB(255, 220, 70), Color3.fromRGB(255, 140, 20))
 local petsButton = menuButton("🐾", "FAMILIERS", 288, Color3.fromRGB(110, 210, 255), Color3.fromRGB(40, 120, 255))
-local fusionButton = menuButton("🧪", "FUSION", 396, Color3.fromRGB(230, 130, 255), Color3.fromRGB(140, 40, 220))
 
 ----------------------------------------------------------------------
 -- Fenêtre Boutique
@@ -572,7 +566,6 @@ petsButton.Activated:Connect(petsWindow.toggle)
 ----------------------------------------------------------------------
 
 local fusionWindow = makeWindow("FUSION", Vector2.new(640, 520), Color3.fromRGB(235, 150, 255), Color3.fromRGB(120, 40, 210))
-fusionButton.Activated:Connect(fusionWindow.toggle)
 
 local fusionInfo = text(fusionWindow.content, string.format("%d FAMILIERS DE MÊME RARETÉ = 1 DE LA RARETÉ AU-DESSUS", Config.Fusion.Count), 18)
 fusionInfo.Size = UDim2.new(1, 0, 0, 24)
@@ -753,7 +746,7 @@ local function updateStats()
 	local money = numberAttribute("Money")
 	moneyLabel.Text = formatMoney(money)
 	local income = numberAttribute("Income")
-	incomeLabel.Text = if income < 10 then string.format("+$%.2f/s", income) else string.format("+%s/s", formatMoney(income))
+	incomeLabel.Text = NumberFormat.perSecond(income)
 	for _, row in ipairs({ { stat = "Speed", ui = speedRow, title = "⚡ VITESSE" }, { stat = "Strength", ui = strengthRow, title = "💪 FORCE" } }) do
 		local level = numberAttribute(row.stat .. "Level")
 		local needed = numberAttribute(row.stat .. "XPNeeded")
@@ -832,6 +825,36 @@ Remotes.Announcement.OnClientEvent:Connect(function(playerName: string, petId: s
 	end
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 	Toast.show(string.format("%s A OBTENU %s (%s) !", playerName:upper(), entry.Name:upper(), rarity.Name:upper()), rarity.Color)
+end)
+
+-- Bâtiments de la map (boutique, machine de fusion) : leur prompt "[E]" ouvre la fenêtre correspondante,
+-- qui se ferme toute seule quand le joueur s'éloigne.
+local promptWindows: { [string]: Window } = {
+	Shop = shopWindow,
+	Fusion = fusionWindow,
+}
+local openedFrom: BasePart? = nil
+ProximityPromptService.PromptTriggered:Connect(function(prompt: ProximityPrompt)
+	local windowName = prompt:GetAttribute("OpensWindow")
+	local window = if type(windowName) == "string" then promptWindows[windowName] else nil
+	if window and prompt.Parent and prompt.Parent:IsA("BasePart") then
+		window.open()
+		openedFrom = prompt.Parent
+	end
+end)
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+		local source = openedFrom
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if source and root and root:IsA("BasePart") and (root.Position - source.Position).Magnitude > 22 then
+			openedFrom = nil
+			for _, window in pairs(promptWindows) do
+				window.close()
+			end
+		end
+	end
 end)
 
 ReplicatedStorage:GetAttributeChangedSignal("GameState"):Connect(updatePhase)

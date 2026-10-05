@@ -74,10 +74,13 @@ local function createItem(tier: Config.ItemTier, cframe: CFrame): Part
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false
-	-- La bulle s'affiche au centre de l'objet : on la remonte à l'écran pour qu'elle soit juste au-dessus
-	-- (un décalage écran marche quelle que soit l'orientation de l'objet tombé).
-	prompt.UIOffset = Vector2.new(0, -55)
-	prompt.Parent = item
+	-- La bulle est portée par un point d'ancrage que le client garde juste au-dessus de l'objet,
+	-- quelle que soit sa rotation (cf. client/ItemPromptAnchors).
+	local anchor = Instance.new("Attachment")
+	anchor.Name = "PromptAnchor"
+	anchor.Position = Vector3.new(0, item.Size.Y / 2 + 1.5, 0)
+	anchor.Parent = item
+	prompt.Parent = anchor
 
 	return item
 end

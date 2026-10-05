@@ -85,7 +85,7 @@ local function consume(item: BasePart)
 		SessionData.AddScore(owner, (if type(value) == "number" then value else 1) * SessionData.GetMultiplier(owner))
 	end
 
-	local prompt = item:FindFirstChildOfClass("ProximityPrompt")
+	local prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)
 	if prompt then
 		prompt:Destroy()
 	end

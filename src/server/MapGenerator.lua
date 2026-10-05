@@ -6,7 +6,7 @@
 -- Structure générée :
 -- Workspace.Map
 --   ArenaFloor, HoleDirt, HoleRing, BlackholeZone (+ Aura), BlackholeCore (+ Light), BlackholeHalo, BlackholeDome
---   Paths (Folder), Trees (Folder)
+--   Paths (Folder), Trees (Folder), Kiosks (Folder : boutique + machine de fusion entre deux bases)
 --   LooseItems (Folder) : objets ramassés / lancés
 --   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation,
 --                              SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
@@ -271,7 +271,12 @@ local function createTrees(map: Folder)
 	local step = math.pi * 2 / ARENA.BaseCount
 	for index = 0, ARENA.BaseCount - 1 do
 		-- Entre deux bases, puis derrière chaque base.
-		for _, spot in ipairs({ { angle = (index + 0.5) * step, radius = ARENA.BaseRingRadius + 30 }, { angle = index * step, radius = ARENA.BaseRingRadius + 67 } }) do
+		local spots = { { angle = index * step, radius = ARENA.BaseRingRadius + 67 } }
+		-- Entre deux bases, sauf là où se trouve un kiosque (boutique + fusion, un toutes les deux bases).
+		if index % 2 == 1 then
+			table.insert(spots, { angle = (index + 0.5) * step, radius = ARENA.BaseRingRadius + 30 })
+		end
+		for _, spot in ipairs(spots) do
 			local position = Vector3.new(math.cos(spot.angle) * spot.radius, 0, math.sin(spot.angle) * spot.radius)
 			createTree(position, rng:NextNumber(0.9, 1.3), folder)
 		end
@@ -284,7 +289,8 @@ local function createStationSign(model: Model, adornee: BasePart, title: string)
 	sign.Name = "StationSign"
 	sign.Adornee = adornee
 	sign.Size = UDim2.fromScale(16, 4)
-	sign.StudsOffsetWorldSpace = Vector3.new(0, 9, 0)
+	sign.StudsOffsetWorldSpace = Vector3.new(0, 7, 0)
+	sign.AlwaysOnTop = true
 	sign.LightInfluence = 0
 	sign.MaxDistance = 250
 	sign.Enabled = false
@@ -350,6 +356,175 @@ local function createBench(cframe: CFrame, base: Model)
 	model.Parent = base
 end
 
+-- Grand panneau flottant au-dessus d'un bâtiment (boutique, fusion).
+local function createTitleSign(adornee: BasePart, title: string, color: Color3, height: number)
+	local sign = Instance.new("BillboardGui")
+	sign.Name = "TitleSign"
+	sign.Adornee = adornee
+	sign.Size = UDim2.fromScale(16, 4)
+	sign.StudsOffsetWorldSpace = Vector3.new(0, height, 0)
+	sign.LightInfluence = 0
+	sign.MaxDistance = 400
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = title
+	styleSignText(label, color)
+	label.Parent = sign
+	sign.Parent = adornee
+end
+
+-- Prompt "[E]" qui ouvre une fenêtre côté client (attribut OpensWindow lu par le HUD).
+local function addWindowPrompt(part: BasePart, objectText: string, window: string)
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Ouvrir"
+	prompt.ObjectText = objectText
+	prompt.KeyboardKeyCode = Enum.KeyCode.E
+	prompt.HoldDuration = 0
+	prompt.MaxActivationDistance = 14
+	prompt.RequiresLineOfSight = false
+	prompt:SetAttribute("OpensWindow", window)
+	prompt.Parent = part
+end
+
+-- Échoppe de marché en bois avec auvent rayé.
+local function createShop(cframe: CFrame, parent: Instance)
+	local model = Instance.new("Model")
+	model.Name = "Shop"
+	local wood = COLORS.WoodRail
+	local dark = COLORS.WoodPost
+
+	local counter = makePart("Counter", Vector3.new(12, 3.5, 3), cframe * CFrame.new(0, 1.75, -1.5), wood, model)
+	counter.Material = Enum.Material.WoodPlanks
+	local top = makePart("CounterTop", Vector3.new(12.6, 0.4, 3.6), cframe * CFrame.new(0, 3.7, -1.5), dark, model)
+	top.Material = Enum.Material.Wood
+	local back = makePart("BackWall", Vector3.new(12, 8, 0.8), cframe * CFrame.new(0, 4, 4), wood, model)
+	back.Material = Enum.Material.WoodPlanks
+	for _, y in ipairs({ 3.5, 6 }) do
+		makePart("Shelf", Vector3.new(11, 0.3, 1.6), cframe * CFrame.new(0, y, 3), dark, model).Material = Enum.Material.Wood
+	end
+	-- Marchandise sur les étagères (petites caisses et sacs colorés).
+	local goods = { Color3.fromRGB(255, 200, 40), Color3.fromRGB(90, 200, 255), Color3.fromRGB(255, 110, 110), Color3.fromRGB(130, 230, 110) }
+	for index = 0, 7 do
+		local y = if index < 4 then 4.2 else 6.7
+		local x = -4.2 + (index % 4) * 2.8
+		makePart("Goods", Vector3.new(1.4, 1.2, 1.2), cframe * CFrame.new(x, y, 3), goods[index % 4 + 1], model)
+	end
+	for _, x in ipairs({ -6, 6 }) do
+		for _, z in ipairs({ -3, 4 }) do
+			local post = makePart("Post", Vector3.new(9, 0.7, 0.7), cframe * CFrame.new(x, 4.5, z) * FLAT, dark, model)
+			post.Shape = Enum.PartType.Cylinder
+			post.Material = Enum.Material.Wood
+		end
+	end
+	-- Auvent rayé rouge / blanc, incliné vers l'avant.
+	for index = 0, 6 do
+		local color = if index % 2 == 0 then Color3.fromRGB(230, 50, 50) else Color3.fromRGB(250, 245, 235)
+		local stripe = makePart("Awning", Vector3.new(2, 0.3, 9), cframe * CFrame.new(-6 + index * 2, 9.4, 0.4) * CFrame.Angles(math.rad(-14), 0, 0), color, model)
+		stripe.Material = Enum.Material.Fabric
+	end
+	makeGhost(makePart("Hitbox", Vector3.new(12, 1, 1), cframe * CFrame.new(0, 2, -3.5), wood, model))
+	local hitbox = model:FindFirstChild("Hitbox") :: BasePart
+	hitbox.Transparency = 1
+	addWindowPrompt(hitbox, "Boutique", "Shop")
+	createTitleSign(counter, "🛒 BOUTIQUE", Color3.fromRGB(255, 210, 60), 9.5)
+	model.Parent = parent
+end
+
+-- Machine de fusion "laboratoire" : deux cuves, une chambre centrale lumineuse, une console.
+local function createFusionMachine(cframe: CFrame, parent: Instance)
+	local model = Instance.new("Model")
+	model.Name = "FusionMachine"
+	local metal = Color3.fromRGB(150, 155, 170)
+	local darkMetal = Color3.fromRGB(70, 72, 85)
+	local glow = Color3.fromRGB(200, 90, 255)
+
+	local platform = makePart("Platform", Vector3.new(1, 12, 12), cframe * CFrame.new(0, 0.5, 0.5) * FLAT, darkMetal, model)
+	platform.Shape = Enum.PartType.Cylinder
+	platform.Material = Enum.Material.DiamondPlate
+
+	for _, x in ipairs({ -3.6, 3.6 }) do
+		local tube = makePart("Tube", Vector3.new(8, 3, 3), cframe * CFrame.new(x, 5, 2) * FLAT, Color3.fromRGB(200, 230, 255), model)
+		tube.Shape = Enum.PartType.Cylinder
+		tube.Material = Enum.Material.Glass
+		tube.Transparency = 0.5
+		local liquid = makePart("Liquid", Vector3.new(5.5, 2.2, 2.2), cframe * CFrame.new(x, 3.8, 2) * FLAT, if x < 0 then Color3.fromRGB(80, 255, 140) else glow, model)
+		liquid.Shape = Enum.PartType.Cylinder
+		liquid.Material = Enum.Material.Neon
+		for _, y in ipairs({ 1.2, 9.2 }) do
+			local cap = makePart("Cap", Vector3.new(0.8, 3.6, 3.6), cframe * CFrame.new(x, y, 2) * FLAT, metal, model)
+			cap.Shape = Enum.PartType.Cylinder
+			cap.Material = Enum.Material.Metal
+		end
+		-- Tuyau entre la cuve et la chambre centrale.
+		local pipe = makePart("Pipe", Vector3.new(3.4, 0.6, 0.6), cframe * CFrame.new(x / 2, 8.4, 2), metal, model)
+		pipe.Shape = Enum.PartType.Cylinder
+		pipe.Material = Enum.Material.Metal
+	end
+
+	local chamber = makePart("Chamber", Vector3.new(5, 5, 5), cframe * CFrame.new(0, 6, 2), Color3.fromRGB(220, 235, 255), model)
+	chamber.Shape = Enum.PartType.Ball
+	chamber.Material = Enum.Material.Glass
+	chamber.Transparency = 0.45
+	local core = makePart("Core", Vector3.new(2.6, 2.6, 2.6), cframe * CFrame.new(0, 6, 2), glow, model)
+	core.Shape = Enum.PartType.Ball
+	core.Material = Enum.Material.Neon
+	local sparks = Instance.new("ParticleEmitter")
+	sparks.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	sparks.Rate = 12
+	sparks.Lifetime = NumberRange.new(0.6, 1.2)
+	sparks.Speed = NumberRange.new(1, 3)
+	sparks.SpreadAngle = Vector2.new(180, 180)
+	sparks.Size = NumberSequence.new(0.5, 0)
+	sparks.Color = ColorSequence.new(glow)
+	sparks.LightEmission = 1
+	sparks.Parent = core
+	local light = Instance.new("PointLight")
+	light.Color = glow
+	light.Range = 18
+	light.Brightness = 2
+	light.Parent = core
+	local stand = makePart("Stand", Vector3.new(3.5, 1.4, 1.4), cframe * CFrame.new(0, 2.4, 2) * FLAT, metal, model)
+	stand.Shape = Enum.PartType.Cylinder
+	stand.Material = Enum.Material.Metal
+
+	-- Console de commande devant la machine.
+	local console = makePart("Console", Vector3.new(5, 3, 2), cframe * CFrame.new(0, 1.5, -3.5), darkMetal, model)
+	console.Material = Enum.Material.Metal
+	local screen = makePart("Screen", Vector3.new(4, 1.4, 0.2), cframe * CFrame.new(0, 3.2, -3.6) * CFrame.Angles(math.rad(-30), 0, 0), Color3.fromRGB(80, 255, 140), model)
+	screen.Material = Enum.Material.Neon
+	for index, color in ipairs({ Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 220, 60), Color3.fromRGB(90, 200, 255) }) do
+		local knob = makePart("Button", Vector3.new(0.5, 0.8, 0.8), cframe * CFrame.new(-1.4 + (index - 1) * 1.4, 3.05, -4.2) * FLAT, color, model)
+		knob.Shape = Enum.PartType.Cylinder
+		knob.Material = Enum.Material.Neon
+	end
+	addWindowPrompt(console, "Machine de fusion", "Fusion")
+	createTitleSign(console, "🧪 FUSION", Color3.fromRGB(220, 140, 255), 10)
+	model.Parent = parent
+end
+
+-- Un "kiosque" entre deux bases : boutique + machine de fusion, sur une dalle de pavés.
+local function createKiosks(map: Folder)
+	local folder = Instance.new("Folder")
+	folder.Name = "Kiosks"
+	folder.Parent = map
+	local step = math.pi * 2 / ARENA.BaseCount
+	for pair = 0, ARENA.BaseCount / 2 - 1 do
+		local angle = (pair * 2 + 0.5) * step
+		local radius = ARENA.BaseRingRadius - 12
+		local position = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+		-- Repère local : -Z vers le trou noir.
+		local origin = CFrame.lookAt(position, Vector3.zero)
+		local kiosk = Instance.new("Model")
+		kiosk.Name = "Kiosk_" .. (pair + 1)
+		local floor = makePart("Floor", Vector3.new(36, 0.2, 18), origin * CFrame.new(0, 0.1, 0.5), Color3.fromRGB(150, 140, 125), kiosk)
+		floor.Material = Enum.Material.Cobblestone
+		createShop(origin * CFrame.new(-9, 0.2, 0), kiosk)
+		createFusionMachine(origin * CFrame.new(9, 0.2, 0), kiosk)
+		kiosk.Parent = folder
+	end
+end
+
 local function createBase(index: number, map: Folder, paths: Folder): Model
 	local angle = (index - 1) * (math.pi * 2 / ARENA.BaseCount)
 	local position = Vector3.new(math.cos(angle) * ARENA.BaseRingRadius, 0, math.sin(angle) * ARENA.BaseRingRadius)
@@ -388,7 +563,7 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	makeGhost(safeZone)
 
 	-- Bouton de verrouillage au sol (géré par LockController) + portail affiché quand la base est fermée.
-	local buttonCFrame = origin * CFrame.new(-16, top, -14)
+	local buttonCFrame = origin * CFrame.new(0, top, -17)
 	local buttonBase = makePart("LockButtonBase", Vector3.new(0.4, 10, 10), buttonCFrame * CFrame.new(0, 0.2, 0) * FLAT, Color3.fromRGB(60, 60, 65), base)
 	buttonBase.Shape = Enum.PartType.Cylinder
 	local button = makePart("LockButton", Vector3.new(0.6, 8, 8), buttonCFrame * CFrame.new(0, 0.5, 0) * FLAT, Color3.fromRGB(220, 50, 50), base)
@@ -399,7 +574,8 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	lockSign.Name = "LockSign"
 	lockSign.Adornee = button
 	lockSign.Size = UDim2.fromScale(12, 3)
-	lockSign.StudsOffsetWorldSpace = Vector3.new(0, 5, 0)
+	lockSign.StudsOffsetWorldSpace = Vector3.new(0, 3.5, 0)
+	lockSign.AlwaysOnTop = true
 	lockSign.LightInfluence = 0
 	lockSign.MaxDistance = 120
 	local lockLabel = Instance.new("TextLabel")
@@ -518,6 +694,7 @@ function MapGenerator.generate(): { Model }
 	applyLighting()
 	createBlackhole(map)
 	createTrees(map)
+	createKiosks(map)
 
 	local paths = Instance.new("Folder")
 	paths.Name = "Paths"

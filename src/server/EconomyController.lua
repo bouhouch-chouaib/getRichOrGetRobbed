@@ -17,11 +17,7 @@ for _, item in ipairs(Config.Shop) do
 	shopById[item.Id] = item
 end
 
-local function petIncome(petId: string): number
-	local entry = PetCatalog.ById[petId]
-	local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
-	return if rarity then rarity.Income else 0
-end
+local petIncome = PetCatalog.GetIncome
 
 -- Les Config.Pets.IncomeSlots meilleurs familiers du joueur (exposés sur les socles de sa base).
 function EconomyController.GetTopPets(player: Player): { string }

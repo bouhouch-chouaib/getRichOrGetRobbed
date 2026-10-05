@@ -67,7 +67,9 @@ HUD style cartoon (LuckiestGuy, contours noirs, fenêtres, Toast, barres d'XP) �
 multiplicateur additif + suit le joueur (`PetFollow`) • revenu = 10 meilleurs familiers • fenêtre collection 3D •
 annonces serveur Légendaire+ • familiers exposés sur 10 socles dans la base (`PedestalController`) •
 économie rééquilibrée (revenus bas, prix hauts) • objets non roulants (frottement max) • map agrandie (bases à 215) •
-`Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester).
+`Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester) • sauvegarde DataStore •
+machine de fusion + boutique physiques dans 4 kiosques entre les bases • économie en grands nombres (K/M/B/T, `NumberFormat`) •
+bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptAnchors`).
 
 ## Prochaines étapes prévues (dans cet ordre, validé avec l'utilisateur)
 

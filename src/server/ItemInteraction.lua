@@ -27,7 +27,7 @@ local function getLooseFolder(): Instance
 end
 
 local function setPromptEnabled(item: BasePart, enabled: boolean)
-	local prompt = item:FindFirstChildOfClass("ProximityPrompt")
+	local prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)
 	if prompt then
 		prompt.Enabled = enabled
 	end
@@ -90,7 +90,7 @@ end
 
 -- À appeler pour chaque item créé (par ItemSpawner).
 function ItemInteraction.Register(item: BasePart)
-	local prompt = item:FindFirstChildOfClass("ProximityPrompt")
+	local prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)
 	if prompt then
 		prompt.Triggered:Connect(function(player)
 			onPromptTriggered(item, player)

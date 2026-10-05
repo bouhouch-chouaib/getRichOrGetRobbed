@@ -12,6 +12,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 
 export type Stat = "Speed" | "Strength"
@@ -191,9 +192,11 @@ local function sync(player: Player)
 		player:SetAttribute("Upgrade_" .. id, level)
 	end
 
-	local money = getStat(player, "Argent")
-	if money then
-		money.Value = math.floor(data.money)
+	-- Argent affiché en texte abrégé dans le classement ("$1.25T").
+	local leaderstats = player:FindFirstChild("leaderstats")
+	local money = leaderstats and leaderstats:FindFirstChild("Argent")
+	if money and money:IsA("StringValue") then
+		money.Value = NumberFormat.money(data.money)
 	end
 	local points = getStat(player, "Points")
 	if points then
@@ -217,11 +220,12 @@ local function onPlayerAdded(player: Player)
 
 	local leaderstats = Instance.new("Folder")
 	leaderstats.Name = "leaderstats"
-	for _, name in ipairs({ "Argent", "Points" }) do
-		local stat = Instance.new("IntValue")
-		stat.Name = name
-		stat.Parent = leaderstats
-	end
+	local moneyStat = Instance.new("StringValue")
+	moneyStat.Name = "Argent"
+	moneyStat.Parent = leaderstats
+	local pointsStat = Instance.new("IntValue")
+	pointsStat.Name = "Points"
+	pointsStat.Parent = leaderstats
 	leaderstats.Parent = player
 
 	player.CharacterAdded:Connect(function()

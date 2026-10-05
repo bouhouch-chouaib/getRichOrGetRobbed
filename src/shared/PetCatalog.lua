@@ -130,6 +130,8 @@ local list: { Pet } = {
 	pet("StrawberryElephant", "Strawberry Elephant", "Sigma", B, "Éléphant rose texture fraise, feuille en chapeau.", { Shape = "Quadruped", Body = rgb(255, 90, 140), Detail = rgb(255, 230, 80), Extra = "Trunk", Effect = "Aura", EffectColor = GOLD }),
 }
 
+local Config = require(script.Parent.Config)
+
 local PetCatalog = {}
 
 PetCatalog.List = list
@@ -145,6 +147,20 @@ for _, entry in ipairs(list) do
 		PetCatalog.ByRarity[entry.Rarity] = bucket
 	end
 	table.insert(bucket, entry)
+end
+
+-- Revenu par seconde d'un familier sur un socle : base de sa rareté, +15 % par rang dans sa rareté
+-- (ordre du catalogue), pour que chaque familier ait sa propre valeur.
+local incomes: { [string]: number } = {}
+for rarityId, bucket in pairs(PetCatalog.ByRarity) do
+	local rarity = Config.Rarities[Config.RarityIndex[rarityId]]
+	for rank, entry in ipairs(bucket) do
+		incomes[entry.Id] = if rarity then math.floor(rarity.Income * (1 + (rank - 1) * 0.15)) else 0
+	end
+end
+
+function PetCatalog.GetIncome(petId: string): number
+	return incomes[petId] or 0
 end
 
 return PetCatalog

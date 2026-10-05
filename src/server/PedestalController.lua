@@ -6,6 +6,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local BaseManager = require(script.Parent.BaseManager)
@@ -23,12 +24,6 @@ type Display = {
 
 local displays: { Display } = {}
 
-local function formatIncome(value: number): string
-	if value < 10 then
-		return string.format("+$%.2f/s", value)
-	end
-	return string.format("+$%d/s", math.floor(value))
-end
 
 local function setSign(pedestal: BasePart, petId: string?)
 	local sign = pedestal:FindFirstChild("PetSign")
@@ -48,7 +43,7 @@ local function setSign(pedestal: BasePart, petId: string?)
 	end
 	local incomeLabel = sign:FindFirstChild("PetIncome")
 	if incomeLabel and incomeLabel:IsA("TextLabel") then
-		incomeLabel.Text = formatIncome(rarity.Income)
+		incomeLabel.Text = NumberFormat.perSecond(PetCatalog.GetIncome(entry.Id))
 	end
 end
 
