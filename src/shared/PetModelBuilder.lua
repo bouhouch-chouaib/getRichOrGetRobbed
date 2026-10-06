@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(script.Parent.Config)
 local PetCatalog = require(script.Parent.PetCatalog)
+local PetModelColors = require(script.Parent.PetModelColors)
 
 local PetModelBuilder = {}
 
@@ -450,6 +451,17 @@ function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
 		child.Parent = model
 	end
 	source:Destroy()
+
+	-- Couleurs perdues à l'import : on les réapplique (PetModelColors), avec un rendu lisse "cartoon".
+	local colors = PetModelColors[entry.Id]
+	if colors then
+		for _, descendant in ipairs(model:GetDescendants()) do
+			if descendant:IsA("BasePart") and colors[descendant.Name] then
+				descendant.Color = colors[descendant.Name]
+				descendant.Material = Enum.Material.SmoothPlastic
+			end
+		end
+	end
 
 	-- Centre de la boîte englobante du contenu importé -> origine, puis rotation.
 	local yaw = custom:GetAttribute("FacingYaw")
