@@ -336,3 +336,39 @@ rojo build -o test.rbxlx
 - Progression lente et satisfaisante (entraînement long, prix croissants), mais qui « ne fait pas rager ».
 - Textes et panneaux toujours visibles, juste au-dessus de ce qu'ils désignent.
 - Il préfère avancer fonctionnalité par fonctionnalité et tester lui-même dans Studio entre chaque étape.
+
+### 7.9 Compléments (ajoutés le 6 oct. au soir, à partir de la feuille de route de Chouaib et de l'historique)
+
+**Fin de chaque feature.** Terminer par une **liste de tests précise** pour Chouaib (Studio : Test → Clients and Servers → 2 joueurs),
+puis lui demander de coller la sortie **Output** (erreurs rouges / avertissements orange). Il copie-colle volontiers les logs.
+
+**Monétisation (P0.7)** — [À DÉCIDER] : dès la sortie publique ou après les premiers retours de joueurs.
+Points d'accroche déjà dans le code : `LootEngine.roll(score, pity, luckBonus)` (paramètre `luckBonus` prévu pour un pass de chance),
+`PlayerData.equipSlots` (pour un pass « +emplacements »). Les gamepasses/produits doivent être créés par Chouaib, qui donne leurs IDs.
+
+**Pipeline d'un modèle 3D de familier (testé avec le Capybara Zen).**
+1. Chouaib génère un `.glb`/`.fbx` (ChatGPT, Meshy, Tripo, générateur Studio…) et le dépose dans `assets/PetModels/`.
+2. L'IA l'inspecte (Python : en-tête glTF, nb de triangles < ~20 000, dimensions, matières, côté des yeux via les bornes des primitives).
+   Les `.glb` regardent généralement vers **+Z** ; le jeu attend **-Z** → rotation 180° appliquée par défaut.
+3. Chouaib l'importe dans Studio (Accueil → Importer 3D), renomme le Model **exactement** comme l'Id (`PetCatalog`), puis clic droit →
+   « Enregistrer dans un fichier » → `assets/PetModels/<Id>.rbxm`, et supprime l'exemplaire du Workspace.
+4. `PetModelBuilder.normalizeCustom` centre le modèle, le tourne (attribut `FacingYaw` en degrés sur le Model pour corriger, 180 par défaut)
+   et le met à la hauteur de sa rareté (attribut `HeightScale` pour ajuster).
+5. **L'importeur Roblox perd les couleurs d'un `.glb` sans texture** (toutes les MeshParts arrivent grises 163,162,165). Méthode utilisée :
+   lire le `.rbxm` (binaire, chunks LZ4 : `pip install lz4`), récupérer noms + tailles des MeshParts, les apparier aux primitives du `.glb`
+   (même ordre, mêmes dimensions), convertir `baseColorFactor` (linéaire) en sRGB, et écrire la table dans `shared/PetModelColors.lua`
+   (`[Id] = { [NomMeshPart] = Color3 }`). Le builder les réapplique en SmoothPlastic.
+6. Pour tester sans tirage : `Config.StudioTestPets = { "<Id>" }` (donné + équipé dans Studio).
+
+**Piste d'anti-triche des lancers (P0.6).** Aujourd'hui `Remotes.ThrowItem` ne transporte que l'item, et le client possède la physique
+de l'objet en vol (il pourrait le téléporter dans le trou). Proposition minimale, sans casser les règles physiques :
+au `ThrowItem`, le serveur enregistre sur l'item `ThrowOrigin` (position du HumanoidRootPart), `ThrowTime` et `ThrowPower`
+(attribut du joueur) ; dans `BlackholeController.consume`, refuser le point si la distance horizontale `ThrowOrigin → bord du trou`
+dépasse la portée max théorique (`ThrowPower² / Workspace.Gravity` × marge ~1,3) ou si le temps de vol est invraisemblable ;
+ajouter un cooldown serveur entre deux `ThrowItem` du même joueur. Les objets non lancés (portés à pied) ne doivent jamais compter.
+
+**Petits restes connus dans le code.**
+- `EconomyController` mentionne encore des « socles » dans ses commentaires : ce sont les familiers qui se baladent dans la base.
+- Le familier équipé apparaît aussi parmi les familiers de la base (il fait partie de `GetTopPets`) : à traiter avec le vol (§7.5).
+- Le classement « Argent » est une `StringValue` (affichage abrégé) : il ne se trie pas numériquement.
+- Les outils de vérification (`luau-lsp`) sont téléchargés dans le dossier temporaire de session : à re-télécharger à chaque nouvelle session.
