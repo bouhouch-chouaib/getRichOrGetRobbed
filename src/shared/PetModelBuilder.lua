@@ -12,6 +12,8 @@ local PetCatalog = require(script.Parent.PetCatalog)
 
 local PetModelBuilder = {}
 
+local normalizeCustom: (Model, PetCatalog.Pet) -> Model
+
 local GOLD = Color3.fromRGB(255, 205, 50)
 local EYE = Color3.fromRGB(20, 20, 25)
 local WHITE = Color3.fromRGB(245, 245, 245)
@@ -420,6 +422,58 @@ local function finalize(model: Model)
 	end
 end
 
+-- Hauteur visée d'un familier selon sa rareté (même gabarit que les modèles de remplacement).
+local function targetHeight(rarityId: string): number
+	local rarityIndex = Config.RarityIndex[rarityId] or 1
+	return 3.2 * (0.8 + rarityIndex * 0.06)
+end
+
+-- Prépare un modèle 3D importé (ReplicatedStorage.PetModels.<Id>) pour qu'il se comporte comme les autres :
+--   - tourné pour regarder vers -Z (les fichiers .glb/.fbx regardent en général vers +Z : 180° par défaut,
+--     réglable avec l'attribut "FacingYaw" en degrés sur le Model),
+--   - mis à la hauteur standard de sa rareté (attribut "HeightScale" sur le Model pour l'ajuster),
+--   - centré sur un "Root" invisible à l'origine (comme les modèles de remplacement).
+function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
+	local source = custom:Clone()
+	local model = Instance.new("Model")
+	model.Name = entry.Id
+
+	local root = Instance.new("Part")
+	root.Name = "Root"
+	root.Size = Vector3.one * 0.2
+	root.Transparency = 1
+	root.CFrame = CFrame.new()
+	root.Parent = model
+	model.PrimaryPart = root
+
+	for _, child in ipairs(source:GetChildren()) do
+		child.Parent = model
+	end
+	source:Destroy()
+
+	-- Centre de la boîte englobante du contenu importé -> origine, puis rotation.
+	local yaw = custom:GetAttribute("FacingYaw")
+	local yawDegrees = if type(yaw) == "number" then yaw else 180
+	local box = model:GetBoundingBox()
+	local offset = CFrame.Angles(0, math.rad(yawDegrees), 0) * CFrame.new(-box.Position)
+	for _, descendant in ipairs(model:GetDescendants()) do
+		if descendant:IsA("BasePart") and descendant ~= root then
+			descendant.CFrame = offset * descendant.CFrame
+		end
+	end
+
+	local _, size = model:GetBoundingBox()
+	local heightScale = custom:GetAttribute("HeightScale")
+	local wanted = targetHeight(entry.Rarity) * (if type(heightScale) == "number" then heightScale else 1)
+	if size.Y > 0 then
+		model:ScaleTo(wanted / size.Y)
+	end
+
+	finalize(model)
+	model:SetAttribute("Float", entry.Look.Float == true)
+	return model
+end
+
 -- Construit le modèle du familier petId (nil si l'Id est inconnu).
 function PetModelBuilder.Build(petId: string): Model?
 	local entry = PetCatalog.ById[petId]
@@ -430,13 +484,7 @@ function PetModelBuilder.Build(petId: string): Model?
 	local folder = ReplicatedStorage:FindFirstChild("PetModels")
 	local custom = folder and folder:FindFirstChild(petId)
 	if custom and custom:IsA("Model") then
-		local clone = custom:Clone()
-		if not clone.PrimaryPart then
-			clone.PrimaryPart = clone:FindFirstChildWhichIsA("BasePart", true)
-		end
-		finalize(clone)
-		clone:SetAttribute("Float", entry.Look.Float == true)
-		return clone
+		return normalizeCustom(custom, entry)
 	end
 
 	local look = entry.Look
