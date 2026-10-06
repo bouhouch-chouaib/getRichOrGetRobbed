@@ -80,6 +80,12 @@ local function withRetries<T>(action: () -> T): (boolean, T | string)
 			return true, result
 		end
 		lastError = tostring(result)
+		-- Studio sans "Enable Studio Access to API Services" : inutile de réessayer.
+		if string.find(lastError, "Studio access to APIs is not allowed", 1, true) then
+			warn("[SessionData] Sauvegarde désactivée dans Studio : Accueil > Paramètres du jeu > Sécurité > "
+				.. "cocher \"Enable Studio Access to API Services\" (le jeu doit être publié).")
+			return false, lastError
+		end
 		task.wait(attempt)
 	end
 	return false, lastError
