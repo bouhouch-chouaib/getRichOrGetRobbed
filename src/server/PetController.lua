@@ -40,6 +40,27 @@ function PetController.Init()
 			giveAll(player)
 		end
 	end
+
+	if RunService:IsStudio() and #Config.StudioTestPets > 0 then
+		local function giveTestPets(player: Player)
+			-- Petit délai : laisse le chargement de la sauvegarde se faire avant (sinon il écraserait l'équipement).
+			task.delay(3, function()
+				if not player.Parent then
+					return
+				end
+				for _, petId in ipairs(Config.StudioTestPets) do
+					if PetCatalog.ById[petId] then
+						SessionData.AddPets(player, { [petId] = 1 })
+						SessionData.Equip(player, petId)
+					end
+				end
+			end)
+		end
+		Players.PlayerAdded:Connect(giveTestPets)
+		for _, player in ipairs(Players:GetPlayers()) do
+			giveTestPets(player)
+		end
+	end
 end
 
 return PetController

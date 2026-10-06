@@ -135,6 +135,9 @@ Config.Fusion = {
 -- Test : dans Roblox Studio uniquement, chaque joueur reçoit 1 exemplaire de chaque familier
 -- (pour voir tous les modèles). Mettre à false pour tester la vraie progression.
 Config.StudioGiveAllPets = false
+-- Test : dans Studio uniquement, ces familiers sont donnés ET équipés à l'arrivée (pour essayer un modèle 3D).
+-- Vider la liste ({}) pour désactiver.
+Config.StudioTestPets = { "CapybaraZen" } :: { string }
 
 -- Argent : revenu passif des familiers + bonus de fin de digestion.
 Config.Economy = {
