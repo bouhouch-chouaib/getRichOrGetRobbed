@@ -2,7 +2,8 @@
 -- InteractionController : tenir et lancer des objets.
 --   [E] sur un objet -> le serveur valide et répond ItemGrabbed -> on soude l'objet à la main
 --   (ou dans le dos si la main est déjà prise : sac à dos).
---   Clic gauche maintenu -> charge (ralentissement + zoom + arc de prédiction).
+--   Clic gauche maintenu (PC), bouton LANCER maintenu (mobile) ou gâchette droite (manette)
+--   -> charge (ralentissement + zoom + arc de prédiction).
 --   Relâchement -> on détruit le weld, on réactive les collisions et on propulse via ApplyImpulse.
 
 local Players = game:GetService("Players")
@@ -14,6 +15,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local ScreenScale = require(script.Parent.ScreenScale)
 local Toast = require(script.Parent.Toast)
 
 local THROW = Config.Throw
@@ -64,6 +66,71 @@ marker.CanQuery = false
 marker.CanTouch = false
 marker.Transparency = 1
 marker.Parent = trajectory
+
+----------------------------------------------------------------------
+-- Bouton LANCER (écrans tactiles) : maintenir pour viser, relâcher pour lancer
+----------------------------------------------------------------------
+
+local throwGui = Instance.new("ScreenGui")
+throwGui.Name = "ThrowButton"
+throwGui.ResetOnSpawn = false
+throwGui.Parent = player:WaitForChild("PlayerGui")
+local throwRoot = ScreenScale.attach(throwGui)
+
+local throwButton = Instance.new("TextButton")
+throwButton.Name = "Throw"
+throwButton.AnchorPoint = Vector2.new(1, 1)
+-- Au-dessus du bouton de saut de Roblox (en bas à droite).
+throwButton.Position = UDim2.new(1, -40, 1, -230)
+throwButton.Size = UDim2.fromOffset(150, 150)
+throwButton.BackgroundColor3 = Color3.new(1, 1, 1)
+throwButton.AutoButtonColor = false
+throwButton.Text = ""
+throwButton.Visible = false
+throwButton.Parent = throwRoot
+do
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0.5, 0)
+	round.Parent = throwButton
+	local border = Instance.new("UIStroke")
+	border.Thickness = 5
+	border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	border.Parent = throwButton
+	local shade = Instance.new("UIGradient")
+	shade.Color = ColorSequence.new(Color3.fromRGB(255, 190, 60), Color3.fromRGB(240, 90, 20))
+	shade.Rotation = 90
+	shade.Parent = throwButton
+end
+
+-- Jauge de charge qui monte dans le bouton.
+local chargeFill = Instance.new("Frame")
+chargeFill.AnchorPoint = Vector2.new(0.5, 1)
+chargeFill.Position = UDim2.fromScale(0.5, 1)
+chargeFill.Size = UDim2.fromScale(1, 0)
+chargeFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+chargeFill.BackgroundTransparency = 0.55
+chargeFill.BorderSizePixel = 0
+chargeFill.Parent = throwButton
+do
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0.5, 0)
+	round.Parent = chargeFill
+end
+
+local throwLabel = Instance.new("TextLabel")
+throwLabel.BackgroundTransparency = 1
+throwLabel.Size = UDim2.fromScale(1, 1)
+throwLabel.Font = Enum.Font.LuckiestGuy
+throwLabel.TextSize = 34
+throwLabel.TextColor3 = Color3.new(1, 1, 1)
+throwLabel.Text = "LANCER"
+throwLabel.ZIndex = 2
+throwLabel.Parent = throwButton
+do
+	local outline = Instance.new("UIStroke")
+	outline.Thickness = 3
+	outline.Parent = throwLabel
+end
 
 local function hideTrajectory()
 	for _, dot in ipairs(dots) do
@@ -191,8 +258,13 @@ local function getTorso(character: Model): BasePart?
 	return nil
 end
 
+local function refreshThrowButton()
+	throwButton.Visible = ScreenScale.isTouch() and #stack > 0
+end
+
 -- Soude chaque objet à sa place : le premier dans la main, les autres empilés dans le dos.
 local function relayout()
+	refreshThrowButton()
 	local character = player.Character
 	if not character then
 		return
@@ -302,17 +374,9 @@ Remotes.Knockback.OnClientEvent:Connect(function(velocity: Vector3)
 	end
 end)
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed or input.UserInputType ~= Enum.UserInputType.MouseButton1 then
-		return
-	end
-	if #stack > 0 then
-		startCharging()
-	end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType ~= Enum.UserInputType.MouseButton1 or not isCharging then
+-- Fin de charge : lance l'objet (ou refuse si le joueur est dans sa propre base).
+local function releaseThrow()
+	if not isCharging then
 		return
 	end
 	if isOnOwnBase() then
@@ -321,6 +385,48 @@ UserInputService.InputEnded:Connect(function(input)
 		return
 	end
 	throw()
+end
+
+local function isThrowInput(input: InputObject): boolean
+	return input.UserInputType == Enum.UserInputType.MouseButton1 or input.KeyCode == Enum.KeyCode.ButtonR2
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed or not isThrowInput(input) then
+		return
+	end
+	if #stack > 0 then
+		startCharging()
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if isThrowInput(input) then
+		releaseThrow()
+	end
+end)
+
+-- Tactile : le doigt posé sur LANCER charge ; quand ce même doigt se lève (même hors du bouton), on lance.
+throwButton.InputBegan:Connect(function(input)
+	if input.UserInputType ~= Enum.UserInputType.Touch and input.UserInputType ~= Enum.UserInputType.MouseButton1 then
+		return
+	end
+	if #stack == 0 or isCharging then
+		return
+	end
+	startCharging()
+	local connection: RBXScriptConnection
+	connection = input:GetPropertyChangedSignal("UserInputState"):Connect(function()
+		if input.UserInputState == Enum.UserInputState.End or input.UserInputState == Enum.UserInputState.Cancel then
+			connection:Disconnect()
+			releaseThrow()
+		end
+	end)
+end)
+
+-- Jauge du bouton LANCER.
+RunService.RenderStepped:Connect(function()
+	chargeFill.Size = UDim2.fromScale(1, if isCharging then chargeRatio() else 0)
 end)
 
 RunService.RenderStepped:Connect(updateTrajectory)

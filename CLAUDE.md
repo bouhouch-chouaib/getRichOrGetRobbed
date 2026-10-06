@@ -68,6 +68,7 @@ multiplicateur additif + suit le joueur (`PetFollow`) • revenu = 10 meilleurs 
 annonces serveur Légendaire+ • familiers qui se baladent dans la base (`BasePetsController` + `client/BasePets`, plus de socles) •
 palettes à objets + objets sauvages dans l'arène + amélioration Chance • plaque d'apparition invisible •
 verrouillage 5 s relancé à chaque passage • consigne de phase en bas de l'écran •
+**mobile** : `client/ScreenScale` (UI à l'échelle), bouton LANCER tactile, gâchette R2 manette •
 économie rééquilibrée (revenus bas, prix hauts) • objets non roulants (frottement max) • map agrandie (bases à 215) •
 `Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester) • sauvegarde DataStore •
 machine de fusion + boutique physiques dans 4 kiosques entre les bases • économie en grands nombres (K/M/B/T, `NumberFormat`) •

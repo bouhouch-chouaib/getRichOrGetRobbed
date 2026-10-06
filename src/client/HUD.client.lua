@@ -16,6 +16,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local ScreenScale = require(script.Parent.ScreenScale)
 local Toast = require(script.Parent.Toast)
 
 local player = Players.LocalPlayer
@@ -29,7 +30,9 @@ local MONEY = Color3.fromRGB(110, 240, 70)
 local PHASES = {
 	Feeding = {
 		Title = "NOURRIS LE TROU NOIR !",
-		Hint = "[E] ramasser  •  maintiens CLIC GAUCHE pour viser, relâche pour lancer",
+		Hint = if ScreenScale.isTouch()
+			then "Touche RAMASSER sur un objet  •  maintiens LANCER pour viser, relâche pour lancer"
+			else "[E] ramasser  •  maintiens CLIC GAUCHE pour viser, relâche pour lancer",
 		Color = Color3.fromRGB(200, 120, 255),
 	},
 	Digesting = {
@@ -126,11 +129,13 @@ end
 -- Fenêtres (popups)
 ----------------------------------------------------------------------
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "HUD"
-gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.Parent = player:WaitForChild("PlayerGui")
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "HUD"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = player:WaitForChild("PlayerGui")
+-- Tous les éléments sont parentés à "gui", un cadre mis à l'échelle de l'écran (téléphone, tablette, PC).
+local gui = ScreenScale.attach(screenGui)
 
 type Window = {
 	frame: Frame,
@@ -276,8 +281,9 @@ pointsLabel.Size = UDim2.fromOffset(400, 34)
 local leftColumn = Instance.new("Frame")
 leftColumn.Name = "Left"
 leftColumn.BackgroundTransparency = 1
-leftColumn.AnchorPoint = Vector2.new(0, 0.5)
-leftColumn.Position = UDim2.new(0, 16, 0.5, 0)
+-- Sur tactile, la colonne est collée en haut pour ne pas passer sous le joystick (bas gauche).
+leftColumn.AnchorPoint = if ScreenScale.isTouch() then Vector2.new(0, 0) else Vector2.new(0, 0.5)
+leftColumn.Position = if ScreenScale.isTouch() then UDim2.new(0, 16, 0, 10) else UDim2.new(0, 16, 0.5, 0)
 leftColumn.Size = UDim2.fromOffset(240, 400)
 leftColumn.Parent = gui
 

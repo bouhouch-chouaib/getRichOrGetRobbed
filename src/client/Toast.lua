@@ -5,6 +5,8 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
+local ScreenScale = require(script.Parent.ScreenScale)
+
 local Toast = {}
 
 local player = Players.LocalPlayer
@@ -22,9 +24,14 @@ label.Size = UDim2.fromOffset(800, 50)
 label.BackgroundTransparency = 1
 label.Font = Enum.Font.LuckiestGuy
 label.TextSize = 38
+-- Les longs messages (annonces) rétrécissent pour tenir dans la largeur.
+label.TextScaled = true
+local sizeLimit = Instance.new("UITextSizeConstraint")
+sizeLimit.MaxTextSize = 38
+sizeLimit.Parent = label
 label.TextColor3 = Color3.new(1, 1, 1)
 label.Visible = false
-label.Parent = gui
+label.Parent = ScreenScale.attach(gui)
 
 local outline = Instance.new("UIStroke")
 outline.Thickness = 3.5

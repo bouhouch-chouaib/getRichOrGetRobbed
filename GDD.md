@@ -86,6 +86,14 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
      `Remotes.Knockback` → **le client** applique l'impulsion (il est propriétaire réseau de son personnage ;
      une impulsion appliquée par le serveur sur un personnage n'est pas fiable).
 
+## Mobile / manette
+
+- `client/ScreenScale` : toute l'interface est dessinée pour 1280x720 puis mise à l'échelle de l'écran (min 0,5).
+- Bouton **LANCER** rond (bas droite, au-dessus du saut) sur écran tactile : maintenir = charger/viser, relâcher = lancer
+  (jauge de charge dans le bouton). Gâchette droite (ButtonR2) à la manette.
+- Consigne de phase adaptée à l'appareil ; colonne de gauche remontée sur tactile (joystick) ; familiers de base animés
+  jusqu'à 150 studs sur téléphone (260 sur PC).
+
 ## Architecture (Rojo)
 
 - `src/shared` → `ReplicatedStorage.Shared`

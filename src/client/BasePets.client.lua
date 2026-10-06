@@ -15,7 +15,9 @@ local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 
 local rng = Random.new()
 
-local VIEW_DISTANCE = 260 -- au-delà, les familiers d'une base ne sont plus animés
+local UserInputService = game:GetService("UserInputService")
+-- Au-delà, les familiers d'une base ne sont plus animés (plus court sur téléphone pour les performances).
+local VIEW_DISTANCE = if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then 150 else 260
 local AREA = 22 -- demi-taille de la zone de promenade (la base fait 56 x 56, clôture comprise)
 local CRATE_ZONE = 13 -- les coins (cagettes) sont évités
 
