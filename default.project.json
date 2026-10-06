@@ -7,6 +7,9 @@
       "Shared": {
         "$path": "src/shared"
       },
+      "PetModels": {
+        "$path": "assets/PetModels"
+      },
       "Remotes": {
         "$className": "Folder",
         "ItemGrabbed": { "$className": "RemoteEvent" },
