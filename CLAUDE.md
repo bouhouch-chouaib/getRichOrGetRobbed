@@ -55,6 +55,9 @@ rojo build -o test.rbxlx
 - État des joueurs : `SessionData` → attributs Player (lus par le HUD) + leaderstats, **sauvegardé en DataStore**
   (`PlayerData_v1`). Ne jamais sauvegarder si le chargement a échoué (`data.loaded`). Dans Studio il faut que le jeu
   soit publié et que "Enable Studio Access to API Services" soit coché (Game Settings > Security).
+- **Verrou de session (anti-duplication)** : toute lecture/écriture de la sauvegarde passe par `UpdateAsync` et le champ
+  `session` (jamais `SetAsync`/`GetAsync`) ; un serveur n'écrit que s'il tient le verrou, le libère au départ du joueur.
+  Toute future feature qui transfère des familiers (vol, échanges) doit s'appuyer dessus. Détails : GDD.md.
 - Toute valeur d'équilibrage va dans `src/shared/Config.lua`.
 
 ## État actuel (fait)

@@ -8,7 +8,7 @@
 
 | # | Étape | Ce que ça change pour le joueur | Fini quand… |
 |---|---|---|---|
-| 1 | **Anti-duplication** : verrou de session sur la sauvegarde | Rien de visible ; empêche de copier des familiers en jouant sur 2 serveurs | Un même compte ne peut pas être chargé deux fois ; aucune perte de sauvegarde |
+| 1 | ✅ **Anti-duplication** : verrou de session sur la sauvegarde (codé et testé le 8 oct. sur une fausse base : 28/28 ; reste le test réel) | Rien de visible ; empêche de copier des familiers en jouant sur 2 serveurs | Un même compte ne peut pas être chargé deux fois ; aucune perte de sauvegarde |
 | 2 | **Familiers de base gérés par le serveur** | Tous les joueurs voient les familiers au même endroit ; le familier équipé ne se balade plus dans la base | 2 joueurs voient la même chose ; aucune saccade sur mobile |
 | 3 | **Vol de familiers** (spec ROADMAP §5) | [E] sur un familier adverse, le porter jusqu'à sa base, ralenti ×0,6 | Les 8 cas de test de la spec passent |
 | 4 | **Défense** : récupération par le propriétaire ([E] près du voleur) + annonces de vol | La victime peut reprendre son familier | Testé à 2 joueurs |

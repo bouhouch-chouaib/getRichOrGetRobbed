@@ -92,7 +92,7 @@
 - Mobile/manette : UI mise à l'échelle, bouton LANCER tactile, colonne gauche remontée, animations allégées, R2.
 
 ### Technique
-- DataStore : argent, familiers, équipés, niveaux, XP, améliorations, pitié. Sauvegarde à la déconnexion, toutes les 60 s, à l'arrêt serveur. Rien n'est sauvegardé si le chargement a échoué.
+- DataStore : argent, familiers, équipés, niveaux, XP, améliorations, pitié. Sauvegarde à la déconnexion, toutes les 60 s, à l'arrêt serveur. Rien n'est sauvegardé si le chargement a échoué. Verrou de session anti-duplication (fait le 8 oct. 2026, voir GDD).
 - Serveur autoritaire : achats, fusion, équipement, ramassage, score, récompenses.
 - Rojo, code typé strict : 7 fichiers client, 15 serveur, 7 partagés. GitHub, GDD, CLAUDE.md.
 - Options Studio : tous les familiers, familiers de test équipés, durées courtes (30 s / 20 s, désactivé).
@@ -102,7 +102,7 @@
 - Social : pas d'échanges ; pas de vol de familiers ; pas de codes, bonus de groupe, badges.
 - Robux : aucun gamepass ni produit.
 - Pas de tutoriel.
-- Sécurité : pas d'anti-triche sur les lancers (calculés côté client) ; pas de protection anti-duplication entre serveurs ; sauvegarde pas remise à zéro pour l'ouverture.
+- Sécurité : pas d'anti-triche sur les lancers (calculés côté client) ; ~~pas de protection anti-duplication entre serveurs~~ (fait : verrou de session) ; sauvegarde pas remise à zéro pour l'ouverture.
 - Publication : noms de brainrots repris de *Steal a Brainrot* non renommés ; icône, vignettes, description à faire ; questionnaire de maturité à remplir ; aucun test multijoueur réel.
 
 ---
@@ -316,10 +316,11 @@ rojo build -o test.rbxlx
 - Points d'accroche existants : KO du dôme → `BlackholeController.knockbackPlayer` (appelle déjà `ItemInteraction.ReleaseHeld`) ;
   verrou → attribut `Locked` de la base ; transfert sans duplication → `SessionData.RemovePets` + `SessionData.AddPets`
   dans la même étape serveur, puis sauvegarde des deux profils.
-- **Pas de verrou de session DataStore** aujourd'hui (§P0.6) : un joueur sur deux serveurs peut dupliquer. À faire avant/avec le vol.
+- ~~Pas de verrou de session DataStore~~ **Fait (8 oct. 2026)** : verrou de session dans `SessionData` (voir GDD). Le transfert
+  du vol doit rester une seule étape serveur (`RemovePets` + `AddPets`) entre deux joueurs dont ce serveur tient les deux verrous.
 
 ### 7.6 Sauvegarde (schéma actuel)
-- Champs sauvegardés : `version = 1`, `levels` {Speed, Strength}, `xp` {Speed, Strength}, `money`, `pets` {petId → quantité},
+- Champs sauvegardés : `version = 2`, `session` {id, job, studio, time} (verrou, `nil` = libre), `levels` {Speed, Strength}, `xp` {Speed, Strength}, `money`, `pets` {petId → quantité},
   `equipped` {petId…}, `pity`, `upgrades` {Id → niveau}. Le score de manche n'est pas sauvegardé.
 - Chargement asynchrone : les données par défaut existent dès l'arrivée ; la sauvegarde est fusionnée ensuite (`data.loaded = true`).
 - Dans Studio, la sauvegarde ne marche que si le jeu est publié **et** que « Enable Studio Access to API Services » est coché

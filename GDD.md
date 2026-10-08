@@ -117,6 +117,13 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `SessionData` : données joueur (niveaux/XP Vitesse et Force, money, pets, équipés, pitié, upgrades) → attributs Player + leaderstats.
     **Sauvegardées** dans le DataStore `PlayerData_v1` (clé `u_<UserId>`) : chargement à la connexion, sauvegarde à la
     déconnexion, toutes les 60 s et à l'arrêt du serveur. Échec de chargement = aucune sauvegarde (protection anti-écrasement).
+    **Verrou de session** (anti-duplication, schéma `version = 2`) : la sauvegarde contient `session = { id, job, studio, time }`.
+    Au chargement, le serveur prend le verrou par `UpdateAsync` ; s'il est tenu par un autre serveur, il réessaie toutes les 3 s
+    (attribut `SaveWaiting` → message dans le HUD) et le reprend s'il n'a pas été rafraîchi depuis 3 min (serveur planté) ;
+    au-delà de 3 min 30 le joueur est expulsé avec un message. Chaque sauvegarde vérifie que le verrou est toujours à nous
+    (sinon : rien n'est écrit, joueur expulsé). Le départ du joueur / l'arrêt du serveur libèrent le verrou (`session = nil`).
+    Les opérations d'un même joueur passent une par une (file à tickets). Dans Studio, le verrou laissé par une partie de test
+    précédente est repris directement (jamais celui d'un vrai serveur).
 - `src/client` → `StarterPlayerScripts.Client`
   - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
   - `HUD` : style cartoon (police LuckiestGuy, contours noirs épais, boutons en dégradé) : phase + chrono, argent et revenu, points, vitesse, boutons BOUTIQUE / FAMILIERS (fenêtres), popup de récompenses.

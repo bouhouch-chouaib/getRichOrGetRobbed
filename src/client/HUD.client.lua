@@ -767,6 +767,15 @@ local function updateStats()
 	updateFusion(money)
 end
 
+-- Sauvegarde encore ouverte sur l'ancien serveur (on vient d'en changer) : le serveur attend qu'elle se libère.
+player:GetAttributeChangedSignal("SaveWaiting"):Connect(function()
+	if player:GetAttribute("SaveWaiting") == true then
+		Toast.show("CHARGEMENT DE TA SAUVEGARDE... PATIENTE QUELQUES SECONDES", Color3.fromRGB(255, 220, 60))
+	else
+		Toast.show("SAUVEGARDE CHARGÉE !", Color3.fromRGB(110, 240, 70))
+	end
+end)
+
 -- Petit "pop" du compteur d'argent quand il augmente.
 local lastMoney = numberAttribute("Money")
 local moneyScale = Instance.new("UIScale")
