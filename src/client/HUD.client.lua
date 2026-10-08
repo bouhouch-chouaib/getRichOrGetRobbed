@@ -807,16 +807,39 @@ end)
 
 local STEAL_MESSAGES: { [string]: { text: string, color: Color3 } } = {
 	Success = { text = "%s EST À TOI !", color = Color3.fromRGB(110, 240, 70) },
-	KO = { text = "TU AS LÂCHÉ %s : IL RENTRE CHEZ LUI !", color = Color3.fromRGB(255, 90, 90) },
-	Timeout = { text = "TROP LENT ! %s RENTRE CHEZ LUI", color = Color3.fromRGB(255, 90, 90) },
-	VictimLeft = { text = "SON PROPRIÉTAIRE EST PARTI : %s RENTRE CHEZ LUI", color = Color3.fromRGB(255, 90, 90) },
-	Gone = { text = "%s N'EST PLUS LÀ !", color = Color3.fromRGB(255, 90, 90) },
+	KO = { text = "LÂCHÉ ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
+	Timeout = { text = "TROP LENT ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
+	VictimLeft = { text = "SON PROPRIÉTAIRE EST PARTI ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
+	Gone = { text = "PLUS LÀ : %s !", color = Color3.fromRGB(255, 90, 90) },
+	Recovered = { text = "RATTRAPÉ ! SON PROPRIÉTAIRE A REPRIS : %s", color = Color3.fromRGB(255, 90, 90) },
 }
 
 Remotes.StealResult.OnClientEvent:Connect(function(outcome: string, petId: string)
 	local message = STEAL_MESSAGES[outcome]
 	if message then
 		Toast.show(string.format(message.text, petName(petId)), message.color)
+	end
+end)
+
+-- Vol de familiers : messages pour la victime, et annonce à tout le serveur des vols rares.
+local RECOVER_KEY = if ScreenScale.isTouch() then "TOUCHE REPRENDRE" else "APPUIE SUR [E]"
+
+Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: string, victimName: string, petId: string)
+	local thief = thiefName:upper()
+	local pet = petName(petId)
+	-- Les noms de familiers ont parfois un article ("Le Capybara Zen"), parfois non ("Chat") : tournures neutres.
+	if kind == "Started" then
+		Toast.show(string.format("🚨 VOL EN COURS : %s ! RATTRAPE %s ET %s !", pet, thief, RECOVER_KEY), Color3.fromRGB(255, 90, 90))
+	elseif kind == "Stolen" then
+		Toast.show(string.format("VOLÉ PAR %s : %s !", thief, pet), Color3.fromRGB(255, 90, 90))
+	elseif kind == "Recovered" then
+		Toast.show(string.format("RÉCUPÉRÉ : %s !", pet), Color3.fromRGB(110, 240, 70))
+	elseif kind == "Returned" then
+		Toast.show(string.format("DE RETOUR DANS TA BASE : %s !", pet), Color3.fromRGB(110, 240, 70))
+	elseif kind == "Announce" then
+		local entry = PetCatalog.ById[petId]
+		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
+		Toast.show(string.format("🚨 %s A VOLÉ %s À %s !", thief, pet, victimName:upper()), if rarity then rarity.Color else Color3.new(1, 1, 1))
 	end
 end)
 

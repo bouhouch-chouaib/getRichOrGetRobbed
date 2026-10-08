@@ -1,8 +1,10 @@
 --!strict
 -- PetFollow : affiche les familiers équipés de TOUS les joueurs, qui les suivent, et le familier volé
 -- que porte un voleur dans son dos (avec son nom et le temps restant).
--- Rendu 100 % local (aucune réplication réseau) à partir des attributs "Equipped", "CarryingPet" et
--- "CarryingUntil" de chaque Player.
+-- Rendu 100 % local (aucune réplication réseau) à partir des attributs "Equipped", "CarryingPet",
+-- "CarryingUntil" et "CarryingFrom" de chaque Player.
+-- Si le joueur local est la victime ("CarryingFrom" = son UserId) : le voleur est entouré de rouge (visible à
+-- travers les murs) et seule la victime voit la bulle [E] "Reprendre" posée par le serveur sur le voleur.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -35,8 +37,10 @@ local followers: { [Player]: { Follower } } = {}
 -- Familier volé porté dans le dos : position par rapport au HumanoidRootPart (derrière les épaules).
 local CARRY_OFFSET = CFrame.new(0, 1.2, 1.6)
 local CARRY_SCALE = 0.6 -- plus petit que dans la base : un gros familier ne cache pas la vue du voleur
-type Carried = { model: Model, timer: TextLabel }
+type Carried = { model: Model, timer: TextLabel, mine: boolean } -- mine : c'est MON familier qu'il porte
 local carried: { [Player]: Carried } = {}
+
+local localPlayer = Players.LocalPlayer
 
 local function clear(player: Player)
 	local list = followers[player]
@@ -115,10 +119,24 @@ local function rebuildCarried(player: Player)
 	line("🚨 " .. entry.Name:upper(), rarity.Color, 0, 0.55)
 	local timer = line("", Color3.fromRGB(255, 90, 90), 0.55, 0.45)
 	-- Le voleur lui-même voit son objectif dans la consigne du HUD (l'étiquette serait cachée par le titre).
-	sign.Enabled = player ~= Players.LocalPlayer
+	sign.Enabled = player ~= localPlayer
 	sign.Parent = model
+
+	-- C'est mon familier : le voleur est entouré de rouge, même derrière un mur, pour que je puisse le rattraper.
+	local mine = player:GetAttribute("CarryingFrom") == localPlayer.UserId
+	if mine and player.Character then
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "ThiefHighlight"
+		highlight.Adornee = player.Character
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		highlight.FillColor = Color3.fromRGB(255, 60, 60)
+		highlight.FillTransparency = 0.75
+		highlight.OutlineColor = Color3.fromRGB(255, 40, 40)
+		highlight.Parent = model -- détruit avec le modèle à la fin du vol
+	end
+
 	model.Parent = folder
-	carried[player] = { model = model, timer = timer }
+	carried[player] = { model = model, timer = timer, mine = mine }
 end
 
 local function watch(player: Player)
@@ -126,6 +144,9 @@ local function watch(player: Player)
 		rebuild(player)
 	end)
 	player:GetAttributeChangedSignal("CarryingPet"):Connect(function()
+		rebuildCarried(player)
+	end)
+	player:GetAttributeChangedSignal("CarryingFrom"):Connect(function()
 		rebuildCarried(player)
 	end)
 	rebuild(player)
@@ -170,6 +191,11 @@ RunService.RenderStepped:Connect(function(dt: number)
 		if root and root:IsA("BasePart") then
 			-- Tourné vers l'arrière, comme s'il était hissé sur le dos.
 			entry.model:PivotTo(root.CFrame * CARRY_OFFSET * CFrame.Angles(0, math.pi, 0))
+			-- Bulle "Reprendre" (posée par le serveur) : visible seulement par la victime.
+			local prompt = root:FindFirstChild("RecoverPrompt")
+			if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled ~= entry.mine then
+				prompt.Enabled = entry.mine
+			end
 		end
 		local untilTime = player:GetAttribute("CarryingUntil")
 		if type(untilTime) == "number" then

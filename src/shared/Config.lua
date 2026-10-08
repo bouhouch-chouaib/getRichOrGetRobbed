@@ -159,6 +159,9 @@ Config.Steal = {
 	HoldDuration = 0.5, -- temps d'appui sur [E] pour voler
 	PromptDistance = 8, -- distance d'affichage de la bulle [E] (studs)
 	MaxDistance = 16, -- distance max acceptée par le serveur (marge pour la latence)
+	-- Défense : la victime rattrape le voleur et appuie sur [E] ("Reprendre") pour récupérer son familier.
+	RecoverPromptDistance = 10, -- distance d'affichage de la bulle "Reprendre" (studs)
+	RecoverMaxDistance = 18, -- distance max acceptée par le serveur (les deux joueurs bougent : marge plus large)
 }
 
 export type ShopItem = {

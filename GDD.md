@@ -82,6 +82,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   Anti-duplication : pendant le transport le familier reste à la victime, seulement **réservé** (`BasePetsController.Reserve`,
   caché de sa base) ; transfert en une étape serveur (`RemovePets` puis `AddPets`) seulement si les deux sauvegardes sont chargées
   (`SessionData.IsLoaded`), puis sauvegarde immédiate de la victime puis du voleur. Résultat envoyé au voleur : `Remotes.StealResult`.
+- **Défense** : pendant un vol, le serveur pose une bulle [E] "Reprendre" (appui simple, 10 studs) sur le HumanoidRootPart du
+  voleur ; attribut `CarryingFrom` = UserId de la victime. Chez la victime seulement (`client/PetFollow`) : bulle visible et voleur
+  entouré de rouge (Highlight, visible à travers les murs). Le serveur vérifie que c'est la victime, vivante, à moins de 18 studs
+  (`Config.Steal.RecoverMaxDistance`) → le familier rentre (résultat "Recovered").
+- **Annonces** (`Remotes.StealNotice`) : à la victime "Started" (début), puis "Stolen" / "Recovered" / "Returned" (KO ou temps
+  écoulé) ; à tout le serveur "Announce" pour un vol réussi de rareté >= `Config.Loot.AnnounceMinRarity` (Légendaire).
 
 ## Règles physiques / réseau (ne pas régresser)
 

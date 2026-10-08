@@ -233,7 +233,7 @@ Permettre de voler un familier dans la base d'un autre joueur et de le ramener d
 > (34/34). « (L) » = logique vérifiée ; reste à cocher après le test réel à 2 joueurs de Chouaib.
 - [ ] (L) Vol réussi : le familier change de base, les deux sauvegardes sont correctes après reconnexion.
 - [ ] (L) Vol raté par KO : le familier revient chez la victime.
-- [ ] Vol raté par récupération du propriétaire (étape 4).
+- [ ] (L) Vol raté par récupération du propriétaire (étape 4, logique vérifiée 20/20 le 8 oct.).
 - [ ] (L) Déconnexion du voleur pendant le transport.
 - [ ] (L) Déconnexion de la victime pendant le transport.
 - [ ] (L) Impossible de voler le familier équipé, ou dans une base verrouillée.

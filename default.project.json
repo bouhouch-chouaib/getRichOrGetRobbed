@@ -21,7 +21,8 @@
         "Announcement": { "$className": "RemoteEvent" },
         "Fuse": { "$className": "RemoteEvent" },
         "FusionResult": { "$className": "RemoteEvent" },
-        "StealResult": { "$className": "RemoteEvent" }
+        "StealResult": { "$className": "RemoteEvent" },
+        "StealNotice": { "$className": "RemoteEvent" }
       }
     },
 

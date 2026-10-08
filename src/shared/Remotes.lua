@@ -58,6 +58,9 @@ return {
 	-- Serveur -> client : (petId: string) résultat de la fusion.
 	FusionResult = remote("FusionResult"),
 	-- Serveur -> voleur : (outcome: string, petId: string) fin d'un vol de familier
-	-- ("Success", "KO", "Timeout", "VictimLeft", "Gone" : voir server/StealController).
+	-- ("Success", "KO", "Timeout", "VictimLeft", "Gone", "Recovered" : voir server/StealController).
 	StealResult = remote("StealResult"),
+	-- Serveur -> victime ou tous : (kind: string, thiefName: string, victimName: string, petId: string)
+	-- kind : "Started", "Stolen", "Recovered", "Returned" (à la victime), "Announce" (à tous, vol rare réussi).
+	StealNotice = remote("StealNotice"),
 }

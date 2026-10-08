@@ -11,7 +11,7 @@
 | 1 | ✅ **Anti-duplication** : verrou de session sur la sauvegarde (codé et testé le 8 oct. sur une fausse base : 28/28 ; reste le test réel) | Rien de visible ; empêche de copier des familiers en jouant sur 2 serveurs | Un même compte ne peut pas être chargé deux fois ; aucune perte de sauvegarde |
 | 2 | ✅ **Familiers de base gérés par le serveur** (fait le 8 oct. ; décision : un familier équipé ne rapporte plus d'argent) | Tous les joueurs voient les familiers au même endroit ; le familier équipé ne se balade plus dans la base | 2 joueurs voient la même chose ; aucune saccade sur mobile |
 | 3 | ✅ **Vol de familiers** (spec ROADMAP §5 ; codé le 8 oct. avec les réglages ci-dessous, logique testée 34/34, reste le test réel à 2) | [E] sur un familier adverse, le porter jusqu'à sa base, ralenti ×0,6 | Les 8 cas de test de la spec passent |
-| 4 | **Défense** : récupération par le propriétaire ([E] près du voleur) + annonces de vol | La victime peut reprendre son familier | Testé à 2 joueurs |
+| 4 | ✅ **Défense** : récupération par le propriétaire ([E] près du voleur) + annonces de vol (fait le 8 oct. ; voleur entouré de rouge chez la victime ; logique testée 20/20, reste le test réel à 2) | La victime peut reprendre son familier | Testé à 2 joueurs |
 
 Réglages proposés : vol **seulement pendant la digestion** et base déverrouillée ; vol annulé si la victime part ; transport max **30 s**.
 
