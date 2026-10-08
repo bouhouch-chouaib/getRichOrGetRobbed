@@ -67,7 +67,7 @@
 - Fenêtre de résultats + annonce serveur pour Légendaire ou mieux.
 
 ### Familiers
-- 75 familiers, 5 catégories (Animaux, Fantastiques, Plantes, Hybrides, Brainrot), 8 raretés de Commun (50 %) à Sigma (0,1 %).
+- 75 familiers, 5 catégories (Animaux, Fantastiques, Plantes, Hybrides, Absurdes cosmiques), 8 raretés de Commun (50 %) à Sigma (0,1 %).
 - Modèles : 74 générés avec des formes de base (provisoires), 1 vrai modèle 3D importé (Capybara Zen).
 - 1 familier équipé : suit le joueur, bonus de points additif (+0,1 à +9).
 - Base : les 10 meilleurs se baladent (un par espèce, « x2 » si doublon), animations variées, nom + revenu affichés.
@@ -103,7 +103,7 @@
 - Robux : aucun gamepass ni produit.
 - ~~Pas de tutoriel~~ (fait le 8 oct., voir GDD « Tutoriel »).
 - Sécurité : pas d'anti-triche sur les lancers (calculés côté client) ; ~~pas de protection anti-duplication entre serveurs~~ (fait : verrou de session) ; sauvegarde pas remise à zéro pour l'ouverture.
-- Publication : noms de brainrots repris de *Steal a Brainrot* non renommés ; icône, vignettes, description à faire ; questionnaire de maturité à remplir ; aucun test multijoueur réel.
+- Publication : ~~noms de brainrots repris de *Steal a Brainrot*~~ (renommés le 8 oct.) ; icône, vignettes, description à faire ; questionnaire de maturité à remplir ; aucun test multijoueur réel.
 
 ---
 

@@ -12,9 +12,9 @@ spec du vol de familiers (prochaine feature) et notes techniques de passation (�
 - Il teste dans **Roblox Studio** ; Claude ne peut pas lancer Studio. Toujours dire clairement ce qui est vérifié
   (analyse statique + build) et ce qui ne l'est pas (rendu / gameplay en Studio).
 - Inspiration revendiquée : **Steal a Brainrot / Steal an Egg** (style visuel cartoon, base à verrouiller, etc.).
-  Reprendre le *style*, jamais copier assets/marques. ⚠️ Plusieurs brainrots du catalogue portent des noms de
-  personnages de Steal a Brainrot (Strawberry Elephant, Garama and Madundung, Dragon Cannelloni, Los Tacoritas,
-  Los Primos, Ketchuru and Musturu…) : à renommer/modifier **avant publication** (risque DMCA). Déjà signalé.
+  Reprendre le *style*, jamais copier assets/marques/noms/sons. Les 15 anciens « brainrots » repris de Steal a Brainrot
+  ont été remplacés le 8 oct. 2026 par des « Absurdes cosmiques » originaux (`PetCatalog.Renamed` convertit les
+  anciennes sauvegardes) : ne jamais réintroduire de personnage, mème ou son d'un autre jeu.
 
 ## Où est le code
 

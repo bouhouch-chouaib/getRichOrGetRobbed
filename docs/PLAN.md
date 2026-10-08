@@ -28,7 +28,7 @@ Réglages proposés : vol **seulement pendant la digestion** et base déverrouil
 
 | # | Étape | Détail |
 |---|---|---|
-| 9 | **Renommer les familiers copiés** de Steal a Brainrot (noms cosmiques à nous) | Obligatoire (risque DMCA) |
+| 9 | ✅ **Renommer les familiers copiés** de Steal a Brainrot (fait le 8 oct. : 15 « Absurdes cosmiques » originaux, noms + concepts + apparences ; anciennes sauvegardes converties) | Obligatoire (risque DMCA) |
 | 10 | **Anti-triche des lancers** | Le serveur vérifie distance, puissance et délai (piste ROADMAP §7.9) |
 | 11 | **Modèles 3D des 10-15 familiers les plus rares** | Pipeline ROADMAP §7.9, import direct dans Studio via le MCP |
 | 12 | **Monétisation de base** | 2X Argent, VIP, +1 sac ; produits : boost de chance serveur, tirage instantané ; `ProcessReceipt` idempotent ; probabilités affichées. Chouaib crée les passes et donne les IDs. [À DÉCIDER] dès la sortie ou après |

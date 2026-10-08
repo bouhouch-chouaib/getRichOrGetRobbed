@@ -226,17 +226,9 @@ local function object(model: Model, look: PetCatalog.Look): Anchors
 			eyes(model, CFrame.new(side * 0.8, 0.3, 0), 1.1)
 		end
 		return { head = CFrame.new(0, 0.3, 0), headSize = 1, top = CFrame.new(0, 1.8, 0), width = 1.4 }
-	elseif extra == "Toilet" then
-		part(model, BLOCK, Vector3.new(1.6, 1.6, 0.6), CFrame.new(0, 0.6, 0.8), look.Body)
-		part(model, CYL, Vector3.new(1.2, 1.8, 1.8), CFrame.new(0, -0.4, 0) * UPRIGHT, look.Body)
-		part(model, BALL, Vector3.one * 1.9, CFrame.new(0, 0.4, 0), look.Detail)
-		for index = 1, 3 do
-			part(model, BALL, Vector3.one * 0.5, CFrame.new(math.cos(index * 2) * 0.6, 1, math.sin(index * 2) * 0.6), Color3.fromRGB(150, 60, 40))
-		end
-		return { head = CFrame.new(0, 0.6, 0.6), headSize = 1.2, top = CFrame.new(0, 1.6, 0), width = 1 }
 	end
 
-	local size = if extra == "Phone" then Vector3.new(1.2, 2.2, 0.4) else Vector3.new(1.8, 1.6, 1.4)
+	local size = Vector3.new(1.8, 1.6, 1.4)
 	if extra == "Mug" then
 		part(model, CYL, Vector3.new(1.8, 1.8, 1.8), CFrame.new() * UPRIGHT, look.Body)
 		part(model, CYL, Vector3.new(0.4, 1, 1), CFrame.new(1.1, 0, 0) * FORWARD, look.Body)
@@ -245,15 +237,7 @@ local function object(model: Model, look: PetCatalog.Look): Anchors
 		return { head = head, headSize = 1.3, top = CFrame.new(0, 1.6, 0), width = 1 }
 	end
 	part(model, BLOCK, size, CFrame.new(), look.Body)
-	if extra == "Phone" then
-		part(model, BLOCK, Vector3.new(1, 1.2, 0.1), CFrame.new(0, 0.3, -0.22), look.Detail, true)
-	elseif extra == "Sombrero" then
-		part(model, CYL, Vector3.new(0.2, 2.8, 2.8), CFrame.new(0, 1, 0) * UPRIGHT, Color3.fromRGB(230, 180, 60))
-		part(model, CYL, Vector3.new(0.8, 1, 1), CFrame.new(0, 1.4, 0) * UPRIGHT, Color3.fromRGB(230, 180, 60))
-		part(model, BLOCK, Vector3.new(1.9, 0.3, 1.5), CFrame.new(0, 0.6, 0), look.Detail)
-	else
-		part(model, BLOCK, size + Vector3.new(0.05, -1.2, 0.05), CFrame.new(0, 0.55, 0), look.Detail, look.Neon)
-	end
+	part(model, BLOCK, size + Vector3.new(0.05, -1.2, 0.05), CFrame.new(0, 0.55, 0), look.Detail, look.Neon)
 	return { head = CFrame.new(0, 0, 0.2), headSize = 1.6, top = CFrame.new(0, size.Y / 2, 0), width = size.X / 2 }
 end
 
@@ -331,8 +315,6 @@ local function addExtra(model: Model, look: PetCatalog.Look, a: Anchors)
 		part(model, BALL, Vector3.one * 1, head * CFrame.new(0, s * 0.8, 0), look.Detail, true)
 	elseif extra == "Gear" then
 		part(model, CYL, Vector3.new(0.2, 1, 1), a.top * CFrame.new(0, -0.6, -0.7) * FORWARD, look.Detail)
-	elseif extra == "Jaw" then
-		part(model, BLOCK, Vector3.new(1.3, 0.45, 1.15), head * CFrame.new(0, -0.45, -0.05), look.Body)
 	elseif extra == "Antennas" then
 		for _, side in ipairs({ -1, 1 }) do
 			part(model, CYL, Vector3.new(1.2, 0.15, 0.15), a.top * CFrame.new(side * 0.5, 0.5, 0.3) * CFrame.Angles(0, 0, side * 0.3) * UPRIGHT, look.Detail)
@@ -348,13 +330,6 @@ local function addExtra(model: Model, look: PetCatalog.Look, a: Anchors)
 		humanoid(model, look, CFrame.new(1.7, -0.2, 0.3))
 		eyes(model, CFrame.new(-1.7, 0.9, 0.3), 1.1)
 		eyes(model, CFrame.new(1.7, 0.9, 0.3), 1.1)
-	elseif extra == "Twin" and look.Shape == "Humanoid" then
-		local other = head * CFrame.new(0, 0, 1.2)
-		part(model, BLOCK, Vector3.new(2, 0.7, 1.1), other, look.Detail)
-	end
-	-- Lunettes noires pour Los Primos.
-	if extra == "Trio" then
-		part(model, BLOCK, Vector3.new(1, 0.25, 0.1), head * CFrame.new(0, 0.1, -0.56), EYE)
 	end
 end
 

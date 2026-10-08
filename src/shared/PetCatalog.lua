@@ -41,7 +41,7 @@ local function pet(id: string, name: string, rarity: string, category: string, d
 	return { Id = id, Name = name, Rarity = rarity, Category = category, Description = description, Look = look }
 end
 
-local A, M, P, H, B = "Animaux", "Fantastiques", "Plantes", "Hybrides", "Brainrot"
+local A, M, P, H, B = "Animaux", "Fantastiques", "Plantes", "Hybrides", "Absurdes"
 
 local list: { Pet } = {
 	-- 🐾 Animaux
@@ -112,22 +112,22 @@ local list: { Pet } = {
 	pet("LionEnceinte", "Lion Enceinte", "Divin", H, "Lion noir à la crinière en caissons de basses.", { Shape = "Quadruped", Body = BLACK, Detail = rgb(60, 60, 70), Extra = "Mane", Effect = "Pulse", EffectColor = rgb(80, 200, 255) }),
 	pet("CanardTractopelle", "Le Canard-Tractopelle", "Sigma", H, "Canard de bain géant sur chenilles en or massif.", { Shape = "Bird", Body = rgb(255, 225, 40), Detail = GOLD, Extra = "Tracks", Effect = "Aura", EffectColor = GOLD }),
 
-	-- 🧠 Brainrot
-	pet("SigmaBoy", "Sigma Boy", "Commun", B, "Noob Roblox à la mâchoire de GigaChad.", { Shape = "Humanoid", Body = rgb(245, 205, 50), Detail = rgb(30, 110, 220), Extra = "Jaw" }),
-	pet("Trenostruzzo", "Trenostruzzo Turbo 4000", "Commun", B, "Autruche fusionnée avec une locomotive à vapeur.", { Shape = "Bird", Body = rgb(80, 80, 85), Detail = rgb(200, 60, 40), Long = true, Effect = "Steam" }),
-	pet("FragolaLaLaLa", "Fragola La La La", "Inhabituel", B, "Petite fraise dodue au visage innocent.", { Shape = "Blob", Body = rgb(235, 40, 60), Detail = rgb(60, 180, 60), Extra = "Leaf", Effect = "Music" }),
-	pet("JobJobJobSahur", "Job Job Job Sahur", "Inhabituel", B, "Ouvrier épuisé avec un café géant.", { Shape = "Humanoid", Body = rgb(255, 140, 20), Detail = rgb(255, 220, 40), Extra = "Hat" }),
-	pet("VaquitasSaturnitas", "Las Vaquitas Saturnitas", "Rare", B, "Petite vache dans une bulle spatiale à anneaux.", { Shape = "Quadruped", Body = WHITE, Detail = BLACK, Float = true, Extra = "Rings" }),
-	pet("CelularciniViciosini", "Celularcini Viciosini", "Rare", B, "Vieux téléphone à clapet avec des bras spaghettis.", { Shape = "Object", Body = rgb(60, 65, 80), Detail = rgb(120, 220, 255), Extra = "Phone" }),
-	pet("LosHotspotsitos", "Los Hotspotsitos", "Epique", B, "Box Wi-Fi en feu, visage paniqué.", { Shape = "Object", Body = WHITE, Detail = rgb(40, 40, 45), Extra = "Antennas", Effect = "Fire" }),
-	pet("Tralaledon", "Tralaledon", "Epique", B, "Créature mi-lézard mi-saucisse qui glisse à plat ventre.", { Shape = "Serpent", Body = rgb(200, 110, 80), Detail = rgb(120, 200, 90), Float = true }),
-	pet("LosTacoritas", "Los Tacoritas", "Legendaire", B, "Taco souriant en sombrero avec des maracas.", { Shape = "Object", Body = rgb(240, 190, 80), Detail = rgb(90, 200, 60), Extra = "Sombrero", Effect = "Music" }),
-	pet("LosPrimos", "Los Primos", "Legendaire", B, "Trois cousins en smoking et lunettes noires.", { Shape = "Humanoid", Body = BLACK, Detail = WHITE, Extra = "Trio", Float = true }),
-	pet("KetchuruMusturu", "Ketchuru and Musturu", "Mythique", B, "Ketchup et moutarde qui se chamaillent.", { Shape = "Object", Body = rgb(220, 30, 30), Detail = rgb(255, 210, 30), Extra = "Twin", Float = true }),
-	pet("GaramaMadundung", "Garama and Madundung", "Mythique", B, "Deux têtes déformées dos à dos qui tournent.", { Shape = "Humanoid", Body = rgb(245, 205, 50), Detail = rgb(255, 150, 200), Extra = "Twin", Float = true }),
-	pet("SpaghettiTualetti", "Spaghetti Tualetti", "Divin", B, "Toilettes débordant de spaghettis bolognaise.", { Shape = "Object", Body = WHITE, Detail = rgb(240, 200, 90), Extra = "Toilet", Effect = "Steam" }),
-	pet("DragonCannelloni", "Dragon Cannelloni", "Divin", B, "Dragon oriental en cannellonis farcis.", { Shape = "Dragon", Body = rgb(245, 220, 150), Detail = rgb(210, 40, 30), Float = true, Effect = "Sparkles", EffectColor = rgb(255, 120, 60) }),
-	pet("StrawberryElephant", "Strawberry Elephant", "Sigma", B, "Éléphant rose texture fraise, feuille en chapeau.", { Shape = "Quadruped", Body = rgb(255, 90, 140), Detail = rgb(255, 230, 80), Extra = "Trunk", Effect = "Aura", EffectColor = GOLD }),
+	-- 🌌 Absurdes cosmiques (créations originales : aucun nom ni concept repris d'un autre jeu)
+	pet("AstroBoulon", "Astro-Boulon", "Commun", B, "Petit robot astronaute tout en boulons, toujours un peu rouillé.", { Shape = "Humanoid", Body = rgb(200, 205, 215), Detail = rgb(60, 140, 255), Extra = "Antennas" }),
+	pet("AutrucheFusee", "Autruche-Fusée", "Commun", B, "Autruche pressée avec deux réacteurs sur le dos.", { Shape = "Bird", Body = rgb(240, 230, 220), Detail = rgb(255, 120, 30), Long = true, Effect = "Fire" }),
+	pet("MyrtilleLunaire", "Myrtille Lunaire", "Inhabituel", B, "Myrtille bleu nuit couverte de petits cratères.", { Shape = "Blob", Body = rgb(80, 90, 200), Detail = rgb(190, 190, 210), Effect = "Sparkles", EffectColor = rgb(200, 200, 255) }),
+	pet("ConciergeCosmique", "Concierge Cosmique", "Inhabituel", B, "Balaie la poussière d'étoiles, mais il en tombe toujours plus.", { Shape = "Humanoid", Body = rgb(70, 90, 160), Detail = rgb(255, 220, 80), Extra = "Hat", Effect = "Sparkles" }),
+	pet("MoutonMeteore", "Mouton Météore", "Rare", B, "Mouton laineux qui tombe du ciel en flammes, sans s'inquiéter.", { Shape = "Quadruped", Body = WHITE, Detail = rgb(255, 110, 40), Effect = "Fire" }),
+	pet("TelecommandePerdue", "Télécommande Perdue", "Rare", B, "Personne ne sait d'où elle vient. Elle flotte et clignote.", { Shape = "Object", Body = rgb(40, 40, 50), Detail = rgb(255, 60, 60), Float = true, Neon = true, Effect = "Pulse", EffectColor = rgb(255, 60, 60) }),
+	pet("SatelliteRonchon", "Satellite Ronchon", "Epique", B, "Satellite cabossé qui grésille dès qu'on lui parle.", { Shape = "Object", Body = rgb(190, 190, 200), Detail = rgb(60, 120, 255), Extra = "Antennas", Float = true, Effect = "Smoke" }),
+	pet("PingouinComete", "Pingouin Comète", "Epique", B, "Glisse sur le ventre à toute vitesse, une traînée de comète derrière lui.", { Shape = "Bird", Body = BLACK, Detail = WHITE, Effect = "Sparkles", EffectColor = rgb(120, 220, 255) }),
+	pet("BurritoNebuleuse", "Burrito Nébuleuse", "Legendaire", B, "Un burrito tiède qui contient une nébuleuse entière.", { Shape = "Object", Body = rgb(235, 200, 130), Detail = rgb(170, 80, 230), Neon = true, Effect = "Aura", EffectColor = rgb(200, 100, 255) }),
+	pet("TrioAsteroides", "Le Trio d'Astéroïdes", "Legendaire", B, "Trois cailloux grognons qui voyagent toujours ensemble.", { Shape = "Humanoid", Body = rgb(110, 100, 95), Detail = rgb(255, 170, 60), Extra = "Trio", Float = true, Effect = "Smoke" }),
+	pet("JumeauxEclipse", "Les Jumeaux Éclipse", "Mythique", B, "Le Soleil et la Lune, collés, qui se disputent la vedette.", { Shape = "Object", Body = rgb(255, 200, 40), Detail = rgb(200, 210, 240), Extra = "Twin", Float = true, Effect = "Pulse", EffectColor = rgb(255, 230, 120) }),
+	pet("ToupieTrouDeVer", "Toupie Trou-de-Ver", "Mythique", B, "Toupie qui tourne si vite qu'elle aspire tout autour d'elle.", { Shape = "Object", Body = rgb(60, 30, 110), Detail = rgb(0, 230, 255), Float = true, Neon = true, Effect = "Pulse", EffectColor = rgb(0, 230, 255) }),
+	pet("MachineQuantique", "Machine à Laver Quantique", "Divin", B, "Essore une galaxie à 3000 tours par seconde.", { Shape = "Object", Body = WHITE, Detail = rgb(90, 60, 200), Neon = true, Effect = "Bubbles", EffectColor = rgb(180, 140, 255) }),
+	pet("DragonAurore", "Dragon Aurore", "Divin", B, "Dragon fait d'aurores boréales qui changent de couleur.", { Shape = "Dragon", Body = rgb(60, 220, 160), Detail = rgb(150, 80, 255), Float = true, Effect = "Sparkles", EffectColor = rgb(120, 255, 200) }),
+	pet("BaleineGalaxie", "La Baleine Galaxie", "Sigma", B, "Baleine immense qui porte une galaxie entière dans son ventre.", { Shape = "Fish", Body = rgb(30, 40, 110), Detail = rgb(255, 120, 230), Float = true, Effect = "Aura", EffectColor = GOLD }),
 }
 
 local Config = require(script.Parent.Config)
@@ -136,6 +136,31 @@ local PetCatalog = {}
 
 PetCatalog.List = list
 PetCatalog.ById = {} :: { [string]: Pet }
+
+-- Anciens Id -> nouveaux (8 oct. 2026 : familiers renommés, leurs noms reprenaient ceux d'un autre jeu).
+-- Les sauvegardes qui contiennent encore un ancien Id sont converties au chargement (SessionData).
+PetCatalog.Renamed = {
+	SigmaBoy = "AstroBoulon",
+	Trenostruzzo = "AutrucheFusee",
+	FragolaLaLaLa = "MyrtilleLunaire",
+	JobJobJobSahur = "ConciergeCosmique",
+	VaquitasSaturnitas = "MoutonMeteore",
+	CelularciniViciosini = "TelecommandePerdue",
+	LosHotspotsitos = "SatelliteRonchon",
+	Tralaledon = "PingouinComete",
+	LosTacoritas = "BurritoNebuleuse",
+	LosPrimos = "TrioAsteroides",
+	KetchuruMusturu = "JumeauxEclipse",
+	GaramaMadundung = "ToupieTrouDeVer",
+	SpaghettiTualetti = "MachineQuantique",
+	DragonCannelloni = "DragonAurore",
+	StrawberryElephant = "BaleineGalaxie",
+} :: { [string]: string }
+
+-- Id actuel d'un familier (gère les anciens Id renommés).
+function PetCatalog.CurrentId(petId: string): string
+	return PetCatalog.Renamed[petId] or petId
+end
 PetCatalog.ByRarity = {} :: { [string]: { Pet } }
 
 for _, entry in ipairs(list) do

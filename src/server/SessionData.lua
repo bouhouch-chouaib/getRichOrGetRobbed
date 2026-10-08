@@ -258,8 +258,10 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	data.money = numberOr(saved.money, 0) + data.money
 	data.pity = numberOr(saved.pity, 0)
 	if type(saved.pets) == "table" then
-		for petId, count in pairs(saved.pets) do
-			if type(petId) == "string" and PetCatalog.ById[petId] and type(count) == "number" and count > 0 then
+		for savedId, count in pairs(saved.pets) do
+			-- Les anciens Id (familiers renommés) sont convertis : le joueur garde ses familiers.
+			local petId = if type(savedId) == "string" then PetCatalog.CurrentId(savedId) else nil
+			if petId and PetCatalog.ById[petId] and type(count) == "number" and count > 0 then
 				data.pets[petId] = (data.pets[petId] or 0) + math.floor(count)
 			end
 		end
@@ -277,8 +279,9 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	data.tutorialDone = data.tutorialDone or saved.tutorialDone == true or (saved.tutorialDone == nil and hasPlayed)
 	if type(saved.equipped) == "table" then
 		data.equipped = {}
-		for _, petId in ipairs(saved.equipped) do
-			if type(petId) == "string" and #data.equipped < data.equipSlots and (data.pets[petId] or 0) > 0 then
+		for _, savedId in ipairs(saved.equipped) do
+			local petId = if type(savedId) == "string" then PetCatalog.CurrentId(savedId) else nil
+			if petId and #data.equipped < data.equipSlots and (data.pets[petId] or 0) > 0 then
 				table.insert(data.equipped, petId)
 			end
 		end

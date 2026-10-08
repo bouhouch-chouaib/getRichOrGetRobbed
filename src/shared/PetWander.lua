@@ -30,7 +30,7 @@ PetWander.STYLES = {
 	Spin = { speed = 2.5, minWait = 2, maxWait = 5, hover = 2 },
 } :: { [string]: Style }
 
-local SPIN_PETS = { OuroborosInfini = true, GaramaMadundung = true, GraineEtoile = true }
+local SPIN_PETS = { OuroborosInfini = true, ToupieTrouDeVer = true, GraineEtoile = true }
 
 -- Façon de bouger selon la silhouette : marche, sautille, ondule, plane, se balance sur place, tourne sur lui-même.
 function PetWander.styleFor(petId: string): string
