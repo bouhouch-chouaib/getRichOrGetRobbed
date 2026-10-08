@@ -124,6 +124,16 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   sons repris d'autres jeux (le Creator Store en contient beaucoup : Geometry Dash, Undertale…).
 - Au chargement de la sauvegarde, les changements de niveaux / améliorations ne déclenchent ni son ni message (`DataLoaded`).
 
+## Effets de satisfaction (`client/Effects`, réglages `Config.Effects`)
+
+- **Points qui s'envolent** : quand un objet dont tu es `Owner` est avalé (`Consumed`), sa position est notée ; à la hausse de
+  `RoundScore`, un "+X" doré (BillboardGui, taille fixe à l'écran) jaillit de cet endroit, monte et s'efface (au-dessus du trou sinon).
+- **Ouverture animée** d'un tirage rare (index >= `RevealMinRarity`, 4 = Épique) : le plus rare des `RewardsGranted`, et chaque
+  `FusionResult`. Fond sombre, rayons tournants, boîte "?" qui tremble 1,1 s, puis flash, familier 3D qui pivote (ViewportFrame),
+  nom + rareté, confettis, secousse, son `RareDrop`. 3,5 s ou un clic ; plusieurs ouvertures s'enchaînent (file).
+- **Secousses d'écran** (après la caméra Roblox, `BindToRenderStep`) : éjection par le dôme (forte), ouverture rare (moyenne),
+  "on vole ton familier" (légère).
+
 ## Mobile / manette
 
 - `client/ScreenScale` : toute l'interface est dessinée pour 1280x720 puis mise à l'échelle de l'écran (min 0,5).

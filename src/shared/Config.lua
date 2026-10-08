@@ -164,6 +164,15 @@ Config.Steal = {
 	RecoverMaxDistance = 18, -- distance max acceptée par le serveur (les deux joueurs bougent : marge plus large)
 }
 
+-- Effets de satisfaction (client/Effects) : points qui s'envolent, ouverture des tirages rares, secousses d'écran.
+Config.Effects = {
+	RevealMinRarity = 4, -- ouverture animée à partir de cet index de rareté (4 = Épique)
+	RevealTime = 3.5, -- durée de l'ouverture (s), fermable avant par un clic
+	ShakeKnockback = 1, -- force des secousses (1 = forte)
+	ShakeReveal = 0.5,
+	ShakeStealAlarm = 0.35,
+}
+
 -- Sons et musique (joués par client/Sounds). Tous viennent des banques sous licence de Roblox
 -- (APM Music, Pro Sound Effects, DistroKid) : pour changer un son, remplacer son Id ici.
 export type SoundDef = { Id: number, Volume: number?, Pitch: number? }
