@@ -102,6 +102,7 @@ local function finish(carry: Carry, outcome: Outcome)
 			and SessionData.RemovePets(carry.victim, { [carry.petId] = 1 })
 		if ok then
 			SessionData.AddPets(carry.thief, { [carry.petId] = 1 })
+			BasePetsController.Celebrate(carry.thief, { carry.petId })
 		else
 			outcome = "Gone" -- la victime ne l'a plus (fusion, équipement...) ou une sauvegarde n'est pas chargée
 		end

@@ -187,6 +187,32 @@ local function updateWalks()
 	end
 end
 
+-- Nouveaux familiers du joueur (tirage, fusion, vol réussi) : la base est mise à jour tout de suite et chaque
+-- familier affiché reçoit l'attribut "ArrivedAt" (heure serveur) -> les clients jouent l'arrivée (chute + étincelles,
+-- client/BasePets). Il reste immobile le temps d'atterrir. Ceux qui ne sont pas dans la base (pas dans les 10
+-- meilleurs) n'ont pas d'effet : ils rejoignent seulement la collection.
+local LANDING_PAUSE = 2.5
+
+function BasePetsController.Celebrate(player: Player, petIds: { string })
+	local base = BaseManager.GetBase(player)
+	local state = if base then states[base] else nil
+	if not state then
+		return
+	end
+	syncBase(state)
+	local time = now()
+	for _, petId in ipairs(petIds) do
+		local pet = state.pets[petId]
+		if pet then
+			local spot = PetWander.positionAt(pet.leg, time)
+			pet.leg = { from = spot, to = spot, start = time, duration = 0 }
+			pet.nextLegAt = time + LANDING_PAUSE
+			pet.anchor:SetAttribute("Walk", PetWander.encode(pet.leg))
+			pet.anchor:SetAttribute("ArrivedAt", time)
+		end
+	end
+end
+
 -- Position officielle (monde) d'un familier de base, au niveau du sol. nil si ce n'est pas un repère de familier.
 function BasePetsController.GetPetPosition(anchor: Instance): Vector3?
 	for _, state in pairs(states) do

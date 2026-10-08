@@ -33,6 +33,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
   Chance légèrement augmentée par le score. **Pitié** : Épique+ garanti au 60e tirage sans Épique+.
 - **Annonce serveur** pour tout drop Légendaire ou mieux.
+- **Acquisition visible** : après un tirage, une fusion ou un vol réussi, `BasePetsController.Celebrate(joueur, petIds)` met la base
+  à jour tout de suite et pose `ArrivedAt` (heure serveur) sur le repère des familiers concernés. Tous les clients (`client/BasePets`)
+  jouent l'arrivée : chute depuis 18 studs, gerbe d'étincelles et flash à la couleur de la rareté, étiquette "✨ NOUVEAU ✨" 5 s,
+  rayon de lumière si Légendaire+. Seuls les familiers affichés (10 meilleurs non équipés) ont l'effet ; les autres vont dans la collection.
+- **Carte de résultats** (HUD) : petite carte sous le chrono (points, tirages, 4 meilleurs drops, argent), ne ferme aucune fenêtre,
+  disparaît après 5 s ou au clic.
 - **Machine de fusion** (`FusionController`, bâtiment physique dans chaque kiosque) : 5 familiers non équipés d'une rareté + un coût
   (250 / 15K / 750K / 40M / 2.5B / 250B $) = 1 familier aléatoire de la rareté au-dessus, de Commun jusqu'à Mythique → Divin.
   Doublons consommés en priorité. Le Sigma ne s'obtient que par chance.

@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local BasePetsController = require(script.Parent.BasePetsController)
 local SessionData = require(script.Parent.SessionData)
 
 local FusionController = {}
@@ -73,6 +74,7 @@ local function onFuse(player: Player, rarityIndex: unknown)
 
 	local result = nextBucket[rng:NextInteger(1, #nextBucket)]
 	SessionData.AddPets(player, { [result.Id] = 1 })
+	BasePetsController.Celebrate(player, { result.Id })
 	Remotes.FusionResult:FireClient(player, result.Id)
 	print(string.format("[Fusion] %s : 5 %s -> %s", player.Name, Config.Rarities[rarityIndex].Name, result.Name))
 

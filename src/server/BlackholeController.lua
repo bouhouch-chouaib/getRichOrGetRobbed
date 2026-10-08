@@ -17,6 +17,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local BasePetsController = require(script.Parent.BasePetsController)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local SessionData = require(script.Parent.SessionData)
@@ -191,6 +192,12 @@ local function distributeRewards()
 		if outcome.pulls > 0 then
 			SessionData.AddPets(player, outcome.results)
 			SessionData.AddMoney(player, money)
+			-- Les nouveaux familiers apparaissent dans la base, visibles par tous (donne envie de venir les voler).
+			local newPets = {}
+			for petId in pairs(outcome.results) do
+				table.insert(newPets, petId)
+			end
+			BasePetsController.Celebrate(player, newPets)
 		end
 		print(string.format("[Blackhole] %s : %.1f points -> %d tirage(s), +%d$", player.Name, score, outcome.pulls, money))
 		Remotes.RewardsGranted:FireClient(player, score, outcome.pulls, outcome.results, money)

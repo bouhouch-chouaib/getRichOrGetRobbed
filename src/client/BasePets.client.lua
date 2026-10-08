@@ -6,10 +6,14 @@
 -- L'animation (marche, sautille, ondule, plane, se balance, tourne) n'est qu'un effet visuel local.
 -- Vol : on déplace aussi (localement) le repère sur le familier pour que sa bulle [E] "Voler" le suive, et on
 -- n'affiche la bulle que si le vol est possible (digestion, base adverse ouverte, mains libres). Le serveur revérifie tout.
+-- Arrivée d'un nouveau familier (attribut "ArrivedAt" posé par le serveur après un tirage, une fusion ou un vol) :
+-- il tombe du ciel, gerbe d'étincelles à la couleur de sa rareté, étiquette "NOUVEAU", rayon de lumière si Légendaire+.
 
+local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
@@ -35,7 +39,13 @@ type Shown = {
 	bottomOffset: number, -- distance pivot -> bas du modèle
 	topOffset: number, -- distance pivot -> haut du modèle (pour l'étiquette)
 	seed: number,
+	arrivedAt: number?, -- heure serveur de son arrivée (animation de chute)
 }
+
+local DROP_TIME = 0.7 -- durée de la chute (s)
+local DROP_HEIGHT = 18 -- hauteur de départ (studs)
+local ARRIVAL_WINDOW = 3 -- une arrivée plus ancienne (joueur qui arrive tard) n'est pas rejouée
+local NEW_TAG_TIME = 5 -- durée de l'étiquette "NOUVEAU"
 
 type BaseDisplay = {
 	base: Model,
@@ -90,6 +100,103 @@ local function setLabel(shown: Shown)
 	sign.Parent = shown.model
 end
 
+-- Effets d'arrivée : étiquette "NOUVEAU" tout de suite, puis à l'atterrissage étincelles + flash (+ rayon si rare).
+local function playArrival(shown: Shown, arrivedAt: number)
+	local now = Workspace:GetServerTimeNow()
+	if now - arrivedAt > ARRIVAL_WINDOW then
+		return
+	end
+	shown.arrivedAt = arrivedAt
+	local model = shown.model
+	local entry = PetCatalog.ById[model.Name]
+	local root = model.PrimaryPart
+	if not entry or not root then
+		return
+	end
+	local rarityIndex = Config.RarityIndex[entry.Rarity] or 1
+	local color = Config.Rarities[rarityIndex].Color
+
+	local tag = Instance.new("BillboardGui")
+	tag.Name = "NewTag"
+	tag.Adornee = root
+	tag.Size = UDim2.fromScale(6, 1.4)
+	tag.StudsOffsetWorldSpace = Vector3.new(0, shown.topOffset + 3.8, 0)
+	tag.AlwaysOnTop = true
+	tag.LightInfluence = 0
+	tag.MaxDistance = 120
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.Size = UDim2.fromScale(1, 1)
+	label.Font = Enum.Font.LuckiestGuy
+	label.TextScaled = true
+	label.TextColor3 = color
+	label.Text = "✨ NOUVEAU ✨"
+	local outline = Instance.new("UIStroke")
+	outline.Thickness = 2.5
+	outline.Parent = label
+	label.Parent = tag
+	tag.Parent = model
+	Debris:AddItem(tag, NEW_TAG_TIME)
+
+	task.delay(math.max(0, arrivedAt + DROP_TIME - now), function()
+		if not model.Parent then
+			return
+		end
+		-- Point d'impact : pièce invisible temporaire qui porte les étincelles et la lumière.
+		local impact = Instance.new("Part")
+		impact.Name = "ArrivalEffect"
+		impact.Anchored = true
+		impact.CanCollide = false
+		impact.CanQuery = false
+		impact.CanTouch = false
+		impact.Transparency = 1
+		impact.Size = Vector3.one
+		impact.CFrame = CFrame.new(model:GetPivot().Position)
+		impact.Parent = folder
+
+		local sparks = Instance.new("ParticleEmitter")
+		sparks.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		sparks.Color = ColorSequence.new(color)
+		sparks.LightEmission = 1
+		sparks.Size = NumberSequence.new(1.2, 0)
+		sparks.Lifetime = NumberRange.new(0.6, 1.2)
+		sparks.Speed = NumberRange.new(10, 22)
+		sparks.SpreadAngle = Vector2.new(180, 180)
+		sparks.Acceleration = Vector3.new(0, -25, 0)
+		sparks.Rate = 0
+		sparks.Parent = impact
+		sparks:Emit(20 + rarityIndex * 6)
+
+		local light = Instance.new("PointLight")
+		light.Color = color
+		light.Range = 16
+		light.Brightness = 4
+		light.Parent = impact
+		TweenService:Create(light, TweenInfo.new(1), { Brightness = 0 }):Play()
+
+		-- Légendaire ou mieux : rayon de lumière qui tombe du ciel sur le familier.
+		if rarityIndex >= Config.Loot.AnnounceMinRarity then
+			local beam = Instance.new("Part")
+			beam.Name = "ArrivalBeam"
+			beam.Shape = Enum.PartType.Cylinder
+			beam.Material = Enum.Material.Neon
+			beam.Color = color
+			beam.Anchored = true
+			beam.CanCollide = false
+			beam.CanQuery = false
+			beam.CanTouch = false
+			beam.CastShadow = false
+			beam.Transparency = 0.25
+			beam.Size = Vector3.new(60, 3, 3)
+			beam.CFrame = CFrame.new(impact.Position + Vector3.new(0, 30, 0)) * CFrame.Angles(0, 0, math.pi / 2)
+			beam.Parent = folder
+			TweenService:Create(beam, TweenInfo.new(1.6), { Transparency = 1, Size = Vector3.new(60, 0.2, 0.2) }):Play()
+			Debris:AddItem(beam, 1.7)
+		end
+		Debris:AddItem(impact, 1.5)
+	end)
+end
+
 local function addPet(display: BaseDisplay, anchor: Instance)
 	if not anchor:IsA("BasePart") or display.pets[anchor] then
 		return
@@ -130,6 +237,14 @@ local function addPet(display: BaseDisplay, anchor: Instance)
 	anchor:GetAttributeChangedSignal("Count"):Connect(function()
 		setLabel(shown)
 	end)
+	local function onArrived()
+		local arrivedAt = anchor:GetAttribute("ArrivedAt")
+		if type(arrivedAt) == "number" then
+			playArrival(shown, arrivedAt)
+		end
+	end
+	anchor:GetAttributeChangedSignal("ArrivedAt"):Connect(onArrived)
+	onArrived() -- nouvelle espèce : le repère arrive avec l'attribut déjà posé
 end
 
 local function removePet(display: BaseDisplay, anchor: Instance)
@@ -182,6 +297,16 @@ local function pose(shown: Shown, dt: number, now: number): CFrame
 
 	local t = now + shown.seed
 	local height = shown.style.hover
+	-- Arrivée : chute depuis le ciel (accélérée), pour que tout le monde voie le nouveau familier.
+	local arrivedAt = shown.arrivedAt
+	if arrivedAt then
+		local fall = (now - arrivedAt) / DROP_TIME
+		if fall < 1 then
+			height += DROP_HEIGHT * (1 - math.max(0, fall) ^ 2)
+		else
+			shown.arrivedAt = nil
+		end
+	end
 	local yaw = shown.heading
 	local roll = 0
 	local name = shown.styleName

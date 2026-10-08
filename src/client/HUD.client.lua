@@ -702,15 +702,49 @@ end)
 -- Popup de récompenses (fin de manche)
 ----------------------------------------------------------------------
 
-local rewardWindow = makeWindow("DIGESTION !", Vector2.new(460, 380), Color3.fromRGB(200, 130, 255), Color3.fromRGB(110, 40, 200))
-local rewardHeadline = text(rewardWindow.content, "", 28)
-rewardHeadline.Size = UDim2.new(1, 0, 0, 36)
-rewardHeadline.Position = UDim2.fromOffset(0, 8)
-local rewardBody = text(rewardWindow.content, "", 24)
-rewardBody.Size = UDim2.new(1, 0, 1, -56)
-rewardBody.Position = UDim2.fromOffset(0, 50)
+-- Carte de résultats des tirages : petite, sous le chrono (la place des points, cachés pendant la digestion),
+-- elle ne ferme aucune fenêtre, glisse puis disparaît seule (ou au clic). Les familiers, eux, tombent dans la base.
+local REWARD_CARD_TIME = 5
+local rewardCard = Instance.new("TextButton")
+rewardCard.Name = "RewardCard"
+rewardCard.AnchorPoint = Vector2.new(0.5, 0)
+rewardCard.Position = UDim2.new(0.5, 0, 0, 112)
+rewardCard.Size = UDim2.fromOffset(360, 60)
+rewardCard.AutomaticSize = Enum.AutomaticSize.Y
+rewardCard.BackgroundColor3 = WHITE
+rewardCard.AutoButtonColor = false
+rewardCard.Text = ""
+rewardCard.Visible = false
+corner(rewardCard, 14)
+stroke(rewardCard, 4, BLACK, true)
+gradient(rewardCard, Color3.fromRGB(200, 130, 255), Color3.fromRGB(110, 40, 200))
+rewardCard.Parent = gui
+do
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 6)
+	padding.PaddingBottom = UDim.new(0, 8)
+	padding.PaddingLeft = UDim.new(0, 10)
+	padding.PaddingRight = UDim.new(0, 10)
+	padding.Parent = rewardCard
+	local layout = Instance.new("UIListLayout")
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 2)
+	layout.Parent = rewardCard
+end
+local rewardHeadline = text(rewardCard, "", 24)
+rewardHeadline.Size = UDim2.new(1, 0, 0, 28)
+rewardHeadline.LayoutOrder = 1
+local rewardBody = text(rewardCard, "", 20)
+rewardBody.Size = UDim2.new(1, 0, 0, 0)
+rewardBody.AutomaticSize = Enum.AutomaticSize.Y
 rewardBody.RichText = true
-rewardBody.TextYAlignment = Enum.TextYAlignment.Top
+rewardBody.LayoutOrder = 2
+local rewardScale = Instance.new("UIScale")
+rewardScale.Parent = rewardCard
+rewardCard.Activated:Connect(function()
+	rewardCard.Visible = false
+end)
 
 ----------------------------------------------------------------------
 -- Mise à jour
@@ -866,7 +900,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 		rewardBody.Text = "0 POINT CETTE MANCHE"
 	else
 		rewardHeadline.Text = string.format("%.1f POINTS  •  %d TIRAGE%s", score, pulls, if pulls > 1 then "S" else "")
-		-- Familiers gagnés, du plus rare au plus commun (6 lignes max).
+		-- Familiers gagnés, du plus rare au plus commun (4 lignes max).
 		local drops = {}
 		for petId, count in pairs(results) do
 			local entry = PetCatalog.ById[petId]
@@ -879,8 +913,8 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 		end)
 		local lines = {}
 		for index, drop in ipairs(drops) do
-			if index > 6 then
-				table.insert(lines, string.format("+ %d AUTRES...", #drops - 6))
+			if index > 4 then
+				table.insert(lines, string.format("+ %d AUTRES...", #drops - 4))
 				break
 			end
 			local rarity = Config.Rarities[drop.rank]
@@ -892,10 +926,12 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 		rewardBody.Text = table.concat(lines, "\n")
 	end
 
-	rewardWindow.open()
-	task.delay(7, function()
+	rewardCard.Visible = true
+	rewardScale.Scale = 0.6
+	TweenService:Create(rewardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	task.delay(REWARD_CARD_TIME, function()
 		if token == rewardToken then
-			rewardWindow.close()
+			rewardCard.Visible = false
 		end
 	end)
 end
