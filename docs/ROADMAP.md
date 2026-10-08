@@ -101,7 +101,7 @@
 - Contenu : ~~aucun son ni musique~~ (fait le 8 oct., voir GDD « Sons et musique ») ; 74/75 modèles provisoires ; pas de rebirth, quêtes, récompenses quotidiennes ; pas de classement global ni d'événements.
 - Social : pas d'échanges ; pas de vol de familiers ; pas de codes, bonus de groupe, badges.
 - Robux : aucun gamepass ni produit.
-- Pas de tutoriel.
+- ~~Pas de tutoriel~~ (fait le 8 oct., voir GDD « Tutoriel »).
 - Sécurité : pas d'anti-triche sur les lancers (calculés côté client) ; ~~pas de protection anti-duplication entre serveurs~~ (fait : verrou de session) ; sauvegarde pas remise à zéro pour l'ouverture.
 - Publication : noms de brainrots repris de *Steal a Brainrot* non renommés ; icône, vignettes, description à faire ; questionnaire de maturité à remplir ; aucun test multijoueur réel.
 
@@ -322,7 +322,7 @@ rojo build -o test.rbxlx
 
 ### 7.6 Sauvegarde (schéma actuel)
 - Champs sauvegardés : `version = 2`, `session` {id, job, studio, time} (verrou, `nil` = libre), `levels` {Speed, Strength}, `xp` {Speed, Strength}, `money`, `pets` {petId → quantité},
-  `equipped` {petId…}, `pity`, `upgrades` {Id → niveau}. Le score de manche n'est pas sauvegardé.
+  `equipped` {petId…}, `pity`, `upgrades` {Id → niveau}, `tutorialDone`. Le score de manche n'est pas sauvegardé.
 - Chargement asynchrone : les données par défaut existent dès l'arrivée ; la sauvegarde est fusionnée ensuite (`data.loaded = true`).
 - Dans Studio, la sauvegarde ne marche que si le jeu est publié **et** que « Enable Studio Access to API Services » est coché
   (sinon un avertissement clair s'affiche et rien n'est sauvegardé).

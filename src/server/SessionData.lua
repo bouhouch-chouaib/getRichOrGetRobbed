@@ -17,6 +17,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 export type Stat = "Speed" | "Strength"
 
@@ -30,6 +31,7 @@ export type PlayerData = {
 	equipSlots: number,
 	pity: number,
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
+	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
 }
 
@@ -91,6 +93,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		equipped = data.equipped,
 		pity = data.pity,
 		upgrades = data.upgrades,
+		tutorialDone = data.tutorialDone,
 		session = session,
 	}
 end
@@ -268,6 +271,10 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 			end
 		end
 	end
+	-- Les sauvegardes d'avant le tutoriel n'ont pas ce champ : un joueur qui a déjà joué (familiers ou argent)
+	-- ne doit pas le revoir.
+	local hasPlayed = (type(saved.pets) == "table" and next(saved.pets) ~= nil) or numberOr(saved.money, 0) > 0
+	data.tutorialDone = data.tutorialDone or saved.tutorialDone == true or (saved.tutorialDone == nil and hasPlayed)
 	if type(saved.equipped) == "table" then
 		data.equipped = {}
 		for _, petId in ipairs(saved.equipped) do
@@ -326,6 +333,7 @@ local function sync(player: Player)
 	end
 	player:SetAttribute("Equipped", table.concat(data.equipped, ","))
 	player:SetAttribute("EquipSlots", data.equipSlots)
+	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
 	for id, level in pairs(data.upgrades) do
 		player:SetAttribute("Upgrade_" .. id, level)
@@ -421,6 +429,7 @@ local function onPlayerAdded(player: Player)
 		equipSlots = Config.Pets.EquipSlots,
 		pity = 0,
 		upgrades = {},
+		tutorialDone = false,
 		loaded = false,
 	}
 
@@ -449,6 +458,9 @@ local function onPlayerAdded(player: Player)
 end
 
 function SessionData.Init()
+	Remotes.TutorialDone.OnServerEvent:Connect(function(player: Player)
+		SessionData.SetTutorialDone(player)
+	end)
 	Players.PlayerAdded:Connect(onPlayerAdded)
 	Players.PlayerRemoving:Connect(function(player)
 		savePlayer(player, true)
@@ -499,6 +511,15 @@ end
 -- Sauvegarde tout de suite (sans attendre la sauvegarde auto). Bloque jusqu'à la fin de l'écriture.
 function SessionData.Save(player: Player)
 	savePlayer(player, false)
+end
+
+-- Tutoriel terminé ou passé (demandé par le client : sans enjeu, aucune vérification nécessaire).
+function SessionData.SetTutorialDone(player: Player)
+	local data = storage[player]
+	if data and not data.tutorialDone then
+		data.tutorialDone = true
+		sync(player)
+	end
 end
 
 -- Réapplique la vitesse de marche (après un changement de l'attribut "SpeedMultiplier").

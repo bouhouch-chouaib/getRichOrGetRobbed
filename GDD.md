@@ -134,6 +134,15 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - **Secousses d'écran** (après la caméra Roblox, `BindToRenderStep`) : éjection par le dôme (forte), ouverture rare (moyenne),
   "on vole ton familier" (légère).
 
+## Tutoriel (`client/Tutorial`)
+
+- Affiché une seule fois : attribut `TutorialDone` (sauvegardé, champ `tutorialDone`). Les anciennes sauvegardes sans ce champ qui
+  ont déjà des familiers ou de l'argent sont considérées comme terminées. Le client attend `DataLoaded` (8 s max) avant de décider.
+- 3 étapes : (1) ramasser un objet (`ItemGrabbed`), (2) le lancer dans le trou (hausse de `RoundScore`), (3) voir ses familiers
+  (`RewardsGranted` avec tirages, fin 3 s après). Panneau en bas de l'écran + "⬇" au-dessus de la cible + rayon doré (Beam) du
+  joueur à la cible : objet le plus proche, trou noir (ou un objet si on n'en tient plus), puis sa base. Pendant la digestion,
+  l'étape 2 dit d'attendre. Bouton PASSER. Fin -> `Remotes.TutorialDone` -> `SessionData.SetTutorialDone`.
+
 ## Mobile / manette
 
 - `client/ScreenScale` : toute l'interface est dessinée pour 1280x720 puis mise à l'échelle de l'écran (min 0,5).

@@ -63,4 +63,6 @@ return {
 	-- Serveur -> victime ou tous : (kind: string, thiefName: string, victimName: string, petId: string)
 	-- kind : "Started", "Stolen", "Recovered", "Returned" (à la victime), "Announce" (à tous, vol rare réussi).
 	StealNotice = remote("StealNotice"),
+	-- Client -> serveur : () tutoriel terminé ou passé (enregistré dans la sauvegarde).
+	TutorialDone = remote("TutorialDone"),
 }
