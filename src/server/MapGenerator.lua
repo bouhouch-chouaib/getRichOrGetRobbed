@@ -361,7 +361,7 @@ local function createTitleSign(adornee: BasePart, title: string, color: Color3, 
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "TitleSign"
 	sign.Adornee = adornee
-	sign.Size = UDim2.fromScale(16, 4)
+	sign.Size = UDim2.fromScale(13, 3.5)
 	sign.StudsOffsetWorldSpace = Vector3.new(0, height, 0)
 	sign.LightInfluence = 0
 	sign.MaxDistance = 400
@@ -499,7 +499,8 @@ local function createFusionMachine(cframe: CFrame, parent: Instance)
 		knob.Material = Enum.Material.Neon
 	end
 	addWindowPrompt(console, "Machine de fusion", "Fusion")
-	createTitleSign(console, "🧪 FUSION", Color3.fromRGB(220, 140, 255), 10)
+	-- Plus haut que BOUTIQUE : vus de biais, les deux panneaux ne se chevauchent pas.
+	createTitleSign(console, "🧪 FUSION", Color3.fromRGB(220, 140, 255), 14)
 	model.Parent = parent
 end
 
