@@ -985,10 +985,17 @@ local STATION_HINTS: { [string]: string } = {
 	Treadmill = " : À GAUCHE DE TA BASE !",
 	Bench = " : À DROITE DE TA BASE !",
 }
+-- Au chargement de la sauvegarde, niveaux et améliorations passent de 0 à leur valeur : pas de message pour ça.
+-- On attend que la sauvegarde soit chargée (ou 8 s si elle ne se charge pas, ex. Studio sans accès API).
+local hudStarted = os.clock()
+local function dataReady(): boolean
+	return player:GetAttribute("DataLoaded") == true or os.clock() - hudStarted > 8
+end
+
 for _, item in ipairs(Config.Shop) do
 	player:GetAttributeChangedSignal("Upgrade_" .. item.Id):Connect(function()
 		local level = numberAttribute("Upgrade_" .. item.Id)
-		if level <= 0 then
+		if level <= 0 or not dataReady() then
 			return
 		end
 		local message = if item.MaxLevel > 1 then string.format("%s NIVEAU %d !", item.Name:upper(), level) else item.Name:upper() .. " DÉBLOQUÉ !"
@@ -1004,7 +1011,7 @@ for _, stat in ipairs({ { id = "Speed", name = "VITESSE" }, { id = "Strength", n
 	local last = numberAttribute(stat.id .. "Level")
 	player:GetAttributeChangedSignal(stat.id .. "Level"):Connect(function()
 		local level = numberAttribute(stat.id .. "Level")
-		if level > last then
+		if level > last and dataReady() then
 			Toast.show(string.format("%s NIVEAU %d !", stat.name, level), Color3.fromRGB(255, 220, 60))
 		end
 		last = level

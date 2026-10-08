@@ -98,7 +98,7 @@
 - Options Studio : tous les familiers, familiers de test équipés, durées courtes (30 s / 20 s, désactivé).
 
 ### Ce qui N'EXISTE PAS encore
-- Contenu : aucun son ni musique ; 74/75 modèles provisoires ; pas de rebirth, quêtes, récompenses quotidiennes ; pas de classement global ni d'événements.
+- Contenu : ~~aucun son ni musique~~ (fait le 8 oct., voir GDD « Sons et musique ») ; 74/75 modèles provisoires ; pas de rebirth, quêtes, récompenses quotidiennes ; pas de classement global ni d'événements.
 - Social : pas d'échanges ; pas de vol de familiers ; pas de codes, bonus de groupe, badges.
 - Robux : aucun gamepass ni produit.
 - Pas de tutoriel.

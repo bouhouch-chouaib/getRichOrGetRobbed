@@ -111,6 +111,19 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
      `Remotes.Knockback` → **le client** applique l'impulsion (il est propriétaire réseau de son personnage ;
      une impulsion appliquée par le serveur sur un personnage n'est pas fiable).
 
+## Sons et musique
+
+- Tout est côté client. `client/Sounds` (module) : `play(nom)` (son 2D, pour soi), `playAt(nom, position)` (son 3D, Attachment
+  dans Terrain, entendu jusqu'à ~140 studs), `setMusic("Feeding" | "Digesting")` (fondu de 2 s). Deux SoundGroups : Music (0,3)
+  et Effects (0,7). Sons préchargés au démarrage.
+- `client/SoundController` branche les sons sur le jeu sans rien envoyer au serveur : phase (musique), `ItemGrabbed`, `RoundScore`,
+  `Knockback`, objet `Consumed` (3D au trou), `RewardsGranted`, `FusionResult`, `Announcement`, `Upgrade_*`, niveaux, vol
+  (`CarryingPet`, `StealResult`, `StealNotice`), base `Locked` (3D au bouton). Lancer : `InteractionController` ; atterrissage
+  d'un familier : `BasePets`.
+- Ids et volumes dans `Config.Sounds` (banques sous licence Roblox : APM Music, Pro Sound Effects, DistroKid). Ne jamais utiliser de
+  sons repris d'autres jeux (le Creator Store en contient beaucoup : Geometry Dash, Undertale…).
+- Au chargement de la sauvegarde, les changements de niveaux / améliorations ne déclenchent ni son ni message (`DataLoaded`).
+
 ## Mobile / manette
 
 - `client/ScreenScale` : toute l'interface est dessinée pour 1280x720 puis mise à l'échelle de l'écran (min 0,5).

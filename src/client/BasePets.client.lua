@@ -22,6 +22,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
+local Sounds = require(script.Parent.Sounds)
 
 -- Au-delà, les familiers d'une base ne sont plus animés (plus court sur téléphone pour les performances).
 local VIEW_DISTANCE = if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then 150 else 260
@@ -166,6 +167,7 @@ local function playArrival(shown: Shown, arrivedAt: number)
 		sparks.Rate = 0
 		sparks.Parent = impact
 		sparks:Emit(20 + rarityIndex * 6)
+		Sounds.playAt(if rarityIndex >= Config.Loot.AnnounceMinRarity then "RareDrop" else "PetArrival", impact.Position)
 
 		local light = Instance.new("PointLight")
 		light.Color = color

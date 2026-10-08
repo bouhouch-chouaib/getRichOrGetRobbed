@@ -164,6 +164,38 @@ Config.Steal = {
 	RecoverMaxDistance = 18, -- distance max acceptée par le serveur (les deux joueurs bougent : marge plus large)
 }
 
+-- Sons et musique (joués par client/Sounds). Tous viennent des banques sous licence de Roblox
+-- (APM Music, Pro Sound Effects, DistroKid) : pour changer un son, remplacer son Id ici.
+export type SoundDef = { Id: number, Volume: number?, Pitch: number? }
+
+Config.Sounds = {
+	MusicVolume = 0.3,
+	EffectsVolume = 0.7,
+	MusicFade = 2, -- secondes de fondu entre les deux musiques
+	Music = {
+		Feeding = { Id = 126187826682373 }, -- "Pocket Band" (DistroKid)
+		Digesting = { Id = 9042311443 }, -- "Devil's Toy - Soft Mix" (APM) : ambiance malicieuse, le moment du vol
+	} :: { [string]: SoundDef },
+	Effects = {
+		Pickup = { Id = 9119668978, Volume = 0.8 }, -- pop cartoon
+		Throw = { Id = 9120711836, Volume = 0.6 }, -- whoosh
+		Consume = { Id = 9112752639, Volume = 0.9 }, -- bloup : un objet avalé par le trou noir
+		Score = { Id = 9119668796, Volume = 0.5, Pitch = 1.4 }, -- petit pop aigu : points marqués
+		Rewards = { Id = 1840076509, Volume = 0.7 }, -- jingle : résultats des tirages
+		RareDrop = { Id = 1839881844, Volume = 0.7 }, -- jingle : familier Légendaire+ (annonce, arrivée)
+		PetArrival = { Id = 9119668796, Volume = 0.8, Pitch = 0.8 }, -- pop grave : un familier atterrit
+		StealStart = { Id = 9120711836, Volume = 0.8, Pitch = 0.8 }, -- whoosh grave : on attrape le familier
+		StealAlarm = { Id = 9113085764, Volume = 0.6 }, -- alarme : on vole TON familier
+		StealSuccess = { Id = 9038686624, Volume = 0.7 }, -- jingle : vol réussi
+		StealFail = { Id = 115475565309914, Volume = 0.7 }, -- jingle raté : vol échoué / familier perdu
+		Recovered = { Id = 9038684308, Volume = 0.7 }, -- jingle : familier récupéré
+		Lock = { Id = 9113760542, Volume = 0.8 }, -- cliquetis : base verrouillée
+		Purchase = { Id = 9044783668, Volume = 0.7 }, -- petit jingle : achat
+		LevelUp = { Id = 1844016113, Volume = 0.6 }, -- jingle : niveau de Vitesse / Force
+		Knockback = { Id = 9113564868, Volume = 0.8 }, -- paf ! : éjecté par le dôme
+	} :: { [string]: SoundDef },
+}
+
 export type ShopItem = {
 	Id: string,
 	Icon: string,

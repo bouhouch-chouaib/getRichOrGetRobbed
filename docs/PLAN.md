@@ -20,7 +20,7 @@ Réglages proposés : vol **seulement pendant la digestion** et base déverrouil
 | # | Étape | Détail |
 |---|---|---|
 | 5 | ✅ **Acquisition visible** (fait le 8 oct.) | Les familiers tirés apparaissent dans la base avec un effet ; annonce pour Légendaire+. Décidé : fenêtre de résultats gardée mais discrète (petite carte, 5 s) |
-| 6 | **Sons et musique** | Module de sons centralisé (IDs dans `Config`) ; Chouaib ajoute les sons dans Studio (via le MCP Studio), musique Feeding/Digesting + ~15 effets |
+| 6 | ✅ **Sons et musique** (fait le 8 oct. : choisis par l'IA dans les banques sous licence via le MCP Studio, à faire écouter et ajuster par Chouaib) | Module de sons centralisé (IDs dans `Config.Sounds`), musique Feeding/Digesting + 16 effets |
 | 7 | **Effets de satisfaction** | « +2.5 » qui s'envole, ouverture animée des tirages rares, petites secousses d'écran |
 | 8 | **Tutoriel** | Flèche + 3 étapes (ramasser → lancer → voir son familier), sauvegardé une fois fini |
 

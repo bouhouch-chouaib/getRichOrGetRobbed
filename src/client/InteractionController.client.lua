@@ -16,6 +16,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local ScreenScale = require(script.Parent.ScreenScale)
+local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
 
 local THROW = Config.Throw
@@ -352,6 +353,7 @@ local function throw()
 	stopCharging()
 	removeEntry(entry) -- l'objet suivant passe automatiquement dans la main
 	Remotes.ThrowItem:FireServer(item)
+	Sounds.play("Throw")
 	-- Après la destruction du weld, l'item est seul dans son assemblage : GetMass() = sa masse.
 	item:ApplyImpulse(velocity * item:GetMass())
 end
