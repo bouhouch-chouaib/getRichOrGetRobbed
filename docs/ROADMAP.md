@@ -82,7 +82,7 @@
 ### Bases et vol
 - Base attribuée automatiquement, apparition dessus.
 - Verrouillage 5 s (10 s avec verrou renforcé), relancé à chaque passage sur le bouton, intrus expulsés.
-- Vol d'objets possible dans les bases ouvertes. **Pas de vol de familiers.**
+- Vol d'objets possible dans les bases ouvertes. **Vol de familiers : fait le 8 oct. 2026** (PLAN étape 3, voir GDD).
 
 ### Interface
 - Style cartoon : police épaisse, contours noirs, dégradés, boutons qui rebondissent.
@@ -229,14 +229,16 @@ Permettre de voler un familier dans la base d'un autre joueur et de le ramener d
 - Mettre à jour l'affichage de la base (familiers qui se baladent) des deux joueurs.
 
 ### Cas à tester (2 joueurs en serveur local, minimum)
-- [ ] Vol réussi : le familier change de base, les deux sauvegardes sont correctes après reconnexion.
-- [ ] Vol raté par KO : le familier revient chez la victime.
-- [ ] Vol raté par récupération du propriétaire.
-- [ ] Déconnexion du voleur pendant le transport.
-- [ ] Déconnexion de la victime pendant le transport.
-- [ ] Impossible de voler le familier équipé, ou dans une base verrouillée.
-- [ ] Impossible de porter deux familiers.
-- [ ] Le familier volé n'apparaît jamais dans deux bases à la fois.
+> 8 oct. 2026 (PLAN étape 3) : logique vérifiée en faisant tourner le vrai `StealController` contre des dépendances simulées
+> (34/34). « (L) » = logique vérifiée ; reste à cocher après le test réel à 2 joueurs de Chouaib.
+- [ ] (L) Vol réussi : le familier change de base, les deux sauvegardes sont correctes après reconnexion.
+- [ ] (L) Vol raté par KO : le familier revient chez la victime.
+- [ ] Vol raté par récupération du propriétaire (étape 4).
+- [ ] (L) Déconnexion du voleur pendant le transport.
+- [ ] (L) Déconnexion de la victime pendant le transport.
+- [ ] (L) Impossible de voler le familier équipé, ou dans une base verrouillée.
+- [ ] (L) Impossible de porter deux familiers.
+- [ ] (L) Le familier volé n'apparaît jamais dans deux bases à la fois.
 
 ---
 
@@ -282,10 +284,9 @@ rojo build -o test.rbxlx
   Chouaib de relancer `rojo serve` + Connect. (C'est pour ça que `Remotes.lua` crée lui-même les RemoteEvents manquants côté serveur.)
 - `ReplicatedStorage.PetModels` est mappé sur `assets/PetModels/` : un Model mis à la main dans ce dossier dans Studio serait effacé par
   Rojo. Les modèles 3D se versionnent en `.rbxm` dans `assets/PetModels/`.
-- **Non résolu au moment de la passation** : le Capybara Zen importé (`assets/PetModels/CapybaraZen.rbxm`) s'affiche encore avec
-  l'ancien modèle chez Chouaib. Cause probable : `rojo serve` pas relancé après l'ajout du mapping. Si après redémarrage les
-  MeshParts arrivent vides, c'est la limite de Rojo sur `MeshPart.MeshId` en synchro live : passer par un `rojo build` de la place
-  ou garder les modèles dans un dossier non géré par Rojo.
+- ~~Capybara Zen mal affiché~~ **Résolu (8 oct. 2026)** : les MeshParts arrivaient bien ; le vrai bug était dans
+  `PetModelBuilder.normalizeCustom`, qui mesurait la boîte englobante AVEC le Root posé à l'origine alors que le modèle importé
+  est loin (Y = -78) : modèle réduit à ~10 % et éclaté. La boîte est maintenant mesurée sur le contenu importé seul.
 
 ### 7.4 Carte du code (à réutiliser, ne pas recréer)
 | Module | Rôle | API utile |

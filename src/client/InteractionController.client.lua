@@ -198,7 +198,9 @@ local function stopCharging()
 	local humanoid = getHumanoid()
 	if humanoid then
 		local speed = player:GetAttribute("Speed")
-		humanoid.WalkSpeed = if type(speed) == "number" then speed else Config.Training.Speed.Base
+		local multiplier = player:GetAttribute("SpeedMultiplier") -- ex. ralenti pendant un vol
+		humanoid.WalkSpeed = (if type(speed) == "number" then speed else Config.Training.Speed.Base)
+			* (if type(multiplier) == "number" then multiplier else 1)
 	end
 	TweenService:Create(Workspace.CurrentCamera, TweenInfo.new(0.2), { FieldOfView = THROW.DefaultFov }):Play()
 end

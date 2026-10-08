@@ -151,6 +151,16 @@ Config.Lock = {
 	ButtonRadius = 4,
 }
 
+-- Vol de familiers : [E] sur un familier d'une base adverse déverrouillée, à ramener dans sa propre base.
+Config.Steal = {
+	OnlyDuringDigesting = true, -- vol possible seulement pendant la digestion
+	SpeedMultiplier = 0.6, -- vitesse du voleur pendant le transport
+	MaxCarryTime = 30, -- au-delà, le familier rentre chez son propriétaire (secondes)
+	HoldDuration = 0.5, -- temps d'appui sur [E] pour voler
+	PromptDistance = 8, -- distance d'affichage de la bulle [E] (studs)
+	MaxDistance = 16, -- distance max acceptée par le serveur (marge pour la latence)
+}
+
 export type ShopItem = {
 	Id: string,
 	Icon: string,

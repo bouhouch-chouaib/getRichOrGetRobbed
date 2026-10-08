@@ -10,6 +10,7 @@ local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
@@ -37,7 +38,9 @@ local PHASES = {
 	},
 	Digesting = {
 		Title = "LE TROU NOIR DIGÈRE...",
-		Hint = "Ferme ta base, entraîne-toi et dépense ton argent dans la boutique !",
+		Hint = if ScreenScale.isTouch()
+			then "Touche VOLER sur un familier d'une base ouverte  •  ferme ta base pour protéger les tiens !"
+			else "Maintiens [E] sur un familier d'une base ouverte pour le VOLER  •  ferme ta base pour protéger les tiens !",
 		Color = Color3.fromRGB(255, 90, 70),
 	},
 }
@@ -714,6 +717,11 @@ rewardBody.TextYAlignment = Enum.TextYAlignment.Top
 ----------------------------------------------------------------------
 
 
+local function petName(petId: unknown): string
+	local entry = if type(petId) == "string" then PetCatalog.ById[petId] else nil
+	return if entry then entry.Name:upper() else "LE FAMILIER"
+end
+
 local function updatePhase()
 	local state = ReplicatedStorage:GetAttribute("GameState")
 	local remaining = ReplicatedStorage:GetAttribute("TimeRemaining")
@@ -721,7 +729,17 @@ local function updatePhase()
 
 	phaseTitle.Text = phase.Title
 	phaseTitle.TextColor3 = phase.Color
-	hintLabel.Text = phase.Hint
+	-- Pendant le transport d'un familier volé, la consigne devient l'objectif + le temps restant.
+	local carryingPet = player:GetAttribute("CarryingPet")
+	local carryingUntil = player:GetAttribute("CarryingUntil")
+	if carryingPet ~= nil and type(carryingUntil) == "number" then
+		local left = math.max(0, math.ceil(carryingUntil - Workspace:GetServerTimeNow()))
+		hintLabel.Text = string.format("🚨 RAMÈNE %s DANS TA BASE !  ⏱ %d s", petName(carryingPet), left)
+		hintLabel.TextColor3 = Color3.fromRGB(255, 220, 60)
+	else
+		hintLabel.Text = phase.Hint
+		hintLabel.TextColor3 = WHITE
+	end
 	pointsLabel.Visible = state ~= "Digesting"
 
 	local seconds = if type(remaining) == "number" then math.max(0, remaining) else 0
@@ -775,6 +793,30 @@ player:GetAttributeChangedSignal("SaveWaiting"):Connect(function()
 		Toast.show("CHARGEMENT DE TA SAUVEGARDE... PATIENTE QUELQUES SECONDES", Color3.fromRGB(255, 220, 60))
 	else
 		Toast.show("SAUVEGARDE CHARGÉE !", Color3.fromRGB(110, 240, 70))
+	end
+end)
+
+-- Vol de familiers : messages pour le voleur (début du transport, puis résultat envoyé par le serveur).
+player:GetAttributeChangedSignal("CarryingPet"):Connect(function()
+	local petId = player:GetAttribute("CarryingPet")
+	if petId ~= nil then
+		Toast.show(string.format("VOLÉ ! RAMÈNE %s DANS TA BASE !", petName(petId)), Color3.fromRGB(255, 220, 60))
+	end
+	updatePhase() -- la consigne du bas devient l'objectif (ou redevient normale)
+end)
+
+local STEAL_MESSAGES: { [string]: { text: string, color: Color3 } } = {
+	Success = { text = "%s EST À TOI !", color = Color3.fromRGB(110, 240, 70) },
+	KO = { text = "TU AS LÂCHÉ %s : IL RENTRE CHEZ LUI !", color = Color3.fromRGB(255, 90, 90) },
+	Timeout = { text = "TROP LENT ! %s RENTRE CHEZ LUI", color = Color3.fromRGB(255, 90, 90) },
+	VictimLeft = { text = "SON PROPRIÉTAIRE EST PARTI : %s RENTRE CHEZ LUI", color = Color3.fromRGB(255, 90, 90) },
+	Gone = { text = "%s N'EST PLUS LÀ !", color = Color3.fromRGB(255, 90, 90) },
+}
+
+Remotes.StealResult.OnClientEvent:Connect(function(outcome: string, petId: string)
+	local message = STEAL_MESSAGES[outcome]
+	if message then
+		Toast.show(string.format(message.text, petName(petId)), message.color)
 	end
 end)
 

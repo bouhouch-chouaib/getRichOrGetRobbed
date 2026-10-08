@@ -78,7 +78,10 @@ verrouillage 5 s relancé à chaque passage • consigne de phase en bas de l'é
 économie rééquilibrée (revenus bas, prix hauts) • objets non roulants (frottement max) • map agrandie (bases à 215) •
 `Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester) • sauvegarde DataStore •
 machine de fusion + boutique physiques dans 4 kiosques entre les bases • économie en grands nombres (K/M/B/T, `NumberFormat`) •
-bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptAnchors`).
+bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptAnchors`) •
+**vol de familiers** pendant la digestion (`StealController`, `Config.Steal`, voir GDD) • modèles 3D importés à la bonne taille.
+
+Pousser le code dans Studio sans `rojo serve` : voir la mémoire « Sync Studio sans Rojo » (rbxm + `GetObjects`).
 
 ## Prochaines étapes prévues (dans cet ordre, validé avec l'utilisateur)
 

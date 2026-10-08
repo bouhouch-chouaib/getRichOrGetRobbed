@@ -73,6 +73,15 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `LongLock` : base fermée 10 s au lieu de 5 s.
 - **Bouton de verrouillage** (comme Steal a Brainrot) : au centre de la base devant la porte ; le propriétaire marche sur le gros bouton rouge → portail fermé pendant 5 s
   (relancé à chaque passage sur le bouton), tout autre joueur à l'intérieur est expulsé devant l'entrée.
+- **Vol de familiers** (`StealController`, réglages `Config.Steal`) : pendant la **digestion**, [E] maintenu 0,5 s sur un familier
+  qui se balade dans une base adverse **déverrouillée** (bulle "Voler" sur son repère `Base_N.Pets.<PetId>`, affichée par le
+  client seulement quand le vol est possible). Le voleur le porte dans le dos (attribut `CarryingPet` + `CarryingUntil`, affiché
+  par `client/PetFollow` pour tout le monde, étiquette nom + temps restant), est ralenti ×0,6 (attribut `SpeedMultiplier`, appliqué
+  par `SessionData`) et ne peut plus ramasser d'objet. Arrivé dans **sa** base : transfert. Échec (le familier rentre) : KO / mort /
+  réapparition / départ du voleur (`ItemInteraction.HeldReleased`), départ de la victime, 30 s écoulées.
+  Anti-duplication : pendant le transport le familier reste à la victime, seulement **réservé** (`BasePetsController.Reserve`,
+  caché de sa base) ; transfert en une étape serveur (`RemovePets` puis `AddPets`) seulement si les deux sauvegardes sont chargées
+  (`SessionData.IsLoaded`), puis sauvegarde immédiate de la victime puis du voleur. Résultat envoyé au voleur : `Remotes.StealResult`.
 
 ## Règles physiques / réseau (ne pas régresser)
 

@@ -4,7 +4,10 @@
 -- avec son trajet en cours dans l'attribut "Walk". Ici, on construit le modèle et on le place à la position
 -- calculée avec l'horloge commune (shared/PetWander) : tous les joueurs voient les familiers au même endroit.
 -- L'animation (marche, sautille, ondule, plane, se balance, tourne) n'est qu'un effet visuel local.
+-- Vol : on déplace aussi (localement) le repère sur le familier pour que sa bulle [E] "Voler" le suive, et on
+-- n'affiche la bulle que si le vol est possible (digestion, base adverse ouverte, mains libres). Le serveur revérifie tout.
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -19,8 +22,11 @@ local PetWander = require(ReplicatedStorage.Shared.PetWander)
 -- Au-delà, les familiers d'une base ne sont plus animés (plus court sur téléphone pour les performances).
 local VIEW_DISTANCE = if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then 150 else 260
 
+local player = Players.LocalPlayer
+
 type Shown = {
 	anchor: BasePart,
+	prompt: ProximityPrompt?,
 	model: Model,
 	styleName: string,
 	style: PetWander.Style,
@@ -32,6 +38,7 @@ type Shown = {
 }
 
 type BaseDisplay = {
+	base: Model,
 	platform: BasePart,
 	pets: { [BasePart]: Shown },
 }
@@ -103,6 +110,7 @@ local function addPet(display: BaseDisplay, anchor: Instance)
 	local styleName = PetWander.styleFor(petId)
 	local shown: Shown = {
 		anchor = anchor,
+		prompt = nil, -- trouvée dans RenderStepped (elle peut arriver du serveur juste après le repère)
 		model = model,
 		styleName = styleName,
 		style = PetWander.STYLES[styleName],
@@ -143,7 +151,7 @@ local function watchBase(base: Instance)
 		if not platform:IsA("BasePart") then
 			return
 		end
-		local display: BaseDisplay = { platform = platform, pets = {} }
+		local display: BaseDisplay = { base = base, platform = platform, pets = {} }
 		displays[base] = display
 		pets.ChildAdded:Connect(function(anchor)
 			addPet(display, anchor)
@@ -196,15 +204,43 @@ local function pose(shown: Shown, dt: number, now: number): CFrame
 	return CFrame.new(position.X, height + shown.bottomOffset, position.Y) * CFrame.Angles(0, yaw, roll)
 end
 
+-- Le joueur local peut-il voler dans cette base en ce moment ? (simple affichage : le serveur revérifie)
+local function canSteal(base: Model): boolean
+	if Config.Steal.OnlyDuringDigesting and ReplicatedStorage:GetAttribute("GameState") ~= "Digesting" then
+		return false
+	end
+	return base:GetAttribute("BaseIndex") ~= player:GetAttribute("BaseIndex")
+		and base:GetAttribute("Locked") ~= true
+		and player:GetAttribute("CarryingPet") == nil
+end
+
+local NEAR_CHARACTER = 90 -- une base aussi proche du personnage est toujours animée (caméra très reculée)
+
 RunService.RenderStepped:Connect(function(dt: number)
 	local camera = Workspace.CurrentCamera
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local now = Workspace:GetServerTimeNow()
 	for _, display in pairs(displays) do
 		local platform = display.platform
-		if (platform.Position - camera.CFrame.Position).Magnitude < VIEW_DISTANCE then
-			local ground = PetWander.groundOf(platform)
-			for _, shown in pairs(display.pets) do
+		local visible = (platform.Position - camera.CFrame.Position).Magnitude < VIEW_DISTANCE
+			or (root ~= nil and root:IsA("BasePart") and (platform.Position - root.Position).Magnitude < NEAR_CHARACTER)
+		local ground = PetWander.groundOf(platform)
+		local stealable = canSteal(display.base)
+		for _, shown in pairs(display.pets) do
+			if visible then
 				shown.model:PivotTo(ground * pose(shown, dt, now))
+				-- Le repère (et sa bulle [E]) suit le familier, chez ce joueur seulement : le serveur ne le déplace jamais.
+				shown.anchor.CFrame = CFrame.new(shown.model:GetPivot().Position)
+			end
+			-- Bulle [E] affichée seulement si le vol est possible (mise à jour même pour les bases lointaines).
+			local prompt = shown.prompt
+			if not prompt then
+				prompt = shown.anchor:FindFirstChildOfClass("ProximityPrompt")
+				shown.prompt = prompt
+			end
+			if prompt and prompt.Enabled ~= stealable then
+				prompt.Enabled = stealable
 			end
 		end
 	end

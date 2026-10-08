@@ -57,4 +57,7 @@ return {
 	Fuse = remote("Fuse"),
 	-- Serveur -> client : (petId: string) résultat de la fusion.
 	FusionResult = remote("FusionResult"),
+	-- Serveur -> voleur : (outcome: string, petId: string) fin d'un vol de familier
+	-- ("Success", "KO", "Timeout", "VictimLeft", "Gone" : voir server/StealController).
+	StealResult = remote("StealResult"),
 }

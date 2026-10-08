@@ -21,6 +21,11 @@ local ItemInteraction = {}
 
 local held: { [Player]: { BasePart } } = {}
 
+-- Déclenché (player) chaque fois que le joueur doit tout lâcher : KO du dôme, mort, réapparition, départ.
+-- StealController s'y abonne pour faire échouer un vol en cours.
+local heldReleased = Instance.new("BindableEvent")
+ItemInteraction.HeldReleased = heldReleased.Event
+
 local function getLooseFolder(): Instance
 	local map = Workspace:FindFirstChild("Map")
 	return (map and map:FindFirstChild("LooseItems")) or Workspace
@@ -52,6 +57,7 @@ function ItemInteraction.ReleaseHeld(player: Player)
 			end
 		end
 	end
+	heldReleased:Fire(player)
 end
 
 local function getCapacity(player: Player): number
@@ -65,6 +71,10 @@ end
 local function onPromptTriggered(item: BasePart, player: Player)
 	local items = held[player] or {}
 	if item:GetAttribute("Holder") or item:GetAttribute("Consumed") or #items >= getCapacity(player) then
+		return
+	end
+	-- Pendant le transport d'un familier volé, les mains sont prises.
+	if player:GetAttribute("CarryingPet") then
 		return
 	end
 	local character = player.Character

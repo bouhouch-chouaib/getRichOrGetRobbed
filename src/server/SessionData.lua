@@ -292,11 +292,13 @@ local function statValue(stat: string, level: number): number
 	return statConfig.Base + statConfig.PerLevel * level
 end
 
+-- WalkSpeed = vitesse d'entraînement × attribut "SpeedMultiplier" du joueur (ex. ralenti pendant un vol).
 local function applySpeed(player: Player, speed: number)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
-		humanoid.WalkSpeed = speed
+		local multiplier = player:GetAttribute("SpeedMultiplier")
+		humanoid.WalkSpeed = speed * (if type(multiplier) == "number" then multiplier else 1)
 	end
 end
 
@@ -485,6 +487,26 @@ end
 
 function SessionData.Get(player: Player): PlayerData?
 	return storage[player]
+end
+
+-- true si la sauvegarde du joueur est chargée et sera écrite. Indispensable avant tout transfert entre joueurs :
+-- modifier un profil non chargé (jamais sauvegardé) créerait une copie.
+function SessionData.IsLoaded(player: Player): boolean
+	local data = storage[player]
+	return data ~= nil and data.loaded
+end
+
+-- Sauvegarde tout de suite (sans attendre la sauvegarde auto). Bloque jusqu'à la fin de l'écriture.
+function SessionData.Save(player: Player)
+	savePlayer(player, false)
+end
+
+-- Réapplique la vitesse de marche (après un changement de l'attribut "SpeedMultiplier").
+function SessionData.RefreshSpeed(player: Player)
+	local data = storage[player]
+	if data then
+		applySpeed(player, statValue("Speed", data.levels.Speed))
+	end
 end
 
 function SessionData.AddScore(player: Player, amount: number)

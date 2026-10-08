@@ -20,7 +20,8 @@
         "EquipPet": { "$className": "RemoteEvent" },
         "Announcement": { "$className": "RemoteEvent" },
         "Fuse": { "$className": "RemoteEvent" },
-        "FusionResult": { "$className": "RemoteEvent" }
+        "FusionResult": { "$className": "RemoteEvent" },
+        "StealResult": { "$className": "RemoteEvent" }
       }
     },
 

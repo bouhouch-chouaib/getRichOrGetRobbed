@@ -436,6 +436,9 @@ end
 --   - centré sur un "Root" invisible à l'origine (comme les modèles de remplacement).
 function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
 	local source = custom:Clone()
+	-- Boîte englobante du contenu importé SEUL, mesurée avant d'ajouter le Root à l'origine : un modèle importé
+	-- loin de l'origine (ex. Capybara Zen à Y = -78) donnerait sinon une boîte énorme et un modèle minuscule.
+	local box, contentSize = source:GetBoundingBox()
 	local model = Instance.new("Model")
 	model.Name = entry.Id
 
@@ -466,7 +469,6 @@ function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
 	-- Centre de la boîte englobante du contenu importé -> origine, puis rotation.
 	local yaw = custom:GetAttribute("FacingYaw")
 	local yawDegrees = if type(yaw) == "number" then yaw else 180
-	local box = model:GetBoundingBox()
 	local offset = CFrame.Angles(0, math.rad(yawDegrees), 0) * CFrame.new(-box.Position)
 	for _, descendant in ipairs(model:GetDescendants()) do
 		if descendant:IsA("BasePart") and descendant ~= root then
@@ -474,11 +476,11 @@ function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
 		end
 	end
 
-	local _, size = model:GetBoundingBox()
+	-- La rotation autour de l'axe vertical ne change pas la hauteur : contentSize.Y reste valable.
 	local heightScale = custom:GetAttribute("HeightScale")
 	local wanted = targetHeight(entry.Rarity) * (if type(heightScale) == "number" then heightScale else 1)
-	if size.Y > 0 then
-		model:ScaleTo(wanted / size.Y)
+	if contentSize.Y > 0 then
+		model:ScaleTo(wanted / contentSize.Y)
 	end
 
 	finalize(model)

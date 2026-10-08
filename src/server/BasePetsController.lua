@@ -6,16 +6,25 @@
 --   PetId, Count (exemplaires), Seed (variation d'animation), Walk (trajet en cours, voir shared/PetWander).
 -- Le serveur ne déplace jamais ces repères : les clients calculent la position à partir de "Walk"
 -- (client/BasePets) et la position officielle s'obtient avec BasePetsController.GetPetPosition.
+-- Chaque repère porte la bulle [E] "Voler" (ProximityPrompt) : le client la fait suivre le familier et ne l'affiche
+-- que quand le vol est possible ; la décision reste au serveur (StealController, via PetTriggered).
+-- Un exemplaire en cours de vol est "réservé" (Reserve) : il n'est plus affiché dans la base de la victime.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
+local Config = require(ReplicatedStorage.Shared.Config)
+local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
 local BaseManager = require(script.Parent.BaseManager)
 local EconomyController = require(script.Parent.EconomyController)
 
 local BasePetsController = {}
+
+-- Déclenché (anchor: BasePart, player: Player) quand un joueur valide la bulle [E] d'un familier de base.
+local petTriggered = Instance.new("BindableEvent")
+BasePetsController.PetTriggered = petTriggered.Event
 
 type PetState = {
 	anchor: BasePart,
@@ -29,6 +38,7 @@ type BaseState = {
 	platform: BasePart,
 	folder: Folder,
 	pets: { [string]: PetState }, -- petId -> état
+	reserved: { [string]: number }, -- petId -> exemplaires en cours de vol (cachés)
 }
 
 local rng = Random.new()
@@ -70,6 +80,21 @@ local function addPet(state: BaseState, petId: string, count: number)
 	anchor:SetAttribute("Count", count)
 	anchor:SetAttribute("Seed", rng:NextInteger(0, 1000))
 	anchor:SetAttribute("Walk", PetWander.encode(leg))
+
+	local entry = PetCatalog.ById[petId]
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "StealPrompt"
+	prompt.ActionText = "Voler"
+	prompt.ObjectText = if entry then entry.Name else petId
+	prompt.KeyboardKeyCode = Enum.KeyCode.E
+	prompt.HoldDuration = Config.Steal.HoldDuration
+	prompt.MaxActivationDistance = Config.Steal.PromptDistance
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = anchor
+	prompt.Triggered:Connect(function(player: Player)
+		petTriggered:Fire(anchor, player)
+	end)
+
 	anchor.Parent = state.folder
 	state.pets[petId] = {
 		anchor = anchor,
@@ -91,19 +116,58 @@ end
 -- Met la base à jour : ajoute / retire des espèces, change les quantités. Les familiers déjà là gardent leur place.
 local function syncBase(state: BaseState)
 	local order, counts = wantedPets(BaseManager.GetOwner(state.base))
+	for petId, count in pairs(counts) do
+		counts[petId] = count - (state.reserved[petId] or 0)
+	end
 	for petId in pairs(state.pets) do
-		if not counts[petId] then
+		if (counts[petId] or 0) <= 0 then
 			removePet(state, petId)
 		end
 	end
 	for _, petId in ipairs(order) do
+		local count = counts[petId]
 		local pet = state.pets[petId]
-		if not pet then
-			addPet(state, petId, counts[petId])
-		elseif pet.anchor:GetAttribute("Count") ~= counts[petId] then
-			pet.anchor:SetAttribute("Count", counts[petId])
+		if count <= 0 then
+			continue
+		elseif not pet then
+			addPet(state, petId, count)
+		elseif pet.anchor:GetAttribute("Count") ~= count then
+			pet.anchor:SetAttribute("Count", count)
 		end
 	end
+end
+
+-- La base dont ce repère fait partie (nil si ce n'est pas un repère de familier actif).
+function BasePetsController.GetBaseOf(anchor: Instance): Model?
+	for base, state in pairs(states) do
+		local petId = anchor:GetAttribute("PetId")
+		local pet = if type(petId) == "string" then state.pets[petId] else nil
+		if pet and pet.anchor == anchor then
+			return base
+		end
+	end
+	return nil
+end
+
+-- Exemplaires de petId en cours de vol dans cette base.
+function BasePetsController.GetReserved(base: Model, petId: string): number
+	local state = states[base]
+	return if state then state.reserved[petId] or 0 else 0
+end
+
+-- Réserve (+1, début de vol) ou rend (-1, fin de vol) un exemplaire. La base est mise à jour tout de suite.
+function BasePetsController.Reserve(base: Model, petId: string, delta: number)
+	local state = states[base]
+	if not state then
+		return
+	end
+	local count = (state.reserved[petId] or 0) + delta
+	if count > 0 then
+		state.reserved[petId] = count
+	else
+		state.reserved[petId] = nil
+	end
+	syncBase(state)
 end
 
 -- Donne un nouveau trajet aux familiers arrivés au bout du leur (après leur pause).
@@ -143,7 +207,7 @@ function BasePetsController.Init(bases: { Model })
 			local folder = Instance.new("Folder")
 			folder.Name = "Pets"
 			folder.Parent = base
-			states[base] = { base = base, platform = platform, folder = folder, pets = {} }
+			states[base] = { base = base, platform = platform, folder = folder, pets = {}, reserved = {} }
 		else
 			warn("[BasePets] " .. base.Name .. " n'a pas de plateforme : pas de familiers dans cette base.")
 		end
