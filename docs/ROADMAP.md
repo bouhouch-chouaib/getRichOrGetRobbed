@@ -297,8 +297,8 @@ rojo build -o test.rbxlx
 | `server/ItemInteraction` | Ramassage/portage/lancer autoritaire, sac à dos | `Register(item)`, `ReleaseHeld(player)`, `IsHeld(item)` |
 | `server/BlackholeController` | Aspiration, dôme, KO (`knockbackPlayer`), distribution des récompenses | — |
 | `server/LockController` | Bouton de verrouillage, portail, expulsion ; attributs `Locked`/`LockedUntil` sur la base | — |
-| `server/EconomyController` | Revenu passif, achats boutique | `GetTopPets(player)` (les 10 meilleurs = ceux qui rapportent), `GetIncome` |
-| `server/BasePetsController` | Publie l'attribut `BasePets` = `"id:quantité,…"` sur chaque base | — |
+| `server/EconomyController` | Revenu passif, achats boutique | `GetTopPets(player)` (les 10 meilleurs NON équipés = ceux de la base, qui rapportent), `GetIncome` |
+| `server/BasePetsController` | Familiers de base autoritaires : repère `Base_N.Pets.<PetId>` (attributs `PetId`, `Count`, `Seed`, `Walk`) | `GetPetPosition(repère)` |
 | `server/FusionController`, `PetController`, `TrainingController`, `ItemSpawner`, `MapGenerator`, `DayNightController` | Fusion, équipement, stations, apparition d'objets, carte, jour/nuit | — |
 | `shared/Config` | **Toutes** les valeurs d'équilibrage (raretés, prix, durées, options Studio) | `GetUpgradePrice`, `GetXPNeeded`, `RarityIndex` |
 | `shared/PetCatalog` | Les 75 familiers (Id sans accent, rareté, apparence) | `ById`, `ByRarity`, `GetIncome(petId)` |
@@ -306,13 +306,13 @@ rojo build -o test.rbxlx
 | `client/HUD`, `InteractionController`, `BasePets`, `PetFollow`, `ItemPromptAnchors`, `ScreenScale`, `Toast` | Interface, lancer (souris/tactile/manette), familiers de base, familiers équipés, bulles [E], mise à l'échelle, messages | `Toast.show(texte, couleur)`, `ScreenScale.attach(screenGui)` |
 
 ### 7.5 ⚠️ Prérequis pour le vol de familiers (§5) : l'état actuel ne le permet pas tel quel
-- Les familiers qui se baladent dans une base sont **100 % côté client** (`client/BasePets`) : chaque joueur les simule localement,
-  avec des positions **différentes d'un écran à l'autre**, et il n'existe aucune instance serveur sur laquelle poser un `[E]`.
-- Il faut d'abord rendre les familiers de base **autoritaires serveur** : le serveur décide des positions (ou de points de promenade)
-  et porte une ancre invisible par familier (avec le ProximityPrompt) ; le client se contente d'interpoler l'animation.
-- Le serveur n'affiche qu'**une créature par espèce** (`"id:quantité"`) : décider ce que vole le voleur (1 exemplaire du lot, logique).
-- Les familiers de base sont **exactement** ceux de `EconomyController.GetTopPets` (les 10 meilleurs, équipés compris pour l'instant) :
-  la règle « jamais le familier équipé » implique de calculer les exemplaires volables avec `SessionData.GetSpareCount`.
+- ~~Familiers de base 100 % côté client~~ **Fait (8 oct. 2026, PLAN étape 2)** : le serveur décide des trajets et porte un repère
+  invisible par espèce (`Base_N.Pets.<PetId>`, Part ancrée, CanQuery = false) ; le client interpole avec `GetServerTimeNow()`.
+  Pour le `[E]` du vol : mettre le ProximityPrompt sur ce repère et le faire suivre **localement** par chaque client (le serveur
+  ne déplace jamais le repère, donc un `PivotTo` local n'est pas écrasé) ; valider la distance côté serveur avec `GetPetPosition`.
+- Le serveur n'affiche qu'**une créature par espèce** (attribut `Count`) : le voleur emporte 1 exemplaire du lot.
+- Les familiers de base sont exactement ceux de `EconomyController.GetTopPets`, qui **exclut désormais les exemplaires équipés**
+  (`SessionData.GetSpareCount`) : tout ce qui est dans une base est volable.
 - Points d'accroche existants : KO du dôme → `BlackholeController.knockbackPlayer` (appelle déjà `ItemInteraction.ReleaseHeld`) ;
   verrou → attribut `Locked` de la base ; transfert sans duplication → `SessionData.RemovePets` + `SessionData.AddPets`
   dans la même étape serveur, puis sauvegarde des deux profils.
@@ -369,7 +369,8 @@ dépasse la portée max théorique (`ThrowPower² / Workspace.Gravity` × marge 
 ajouter un cooldown serveur entre deux `ThrowItem` du même joueur. Les objets non lancés (portés à pied) ne doivent jamais compter.
 
 **Petits restes connus dans le code.**
-- `EconomyController` mentionne encore des « socles » dans ses commentaires : ce sont les familiers qui se baladent dans la base.
-- Le familier équipé apparaît aussi parmi les familiers de la base (il fait partie de `GetTopPets`) : à traiter avec le vol (§7.5).
+- ~~Commentaires « socles » dans `EconomyController`~~ et ~~familier équipé visible dans la base~~ : corrigés (étape 2).
+- En Studio avec l'accès API activé, `Config.StudioTestPets` redonne +1 Capybara Zen **sauvegardé** à chaque partie de test
+  (le compte de Chouaib en accumule) : vider la liste quand le modèle est validé.
 - Le classement « Argent » est une `StringValue` (affichage abrégé) : il ne se trie pas numériquement.
 - Les outils de vérification (`luau-lsp`) sont téléchargés dans le dossier temporaire de session : à re-télécharger à chaque nouvelle session.

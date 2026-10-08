@@ -70,7 +70,8 @@ HUD style cartoon (LuckiestGuy, contours noirs, fenêtres, Toast, barres d'XP) �
 (`PetCatalog`), modèles de remplacement procéduraux (`PetModelBuilder`, surchargeables par
 `ReplicatedStorage.PetModels.<Id>`) • tirages à coût croissant + pitié (`LootEngine`) • 1 familier équipé =
 multiplicateur additif + suit le joueur (`PetFollow`) • revenu = 10 meilleurs familiers • fenêtre collection 3D •
-annonces serveur Légendaire+ • familiers qui se baladent dans la base (`BasePetsController` + `client/BasePets`, plus de socles) •
+annonces serveur Légendaire+ • familiers qui se baladent dans la base, **trajets décidés par le serveur** (`BasePetsController` + `shared/PetWander` +
+`client/BasePets`, plus de socles ; un familier équipé ne rapporte pas et n'est pas dans la base) • verrou de session anti-duplication •
 palettes à objets + objets sauvages dans l'arène + amélioration Chance • plaque d'apparition invisible •
 verrouillage 5 s relancé à chaque passage • consigne de phase en bas de l'écran •
 **mobile** : `client/ScreenScale` (UI à l'échelle), bouton LANCER tactile, gâchette R2 manette •

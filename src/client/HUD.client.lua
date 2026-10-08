@@ -522,6 +522,8 @@ for order, entry in ipairs(PetCatalog.List) do
 		local slots = numberAttribute("EquipSlots")
 		if equippedCount < owned and #list < slots then
 			Remotes.EquipPet:FireServer(entry.Id, true)
+			-- Seuls les familiers de la base rapportent : on le rappelle au joueur.
+			Toast.show("ÉQUIPÉ ! BONUS DE POINTS, MAIS IL NE RAPPORTE PLUS D'ARGENT", Color3.fromRGB(255, 220, 60))
 		elseif equippedCount > 0 then
 			Remotes.EquipPet:FireServer(entry.Id, false)
 		else

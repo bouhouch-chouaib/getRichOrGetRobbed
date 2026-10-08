@@ -1,83 +1,39 @@
 --!strict
--- BasePets : les familiers de chaque base s'y baladent librement (style Steal an Egg).
--- Le serveur écrit sur chaque base l'attribut "BasePets" ("id:quantité,...") ; ici, chaque client construit
--- les modèles et les anime localement (aucune réplication réseau). Chaque familier a une façon de bouger
--- selon sa silhouette : marche, sautille, ondule, plane, se balance sur place, tourne sur lui-même.
+-- BasePets : affiche les familiers qui se baladent dans chaque base (style Steal an Egg).
+-- C'est le SERVEUR qui décide (server/BasePetsController) : un repère invisible Base_N.Pets.<PetId> par espèce,
+-- avec son trajet en cours dans l'attribut "Walk". Ici, on construit le modèle et on le place à la position
+-- calculée avec l'horloge commune (shared/PetWander) : tous les joueurs voient les familiers au même endroit.
+-- L'animation (marche, sautille, ondule, plane, se balance, tourne) n'est qu'un effet visuel local.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local PetWander = require(ReplicatedStorage.Shared.PetWander)
 
-local rng = Random.new()
-
-local UserInputService = game:GetService("UserInputService")
 -- Au-delà, les familiers d'une base ne sont plus animés (plus court sur téléphone pour les performances).
 local VIEW_DISTANCE = if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then 150 else 260
-local AREA = 22 -- demi-taille de la zone de promenade (la base fait 56 x 56, clôture comprise)
-local CRATE_ZONE = 13 -- les coins (cagettes) sont évités
 
-type Style = {
-	speed: number,
-	minWait: number,
-	maxWait: number,
-	hover: number, -- hauteur au-dessus du sol
-}
-
-local STYLES: { [string]: Style } = {
-	Walk = { speed = 5, minWait = 1, maxWait = 4, hover = 0 },
-	Hop = { speed = 6, minWait = 0.5, maxWait = 3, hover = 0 },
-	Slither = { speed = 3.5, minWait = 1, maxWait = 3, hover = 0 },
-	Fly = { speed = 6, minWait = 0.5, maxWait = 2.5, hover = 3 },
-	Plant = { speed = 1.5, minWait = 5, maxWait = 12, hover = 0 },
-	Spin = { speed = 2.5, minWait = 2, maxWait = 5, hover = 2 },
-}
-
-local SPIN_PETS = { OuroborosInfini = true, GaramaMadundung = true, GraineEtoile = true }
-
-local function styleFor(petId: string): string
-	if SPIN_PETS[petId] then
-		return "Spin"
-	end
-	local entry = PetCatalog.ById[petId]
-	if not entry then
-		return "Walk"
-	end
-	local look = entry.Look
-	if look.Float or look.Shape == "Fish" or look.Shape == "Dragon" then
-		return "Fly"
-	elseif look.Shape == "Serpent" then
-		return "Slither"
-	elseif look.Shape == "Plant" then
-		return "Plant"
-	elseif look.Shape == "Blob" or look.Shape == "Object" or look.Shape == "Bird" then
-		return "Hop"
-	end
-	return "Walk"
-end
-
-type Wanderer = {
+type Shown = {
+	anchor: BasePart,
 	model: Model,
-	style: Style,
 	styleName: string,
-	position: Vector2, -- position locale dans la base (X, Z)
-	target: Vector2,
+	style: PetWander.Style,
+	leg: PetWander.Leg?,
 	heading: number,
-	waitUntil: number,
 	bottomOffset: number, -- distance pivot -> bas du modèle
+	topOffset: number, -- distance pivot -> haut du modèle (pour l'étiquette)
 	seed: number,
 }
 
 type BaseDisplay = {
-	base: Model,
 	platform: BasePart,
-	folder: Folder,
-	signature: string,
-	pets: { Wanderer },
+	pets: { [BasePart]: Shown },
 }
 
 local displays: { [Model]: BaseDisplay } = {}
@@ -86,28 +42,25 @@ local folder = Instance.new("Folder")
 folder.Name = "BasePets"
 folder.Parent = Workspace
 
-local function randomSpot(): Vector2
-	for _ = 1, 20 do
-		local spot = Vector2.new(rng:NextNumber(-AREA, AREA), rng:NextNumber(-AREA, AREA))
-		if not (math.abs(spot.X) > CRATE_ZONE and math.abs(spot.Y) > CRATE_ZONE) then
-			return spot
-		end
+local function setLabel(shown: Shown)
+	local old = shown.model:FindFirstChild("PetLabel")
+	if old then
+		old:Destroy()
 	end
-	return Vector2.zero
-end
-
-local function addLabel(model: Model, petId: string, count: number, topOffset: number)
+	local petId = shown.model.Name
 	local entry = PetCatalog.ById[petId]
-	local root = model.PrimaryPart
+	local root = shown.model.PrimaryPart
 	if not entry or not root then
 		return
 	end
+	local countValue = shown.anchor:GetAttribute("Count")
+	local count = if type(countValue) == "number" then countValue else 1
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "PetLabel"
 	sign.Adornee = root
 	sign.Size = UDim2.fromScale(7, 2.2)
-	sign.StudsOffsetWorldSpace = Vector3.new(0, topOffset + 1.4, 0)
+	sign.StudsOffsetWorldSpace = Vector3.new(0, shown.topOffset + 1.4, 0)
 	sign.AlwaysOnTop = true
 	sign.LightInfluence = 0
 	sign.MaxDistance = 70
@@ -127,108 +80,103 @@ local function addLabel(model: Model, petId: string, count: number, topOffset: n
 	end
 	line(entry.Name:upper() .. (if count > 1 then " x" .. count else ""), rarity.Color, 0, 0.55)
 	line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.55, 0.45)
-	sign.Parent = model
+	sign.Parent = shown.model
 end
 
-type PetEntry = { id: string, count: number }
-
-local function rebuild(display: BaseDisplay, petIds: { PetEntry })
-	display.folder:ClearAllChildren()
-	display.pets = {}
-	for _, petEntry in ipairs(petIds) do
-		local petId = petEntry.id
-		local model = PetModelBuilder.Build(petId)
-		if model then
-			-- Mesures du modèle à l'origine : bas et haut par rapport à son pivot.
-			model:PivotTo(CFrame.new())
-			local box, size = model:GetBoundingBox()
-			local bottomOffset = -(box.Position.Y - size.Y / 2)
-			local topOffset = box.Position.Y + size.Y / 2
-			addLabel(model, petId, petEntry.count, topOffset)
-			model.Parent = display.folder
-			local styleName = styleFor(petId)
-			local start = randomSpot()
-			table.insert(display.pets, {
-				model = model,
-				style = STYLES[styleName],
-				styleName = styleName,
-				position = start,
-				target = randomSpot(),
-				heading = rng:NextNumber(0, math.pi * 2),
-				waitUntil = os.clock() + rng:NextNumber(0, 2),
-				bottomOffset = bottomOffset,
-				seed = rng:NextNumber(0, 100),
-			})
-		end
-	end
-end
-
-local function syncBase(base: Model)
-	local display = displays[base]
-	if not display then
-		local platform = base:FindFirstChild("BasePart")
-		if not platform or not platform:IsA("BasePart") then
-			return
-		end
-		local petFolder = Instance.new("Folder")
-		petFolder.Name = base.Name
-		petFolder.Parent = folder
-		display = { base = base, platform = platform, folder = petFolder, signature = "", pets = {} }
-		displays[base] = display
-	end
-	local current = display :: BaseDisplay
-	local value = base:GetAttribute("BasePets")
-	local signature = if type(value) == "string" then value else ""
-	if signature == current.signature then
+local function addPet(display: BaseDisplay, anchor: Instance)
+	if not anchor:IsA("BasePart") or display.pets[anchor] then
 		return
 	end
-	current.signature = signature
-	local ids = {}
-	for chunk in string.gmatch(signature, "[^,]+") do
-		local petId, count = string.match(chunk, "^([^:]+):?(%d*)$")
-		if petId then
-			table.insert(ids, { id = petId, count = tonumber(count) or 1 })
-		end
+	local petId = anchor:GetAttribute("PetId")
+	if type(petId) ~= "string" then
+		return
 	end
-	rebuild(current, ids)
+	local model = PetModelBuilder.Build(petId)
+	if not model then
+		return
+	end
+	-- Mesures du modèle à l'origine : bas et haut par rapport à son pivot.
+	model:PivotTo(CFrame.new())
+	local box, size = model:GetBoundingBox()
+	local seedValue = anchor:GetAttribute("Seed")
+	local seed = if type(seedValue) == "number" then seedValue else 0
+	local styleName = PetWander.styleFor(petId)
+	local shown: Shown = {
+		anchor = anchor,
+		model = model,
+		styleName = styleName,
+		style = PetWander.STYLES[styleName],
+		leg = PetWander.decode(anchor:GetAttribute("Walk")),
+		heading = seed % 7, -- orientation de départ, la même pour tout le monde
+		bottomOffset = -(box.Position.Y - size.Y / 2),
+		topOffset = box.Position.Y + size.Y / 2,
+		seed = seed,
+	}
+	setLabel(shown)
+	model.Parent = folder
+	display.pets[anchor] = shown
+
+	anchor:GetAttributeChangedSignal("Walk"):Connect(function()
+		shown.leg = PetWander.decode(anchor:GetAttribute("Walk"))
+	end)
+	anchor:GetAttributeChangedSignal("Count"):Connect(function()
+		setLabel(shown)
+	end)
+end
+
+local function removePet(display: BaseDisplay, anchor: Instance)
+	local shown = if anchor:IsA("BasePart") then display.pets[anchor] else nil
+	if shown then
+		shown.model:Destroy()
+		display.pets[anchor :: BasePart] = nil
+	end
 end
 
 local function watchBase(base: Instance)
 	if not base:IsA("Model") or not base.Name:match("^Base_%d+$") then
 		return
 	end
-	base:GetAttributeChangedSignal("BasePets"):Connect(function()
-		syncBase(base)
+	task.spawn(function()
+		-- WaitForChild : la base peut arriver par morceaux (chargement progressif de la carte).
+		local platform = base:WaitForChild("BasePart")
+		local pets = base:WaitForChild("Pets")
+		if not platform:IsA("BasePart") then
+			return
+		end
+		local display: BaseDisplay = { platform = platform, pets = {} }
+		displays[base] = display
+		pets.ChildAdded:Connect(function(anchor)
+			addPet(display, anchor)
+		end)
+		pets.ChildRemoved:Connect(function(anchor)
+			removePet(display, anchor)
+		end)
+		for _, anchor in ipairs(pets:GetChildren()) do
+			addPet(display, anchor)
+		end
 	end)
-	syncBase(base)
 end
 
--- Déplace un familier et calcule sa pose de l'image.
-local function step(pet: Wanderer, dt: number, now: number): CFrame
-	local style = pet.style
-	local moving = false
-	if now >= pet.waitUntil then
-		local delta = pet.target - pet.position
-		local distance = delta.Magnitude
-		if distance < 0.3 then
-			pet.target = randomSpot()
-			pet.waitUntil = now + rng:NextNumber(style.minWait, style.maxWait)
-		else
-			moving = true
-			local move = math.min(distance, style.speed * dt)
-			pet.position += delta.Unit * move
+-- Pose du familier à l'instant `now` (horloge serveur), dans le repère du sol de sa base.
+local function pose(shown: Shown, dt: number, now: number): CFrame
+	local position, moving = Vector2.zero, false
+	local leg = shown.leg
+	if leg then
+		position, moving = PetWander.positionAt(leg, now)
+		if moving then
 			-- Se tourne progressivement dans la direction de marche.
+			local delta = leg.to - leg.from
 			local wanted = math.atan2(-delta.X, -delta.Y)
-			local diff = (wanted - pet.heading + math.pi) % (math.pi * 2) - math.pi
-			pet.heading += diff * math.min(1, dt * 6)
+			local diff = (wanted - shown.heading + math.pi) % (math.pi * 2) - math.pi
+			shown.heading += diff * math.min(1, dt * 6)
 		end
 	end
 
-	local t = now + pet.seed
-	local height = style.hover
-	local yaw = pet.heading
+	local t = now + shown.seed
+	local height = shown.style.hover
+	local yaw = shown.heading
 	local roll = 0
-	local name = pet.styleName
+	local name = shown.styleName
 	if name == "Walk" then
 		height += if moving then math.abs(math.sin(t * 10)) * 0.25 else 0
 		roll = if moving then math.sin(t * 10) * 0.08 else 0
@@ -245,20 +193,18 @@ local function step(pet: Wanderer, dt: number, now: number): CFrame
 		height += math.sin(t * 1.5) * 0.5
 		yaw = t * 1.5
 	end
-	return CFrame.new(pet.position.X, height + pet.bottomOffset, pet.position.Y) * CFrame.Angles(0, yaw, roll)
+	return CFrame.new(position.X, height + shown.bottomOffset, position.Y) * CFrame.Angles(0, yaw, roll)
 end
 
 RunService.RenderStepped:Connect(function(dt: number)
 	local camera = Workspace.CurrentCamera
-	local now = os.clock()
+	local now = Workspace:GetServerTimeNow()
 	for _, display in pairs(displays) do
 		local platform = display.platform
-		local visible = (platform.Position - camera.CFrame.Position).Magnitude < VIEW_DISTANCE
-		if visible and #display.pets > 0 then
-			-- Repère du sol de la base : centre du dessus de la plateforme, orienté comme la base.
-			local ground = platform.CFrame * CFrame.new(0, platform.Size.Y / 2, 0)
-			for _, pet in ipairs(display.pets) do
-				pet.model:PivotTo(ground * step(pet, dt, now))
+		if (platform.Position - camera.CFrame.Position).Magnitude < VIEW_DISTANCE then
+			local ground = PetWander.groundOf(platform)
+			for _, shown in pairs(display.pets) do
+				shown.model:PivotTo(ground * pose(shown, dt, now))
 			end
 		end
 	end

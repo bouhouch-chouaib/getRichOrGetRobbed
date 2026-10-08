@@ -20,10 +20,14 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Catalogue : `PetCatalog` (5 catégories x 15 : Animaux, Fantastiques, Plantes, Hybrides, Brainrot).
 - Raretés (`Config.Rarities`) : Commun 50 %, Inhabituel 25 %, Rare 12 %, Épique 7 %, Légendaire 4 %, Mythique 1,5 %, Divin 0,4 %, Sigma 0,1 %.
 - **Équipé** (1 place de base) : le familier suit le joueur et ajoute un bonus de points, additif :
-  ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus).
-- **Dans la base** : les 10 meilleurs familiers se baladent librement dans la base (`BasePetsController` → attribut `BasePets`,
-  animés côté client par `client/BasePets` : marche, sautille, ondule, plane, se balance, tourne ; une seule créature par
-  espèce avec "x2" si plusieurs exemplaires) et rapportent de l'argent chaque seconde
+  ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus). **Un familier équipé ne rapporte pas d'argent**
+  et n'est pas dans la base (choix stratégique : bonus de points OU revenu).
+- **Dans la base** : les 10 meilleurs familiers **non équipés** se baladent librement dans la base, décidés par le **serveur**
+  (`BasePetsController` : un repère invisible `Base_N.Pets.<PetId>` par espèce, attributs `PetId`, `Count`, `Seed` et `Walk` =
+  trajet en cours ; module partagé `PetWander`). Les clients (`client/BasePets`) calculent la position avec l'horloge commune
+  `GetServerTimeNow()` : tout le monde voit la même chose, sans réplication de mouvement. Position officielle côté serveur :
+  `BasePetsController.GetPetPosition(repère)`. Animation locale : marche, sautille, ondule, plane, se balance, tourne ; une seule
+  créature par espèce avec "x2" si plusieurs exemplaires. Ils rapportent de l'argent chaque seconde
   (base 2 / 25 / 400 / 8K / 200K / 6M / 250M / 25B $/s de Commun à Sigma,
   +15 % par rang du familier dans sa rareté : `PetCatalog.GetIncome`).
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
@@ -111,7 +115,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
   - `BlackholeController` : consommation, dôme répulsif, récompenses.
   - `TrainingController` : stations tapis (Vitesse) et banc (Force), niveaux, XP.
-  - `BasePetsController` : liste des familiers qui vivent dans chaque base (animés côté client).
+  - `BasePetsController` : familiers qui vivent dans chaque base (repères + trajets décidés par le serveur, affichés par le client).
   - `LockController` : bouton de verrouillage, portail, expulsion des intrus.
   - `EconomyController` : revenu passif des familiers, achats de la boutique (`Remotes.BuyUpgrade`).
   - `SessionData` : données joueur (niveaux/XP Vitesse et Force, money, pets, équipés, pitié, upgrades) → attributs Player + leaderstats.

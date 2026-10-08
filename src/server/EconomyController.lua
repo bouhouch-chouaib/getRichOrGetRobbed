@@ -19,15 +19,16 @@ end
 
 local petIncome = PetCatalog.GetIncome
 
--- Les Config.Pets.IncomeSlots meilleurs familiers du joueur (exposés sur les socles de sa base).
+-- Les Config.Pets.IncomeSlots meilleurs familiers NON équipés du joueur : ceux qui se baladent dans sa base
+-- et rapportent de l'argent. Un familier équipé suit le joueur (bonus de points) mais ne rapporte rien.
 function EconomyController.GetTopPets(player: Player): { string }
 	local data = SessionData.Get(player)
 	if not data then
 		return {}
 	end
 	local list = {}
-	for petId, count in pairs(data.pets) do
-		for _ = 1, math.min(count, Config.Pets.IncomeSlots) do
+	for petId in pairs(data.pets) do
+		for _ = 1, math.min(SessionData.GetSpareCount(player, petId), Config.Pets.IncomeSlots) do
 			table.insert(list, petId)
 		end
 	end
@@ -45,7 +46,7 @@ function EconomyController.GetTopPets(player: Player): { string }
 	return top
 end
 
--- Revenu par seconde : seuls les familiers exposés sur les socles rapportent.
+-- Revenu par seconde : seuls les familiers qui se baladent dans la base rapportent.
 function EconomyController.GetIncome(player: Player): number
 	local income = 0
 	for _, petId in ipairs(EconomyController.GetTopPets(player)) do
