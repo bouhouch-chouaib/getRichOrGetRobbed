@@ -475,31 +475,46 @@ function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
 	return model
 end
 
--- Prépare une fois les vrais modèles 3D de PetMeshes (forme + texture recréées à partir des assets).
-local function loadMeshes()
-	for petId, def in pairs(PetMeshes) do
-		local entry = PetCatalog.ById[petId]
-		if not entry then
-			warn("[PetModelBuilder] PetMeshes : familier inconnu " .. petId)
-			continue
-		end
-		local ok, result = pcall(function()
-			return AssetService:CreateMeshPartAsync(Content.fromUri(def.MeshId))
-		end)
-		if ok and typeof(result) == "Instance" and result:IsA("MeshPart") then
-			result.Name = "Mesh"
-			result.TextureID = def.TextureId
-			local source = Instance.new("Model")
-			source:SetAttribute("FacingYaw", def.FacingYaw or 180)
-			source:SetAttribute("HeightScale", def.HeightScale or 1)
-			result.Parent = source
-			meshTemplates[petId] = normalizeCustom(source, entry)
-			source:Destroy()
-		else
-			warn(string.format("[PetModelBuilder] Modèle 3D de %s non chargé : %s", petId, tostring(result)))
-		end
+-- Prépare un vrai modèle 3D de PetMeshes (forme + texture recréées à partir des assets).
+local function loadMesh(petId: string, def: PetMeshes.MeshDef)
+	local entry = PetCatalog.ById[petId]
+	if not entry then
+		warn("[PetModelBuilder] PetMeshes : familier inconnu " .. petId)
+		return
 	end
-	meshesReady:Fire()
+	local ok, result = pcall(function()
+		return AssetService:CreateMeshPartAsync(Content.fromUri(def.MeshId))
+	end)
+	if ok and typeof(result) == "Instance" and result:IsA("MeshPart") then
+		result.Name = "Mesh"
+		result.TextureID = def.TextureId
+		local source = Instance.new("Model")
+		source:SetAttribute("FacingYaw", def.FacingYaw or 180)
+		source:SetAttribute("HeightScale", def.HeightScale or 1)
+		result.Parent = source
+		meshTemplates[petId] = normalizeCustom(source, entry)
+		source:Destroy()
+	else
+		warn(string.format("[PetModelBuilder] Modèle 3D de %s non chargé : %s", petId, tostring(result)))
+	end
+end
+
+-- Tous les modèles sont chargés en même temps ; MeshesReady quand le dernier est prêt.
+local function loadMeshes()
+	local pending = 0
+	for petId, def in pairs(PetMeshes) do
+		pending += 1
+		task.spawn(function()
+			loadMesh(petId, def)
+			pending -= 1
+			if pending == 0 then
+				meshesReady:Fire()
+			end
+		end)
+	end
+	if pending == 0 then
+		meshesReady:Fire()
+	end
 end
 if RunService:IsClient() then
 	task.spawn(loadMeshes)
