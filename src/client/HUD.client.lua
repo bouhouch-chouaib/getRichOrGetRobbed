@@ -16,6 +16,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetMeshes = require(ReplicatedStorage.Shared.PetMeshes)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Toast = require(script.Parent.Toast)
@@ -1028,6 +1029,18 @@ for _, item in ipairs(Config.Shop) do
 	end)
 end
 Remotes.RewardsGranted.OnClientEvent:Connect(showRewards)
+
+-- Les vrais modèles 3D (shared/PetMeshes) viennent d'être chargés : les aperçus de la collection sont refaits.
+PetModelBuilder.MeshesReady:Connect(function()
+	for petId in pairs(PetMeshes) do
+		local card = petCards[petId]
+		if card and card.viewport then
+			card.viewport:Destroy()
+			card.viewport = nil
+		end
+	end
+	updatePets()
+end)
 
 updatePhase()
 updateStats()

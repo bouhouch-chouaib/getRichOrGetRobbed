@@ -373,6 +373,25 @@ RunService.RenderStepped:Connect(function(dt: number)
 	end
 end)
 
+-- Les vrais modèles 3D (shared/PetMeshes) viennent d'être chargés : on remplace ceux déjà affichés.
+PetModelBuilder.MeshesReady:Connect(function()
+	for _, display in pairs(displays) do
+		for _, shown in pairs(display.pets) do
+			local model = PetModelBuilder.Build(shown.model.Name)
+			if model then
+				model:PivotTo(CFrame.new())
+				local box, size = model:GetBoundingBox()
+				shown.model:Destroy()
+				shown.model = model
+				shown.bottomOffset = -(box.Position.Y - size.Y / 2)
+				shown.topOffset = box.Position.Y + size.Y / 2
+				setLabel(shown)
+				model.Parent = folder
+			end
+		end
+	end
+end)
+
 local map = Workspace:WaitForChild("Map")
 map.ChildAdded:Connect(watchBase)
 for _, child in ipairs(map:GetChildren()) do

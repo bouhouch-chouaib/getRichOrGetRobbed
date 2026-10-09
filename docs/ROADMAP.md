@@ -348,7 +348,13 @@ puis lui demander de coller la sortie **Output** (erreurs rouges / avertissement
 Points d'accroche déjà dans le code : `LootEngine.roll(score, pity, luckBonus)` (paramètre `luckBonus` prévu pour un pass de chance),
 `PlayerData.equipSlots` (pour un pass « +emplacements »). Les gamepasses/produits doivent être créés par Chouaib, qui donne leurs IDs.
 
-**Pipeline d'un modèle 3D de familier (testé avec le Capybara Zen).**
+**Pipeline recommandé (9 oct. 2026) : génération dans Studio + `shared/PetMeshes`.** L'outil MCP Studio `generate_mesh`
+(prompt "cute cartoon … pet, stylized toy-like Roblox style …", maxTriangles ~6000, segmentation "none") crée un MeshPart texturé
+dont MeshId / TextureID sont des assets du créateur. On recopie ces deux Id dans `PetMeshes` (FacingYaw = 0 si le modèle
+regarde vers -Z, ce qui est le cas des générations testées), puis on supprime le modèle généré du Workspace. Aucun fichier
+.rbxm ni intervention de Chouaib ; versionné par git. Premier modèle : La Baleine Galaxie.
+
+**Ancien pipeline (fichiers importés, testé avec le Capybara Zen).**
 1. Chouaib génère un `.glb`/`.fbx` (ChatGPT, Meshy, Tripo, générateur Studio…) et le dépose dans `assets/PetModels/`.
 2. L'IA l'inspecte (Python : en-tête glTF, nb de triangles < ~20 000, dimensions, matières, côté des yeux via les bornes des primitives).
    Les `.glb` regardent généralement vers **+Z** ; le jeu attend **-Z** → rotation 180° appliquée par défaut.

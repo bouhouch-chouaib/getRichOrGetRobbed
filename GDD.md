@@ -42,8 +42,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - **Machine de fusion** (`FusionController`, bâtiment physique dans chaque kiosque) : 5 familiers non équipés d'une rareté + un coût
   (250 / 15K / 750K / 40M / 2.5B / 250B $) = 1 familier aléatoire de la rareté au-dessus, de Commun jusqu'à Mythique → Divin.
   Doublons consommés en priorité. Le Sigma ne s'obtient que par chance.
-- Modèles : `PetModelBuilder` construit un modèle de remplacement en formes de base ; un Model nommé comme l'Id
-  dans `ReplicatedStorage.PetModels` le remplace automatiquement.
+- Modèles, par ordre de priorité (`PetModelBuilder.Build`) :
+  1. **vrais modèles 3D en assets** listés dans `shared/PetMeshes` (MeshId + TextureId + FacingYaw) : recréés une fois au
+     démarrage côté client (`AssetService:CreateMeshPartAsync`), normalisés (taille de la rareté, -Z, particules), puis clonés.
+     Quand ils sont prêts, `PetModelBuilder.MeshesReady` fait reconstruire ce qui est déjà affiché (BasePets, PetFollow, HUD) ;
+  2. un Model nommé comme l'Id dans `ReplicatedStorage.PetModels` (fichiers `.rbxm` de `assets/PetModels/`, ex. Capybara Zen) ;
+  3. sinon un modèle de remplacement en formes de base.
 - Test : `Config.StudioGiveAllPets = true` donne les 75 familiers dans Studio (désactivé par défaut : fausse l'économie).
 
 ## Objets à jeter

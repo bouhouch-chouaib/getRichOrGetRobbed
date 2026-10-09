@@ -162,6 +162,14 @@ for _, player in ipairs(Players:GetPlayers()) do
 	watch(player)
 end
 
+-- Les vrais modèles 3D (shared/PetMeshes) viennent d'être chargés : on reconstruit ce qui est déjà affiché.
+PetModelBuilder.MeshesReady:Connect(function()
+	for _, player in ipairs(Players:GetPlayers()) do
+		rebuild(player)
+		rebuildCarried(player)
+	end
+end)
+
 RunService.RenderStepped:Connect(function(dt: number)
 	local now = os.clock()
 	local alpha = math.min(1, dt * SMOOTHNESS)

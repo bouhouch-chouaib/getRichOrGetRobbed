@@ -1,17 +1,28 @@
 --!strict
 -- PetModelBuilder : fabrique le modèle 3D d'un familier.
--- 1. Si ReplicatedStorage.PetModels contient un Model nommé comme l'Id du familier, on le clone.
--- 2. Sinon, on assemble un modèle de remplacement à partir de formes de base (PetCatalog.Look).
+-- 1. Si le familier a un vrai modèle 3D en assets (shared/PetMeshes), on clone ce modèle (préparé au démarrage
+--    côté client ; tant qu'il n'est pas prêt, on utilise les solutions suivantes, puis MeshesReady est déclenché).
+-- 2. Si ReplicatedStorage.PetModels contient un Model nommé comme l'Id du familier, on le clone.
+-- 3. Sinon, on assemble un modèle de remplacement à partir de formes de base (PetCatalog.Look).
 -- Le modèle retourné est ancré, sans collision, avec un PrimaryPart "Root" invisible à l'origine
 -- (le familier regarde vers -Z). On le place avec model:PivotTo().
 
+local AssetService = game:GetService("AssetService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Config = require(script.Parent.Config)
 local PetCatalog = require(script.Parent.PetCatalog)
+local PetMeshes = require(script.Parent.PetMeshes)
 local PetModelColors = require(script.Parent.PetModelColors)
 
 local PetModelBuilder = {}
+
+-- Déclenché quand les modèles 3D de PetMeshes sont prêts : les scripts qui ont déjà construit des familiers
+-- les reconstruisent pour afficher les vrais modèles.
+local meshesReady = Instance.new("BindableEvent")
+PetModelBuilder.MeshesReady = meshesReady.Event
+local meshTemplates: { [string]: Model } = {}
 
 local normalizeCustom: (Model, PetCatalog.Pet) -> Model
 
@@ -459,8 +470,39 @@ function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
 	end
 
 	finalize(model)
+	addEffect(root, entry.Look)
 	model:SetAttribute("Float", entry.Look.Float == true)
 	return model
+end
+
+-- Prépare une fois les vrais modèles 3D de PetMeshes (forme + texture recréées à partir des assets).
+local function loadMeshes()
+	for petId, def in pairs(PetMeshes) do
+		local entry = PetCatalog.ById[petId]
+		if not entry then
+			warn("[PetModelBuilder] PetMeshes : familier inconnu " .. petId)
+			continue
+		end
+		local ok, result = pcall(function()
+			return AssetService:CreateMeshPartAsync(Content.fromUri(def.MeshId))
+		end)
+		if ok and typeof(result) == "Instance" and result:IsA("MeshPart") then
+			result.Name = "Mesh"
+			result.TextureID = def.TextureId
+			local source = Instance.new("Model")
+			source:SetAttribute("FacingYaw", def.FacingYaw or 180)
+			source:SetAttribute("HeightScale", def.HeightScale or 1)
+			result.Parent = source
+			meshTemplates[petId] = normalizeCustom(source, entry)
+			source:Destroy()
+		else
+			warn(string.format("[PetModelBuilder] Modèle 3D de %s non chargé : %s", petId, tostring(result)))
+		end
+	end
+	meshesReady:Fire()
+end
+if RunService:IsClient() then
+	task.spawn(loadMeshes)
 end
 
 -- Construit le modèle du familier petId (nil si l'Id est inconnu).
@@ -468,6 +510,11 @@ function PetModelBuilder.Build(petId: string): Model?
 	local entry = PetCatalog.ById[petId]
 	if not entry then
 		return nil
+	end
+
+	local template = meshTemplates[petId]
+	if template then
+		return template:Clone()
 	end
 
 	local folder = ReplicatedStorage:FindFirstChild("PetModels")
