@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local SessionData = require(script.Parent.SessionData)
 
@@ -52,7 +53,8 @@ function EconomyController.GetIncome(player: Player): number
 	for _, petId in ipairs(EconomyController.GetTopPets(player)) do
 		income += petIncome(petId)
 	end
-	return income
+	-- Passes 2X Argent et VIP (shared/Perks).
+	return income * Perks.MoneyMultiplier(player)
 end
 
 EconomyController.GetPetIncome = petIncome

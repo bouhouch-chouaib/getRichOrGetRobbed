@@ -100,7 +100,7 @@
 ### Ce qui N'EXISTE PAS encore
 - Contenu : ~~aucun son ni musique~~ (fait le 8 oct., voir GDD « Sons et musique ») ; ~~74/75 modèles provisoires~~ 61/75 provisoires (tous les Sigma et Divins ont un vrai modèle 3D depuis le 9 oct.) ; pas de rebirth, quêtes, récompenses quotidiennes ; pas de classement global ni d'événements.
 - Social : pas d'échanges ; pas de vol de familiers ; pas de codes, bonus de groupe, badges.
-- Robux : aucun gamepass ni produit.
+- Robux : ~~aucun gamepass ni produit~~ 5 passes + 3 produits codés le 9 oct. (voir GDD « Monétisation ») ; Id à créer sur Roblox.
 - ~~Pas de tutoriel~~ (fait le 8 oct., voir GDD « Tutoriel »).
 - Sécurité : ~~pas d'anti-triche sur les lancers~~ (fait le 9 oct., voir GDD règle 5) ; ~~pas de protection anti-duplication entre serveurs~~ (fait : verrou de session) ; sauvegarde pas remise à zéro pour l'ouverture.
 - Publication : ~~noms de brainrots repris de *Steal a Brainrot*~~ (renommés le 8 oct.) ; icône, vignettes, description à faire ; questionnaire de maturité à remplir ; aucun test multijoueur réel.

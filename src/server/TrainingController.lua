@@ -9,6 +9,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local BaseManager = require(script.Parent.BaseManager)
 local SessionData = require(script.Parent.SessionData)
 
@@ -73,7 +74,7 @@ local function render(station: Station, level: number)
 		station.sign.Enabled = visible
 	end
 	if station.label then
-		station.label.Text = string.format("%s\nNIVEAU %d • %s • XP x%s", station.kind.title, level, look.Name:upper(), tostring(Config.Training.StationRates[level] or 1))
+		station.label.Text = string.format("%s\nNIVEAU %d • %s • XP x%s", station.kind.title, level, TextFormat.upper(look.Name), tostring(Config.Training.StationRates[level] or 1))
 	end
 	-- Le tapis roule en permanence quand il existe (convoyeur vers l'arrière de la base).
 	if station.kind.model == "Treadmill" then

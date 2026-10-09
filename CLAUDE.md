@@ -79,7 +79,7 @@ verrouillage 5 s relancé à chaque passage • consigne de phase en bas de l'é
 `Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester) • sauvegarde DataStore •
 machine de fusion + boutique physiques dans 4 kiosques entre les bases • économie en grands nombres (K/M/B/T, `NumberFormat`) •
 bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptAnchors`) •
-**vol de familiers** pendant la digestion + défense « Reprendre » et annonces (`StealController`, `Config.Steal`, voir GDD) • modèles 3D importés à la bonne taille • nouveaux familiers qui tombent du ciel dans la base (`Celebrate`) + carte de résultats discrète • sons et musique (`client/Sounds`, `Config.Sounds`) • effets de satisfaction : points qui s'envolent, ouverture animée des tirages rares, secousses (`client/Effects`) • tutoriel en 3 étapes, une seule fois (`client/Tutorial`) • anti-triche des lancers (`Config.AntiCheat`, vérifié quand le trou avale l'objet) • vrais modèles 3D des 14 familiers Sigma/Divins (`shared/PetMeshes`, générés dans Studio avec l'outil MCP `generate_mesh`).
+**vol de familiers** pendant la digestion + défense « Reprendre » et annonces (`StealController`, `Config.Steal`, voir GDD) • modèles 3D importés à la bonne taille • nouveaux familiers qui tombent du ciel dans la base (`Celebrate`) + carte de résultats discrète • sons et musique (`client/Sounds`, `Config.Sounds`) • effets de satisfaction : points qui s'envolent, ouverture animée des tirages rares, secousses (`client/Effects`) • tutoriel en 3 étapes, une seule fois (`client/Tutorial`) • anti-triche des lancers (`Config.AntiCheat`, vérifié quand le trou avale l'objet) • vrais modèles 3D des 14 familiers Sigma/Divins (`shared/PetMeshes`, générés dans Studio avec l'outil MCP `generate_mesh`) • boutique Robux : 5 passes + 3 produits, achats sûrs, probabilités affichées (`MonetizationController`, `client/RobuxShop`).
 
 Pousser le code dans Studio sans `rojo serve` : voir la mémoire « Sync Studio sans Rojo » (rbxm + `GetObjects`).
 ⚠️ Si `rojo serve` tourne (port 34872), Rojo écrase ce qu'on modifie directement dans Studio par la version du dossier
@@ -90,9 +90,8 @@ OneDrive : dans ce cas, copier les fichiers dans OneDrive (ou aligner après le 
 1. (fait : socles) Idée : slots de socles supplémentaires achetables, vol de familiers sur les socles adverses.
 2. (fait : machine de fusion, `FusionController` + fenêtre FUSION)
 3. (fait : sauvegarde DataStore)
-4. Monétisation : gamepass "Equip +2" (800 R$), "Lucky Luck" (400 R$, `luckBonus` déjà prévu dans `LootEngine.roll`),
-   produits développeur "points de tirage" (afficher les probabilités : règle Roblox sur les objets aléatoires payants).
-   Il faudra que l'utilisateur crée les gamepasses/produits et fournisse leurs IDs.
+4. (fait le 9 oct. : monétisation codée — 5 passes + 3 produits, `MonetizationController`, `client/RobuxShop`, `shared/Perks`).
+   Reste : l'utilisateur crée les passes/produits sur create.roblox.com et fournit leurs Id (`Config.Monetization`).
 5. Échanges entre joueurs (double confirmation anti-arnaque).
 
 Autres idées notées : vol de familiers dans les bases adverses (colle au nom du jeu), bulle ProximityPrompt

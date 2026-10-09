@@ -16,6 +16,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BasePetsController = require(script.Parent.BasePetsController)
 local GameLoopManager = require(script.Parent.GameLoopManager)
@@ -227,8 +228,9 @@ end
 local function distributeRewards()
 	for _, player in ipairs(Players:GetPlayers()) do
 		local score = math.floor(SessionData.GetRoundScore(player) * 10) / 10
-		local outcome = LootEngine.roll(score, SessionData.GetPity(player))
-		local money = math.floor(score * Config.Economy.MoneyPerPoint)
+		-- Chance et argent en plus selon les passes et le boost de chance serveur (shared/Perks).
+		local outcome = LootEngine.roll(score, SessionData.GetPity(player), Perks.LuckBonus(player))
+		local money = math.floor(score * Config.Economy.MoneyPerPoint * Perks.MoneyMultiplier(player))
 		SessionData.SetPity(player, outcome.pity)
 		if outcome.pulls > 0 then
 			SessionData.AddPets(player, outcome.results)

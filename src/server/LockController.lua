@@ -10,6 +10,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Perks = require(ReplicatedStorage.Shared.Perks)
 local BaseManager = require(script.Parent.BaseManager)
 local SessionData = require(script.Parent.SessionData)
 
@@ -78,7 +79,8 @@ local function update(entry: BaseParts, now: number)
 		-- Le bouton est un cylindre couché : son axe (hauteur) est l'axe X local.
 		local flat = Vector2.new(offset.Y, offset.Z).Magnitude
 		if flat <= Config.Lock.ButtonRadius and offset.X > -1 and offset.X < 6 then
-			local duration = if SessionData.HasUnlock(owner, "LongLock") then Config.Lock.LongDuration else Config.Lock.Duration
+			local duration = (if SessionData.HasUnlock(owner, "LongLock") then Config.Lock.LongDuration else Config.Lock.Duration)
+				+ Perks.LockBonus(owner) -- passe VIP
 			local wasLocked = untilTime ~= nil
 			local newUntil = now + duration
 			untilTime = newUntil

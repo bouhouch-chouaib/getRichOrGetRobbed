@@ -22,6 +22,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
+local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local Sounds = require(script.Parent.Sounds)
 
 -- Au-delà, les familiers d'une base ne sont plus animés (plus court sur téléphone pour les performances).
@@ -96,7 +97,7 @@ local function setLabel(shown: Shown)
 		outline.Parent = label
 		label.Parent = sign
 	end
-	line(entry.Name:upper() .. (if count > 1 then " x" .. count else ""), rarity.Color, 0, 0.55)
+	line(TextFormat.upper(entry.Name) .. (if count > 1 then " x" .. count else ""), rarity.Color, 0, 0.55)
 	line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.55, 0.45)
 	sign.Parent = shown.model
 end

@@ -124,6 +124,23 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
    Limite connue : un tricheur à portée qui attend le temps d'un vrai vol avant de téléporter son objet n'est pas détecté
    (il ne gagne alors rien de plus qu'un lancer réussi).
 
+## Monétisation (Robux)
+
+- Catalogue : `Config.Monetization` (Id = numéro créé sur create.roblox.com ; 0 = pas encore créé -> "BIENTÔT").
+  Passes : 2X Argent (x2), VIP (+25 % d'argent, étiquette au-dessus de la tête, verrou +10 s), Sac à dos +1, Équipement +2,
+  Chance Chanceuse (+0,5 de chance). Produits : boost de chance serveur (+1 de chance = raretés au-dessus de Commun x2,
+  10 min prolongeables, annoncé à tous : attributs `LuckBoostUntil/By/At` de ReplicatedStorage), 1 et 10 tirages instantanés
+  (chance de base 0,5).
+- Effets centralisés dans `shared/Perks` (lit `Player.Pass_<Key>`) : utilisé par EconomyController (revenu), BlackholeController
+  (argent et chance des manches), LockController (verrou), ItemInteraction + SessionData (sac, places d'équipement).
+- `server/MonetizationController` : vérifie les passes à l'arrivée et après achat (`PromptGamePassPurchaseFinished`) ;
+  `ProcessReceipt` idempotent : reçu (PurchaseId) noté dans la sauvegarde (`receipts`, 100 derniers), PurchaseGranted seulement
+  après une sauvegarde réussie ; l'affichage (carte, ouverture, annonces) tourne à part pour qu'une erreur visuelle ne fasse
+  jamais refuser un achat déjà accordé. Studio : `StudioTestPasses` simule des passes possédés.
+- `client/RobuxShop` : bouton ⭐ ROBUX (droite), fenêtre passes / produits (vrai prix lu sur Roblox), **probabilités exactes**
+  d'un tirage acheté (`LootEngine.odds` avec la chance réelle du joueur) + règle de la pitié ; bandeau du boost serveur.
+- `shared/TextFormat.upper` : majuscules avec accents (remplace `:upper()` partout).
+
 ## Sons et musique
 
 - Tout est côté client. `client/Sounds` (module) : `play(nom)` (son 2D, pour soi), `playAt(nom, position)` (son 3D, Attachment

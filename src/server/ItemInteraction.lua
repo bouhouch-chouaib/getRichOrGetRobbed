@@ -17,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local SessionData = require(script.Parent.SessionData)
 
@@ -81,7 +82,7 @@ function ItemInteraction.ReleaseHeld(player: Player)
 end
 
 local function getCapacity(player: Player): number
-	return 1 + SessionData.GetUpgradeLevel(player, "Backpack")
+	return 1 + SessionData.GetUpgradeLevel(player, "Backpack") + Perks.ExtraCapacity(player)
 end
 
 function ItemInteraction.IsHeld(item: BasePart): boolean

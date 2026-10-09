@@ -18,6 +18,7 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetMeshes = require(ReplicatedStorage.Shared.PetMeshes)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Toast = require(script.Parent.Toast)
 
@@ -352,7 +353,7 @@ local shopLevels: { [string]: TextLabel } = {}
 for index, item in ipairs(Config.Shop) do
 	local cardFrame = makeCard(shopList, 96, index)
 
-	local name = text(cardFrame, item.Icon .. " " .. item.Name:upper(), 24, Color3.fromRGB(255, 200, 50))
+	local name = text(cardFrame, item.Icon .. " " .. TextFormat.upper(item.Name), 24, Color3.fromRGB(255, 200, 50))
 	name.Position = UDim2.fromOffset(14, 8)
 	name.Size = UDim2.new(1, -180, 0, 30)
 	name.TextXAlignment = Enum.TextXAlignment.Left
@@ -489,7 +490,7 @@ for order, entry in ipairs(PetCatalog.List) do
 	name.Size = UDim2.new(1, -8, 0, 22)
 	name.TextScaled = true
 
-	local rarityLabel = text(button, rarity.Name:upper(), 14, rarity.Color:Lerp(WHITE, 0.3))
+	local rarityLabel = text(button, TextFormat.upper(rarity.Name), 14, rarity.Color:Lerp(WHITE, 0.3))
 	rarityLabel.Position = UDim2.new(0, 4, 1, -22)
 	rarityLabel.Size = UDim2.new(1, -8, 0, 18)
 
@@ -612,7 +613,7 @@ for rarityIndex = 1, Config.Fusion.MaxFromRarity do
 	cardFrame.BackgroundColor3 = WHITE
 	gradient(cardFrame, from.Color:Lerp(WHITE, 0.4), to.Color:Lerp(WHITE, 0.2))
 
-	local title = text(cardFrame, string.format("%s → %s", from.Name:upper(), to.Name:upper()), 20)
+	local title = text(cardFrame, string.format("%s → %s", TextFormat.upper(from.Name), TextFormat.upper(to.Name)), 20)
 	title.Position = UDim2.fromOffset(12, 4)
 	title.Size = UDim2.new(1, -150, 0, 28)
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -690,13 +691,13 @@ Remotes.FusionResult.OnClientEvent:Connect(function(petId: string)
 	viewport.Position = UDim2.fromOffset(6, 30)
 	viewport.Size = UDim2.new(1, -12, 1, -78)
 	resultViewport = viewport
-	resultName.Text = entry.Name:upper()
+	resultName.Text = TextFormat.upper(entry.Name)
 	resultName.TextColor3 = rarity.Color
 	local scale = resultCard:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
 	scale.Parent = resultCard
 	scale.Scale = 0.6
 	TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	Toast.show(string.format("FUSION : %s (%s) !", entry.Name:upper(), rarity.Name:upper()), rarity.Color)
+	Toast.show(string.format("FUSION : %s (%s) !", TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
 end)
 
 ----------------------------------------------------------------------
@@ -754,7 +755,7 @@ end)
 
 local function petName(petId: unknown): string
 	local entry = if type(petId) == "string" then PetCatalog.ById[petId] else nil
-	return if entry then entry.Name:upper() else "LE FAMILIER"
+	return if entry then TextFormat.upper(entry.Name) else "LE FAMILIER"
 end
 
 local function updatePhase()
@@ -860,7 +861,7 @@ end)
 local RECOVER_KEY = if ScreenScale.isTouch() then "TOUCHE REPRENDRE" else "APPUIE SUR [E]"
 
 Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: string, victimName: string, petId: string)
-	local thief = thiefName:upper()
+	local thief = TextFormat.upper(thiefName)
 	local pet = petName(petId)
 	-- Les noms de familiers ont parfois un article ("Le Capybara Zen"), parfois non ("Chat") : tournures neutres.
 	if kind == "Started" then
@@ -874,7 +875,7 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 	elseif kind == "Announce" then
 		local entry = PetCatalog.ById[petId]
 		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
-		Toast.show(string.format("🚨 %s A VOLÉ %s À %s !", thief, pet, victimName:upper()), if rarity then rarity.Color else Color3.new(1, 1, 1))
+		Toast.show(string.format("🚨 %s A VOLÉ %s À %s !", thief, pet, TextFormat.upper(victimName)), if rarity then rarity.Color else Color3.new(1, 1, 1))
 	end
 end)
 
@@ -900,7 +901,10 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 		rewardHeadline.Text = "IL A ENCORE FAIM..."
 		rewardBody.Text = "0 POINT CETTE MANCHE"
 	else
-		rewardHeadline.Text = string.format("%.1f POINTS  •  %d TIRAGE%s", score, pulls, if pulls > 1 then "S" else "")
+		local plural = if pulls > 1 then "S" else ""
+		rewardHeadline.Text = if score == 0
+			then string.format("%d TIRAGE%s !", pulls, plural) -- tirages achetés en Robux (pas de points de manche)
+			else string.format("%.1f POINTS  •  %d TIRAGE%s", score, pulls, plural)
 		-- Familiers gagnés, du plus rare au plus commun (4 lignes max).
 		local drops = {}
 		for petId, count in pairs(results) do
@@ -919,7 +923,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 				break
 			end
 			local rarity = Config.Rarities[drop.rank]
-			table.insert(lines, string.format('<font color="#%s">+%d %s</font>', rarity.Color:ToHex(), drop.count, drop.entry.Name:upper()))
+			table.insert(lines, string.format('<font color="#%s">+%d %s</font>', rarity.Color:ToHex(), drop.count, TextFormat.upper(drop.entry.Name)))
 		end
 		if money and money > 0 then
 			table.insert(lines, string.format('<font color="#%s">+%s</font>', MONEY:ToHex(), formatMoney(money)))
@@ -944,7 +948,7 @@ Remotes.Announcement.OnClientEvent:Connect(function(playerName: string, petId: s
 		return
 	end
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
-	Toast.show(string.format("%s A OBTENU %s (%s) !", playerName:upper(), entry.Name:upper(), rarity.Name:upper()), rarity.Color)
+	Toast.show(string.format("%s A OBTENU %s (%s) !", TextFormat.upper(playerName), TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
 end)
 
 -- Bâtiments de la map (boutique, machine de fusion) : leur prompt "[E]" ouvre la fenêtre correspondante,
@@ -999,9 +1003,9 @@ for _, item in ipairs(Config.Shop) do
 		if level <= 0 or not dataReady() then
 			return
 		end
-		local message = if item.MaxLevel > 1 then string.format("%s NIVEAU %d !", item.Name:upper(), level) else item.Name:upper() .. " DÉBLOQUÉ !"
+		local message = if item.MaxLevel > 1 then string.format("%s NIVEAU %d !", TextFormat.upper(item.Name), level) else TextFormat.upper(item.Name) .. " DÉBLOQUÉ !"
 		if level == 1 and STATION_HINTS[item.Id] then
-			message = item.Name:upper() .. STATION_HINTS[item.Id]
+			message = TextFormat.upper(item.Name) .. STATION_HINTS[item.Id]
 		end
 		Toast.show(message, Color3.fromRGB(110, 240, 70))
 	end)

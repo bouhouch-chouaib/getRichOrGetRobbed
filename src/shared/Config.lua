@@ -137,6 +137,44 @@ Config.Pets = {
 	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
 }
 
+-- Monétisation (Robux). Id = numéro du pass / produit créé sur create.roblox.com (0 = pas encore créé : affiché "BIENTÔT").
+-- Price = prix affiché par défaut (le vrai prix est lu sur Roblox dès que l'Id est renseigné).
+export type MonetizationItem = {
+	Key: string,
+	Id: number,
+	Icon: string,
+	Name: string,
+	Description: string,
+	Price: number,
+	Pulls: number?, -- produits "tirages" : nombre de tirages accordés
+}
+
+Config.Monetization = {
+	GamePasses = {
+		{ Key = "DoubleMoney", Id = 0, Icon = "💰", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
+		{ Key = "VIP", Id = 0, Icon = "👑", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
+		{ Key = "ExtraBackpack", Id = 0, Icon = "🎒", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
+		{ Key = "EquipPlus2", Id = 0, Icon = "🐾", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
+		{ Key = "LuckyLuck", Id = 0, Icon = "🍀", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
+	} :: { MonetizationItem },
+	Products = {
+		{ Key = "ServerLuck", Id = 0, Icon = "🌟", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
+		{ Key = "Pull1", Id = 0, Icon = "🎲", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
+		{ Key = "Pull10", Id = 0, Icon = "🎰", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
+	} :: { MonetizationItem },
+	DoubleMoneyMultiplier = 2,
+	VipMoneyMultiplier = 1.25,
+	VipLockBonus = 10, -- secondes de verrou en plus
+	ExtraBackpack = 1, -- objets portés en plus
+	ExtraEquipSlots = 2, -- familiers équipés en plus
+	LuckyLuckBonus = 0.5, -- bonus de chance des tirages (voir LootEngine)
+	ServerLuckBonus = 1, -- boost serveur : poids des raretés au-dessus de Commun x2
+	ServerLuckDuration = 600, -- secondes (un nouvel achat prolonge le boost)
+	PullLuck = 0.5, -- chance de base des tirages achetés (= une bonne manche)
+	-- Studio uniquement, pour tester sans acheter : clés des passes considérés comme possédés (ex. { "VIP" }).
+	StudioTestPasses = {} :: { string },
+}
+
 -- Machine de fusion : Count familiers d'une même rareté -> 1 familier aléatoire de la rareté au-dessus.
 -- Possible jusqu'à MaxFromRarity (6 = Mythique -> Divin). Le Sigma ne s'obtient que par chance.
 Config.Fusion = {

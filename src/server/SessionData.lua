@@ -17,6 +17,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 export type Stat = "Speed" | "Strength"
@@ -32,8 +33,11 @@ export type PlayerData = {
 	pity: number,
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
+	receipts: { string }, -- derniers achats Robux accordés (PurchaseId) : jamais deux fois le même (MonetizationController)
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
 }
+
+local MAX_RECEIPTS = 100 -- on garde les 100 derniers achats (largement assez pour repérer un doublon)
 
 local SessionData = {}
 
@@ -94,6 +98,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		pity = data.pity,
 		upgrades = data.upgrades,
 		tutorialDone = data.tutorialDone,
+		receipts = data.receipts,
 		session = session,
 	}
 end
@@ -176,17 +181,18 @@ end
 
 -- Écrit la sauvegarde du joueur, seulement si ce serveur tient toujours son verrou.
 -- release = true (départ du joueur, arrêt du serveur) : libère le verrou ; plus rien n'est écrit ensuite.
-local function savePlayer(player: Player, release: boolean)
+-- Retourne true si la sauvegarde a bien été écrite.
+local function savePlayer(player: Player, release: boolean): boolean
 	local data = storage[player]
 	if not data or not data.loaded or not store then
-		return
+		return false
 	end
 	local userId = player.UserId
 	lockKey(userId)
 	if not data.loaded then
 		-- Déjà libérée (ou verrou perdu) pendant qu'on attendait notre tour.
 		unlockKey(userId)
-		return
+		return false
 	end
 	local payload = serialize(data, if release then nil else newLock())
 	local currentStore = store :: DataStore
@@ -217,6 +223,7 @@ local function savePlayer(player: Player, release: boolean)
 			player:Kick("Ta partie a été ouverte sur un autre serveur. Reconnecte-toi pour continuer.")
 		end
 	end
+	return ok and not lostLock
 end
 
 -- Rend la sauvegarde sans rien y changer d'autre (joueur parti pendant son chargement).
@@ -277,14 +284,32 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	-- ne doit pas le revoir.
 	local hasPlayed = (type(saved.pets) == "table" and next(saved.pets) ~= nil) or numberOr(saved.money, 0) > 0
 	data.tutorialDone = data.tutorialDone or saved.tutorialDone == true or (saved.tutorialDone == nil and hasPlayed)
+	if type(saved.receipts) == "table" then
+		for _, purchaseId in ipairs(saved.receipts) do
+			if type(purchaseId) == "string" and not table.find(data.receipts, purchaseId) then
+				table.insert(data.receipts, purchaseId)
+			end
+		end
+	end
 	if type(saved.equipped) == "table" then
 		data.equipped = {}
+		-- On garde jusqu'au maximum possible (avec le passe "Équipement +2") : la vérification des passes peut
+		-- finir après le chargement ; le surplus éventuel est retiré ensuite (refreshPerks).
+		local maxSlots = Config.Pets.EquipSlots + Config.Monetization.ExtraEquipSlots
 		for _, savedId in ipairs(saved.equipped) do
 			local petId = if type(savedId) == "string" then PetCatalog.CurrentId(savedId) else nil
-			if petId and #data.equipped < data.equipSlots and (data.pets[petId] or 0) > 0 then
+			if petId and #data.equipped < maxSlots and (data.pets[petId] or 0) > 0 then
 				table.insert(data.equipped, petId)
 			end
 		end
+	end
+end
+
+-- Places d'équipement selon les passes (Perks) ; retire les familiers équipés en trop.
+local function refreshPerks(player: Player, data: PlayerData)
+	data.equipSlots = Config.Pets.EquipSlots + Perks.ExtraEquipSlots(player)
+	while #data.equipped > data.equipSlots do
+		table.remove(data.equipped)
 	end
 end
 
@@ -327,7 +352,7 @@ local function sync(player: Player)
 	end
 	player:SetAttribute("Speed", statValue("Speed", data.levels.Speed))
 	player:SetAttribute("ThrowPower", statValue("Strength", data.levels.Strength))
-	player:SetAttribute("Capacity", 1 + (data.upgrades.Backpack or 0))
+	player:SetAttribute("Capacity", 1 + (data.upgrades.Backpack or 0) + Perks.ExtraCapacity(player))
 	player:SetAttribute("RoundScore", data.roundScore)
 	player:SetAttribute("Money", data.money)
 
@@ -399,6 +424,7 @@ local function loadPlayer(player: Player)
 			if type(saved) == "table" then
 				applySaved(data, saved :: { [string]: any })
 			end
+			refreshPerks(player, data)
 			data.loaded = true
 			applySpeed(player, statValue("Speed", data.levels.Speed))
 			sync(player)
@@ -433,6 +459,7 @@ local function onPlayerAdded(player: Player)
 		pity = 0,
 		upgrades = {},
 		tutorialDone = false,
+		receipts = {},
 		loaded = false,
 	}
 
@@ -512,8 +539,33 @@ function SessionData.IsLoaded(player: Player): boolean
 end
 
 -- Sauvegarde tout de suite (sans attendre la sauvegarde auto). Bloque jusqu'à la fin de l'écriture.
-function SessionData.Save(player: Player)
-	savePlayer(player, false)
+function SessionData.Save(player: Player): boolean
+	return savePlayer(player, false)
+end
+
+-- Un passe vient d'être détecté ou acheté : places d'équipement, sac, etc. sont recalculés.
+function SessionData.RefreshPerks(player: Player)
+	local data = storage[player]
+	if data then
+		refreshPerks(player, data)
+		sync(player)
+	end
+end
+
+-- Achats Robux déjà accordés (voir MonetizationController.ProcessReceipt).
+function SessionData.HasReceipt(player: Player, purchaseId: string): boolean
+	local data = storage[player]
+	return data ~= nil and table.find(data.receipts, purchaseId) ~= nil
+end
+
+function SessionData.AddReceipt(player: Player, purchaseId: string)
+	local data = storage[player]
+	if data and not table.find(data.receipts, purchaseId) then
+		table.insert(data.receipts, purchaseId)
+		while #data.receipts > MAX_RECEIPTS do
+			table.remove(data.receipts, 1)
+		end
+	end
 end
 
 -- Tutoriel terminé ou passé (demandé par le client : sans enjeu, aucune vérification nécessaire).

@@ -71,13 +71,25 @@ local function pickPet(rarityIndex: number): string
 	return PetCatalog.List[1].Id
 end
 
--- score : points de la manche (déjà multipliés). pity : compteur actuel du joueur.
--- luckBonus : bonus de chance externe (ex : gamepass), 0 par défaut.
-function LootEngine.roll(score: number, pity: number, luckBonus: number?): Outcome
-	local outcome: Outcome = { results = {}, pulls = 0, pity = pity, drops = {} }
-	local pulls = LootEngine.countPulls(score)
-	local luck = math.min(score * Config.Loot.LuckPerPoint, Config.Loot.MaxLuck) + (luckBonus or 0)
+-- Probabilité de chaque rareté pour un tirage avec cette chance (hors garantie de la pitié).
+-- Sert à afficher les chances exactes avant un achat de tirage (règle Roblox sur les objets aléatoires payants).
+function LootEngine.odds(luck: number): { number }
+	local weights = {}
+	local total = 0
+	for index, rarity in ipairs(Config.Rarities) do
+		local weight = if index == 1 then rarity.Weight else rarity.Weight * (1 + luck)
+		weights[index] = weight
+		total += weight
+	end
+	for index, weight in ipairs(weights) do
+		weights[index] = weight / total
+	end
+	return weights
+end
 
+-- Effectue `pulls` tirages avec cette chance (tirages achetés, ou ceux d'une manche).
+function LootEngine.rollPulls(pulls: number, pity: number, luck: number): Outcome
+	local outcome: Outcome = { results = {}, pulls = 0, pity = pity, drops = {} }
 	for _ = 1, pulls do
 		outcome.pity += 1
 		local minIndex = if outcome.pity >= Config.Loot.PityPulls then Config.Loot.PityMinRarity else 1
@@ -92,6 +104,13 @@ function LootEngine.roll(score: number, pity: number, luckBonus: number?): Outco
 
 	outcome.pulls = pulls
 	return outcome
+end
+
+-- score : points de la manche (déjà multipliés). pity : compteur actuel du joueur.
+-- luckBonus : bonus de chance externe (passe "Chance Chanceuse", boost serveur : shared/Perks), 0 par défaut.
+function LootEngine.roll(score: number, pity: number, luckBonus: number?): Outcome
+	local luck = math.min(score * Config.Loot.LuckPerPoint, Config.Loot.MaxLuck) + (luckBonus or 0)
+	return LootEngine.rollPulls(LootEngine.countPulls(score), pity, luck)
 end
 
 return LootEngine

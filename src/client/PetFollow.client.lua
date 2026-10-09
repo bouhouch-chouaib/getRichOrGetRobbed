@@ -14,6 +14,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 
 -- Positions derrière le joueur selon le nombre de familiers équipés (X, Z).
 local SLOTS = {
@@ -116,7 +117,7 @@ local function rebuildCarried(player: Player)
 		label.Parent = sign
 		return label
 	end
-	line("🚨 " .. entry.Name:upper(), rarity.Color, 0, 0.55)
+	line("🚨 " .. TextFormat.upper(entry.Name), rarity.Color, 0, 0.55)
 	local timer = line("", Color3.fromRGB(255, 90, 90), 0.55, 0.45)
 	-- Le voleur lui-même voit son objectif dans la consigne du HUD (l'étiquette serait cachée par le titre).
 	sign.Enabled = player ~= localPlayer
