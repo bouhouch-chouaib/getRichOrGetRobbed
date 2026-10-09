@@ -79,7 +79,7 @@ verrouillage 5 s relancé à chaque passage • consigne de phase en bas de l'é
 `Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester) • sauvegarde DataStore •
 machine de fusion + boutique physiques dans 4 kiosques entre les bases • économie en grands nombres (K/M/B/T, `NumberFormat`) •
 bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptAnchors`) •
-**vol de familiers** pendant la digestion + défense « Reprendre » et annonces (`StealController`, `Config.Steal`, voir GDD) • modèles 3D importés à la bonne taille • nouveaux familiers qui tombent du ciel dans la base (`Celebrate`) + carte de résultats discrète • sons et musique (`client/Sounds`, `Config.Sounds`) • effets de satisfaction : points qui s'envolent, ouverture animée des tirages rares, secousses (`client/Effects`) • tutoriel en 3 étapes, une seule fois (`client/Tutorial`).
+**vol de familiers** pendant la digestion + défense « Reprendre » et annonces (`StealController`, `Config.Steal`, voir GDD) • modèles 3D importés à la bonne taille • nouveaux familiers qui tombent du ciel dans la base (`Celebrate`) + carte de résultats discrète • sons et musique (`client/Sounds`, `Config.Sounds`) • effets de satisfaction : points qui s'envolent, ouverture animée des tirages rares, secousses (`client/Effects`) • tutoriel en 3 étapes, une seule fois (`client/Tutorial`) • anti-triche des lancers (`Config.AntiCheat`, vérifié quand le trou avale l'objet).
 
 Pousser le code dans Studio sans `rojo serve` : voir la mémoire « Sync Studio sans Rojo » (rbxm + `GetObjects`).
 

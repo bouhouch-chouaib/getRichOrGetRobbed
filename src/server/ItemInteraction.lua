@@ -9,17 +9,37 @@
 --   3. Au lancer, le client détruit le weld, applique l'impulsion et prévient le serveur (ThrowItem).
 --   4. Lâcher forcé (KO, mort, départ) : le serveur efface "Holder", le client le détecte et lâche.
 -- Sac à dos : un joueur peut porter 1 + niveau "Backpack" objets (le 1er en main, les autres dans le dos).
+-- Anti-triche : à chaque lancer, le serveur note qui, d'où (position de son personnage côté serveur), quand et avec
+-- quelle puissance max ; BlackholeController vérifie ces infos (GetThrowInfo) avant de donner des points.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
+local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local SessionData = require(script.Parent.SessionData)
 
 local ItemInteraction = {}
 
 local held: { [Player]: { BasePart } } = {}
+
+export type ThrowInfo = {
+	thrower: Player,
+	origin: Vector3, -- position du HumanoidRootPart (côté serveur) au moment du lancer
+	time: number, -- os.clock() du serveur
+	power: number, -- vitesse de lancer max du joueur (attribut "ThrowPower", calculé par le serveur)
+	tooFast: boolean, -- lancé trop vite après le précédent (Config.AntiCheat.MinThrowInterval)
+}
+
+-- Clés faibles : un objet détruit disparaît aussi de cette table.
+local throws: { [BasePart]: ThrowInfo } = setmetatable({}, { __mode = "k" }) :: any
+local lastThrow: { [Player]: number } = {}
+
+-- Infos du dernier lancer de cet objet (nil s'il n'a jamais été lancé : lâché, poussé, téléporté...).
+function ItemInteraction.GetThrowInfo(item: BasePart): ThrowInfo?
+	return throws[item]
+end
 
 -- Déclenché (player) chaque fois que le joueur doit tout lâcher : KO du dôme, mort, réapparition, départ.
 -- StealController s'y abonne pour faire échouer un vol en cours.
@@ -85,6 +105,7 @@ local function onPromptTriggered(item: BasePart, player: Player)
 
 	table.insert(items, item)
 	held[player] = items
+	throws[item] = nil -- un ancien lancer ne compte plus une fois l'objet repris en main
 	item:SetAttribute("Holder", player.Name)
 	item:SetAttribute("Owner", player.Name)
 	item.CanCollide = false
@@ -121,6 +142,22 @@ function ItemInteraction.Init()
 		part:SetAttribute("Holder", nil)
 		part.CanCollide = true
 		part.Massless = false
+
+		-- Anti-triche : on note le lancer tel que le serveur le voit (le client ne peut rien y changer).
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local power = player:GetAttribute("ThrowPower")
+		local now = os.clock()
+		if root and root:IsA("BasePart") then
+			throws[part] = {
+				thrower = player,
+				origin = root.Position,
+				time = now,
+				power = if type(power) == "number" then power else Config.Training.Strength.Base,
+				tooFast = now - (lastThrow[player] or 0) < Config.AntiCheat.MinThrowInterval,
+			}
+		end
+		lastThrow[player] = now
 	end)
 
 	local function watchCharacter(player: Player, character: Model)
@@ -146,7 +183,10 @@ function ItemInteraction.Init()
 	for _, player in ipairs(Players:GetPlayers()) do
 		onPlayerAdded(player)
 	end
-	Players.PlayerRemoving:Connect(ItemInteraction.ReleaseHeld)
+	Players.PlayerRemoving:Connect(function(player: Player)
+		ItemInteraction.ReleaseHeld(player)
+		lastThrow[player] = nil
+	end)
 end
 
 return ItemInteraction

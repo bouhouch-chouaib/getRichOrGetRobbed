@@ -102,7 +102,7 @@
 - Social : pas d'échanges ; pas de vol de familiers ; pas de codes, bonus de groupe, badges.
 - Robux : aucun gamepass ni produit.
 - ~~Pas de tutoriel~~ (fait le 8 oct., voir GDD « Tutoriel »).
-- Sécurité : pas d'anti-triche sur les lancers (calculés côté client) ; ~~pas de protection anti-duplication entre serveurs~~ (fait : verrou de session) ; sauvegarde pas remise à zéro pour l'ouverture.
+- Sécurité : ~~pas d'anti-triche sur les lancers~~ (fait le 9 oct., voir GDD règle 5) ; ~~pas de protection anti-duplication entre serveurs~~ (fait : verrou de session) ; sauvegarde pas remise à zéro pour l'ouverture.
 - Publication : ~~noms de brainrots repris de *Steal a Brainrot*~~ (renommés le 8 oct.) ; icône, vignettes, description à faire ; questionnaire de maturité à remplir ; aucun test multijoueur réel.
 
 ---
@@ -362,7 +362,7 @@ Points d'accroche déjà dans le code : `LootEngine.roll(score, pity, luckBonus)
    (`[Id] = { [NomMeshPart] = Color3 }`). Le builder les réapplique en SmoothPlastic.
 6. Pour tester sans tirage : `Config.StudioTestPets = { "<Id>" }` (donné + équipé dans Studio).
 
-**Piste d'anti-triche des lancers (P0.6).** Aujourd'hui `Remotes.ThrowItem` ne transporte que l'item, et le client possède la physique
+**Piste d'anti-triche des lancers (P0.6) — FAIT le 9 oct. 2026 (voir GDD règle 5 ; temps de vol minimal ajouté).** Aujourd'hui `Remotes.ThrowItem` ne transporte que l'item, et le client possède la physique
 de l'objet en vol (il pourrait le téléporter dans le trou). Proposition minimale, sans casser les règles physiques :
 au `ThrowItem`, le serveur enregistre sur l'item `ThrowOrigin` (position du HumanoidRootPart), `ThrowTime` et `ThrowPower`
 (attribut du joueur) ; dans `BlackholeController.consume`, refuser le point si la distance horizontale `ThrowOrigin → bord du trou`

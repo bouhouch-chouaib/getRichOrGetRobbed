@@ -26,6 +26,7 @@ local BlackholeController = {}
 
 local ARENA = Config.Arena
 local KNOCKBACK = Config.Knockback
+local ANTICHEAT = Config.AntiCheat
 local CENTER = Vector3.zero
 
 local map: Folder
@@ -75,15 +76,55 @@ end
 -- Feeding : consommation des items
 ----------------------------------------------------------------------
 
+-- Anti-triche : l'objet a-t-il vraiment été lancé par son propriétaire, depuis une distance atteignable ?
+-- Retourne la raison du refus (nil si le lancer est valable).
+local function rejectReason(item: BasePart, owner: Player): string?
+	local throw = ItemInteraction.GetThrowInfo(item)
+	if not throw then
+		return "jamais lancé" -- lâché, poussé ou téléporté : ne rapporte rien
+	end
+	if throw.thrower ~= owner then
+		return "lancé par un autre joueur"
+	end
+	if throw.tooFast then
+		return "lancers trop rapprochés"
+	end
+	if os.clock() - throw.time > ANTICHEAT.MaxFlightTime then
+		return "lancé il y a trop longtemps"
+	end
+	-- Distance à parcourir depuis le point de lancer jusqu'au bord du trou, comparée à la portée max théorique
+	-- d'un projectile lancé à la vitesse max du joueur (v² / g), avec une marge.
+	local flat = Vector3.new(throw.origin.X, 0, throw.origin.Z)
+	local needed = flat.Magnitude - ARENA.HoleRadius
+	local maxRange = throw.power * throw.power / Workspace.Gravity * ANTICHEAT.RangeMargin + ANTICHEAT.RangeBonus
+	if needed > maxRange then
+		return string.format("trop loin (%.0f studs pour une portée max de %.0f)", needed, maxRange)
+	end
+	-- Un objet ne peut pas voler plus vite que la vitesse de lancer du joueur : arrivé trop tôt = téléporté.
+	local flightTime = os.clock() - throw.time
+	local minFlightTime = math.max(0, needed) / throw.power * ANTICHEAT.MinFlightRatio - ANTICHEAT.FlightTimeMargin
+	if flightTime < minFlightTime then
+		return string.format("arrivé trop vite (%.2f s pour %.0f studs, minimum %.2f s)", flightTime, needed, minFlightTime)
+	end
+	return nil
+end
+
 local function consume(item: BasePart)
 	item:SetAttribute("Consumed", true)
 
 	local ownerName = item:GetAttribute("Owner")
-	local owner = if type(ownerName) == "string" then Players:FindFirstChild(ownerName) else nil
-	if owner and owner:IsA("Player") then
-		-- Points = valeur de l'objet (Config.ItemTiers) × multiplicateur des familiers équipés.
-		local value = item:GetAttribute("Value")
-		SessionData.AddScore(owner, (if type(value) == "number" then value else 1) * SessionData.GetMultiplier(owner))
+	local found = if type(ownerName) == "string" then Players:FindFirstChild(ownerName) else nil
+	local owner = if found and found:IsA("Player") then found else nil
+	if owner then
+		local reason = rejectReason(item, owner)
+		if not reason then
+			-- Points = valeur de l'objet (Config.ItemTiers) × multiplicateur des familiers équipés.
+			local value = item:GetAttribute("Value")
+			SessionData.AddScore(owner, (if type(value) == "number" then value else 1) * SessionData.GetMultiplier(owner))
+		elseif reason ~= "jamais lancé" then
+			-- Un objet simplement lâché près du trou n'est pas suspect ; le reste est signalé.
+			warn(string.format("[AntiCheat] %s : objet avalé sans points (%s)", owner.Name, reason))
+		end
 	end
 
 	local prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)

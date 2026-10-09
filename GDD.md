@@ -110,6 +110,15 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
    - Digesting, joueurs dans le dôme : lâcher forcé, `humanoid.Sit = true`, soulevé d'1 stud, puis
      `Remotes.Knockback` → **le client** applique l'impulsion (il est propriétaire réseau de son personnage ;
      une impulsion appliquée par le serveur sur un personnage n'est pas fiable).
+5. **Anti-triche des lancers** (`Config.AntiCheat`) : au `ThrowItem`, le serveur note (table interne d'`ItemInteraction`,
+   `GetThrowInfo`) le lanceur, la position de son HumanoidRootPart côté serveur, l'heure et sa `ThrowPower` ; un lancer moins de
+   0,12 s après le précédent est marqué suspect ; reprendre l'objet en main efface ce lancer. Quand le trou avale un objet
+   (`BlackholeController.rejectReason`), pas de points s'il n'a jamais été lancé (lâché, poussé, téléporté), s'il a été lancé par
+   un autre que son `Owner`, trop vite, il y a plus de 8 s, depuis plus loin que la portée max (ThrowPower² / gravité × 1,25
+   + 15 studs), ou s'il est arrivé plus vite que la vitesse de lancer ne le permet (≥ 90 % du temps minimal − 0,15 s). L'objet est
+   quand même avalé ; un message `[AntiCheat]` est écrit côté serveur (sauf pour un simple objet lâché).
+   Limite connue : un tricheur à portée qui attend le temps d'un vrai vol avant de téléporter son objet n'est pas détecté
+   (il ne gagne alors rien de plus qu'un lancer réussi).
 
 ## Sons et musique
 

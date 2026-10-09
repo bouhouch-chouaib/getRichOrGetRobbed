@@ -76,6 +76,19 @@ Config.Throw = {
 	DefaultFov = 70,
 }
 
+-- Anti-triche des lancers (serveur). Le client simule le vol de l'objet : le serveur vérifie, quand le trou l'avale,
+-- qu'il a vraiment été lancé par son propriétaire, depuis une distance atteignable avec sa Force, et récemment.
+Config.AntiCheat = {
+	RangeMargin = 1.25, -- portée max acceptée = (ThrowPower² / gravité) × marge + bonus
+	RangeBonus = 15, -- studs : hauteur de lancer, latence, déplacement pendant la charge
+	MaxFlightTime = 8, -- un objet avalé plus de 8 s après son lancer ne rapporte rien
+	-- Temps de vol minimal : l'objet ne peut pas aller plus vite que la vitesse de lancer (sinon : téléporté).
+	-- Accepté si temps >= (distance / ThrowPower) × ratio - marge (la latence touche le lancer ET l'arrivée).
+	MinFlightRatio = 0.9,
+	FlightTimeMargin = 0.15,
+	MinThrowInterval = 0.12, -- deux lancers plus rapprochés : le second ne rapporte rien
+}
+
 -- Éjection par le dôme (vitesses en studs/s).
 Config.Knockback = {
 	OutwardSpeed = 110,
