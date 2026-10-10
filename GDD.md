@@ -198,11 +198,17 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
   - `BlackholeController` : consommation, dôme répulsif, récompenses.
   - `TrainingController` : stations tapis (Vitesse) et banc (Force), niveaux, XP.
+  - `LeaderboardController` : tableau « LES PLUS RICHES » dans l'arène (top 10 de tous les serveurs, `Config.Leaderboard`).
+    Chaque minute : écrit l'argent des joueurs dans l'OrderedDataStore `RichestBoard_v2` (valeur = log10(argent + 1) × 10¹²,
+    pour ranger les très grands nombres dans un entier) puis relit le top. Affichage seulement : la vraie sauvegarde reste
+    `SessionData`. Sans DataStore (Studio sans accès API) : affiche les joueurs du serveur. Dans la liste des joueurs Roblox,
+    « Argent » est un `IntValue` (trié, nombre complet) ; le HUD et le tableau gardent l'affichage abrégé.
   - `BasePetsController` : familiers qui vivent dans chaque base (repères + trajets décidés par le serveur, affichés par le client).
   - `LockController` : bouton de verrouillage, portail, expulsion des intrus.
   - `EconomyController` : revenu passif des familiers, achats de la boutique (`Remotes.BuyUpgrade`).
   - `SessionData` : données joueur (niveaux/XP Vitesse et Force, money, pets, équipés, pitié, upgrades) → attributs Player + leaderstats.
-    **Sauvegardées** dans le DataStore `PlayerData_v1` (clé `u_<UserId>`) : chargement à la connexion, sauvegarde à la
+    **Sauvegardées** dans le DataStore `PlayerData_v2` (`PlayerData_v2_studio` dans Studio : les tests ne touchent jamais
+    les vrais joueurs ; version dans `Config.Save.Version`, la changer remet tout à zéro) (clé `u_<UserId>`) : chargement à la connexion, sauvegarde à la
     déconnexion, toutes les 60 s et à l'arrêt du serveur. Échec de chargement = aucune sauvegarde (protection anti-écrasement).
     **Verrou de session** (anti-duplication, schéma `version = 2`) : la sauvegarde contient `session = { id, job, studio, time }`.
     Au chargement, le serveur prend le verrou par `UpdateAsync` ; s'il est tenu par un autre serveur, il réessaie toutes les 3 s
@@ -222,6 +228,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - `LooseItems` : objets ramassés ou lancés.
 - `Base_1` … `Base_8` en cercle (rayon 215, ~150 studs entre l'entrée et le trou) : `BasePart`, `SpawnLocation`, `SafeZone` (visuel), `TreadmillZone`,
   `SpawnPoints` (4 coins), `ItemSpawns`, `Fence` (clôture en bois, entrée côté trou noir). Un chemin de terre (`Map.Paths`) relie chaque base au trou.
+- `Kiosks` : boutique + machine de fusion, entre deux bases (un kiosque toutes les deux bases).
+- `Leaderboard` : grand panneau en bois « LES PLUS RICHES » entre la 2e et la 3e base (rayon 190), lisible des deux côtés.
 
 ## Pas encore dans le MVP
 

@@ -15,7 +15,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
@@ -37,6 +36,7 @@ export type PlayerData = {
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
 }
 
+local MAX_STAT = 2 ^ 53 -- valeur max affichée dans la liste des joueurs
 local MAX_RECEIPTS = 100 -- on garde les 100 derniers achats (largement assez pour repérer un doublon)
 
 local SessionData = {}
@@ -47,7 +47,6 @@ local storage: { [Player]: PlayerData } = {}
 -- Sauvegarde (DataStore)
 ----------------------------------------------------------------------
 
-local STORE_NAME = "PlayerData_v1" -- changer le nom remet toutes les progressions à zéro
 local AUTOSAVE = 60
 local RETRIES = 3
 
@@ -61,6 +60,8 @@ local LOCK_MAX_WAIT = LOCK_STALE + 30 -- au-delà, le joueur est expulsé avec u
 local IS_STUDIO = RunService:IsStudio()
 -- game.JobId est vide dans Studio : on se donne notre propre identifiant de serveur.
 local SESSION_ID = HttpService:GenerateGUID(false)
+-- "PlayerData_v2" en ligne, "PlayerData_v2_studio" dans Studio (voir Config.Save).
+local STORE_NAME = "PlayerData_v" .. Config.Save.Version .. (if IS_STUDIO then "_studio" else "")
 
 type SessionLock = {
 	id: string, -- SESSION_ID du serveur qui a ouvert la sauvegarde
@@ -367,11 +368,11 @@ local function sync(player: Player)
 		player:SetAttribute("Upgrade_" .. id, level)
 	end
 
-	-- Argent affiché en texte abrégé dans le classement ("$1.25T").
-	local leaderstats = player:FindFirstChild("leaderstats")
-	local money = leaderstats and leaderstats:FindFirstChild("Argent")
-	if money and money:IsA("StringValue") then
-		money.Value = NumberFormat.money(data.money)
+	-- Argent en nombre entier dans la liste des joueurs : Roblox la trie (le plus riche en haut) mais n'abrège pas.
+	-- Plafonné pour rester exact (au-delà de 2^53, les nombres à virgule perdent les unités).
+	local money = getStat(player, "Argent")
+	if money then
+		money.Value = math.clamp(math.floor(data.money), 0, MAX_STAT)
 	end
 	local points = getStat(player, "Points")
 	if points then
@@ -465,7 +466,7 @@ local function onPlayerAdded(player: Player)
 
 	local leaderstats = Instance.new("Folder")
 	leaderstats.Name = "leaderstats"
-	local moneyStat = Instance.new("StringValue")
+	local moneyStat = Instance.new("IntValue")
 	moneyStat.Name = "Argent"
 	moneyStat.Parent = leaderstats
 	local pointsStat = Instance.new("IntValue")

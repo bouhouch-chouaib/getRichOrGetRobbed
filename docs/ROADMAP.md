@@ -293,7 +293,7 @@ rojo build -o test.rbxlx
 |---|---|---|
 | `server/Main.server.lua` | Ordre d'initialisation (tout s'abonne avant `GameLoopManager.Start()`) | — |
 | `server/GameLoopManager` | Phases Feeding/Digesting, attributs `GameState`/`TimeRemaining` sur ReplicatedStorage | `ServerEvent` ("StateChanged", "Tick"), `GetState()` |
-| `server/SessionData` | Données joueur + DataStore `PlayerData_v1` (clé `u_<UserId>`) → attributs Player + leaderstats | `Get`, `AddMoney`, `SpendMoney`, `AddPets`, `RemovePets`, `GetSpareCount`, `Equip`, `Unequip`, `GetMultiplier`, `AddTrainingXP`, `GetUpgradeLevel`, `SetUpgradeLevel`, `HasUnlock`, `AddScore`, `GetPity`/`SetPity` |
+| `server/SessionData` | Données joueur + DataStore `PlayerData_v2` (`_studio` dans Studio, clé `u_<UserId>`) → attributs Player + leaderstats | `Get`, `AddMoney`, `SpendMoney`, `AddPets`, `RemovePets`, `GetSpareCount`, `Equip`, `Unequip`, `GetMultiplier`, `AddTrainingXP`, `GetUpgradeLevel`, `SetUpgradeLevel`, `HasUnlock`, `AddScore`, `GetPity`/`SetPity` |
 | `server/BaseManager` | Attribution des bases | `GetBase(player)`, `GetOwner(base)`, `GetOccupiedBases()`, évènement `BaseAssigned` |
 | `server/ItemInteraction` | Ramassage/portage/lancer autoritaire, sac à dos | `Register(item)`, `ReleaseHeld(player)`, `IsHeld(item)` |
 | `server/BlackholeController` | Aspiration, dôme, KO (`knockbackPlayer`), distribution des récompenses | — |
@@ -327,10 +327,10 @@ rojo build -o test.rbxlx
 - Dans Studio, la sauvegarde ne marche que si le jeu est publié **et** que « Enable Studio Access to API Services » est coché
   (sinon un avertissement clair s'affiche et rien n'est sauvegardé).
 
-### 7.7 Options de test actuellement actives (à remettre avant publication)
-- `Config.StudioTestPets = { "CapybaraZen" }` : donne et équipe ce familier dans Studio (3 s après l'arrivée). Vider la liste ensuite.
-- `Config.StudioGiveAllPets = false`, `Config.UseStudioDurations = false`.
-- Les familiers donnés en test sont **sauvegardés** si l'accès API Studio est activé : prévoir la nouvelle clé de DataStore avant l'ouverture (§P0.6).
+### 7.7 Options de test (toutes désactivées le 10 oct. 2026, étape 13)
+- `Config.StudioTestPets = {}`, `Config.StudioGiveAllPets = false`, `Config.UseStudioDurations = false`, `Config.Monetization.StudioTestPasses = {}`.
+- Depuis l'étape 13, Studio écrit dans des magasins séparés (`PlayerData_v2_studio`, `RichestBoard_v2_studio`) :
+  ces options ne peuvent plus polluer les sauvegardes des vrais joueurs. Les sauvegardes `PlayerData_v1` (développement) sont abandonnées.
 
 ### 7.8 Préférences de Chouaib déjà exprimées
 - Style visuel : Steal a Brainrot / Steal an Egg (cartoon, contours noirs épais, pas de néons dans les bases, prairie, bois).
@@ -377,7 +377,5 @@ ajouter un cooldown serveur entre deux `ThrowItem` du même joueur. Les objets n
 
 **Petits restes connus dans le code.**
 - ~~Commentaires « socles » dans `EconomyController`~~ et ~~familier équipé visible dans la base~~ : corrigés (étape 2).
-- En Studio avec l'accès API activé, `Config.StudioTestPets` redonne +1 Capybara Zen **sauvegardé** à chaque partie de test
-  (le compte de Chouaib en accumule) : vider la liste quand le modèle est validé.
-- Le classement « Argent » est une `StringValue` (affichage abrégé) : il ne se trie pas numériquement.
+- ~~`Config.StudioTestPets` qui redonne un Capybara Zen sauvegardé~~ et ~~classement « Argent » non triable~~ : corrigés (étape 13).
 - Les outils de vérification (`luau-lsp`) sont téléchargés dans le dossier temporaire de session : à re-télécharger à chaque nouvelle session.

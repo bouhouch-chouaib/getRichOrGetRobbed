@@ -188,7 +188,21 @@ Config.Fusion = {
 Config.StudioGiveAllPets = false
 -- Test : dans Studio uniquement, ces familiers sont donnés ET équipés à l'arrivée (pour essayer un modèle 3D).
 -- Vider la liste ({}) pour désactiver.
-Config.StudioTestPets = { "CapybaraZen" } :: { string }
+Config.StudioTestPets = {} :: { string }
+
+-- Sauvegardes (DataStore). Changer Version remet TOUTES les progressions et le tableau des plus riches à zéro.
+-- Dans Studio, tout va dans des magasins séparés (suffixe "_studio") : les tests ne touchent jamais les vrais joueurs.
+Config.Save = {
+	Version = 2, -- v1 = sauvegardes de développement, abandonnées le 10 oct. 2026 (nettoyage avant sortie)
+}
+
+-- Tableau des plus riches, planté dans l'arène (tous serveurs confondus, OrderedDataStore).
+Config.Leaderboard = {
+	Size = 10, -- nombre de joueurs affichés
+	RefreshInterval = 60, -- secondes entre deux mises à jour (écriture de l'argent + lecture du classement)
+	Angle = 67.5, -- degrés : entre la 2e et la 3e base, là où il n'y a pas de kiosque
+	Radius = 190, -- distance au trou noir (juste avant les bases)
+}
 
 -- Argent : revenu passif des familiers + bonus de fin de digestion.
 Config.Economy = {

@@ -7,6 +7,7 @@
 -- Workspace.Map
 --   ArenaFloor, HoleDirt, HoleRing, BlackholeZone (+ Aura), BlackholeCore (+ Light), BlackholeHalo, BlackholeDome
 --   Paths (Folder), Trees (Folder), Kiosks (Folder : boutique + machine de fusion entre deux bases)
+--   Leaderboard (Model) : tableau des plus riches (Screen rempli par LeaderboardController)
 --   LooseItems (Folder) : objets ramassés / lancés
 --   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Pallets,
 --                              SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
@@ -526,6 +527,40 @@ local function createKiosks(map: Folder)
 	end
 end
 
+-- Tableau des plus riches : grand panneau en bois sur deux poteaux, face au trou noir (lisible des deux côtés).
+-- Le contenu (SurfaceGui sur Screen) est écrit par LeaderboardController.
+local function createLeaderboard(map: Folder)
+	local settings = Config.Leaderboard
+	local angle = math.rad(settings.Angle)
+	local position = Vector3.new(math.cos(angle) * settings.Radius, 0, math.sin(angle) * settings.Radius)
+	-- Repère local : -Z vers le trou noir (la face avant du panneau regarde le centre).
+	local origin = CFrame.lookAt(position, Vector3.zero)
+	local model = Instance.new("Model")
+	model.Name = "Leaderboard"
+
+	local floor = makePart("Floor", Vector3.new(40, 0.2, 14), origin * CFrame.new(0, 0.1, 0), Color3.fromRGB(150, 140, 125), model)
+	floor.Material = Enum.Material.Cobblestone
+	for _, x in ipairs({ -16.5, 16.5 }) do
+		local post = makePart("Post", Vector3.new(2, 27, 2), origin * CFrame.new(x, 13.5, 0), COLORS.WoodPost, model)
+		post.Material = Enum.Material.Wood
+	end
+	-- Cadre en bois autour de l'écran (30 x 18 studs).
+	local frame = makePart("Frame", Vector3.new(32, 20, 1), origin * CFrame.new(0, 15, 0), COLORS.WoodRail, model)
+	frame.Material = Enum.Material.WoodPlanks
+	local screen = makePart("Screen", Vector3.new(30, 18, 1.4), origin * CFrame.new(0, 15, 0), Color3.fromRGB(40, 32, 60), model)
+	screen.Material = Enum.Material.SmoothPlastic
+	local roof = makePart("Roof", Vector3.new(36, 1, 4), origin * CFrame.new(0, 25.5, 0), COLORS.WoodPost, model)
+	roof.Material = Enum.Material.Wood
+	-- Trophée doré au sommet.
+	local gold = Color3.fromRGB(255, 200, 40)
+	local cup = makePart("Trophy", Vector3.new(3.2, 3.2, 3.2), origin * CFrame.new(0, 28.6, 0), gold, model)
+	cup.Shape = Enum.PartType.Ball
+	cup.Material = Enum.Material.Foil
+	local foot = makePart("TrophyFoot", Vector3.new(2.2, 1, 2.2), origin * CFrame.new(0, 26.5, 0), gold, model)
+	foot.Material = Enum.Material.Foil
+	model.Parent = map
+end
+
 -- Palette en bois basse : plateau de lattes sur 3 chevrons, avec un petit rebord pour que les objets
 -- ne roulent pas par terre. Les objets restent bien accessibles (pas de parois hautes).
 local PALLET_SIZE = 8
@@ -690,6 +725,7 @@ function MapGenerator.generate(): { Model }
 	createBlackhole(map)
 	createTrees(map)
 	createKiosks(map)
+	createLeaderboard(map)
 
 	local paths = Instance.new("Folder")
 	paths.Name = "Paths"
