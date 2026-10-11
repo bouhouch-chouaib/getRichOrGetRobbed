@@ -80,6 +80,13 @@ local function onPlayerAdded(player: Player)
 			break
 		end
 	end
+	-- Une base par joueur : la taille des serveurs doit être réglée à 8 (Paramètres du jeu > Places).
+	-- Si un 9e joueur arrive quand même, il ne pourrait pas jouer : on le renvoie avec un message clair.
+	if not BaseManager.GetBase(player) then
+		warn("[BaseManager] Aucune base libre pour " .. player.Name .. " : régler la taille des serveurs à " .. #bases .. ".")
+		player:Kick("Ce serveur est plein (" .. #bases .. " bases). Relance le jeu pour rejoindre un autre serveur !")
+		return
+	end
 
 	player.CharacterAdded:Connect(function(character)
 		onCharacterAdded(player, character)

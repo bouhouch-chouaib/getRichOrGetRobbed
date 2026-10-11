@@ -5,9 +5,12 @@
 --     (règle Roblox : les probabilités des objets aléatoires payants doivent être affichées avant l'achat).
 --   - Un objet dont l'Id vaut 0 (pas encore créé sur Roblox) est affiché "BIENTÔT".
 --   - Boost de chance serveur : bandeau avec le temps restant + annonce à tous au moment de l'achat.
+--   - Pays où les objets aléatoires payants sont interdits (PolicyService) : les tirages Robux et leurs chances
+--     sont cachés. Ils restent cachés tant que la réponse de Roblox n'est pas arrivée (ou si elle échoue).
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
+local PolicyService = game:GetService("PolicyService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
@@ -154,11 +157,19 @@ local function nextOrder(): number
 	return order
 end
 
-local function section(label: string)
+local function section(label: string): TextLabel
 	local header = text(list, label, 26)
 	header.Size = UDim2.new(1, -12, 0, 32)
 	header.TextXAlignment = Enum.TextXAlignment.Left
 	header.LayoutOrder = nextOrder()
+	return header
+end
+
+-- Tout ce qui concerne les objets aléatoires payants (tirages Robux et leurs chances) : caché par défaut.
+local randomItemParts: { GuiObject } = {}
+local function randomItem(object: GuiObject)
+	object.Visible = false
+	table.insert(randomItemParts, object)
 end
 
 type Row = { item: Config.MonetizationItem, isPass: boolean, buy: TextButton, price: number }
@@ -172,6 +183,9 @@ local function rowFor(item: Config.MonetizationItem, isPass: boolean)
 	frame.LayoutOrder = nextOrder()
 	corner(frame, 12)
 	frame.Parent = list
+	if item.Pulls then
+		randomItem(frame)
+	end
 	local name = text(frame, item.Icon .. " " .. item.Name, 24)
 	name.Position = UDim2.fromOffset(12, 6)
 	name.Size = UDim2.new(1, -170, 0, 30)
@@ -222,7 +236,7 @@ for _, product in ipairs(M.Products) do
 end
 
 -- Chances exactes d'un tirage acheté, avec la chance réelle du joueur (passe Chance Chanceuse, boost serveur).
-section("CHANCES PAR TIRAGE ACHETÉ")
+randomItem(section("CHANCES PAR TIRAGE ACHETÉ"))
 local oddsLabel = text(list, "", 18, BODY_FONT)
 oddsLabel.Size = UDim2.new(1, -12, 0, 0)
 oddsLabel.AutomaticSize = Enum.AutomaticSize.Y
@@ -231,6 +245,19 @@ oddsLabel.TextXAlignment = Enum.TextXAlignment.Left
 oddsLabel.TextYAlignment = Enum.TextYAlignment.Top
 oddsLabel.TextWrapped = true
 oddsLabel.LayoutOrder = nextOrder()
+randomItem(oddsLabel)
+
+-- Règle Roblox : pas d'objets aléatoires payants là où la loi les interdit (ex. Belgique, Pays-Bas).
+task.spawn(function()
+	local ok, policy = pcall(function()
+		return PolicyService:GetPolicyInfoForPlayerAsync(player)
+	end)
+	if ok and type(policy) == "table" and policy.ArePaidRandomItemsRestricted == false then
+		for _, object in ipairs(randomItemParts) do
+			object.Visible = true
+		end
+	end
+end)
 
 local function formatPercent(probability: number): string
 	local percent = probability * 100

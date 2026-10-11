@@ -33,7 +33,7 @@ Réglages proposés : vol **seulement pendant la digestion** et base déverrouil
 | 11 | ✅ **Modèles 3D des familiers les plus rares** (fait le 9 oct. : 13 générés dans Studio — tous les Sigma et Divins — + le Capybara importé ; `shared/PetMeshes`, chargés en parallèle au démarrage) | Pipeline ROADMAP §7.9 |
 | 12 | ✅ **Monétisation de base** (codée le 9 oct., dès la sortie ; passes et produits créés par Chouaib le 11 oct., Id dans `Config.Monetization`, vérifiés en vente) | 2X Argent, VIP, +1 sac ; produits : boost de chance serveur, tirage instantané ; `ProcessReceipt` idempotent ; probabilités affichées. Chouaib crée les passes et donne les IDs. [À DÉCIDER] dès la sortie ou après |
 | 13 | ✅ **Nettoyage avant sortie** (fait le 10 oct. : sauvegardes `PlayerData_v2`, Studio dans des magasins `_studio` séparés, options de test vidées, « Argent » trié dans la liste des joueurs ; demandé par Chouaib : tableau « LES PLUS RICHES » dans l'arène, top 10 de tous les serveurs) | Nouvelle clé de DataStore, options Studio remises à zéro (`StudioTestPets` vide), classement Argent triable |
-| 14 | **Page du jeu** | Icône, vignettes, description, questionnaire de maturité |
+| 14 | ✅ **Page du jeu** (préparée le 11 oct. : `docs/PAGE_DU_JEU.md` + images `assets/store/` ; tirages Robux cachés là où la loi l'interdit ; 9e joueur renvoyé « serveur plein ». Reste à Chouaib : remplir le Creator Hub et régler la taille des serveurs à 8) | Icône, vignettes, description, questionnaire de maturité |
 | 15 | **Test réel** | Plusieurs comptes et appareils (PC + téléphone), puis publication. Si les tests en ligne ont laissé des progressions à effacer, passer `Config.Save.Version` à 3 juste avant d'ouvrir le jeu |
 
 **→ Sortie publique possible après l'étape 15.**

@@ -139,6 +139,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   jamais refuser un achat déjà accordé. Studio : `StudioTestPasses` simule des passes possédés.
 - `client/RobuxShop` : bouton ⭐ ROBUX (droite), fenêtre passes / produits (vrai prix lu sur Roblox), **probabilités exactes**
   d'un tirage acheté (`LootEngine.odds` avec la chance réelle du joueur) + règle de la pitié ; bandeau du boost serveur.
+  Les tirages Robux et leurs chances sont **cachés** si `PolicyService` indique `ArePaidRandomItemsRestricted`
+  (pays où les objets aléatoires payants sont interdits) ou si la réponse échoue. Le créateur du jeu possède d'office ses passes.
+- Serveurs : 8 joueurs maximum (une base chacun). `BaseManager` renvoie un 9e joueur avec un message « serveur plein ».
 - `shared/TextFormat.upper` : majuscules avec accents (remplace `:upper()` partout).
 
 ## Sons et musique
