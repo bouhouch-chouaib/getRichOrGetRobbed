@@ -151,16 +151,16 @@ export type MonetizationItem = {
 
 Config.Monetization = {
 	GamePasses = {
-		{ Key = "DoubleMoney", Id = 0, Icon = "💰", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
-		{ Key = "VIP", Id = 0, Icon = "👑", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
-		{ Key = "ExtraBackpack", Id = 0, Icon = "🎒", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
-		{ Key = "EquipPlus2", Id = 0, Icon = "🐾", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
-		{ Key = "LuckyLuck", Id = 0, Icon = "🍀", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
+		{ Key = "DoubleMoney", Id = 2025998871, Icon = "💰", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
+		{ Key = "VIP", Id = 2026292822, Icon = "👑", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
+		{ Key = "ExtraBackpack", Id = 2025176879, Icon = "🎒", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
+		{ Key = "EquipPlus2", Id = 2025296892, Icon = "🐾", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
+		{ Key = "LuckyLuck", Id = 2026568802, Icon = "🍀", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
 	} :: { MonetizationItem },
 	Products = {
-		{ Key = "ServerLuck", Id = 0, Icon = "🌟", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
-		{ Key = "Pull1", Id = 0, Icon = "🎲", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
-		{ Key = "Pull10", Id = 0, Icon = "🎰", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
+		{ Key = "ServerLuck", Id = 3717917081, Icon = "🌟", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
+		{ Key = "Pull1", Id = 3717917143, Icon = "🎲", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
+		{ Key = "Pull10", Id = 3717917239, Icon = "🎰", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,
 	VipMoneyMultiplier = 1.25,
