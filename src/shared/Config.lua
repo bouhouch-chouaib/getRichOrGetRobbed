@@ -218,6 +218,13 @@ Config.Fusion = {
 	Costs = { 250, 15e3, 750e3, 40e6, 2.5e9, 250e9 }, -- prix en $ selon la rareté fusionnée (index de rareté)
 }
 
+-- Index (collection) : chaque familier découvert donne une récompense à réclamer une seule fois
+-- (fenêtre INDEX, bouton RÉCLAMER) = RewardSeconds secondes de son revenu.
+Config.Index = {
+	RewardSeconds = 120,
+	MinReward = 100,
+}
+
 -- Test : dans Roblox Studio uniquement, chaque joueur reçoit 1 exemplaire de chaque familier
 -- (pour voir tous les modèles). Mettre à false pour tester la vraie progression.
 Config.StudioGiveAllPets = false
@@ -355,6 +362,12 @@ Config.Weapons = {
 }
 
 -- Prix du prochain niveau (nil si niveau max atteint).
+-- Récompense d'Index d'un familier (argent).
+function Config.GetIndexReward(petId: string): number
+	local PetCatalog = require(script.Parent.PetCatalog) :: any
+	return math.max(Config.Index.MinReward, math.floor(PetCatalog.GetIncome(petId) * Config.Index.RewardSeconds))
+end
+
 function Config.GetUpgradePrice(item: ShopItem, currentLevel: number): number?
 	if currentLevel >= item.MaxLevel then
 		return nil

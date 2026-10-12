@@ -21,6 +21,8 @@
         "Announcement": { "$className": "RemoteEvent" },
         "Fuse": { "$className": "RemoteEvent" },
         "FusionResult": { "$className": "RemoteEvent" },
+        "ClaimIndex": { "$className": "RemoteEvent" },
+        "IndexClaimed": { "$className": "RemoteEvent" },
         "StealResult": { "$className": "RemoteEvent" },
         "StealPet": { "$className": "RemoteEvent" },
         "StopTraining": { "$className": "RemoteEvent" },

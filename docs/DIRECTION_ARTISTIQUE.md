@@ -131,5 +131,5 @@ servent ce cœur, ils ne le remplacent pas. **Pas de couloir de zones** (refusé
   les ~5 niveaux, de plus en plus épique, toujours en blocs à tenons ; créatures en voxels détaillés ; effets
   et sons travaillés.
 - **Ordre de travail** : 1) passe tenons + palette (fait le 13 oct.) ; 2) une base du palier 1 en qualité (fait le 13 oct.)
-  finale (ZONE SÛRE, cercles au sol, tapis et banc à paliers visuels) ; 3) interface ; 4) mondes des paliers ;
+  finale (ZONE SÛRE, cercles au sol, tapis et banc à paliers visuels) ; 3) interface (fait le 13 oct. : menus reconstruits) ; 4) mondes des paliers ;
   5) familiers en voxels + auras ; 6) paliers du trou noir.

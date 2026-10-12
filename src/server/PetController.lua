@@ -24,6 +24,35 @@ function PetController.Init()
 		end
 	end)
 
+	-- Index : récompense d'un familier découvert (ou de tous ceux qui attendent si petId = nil).
+	local lastClaim: { [Player]: number } = {}
+	Remotes.ClaimIndex.OnServerEvent:Connect(function(player: Player, petId: unknown)
+		local now = os.clock()
+		if now - (lastClaim[player] or 0) < 0.3 then
+			return
+		end
+		lastClaim[player] = now
+		local total, count = 0, 0
+		if type(petId) == "string" then
+			total = SessionData.ClaimIndex(player, petId)
+			count = if total > 0 then 1 else 0
+		elseif petId == nil then
+			for _, entry in ipairs(PetCatalog.List) do
+				local reward = SessionData.ClaimIndex(player, entry.Id)
+				if reward > 0 then
+					total += reward
+					count += 1
+				end
+			end
+		end
+		if count > 0 then
+			Remotes.IndexClaimed:FireClient(player, total, count)
+		end
+	end)
+	Players.PlayerRemoving:Connect(function(player: Player)
+		lastClaim[player] = nil
+	end)
+
 	if RunService:IsStudio() and Config.StudioGiveAllPets then
 		local function giveAll(player: Player)
 			-- task.defer : SessionData doit avoir créé les données du joueur avant.

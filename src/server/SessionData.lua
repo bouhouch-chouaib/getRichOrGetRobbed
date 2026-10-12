@@ -33,6 +33,7 @@ export type PlayerData = {
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
 	receipts: { string }, -- derniers achats Robux accordés (PurchaseId) : jamais deux fois le même (MonetizationController)
+	indexClaimed: { string }, -- familiers dont la récompense d'Index a été réclamée (ils restent « découverts » même volés)
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
 }
 
@@ -103,6 +104,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		stationScale = 25, -- tapis et banc sur 25 niveaux (avant : 8, converti à la lecture)
 		tutorialDone = data.tutorialDone,
 		receipts = data.receipts,
+		indexClaimed = data.indexClaimed,
 		session = session,
 	}
 end
@@ -300,6 +302,14 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 			end
 		end
 	end
+	if type(saved.indexClaimed) == "table" then
+		for _, savedId in ipairs(saved.indexClaimed) do
+			local petId = if type(savedId) == "string" then PetCatalog.CurrentId(savedId) else nil
+			if petId and PetCatalog.ById[petId] and not table.find(data.indexClaimed, petId) then
+				table.insert(data.indexClaimed, petId)
+			end
+		end
+	end
 	if type(saved.equipped) == "table" then
 		data.equipped = {}
 		-- On garde jusqu'au maximum possible (avec le passe "Équipement +2") : la vérification des passes peut
@@ -371,6 +381,7 @@ local function sync(player: Player)
 	player:SetAttribute("Equipped", table.concat(data.equipped, ","))
 	player:SetAttribute("EquipSlots", data.equipSlots)
 	player:SetAttribute("TutorialDone", data.tutorialDone)
+	player:SetAttribute("IndexClaimed", table.concat(data.indexClaimed, ","))
 	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
 	for id, level in pairs(data.upgrades) do
 		player:SetAttribute("Upgrade_" .. id, level)
@@ -469,6 +480,7 @@ local function onPlayerAdded(player: Player)
 		upgrades = {},
 		tutorialDone = false,
 		receipts = {},
+		indexClaimed = {},
 		loaded = false,
 	}
 
@@ -599,6 +611,23 @@ function SessionData.SetTutorialDone(player: Player)
 		data.tutorialDone = true
 		sync(player)
 	end
+end
+
+-- Index : récompense d'un familier découvert (possédé au moins une fois), une seule fois par familier.
+-- Retourne l'argent gagné (0 si rien à réclamer).
+function SessionData.ClaimIndex(player: Player, petId: string): number
+	local data = storage[player]
+	if not data or not data.loaded or not PetCatalog.ById[petId] then
+		return 0
+	end
+	if table.find(data.indexClaimed, petId) or (data.pets[petId] or 0) <= 0 then
+		return 0
+	end
+	table.insert(data.indexClaimed, petId)
+	local reward = Config.GetIndexReward(petId)
+	data.money += reward
+	sync(player)
+	return reward
 end
 
 -- Réapplique la vitesse de marche (après un changement de l'attribut "SpeedMultiplier").

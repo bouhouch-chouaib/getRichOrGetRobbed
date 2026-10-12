@@ -1,7 +1,8 @@
 --!strict
 -- FusionController : machine de fusion.
 -- Config.Fusion.Count familiers d'une même rareté (non équipés) + un coût en $ -> 1 familier
--- aléatoire de la rareté au-dessus. Les doublons sont consommés en priorité.
+-- aléatoire de la rareté au-dessus. Le joueur choisit les familiers dans les cases de la machine (client/HUD) ;
+-- sans choix valide, les doublons sont consommés en priorité.
 -- Le Sigma ne peut pas être obtenu par fusion (Config.Fusion.MaxFromRarity).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -44,7 +45,28 @@ local function pickIngredients(player: Player, rarityId: string): { [string]: nu
 	return chosen
 end
 
-local function onFuse(player: Player, rarityIndex: unknown)
+-- Valide le choix du client : exactement Config.Fusion.Count familiers libres, tous de cette rareté.
+local function checkChosen(player: Player, rarityId: string, chosen: unknown): { [string]: number }?
+	if type(chosen) ~= "table" then
+		return nil
+	end
+	local result: { [string]: number } = {}
+	local total = 0
+	for petId, count in pairs(chosen :: { [unknown]: unknown }) do
+		if type(petId) ~= "string" or type(count) ~= "number" or count % 1 ~= 0 or count < 1 then
+			return nil
+		end
+		local entry = PetCatalog.ById[petId]
+		if not entry or entry.Rarity ~= rarityId or SessionData.GetSpareCount(player, petId) < count then
+			return nil
+		end
+		result[petId] = count
+		total += count
+	end
+	return if total == Config.Fusion.Count then result else nil
+end
+
+local function onFuse(player: Player, rarityIndex: unknown, chosen: unknown)
 	if type(rarityIndex) ~= "number" or rarityIndex % 1 ~= 0 then
 		return
 	end
@@ -57,7 +79,8 @@ local function onFuse(player: Player, rarityIndex: unknown)
 		return
 	end
 
-	local ingredients = pickIngredients(player, Config.Rarities[rarityIndex].Id)
+	local rarityId = Config.Rarities[rarityIndex].Id
+	local ingredients = checkChosen(player, rarityId, chosen) or pickIngredients(player, rarityId)
 	if not ingredients then
 		return
 	end
@@ -76,7 +99,7 @@ local function onFuse(player: Player, rarityIndex: unknown)
 	SessionData.AddPets(player, { [result.Id] = 1 })
 	BasePetsController.Celebrate(player, { result.Id })
 	Remotes.FusionResult:FireClient(player, result.Id)
-	print(string.format("[Fusion] %s : 5 %s -> %s", player.Name, Config.Rarities[rarityIndex].Name, result.Name))
+	print(string.format("[Fusion] %s : %d %s -> %s", player.Name, Config.Fusion.Count, Config.Rarities[rarityIndex].Name, result.Name))
 
 	if rarityIndex + 1 >= Config.Loot.AnnounceMinRarity then
 		Remotes.Announcement:FireAllClients(player.DisplayName, result.Id)

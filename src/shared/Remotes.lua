@@ -54,10 +54,15 @@ return {
 	EquipPet = remote("EquipPet"),
 	-- Serveur -> tous les clients : (playerName: string, petId: string) gros drop annoncé à tout le serveur.
 	Announcement = remote("Announcement"),
-	-- Client -> serveur : (rarityIndex: number) fusionner Config.Fusion.Count familiers de cette rareté.
+	-- Client -> serveur : (rarityIndex: number, chosen: { [petId]: count }?) fusionner Config.Fusion.Count familiers de cette
+	-- rareté ; chosen = les familiers choisis dans les cases de la machine (sinon le serveur choisit, doublons d'abord).
 	Fuse = remote("Fuse"),
 	-- Serveur -> client : (petId: string) résultat de la fusion.
 	FusionResult = remote("FusionResult"),
+	-- Client -> serveur : (petId: string?) réclamer la récompense d'Index d'un familier découvert (nil = toutes).
+	ClaimIndex = remote("ClaimIndex"),
+	-- Serveur -> client : (money: number, count: number) récompenses d'Index accordées.
+	IndexClaimed = remote("IndexClaimed"),
 	-- Serveur -> voleur : (outcome: string, petId: string) fin d'un vol de familier
 	-- ("Success", "KO", "Timeout", "VictimLeft" = la victime a quitté, le voleur gagne, "Gone", "Recovered" : voir server/StealController).
 	StealResult = remote("StealResult"),

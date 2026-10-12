@@ -1,10 +1,12 @@
 --!strict
--- HUD : toute l'interface du joueur, style "Steal a Brainrot / Steal an Egg" :
--- textes épais à gros contour noir, boutons carrés en dégradé sur la gauche,
--- fenêtres arrondies avec titre qui déborde et croix rouge.
---
--- Données lues depuis des attributs répliqués (ReplicatedStorage et Player).
--- Seul appel serveur : Remotes.BuyUpgrade (le serveur valide le prix).
+-- HUD : l'écran de jeu, disposé comme la référence (docs/DIRECTION_ARTISTIQUE.md §3) :
+--   - au milieu à gauche : gros boutons Boutique (vert) et Index (cyan) avec pastilles rouges ;
+--   - en bas à gauche : Force, Vitesse et argent en gros chiffres italiques ;
+--   - en bas à droite : l'horloge de la manche (lune = on nourrit le trou noir, soleil = il digère) ;
+--   - en haut : bandeau de phase qui apparaît à chaque changement, points de la manche, carte des tirages ;
+--   - en bas au centre : la consigne.
+-- Les fenêtres sont dans client/ShopMenu, client/IndexMenu et client/FusionMenu (socle client/MenuKit).
+-- Ce script relie tout aux attributs répliqués et aux messages du serveur.
 
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
@@ -16,23 +18,30 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
-local PetMeshes = require(ReplicatedStorage.Shared.PetMeshes)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
+local FusionMenu = require(script.Parent.FusionMenu)
+local IndexMenu = require(script.Parent.IndexMenu)
+local MenuKit = require(script.Parent.MenuKit)
 local ScreenScale = require(script.Parent.ScreenScale)
+local ShopMenu = require(script.Parent.ShopMenu)
 local Toast = require(script.Parent.Toast)
+local UiStyle = require(script.Parent.UiStyle)
 
 local player = Players.LocalPlayer
 
-local TITLE_FONT = Enum.Font.LuckiestGuy
-local BODY_FONT = Enum.Font.FredokaOne
+local BODY_FONT = UiStyle.BODY_FONT
 local BLACK = Color3.new(0, 0, 0)
 local WHITE = Color3.new(1, 1, 1)
-local MONEY = Color3.fromRGB(110, 240, 70)
+local MONEY = UiStyle.Colors.Money
+local text = UiStyle.text
+local numberAttribute = MenuKit.number
 
 local PHASES = {
 	Feeding = {
 		Title = "NOURRIS LE TROU NOIR !",
+		Clock = "🌙",
+		Next = "Digestion",
 		Hint = if ScreenScale.isTouch()
 			then "Touche RAMASSER sur un objet  •  maintiens LANCER pour viser  •  VOLE les familiers des bases ouvertes !"
 			else "[E] ramasser  •  maintiens CLIC GAUCHE pour viser, relâche pour lancer  •  [E] sur un familier adverse pour le VOLER",
@@ -40,99 +49,14 @@ local PHASES = {
 	},
 	Digesting = {
 		Title = "LE TROU NOIR DIGÈRE...",
+		Clock = "☀️",
+		Next = "Repas",
 		Hint = if ScreenScale.isTouch()
 			then "Touche VOLER sur un familier d'une base ouverte  •  ferme ta base pour protéger les tiens !"
 			else "Maintiens [E] sur un familier d'une base ouverte pour le VOLER  •  frappe les voleurs avec une arme (BOUTIQUE) !",
 		Color = Color3.fromRGB(255, 90, 70),
 	},
 }
-
-----------------------------------------------------------------------
--- Briques de style
-----------------------------------------------------------------------
-
-local function corner(parent: Instance, radius: number)
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, radius)
-	c.Parent = parent
-end
-
-local function stroke(parent: Instance, thickness: number, color: Color3?, border: boolean?)
-	local s = Instance.new("UIStroke")
-	s.Thickness = thickness
-	s.Color = color or BLACK
-	s.ApplyStrokeMode = if border then Enum.ApplyStrokeMode.Border else Enum.ApplyStrokeMode.Contextual
-	s.Parent = parent
-end
-
-local function gradient(parent: Instance, top: Color3, bottom: Color3)
-	local g = Instance.new("UIGradient")
-	g.Color = ColorSequence.new(top, bottom)
-	g.Rotation = 90
-	g.Parent = parent
-end
-
--- Texte cartoon : police épaisse + contour noir.
-local function text(parent: Instance, value: string, size: number, color: Color3?, font: Enum.Font?): TextLabel
-	local label = Instance.new("TextLabel")
-	label.BackgroundTransparency = 1
-	label.Text = value
-	label.TextSize = size
-	label.Font = font or TITLE_FONT
-	label.TextColor3 = color or WHITE
-	stroke(label, math.max(1.5, size / 12))
-	label.Parent = parent
-	return label
-end
-
--- Petit effet "rebond" au clic sur un bouton.
-local function bounce(button: GuiButton)
-	local scale = Instance.new("UIScale")
-	scale.Parent = button
-	button.MouseEnter:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.1), { Scale = 1.06 }):Play()
-	end)
-	button.MouseLeave:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.1), { Scale = 1 }):Play()
-	end)
-	button.MouseButton1Down:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.06), { Scale = 0.92 }):Play()
-	end)
-	button.MouseButton1Up:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1.06 }):Play()
-	end)
-end
-
--- Bouton épais en dégradé avec contour noir.
-local function chunkyButton(parent: Instance, label: string, size: UDim2, top: Color3, bottom: Color3, textSize: number): TextButton
-	local button = Instance.new("TextButton")
-	button.Size = size
-	button.BackgroundColor3 = WHITE
-	button.AutoButtonColor = false
-	button.Text = ""
-	corner(button, 12)
-	stroke(button, 3, BLACK, true)
-	gradient(button, top, bottom)
-	button.Parent = parent
-
-	local caption = text(button, label, textSize)
-	caption.Name = "Caption"
-	caption.Size = UDim2.fromScale(1, 1)
-
-	bounce(button)
-	return button
-end
-
-local formatMoney = NumberFormat.money
-
-local function numberAttribute(name: string): number
-	local value = player:GetAttribute(name)
-	return if type(value) == "number" then value else 0
-end
-
-----------------------------------------------------------------------
--- Fenêtres (popups)
-----------------------------------------------------------------------
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "HUD"
@@ -141,585 +65,168 @@ screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = player:WaitForChild("PlayerGui")
 -- Tous les éléments sont parentés à "gui", un cadre mis à l'échelle de l'écran (téléphone, tablette, PC).
 local gui = ScreenScale.attach(screenGui)
-
-type Window = {
-	frame: Frame,
-	content: Frame,
-	open: () -> (),
-	close: () -> (),
-	toggle: () -> (),
-}
-
-local openWindow: Window? = nil
-
-local function makeWindow(title: string, size: Vector2, top: Color3, bottom: Color3): Window
-	local frame = Instance.new("Frame")
-	frame.Name = title
-	frame.AnchorPoint = Vector2.new(0.5, 0.5)
-	frame.Position = UDim2.fromScale(0.5, 0.52)
-	frame.Size = UDim2.fromOffset(size.X, size.Y)
-	frame.BackgroundColor3 = WHITE
-	frame.Visible = false
-	corner(frame, 18)
-	stroke(frame, 5, BLACK, true)
-	gradient(frame, top, bottom)
-	frame.Parent = gui
-
-	local scale = Instance.new("UIScale")
-	scale.Parent = frame
-
-	-- Titre qui déborde du haut de la fenêtre.
-	local titleLabel = text(frame, title, 46, WHITE)
-	titleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-	titleLabel.Position = UDim2.new(0.5, 0, 0, 4)
-	titleLabel.Size = UDim2.new(1, 0, 0, 56)
-	titleLabel.ZIndex = 3
-
-	local closeButton = chunkyButton(frame, "X", UDim2.fromOffset(50, 50), Color3.fromRGB(255, 90, 90), Color3.fromRGB(200, 30, 30), 30)
-	closeButton.AnchorPoint = Vector2.new(0.5, 0.5)
-	closeButton.Position = UDim2.new(1, -6, 0, 6)
-	closeButton.ZIndex = 3
-
-	local content = Instance.new("Frame")
-	content.Name = "Content"
-	content.BackgroundTransparency = 1
-	content.Position = UDim2.fromOffset(18, 44)
-	content.Size = UDim2.new(1, -36, 1, -60)
-	content.Parent = frame
-
-	local window: Window
-	window = {
-		frame = frame,
-		content = content,
-		open = function()
-			if openWindow and openWindow ~= window then
-				openWindow.close()
-			end
-			openWindow = window
-			frame.Visible = true
-			scale.Scale = 0.6
-			TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-		end,
-		close = function()
-			if openWindow == window then
-				openWindow = nil
-			end
-			frame.Visible = false
-		end,
-		toggle = function()
-			if frame.Visible then
-				window.close()
-			else
-				window.open()
-			end
-		end,
-	}
-	closeButton.Activated:Connect(window.close)
-	return window
-end
-
--- Liste défilante verticale pour le contenu d'une fenêtre.
-local function makeList(parent: Instance, padding: number): ScrollingFrame
-	local list = Instance.new("ScrollingFrame")
-	list.Size = UDim2.fromScale(1, 1)
-	list.BackgroundTransparency = 1
-	list.BorderSizePixel = 0
-	list.ScrollBarThickness = 8
-	list.ScrollBarImageColor3 = BLACK
-	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	list.CanvasSize = UDim2.new()
-	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, padding)
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Parent = list
-	local pad = Instance.new("UIPadding")
-	pad.PaddingTop = UDim.new(0, 8)
-	pad.PaddingLeft = UDim.new(0, 6)
-	pad.PaddingRight = UDim.new(0, 14)
-	pad.PaddingBottom = UDim.new(0, 8)
-	pad.Parent = list
-	list.Parent = parent
-	return list
-end
-
--- Carte claire avec contour noir (une ligne de boutique ou de familier).
-local function makeCard(parent: Instance, height: number, order: number): Frame
-	local cardFrame = Instance.new("Frame")
-	cardFrame.Size = UDim2.new(1, 0, 0, height)
-	cardFrame.BackgroundColor3 = Color3.fromRGB(255, 250, 235)
-	cardFrame.LayoutOrder = order
-	corner(cardFrame, 14)
-	stroke(cardFrame, 3, BLACK, true)
-	cardFrame.Parent = parent
-	return cardFrame
-end
+local isTouch = ScreenScale.isTouch()
 
 ----------------------------------------------------------------------
--- Haut de l'écran : phase, chrono, consigne, points de la manche
+-- Haut : bandeau de phase, points de la manche
 ----------------------------------------------------------------------
 
-local phaseTitle = text(gui, "", 40)
+-- Bandeau : grand à chaque changement de phase, puis il remonte et rapetisse en titre discret.
+local phaseTitle = text(gui, "", 44)
 phaseTitle.AnchorPoint = Vector2.new(0.5, 0)
-phaseTitle.Position = UDim2.new(0.5, 0, 0, 6)
-phaseTitle.Size = UDim2.fromOffset(700, 44)
+phaseTitle.Position = UDim2.new(0.5, 0, 0, 8)
+phaseTitle.Size = UDim2.fromOffset(760, 50)
+local phaseScale = Instance.new("UIScale")
+phaseScale.Scale = 0.7
+phaseScale.Parent = phaseTitle
 
-local timerLabel = text(gui, "0:00", 54)
-timerLabel.AnchorPoint = Vector2.new(0.5, 0)
-timerLabel.Position = UDim2.new(0.5, 0, 0, 50)
-timerLabel.Size = UDim2.fromOffset(300, 56)
+local pointsPill = UiStyle.panel(gui, UDim2.fromOffset(230, 44))
+pointsPill.AnchorPoint = Vector2.new(0.5, 0)
+pointsPill.Position = UDim2.new(0.5, 0, 0, 62)
+pointsPill.BackgroundColor3 = UiStyle.Colors.WindowBody
+local pointsLabel = UiStyle.number(pointsPill, "", 28, UiStyle.Colors.Gold)
+pointsLabel.Size = UDim2.fromScale(1, 1)
 
 local hintLabel = text(gui, "", 18, WHITE, BODY_FONT)
--- En bas de l'écran pour ne pas gêner la vue.
 hintLabel.AnchorPoint = Vector2.new(0.5, 1)
 hintLabel.Position = UDim2.new(0.5, 0, 1, -18)
 hintLabel.Size = UDim2.fromOffset(760, 24)
 
-local pointsLabel = text(gui, "", 30, Color3.fromRGB(255, 220, 60))
-pointsLabel.AnchorPoint = Vector2.new(0.5, 0)
-pointsLabel.Position = UDim2.new(0.5, 0, 0, 136)
-pointsLabel.Size = UDim2.fromOffset(400, 34)
-
 ----------------------------------------------------------------------
--- Gauche : argent + boutons de menu
+-- Bas à droite : horloge de la manche
 ----------------------------------------------------------------------
 
-local leftColumn = Instance.new("Frame")
-leftColumn.Name = "Left"
-leftColumn.BackgroundTransparency = 1
--- Sur tactile, la colonne est collée en haut pour ne pas passer sous le joystick (bas gauche).
-leftColumn.AnchorPoint = if ScreenScale.isTouch() then Vector2.new(0, 0) else Vector2.new(0, 0.5)
-leftColumn.Position = if ScreenScale.isTouch() then UDim2.new(0, 16, 0, 10) else UDim2.new(0, 16, 0.5, 0)
-leftColumn.Size = UDim2.fromOffset(240, 400)
-leftColumn.Parent = gui
+local clock = Instance.new("Frame")
+clock.Name = "Clock"
+clock.BackgroundTransparency = 1
+clock.AnchorPoint = Vector2.new(1, 1)
+clock.Position = UDim2.new(1, -16, 1, -10)
+clock.Size = UDim2.fromOffset(300, 80)
+clock.Parent = gui
+local clockIcon = text(clock, "🌙", 46)
+clockIcon.Position = UDim2.fromOffset(0, 22)
+clockIcon.Size = UDim2.fromOffset(60, 56)
+local clockNext = text(clock, "", 20, WHITE, BODY_FONT)
+clockNext.Position = UDim2.fromOffset(64, 0)
+clockNext.Size = UDim2.new(1, -64, 0, 24)
+clockNext.TextXAlignment = Enum.TextXAlignment.Left
+local clockLabel = UiStyle.number(clock, "", 40, WHITE)
+clockLabel.Position = UDim2.fromOffset(64, 24)
+clockLabel.Size = UDim2.new(1, -64, 0, 50)
+clockLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local moneyLabel = text(leftColumn, "$0", 48, MONEY)
-moneyLabel.Size = UDim2.new(1, 0, 0, 52)
-moneyLabel.TextXAlignment = Enum.TextXAlignment.Left
+----------------------------------------------------------------------
+-- Gauche : boutons de menu, stats et argent
+----------------------------------------------------------------------
 
-local incomeLabel = text(leftColumn, "+$0/s", 24, MONEY)
-incomeLabel.Position = UDim2.fromOffset(0, 52)
-incomeLabel.Size = UDim2.new(1, 0, 0, 28)
-incomeLabel.TextXAlignment = Enum.TextXAlignment.Left
+-- Sur tactile, tout est collé en haut à gauche (le joystick occupe le bas gauche).
+local STATS_HEIGHT = 178
 
--- Ligne de stat d'entraînement : "⚡ VITESSE NV 3" + barre d'XP.
+local statsColumn = Instance.new("Frame")
+statsColumn.Name = "Stats"
+statsColumn.BackgroundTransparency = 1
+statsColumn.AnchorPoint = if isTouch then Vector2.new(0, 0) else Vector2.new(0, 1)
+statsColumn.Position = if isTouch then UDim2.new(0, 16, 0, 10) else UDim2.new(0, 16, 1, -12)
+statsColumn.Size = UDim2.fromOffset(260, STATS_HEIGHT)
+statsColumn.Parent = gui
+
+local menuColumn = Instance.new("Frame")
+menuColumn.Name = "Left"
+menuColumn.BackgroundTransparency = 1
+menuColumn.AnchorPoint = if isTouch then Vector2.new(0, 0) else Vector2.new(0, 0.5)
+menuColumn.Position = if isTouch then UDim2.new(0, 16, 0, STATS_HEIGHT + 20) else UDim2.new(0, 16, 0.5, -30)
+menuColumn.Size = UDim2.fromOffset(220, 170)
+menuColumn.Parent = gui
+
+-- Ligne de stat d'entraînement : icône + « NV 13 » en italique + barre d'XP.
 type StatRow = { label: TextLabel, fill: Frame }
-local function statRow(y: number, color: Color3): StatRow
-	local label = text(leftColumn, "", 20, color)
-	label.Position = UDim2.fromOffset(0, y)
-	label.Size = UDim2.new(1, 0, 0, 24)
+local function statRow(y: number, icon: string, color: Color3): StatRow
+	local iconLabel = text(statsColumn, icon, 30)
+	iconLabel.Position = UDim2.fromOffset(0, y)
+	iconLabel.Size = UDim2.fromOffset(38, 34)
+	local label = UiStyle.number(statsColumn, "", 28, color)
+	label.Position = UDim2.fromOffset(42, y)
+	label.Size = UDim2.new(1, -42, 0, 32)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	local bar = Instance.new("Frame")
-	bar.Position = UDim2.fromOffset(0, y + 26)
-	bar.Size = UDim2.fromOffset(200, 12)
+	bar.Position = UDim2.fromOffset(44, y + 33)
+	bar.Size = UDim2.fromOffset(170, 10)
 	bar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-	corner(bar, 6)
-	stroke(bar, 2, BLACK, true)
-	bar.Parent = leftColumn
+	UiStyle.corner(bar, 4)
+	UiStyle.stroke(bar, 2, BLACK, true)
+	bar.Parent = statsColumn
 	local fill = Instance.new("Frame")
 	fill.Size = UDim2.fromScale(0, 1)
 	fill.BackgroundColor3 = color
-	corner(fill, 6)
+	UiStyle.corner(fill, 4)
 	fill.Parent = bar
 	return { label = label, fill = fill }
 end
-local speedRow = statRow(84, Color3.fromRGB(120, 210, 255))
-local strengthRow = statRow(130, Color3.fromRGB(255, 150, 80))
+local strengthRow = statRow(0, "💪", UiStyle.Colors.Strength)
+local speedRow = statRow(48, "👟", UiStyle.Colors.Speed)
 
--- Bouton de menu carré : grosse icône + nom en dessous.
-local function menuButton(icon: string, name: string, y: number, top: Color3, bottom: Color3): TextButton
-	local button = chunkyButton(leftColumn, "", UDim2.fromOffset(96, 96), top, bottom, 1)
+local moneyIcon = text(statsColumn, "💵", 38)
+moneyIcon.Position = UDim2.fromOffset(0, 100)
+moneyIcon.Size = UDim2.fromOffset(46, 50)
+local moneyLabel = UiStyle.number(statsColumn, "$0", 50, MONEY)
+moneyLabel.Position = UDim2.fromOffset(48, 96)
+moneyLabel.Size = UDim2.new(1, 0, 0, 56)
+moneyLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local incomeLabel = UiStyle.number(statsColumn, "+$0/s", 22, MONEY)
+incomeLabel.Position = UDim2.fromOffset(52, 150)
+incomeLabel.Size = UDim2.new(1, -52, 0, 26)
+incomeLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Gros bouton de menu : icône + nom, pastille rouge de notification.
+local function menuButton(icon: string, name: string, y: number, color: Color3): (TextButton, TextLabel)
+	local button = UiStyle.button(menuColumn, "", UDim2.fromOffset(210, 70), color, 1)
 	button.Position = UDim2.fromOffset(0, y)
-	local iconLabel = text(button, icon, 46)
-	iconLabel.Size = UDim2.new(1, 0, 0.72, 0)
-	iconLabel.Position = UDim2.fromScale(0, 0.04)
-	local nameLabel = text(button, name, 18)
-	nameLabel.Size = UDim2.new(1, 0, 0.3, 0)
-	nameLabel.Position = UDim2.fromScale(0, 0.68)
-	return button
+	local iconLabel = text(button, icon, 36)
+	iconLabel.Position = UDim2.fromOffset(8, 0)
+	iconLabel.Size = UDim2.new(0, 50, 1, 0)
+	iconLabel.ZIndex = 2
+	local nameLabel = text(button, name, 32, WHITE, BODY_FONT)
+	nameLabel.Position = UDim2.fromOffset(60, 0)
+	nameLabel.Size = UDim2.new(1, -66, 1, 0)
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.ZIndex = 2
+	return button, UiStyle.badge(button)
 end
 
-local shopButton = menuButton("🛒", "BOUTIQUE", 180, Color3.fromRGB(255, 220, 70), Color3.fromRGB(255, 140, 20))
-local petsButton = menuButton("🐾", "FAMILIERS", 288, Color3.fromRGB(110, 210, 255), Color3.fromRGB(40, 120, 255))
+local shopButton, shopBadge = menuButton("🛒", "Boutique", 0, UiStyle.Colors.Green)
+local indexButton, indexBadge = menuButton("📘", "Index", 88, UiStyle.Colors.Cyan)
 
 ----------------------------------------------------------------------
--- Fenêtre Boutique
+-- Fenêtres
 ----------------------------------------------------------------------
 
-local shopWindow = makeWindow("BOUTIQUE", Vector2.new(560, 440), Color3.fromRGB(255, 215, 80), Color3.fromRGB(255, 130, 30))
-local shopList = makeList(shopWindow.content, 10)
+local shop = ShopMenu.create(gui)
+local index = IndexMenu.create(gui)
+local fusion = FusionMenu.create(gui)
 
-local buyButtons: { [string]: TextButton } = {}
-local shopLevels: { [string]: TextLabel } = {}
-for index, item in ipairs(Config.Shop) do
-	local cardFrame = makeCard(shopList, 96, index)
-
-	local name = text(cardFrame, item.Icon .. " " .. TextFormat.upper(item.Name), 24, Color3.fromRGB(255, 200, 50))
-	name.Position = UDim2.fromOffset(14, 8)
-	name.Size = UDim2.new(1, -180, 0, 30)
-	name.TextXAlignment = Enum.TextXAlignment.Left
-
-	local levelLabel = text(cardFrame, "", 16, Color3.fromRGB(120, 210, 255))
-	levelLabel.Name = "Level"
-	levelLabel.AnchorPoint = Vector2.new(1, 0)
-	levelLabel.Position = UDim2.new(1, -12, 0, 4)
-	levelLabel.Size = UDim2.fromOffset(140, 18)
-	levelLabel.ZIndex = 2
-	shopLevels[item.Id] = levelLabel
-
-	local description = Instance.new("TextLabel")
-	description.BackgroundTransparency = 1
-	description.Font = BODY_FONT
-	description.TextSize = 16
-	description.TextColor3 = Color3.fromRGB(60, 50, 40)
-	description.TextWrapped = true
-	description.TextXAlignment = Enum.TextXAlignment.Left
-	description.TextYAlignment = Enum.TextYAlignment.Top
-	description.Text = item.Description
-	description.Position = UDim2.fromOffset(14, 42)
-	description.Size = UDim2.new(1, -180, 0, 46)
-	description.Parent = cardFrame
-
-	local buy = chunkyButton(cardFrame, "", UDim2.fromOffset(140, 56), Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40), 26)
-	buy.AnchorPoint = Vector2.new(1, 0.5)
-	buy.Position = UDim2.new(1, -12, 0.5, 8)
-	buy.Activated:Connect(function()
-		Remotes.BuyUpgrade:FireServer(item.Id)
-	end)
-	buyButtons[item.Id] = buy
-end
+shopButton.Activated:Connect(shop.window.toggle)
+indexButton.Activated:Connect(index.window.toggle)
 
 ----------------------------------------------------------------------
--- Fenêtre Familiers
+-- Carte de résultats des tirages (fin de manche)
 ----------------------------------------------------------------------
 
-local petsWindow = makeWindow("FAMILIERS", Vector2.new(720, 520), Color3.fromRGB(120, 215, 255), Color3.fromRGB(50, 110, 240))
-
--- Bandeau : places d'équipement, multiplicateur, collection.
-local petsHeader = text(petsWindow.content, "", 22)
-petsHeader.Size = UDim2.new(1, 0, 0, 28)
-petsHeader.Position = UDim2.fromOffset(0, 6)
-
-local petsGrid = Instance.new("ScrollingFrame")
-petsGrid.Position = UDim2.fromOffset(0, 40)
-petsGrid.Size = UDim2.new(1, 0, 1, -40)
-petsGrid.BackgroundTransparency = 1
-petsGrid.BorderSizePixel = 0
-petsGrid.ScrollBarThickness = 8
-petsGrid.ScrollBarImageColor3 = BLACK
-petsGrid.AutomaticCanvasSize = Enum.AutomaticSize.Y
-petsGrid.CanvasSize = UDim2.new()
-petsGrid.Parent = petsWindow.content
-local gridLayout = Instance.new("UIGridLayout")
-gridLayout.CellSize = UDim2.fromOffset(122, 160)
-gridLayout.CellPadding = UDim2.fromOffset(10, 10)
-gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
-gridLayout.Parent = petsGrid
-local gridPadding = Instance.new("UIPadding")
-gridPadding.PaddingTop = UDim.new(0, 6)
-gridPadding.PaddingLeft = UDim.new(0, 6)
-gridPadding.Parent = petsGrid
-
--- Aperçu 3D d'un familier dans un ViewportFrame (silhouette noire si non obtenu).
-local function petViewport(parent: Instance, petId: string, silhouette: boolean): ViewportFrame
-	local viewport = Instance.new("ViewportFrame")
-	viewport.BackgroundTransparency = 1
-	viewport.Ambient = Color3.fromRGB(200, 200, 200)
-	viewport.LightColor = WHITE
-	viewport.Parent = parent
-	local model = PetModelBuilder.Build(petId)
-	if model then
-		for _, descendant in ipairs(model:GetDescendants()) do
-			if descendant:IsA("ParticleEmitter") then
-				descendant:Destroy()
-			elseif silhouette and descendant:IsA("BasePart") then
-				descendant.Color = Color3.fromRGB(20, 20, 30)
-				descendant.Material = Enum.Material.SmoothPlastic
-			end
-		end
-		model:PivotTo(CFrame.new())
-		model.Parent = viewport
-		local extent = model:GetExtentsSize().Magnitude
-		local camera = Instance.new("Camera")
-		camera.FieldOfView = 40
-		camera.CFrame = CFrame.lookAt(Vector3.new(0.6, 0.45, -1).Unit * extent * 1.45, Vector3.zero)
-		camera.Parent = viewport
-		viewport.CurrentCamera = camera
-	end
-	return viewport
-end
-
-type PetCard = {
-	frame: Frame,
-	viewport: ViewportFrame?,
-	owned: boolean,
-	count: TextLabel,
-	badge: TextLabel,
-	name: TextLabel,
-}
-
-local petCards: { [string]: PetCard } = {}
-
-local function equippedList(): { string }
-	local list = {}
-	local equipped = player:GetAttribute("Equipped")
-	if type(equipped) == "string" then
-		for petId in string.gmatch(equipped, "[^,]+") do
-			table.insert(list, petId)
-		end
-	end
-	return list
-end
-
-for order, entry in ipairs(PetCatalog.List) do
-	local rarityIndex = Config.RarityIndex[entry.Rarity]
-	local rarity = Config.Rarities[rarityIndex]
-
-	local button = Instance.new("TextButton")
-	button.Text = ""
-	button.AutoButtonColor = false
-	button.BackgroundColor3 = WHITE
-	button.LayoutOrder = rarityIndex * 100 + order
-	corner(button, 14)
-	stroke(button, 3, BLACK, true)
-	gradient(button, rarity.Color:Lerp(WHITE, 0.45), rarity.Color)
-	button.Parent = petsGrid
-	bounce(button)
-
-	local name = text(button, "???", 15)
-	name.Position = UDim2.new(0, 4, 1, -44)
-	name.Size = UDim2.new(1, -8, 0, 22)
-	name.TextScaled = true
-
-	local rarityLabel = text(button, TextFormat.upper(rarity.Name), 14, rarity.Color:Lerp(WHITE, 0.3))
-	rarityLabel.Position = UDim2.new(0, 4, 1, -22)
-	rarityLabel.Size = UDim2.new(1, -8, 0, 18)
-
-	local count = text(button, "", 20)
-	count.AnchorPoint = Vector2.new(1, 0)
-	count.Position = UDim2.new(1, -6, 0, 2)
-	count.Size = UDim2.fromOffset(60, 24)
-	count.TextXAlignment = Enum.TextXAlignment.Right
-	count.ZIndex = 2
-
-	local badge = text(button, "ÉQUIPÉ", 16, Color3.fromRGB(120, 255, 90))
-	badge.Position = UDim2.fromOffset(6, 4)
-	badge.Size = UDim2.fromOffset(70, 20)
-	badge.TextXAlignment = Enum.TextXAlignment.Left
-	badge.ZIndex = 2
-	badge.Visible = false
-
-	local card: PetCard = { frame = button :: any, viewport = nil, owned = false, count = count, badge = badge, name = name }
-	petCards[entry.Id] = card
-
-	button.Activated:Connect(function()
-		if not card.owned then
-			Toast.show("PAS ENCORE OBTENU !", Color3.fromRGB(255, 90, 90))
-			return
-		end
-		local list = equippedList()
-		local equippedCount = 0
-		for _, id in ipairs(list) do
-			if id == entry.Id then
-				equippedCount += 1
-			end
-		end
-		local owned = numberAttribute("Pet_" .. entry.Id)
-		local slots = numberAttribute("EquipSlots")
-		if equippedCount < owned and #list < slots then
-			Remotes.EquipPet:FireServer(entry.Id, true)
-			-- Seuls les familiers de la base rapportent : on le rappelle au joueur.
-			Toast.show("ÉQUIPÉ ! BONUS DE POINTS, MAIS IL NE RAPPORTE PLUS D'ARGENT", Color3.fromRGB(255, 220, 60))
-		elseif equippedCount > 0 then
-			Remotes.EquipPet:FireServer(entry.Id, false)
-		else
-			Toast.show("PLUS DE PLACE ! DÉSÉQUIPE UN FAMILIER", Color3.fromRGB(255, 90, 90))
-		end
-	end)
-end
-
-local function updatePets()
-	local list = equippedList()
-	local collected = 0
-	for _, entry in ipairs(PetCatalog.List) do
-		local card = petCards[entry.Id]
-		local owned = numberAttribute("Pet_" .. entry.Id)
-		if owned > 0 then
-			collected += 1
-		end
-		local nowOwned = owned > 0
-		if nowOwned ~= card.owned or card.viewport == nil then
-			card.owned = nowOwned
-			if card.viewport then
-				card.viewport:Destroy()
-			end
-			local viewport = petViewport(card.frame, entry.Id, not nowOwned)
-			viewport.Position = UDim2.fromOffset(6, 22)
-			viewport.Size = UDim2.new(1, -12, 1, -68)
-			card.viewport = viewport
-		end
-		card.name.Text = if nowOwned then entry.Name else "???"
-		card.count.Text = if nowOwned then "x" .. owned else ""
-		card.badge.Visible = table.find(list, entry.Id) ~= nil
-	end
-	local multiplier = player:GetAttribute("Multiplier")
-	petsHeader.Text = string.format(
-		"ÉQUIPÉS %d/%d   •   POINTS x%.2f   •   COLLECTION %d/%d",
-		#list,
-		numberAttribute("EquipSlots"),
-		if type(multiplier) == "number" then multiplier else 1,
-		collected,
-		#PetCatalog.List
-	)
-end
-
-shopButton.Activated:Connect(shopWindow.toggle)
-petsButton.Activated:Connect(petsWindow.toggle)
-
-----------------------------------------------------------------------
--- Fenêtre Fusion
-----------------------------------------------------------------------
-
-local fusionWindow = makeWindow("FUSION", Vector2.new(640, 520), Color3.fromRGB(235, 150, 255), Color3.fromRGB(120, 40, 210))
-
-local fusionInfo = text(fusionWindow.content, string.format("%d FAMILIERS DE MÊME RARETÉ = 1 DE LA RARETÉ AU-DESSUS", Config.Fusion.Count), 18)
-fusionInfo.Size = UDim2.new(1, 0, 0, 24)
-fusionInfo.Position = UDim2.fromOffset(0, 6)
-
-local fusionList = makeList(fusionWindow.content, 8)
-fusionList.Position = UDim2.fromOffset(0, 34)
-fusionList.Size = UDim2.new(1, -170, 1, -34)
-
--- Aperçu du dernier familier obtenu par fusion.
-local resultCard = makeCard(fusionWindow.content, 0, 0)
-resultCard.Size = UDim2.fromOffset(156, 210)
-resultCard.AnchorPoint = Vector2.new(1, 0)
-resultCard.Position = UDim2.new(1, 0, 0, 40)
-local resultTitle = text(resultCard, "RÉSULTAT", 18, Color3.fromRGB(255, 220, 60))
-resultTitle.Size = UDim2.new(1, 0, 0, 24)
-resultTitle.Position = UDim2.fromOffset(0, 4)
-local resultName = text(resultCard, "?", 16)
-resultName.Size = UDim2.new(1, -8, 0, 40)
-resultName.Position = UDim2.new(0, 4, 1, -44)
-resultName.TextWrapped = true
-local resultViewport: ViewportFrame? = nil
-
-type FusionRow = { rarityIndex: number, count: TextLabel, button: TextButton }
-local fusionRows: { FusionRow } = {}
-
-for rarityIndex = 1, Config.Fusion.MaxFromRarity do
-	local from = Config.Rarities[rarityIndex]
-	local to = Config.Rarities[rarityIndex + 1]
-	local cardFrame = makeCard(fusionList, 64, rarityIndex)
-	cardFrame.BackgroundColor3 = WHITE
-	gradient(cardFrame, from.Color:Lerp(WHITE, 0.4), to.Color:Lerp(WHITE, 0.2))
-
-	local title = text(cardFrame, string.format("%s → %s", TextFormat.upper(from.Name), TextFormat.upper(to.Name)), 20)
-	title.Position = UDim2.fromOffset(12, 4)
-	title.Size = UDim2.new(1, -150, 0, 28)
-	title.TextXAlignment = Enum.TextXAlignment.Left
-
-	local count = text(cardFrame, "", 16)
-	count.Position = UDim2.fromOffset(12, 34)
-	count.Size = UDim2.new(1, -150, 0, 22)
-	count.TextXAlignment = Enum.TextXAlignment.Left
-
-	local button = chunkyButton(cardFrame, "", UDim2.fromOffset(130, 48), Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40), 20)
-	button.AnchorPoint = Vector2.new(1, 0.5)
-	button.Position = UDim2.new(1, -8, 0.5, 0)
-	button.Activated:Connect(function()
-		Remotes.Fuse:FireServer(rarityIndex)
-	end)
-	table.insert(fusionRows, { rarityIndex = rarityIndex, count = count, button = button })
-end
-
--- Exemplaires non équipés d'une rareté (calcul identique au serveur).
-local function spareOfRarity(rarityId: string): number
-	local equipped = equippedList()
-	local total = 0
-	for _, entry in ipairs(PetCatalog.ByRarity[rarityId] or {}) do
-		local owned = numberAttribute("Pet_" .. entry.Id)
-		local used = 0
-		for _, id in ipairs(equipped) do
-			if id == entry.Id then
-				used += 1
-			end
-		end
-		total += math.max(0, owned - used)
-	end
-	return total
-end
-
-local function updateFusion(money: number)
-	for _, row in ipairs(fusionRows) do
-		local rarity = Config.Rarities[row.rarityIndex]
-		local spare = spareOfRarity(rarity.Id)
-		local cost = Config.Fusion.Costs[row.rarityIndex]
-		row.count.Text = string.format("TU EN AS %d / %d (HORS ÉQUIPÉS)", spare, Config.Fusion.Count)
-		local caption = row.button:FindFirstChild("Caption") :: TextLabel
-		local buttonGradient = row.button:FindFirstChildOfClass("UIGradient") :: UIGradient
-		caption.Text = formatMoney(cost)
-		if spare >= Config.Fusion.Count and money >= cost then
-			buttonGradient.Color = ColorSequence.new(Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40))
-		else
-			buttonGradient.Color = ColorSequence.new(Color3.fromRGB(255, 110, 110), Color3.fromRGB(190, 40, 40))
-		end
-		row.button:SetAttribute("Ready", spare >= Config.Fusion.Count)
-		row.button:SetAttribute("Affordable", money >= cost)
-	end
-end
-
-for _, row in ipairs(fusionRows) do
-	row.button.Activated:Connect(function()
-		if not row.button:GetAttribute("Ready") then
-			Toast.show(string.format("IL TE FAUT %d FAMILIERS LIBRES DE CETTE RARETÉ !", Config.Fusion.Count), Color3.fromRGB(255, 90, 90))
-		elseif not row.button:GetAttribute("Affordable") then
-			Toast.show("PAS ASSEZ D'ARGENT !", Color3.fromRGB(255, 90, 90))
-		end
-	end)
-end
-
-Remotes.FusionResult.OnClientEvent:Connect(function(petId: string)
-	local entry = PetCatalog.ById[petId]
-	if not entry then
-		return
-	end
-	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
-	if resultViewport then
-		resultViewport:Destroy()
-	end
-	local viewport = petViewport(resultCard, petId, false)
-	viewport.Position = UDim2.fromOffset(6, 30)
-	viewport.Size = UDim2.new(1, -12, 1, -78)
-	resultViewport = viewport
-	resultName.Text = TextFormat.upper(entry.Name)
-	resultName.TextColor3 = rarity.Color
-	local scale = resultCard:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
-	scale.Parent = resultCard
-	scale.Scale = 0.6
-	TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	Toast.show(string.format("FUSION : %s (%s) !", TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
-end)
-
-----------------------------------------------------------------------
--- Popup de récompenses (fin de manche)
-----------------------------------------------------------------------
-
--- Carte de résultats des tirages : petite, sous le chrono (la place des points, cachés pendant la digestion),
--- elle ne ferme aucune fenêtre, glisse puis disparaît seule (ou au clic). Les familiers, eux, tombent dans la base.
+-- Petite carte sous le bandeau (à la place des points, cachés pendant la digestion). Elle ne ferme aucune
+-- fenêtre, glisse puis disparaît seule (ou au clic). Les familiers, eux, tombent dans la base.
 local REWARD_CARD_TIME = 5
 local rewardCard = Instance.new("TextButton")
 rewardCard.Name = "RewardCard"
 rewardCard.AnchorPoint = Vector2.new(0.5, 0)
-rewardCard.Position = UDim2.new(0.5, 0, 0, 112)
-rewardCard.Size = UDim2.fromOffset(360, 60)
+rewardCard.Position = UDim2.new(0.5, 0, 0, 62)
+rewardCard.Size = UDim2.fromOffset(380, 60)
 rewardCard.AutomaticSize = Enum.AutomaticSize.Y
-rewardCard.BackgroundColor3 = WHITE
+rewardCard.BackgroundColor3 = UiStyle.Colors.WindowBody
 rewardCard.AutoButtonColor = false
 rewardCard.Text = ""
 rewardCard.Visible = false
-corner(rewardCard, 14)
-stroke(rewardCard, 4, BLACK, true)
-gradient(rewardCard, Color3.fromRGB(200, 130, 255), Color3.fromRGB(110, 40, 200))
+UiStyle.corner(rewardCard, 8)
+UiStyle.stroke(rewardCard, 4, BLACK, true)
 rewardCard.Parent = gui
 do
 	local padding = Instance.new("UIPadding")
@@ -734,7 +241,7 @@ do
 	layout.Padding = UDim.new(0, 2)
 	layout.Parent = rewardCard
 end
-local rewardHeadline = text(rewardCard, "", 24)
+local rewardHeadline = text(rewardCard, "", 24, UiStyle.Colors.Gold)
 rewardHeadline.Size = UDim2.new(1, 0, 0, 28)
 rewardHeadline.LayoutOrder = 1
 local rewardBody = text(rewardCard, "", 20)
@@ -752,83 +259,83 @@ end)
 -- Mise à jour
 ----------------------------------------------------------------------
 
-
 local function petName(petId: unknown): string
 	local entry = if type(petId) == "string" then PetCatalog.ById[petId] else nil
 	return if entry then TextFormat.upper(entry.Name) else "LE FAMILIER"
 end
 
+local shownState: string? = nil
+local function announcePhase(phase: typeof(PHASES.Feeding))
+	phaseTitle.Text = phase.Title
+	phaseTitle.TextColor3 = phase.Color
+	phaseScale.Scale = 1.5
+	TweenService:Create(phaseScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1.2 }):Play()
+	task.delay(2.2, function()
+		if phaseTitle.Text == phase.Title then
+			TweenService:Create(phaseScale, TweenInfo.new(0.4, Enum.EasingStyle.Quad), { Scale = 0.7 }):Play()
+		end
+	end)
+end
+
 local function updatePhase()
 	local state = ReplicatedStorage:GetAttribute("GameState")
 	local remaining = ReplicatedStorage:GetAttribute("TimeRemaining")
-	local phase = if state == "Digesting" then PHASES.Digesting else PHASES.Feeding
+	local stateName = if state == "Digesting" then "Digesting" else "Feeding"
+	local phase = PHASES[stateName]
+	if shownState ~= stateName then
+		shownState = stateName
+		announcePhase(phase)
+	end
 
-	phaseTitle.Text = phase.Title
-	phaseTitle.TextColor3 = phase.Color
 	-- Pendant le transport d'un familier volé, la consigne devient l'objectif + le temps restant.
 	local carryingPet = player:GetAttribute("CarryingPet")
 	local carryingUntil = player:GetAttribute("CarryingUntil")
 	if carryingPet ~= nil and type(carryingUntil) == "number" then
 		local left = math.max(0, math.ceil(carryingUntil - Workspace:GetServerTimeNow()))
 		hintLabel.Text = string.format("🚨 RAMÈNE %s DANS TA BASE !  ⏱ %d s", petName(carryingPet), left)
-		hintLabel.TextColor3 = Color3.fromRGB(255, 220, 60)
+		hintLabel.TextColor3 = UiStyle.Colors.Gold
 	else
 		hintLabel.Text = phase.Hint
 		hintLabel.TextColor3 = WHITE
 	end
-	pointsLabel.Visible = state ~= "Digesting"
+	pointsPill.Visible = stateName == "Feeding" and not rewardCard.Visible
 
 	local seconds = if type(remaining) == "number" then math.max(0, remaining) else 0
-	timerLabel.Text = string.format("%d:%02d", seconds // 60, seconds % 60)
-	-- Les 10 dernières secondes clignotent en rouge.
-	timerLabel.TextColor3 = if seconds <= 10 and seconds % 2 == 0 then Color3.fromRGB(255, 70, 70) else WHITE
-end
-
-local function updateShop(money: number)
-	for _, item in ipairs(Config.Shop) do
-		local buy = buyButtons[item.Id]
-		local caption = buy:FindFirstChild("Caption") :: TextLabel
-		local buyGradient = buy:FindFirstChildOfClass("UIGradient") :: UIGradient
-		local level = numberAttribute("Upgrade_" .. item.Id)
-		local price = Config.GetUpgradePrice(item, level)
-		shopLevels[item.Id].Text = if item.MaxLevel > 1 then string.format("NIVEAU %d/%d", level, item.MaxLevel) else ""
-		if not price then
-			caption.Text = if item.MaxLevel > 1 then "MAX" else "ACQUIS"
-			buyGradient.Color = ColorSequence.new(Color3.fromRGB(190, 190, 190), Color3.fromRGB(120, 120, 120))
-		elseif money >= price then
-			caption.Text = formatMoney(price)
-			buyGradient.Color = ColorSequence.new(Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40))
-		else
-			caption.Text = formatMoney(price)
-			buyGradient.Color = ColorSequence.new(Color3.fromRGB(255, 110, 110), Color3.fromRGB(190, 40, 40))
-		end
-	end
+	clockIcon.Text = phase.Clock
+	clockNext.Text = phase.Next
+	clockLabel.Text = if seconds >= 60 then string.format("dans %d:%02d", seconds // 60, seconds % 60) else string.format("dans %d s", seconds)
+	-- Les 10 dernières secondes : en rouge.
+	clockLabel.TextColor3 = if seconds <= 10 then Color3.fromRGB(255, 70, 70) else WHITE
 end
 
 local function updateStats()
 	local money = numberAttribute("Money")
-	moneyLabel.Text = formatMoney(money)
-	local income = numberAttribute("Income")
-	incomeLabel.Text = NumberFormat.perSecond(income)
-	for _, row in ipairs({ { stat = "Speed", ui = speedRow, title = "⚡ VITESSE" }, { stat = "Strength", ui = strengthRow, title = "💪 FORCE" } }) do
+	moneyLabel.Text = NumberFormat.money(money)
+	incomeLabel.Text = NumberFormat.perSecond(numberAttribute("Income"))
+	for _, row in ipairs({ { stat = "Speed", ui = speedRow }, { stat = "Strength", ui = strengthRow } }) do
 		local level = numberAttribute(row.stat .. "Level")
 		local needed = numberAttribute(row.stat .. "XPNeeded")
-		row.ui.label.Text = string.format("%s  NV %d", row.title, level)
+		row.ui.label.Text = string.format("NV %d", level)
 		row.ui.fill.Size = UDim2.fromScale(if needed > 0 then math.clamp(numberAttribute(row.stat .. "XP") / needed, 0, 1) else 1, 1)
 	end
-	pointsLabel.Text = string.format("POINTS : %.1f", numberAttribute("RoundScore"))
-	updateShop(money)
+	pointsLabel.Text = string.format("POINTS  %.1f", numberAttribute("RoundScore"))
 
-	updatePets()
-	updateFusion(money)
+	shop.refresh()
+	index.refresh()
+	if fusion.window.isOpen() then
+		fusion.refresh()
+	end
+	UiStyle.setBadge(shopBadge, if shop.affordableCount() > 0 then "!" else nil)
+	local claimable = MenuKit.claimableCount()
+	UiStyle.setBadge(indexBadge, if claimable > 0 then tostring(claimable) else nil)
 end
 
 -- Sauvegarde encore ouverte sur l'ancien serveur (on vient d'en changer) : le serveur attend qu'elle se libère.
 player:GetAttributeChangedSignal("SaveWaiting"):Connect(function()
 	if player:GetAttribute("SaveWaiting") == true then
-		Toast.show("CHARGEMENT DE TA SAUVEGARDE... PATIENTE QUELQUES SECONDES", Color3.fromRGB(255, 220, 60))
+		Toast.show("CHARGEMENT DE TA SAUVEGARDE... PATIENTE QUELQUES SECONDES", UiStyle.Colors.Gold)
 	else
-		Toast.show("SAUVEGARDE CHARGÉE !", Color3.fromRGB(110, 240, 70))
+		Toast.show("SAUVEGARDE CHARGÉE !", MONEY)
 	end
 end)
 
@@ -836,16 +343,16 @@ end)
 player:GetAttributeChangedSignal("CarryingPet"):Connect(function()
 	local petId = player:GetAttribute("CarryingPet")
 	if petId ~= nil then
-		Toast.show(string.format("VOLÉ ! RAMÈNE %s DANS TA BASE !", petName(petId)), Color3.fromRGB(255, 220, 60))
+		Toast.show(string.format("VOLÉ ! RAMÈNE %s DANS TA BASE !", petName(petId)), UiStyle.Colors.Gold)
 	end
 	updatePhase() -- la consigne du bas devient l'objectif (ou redevient normale)
 end)
 
 local STEAL_MESSAGES: { [string]: { text: string, color: Color3 } } = {
-	Success = { text = "%s EST À TOI !", color = Color3.fromRGB(110, 240, 70) },
+	Success = { text = "%s EST À TOI !", color = MONEY },
 	KO = { text = "LÂCHÉ ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
 	Timeout = { text = "TROP LENT ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
-	VictimLeft = { text = "SON PROPRIÉTAIRE A FUI : %s EST À TOI !", color = Color3.fromRGB(110, 240, 70) },
+	VictimLeft = { text = "SON PROPRIÉTAIRE A FUI : %s EST À TOI !", color = MONEY },
 	Gone = { text = "PLUS LÀ : %s !", color = Color3.fromRGB(255, 90, 90) },
 	Recovered = { text = "RATTRAPÉ ! SON PROPRIÉTAIRE A REPRIS : %s", color = Color3.fromRGB(255, 90, 90) },
 }
@@ -858,7 +365,7 @@ Remotes.StealResult.OnClientEvent:Connect(function(outcome: string, petId: strin
 end)
 
 -- Vol de familiers : messages pour la victime, et annonce à tout le serveur des vols rares.
-local RECOVER_KEY = if ScreenScale.isTouch() then "TOUCHE REPRENDRE" else "APPUIE SUR [E]"
+local RECOVER_KEY = if isTouch then "TOUCHE REPRENDRE" else "APPUIE SUR [E]"
 
 Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: string, victimName: string, petId: string)
 	local thief = TextFormat.upper(thiefName)
@@ -869,13 +376,13 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 	elseif kind == "Stolen" then
 		Toast.show(string.format("VOLÉ PAR %s : %s !", thief, pet), Color3.fromRGB(255, 90, 90))
 	elseif kind == "Recovered" then
-		Toast.show(string.format("RÉCUPÉRÉ : %s !", pet), Color3.fromRGB(110, 240, 70))
+		Toast.show(string.format("RÉCUPÉRÉ : %s !", pet), MONEY)
 	elseif kind == "Returned" then
-		Toast.show(string.format("DE RETOUR DANS TA BASE : %s !", pet), Color3.fromRGB(110, 240, 70))
+		Toast.show(string.format("DE RETOUR DANS TA BASE : %s !", pet), MONEY)
 	elseif kind == "Announce" then
 		local entry = PetCatalog.ById[petId]
 		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
-		Toast.show(string.format("🚨 %s A VOLÉ %s À %s !", thief, pet, TextFormat.upper(victimName)), if rarity then rarity.Color else Color3.new(1, 1, 1))
+		Toast.show(string.format("🚨 %s A VOLÉ %s À %s !", thief, pet, TextFormat.upper(victimName)), if rarity then rarity.Color else WHITE)
 	end
 end)
 
@@ -917,8 +424,8 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 			return a.rank > b.rank
 		end)
 		local lines = {}
-		for index, drop in ipairs(drops) do
-			if index > 4 then
+		for order, drop in ipairs(drops) do
+			if order > 4 then
 				table.insert(lines, string.format("+ %d AUTRES...", #drops - 4))
 				break
 			end
@@ -926,17 +433,19 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 			table.insert(lines, string.format('<font color="#%s">+%d %s</font>', rarity.Color:ToHex(), drop.count, TextFormat.upper(drop.entry.Name)))
 		end
 		if money and money > 0 then
-			table.insert(lines, string.format('<font color="#%s">+%s</font>', MONEY:ToHex(), formatMoney(money)))
+			table.insert(lines, string.format('<font color="#%s">+%s</font>', MONEY:ToHex(), NumberFormat.money(money)))
 		end
 		rewardBody.Text = table.concat(lines, "\n")
 	end
 
 	rewardCard.Visible = true
+	pointsPill.Visible = false
 	rewardScale.Scale = 0.6
 	TweenService:Create(rewardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	task.delay(REWARD_CARD_TIME, function()
 		if token == rewardToken then
 			rewardCard.Visible = false
+			updatePhase()
 		end
 	end)
 end
@@ -951,11 +460,28 @@ Remotes.Announcement.OnClientEvent:Connect(function(playerName: string, petId: s
 	Toast.show(string.format("%s A OBTENU %s (%s) !", TextFormat.upper(playerName), TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
 end)
 
+-- Fusion réussie : la chambre de la machine montre le nouveau familier.
+Remotes.FusionResult.OnClientEvent:Connect(function(petId: string)
+	local entry = PetCatalog.ById[petId]
+	if not entry then
+		return
+	end
+	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
+	fusion.showResult(petId)
+	Toast.show(string.format("FUSION : %s (%s) !", TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
+end)
+
+-- Récompenses d'Index accordées.
+Remotes.IndexClaimed.OnClientEvent:Connect(function(money: number, count: number)
+	local label = if count > 1 then string.format(" (%d FAMILIERS)", count) else ""
+	Toast.show("INDEX : +" .. NumberFormat.money(money) .. label .. " !", MONEY)
+end)
+
 -- Bâtiments de la map (boutique, machine de fusion) : leur prompt "[E]" ouvre la fenêtre correspondante,
 -- qui se ferme toute seule quand le joueur s'éloigne.
-local promptWindows: { [string]: Window } = {
-	Shop = shopWindow,
-	Fusion = fusionWindow,
+local promptWindows: { [string]: MenuKit.Window } = {
+	Shop = shop.window,
+	Fusion = fusion.window,
 }
 local openedFrom: BasePart? = nil
 ProximityPromptService.PromptTriggered:Connect(function(prompt: ProximityPrompt)
@@ -983,7 +509,20 @@ end)
 
 ReplicatedStorage:GetAttributeChangedSignal("GameState"):Connect(updatePhase)
 ReplicatedStorage:GetAttributeChangedSignal("TimeRemaining"):Connect(updatePhase)
-player.AttributeChanged:Connect(updateStats)
+
+-- Beaucoup d'attributs changent à la fois (argent chaque seconde, chargement de la sauvegarde) :
+-- une seule mise à jour par image.
+local statsQueued = false
+player.AttributeChanged:Connect(function()
+	if statsQueued then
+		return
+	end
+	statsQueued = true
+	task.defer(function()
+		statsQueued = false
+		updateStats()
+	end)
+end)
 
 -- Confirmation d'achat : le serveur écrit "Upgrade_<Id>" (niveau) quand l'achat est validé.
 local STATION_HINTS: { [string]: string } = {
@@ -1007,7 +546,7 @@ for _, item in ipairs(Config.Shop) do
 		if level == 1 and STATION_HINTS[item.Id] then
 			message = TextFormat.upper(item.Name) .. STATION_HINTS[item.Id]
 		end
-		Toast.show(message, Color3.fromRGB(110, 240, 70))
+		Toast.show(message, MONEY)
 	end)
 end
 
@@ -1017,34 +556,16 @@ for _, stat in ipairs({ { id = "Speed", name = "VITESSE" }, { id = "Strength", n
 	player:GetAttributeChangedSignal(stat.id .. "Level"):Connect(function()
 		local level = numberAttribute(stat.id .. "Level")
 		if level > last and dataReady() then
-			Toast.show(string.format("%s NIVEAU %d !", stat.name, level), Color3.fromRGB(255, 220, 60))
+			Toast.show(string.format("%s NIVEAU %d !", stat.name, level), UiStyle.Colors.Gold)
 		end
 		last = level
 	end)
 end
 
--- Achat refusé faute d'argent : retour immédiat côté client.
-for _, item in ipairs(Config.Shop) do
-	buyButtons[item.Id].Activated:Connect(function()
-		local price = Config.GetUpgradePrice(item, numberAttribute("Upgrade_" .. item.Id))
-		if price and numberAttribute("Money") < price then
-			Toast.show("PAS ASSEZ D'ARGENT !", Color3.fromRGB(255, 90, 90))
-		end
-	end)
-end
 Remotes.RewardsGranted.OnClientEvent:Connect(showRewards)
 
--- Les vrais modèles 3D (shared/PetMeshes) viennent d'être chargés : les aperçus de la collection sont refaits.
-PetModelBuilder.MeshesReady:Connect(function()
-	for petId in pairs(PetMeshes) do
-		local card = petCards[petId]
-		if card and card.viewport then
-			card.viewport:Destroy()
-			card.viewport = nil
-		end
-	end
-	updatePets()
-end)
+-- Les vrais modèles 3D (shared/PetMeshes) viennent d'être chargés : les aperçus sont refaits.
+PetModelBuilder.MeshesReady:Connect(index.rebuildViewports)
 
 updatePhase()
 updateStats()

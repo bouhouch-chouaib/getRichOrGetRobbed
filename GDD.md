@@ -44,7 +44,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   disparaît après 5 s ou au clic.
 - **Machine de fusion** (`FusionController`, bâtiment physique dans chaque kiosque) : 5 familiers non équipés d'une rareté + un coût
   (250 / 15K / 750K / 40M / 2.5B / 250B $) = 1 familier aléatoire de la rareté au-dessus, de Commun jusqu'à Mythique → Divin.
-  Doublons consommés en priorité. Le Sigma ne s'obtient que par chance.
+  Le joueur choisit lui-même les 5 familiers dans les cases de la machine (`client/FusionMenu`, bouton « Auto » = doublons
+  d'abord) ; `Remotes.Fuse(rarityIndex, choix)`, le serveur revalide le choix (sinon doublons d'abord). Le Sigma ne
+  s'obtient que par chance.
+- **Index** (`client/IndexMenu`) : collection par rareté ; chaque familier découvert donne une récompense à réclamer une
+  seule fois = 120 s de son revenu (`Config.Index`, `SessionData.ClaimIndex`, champ sauvegardé `indexClaimed`, attribut
+  `IndexClaimed`, `Remotes.ClaimIndex` / `IndexClaimed`). Un familier réclamé reste « découvert » même s'il est volé.
 - Modèles, par ordre de priorité (`PetModelBuilder.Build`) :
   1. **vrais modèles 3D en assets** listés dans `shared/PetMeshes` (MeshId + TextureId + FacingYaw) : recréés une fois au
      démarrage côté client (`AssetService:CreateMeshPartAsync`), normalisés (taille de la rareté, -Z, particules), puis clonés.
@@ -264,7 +269,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
     précédente est repris directement (jamais celui d'un vrai serveur).
 - `src/client` → `StarterPlayerScripts.Client`
   - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
-  - `HUD` : style cartoon (police LuckiestGuy, contours noirs épais, boutons en dégradé) : phase + chrono, argent et revenu, points, vitesse, boutons BOUTIQUE / FAMILIERS (fenêtres), popup de récompenses.
+  - `HUD` (13 oct., disposition de la référence) : boutons Boutique / Index à gauche avec pastilles, Force / Vitesse /
+    argent en chiffres italiques en bas à gauche, horloge de manche en bas à droite, bandeau de phase animé, points.
+  - Menus reconstruits façon Steal an Egg : `UiStyle` (fenêtres à tenons, en-tête coloré à rayures, croix rouge, cartes
+    vives à rayons de soleil, pastilles), `MenuKit` (une fenêtre à la fois, onglets à droite, aperçus 3D),
+    `ShopMenu` (cartes qui défilent, onglets Entraînement / Bonus / Armes), `IndexMenu`, `FusionMenu`,
+    `RobuxShop` (cartes, onglets Passes / Produits / Chances).
   - `Toast` (ModuleScript) : gros message temporaire au centre de l'écran (`Toast.show(texte, couleur)`).
 
 ## Carte (`Workspace.Map`, générée)
