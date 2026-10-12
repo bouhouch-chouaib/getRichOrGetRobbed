@@ -70,9 +70,18 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Deux stats à niveaux : **Vitesse** (WalkSpeed 16 + 0,5/niveau) et **Force** (vitesse de lancer max 70 + 3/niveau), max niveau 60.
 - XP pour passer au niveau suivant = 5 × 1,12^niveau (niveau 10 en ~1,5 min, niveau 30 en ~20 min, niveau 60 en plusieurs heures).
 - Stations achetées en boutique, posées hors de la base : **tapis de course** (gauche, Vitesse) et **banc de muscu** (droite, Force).
-  8 niveaux chacune (bois → pierre → fer → or → diamant → émeraude → rubis → cosmique) = XP ×1 / ×2 / ×3,5 / ×6 / ×10 / ×16 / ×25 / ×40
-  (prix ×120 par niveau) ; niveaux 6 à 8 : la station brille et lâche des étincelles ; on court / pousse 12 % plus vite par
-  niveau (`Config.Training.AnimSpeedPerLevel`). Utilisables à tout moment par le propriétaire.
+  **25 niveaux** chacune (depuis le 13 oct.) = 5 **modèles** de 5 niveaux (`server/StationLooks`, couleurs dans
+  `Config.Training.StationTiers`) : Bois → Acier (bandes de couleur) → Or (portique) → Cristal (cristaux, chevrons
+  lumineux, étincelles) → Cosmique (néons, halo de cubes). Dans un modèle, chaque niveau allume un voyant de plus ; au 5e,
+  une étoile dorée. XP/s = 1,17^(niveau-1) (`Config.GetStationRate`, ×43 au niveau 25), prix ×4,04 par niveau (même
+  prix final qu'avant). Anciennes sauvegardes (8 niveaux) converties à la lecture (`Config.Training.OldStationLevels`,
+  champ `stationScale`). On court / pousse 4 % plus vite par niveau. Utilisables à tout moment par le propriétaire.
+- **Panneau « Amélioration »** planté à côté de chaque station (niveau actuel > suivant, prix), visible dès que la base a
+  un propriétaire, même avant l'achat ; la bulle [E] « Acheter / Améliorer » n'existe que chez le propriétaire
+  (`client/UpgradeSigns` → `Remotes.BuyUpgrade`) ; message à chaque nouveau modèle. Cercle lumineux au sol sous chaque
+  station (couleur du modèle) et devant la boutique et la fusion.
+- **Base** : « ZONE SÛRE » peint au sol derrière une ligne rouge à l'entrée (un familier volé devient celui du voleur
+  dans sa base) ; bouton de verrou sur un socle à bandes jaunes et noires.
 - **Façon Steal an Egg** (depuis le 12 oct.) : marcher sur la station → le serveur (`TrainingController`) **ancre** le
   HumanoidRootPart (debout sur le tapis face à la console, ou allongé sur le dos sur le banc) et écrit l'attribut `Training`
   ("Treadmill" / "Bench"). XP chaque seconde ; attributs `TrainingGain` + `TrainingPulse` → `client/TrainingFx` affiche
@@ -87,7 +96,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 ## Économie et base
 
 - **Argent** : nombres « astronomiques » (affichage K/M/B/T/Qa via `NumberFormat`). Revenu passif des 10 familiers exposés
-  + 15 $ par point à la digestion. Prix boutique : tapis/banc 500 $ (×120/niveau → 104B), objets de qualité 2K (×18 → ~400T),
+  + 15 $ par point à la digestion. Prix boutique : tapis/banc 500 $ (×4,04/niveau, 25 niveaux), objets de qualité 2K (×18 → ~400T),
   sac à dos 25K (×400 → 1.6T), verrou renforcé 5M.
 - **Kiosques** : entre chaque paire de bases, une échoppe BOUTIQUE et une machine de FUSION (prompt [E] → fenêtre, fermée en s'éloignant).
 - **Boutique** (`Config.Shop`) : améliorations à niveaux, prix = BasePrice × PriceGrowth^niveau, attribut `Upgrade_<Id>`.
@@ -232,7 +241,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `ItemSpawner` : objets dans les bases occupées pendant le Feeding.
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
   - `BlackholeController` : consommation, dôme répulsif, récompenses.
-  - `TrainingController` : stations tapis (Vitesse) et banc (Force), niveaux, XP.
+  - `TrainingController` : stations tapis (Vitesse) et banc (Force), niveaux, XP, panneaux « Amélioration ».
+  - `StationLooks` : modèle du tapis et du banc selon le niveau (5 modèles × 5 niveaux).
   - `LeaderboardController` : tableau « LES PLUS RICHES » dans l'arène (top 10 de tous les serveurs, `Config.Leaderboard`).
     Chaque minute : écrit l'argent des joueurs dans l'OrderedDataStore `RichestBoard_v2` (valeur = log10(argent + 1) × 10¹²,
     pour ranger les très grands nombres dans un entier) puis relit le top. Affichage seulement : la vraie sauvegarde reste

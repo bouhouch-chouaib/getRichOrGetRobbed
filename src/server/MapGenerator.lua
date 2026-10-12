@@ -400,13 +400,13 @@ local function createStationSign(model: Model, adornee: BasePart, title: string)
 	sign.Parent = model
 end
 
--- Les pièces marquées "Tint" prennent la couleur/matière du niveau de la station.
+-- Les pièces marquées "Tint" prennent la couleur du modèle de la station (server/StationLooks).
 local function tint(part: BasePart)
 	part:SetAttribute("Tint", true)
 end
 
 local function hideStation(model: Model)
-	for _, part in ipairs(model:GetDescendants()) do
+	for _, part in ipairs(model:GetChildren()) do
 		if part:IsA("BasePart") then
 			part.Transparency = 1
 			makeGhost(part)
@@ -414,21 +414,63 @@ local function hideStation(model: Model)
 	end
 end
 
-local function createTreadmill(cframe: CFrame, base: Model)
+-- Texte d'un panneau d'amélioration (police cartoon, contour noir).
+local function signLine(name: string, text: string, height: number, color: Color3, parent: Instance): TextLabel
+	local label = Instance.new("TextLabel")
+	label.Name = name
+	label.Size = UDim2.fromScale(1, height)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	styleSignText(label, color)
+	label.Parent = parent
+	return label
+end
+
+-- Panneau « Amélioration » planté à côté d'une station (comme dans la référence) : niveau actuel > suivant et prix.
+-- Textes écrits par TrainingController ; la bulle [E] « Améliorer » est créée par le client du propriétaire
+-- (client/UpgradeSigns). Face avant tournée vers le trou noir.
+local function createUpgradeSign(cframe: CFrame, upgradeId: string, model: Model)
+	local sign = Instance.new("Model")
+	sign.Name = "UpgradeSign"
+	sign:SetAttribute("UpgradeId", upgradeId)
+	makePart("Post", Vector3.new(0.8, 4.4, 0.8), cframe * CFrame.new(0, 2.2, 0.3), COLORS.WoodPost, sign)
+	local board = makePart("Board", Vector3.new(6.4, 3.6, 0.6), cframe * CFrame.new(0, 5.6, 0), Color3.fromRGB(30, 36, 64), sign)
+	makePart("Frame", Vector3.new(6.8, 4, 0.4), cframe * CFrame.new(0, 5.6, 0.3), Color3.fromRGB(16, 18, 34), sign)
+	board.FrontSurface = Enum.SurfaceType.Smooth
+	local gui = Instance.new("SurfaceGui")
+	gui.Name = "Gui"
+	gui.Face = Enum.NormalId.Front
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 40
+	gui.LightInfluence = 0
+	gui.MaxDistance = 120
+	local layout = Instance.new("UIListLayout")
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.Parent = gui
+	local padding = Instance.new("UIPadding")
+	padding.PaddingLeft = UDim.new(0.05, 0)
+	padding.PaddingRight = UDim.new(0.05, 0)
+	padding.Parent = gui
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	signLine("Title", "AMÉLIORATION", 0.28, Color3.new(1, 1, 1), gui).LayoutOrder = 1
+	signLine("Levels", "", 0.26, Color3.fromRGB(255, 220, 70), gui).LayoutOrder = 2
+	signLine("Price", "", 0.32, Color3.fromRGB(120, 255, 90), gui).LayoutOrder = 3
+	gui.Parent = board
+	sign.Parent = model
+end
+
+local function createTreadmill(cframe: CFrame, outward: number, base: Model)
 	local model = Instance.new("Model")
 	model.Name = "Treadmill"
 	local belt = makePart("Zone", Vector3.new(10, 0.6, 20), cframe * CFrame.new(0, 0.3, 0), Color3.fromRGB(45, 45, 50), model)
-	for _, side in ipairs({ -5.5, 5.5 }) do
-		tint(makePart("Rail", Vector3.new(1, 1.2, 20), cframe * CFrame.new(side, 0.6, 0), COLORS.WoodPost, model))
-		tint(makePart("Handle", Vector3.new(0.6, 3.5, 0.6), cframe * CFrame.new(side, 2.3, -9), COLORS.WoodPost, model))
-	end
-	tint(makePart("Console", Vector3.new(11.6, 1.2, 1.2), cframe * CFrame.new(0, 4, -9), COLORS.WoodPost, model))
 	createStationSign(model, belt, "TAPIS DE COURSE")
+	createUpgradeSign(cframe * CFrame.new(outward * 9.5, 0, -12), "Treadmill", model)
 	hideStation(model)
 	model.Parent = base
 end
 
-local function createBench(cframe: CFrame, base: Model)
+local function createBench(cframe: CFrame, outward: number, base: Model)
 	local model = Instance.new("Model")
 	model.Name = "Bench"
 	local mat = makePart("Zone", Vector3.new(12, 0.3, 16), cframe * CFrame.new(0, 0.15, 0), Color3.fromRGB(45, 45, 50), model)
@@ -437,7 +479,7 @@ local function createBench(cframe: CFrame, base: Model)
 		tint(makePart("Leg", Vector3.new(2.4, 1.6, 1), cframe * CFrame.new(0, 0.8, z), COLORS.WoodPost, model))
 	end
 	for _, side in ipairs({ -2.2, 2.2 }) do
-		tint(makePart("Upright", Vector3.new(0.6, 5, 0.6), cframe * CFrame.new(side, 2.5, -3.2), COLORS.WoodPost, model))
+		tint(makePart("Upright", Vector3.new(0.9, 5, 0.9), cframe * CFrame.new(side, 2.5, -3.2), COLORS.WoodPost, model))
 	end
 	local bar = makePart("Bar", Vector3.new(10, 0.35, 0.35), cframe * CFrame.new(0, 5, -3.2), Color3.fromRGB(200, 200, 205), model)
 	bar.Shape = Enum.PartType.Cylinder
@@ -446,8 +488,25 @@ local function createBench(cframe: CFrame, base: Model)
 		plate.Shape = Enum.PartType.Cylinder
 	end
 	createStationSign(model, mat, "BANC DE MUSCU")
+	createUpgradeSign(cframe * CFrame.new(outward * 9, 0, -9), "Bench", model)
 	hideStation(model)
 	model.Parent = base
+end
+
+-- Cercle lumineux au sol devant une machine (boutique, fusion).
+local function createGlowCircle(cframe: CFrame, diameter: number, color: Color3, parent: Instance)
+	local ring = makePart("GlowRing", Vector3.new(0.1, diameter, diameter), cframe * CFrame.new(0, 0.05, 0) * FLAT, color, parent)
+	ring.Shape = Enum.PartType.Cylinder
+	ring.Material = Enum.Material.Neon
+	ring.Transparency = 0.25
+	ring.CastShadow = false
+	makeGhost(ring)
+	local fill = makePart("GlowFill", Vector3.new(0.1, diameter - 1.4, diameter - 1.4), cframe * CFrame.new(0, 0.08, 0) * FLAT, color:Lerp(Color3.new(1, 1, 1), 0.5), parent)
+	fill.Shape = Enum.PartType.Cylinder
+	fill.Material = Enum.Material.Neon
+	fill.Transparency = 0.7
+	fill.CastShadow = false
+	makeGhost(fill)
 end
 
 -- Grand panneau flottant au-dessus d'un bâtiment (boutique, fusion).
@@ -604,6 +663,8 @@ local function createKiosks(map: Folder)
 		makePart("Floor", Vector3.new(36, 0.2, 18), origin * CFrame.new(0, 0.1, 0.5), COLORS.Stone, kiosk)
 		createShop(origin * CFrame.new(-9, 0.2, 0), kiosk)
 		createFusionMachine(origin * CFrame.new(9, 0.2, 0), kiosk)
+		createGlowCircle(origin * CFrame.new(-9, 0.2, -6), 9, Color3.fromRGB(90, 235, 70), kiosk)
+		createGlowCircle(origin * CFrame.new(9, 0.2, -6.5), 9, Color3.fromRGB(200, 100, 255), kiosk)
 		kiosk.Parent = folder
 	end
 end
@@ -720,12 +781,56 @@ local function createBase(index: number, map: Folder): Model
 	makeGhost(safeZone)
 
 	-- Bouton de verrouillage au sol (géré par LockController) + portail affiché quand la base est fermée.
+	-- Socle carré sombre bordé de bandes jaunes et noires, gros bouton rond par-dessus.
 	local buttonCFrame = origin * CFrame.new(0, top, -17)
-	local buttonBase = makePart("LockButtonBase", Vector3.new(0.4, 10, 10), buttonCFrame * CFrame.new(0, 0.2, 0) * FLAT, Color3.fromRGB(60, 60, 65), base)
-	buttonBase.Shape = Enum.PartType.Cylinder
-	local button = makePart("LockButton", Vector3.new(0.6, 8, 8), buttonCFrame * CFrame.new(0, 0.5, 0) * FLAT, Color3.fromRGB(220, 50, 50), base)
+	local pedestal = Instance.new("Model")
+	pedestal.Name = "LockPedestal"
+	makePart("Plate", Vector3.new(10, 0.5, 10), buttonCFrame * CFrame.new(0, 0.25, 0), Color3.fromRGB(52, 54, 66), pedestal)
+	for side = 0, 3 do
+		local edge = buttonCFrame * CFrame.Angles(0, side * math.pi / 2, 0)
+		for index = 0, 4 do
+			local stripe = if index % 2 == 0 then Color3.fromRGB(255, 205, 40) else Color3.fromRGB(28, 28, 32)
+			makePart("Hazard", Vector3.new(2, 0.6, 0.8), edge * CFrame.new(-4 + index * 2, 0.3, -4.6), stripe, pedestal)
+		end
+	end
+	local ring = makePart("ButtonRing", Vector3.new(0.4, 9, 9), buttonCFrame * CFrame.new(0, 0.7, 0) * FLAT, Color3.fromRGB(28, 28, 32), pedestal)
+	ring.Shape = Enum.PartType.Cylinder
+	for _, part in ipairs(pedestal:GetChildren()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = false
+		end
+	end
+	pedestal.Parent = base
+	local button = makePart("LockButton", Vector3.new(0.6, 8, 8), buttonCFrame * CFrame.new(0, 0.9, 0) * FLAT, Color3.fromRGB(220, 50, 50), base)
 	button.Shape = Enum.PartType.Cylinder
 	button.CanCollide = false
+
+	-- « ZONE SÛRE » peint au sol juste après l'entrée et ligne rouge au bord de la base (comme la référence) :
+	-- un familier volé devient celui du voleur dès qu'il arrive dans SA base.
+	local half = size.X / 2 - 0.5
+	local line = makePart("SafeLine", Vector3.new(size.X - 1.5, 0.06, 0.7), origin * CFrame.new(0, top + 0.03, -half + 1.4), Color3.fromRGB(235, 40, 60), base)
+	line.Material = Enum.Material.Neon
+	line.Transparency = 0.15
+	line.CastShadow = false
+	makeGhost(line)
+	-- Face du dessus : la largeur du SurfaceGui suit l'axe Z de la pièce, d'où le quart de tour.
+	local paint = makePart("SafeZoneSign", Vector3.new(3.6, 0.05, 24), origin * CFrame.new(0, top + 0.03, -half + 3.5) * CFrame.Angles(0, math.pi / 2, 0), Color3.new(1, 1, 1), base)
+	paint.Transparency = 1
+	makeGhost(paint)
+	local paintGui = Instance.new("SurfaceGui")
+	paintGui.Face = Enum.NormalId.Top
+	paintGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	paintGui.PixelsPerStud = 30
+	paintGui.LightInfluence = 0.4
+	paintGui.MaxDistance = 160
+	local paintLabel = Instance.new("TextLabel")
+	paintLabel.Size = UDim2.fromScale(1, 1)
+	paintLabel.BackgroundTransparency = 1
+	paintLabel.Text = "ZONE SÛRE"
+	styleSignText(paintLabel, Color3.new(1, 1, 1))
+	paintLabel.TextTransparency = 0.1
+	paintLabel.Parent = paintGui
+	paintGui.Parent = paint
 
 	local lockSign = Instance.new("BillboardGui")
 	lockSign.Name = "LockSign"
@@ -744,7 +849,6 @@ local function createBase(index: number, map: Folder): Model
 	lockLabel.Parent = lockSign
 	lockSign.Parent = base
 
-	local half = size.X / 2 - 0.5
 	local gate = makePart("Gate", Vector3.new(FENCE_GAP, FENCE_HEIGHT - 0.5, 0.6), origin * CFrame.new(0, top + (FENCE_HEIGHT - 0.5) / 2, -half), COLORS.WoodRail, base)
 	gate.Transparency = 1
 	makeGhost(gate)
@@ -752,8 +856,8 @@ local function createBase(index: number, map: Folder): Model
 	-- Stations d'entraînement à l'extérieur de la base (cachées tant qu'elles ne sont pas achetées) :
 	-- tapis de course à gauche (Vitesse), banc de développé couché à droite (Force).
 	-- TrainingController gère l'affichage, la matière selon le niveau et l'XP.
-	createTreadmill(origin * CFrame.new(-half - 10, 0, -4), base)
-	createBench(origin * CFrame.new(half + 10, 0, -4), base)
+	createTreadmill(origin * CFrame.new(-half - 10, 0, -4), -1, base)
+	createBench(origin * CFrame.new(half + 10, 0, -4), 1, base)
 
 	local spawnPoints = Instance.new("Folder")
 	spawnPoints.Name = "SpawnPoints"

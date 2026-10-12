@@ -100,6 +100,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		equipped = data.equipped,
 		pity = data.pity,
 		upgrades = data.upgrades,
+		stationScale = 25, -- tapis et banc sur 25 niveaux (avant : 8, converti à la lecture)
 		tutorialDone = data.tutorialDone,
 		receipts = data.receipts,
 		session = session,
@@ -279,7 +280,12 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	if type(saved.upgrades) == "table" then
 		for id, level in pairs(saved.upgrades) do
 			if type(id) == "string" and type(level) == "number" then
-				data.upgrades[id] = math.max(data.upgrades[id] or 0, math.floor(level))
+				local value = math.floor(level)
+				-- Ancienne échelle des stations (8 niveaux) : convertie vers les 25 niveaux actuels.
+				if saved.stationScale == nil and (id == "Treadmill" or id == "Bench") and value > 0 then
+					value = Config.Training.OldStationLevels[math.min(value, #Config.Training.OldStationLevels)]
+				end
+				data.upgrades[id] = math.max(data.upgrades[id] or 0, value)
 			end
 		end
 	end

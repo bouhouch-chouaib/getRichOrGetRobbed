@@ -7,18 +7,21 @@
 -- seconde. Le client (client/TrainingFx) joue l'animation (course sur place, développé couché + grognements) et affiche
 -- les "+X 👟" / "+X 💪" qui s'envolent (attributs "TrainingGain" et "TrainingPulse", vus par tout le monde).
 -- Pour descendre : sauter ou bouton ARRÊTER (Remotes.StopTraining) ; il faut quitter la station avant d'y remonter.
--- La station est cachée tant que le propriétaire de la base ne l'a pas achetée. Son niveau (1 à 5) change sa matière
--- (bois -> diamant) et multiplie l'XP gagnée (Config.Training.StationRates).
+-- La station est cachée tant que le propriétaire de la base ne l'a pas achetée. Son niveau (1 à 25) choisit son modèle
+-- (server/StationLooks : bois, acier, or, cristal, cosmique) et multiplie l'XP gagnée (Config.GetStationRate).
+-- À côté, un panneau « Amélioration » montre le niveau suivant et son prix (bulle d'achat : client/UpgradeSigns).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local BaseManager = require(script.Parent.BaseManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local SessionData = require(script.Parent.SessionData)
+local StationLooks = require(script.Parent.StationLooks)
 
 local TrainingController = {}
 
@@ -40,6 +43,8 @@ type Station = {
 	label: TextLabel?,
 	sign: BillboardGui?,
 	shownLevel: number, -- niveau actuellement affiché (0 = caché)
+	shownOwned: boolean, -- la base avait un propriétaire au dernier affichage (panneau d'amélioration visible)
+	upgradeSign: Model?,
 }
 
 type Session = {
@@ -50,6 +55,10 @@ type Session = {
 }
 
 local stations: { Station } = {}
+local shopItem: { [string]: Config.ShopItem } = {}
+for _, item in ipairs(Config.Shop) do
+	shopItem[item.Id] = item
+end
 local sessions: { [Player]: Session } = {}
 local mustLeave: { [Player]: Station } = {} -- descendu de cette station : il doit en sortir avant de remonter
 
@@ -131,72 +140,73 @@ local function start(player: Player, station: Station)
 	player:SetAttribute("Training", station.kind.model)
 end
 
--- Affiche / cache la station et applique la matière de son niveau.
-local function render(station: Station, level: number)
-	if station.shownLevel == level then
+-- Panneau « Amélioration » : niveau actuel > suivant et prix (caché si la base n'a pas de propriétaire).
+local function renderUpgradeSign(station: Station, level: number, owned: boolean)
+	local sign = station.upgradeSign
+	if not sign then
 		return
 	end
-	station.shownLevel = level
-	local visible = level > 0
-	local look = Config.Training.StationMaterials[math.clamp(level, 1, #Config.Training.StationMaterials)]
-	for _, part in ipairs(station.model:GetDescendants()) do
+	for _, part in ipairs(sign:GetChildren()) do
 		if part:IsA("BasePart") then
-			part.Transparency = if visible then 0 else 1
-			part.CanCollide = visible
-			part.CanQuery = visible
-			if part:GetAttribute("Tint") then
-				part.Color = look.Color
-				part.Material = look.Material
+			part.Transparency = if owned then 0 else 1
+			part.CanCollide = owned
+			part.CanQuery = owned
+		end
+	end
+	local board = sign:FindFirstChild("Board")
+	local gui = board and board:FindFirstChild("Gui")
+	if not gui or not gui:IsA("SurfaceGui") then
+		return
+	end
+	gui.Enabled = owned
+	local item = shopItem[station.kind.upgrade]
+	local title = gui:FindFirstChild("Title")
+	local levels = gui:FindFirstChild("Levels")
+	local price = gui:FindFirstChild("Price")
+	if not item or not title or not levels or not price or not title:IsA("TextLabel") or not levels:IsA("TextLabel") or not price:IsA("TextLabel") then
+		return
+	end
+	local cost = Config.GetUpgradePrice(item, level)
+	if level <= 0 then
+		title.Text = station.kind.title
+		levels.Text = "À ACHETER"
+	elseif cost then
+		title.Text = "AMÉLIORATION"
+		levels.Text = string.format("NIVEAU %d > %d", level, level + 1)
+	else
+		title.Text = "AMÉLIORATION"
+		levels.Text = "NIVEAU MAX !"
+	end
+	price.Text = if cost then NumberFormat.money(cost) else "★ " .. level .. " ★"
+end
+
+-- Affiche / cache la station et applique le modèle de son niveau (server/StationLooks).
+local function render(station: Station, level: number, owned: boolean)
+	if station.shownLevel == level and station.shownOwned == owned then
+		return
+	end
+	if station.shownLevel ~= level then
+		station.shownLevel = level
+		local visible = level > 0
+		-- Seules les pièces utiles (enfants directs) sont cachées ; le décor "Look" est reconstruit ou supprimé.
+		for _, part in ipairs(station.model:GetChildren()) do
+			if part:IsA("BasePart") then
+				part.Transparency = if visible then 0 else 1
+				part.CanCollide = visible
+				part.CanQuery = visible
 			end
 		end
-	end
-	-- Hauts niveaux (Émeraude, Rubis, Cosmique) : lumière + étincelles à la couleur de la matière.
-	local glowing = visible and look.Glow == true
-	local sparkles = station.zone:FindFirstChild("StationSparkles")
-	local light = station.zone:FindFirstChild("StationLight")
-	if glowing then
-		if not sparkles then
-			local emitter = Instance.new("ParticleEmitter")
-			emitter.Name = "StationSparkles"
-			emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-			emitter.Rate = 14
-			emitter.Lifetime = NumberRange.new(0.8, 1.6)
-			emitter.Speed = NumberRange.new(2, 5)
-			emitter.SpreadAngle = Vector2.new(25, 25)
-			emitter.EmissionDirection = Enum.NormalId.Top
-			emitter.Size = NumberSequence.new(0.6, 0)
-			emitter.LightEmission = 1
-			emitter.Parent = station.zone
-			sparkles = emitter
+		StationLooks.Apply(station.model, station.kind.model, level)
+		if station.sign then
+			station.sign.Enabled = visible
 		end
-		if not light then
-			local point = Instance.new("PointLight")
-			point.Name = "StationLight"
-			point.Range = 14
-			point.Brightness = 1.5
-			point.Parent = station.zone
-			light = point
-		end
-		if sparkles and sparkles:IsA("ParticleEmitter") then
-			sparkles.Color = ColorSequence.new(look.Color)
-		end
-		if light and light:IsA("PointLight") then
-			light.Color = look.Color
-		end
-	else
-		if sparkles then
-			sparkles:Destroy()
-		end
-		if light then
-			light:Destroy()
+		if station.label then
+			local tier = Config.GetStationTier(level)
+			station.label.Text = string.format("%s\nNIVEAU %d • %s • XP x%s", station.kind.title, level, TextFormat.upper(tier.Name), NumberFormat.short(Config.GetStationRate(level)))
 		end
 	end
-	if station.sign then
-		station.sign.Enabled = visible
-	end
-	if station.label then
-		station.label.Text = string.format("%s\nNIVEAU %d • %s • XP x%s", station.kind.title, level, TextFormat.upper(look.Name), tostring(Config.Training.StationRates[level] or 1))
-	end
+	station.shownOwned = owned
+	renderUpgradeSign(station, level, owned)
 end
 
 local function update()
@@ -204,13 +214,13 @@ local function update()
 	for _, station in ipairs(stations) do
 		local owner = BaseManager.GetOwner(station.base)
 		local level = if owner then SessionData.GetUpgradeLevel(owner, station.kind.upgrade) else 0
-		render(station, level)
+		render(station, level, owner ~= nil)
 
 		if owner and level > 0 then
 			local session = sessions[owner]
 			local root = getRoot(owner)
 			if session and session.station == station then
-				local gain = (Config.Training.StationRates[level] or 1) * TICK
+				local gain = Config.GetStationRate(level) * TICK
 				SessionData.AddTrainingXP(owner, station.kind.stat, gain)
 				session.gained += gain
 				if now >= session.nextPulse then
@@ -248,6 +258,7 @@ function TrainingController.Init(bases: { Model })
 			if model and model:IsA("Model") and zone and zone:IsA("BasePart") then
 				local sign = model:FindFirstChild("StationSign")
 				local label = sign and sign:FindFirstChild("Label")
+				local upgradeSign = model:FindFirstChild("UpgradeSign")
 				table.insert(stations, {
 					base = base,
 					kind = kind,
@@ -255,7 +266,9 @@ function TrainingController.Init(bases: { Model })
 					zone = zone,
 					sign = if sign and sign:IsA("BillboardGui") then sign else nil,
 					label = if label and label:IsA("TextLabel") then label else nil,
-					shownLevel = 0,
+					shownLevel = -1, -- force le premier affichage
+					shownOwned = false,
+					upgradeSign = if upgradeSign and upgradeSign:IsA("Model") then upgradeSign else nil,
 				})
 			else
 				warn("[TrainingController] Station " .. kind.model .. " introuvable dans " .. base.Name)

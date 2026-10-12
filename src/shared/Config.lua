@@ -101,31 +101,52 @@ Config.Knockback = {
 
 -- Entraînement : Vitesse (tapis de course) et Force (banc de développé couché).
 -- XP pour passer du niveau L au niveau L+1 = XPBase × XPGrowth^L (progression longue).
--- XP gagnée par seconde sur la station = StationRates[niveau de la station].
+-- XP gagnée par seconde sur la station = StationRateGrowth^(niveau - 1) (Config.GetStationRate).
+-- Stations : 25 niveaux, un nouveau modèle tous les LevelsPerTier niveaux (server/StationLooks), de plus en plus
+-- épique. Dans un modèle, chaque niveau allume un voyant de plus ; le 5e ajoute une étoile au sommet.
 export type StatConfig = { Base: number, PerLevel: number, MaxLevel: number }
-export type StationLook = { Name: string, Color: Color3, Material: Enum.Material, Glow: boolean? }
+export type StationTier = {
+	Name: string,
+	Main: Color3, -- couleur principale (châssis)
+	Dark: Color3, -- pièces sombres (pieds, dessous)
+	Accent: Color3, -- voyants, écran, cercle au sol
+	Belt: Color3, -- tapis / matelas
+	Trim: Color3?, -- liserés (modèles Cristal et Cosmique)
+	Glow: boolean?, -- lumière + étincelles
+}
 Config.Training = {
 	Speed = { Base = 16, PerLevel = 0.5, MaxLevel = 60 } :: StatConfig, -- WalkSpeed
 	Strength = { Base = 70, PerLevel = 3, MaxLevel = 60 } :: StatConfig, -- vitesse de lancer max
 	XPBase = 5,
 	XPGrowth = 1.12,
-	StationRates = { 1, 2, 3.5, 6, 10, 16, 25, 40 },
-	-- Matière de la station selon son niveau. Glow = true : la station brille et lâche des étincelles (niveaux 6 à 8).
-	StationMaterials = {
-		{ Name = "Bois", Color = Color3.fromRGB(150, 100, 55), Material = Enum.Material.Plastic },
-		{ Name = "Pierre", Color = Color3.fromRGB(140, 140, 145), Material = Enum.Material.Plastic },
-		{ Name = "Fer", Color = Color3.fromRGB(180, 185, 195), Material = Enum.Material.Plastic },
-		{ Name = "Or", Color = Color3.fromRGB(255, 200, 40), Material = Enum.Material.Plastic },
-		{ Name = "Diamant", Color = Color3.fromRGB(120, 230, 255), Material = Enum.Material.Glass },
-		{ Name = "Émeraude", Color = Color3.fromRGB(60, 230, 120), Material = Enum.Material.Glass, Glow = true },
-		{ Name = "Rubis", Color = Color3.fromRGB(255, 60, 90), Material = Enum.Material.Glass, Glow = true },
-		{ Name = "Cosmique", Color = Color3.fromRGB(170, 80, 255), Material = Enum.Material.Neon, Glow = true },
-	} :: { StationLook },
+	StationRateGrowth = 1.17, -- niveau 25 : x43 (l'ancien niveau 8 donnait x40)
+	LevelsPerTier = 5,
+	StationTiers = {
+		{ Name = "Bois", Main = Color3.fromRGB(216, 128, 42), Dark = Color3.fromRGB(120, 76, 40), Accent = Color3.fromRGB(90, 230, 80), Belt = Color3.fromRGB(55, 55, 62) },
+		{ Name = "Acier", Main = Color3.fromRGB(228, 232, 240), Dark = Color3.fromRGB(110, 118, 138), Accent = Color3.fromRGB(40, 150, 255), Belt = Color3.fromRGB(40, 44, 56) },
+		{ Name = "Or", Main = Color3.fromRGB(255, 198, 40), Dark = Color3.fromRGB(205, 112, 22), Accent = Color3.fromRGB(255, 120, 30), Belt = Color3.fromRGB(30, 30, 36) },
+		{ Name = "Cristal", Main = Color3.fromRGB(36, 40, 64), Dark = Color3.fromRGB(20, 22, 36), Accent = Color3.fromRGB(70, 230, 255), Belt = Color3.fromRGB(14, 16, 28), Trim = Color3.fromRGB(255, 198, 40), Glow = true },
+		{ Name = "Cosmique", Main = Color3.fromRGB(44, 24, 76), Dark = Color3.fromRGB(20, 10, 36), Accent = Color3.fromRGB(190, 90, 255), Belt = Color3.fromRGB(12, 6, 24), Trim = Color3.fromRGB(255, 130, 235), Glow = true },
+	} :: { StationTier },
+	-- Sauvegardes d'avant les 25 niveaux (8 niveaux) : ancien niveau -> nouveau (même XP par seconde à peu près).
+	OldStationLevels = { 1, 5, 9, 12, 16, 19, 22, 25 },
 	-- Animations (client/TrainingFx) : course sur place et développé couché.
 	RunAnimSpeed = 1.3, -- vitesse de l'animation de course sur le tapis (niveau 1)
 	BenchRepTime = 1.6, -- secondes par répétition au banc (niveau 1 ; un grognement d'effort à chaque poussée)
-	AnimSpeedPerLevel = 0.12, -- chaque niveau de station au-dessus de 1 : on court / pousse 12 % plus vite
+	AnimSpeedPerLevel = 0.04, -- chaque niveau de station au-dessus de 1 : on court / pousse 4 % plus vite
 }
+
+-- XP par seconde d'une station de ce niveau.
+function Config.GetStationRate(level: number): number
+	return Config.Training.StationRateGrowth ^ (math.max(level, 1) - 1)
+end
+
+-- Modèle (StationTiers) d'une station de ce niveau, et rang du niveau dans ce modèle (1 à LevelsPerTier).
+function Config.GetStationTier(level: number): (StationTier, number)
+	local perTier = Config.Training.LevelsPerTier
+	local index = math.clamp((math.max(level, 1) - 1) // perTier + 1, 1, #Config.Training.StationTiers)
+	return Config.Training.StationTiers[index], (math.max(level, 1) - 1) % perTier + 1
+end
 
 -- Tirages : un objet avalé rapporte sa valeur (Config.ItemTiers) × multiplicateur des familiers équipés.
 -- Le coût d'un tirage augmente à chaque tirage de la même manche (évite l'emballement).
@@ -297,8 +318,8 @@ export type ShopItem = {
 
 -- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 8 niveaux, du bois au cosmique : chaque niveau entraîne plus vite.", MaxLevel = 8, BasePrice = 500, PriceGrowth = 120 },
-	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 8 niveaux, du bois au cosmique.", MaxLevel = 8, BasePrice = 500, PriceGrowth = 120 },
+	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 5 modèles (bois, acier, or, cristal, cosmique) : chaque niveau entraîne plus vite.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
+	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
 	{ Id = "ItemQuality", Icon = "🍀", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
 	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
 	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
