@@ -2,11 +2,14 @@
 -- StealController : vol de familiers dans les bases adverses (cœur du genre "Steal a ...").
 --
 -- Règles (Config.Steal) :
---   - [E] (maintenu) sur un familier qui se balade dans une base adverse DÉVERROUILLÉE, pendant la digestion.
+--   - [E] (maintenu) sur un familier qui se balade dans une base adverse DÉVERROUILLÉE, à tout moment
+--     (Config.Steal.OnlyDuringDigesting = false), mains libres (ni objet ni arme). La bulle est créée par le client
+--     (client/BasePets) qui envoie Remotes.StealPet -> BasePetsController.PetTriggered.
 --   - Le voleur le porte dans le dos (attribut "CarryingPet", affiché par client/PetFollow), est ralenti
 --     (attribut "SpeedMultiplier") et ne peut plus ramasser d'objet. Un seul familier à la fois.
 --   - Arrivé dans SA base : le familier change de propriétaire.
---   - Échec, le familier rentre chez sa victime : voleur KO / mort / réapparu (ItemInteraction.HeldReleased),
+--   - Échec, le familier rentre chez sa victime : voleur KO (dôme, arme d'un autre joueur) / mort / réapparu
+--     (ItemInteraction.HeldReleased),
 --     voleur ou victime qui quitte le serveur, transport trop long (Config.Steal.MaxCarryTime).
 --   - Défense : une bulle [E] "Reprendre" est posée sur le voleur ; seule la victime la voit (attribut "CarryingFrom"
 --     = UserId de la victime, lu par client/PetFollow, qui entoure aussi le voleur de rouge chez elle). Si elle la
@@ -178,6 +181,10 @@ local function tryStart(anchor: BasePart, thief: Player)
 		return
 	end
 	if not BaseManager.GetBase(thief) or not isAlive(thief) then
+		return
+	end
+	-- Arme en main : les mains sont prises (server/WeaponController).
+	if thief.Character and thief.Character:FindFirstChildOfClass("Tool") then
 		return
 	end
 	-- Les deux sauvegardes doivent être chargées, sinon le transfert ne serait pas enregistré (risque de copie).

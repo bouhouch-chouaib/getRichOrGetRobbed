@@ -34,15 +34,15 @@ local PHASES = {
 	Feeding = {
 		Title = "NOURRIS LE TROU NOIR !",
 		Hint = if ScreenScale.isTouch()
-			then "Touche RAMASSER sur un objet  •  maintiens LANCER pour viser, relâche pour lancer"
-			else "[E] ramasser  •  maintiens CLIC GAUCHE pour viser, relâche pour lancer",
+			then "Touche RAMASSER sur un objet  •  maintiens LANCER pour viser  •  VOLE les familiers des bases ouvertes !"
+			else "[E] ramasser  •  maintiens CLIC GAUCHE pour viser, relâche pour lancer  •  [E] sur un familier adverse pour le VOLER",
 		Color = Color3.fromRGB(200, 120, 255),
 	},
 	Digesting = {
 		Title = "LE TROU NOIR DIGÈRE...",
 		Hint = if ScreenScale.isTouch()
 			then "Touche VOLER sur un familier d'une base ouverte  •  ferme ta base pour protéger les tiens !"
-			else "Maintiens [E] sur un familier d'une base ouverte pour le VOLER  •  ferme ta base pour protéger les tiens !",
+			else "Maintiens [E] sur un familier d'une base ouverte pour le VOLER  •  frappe les voleurs avec une arme (BOUTIQUE) !",
 		Color = Color3.fromRGB(255, 90, 70),
 	},
 }

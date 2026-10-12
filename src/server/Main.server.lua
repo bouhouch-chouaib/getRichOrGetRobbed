@@ -20,6 +20,7 @@ local PetController = require(script.Parent.PetController)
 local SessionData = require(script.Parent.SessionData)
 local StealController = require(script.Parent.StealController)
 local TrainingController = require(script.Parent.TrainingController)
+local WeaponController = require(script.Parent.WeaponController)
 
 SessionData.Init()
 
@@ -36,6 +37,7 @@ PetController.Init()
 FusionController.Init()
 BasePetsController.Init(bases)
 StealController.Init()
+WeaponController.Init()
 MonetizationController.Init()
 LeaderboardController.Init()
 

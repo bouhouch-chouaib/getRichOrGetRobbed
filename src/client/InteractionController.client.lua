@@ -435,6 +435,26 @@ end)
 
 RunService.RenderStepped:Connect(updateTrajectory)
 
-player.CharacterAdded:Connect(function()
+-- Une arme sortie alors que les mains sont prises (objets, familier volé) est rangée tout de suite
+-- (le serveur le fait aussi, server/WeaponController) : on explique pourquoi.
+local function watchTools(character: Model)
+	character.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") and (#stack > 0 or player:GetAttribute("CarryingPet") ~= nil) then
+			Toast.show("TES MAINS SONT PRISES : LÂCHE TES OBJETS POUR SORTIR UNE ARME !", Color3.fromRGB(255, 90, 90))
+			task.defer(function()
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				if humanoid and child.Parent == character then
+					humanoid:UnequipTools()
+				end
+			end)
+		end
+	end)
+end
+
+player.CharacterAdded:Connect(function(character)
 	releaseAll()
+	watchTools(character)
 end)
+if player.Character then
+	watchTools(player.Character)
+end

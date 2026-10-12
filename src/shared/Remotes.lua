@@ -60,6 +60,10 @@ return {
 	-- Serveur -> voleur : (outcome: string, petId: string) fin d'un vol de familier
 	-- ("Success", "KO", "Timeout", "VictimLeft", "Gone", "Recovered" : voir server/StealController).
 	StealResult = remote("StealResult"),
+	-- Client -> serveur : (anchor: BasePart) le joueur a validé la bulle [E] "Voler" d'un familier de base.
+	-- La bulle est créée par le client (client/BasePets) car elle suit le familier chez lui seulement :
+	-- une bulle du serveur serait refusée par Roblox dès que le familier s'éloigne de son repère.
+	StealPet = remote("StealPet"),
 	-- Serveur -> victime ou tous : (kind: string, thiefName: string, victimName: string, petId: string)
 	-- kind : "Started", "Stolen", "Recovered", "Returned" (à la victime), "Announce" (à tous, vol rare réussi).
 	StealNotice = remote("StealNotice"),

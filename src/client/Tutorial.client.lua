@@ -266,7 +266,7 @@ local function finish(skipped: boolean)
 		Toast.show("TUTORIEL PASSÉ", Color3.fromRGB(200, 200, 200))
 	else
 		Sounds.play("LevelUp")
-		Toast.show("BRAVO ! PENDANT LA DIGESTION, VOLE LES FAMILIERS DES BASES OUVERTES !", GOLD)
+		Toast.show("BRAVO ! VOLE LES FAMILIERS DES BASES OUVERTES ET RAMÈNE-LES CHEZ TOI !", GOLD)
 	end
 end
 

@@ -6,17 +6,19 @@
 --   PetId, Count (exemplaires), Seed (variation d'animation), Walk (trajet en cours, voir shared/PetWander).
 -- Le serveur ne déplace jamais ces repères : les clients calculent la position à partir de "Walk"
 -- (client/BasePets) et la position officielle s'obtient avec BasePetsController.GetPetPosition.
--- Chaque repère porte la bulle [E] "Voler" (ProximityPrompt) : le client la fait suivre le familier et ne l'affiche
--- que quand le vol est possible ; la décision reste au serveur (StealController, via PetTriggered).
+-- La bulle [E] "Voler" est créée par chaque client sur le repère (client/BasePets), suit le familier et prévient
+-- le serveur par Remotes.StealPet ; la décision reste au serveur (StealController, via PetTriggered).
+-- (Une bulle créée par le serveur serait refusée par Roblox dès que le familier s'éloigne de son repère, que le
+-- serveur ne déplace jamais : c'était la cause des vols qui « ne marchaient pas ».)
 -- Un exemplaire en cours de vol est "réservé" (Reserve) : il n'est plus affiché dans la base de la victime.
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
-local Config = require(ReplicatedStorage.Shared.Config)
-local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local EconomyController = require(script.Parent.EconomyController)
 
@@ -80,21 +82,6 @@ local function addPet(state: BaseState, petId: string, count: number)
 	anchor:SetAttribute("Count", count)
 	anchor:SetAttribute("Seed", rng:NextInteger(0, 1000))
 	anchor:SetAttribute("Walk", PetWander.encode(leg))
-
-	local entry = PetCatalog.ById[petId]
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.Name = "StealPrompt"
-	prompt.ActionText = "Voler"
-	prompt.ObjectText = if entry then entry.Name else petId
-	prompt.KeyboardKeyCode = Enum.KeyCode.E
-	prompt.HoldDuration = Config.Steal.HoldDuration
-	prompt.MaxActivationDistance = Config.Steal.PromptDistance
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = anchor
-	prompt.Triggered:Connect(function(player: Player)
-		petTriggered:Fire(anchor, player)
-	end)
-
 	anchor.Parent = state.folder
 	state.pets[petId] = {
 		anchor = anchor,
@@ -226,7 +213,24 @@ function BasePetsController.GetPetPosition(anchor: Instance): Vector3?
 	return nil
 end
 
+local lastStealRequest: { [Player]: number } = {}
+
 function BasePetsController.Init(bases: { Model })
+	-- Bulle [E] "Voler" validée chez un client : StealController vérifie tout (base, distance, sauvegardes...).
+	Remotes.StealPet.OnServerEvent:Connect(function(player: Player, anchor: unknown)
+		local time = os.clock()
+		if time - (lastStealRequest[player] or 0) < 0.25 then
+			return -- pas plus de 4 demandes par seconde
+		end
+		lastStealRequest[player] = time
+		if typeof(anchor) == "Instance" and anchor:IsA("BasePart") and BasePetsController.GetBaseOf(anchor) then
+			petTriggered:Fire(anchor, player)
+		end
+	end)
+	Players.PlayerRemoving:Connect(function(player: Player)
+		lastStealRequest[player] = nil
+	end)
+
 	for _, base in ipairs(bases) do
 		local platform = base:FindFirstChild("BasePart")
 		if platform and platform:IsA("BasePart") then

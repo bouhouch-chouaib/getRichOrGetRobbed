@@ -4,8 +4,9 @@
 -- avec son trajet en cours dans l'attribut "Walk". Ici, on construit le modèle et on le place à la position
 -- calculée avec l'horloge commune (shared/PetWander) : tous les joueurs voient les familiers au même endroit.
 -- L'animation (marche, sautille, ondule, plane, se balance, tourne) n'est qu'un effet visuel local.
--- Vol : on déplace aussi (localement) le repère sur le familier pour que sa bulle [E] "Voler" le suive, et on
--- n'affiche la bulle que si le vol est possible (digestion, base adverse ouverte, mains libres). Le serveur revérifie tout.
+-- Vol : on crée ici (localement) la bulle [E] "Voler" sur le repère, on déplace le repère sur le familier pour que
+-- la bulle le suive, et on ne l'affiche que si le vol est possible (base adverse ouverte, mains libres). Validée, elle
+-- envoie Remotes.StealPet ; le serveur revérifie tout (server/StealController).
 -- Arrivée d'un nouveau familier (attribut "ArrivedAt" posé par le serveur après un tirage, une fusion ou un vol) :
 -- il tombe du ciel, gerbe d'étincelles à la couleur de sa rareté, étiquette "NOUVEAU", rayon de lumière si Légendaire+.
 
@@ -22,6 +23,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local Sounds = require(script.Parent.Sounds)
 
@@ -218,9 +220,25 @@ local function addPet(display: BaseDisplay, anchor: Instance)
 	local seedValue = anchor:GetAttribute("Seed")
 	local seed = if type(seedValue) == "number" then seedValue else 0
 	local styleName = PetWander.styleFor(petId)
+	-- Bulle [E] "Voler", propre à ce client : elle suit le familier et prévient le serveur.
+	local entry = PetCatalog.ById[petId]
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "StealPrompt"
+	prompt.ActionText = "Voler"
+	prompt.ObjectText = if entry then entry.Name else petId
+	prompt.KeyboardKeyCode = Enum.KeyCode.E
+	prompt.HoldDuration = Config.Steal.HoldDuration
+	prompt.MaxActivationDistance = Config.Steal.PromptDistance
+	prompt.RequiresLineOfSight = false
+	prompt.Enabled = false -- RenderStepped l'active si le vol est possible
+	prompt.Triggered:Connect(function()
+		Remotes.StealPet:FireServer(anchor)
+	end)
+	prompt.Parent = anchor
+
 	local shown: Shown = {
 		anchor = anchor,
-		prompt = nil, -- trouvée dans RenderStepped (elle peut arriver du serveur juste après le repère)
+		prompt = prompt,
 		model = model,
 		styleName = styleName,
 		style = PetWander.STYLES[styleName],
@@ -254,6 +272,9 @@ local function removePet(display: BaseDisplay, anchor: Instance)
 	local shown = if anchor:IsA("BasePart") then display.pets[anchor] else nil
 	if shown then
 		shown.model:Destroy()
+		if shown.prompt then
+			shown.prompt:Destroy()
+		end
 		display.pets[anchor :: BasePart] = nil
 	end
 end
@@ -340,6 +361,7 @@ local function canSteal(base: Model): boolean
 	return base:GetAttribute("BaseIndex") ~= player:GetAttribute("BaseIndex")
 		and base:GetAttribute("Locked") ~= true
 		and player:GetAttribute("CarryingPet") == nil
+		and not (player.Character and player.Character:FindFirstChildOfClass("Tool")) -- arme en main : mains prises
 end
 
 local NEAR_CHARACTER = 90 -- une base aussi proche du personnage est toujours animée (caméra très reculée)
@@ -363,10 +385,6 @@ RunService.RenderStepped:Connect(function(dt: number)
 			end
 			-- Bulle [E] affichée seulement si le vol est possible (mise à jour même pour les bases lointaines).
 			local prompt = shown.prompt
-			if not prompt then
-				prompt = shown.anchor:FindFirstChildOfClass("ProximityPrompt")
-				shown.prompt = prompt
-			end
 			if prompt and prompt.Enabled ~= stealable then
 				prompt.Enabled = stealable
 			end

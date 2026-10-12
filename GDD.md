@@ -83,12 +83,16 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `LongLock` : base fermée 10 s au lieu de 5 s.
 - **Bouton de verrouillage** (comme Steal a Brainrot) : au centre de la base devant la porte ; le propriétaire marche sur le gros bouton rouge → portail fermé pendant 5 s
   (relancé à chaque passage sur le bouton), tout autre joueur à l'intérieur est expulsé devant l'entrée.
-- **Vol de familiers** (`StealController`, réglages `Config.Steal`) : pendant la **digestion**, [E] maintenu 0,5 s sur un familier
-  qui se balade dans une base adverse **déverrouillée** (bulle "Voler" sur son repère `Base_N.Pets.<PetId>`, affichée par le
-  client seulement quand le vol est possible). Le voleur le porte dans le dos (attribut `CarryingPet` + `CarryingUntil`, affiché
-  par `client/PetFollow` pour tout le monde, étiquette nom + temps restant), est ralenti ×0,6 (attribut `SpeedMultiplier`, appliqué
-  par `SessionData`) et ne peut plus ramasser d'objet. Arrivé dans **sa** base : transfert. Échec (le familier rentre) : KO / mort /
-  réapparition / départ du voleur (`ItemInteraction.HeldReleased`), départ de la victime, 30 s écoulées.
+- **Vol de familiers** (`StealController`, réglages `Config.Steal`) : **à tout moment** (depuis le 12 oct. ;
+  `OnlyDuringDigesting = false`), [E] maintenu 0,3 s sur un familier qui se balade dans une base adverse **déverrouillée**,
+  mains libres (ni objet ni arme). La bulle "Voler" est **créée par le client** sur le repère `Base_N.Pets.<PetId>` (client/BasePets),
+  qu'il déplace localement sur le familier, et envoie `Remotes.StealPet(anchor)` (4 demandes/s max). Ne jamais remettre une
+  bulle serveur : Roblox refuse un ProximityPrompt validé loin de sa position serveur, et le serveur ne déplace jamais les repères
+  (c'était la cause des vols qui « ne marchaient pas »). Le voleur le porte dans le dos (attribut `CarryingPet` + `CarryingUntil`, affiché
+  par `client/PetFollow` pour tout le monde, étiquette nom + temps restant), est ralenti ×0,9 (attribut `SpeedMultiplier`, appliqué
+  par `SessionData`) et ne peut plus ramasser d'objet ni sortir d'arme. Arrivé dans **sa** base : transfert. Échec (le familier rentre) :
+  KO (dôme ou arme) / mort / réapparition / départ du voleur (`ItemInteraction.HeldReleased`), départ de la victime, 60 s écoulées
+  (la base d'en face est à ~430 studs).
   Anti-duplication : pendant le transport le familier reste à la victime, seulement **réservé** (`BasePetsController.Reserve`,
   caché de sa base) ; transfert en une étape serveur (`RemovePets` puis `AddPets`) seulement si les deux sauvegardes sont chargées
   (`SessionData.IsLoaded`), puis sauvegarde immédiate de la victime puis du voleur. Résultat envoyé au voleur : `Remotes.StealResult`.
@@ -96,6 +100,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   voleur ; attribut `CarryingFrom` = UserId de la victime. Chez la victime seulement (`client/PetFollow`) : bulle visible et voleur
   entouré de rouge (Highlight, visible à travers les murs). Le serveur vérifie que c'est la victime, vivante, à moins de 18 studs
   (`Config.Steal.RecoverMaxDistance`) → le familier rentre (résultat "Recovered").
+- **Armes de PvP** (`WeaponController`, réglages `Config.Weapons`, achetées dans la boutique d'argent : `WeaponSlap` Gant à claques
+  2 K$, `WeaponPan` Poêle cosmique 250 K$, `WeaponShockwave` Bâton à ondes 20 M$) : un `Tool` par arme possédée (niveau 1 de
+  l'amélioration, donc sauvegardé), redonné à chaque réapparition. Clic → le serveur choisit la cible (le plus proche devant soi,
+  ou tout le monde autour pour l'onde), l'éjecte (assis + `Remotes.Knockback`) et lui fait tout lâcher (`ReleaseHeld`) : un voleur
+  touché perd le familier. Immunité 2 s après un coup. Mains exclusives : arme en main → pas de ramassage ni de vol (serveur +
+  bulles cachées côté client) ; objets portés ou familier volé → l'arme sortie est rangée (serveur + message côté client).
 - **Annonces** (`Remotes.StealNotice`) : à la victime "Started" (début), puis "Stolen" / "Recovered" / "Returned" (KO ou temps
   écoulé) ; à tout le serveur "Announce" pour un vol réussi de rareté >= `Config.Loot.AnnounceMinRarity` (Légendaire).
 

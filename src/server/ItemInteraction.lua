@@ -85,6 +85,12 @@ local function getCapacity(player: Player): number
 	return 1 + SessionData.GetUpgradeLevel(player, "Backpack") + Perks.ExtraCapacity(player)
 end
 
+-- Nombre d'objets portés par le joueur (WeaponController : pas d'arme en main tant qu'il en porte).
+function ItemInteraction.GetHeldCount(player: Player): number
+	local items = held[player]
+	return if items then #items else 0
+end
+
 function ItemInteraction.IsHeld(item: BasePart): boolean
 	return item:GetAttribute("Holder") ~= nil
 end
@@ -101,6 +107,10 @@ local function onPromptTriggered(item: BasePart, player: Player)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if not humanoid or humanoid.Health <= 0 then
+		return
+	end
+	-- Une arme en main (Tool équipé, server/WeaponController) : pas de ramassage.
+	if character and character:FindFirstChildOfClass("Tool") then
 		return
 	end
 
@@ -143,6 +153,8 @@ function ItemInteraction.Init()
 		part:SetAttribute("Holder", nil)
 		part.CanCollide = true
 		part.Massless = false
+		-- La bulle [E] revient : un objet lancé qui rate le trou doit pouvoir être ramassé à nouveau.
+		setPromptEnabled(part, true)
 
 		-- Anti-triche : on note le lancer tel que le serveur le voit (le client ne peut rien y changer).
 		local character = player.Character

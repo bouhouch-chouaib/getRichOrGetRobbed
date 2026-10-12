@@ -218,10 +218,10 @@ Config.Lock = {
 
 -- Vol de familiers : [E] sur un familier d'une base adverse déverrouillée, à ramener dans sa propre base.
 Config.Steal = {
-	OnlyDuringDigesting = true, -- vol possible seulement pendant la digestion
-	SpeedMultiplier = 0.6, -- vitesse du voleur pendant le transport
-	MaxCarryTime = 30, -- au-delà, le familier rentre chez son propriétaire (secondes)
-	HoldDuration = 0.5, -- temps d'appui sur [E] pour voler
+	OnlyDuringDigesting = false, -- false : vol possible à tout moment (nuit comme jour)
+	SpeedMultiplier = 0.9, -- vitesse du voleur pendant le transport (0,6 rendait les vols impossibles)
+	MaxCarryTime = 60, -- au-delà, le familier rentre chez son propriétaire (secondes ; la base d'en face est à ~430 studs)
+	HoldDuration = 0.3, -- temps d'appui sur [E] pour voler
 	PromptDistance = 8, -- distance d'affichage de la bulle [E] (studs)
 	MaxDistance = 16, -- distance max acceptée par le serveur (marge pour la latence)
 	-- Défense : la victime rattrape le voleur et appuie sur [E] ("Reprendre") pour récupérer son familier.
@@ -287,7 +287,32 @@ Config.Shop = {
 	{ Id = "ItemQuality", Icon = "🍀", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
 	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
 	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
+	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2, 3).
+	{ Id = "WeaponSlap", Icon = "🖐", Name = "Gant à claques", Description = "ARME : une claque qui repousse un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },
+	{ Id = "WeaponPan", Icon = "🍳", Name = "Poêle cosmique", Description = "ARME : un gros coup de poêle. Repousse bien plus loin et assomme plus longtemps.", MaxLevel = 1, BasePrice = 250e3, PriceGrowth = 1 },
+	{ Id = "WeaponShockwave", Icon = "💥", Name = "Bâton à ondes", Description = "ARME : une onde de choc qui repousse TOUS les joueurs autour de toi (recharge 8 s).", MaxLevel = 1, BasePrice = 20e6, PriceGrowth = 1 },
 } :: { ShopItem }
+
+export type WeaponDef = {
+	Range: number, -- portée en studs (rayon de l'onde pour une arme de zone)
+	Area: boolean, -- true : touche tout le monde autour ; false : le joueur le plus proche devant soi
+	Push: number, -- vitesse d'éjection horizontale
+	Up: number, -- vitesse d'éjection vers le haut
+	Stun: number, -- secondes assis (sans contrôle)
+	Cooldown: number, -- secondes entre deux coups
+}
+
+-- Armes de PvP (server/WeaponController). Une arme en main = pas de ramassage d'objet, et inversement.
+-- Toucher un joueur lui fait lâcher ses objets ; un voleur touché perd le familier qu'il portait (il rentre chez lui).
+Config.Weapons = {
+	List = {
+		WeaponSlap = { Range = 7, Area = false, Push = 60, Up = 28, Stun = 0.8, Cooldown = 1.2 },
+		WeaponPan = { Range = 8, Area = false, Push = 100, Up = 42, Stun = 1.6, Cooldown = 1.6 },
+		WeaponShockwave = { Range = 16, Area = true, Push = 85, Up = 45, Stun = 1.2, Cooldown = 8 },
+	} :: { [string]: WeaponDef },
+	HitImmunity = 2, -- secondes pendant lesquelles un joueur touché ne peut pas être retouché
+	RangeMargin = 3, -- studs de marge sur la portée (latence)
+}
 
 -- Prix du prochain niveau (nil si niveau max atteint).
 function Config.GetUpgradePrice(item: ShopItem, currentLevel: number): number?
