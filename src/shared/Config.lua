@@ -178,6 +178,9 @@ Config.Monetization = {
 	PullLuck = 0.5, -- chance de base des tirages achetés (= une bonne manche)
 	-- Studio uniquement, pour tester sans acheter : clés des passes considérés comme possédés (ex. { "VIP" }).
 	StudioTestPasses = {} :: { string },
+	-- Roblox donne d'office tous ses passes au créateur du jeu. false : le créateur joue SANS leurs effets
+	-- (même partie que ses amis). StudioTestPasses reste utilisable pour tester.
+	CreatorOwnsPasses = false,
 }
 
 -- Machine de fusion : Count familiers d'une même rareté -> 1 familier aléatoire de la rareté au-dessus.

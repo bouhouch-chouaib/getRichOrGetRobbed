@@ -91,7 +91,7 @@ OneDrive : dans ce cas, copier les fichiers dans OneDrive (ou aligner après le 
 2. (fait : machine de fusion, `FusionController` + fenêtre FUSION)
 3. (fait : sauvegarde DataStore)
 4. (fait le 9 oct. : monétisation codée — 5 passes + 3 produits, `MonetizationController`, `client/RobuxShop`, `shared/Perks`).
-   Passes/produits créés le 11 oct. et Id remplis dans `Config.Monetization`. Le créateur du jeu possède d'office ses passes (« POSSÉDÉ » en Studio).
+   Passes/produits créés le 11 oct. et Id remplis dans `Config.Monetization`. Le créateur du jeu possède d'office ses passes chez Roblox : depuis le 12 oct., `Config.Monetization.CreatorOwnsPasses = false` les ignore (il joue sans avantages, comme ses amis).
 5. Échanges entre joueurs (double confirmation anti-arnaque).
 
 Autres idées notées : vol de familiers dans les bases adverses (colle au nom du jeu), bulle ProximityPrompt

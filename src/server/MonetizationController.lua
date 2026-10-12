@@ -88,6 +88,11 @@ local function checkPasses(player: Player)
 			grantPass(player, key)
 		end
 	end
+	-- Le créateur possède d'office ses passes chez Roblox : on l'ignore (Config.Monetization.CreatorOwnsPasses).
+	local isCreator = game.CreatorType == Enum.CreatorType.User and player.UserId == game.CreatorId
+	if isCreator and not M.CreatorOwnsPasses then
+		return
+	end
 	for _, pass in ipairs(M.GamePasses) do
 		if pass.Id ~= 0 then
 			local ok, owns = pcall(function()
