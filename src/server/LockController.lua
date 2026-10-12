@@ -4,6 +4,10 @@
 -- (compte à rebours relancé à chaque passage sur le bouton) :
 -- le portail apparaît et tout autre joueur à l'intérieur est expulsé devant l'entrée.
 -- Attributs écrits sur la base : "Locked" (bool) et "LockedUntil" (temps serveur).
+-- Clé (Config.Keys) : un autre joueur près du portail d'une base FERMÉE l'utilise (Remotes.UseKey, bulle créée par
+-- client/BaseKeys) -> la base est ouverte Config.Keys.Duration secondes (attribut "ForcedOpenUntil") : pas d'expulsion,
+-- vol possible, même si le propriétaire repasse sur le bouton. Ensuite, elle redevient fermée si le compte à rebours
+-- du propriétaire tourne encore.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,6 +15,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Perks = require(ReplicatedStorage.Shared.Perks)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local SessionData = require(script.Parent.SessionData)
 
@@ -30,6 +35,7 @@ type BaseParts = {
 
 local entries: { BaseParts } = {}
 local lockedUntil: { [Model]: number } = {}
+local forcedUntil: { [Model]: number } = {} -- ouverte par une clé jusqu'à cette heure serveur
 
 local function getRoot(player: Player): BasePart?
 	local character = player.Character
@@ -53,6 +59,13 @@ local function setLocked(entry: BaseParts, locked: boolean)
 	end
 end
 
+-- Base ouverte par une clé : visuellement ouverte, sans toucher au compte à rebours du propriétaire.
+local function showForcedOpen(entry: BaseParts)
+	entry.base:SetAttribute("Locked", false)
+	entry.gate.Transparency = 1
+	entry.button.Color = COLOR_OPEN
+end
+
 local function isInsideBase(platform: BasePart, position: Vector3): boolean
 	local localPosition = platform.CFrame:PointToObjectSpace(position)
 	local half = platform.Size / 2 + Vector3.new(1.5, 0, 1.5)
@@ -66,6 +79,17 @@ local function update(entry: BaseParts, now: number)
 	if untilTime and (not owner or now >= untilTime) then
 		setLocked(entry, false)
 		untilTime = nil
+	end
+
+	-- Fin de l'ouverture par une clé : la base se referme si le propriétaire l'avait fermée entre-temps.
+	local forced: number? = forcedUntil[entry.base]
+	if forced and (not owner or now >= forced) then
+		forcedUntil[entry.base] = nil
+		entry.base:SetAttribute("ForcedOpenUntil", nil)
+		forced = nil
+		if untilTime then
+			setLocked(entry, true)
+		end
 	end
 
 	if not owner then
@@ -86,7 +110,7 @@ local function update(entry: BaseParts, now: number)
 			untilTime = newUntil
 			lockedUntil[entry.base] = newUntil
 			entry.base:SetAttribute("LockedUntil", newUntil)
-			if not wasLocked then
+			if not wasLocked and not forced then
 				setLocked(entry, true)
 			end
 		end
@@ -95,6 +119,12 @@ local function update(entry: BaseParts, now: number)
 		return
 	end
 
+	if forced then
+		if entry.label then
+			entry.label.Text = string.format("🗝 OUVERTE : %ds", math.ceil(forced - now))
+		end
+		return -- ouverte par une clé : personne n'est expulsé
+	end
 	if entry.label and untilTime then
 		entry.label.Text = string.format("FERMÉE : %ds", math.ceil(untilTime - now))
 	end
@@ -112,7 +142,45 @@ local function update(entry: BaseParts, now: number)
 	end
 end
 
+-- Un joueur utilise une clé sur le portail d'une base fermée : tout est vérifié ici.
+local function useKey(player: Player, base: unknown)
+	if typeof(base) ~= "Instance" then
+		return
+	end
+	local entry: BaseParts? = nil
+	for _, candidate in ipairs(entries) do
+		if candidate.base == base then
+			entry = candidate
+		end
+	end
+	if not entry then
+		return
+	end
+	local now = Workspace:GetServerTimeNow()
+	local owner = BaseManager.GetOwner(entry.base)
+	local locked = (lockedUntil[entry.base] or 0) > now
+	if not owner or owner == player or not locked or (forcedUntil[entry.base] or 0) > now then
+		return
+	end
+	local root = getRoot(player)
+	if not root or (root.Position - entry.gate.Position).Magnitude > Config.Keys.UseDistance + 4 then
+		return
+	end
+	if not SessionData.SpendKey(player) then
+		return
+	end
+	local untilTime = now + Config.Keys.Duration
+	forcedUntil[entry.base] = untilTime
+	entry.base:SetAttribute("ForcedOpenUntil", untilTime)
+	showForcedOpen(entry)
+	Remotes.StealNotice:FireClient(owner, "KeyUsed", player.DisplayName, owner.DisplayName, "")
+	Remotes.StealNotice:FireClient(player, "KeyOpened", player.DisplayName, owner.DisplayName, "")
+	print(string.format("[Lock] %s ouvre la base de %s avec une clé", player.Name, owner.Name))
+end
+
 function LockController.Init(bases: { Model })
+	Remotes.UseKey.OnServerEvent:Connect(useKey)
+
 	for _, base in ipairs(bases) do
 		local platform = base:FindFirstChild("BasePart")
 		local button = base:FindFirstChild("LockButton")

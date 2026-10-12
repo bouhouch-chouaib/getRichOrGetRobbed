@@ -151,6 +151,8 @@ local function grantProduct(player: Player, product: Config.MonetizationItem)
 		grantServerLuck(player)
 	elseif product.Pulls then
 		grantPulls(player, product.Pulls)
+	elseif product.Keys then
+		SessionData.AddKeys(player, product.Keys)
 	else
 		error("Produit sans effet : " .. product.Key)
 	end

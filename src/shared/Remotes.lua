@@ -69,6 +69,10 @@ return {
 	StopTraining = remote("StopTraining"),
 	-- Serveur -> tous : ("Swing" | "Hit", player: Player, weaponId: string) geste d'une arme / impact sur une victime.
 	WeaponFx = remote("WeaponFx"),
+	-- Client -> serveur : () acheter une clé avec l'argent du jeu (prix : Config.GetKeyPrice).
+	BuyKey = remote("BuyKey"),
+	-- Client -> serveur : (base: Model) utiliser une clé sur le portail de cette base fermée (server/LockController).
+	UseKey = remote("UseKey"),
 	-- Serveur -> victime ou tous : (kind: string, thiefName: string, victimName: string, petId: string)
 	-- kind : "Started", "Stolen", "Recovered", "Returned" (à la victime), "Announce" (à tous, vol rare réussi).
 	StealNotice = remote("StealNotice"),
