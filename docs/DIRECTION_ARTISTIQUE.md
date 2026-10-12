@@ -1,0 +1,101 @@
+# Direction artistique — Get Rich Or Get Robbed
+
+Fiche de référence pour toute IA ou personne qui touche au visuel du jeu.
+Référence de **style** : *Steal an Egg* (Roblox, place 107778070777162). On reprend le style, **jamais** les
+modèles, noms, sons, icônes ou menus à l'identique (voir CLAUDE.md).
+
+Sources étudiées le 12 oct. 2026 (dossier local `references/`, exclu de git, ne jamais publier) :
+11 captures en jeu de Chouaib (`references/captures/sae_*.png`), sa vidéo de 83 s (traversée de toutes les zones),
+une vidéo YouTube de 34 min (progression complète), planches d'images dans `references/video_*`.
+
+---
+
+## 1. La règle d'or : tout est en briques à tenons
+
+Le point qui fait 80 % de la ressemblance : **chaque surface porte la texture de tenons Roblox** (les « studs » façon
+LEGO) : sol, murs, clôtures, machines, panneaux, **et même les fenêtres d'interface**.
+
+- Sol : grand damier de 2 tons d'une même couleur + tenons. Cases d'environ 8 à 12 studs.
+- Murs : damier 2 tons + tenons, avec un liseré d'herbe vert vif sur le dessus.
+- Familiers et œufs : **voxels** (petits cubes) recouverts de tenons, contours nets, pas de formes lisses.
+- Interface : texture de tenons en léger relief dans le fond des fenêtres et des cartes.
+
+Aujourd'hui notre `MapGenerator` fait l'inverse : surfaces lisses (`SurfaceType.Smooth`) et matières réalistes
+(Wood, WoodPlanks, Grass, Metal). **À remplacer par du Plastic + texture de tenons + couleurs vives.**
+
+## 2. Palette relevée sur les captures (valeurs approchées)
+
+| Rôle | Couleur | Notes |
+|---|---|---|
+| Herbe, ton 1 / ton 2 | `#98E634` / `#51CC29` | Vert pomme saturé, damier |
+| Mur, ton 1 / ton 2 | `#CA9156` / `#B97D49` | Beige orangé, damier |
+| Clôture bois | `#C87425` | Orange vif, poteaux gris-brun `#8B716A` |
+| Ciel | bleu clair + gros cumulus blancs | Ciel lumineux, jamais gris |
+| Fond des fenêtres | `#323141` | Gris-bleu nuit + tenons |
+| En-tête vert / violet / cyan | `#A3DC0B` / `#A804FC` / `#36CCFE` | Dégradé + 2 rayures diagonales claires |
+| Bouton fermer | rouge vif ~`#E8141A`, X blanc | Carré, contour noir |
+| Bouton « Index » | `#07C7FF` | Cyan |
+| Bouton « Boutique » | vert vif ~`#5BE51E` | |
+| Boutons ronds à droite | `#F7494C` rouge, `#F3A646` orange | Carrés arrondis, icône blanche |
+| Bouton prix / acheter | `#60FE03` | Vert fluo, texte blanc contour noir |
+| Cartes par rareté | gris → `#1AFA4D` vert → `#016DFD` bleu → `#D50BFA` violet → `#F9DD00` or | Fond en **rayons de soleil** (sunburst) |
+
+Règle : couleurs **pures et saturées**, peu de pastel, pas de marron terne. Le néon est réservé aux effets
+(familiers rares, machines, zones de clic au sol), jamais aux murs ou au sol.
+
+## 3. Interface
+
+- **Police** : grasse, ronde, souvent *italique* pour les chiffres (argent, vitesse, minuteur). Nous avons
+  Luckiest Guy et Fredoka One : garder, ajouter l'italique pour les nombres.
+- **Contour noir épais** sur tout le texte (UIStroke 2 à 3 px) et sur tous les boutons.
+- **Fenêtres** : fond sombre texturé, en-tête coloré (couleur = fonction : vert vente, violet machines/boutiques,
+  cyan collection), bouton X rouge en haut à droite, coins peu arrondis (4 à 6 px), pas d'ombres floues.
+- **HUD** : en bas à gauche, icône + gros chiffre italique (vitesse en bleu, argent en vert). À gauche au milieu,
+  2 gros boutons rectangulaires (Boutique, Index) avec pastille rouge de notification. À droite, boutons carrés
+  colorés. En bas à droite, le minuteur jour/nuit avec une icône lune.
+- **Textes dans le monde** : grosses lettres colorées à contour noir (« VENDRE » rouge, « GRATUIT ! » vert,
+  nom de machine en bleu + compteur « 0/3 »), étiquettes des familiers en 3 lignes : rareté (couleur de rareté),
+  nom (blanc), revenu (vert, « $1.3K/s »).
+- **Annonces** : bandeau centré en haut (« RUN!! » rouge, nom de zone à l'entrée de chaque zone, apparition
+  d'un œuf rare dans tout le serveur), texte coloré par rareté.
+
+## 4. Le monde
+
+- **Structure** : un très long couloir encadré de hauts murs, découpé en **zones à thème** qui s'enchaînent
+  (Neige, Volcan, Océan des abysses, Préhistoire, Cosmique, Cerisiers, Temple des titans, Anges,
+  Forêt enchantée…). Chaque zone change : couleur du sol, matière des murs, décor (coraux, os géants, torii,
+  cascades, cristaux, palmiers, colonnes dorées), et le ciel (étoiles en zone cosmique).
+- **Entrée de zone** : grande arche ou portail + nom de la zone affiché en haut de l'écran.
+- **Bases** : enclos de clôtures en bois orange sur l'herbe, avec une ligne rouge au sol et le texte géant
+  « ZONE SÛRE » peint par terre. Les familiers se baladent librement dedans.
+- **Stations** : tapis de course, machine de fusion, stand de vente (auvent rayé rouge et blanc), boutique
+  (auvent jaune et blanc), coffre gratuit, tableau des scores. Chaque station a un **cercle lumineux au sol**
+  (vert, jaune) qui montre où se placer.
+- **Évolution visible** : le tapis change de modèle à chaque niveau (gris → orange et or → noir et or avec
+  cristaux bleus lumineux). Le joueur *voit* sa progression.
+
+## 5. Familiers et œufs
+
+- **Taille** : beaucoup sont **plus grands que l'avatar**, les plus rares sont gigantesques (2 à 5 fois l'avatar).
+  Les œufs aussi grandissent avec la rareté (« œuf géant »).
+- **Style** : voxels + tenons, couleurs franches, yeux simples, grosses formes lisibles de loin.
+- **Rareté = effets** : rien pour les communs ; à partir d'Épique, aura (fumée violette, flammes, étincelles,
+  ailes lumineuses, halo). Les plus rares sont lisibles à 100 studs.
+- **Œuf porté** : tenu au-dessus de la tête, bandeau « RUN!! », bouton « Drop » rouge en bas.
+
+## 6. Effets et lumière
+
+- Lumière de plein jour, forte, ombres légères. Bloom modéré (les néons « bavent » un peu). Saturation
+  légèrement poussée. La nuit reste claire (bleu nuit, jamais noir).
+- Traînée lumineuse derrière le joueur quand il court (achetable : grise, verte, bleue…).
+- Chiffres qui s'envolent (« +30/pas », « +$28K ») en couleur vive à contour noir.
+- Éclosion : flash blanc, rayons, nuages de particules, apparition du familier en grand.
+
+## 7. Méthode de travail
+
+1. Une zone à la fois : d'abord **une base**, puis le couloir et ses zones, puis l'interface, puis les effets.
+2. Pour chaque zone : capture Studio (outil MCP `screen_capture`) à côté de la capture de référence, corriger
+   jusqu'à ce que les deux se ressemblent.
+3. Modèles : générer avec `generate_mesh` (comme les 14 familiers Sigma/Divins), ou modèles gratuits de la
+   boutique Roblox **sans scripts** (les vérifier et supprimer leurs scripts avant usage).
+4. Performance mobile : texture de tenons partagée, pas de particules sur les communs, limiter les pièces.

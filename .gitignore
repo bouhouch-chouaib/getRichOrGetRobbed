@@ -10,3 +10,5 @@ sourcemap.json
 .aider*
 
 .env
+# Captures de jeux de référence (ne jamais publier)
+/references/
