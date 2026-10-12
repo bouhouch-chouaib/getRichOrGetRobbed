@@ -81,6 +81,19 @@ machine de fusion + boutique physiques dans 4 kiosques entre les bases • écon
 bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptAnchors`) •
 **vol de familiers** pendant la digestion + défense « Reprendre » et annonces (`StealController`, `Config.Steal`, voir GDD) • modèles 3D importés à la bonne taille • nouveaux familiers qui tombent du ciel dans la base (`Celebrate`) + carte de résultats discrète • sons et musique (`client/Sounds`, `Config.Sounds`) • effets de satisfaction : points qui s'envolent, ouverture animée des tirages rares, secousses (`client/Effects`) • tutoriel en 3 étapes, une seule fois (`client/Tutorial`) • anti-triche des lancers (`Config.AntiCheat`, vérifié quand le trou avale l'objet) • vrais modèles 3D des 14 familiers Sigma/Divins (`shared/PetMeshes`, générés dans Studio avec l'outil MCP `generate_mesh`) • boutique Robux : 5 passes + 3 produits, achats sûrs, probabilités affichées (`MonetizationController`, `client/RobuxShop`) • nettoyage avant sortie : sauvegardes v2, Studio séparé (`_studio`), options de test vidées • tableau « LES PLUS RICHES » dans l'arène, top 10 tous serveurs (`LeaderboardController`) + « Argent » trié dans la liste des joueurs • page du jeu préparée (`docs/PAGE_DU_JEU.md`, images `assets/store/`), tirages Robux cachés si `PolicyService` les interdit, 9e joueur renvoyé (8 bases : taille des serveurs à régler à 8) • 12 oct. (retours de la 1re session de jeu) : objet lancé de nouveau ramassable, vol à tout moment, voleur ×0,9 et 60 s, bulle « Voler » créée côté client (`Remotes.StealPet`), 3 armes de PvP (`WeaponController`, `Config.Weapons`) • tirages : familiers pas encore possédés ×5 (`Config.Loot.NewPetWeight`) • tapis et banc façon Steal an Egg (joueur bloqué sur la station, course / développé couché, « +X 👟 / 💪 », `client/TrainingFx`). Les avatars récents ont des articulations `AnimationConstraint` (pas Motor6D) : en tenir compte pour toute animation par code.
 
+## À vérifier en priorité (état au 12 oct. 2026, fin de session Claude)
+
+- **Jamais vus en jeu** (Studio fermé au moment du codage) : les gestes des armes (`client/WeaponFx`, angles réglés au jugé :
+  la claque peut partir du mauvais côté) et la victime qui part en vrille (`InteractionController`, Knockback avec durée de KO).
+- **À tester à 2 joueurs** : vol (bulle client + `Remotes.StealPet`), défense « Reprendre », coups d'armes sur un voleur,
+  victime qui quitte pendant un vol (le voleur gagne : testé seulement avec des joueurs simulés).
+- Vérifiés en jeu (solo) : lancer puis re-ramasser un objet, achat / réapparition des armes, mains exclusives,
+  tapis et banc (blocage, course, développé couché, « +X »), tirages « nouveaux d'abord » (simulation 20 000 tirages).
+- Les **clés** (ouvrir une base fermée) ont été ajoutées puis **retirées** à la demande de Chouaib (commit de retrait 3e71598).
+- Chaque changement ne passe dans le vrai jeu qu'après **Publier** dans Studio puis redémarrage des serveurs.
+- Pistes de Chouaib pour la suite : se rapprocher de la direction artistique de Steal an Egg (map faite de vrais modèles 3D
+  plutôt que générée par `MapGenerator`, effets, interface) ; voir les conseils de passation dans l'historique.
+
 Pousser le code dans Studio sans `rojo serve` : voir la mémoire « Sync Studio sans Rojo » (rbxm + `GetObjects`).
 ⚠️ Si `rojo serve` tourne (port 34872), Rojo écrase ce qu'on modifie directement dans Studio par la version du dossier
 OneDrive : dans ce cas, copier les fichiers dans OneDrive (ou aligner après le push) au lieu de passer par le rbxm.
