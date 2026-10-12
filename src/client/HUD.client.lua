@@ -8,6 +8,7 @@
 -- Les fenêtres sont dans client/ShopMenu, client/IndexMenu et client/FusionMenu (socle client/MenuKit).
 -- Ce script relie tout aux attributs répliqués et aux messages du serveur.
 
+local ContentProvider = game:GetService("ContentProvider")
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -15,6 +16,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
@@ -40,7 +42,7 @@ local numberAttribute = MenuKit.number
 local PHASES = {
 	Feeding = {
 		Title = "NOURRIS LE TROU NOIR !",
-		Clock = "🌙",
+		Clock = "Moon",
 		Next = "Digestion",
 		Hint = if ScreenScale.isTouch()
 			then "Touche RAMASSER sur un objet  •  maintiens LANCER pour viser  •  VOLE les familiers des bases ouvertes !"
@@ -49,7 +51,7 @@ local PHASES = {
 	},
 	Digesting = {
 		Title = "LE TROU NOIR DIGÈRE...",
-		Clock = "☀️",
+		Clock = "Sun",
 		Next = "Repas",
 		Hint = if ScreenScale.isTouch()
 			then "Touche VOLER sur un familier d'une base ouverte  •  ferme ta base pour protéger les tiens !"
@@ -103,9 +105,7 @@ clock.AnchorPoint = Vector2.new(1, 1)
 clock.Position = UDim2.new(1, -16, 1, -10)
 clock.Size = UDim2.fromOffset(300, 80)
 clock.Parent = gui
-local clockIcon = text(clock, "🌙", 46)
-clockIcon.Position = UDim2.fromOffset(0, 22)
-clockIcon.Size = UDim2.fromOffset(60, 56)
+local clockIcon = Icons.image(clock, "Moon", UDim2.fromOffset(62, 62), UDim2.fromOffset(0, 16))
 local clockNext = text(clock, "", 20, WHITE, BODY_FONT)
 clockNext.Position = UDim2.fromOffset(64, 0)
 clockNext.Size = UDim2.new(1, -64, 0, 24)
@@ -141,9 +141,7 @@ menuColumn.Parent = gui
 -- Ligne de stat d'entraînement : icône + « NV 13 » en italique + barre d'XP.
 type StatRow = { label: TextLabel, fill: Frame }
 local function statRow(y: number, icon: string, color: Color3): StatRow
-	local iconLabel = text(statsColumn, icon, 30)
-	iconLabel.Position = UDim2.fromOffset(0, y)
-	iconLabel.Size = UDim2.fromOffset(38, 34)
+	Icons.image(statsColumn, icon, UDim2.fromOffset(42, 42), UDim2.fromOffset(-2, y - 4))
 	local label = UiStyle.number(statsColumn, "", 28, color)
 	label.Position = UDim2.fromOffset(42, y)
 	label.Size = UDim2.new(1, -42, 0, 32)
@@ -162,12 +160,10 @@ local function statRow(y: number, icon: string, color: Color3): StatRow
 	fill.Parent = bar
 	return { label = label, fill = fill }
 end
-local strengthRow = statRow(0, "💪", UiStyle.Colors.Strength)
-local speedRow = statRow(48, "👟", UiStyle.Colors.Speed)
+local strengthRow = statRow(0, "Strength", UiStyle.Colors.Strength)
+local speedRow = statRow(48, "Speed", UiStyle.Colors.Speed)
 
-local moneyIcon = text(statsColumn, "💵", 38)
-moneyIcon.Position = UDim2.fromOffset(0, 100)
-moneyIcon.Size = UDim2.fromOffset(46, 50)
+Icons.image(statsColumn, "Money", UDim2.fromOffset(54, 54), UDim2.fromOffset(-4, 98))
 local moneyLabel = UiStyle.number(statsColumn, "$0", 50, MONEY)
 moneyLabel.Position = UDim2.fromOffset(48, 96)
 moneyLabel.Size = UDim2.new(1, 0, 0, 56)
@@ -182,10 +178,8 @@ incomeLabel.TextXAlignment = Enum.TextXAlignment.Left
 local function menuButton(icon: string, name: string, y: number, color: Color3): (TextButton, TextLabel)
 	local button = UiStyle.button(menuColumn, "", UDim2.fromOffset(210, 70), color, 1)
 	button.Position = UDim2.fromOffset(0, y)
-	local iconLabel = text(button, icon, 36)
-	iconLabel.Position = UDim2.fromOffset(8, 0)
-	iconLabel.Size = UDim2.new(0, 50, 1, 0)
-	iconLabel.ZIndex = 2
+	local iconImage = Icons.image(button, icon, UDim2.fromOffset(62, 62), UDim2.fromOffset(2, 4))
+	iconImage.ZIndex = 2
 	local nameLabel = text(button, name, 32, WHITE, BODY_FONT)
 	nameLabel.Position = UDim2.fromOffset(60, 0)
 	nameLabel.Size = UDim2.new(1, -66, 1, 0)
@@ -194,8 +188,8 @@ local function menuButton(icon: string, name: string, y: number, color: Color3):
 	return button, UiStyle.badge(button)
 end
 
-local shopButton, shopBadge = menuButton("🛒", "Boutique", 0, UiStyle.Colors.Green)
-local indexButton, indexBadge = menuButton("📘", "Index", 88, UiStyle.Colors.Cyan)
+local shopButton, shopBadge = menuButton("Shop", "Boutique", 0, UiStyle.Colors.Green)
+local indexButton, indexBadge = menuButton("Index", "Index", 88, UiStyle.Colors.Cyan)
 
 ----------------------------------------------------------------------
 -- Fenêtres
@@ -292,7 +286,7 @@ local function updatePhase()
 	local carryingUntil = player:GetAttribute("CarryingUntil")
 	if carryingPet ~= nil and type(carryingUntil) == "number" then
 		local left = math.max(0, math.ceil(carryingUntil - Workspace:GetServerTimeNow()))
-		hintLabel.Text = string.format("🚨 RAMÈNE %s DANS TA BASE !  ⏱ %d s", petName(carryingPet), left)
+		hintLabel.Text = string.format("RAMÈNE %s DANS TA BASE !  %d s", petName(carryingPet), left)
 		hintLabel.TextColor3 = UiStyle.Colors.Gold
 	else
 		hintLabel.Text = phase.Hint
@@ -301,7 +295,7 @@ local function updatePhase()
 	pointsPill.Visible = stateName == "Feeding" and not rewardCard.Visible
 
 	local seconds = if type(remaining) == "number" then math.max(0, remaining) else 0
-	clockIcon.Text = phase.Clock
+	clockIcon.Image = Icons.id(phase.Clock) or ""
 	clockNext.Text = phase.Next
 	clockLabel.Text = if seconds >= 60 then string.format("dans %d:%02d", seconds // 60, seconds % 60) else string.format("dans %d s", seconds)
 	-- Les 10 dernières secondes : en rouge.
@@ -372,7 +366,7 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 	local pet = petName(petId)
 	-- Les noms de familiers ont parfois un article ("Le Capybara Zen"), parfois non ("Chat") : tournures neutres.
 	if kind == "Started" then
-		Toast.show(string.format("🚨 VOL EN COURS : %s ! RATTRAPE %s ET %s !", pet, thief, RECOVER_KEY), Color3.fromRGB(255, 90, 90))
+		Toast.show(string.format("VOL EN COURS : %s ! RATTRAPE %s ET %s !", pet, thief, RECOVER_KEY), Color3.fromRGB(255, 90, 90))
 	elseif kind == "Stolen" then
 		Toast.show(string.format("VOLÉ PAR %s : %s !", thief, pet), Color3.fromRGB(255, 90, 90))
 	elseif kind == "Recovered" then
@@ -382,7 +376,7 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 	elseif kind == "Announce" then
 		local entry = PetCatalog.ById[petId]
 		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
-		Toast.show(string.format("🚨 %s A VOLÉ %s À %s !", thief, pet, TextFormat.upper(victimName)), if rarity then rarity.Color else WHITE)
+		Toast.show(string.format("%s A VOLÉ %s À %s !", thief, pet, TextFormat.upper(victimName)), if rarity then rarity.Color else WHITE)
 	end
 end)
 
@@ -569,3 +563,10 @@ PetModelBuilder.MeshesReady:Connect(index.rebuildViewports)
 
 updatePhase()
 updateStats()
+
+-- Les icônes (shared/Icons) sont téléchargées tout de suite : les menus ne s'ouvrent pas avec des trous.
+task.spawn(function()
+	pcall(function()
+		ContentProvider:PreloadAsync(Icons.all())
+	end)
+end)

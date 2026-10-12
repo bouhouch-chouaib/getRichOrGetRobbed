@@ -37,13 +37,34 @@ local function onIncrease(name: string, sound: string)
 	end)
 end
 
--- Musique de la phase en cours.
+-- Musique : la playlist du palier du joueur (attribut "Tier", 1 tant que les paliers n'existent pas).
 local function updateMusic()
-	local state = ReplicatedStorage:GetAttribute("GameState")
-	Sounds.setMusic(if state == "Digesting" then "Digesting" else "Feeding")
+	local tier = player:GetAttribute("Tier")
+	Sounds.setPlaylist(if type(tier) == "number" then tier else 1)
 end
-ReplicatedStorage:GetAttributeChangedSignal("GameState"):Connect(updateMusic)
+player:GetAttributeChangedSignal("Tier"):Connect(updateMusic)
 updateMusic()
+
+-- Changement de phase : petit jingle (la musique baisse pendant ce temps).
+local lastState = ReplicatedStorage:GetAttribute("GameState")
+ReplicatedStorage:GetAttributeChangedSignal("GameState"):Connect(function()
+	local state = ReplicatedStorage:GetAttribute("GameState")
+	if state ~= lastState and ready() then
+		Sounds.duck(4)
+		Sounds.play(if state == "Digesting" then "PhaseDigesting" else "PhaseFeeding")
+	end
+	lastState = state
+end)
+
+-- Les 5 dernières secondes d'une phase : tic à chaque seconde.
+local lastTick = -1
+ReplicatedStorage:GetAttributeChangedSignal("TimeRemaining"):Connect(function()
+	local remaining = ReplicatedStorage:GetAttribute("TimeRemaining")
+	if type(remaining) == "number" and remaining >= 1 and remaining <= 5 and remaining ~= lastTick then
+		lastTick = remaining
+		Sounds.play("Tick")
+	end
+end)
 
 -- Ramasser, marquer des points, être éjecté par le dôme.
 Remotes.ItemGrabbed.OnClientEvent:Connect(function()
@@ -81,7 +102,10 @@ Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, pulls: num
 	end
 end)
 Remotes.FusionResult.OnClientEvent:Connect(function()
-	Sounds.play("Rewards")
+	Sounds.play("FusionDone")
+end)
+Remotes.IndexClaimed.OnClientEvent:Connect(function()
+	Sounds.play("Coins")
 end)
 Remotes.Announcement.OnClientEvent:Connect(function()
 	Sounds.play("RareDrop")
@@ -89,7 +113,18 @@ end)
 
 -- Boutique et entraînement.
 for _, item in ipairs(Config.Shop) do
-	onIncrease("Upgrade_" .. item.Id, "Purchase")
+	onIncrease("Upgrade_" .. item.Id, "Cash")
+	-- Tapis / banc : nouveau modèle débloqué (niveaux 6, 11, 16, 21) -> jingle en plus.
+	if item.Id == "Treadmill" or item.Id == "Bench" then
+		local last = numberAttribute("Upgrade_" .. item.Id)
+		player:GetAttributeChangedSignal("Upgrade_" .. item.Id):Connect(function()
+			local level = numberAttribute("Upgrade_" .. item.Id)
+			if level > last and level > 1 and (level - 1) % Config.Training.LevelsPerTier == 0 and ready() then
+				Sounds.play("ModelUnlock")
+			end
+			last = level
+		end)
+	end
 end
 onIncrease("SpeedLevel", "LevelUp")
 onIncrease("StrengthLevel", "LevelUp")

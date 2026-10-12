@@ -15,6 +15,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Joints = require(script.Parent.Joints)
 local ScreenScale = require(script.Parent.ScreenScale)
@@ -160,21 +161,25 @@ local function popup(target: Player)
 	billboard.LightInfluence = 0
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
-	label.Size = UDim2.fromScale(1, 1)
+	label.Size = UDim2.fromScale(0.68, 1)
 	label.Font = Enum.Font.LuckiestGuy
 	label.TextScaled = true
-	label.Text = "+" .. formatGain(gain) .. (if isSpeed then " 👟" else " 💪")
+	label.TextXAlignment = Enum.TextXAlignment.Right
+	label.Text = "+" .. formatGain(gain)
 	label.TextColor3 = if isSpeed then Color3.fromRGB(120, 230, 255) else Color3.fromRGB(255, 170, 60)
 	local stroke = Instance.new("UIStroke")
 	stroke.Thickness = 2.5
 	stroke.Parent = label
 	label.Parent = billboard
+	-- Icône de la stat (basket ou haltère) à droite du nombre.
+	local icon = Icons.image(billboard, if isSpeed then "Speed" else "Strength", UDim2.fromScale(0.3, 1), UDim2.fromScale(0.7, 0))
 	billboard.Parent = gui
 
 	local info = TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	TweenService:Create(billboard, info, { StudsOffsetWorldSpace = billboard.StudsOffsetWorldSpace + Vector3.new(0, 3.5, 0) }):Play()
 	TweenService:Create(label, info, { TextTransparency = 1 }):Play()
 	TweenService:Create(stroke, info, { Transparency = 1 }):Play()
+	TweenService:Create(icon, info, { ImageTransparency = 1 }):Play()
 	task.delay(1.2, function()
 		billboard:Destroy()
 	end)

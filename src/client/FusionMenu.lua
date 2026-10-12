@@ -13,7 +13,9 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local MenuKit = require(script.Parent.MenuKit)
+local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
 local UiStyle = require(script.Parent.UiStyle)
 
@@ -83,7 +85,7 @@ function FusionMenu.create(gui: Instance): Fusion
 	local line1 = UiStyle.text(content, string.format("Mets %d familiers de la même rareté dans la machine", COUNT), 22, WHITE, UiStyle.BODY_FONT)
 	line1.Size = UDim2.new(1, 0, 0, 26)
 	line1.ZIndex = 3
-	local line2 = UiStyle.text(content, "Tu obtiens un familier de la rareté au-dessus 🍀 !", 20, WHITE)
+	local line2 = UiStyle.text(content, "Tu obtiens un familier de la rareté au-dessus !", 20, WHITE)
 	line2.FontFace = UiStyle.NUMBER_FONT
 	line2.Position = UDim2.fromOffset(0, 26)
 	line2.Size = UDim2.new(1, 0, 0, 24)
@@ -329,9 +331,15 @@ function FusionMenu.create(gui: Instance): Fusion
 	help.Position = UDim2.new(0, -14, 0.5, 0)
 	help.BackgroundColor3 = UiStyle.Colors.WindowBody
 	help.Visible = false
-	local helpText = UiStyle.text(help, string.format("%d x 🐾  ≈  ⭐", COUNT), 44, WHITE)
-	helpText.Position = UDim2.fromOffset(0, 18)
-	helpText.Size = UDim2.new(1, 0, 0, 60)
+	-- « 5 x [patte] = [étoile] »
+	local helpCount = UiStyle.text(help, COUNT .. " x", 40, WHITE)
+	helpCount.Position = UDim2.fromOffset(10, 18)
+	helpCount.Size = UDim2.fromOffset(70, 64)
+	Icons.image(help, "Paw", UDim2.fromOffset(64, 64), UDim2.fromOffset(78, 18))
+	local helpEquals = UiStyle.text(help, "=", 44, WHITE)
+	helpEquals.Position = UDim2.fromOffset(142, 18)
+	helpEquals.Size = UDim2.fromOffset(30, 64)
+	Icons.image(help, "Sparkle", UDim2.fromOffset(70, 70), UDim2.fromOffset(172, 14))
 	local helpSub = UiStyle.text(help, "5 de la même rareté = 1 plus rare !", 18, WHITE, UiStyle.BODY_FONT)
 	helpSub.Position = UDim2.fromOffset(8, 84)
 	helpSub.Size = UDim2.new(1, -16, 0, 44)
@@ -417,6 +425,7 @@ function FusionMenu.create(gui: Instance): Fusion
 		local cost = Config.Fusion.Costs[rarityIndex] or 0
 		if MenuKit.number("Money") < cost then
 			Toast.show("PAS ASSEZ D'ARGENT : " .. NumberFormat.money(cost), UiStyle.Colors.Red)
+			Sounds.play("Error")
 			return
 		end
 		local chosen: { [string]: number } = {}
@@ -447,6 +456,7 @@ function FusionMenu.create(gui: Instance): Fusion
 		end
 		if not lock then
 			Toast.show(string.format("IL TE FAUT %d FAMILIERS LIBRES D'UNE MÊME RARETÉ !", COUNT), UiStyle.Colors.Red)
+			Sounds.play("Error")
 			return
 		end
 		local bucket = PetCatalog.ByRarity[Config.Rarities[lock].Id] or {}

@@ -12,6 +12,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Joints = require(script.Parent.Joints)
 
@@ -221,15 +222,10 @@ local function dizzy(head: BasePart, duration: number)
 	billboard.StudsOffsetWorldSpace = Vector3.new(0, 1.8, 0)
 	billboard.LightInfluence = 0
 	billboard.MaxDistance = 120
-	local stars: { TextLabel } = {}
+	local stars: { ImageLabel } = {}
 	for index = 1, 3 do
-		local star = Instance.new("TextLabel")
+		local star = Icons.image(billboard, "Sparkle", UDim2.fromOffset(if index == 2 then 30 else 24, if index == 2 then 30 else 24))
 		star.AnchorPoint = Vector2.new(0.5, 0.5)
-		star.Size = UDim2.fromOffset(26, 26)
-		star.BackgroundTransparency = 1
-		star.TextScaled = true
-		star.Text = if index == 2 then "💫" else "⭐"
-		star.Parent = billboard
 		stars[index] = star
 	end
 	billboard.Parent = effectsGui

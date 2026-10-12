@@ -2,7 +2,8 @@
 -- Sounds : module de sons centralisé (côté client). Les Id et volumes sont dans Config.Sounds.
 --   Sounds.play("Pickup")                      -> son "2D" (entendu seulement par ce joueur, partout)
 --   Sounds.playAt("Consume", position)         -> son "3D" (entendu par ce joueur s'il est près de l'endroit)
---   Sounds.setMusic("Feeding" | "Digesting")  -> fondu vers la musique de la phase
+--   Sounds.setPlaylist(palier)                 -> musiques du palier, mélangées, enchaînées en fondu
+--   Sounds.duck(secondes)                      -> baisse la musique un moment (pendant un jingle)
 -- Deux groupes de volume (SoundGroup) : Music et Effects.
 
 local ContentProvider = game:GetService("ContentProvider")
@@ -80,59 +81,114 @@ function Sounds.playAt(name: string, position: Vector3)
 	Debris:AddItem(emitter, lifetime(sound))
 end
 
--- Musiques : une piste en boucle par phase, fondu de l'une à l'autre.
-local tracks: { [string]: Sound } = {}
-for name, def in pairs(SOUNDS.Music) do
-	local track = Instance.new("Sound")
-	track.Name = "Music_" .. name
-	track.SoundId = "rbxassetid://" .. def.Id
-	track.Looped = true
-	track.Volume = 0
-	track:SetAttribute("TargetVolume", def.Volume or 1)
-	track.SoundGroup = musicGroup
-	track.Parent = musicGroup
-	tracks[name] = track
-end
-
 -- Préchargement en arrière-plan : le premier son joué ne sera pas en retard.
 task.spawn(function()
 	local all: { Instance } = {}
 	for _, sound in pairs(templates) do
 		table.insert(all, sound)
 	end
-	for _, track in pairs(tracks) do
-		table.insert(all, track)
-	end
 	pcall(function()
 		ContentProvider:PreloadAsync(all)
 	end)
 end)
 
-local currentMusic: string? = nil
+----------------------------------------------------------------------
+-- Musique : playlist du palier (Config.Sounds.Playlists), morceaux mélangés enchaînés en fondu
+----------------------------------------------------------------------
 
-function Sounds.setMusic(name: string)
-	if name == currentMusic then
+local playlistTier = 0
+local playlistToken = 0
+local currentTrack: Sound? = nil
+
+-- Le groupe Music porte le volume général : on le baisse un moment pendant un jingle.
+local duckToken = 0
+function Sounds.duck(seconds: number)
+	duckToken += 1
+	local token = duckToken
+	TweenService:Create(musicGroup, TweenInfo.new(0.3), { Volume = SOUNDS.MusicVolume * SOUNDS.MusicDuck }):Play()
+	task.delay(seconds, function()
+		if token == duckToken then
+			TweenService:Create(musicGroup, TweenInfo.new(1), { Volume = SOUNDS.MusicVolume }):Play()
+		end
+	end)
+end
+
+local function fadeOut(track: Sound)
+	local tween = TweenService:Create(track, TweenInfo.new(SOUNDS.MusicFade), { Volume = 0 })
+	tween.Completed:Once(function()
+		track:Destroy()
+	end)
+	tween:Play()
+end
+
+local function shuffled(list: { SoundDef }): { SoundDef }
+	local copy = table.clone(list)
+	for index = #copy, 2, -1 do
+		local other = math.random(1, index)
+		copy[index], copy[other] = copy[other], copy[index]
+	end
+	return copy
+end
+
+type SoundDef = { Id: number, Volume: number?, Pitch: number? }
+
+-- Lance la playlist d'un palier (sans effet si c'est déjà elle). Un palier sans liste reprend celle du palier 1.
+function Sounds.setPlaylist(tier: number)
+	local list = SOUNDS.Playlists[tier] or SOUNDS.Playlists[1]
+	if not list or #list == 0 then
 		return
 	end
-	currentMusic = name
-	local fade = TweenInfo.new(SOUNDS.MusicFade)
-	for trackName, track in pairs(tracks) do
-		if trackName == name then
-			if not track.IsPlaying then
-				track:Play()
-			end
-			local target = track:GetAttribute("TargetVolume")
-			TweenService:Create(track, fade, { Volume = if type(target) == "number" then target else 1 }):Play()
-		elseif track.IsPlaying then
-			local tween = TweenService:Create(track, fade, { Volume = 0 })
-			tween.Completed:Once(function()
-				if currentMusic ~= trackName then
-					track:Pause() -- reprendra où elle en était
-				end
-			end)
-			tween:Play()
-		end
+	local effective = if SOUNDS.Playlists[tier] then tier else 1
+	if effective == playlistTier then
+		return
 	end
+	playlistTier = effective
+	playlistToken += 1
+	local token = playlistToken
+	if currentTrack then
+		fadeOut(currentTrack)
+		currentTrack = nil
+	end
+	task.spawn(function()
+		local queue: { SoundDef } = {}
+		local last: number? = nil
+		while token == playlistToken do
+			if #queue == 0 then
+				queue = shuffled(list)
+				-- Pas deux fois le même morceau d'affilée quand la liste recommence.
+				if #queue > 1 and queue[1].Id == last then
+					queue[1], queue[#queue] = queue[#queue], queue[1]
+				end
+			end
+			local def = table.remove(queue, 1) :: SoundDef
+			last = def.Id
+			local track = Instance.new("Sound")
+			track.Name = "Music"
+			track.SoundId = "rbxassetid://" .. def.Id
+			track.Volume = 0
+			track.SoundGroup = musicGroup
+			track.Parent = musicGroup
+			currentTrack = track
+			track:Play()
+			TweenService:Create(track, TweenInfo.new(SOUNDS.MusicFade), { Volume = def.Volume or 1 }):Play()
+			-- Attend la fin du morceau (moins le fondu) pour enchaîner.
+			local started = os.clock()
+			while token == playlistToken and track.Parent do
+				local length = track.TimeLength
+				if length > 0 and (track.TimePosition >= length - SOUNDS.MusicFade or not track.IsPlaying) then
+					break
+				end
+				if length == 0 and os.clock() - started > 20 then
+					break -- morceau qui ne se charge pas : on passe au suivant
+				end
+				task.wait(0.25)
+			end
+			if token ~= playlistToken then
+				return
+			end
+			fadeOut(track)
+		end
+	end)
 end
 
 return Sounds

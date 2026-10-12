@@ -174,7 +174,7 @@ Config.Pets = {
 export type MonetizationItem = {
 	Key: string,
 	Id: number,
-	Icon: string,
+	Icon: string, -- nom d'une icône de shared/Icons
 	Name: string,
 	Description: string,
 	Price: number,
@@ -183,16 +183,16 @@ export type MonetizationItem = {
 
 Config.Monetization = {
 	GamePasses = {
-		{ Key = "DoubleMoney", Id = 2025998871, Icon = "💰", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
-		{ Key = "VIP", Id = 2026292822, Icon = "👑", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
-		{ Key = "ExtraBackpack", Id = 2025176879, Icon = "🎒", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
-		{ Key = "EquipPlus2", Id = 2025296892, Icon = "🐾", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
-		{ Key = "LuckyLuck", Id = 2026568802, Icon = "🍀", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
+		{ Key = "DoubleMoney", Id = 2025998871, Icon = "Money", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
+		{ Key = "VIP", Id = 2026292822, Icon = "Crown", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
+		{ Key = "ExtraBackpack", Id = 2025176879, Icon = "Backpack", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
+		{ Key = "EquipPlus2", Id = 2025296892, Icon = "Paw", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
+		{ Key = "LuckyLuck", Id = 2026568802, Icon = "Clover", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
 	} :: { MonetizationItem },
 	Products = {
-		{ Key = "ServerLuck", Id = 3717917081, Icon = "🌟", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
-		{ Key = "Pull1", Id = 3717917143, Icon = "🎲", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
-		{ Key = "Pull10", Id = 3717917239, Icon = "🎰", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
+		{ Key = "ServerLuck", Id = 3717917081, Icon = "Sparkle", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
+		{ Key = "Pull1", Id = 3717917143, Icon = "Dice", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
+		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,
 	VipMoneyMultiplier = 1.25,
@@ -287,11 +287,20 @@ export type SoundDef = { Id: number, Volume: number?, Pitch: number? }
 Config.Sounds = {
 	MusicVolume = 0.3,
 	EffectsVolume = 0.7,
-	MusicFade = 2, -- secondes de fondu entre les deux musiques
-	Music = {
-		Feeding = { Id = 126187826682373 }, -- "Pocket Band" (DistroKid)
-		Digesting = { Id = 9042311443 }, -- "Devil's Toy - Soft Mix" (APM) : ambiance malicieuse, le moment du vol
-	} :: { [string]: SoundDef },
+	MusicFade = 2, -- secondes de fondu entre deux morceaux
+	-- Musique par palier (attribut "Tier" du joueur, 1 tant que les paliers n'existent pas) : les morceaux du palier
+	-- s'enchaînent dans un ordre mélangé, en fondu. Palier 1 : morceaux calmes (bibliothèque APM sous licence Roblox).
+	-- Les paliers suivants seront ajoutés avec leurs mondes (Playlists[2], [3]...) ; sans liste, on garde le palier 1.
+	Playlists = {
+		{
+			{ Id = 1839578771, Volume = 0.8 }, -- "Charming View Ukulele" (APM), 64 s
+			{ Id = 1839580471, Volume = 0.8 }, -- "Happy Forever Ukulele" (APM), 65 s
+			{ Id = 1839727388, Volume = 0.8 }, -- "Gardening" (APM), 95 s
+			{ Id = 1839453894, Volume = 0.8 }, -- "So Kind" (APM), 68 s
+			{ Id = 1845913205, Volume = 0.8 }, -- "Walking On The Beach" (APM, ukulélé hawaïen), 111 s
+		},
+	} :: { { SoundDef } },
+	MusicDuck = 0.35, -- pendant un petit jingle (changement de phase), la musique descend à 35 %
 	Effects = {
 		Pickup = { Id = 9119668978, Volume = 0.8 }, -- pop cartoon
 		Throw = { Id = 9120711836, Volume = 0.6 }, -- whoosh
@@ -310,12 +319,23 @@ Config.Sounds = {
 		LevelUp = { Id = 1844016113, Volume = 0.6 }, -- jingle : niveau de Vitesse / Force
 		Knockback = { Id = 9113564868, Volume = 0.8 }, -- paf ! : éjecté par le dôme
 		Effort = { Id = 9120416707, Volume = 0.7 }, -- grognement d'effort au banc de muscu (Pro Sound Effects)
+		-- Interface (client/UiStyle, client/MenuKit) et retours d'action.
+		UiClick = { Id = 9119668978, Volume = 0.45, Pitch = 1.35 }, -- petit « pop » aigu à chaque bouton (Pro Sound Effects)
+		WindowOpen = { Id = 9120711836, Volume = 0.35, Pitch = 1.5 }, -- whoosh léger à l'ouverture d'une fenêtre
+		Error = { Id = 9119668978, Volume = 0.6, Pitch = 0.55 }, -- pop grave : pas assez d'argent, impossible
+		Cash = { Id = 9113728756, Volume = 0.6 }, -- caisse enregistreuse : achat d'une amélioration
+		Coins = { Id = 9113704038, Volume = 0.7 }, -- pluie de pièces : récompense d'Index, gros gain
+		Tick = { Id = 9118138365, Volume = 0.5 }, -- tic : 5 dernières secondes d'une phase
+		FusionDone = { Id = 1841209502, Volume = 0.7 }, -- scintillement : la fusion a réussi
+		ModelUnlock = { Id = 9043151109, Volume = 0.6 }, -- jingle : nouveau modèle de tapis / banc
+		PhaseFeeding = { Id = 1841324020, Volume = 0.6 }, -- jingle : le trou noir a faim
+		PhaseDigesting = { Id = 9045119921, Volume = 0.6 }, -- jingle malicieux : il digère, le moment du vol
 	} :: { [string]: SoundDef },
 }
 
 export type ShopItem = {
 	Id: string,
-	Icon: string,
+	Icon: string, -- nom d'une icône de shared/Icons
 	Name: string,
 	Description: string,
 	MaxLevel: number,
@@ -325,15 +345,15 @@ export type ShopItem = {
 
 -- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 5 modèles (bois, acier, or, cristal, cosmique) : chaque niveau entraîne plus vite.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
-	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
-	{ Id = "ItemQuality", Icon = "🍀", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
-	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
-	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
+	{ Id = "Treadmill", Icon = "Treadmill", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 5 modèles (bois, acier, or, cristal, cosmique) : chaque niveau entraîne plus vite.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
+	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
+	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
+	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
+	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2, 3).
-	{ Id = "WeaponSlap", Icon = "🖐", Name = "Gant à claques", Description = "ARME : une claque qui repousse un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },
-	{ Id = "WeaponPan", Icon = "🍳", Name = "Poêle cosmique", Description = "ARME : un gros coup de poêle. Repousse bien plus loin et assomme plus longtemps.", MaxLevel = 1, BasePrice = 250e3, PriceGrowth = 1 },
-	{ Id = "WeaponShockwave", Icon = "💥", Name = "Bâton à ondes", Description = "ARME : une onde de choc qui repousse TOUS les joueurs autour de toi (recharge 8 s).", MaxLevel = 1, BasePrice = 20e6, PriceGrowth = 1 },
+	{ Id = "WeaponSlap", Icon = "Glove", Name = "Gant à claques", Description = "ARME : une claque qui repousse un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },
+	{ Id = "WeaponPan", Icon = "Pan", Name = "Poêle cosmique", Description = "ARME : un gros coup de poêle. Repousse bien plus loin et assomme plus longtemps.", MaxLevel = 1, BasePrice = 250e3, PriceGrowth = 1 },
+	{ Id = "WeaponShockwave", Icon = "Staff", Name = "Bâton à ondes", Description = "ARME : une onde de choc qui repousse TOUS les joueurs autour de toi (recharge 8 s).", MaxLevel = 1, BasePrice = 20e6, PriceGrowth = 1 },
 } :: { ShopItem }
 
 export type WeaponDef = {

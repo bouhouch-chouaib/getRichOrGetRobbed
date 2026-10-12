@@ -192,9 +192,13 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 ## Sons et musique
 
 - Tout est côté client. `client/Sounds` (module) : `play(nom)` (son 2D, pour soi), `playAt(nom, position)` (son 3D, Attachment
-  dans Terrain, entendu jusqu'à ~140 studs), `setMusic("Feeding" | "Digesting")` (fondu de 2 s). Deux SoundGroups : Music (0,3)
-  et Effects (0,7). Sons préchargés au démarrage.
-- `client/SoundController` branche les sons sur le jeu sans rien envoyer au serveur : phase (musique), `ItemGrabbed`, `RoundScore`,
+  dans Terrain, entendu jusqu'à ~140 studs), `setPlaylist(palier)` (13 oct. : une playlist par palier, `Config.Sounds.Playlists`,
+  morceaux mélangés enchaînés en fondu de 2 s ; palier 1 = 5 morceaux calmes APM ; attribut joueur `Tier`, 1 par défaut),
+  `duck(s)` (baisse la musique pendant un jingle). Deux SoundGroups : Music (0,3) et Effects (0,7). Sons préchargés.
+- Interface : clic sur tout bouton `UiStyle` (`UiClick`), ouverture de fenêtre (`WindowOpen`), erreur / pas assez d'argent
+  (`Error`), achat d'amélioration (`Cash`), récompense d'Index (`Coins`), fusion (`FusionDone`), nouveau modèle de tapis / banc
+  (`ModelUnlock`), jingle à chaque changement de phase (`PhaseFeeding` / `PhaseDigesting`), tic les 5 dernières secondes (`Tick`).
+- `client/SoundController` branche les sons sur le jeu sans rien envoyer au serveur : palier (musique), phase (jingle), `ItemGrabbed`, `RoundScore`,
   `Knockback`, objet `Consumed` (3D au trou), `RewardsGranted`, `FusionResult`, `Announcement`, `Upgrade_*`, niveaux, vol
   (`CarryingPet`, `StealResult`, `StealNotice`), base `Locked` (3D au bouton). Lancer : `InteractionController` ; atterrissage
   d'un familier : `BasePets`.
@@ -269,6 +273,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
     précédente est repris directement (jamais celui d'un vrai serveur).
 - `src/client` → `StarterPlayerScripts.Client`
   - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
+  - Icônes : `shared/Icons` (27 icônes 2D cartoon à gros contour noir, dessinées par `tools/icons/make_icons.py`, PNG dans
+    `assets/icons`, envoyées sur Roblox ; `Icons.image(parent, nom)`). Plus aucun émoji dans l'interface ni le décor.
   - `HUD` (13 oct., disposition de la référence) : boutons Boutique / Index à gauche avec pastilles, Force / Vitesse /
     argent en chiffres italiques en bas à gauche, horloge de manche en bas à droite, bandeau de phase animé, points.
   - Menus reconstruits façon Steal an Egg : `UiStyle` (fenêtres à tenons, en-tête coloré à rayures, croix rouge, cartes

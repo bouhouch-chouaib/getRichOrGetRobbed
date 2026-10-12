@@ -12,6 +12,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
+local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
 
 local player = Players.LocalPlayer
@@ -78,6 +79,7 @@ local function attachPrompts()
 				local money = player:GetAttribute("Money")
 				if price and type(money) == "number" and money < price then
 					Toast.show("Pas assez d'argent : " .. NumberFormat.money(price), Color3.fromRGB(255, 90, 90))
+					Sounds.play("Error")
 					return
 				end
 				Remotes.BuyUpgrade:FireServer(id)

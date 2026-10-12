@@ -24,6 +24,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 
 local MapGenerator = {}
 
@@ -510,7 +511,7 @@ local function createGlowCircle(cframe: CFrame, diameter: number, color: Color3,
 end
 
 -- Grand panneau flottant au-dessus d'un bâtiment (boutique, fusion).
-local function createTitleSign(adornee: BasePart, title: string, color: Color3, height: number)
+local function createTitleSign(adornee: BasePart, title: string, color: Color3, height: number, icon: string?)
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "TitleSign"
 	sign.Adornee = adornee
@@ -524,6 +525,12 @@ local function createTitleSign(adornee: BasePart, title: string, color: Color3, 
 	label.Text = title
 	styleSignText(label, color)
 	label.Parent = sign
+	if icon then
+		-- Icône à gauche du texte, le texte se décale d'autant.
+		label.Position = UDim2.fromScale(0.24, 0)
+		label.Size = UDim2.fromScale(0.76, 1)
+		Icons.image(sign, icon, UDim2.fromScale(0.24, 1))
+	end
 	sign.Parent = adornee
 end
 
@@ -574,7 +581,7 @@ local function createShop(cframe: CFrame, parent: Instance)
 	local hitbox = model:FindFirstChild("Hitbox") :: BasePart
 	hitbox.Transparency = 1
 	addWindowPrompt(hitbox, "Boutique", "Shop")
-	createTitleSign(counter, "🛒 BOUTIQUE", Color3.fromRGB(255, 210, 60), 9.5)
+	createTitleSign(counter, "BOUTIQUE", Color3.fromRGB(255, 210, 60), 9.5, "Shop")
 	model.Parent = parent
 end
 
@@ -642,7 +649,7 @@ local function createFusionMachine(cframe: CFrame, parent: Instance)
 	end
 	addWindowPrompt(console, "Machine de fusion", "Fusion")
 	-- Plus haut que BOUTIQUE : vus de biais, les deux panneaux ne se chevauchent pas.
-	createTitleSign(console, "🧪 FUSION", Color3.fromRGB(220, 140, 255), 14)
+	createTitleSign(console, "FUSION", Color3.fromRGB(220, 140, 255), 14, "Fusion")
 	model.Parent = parent
 end
 

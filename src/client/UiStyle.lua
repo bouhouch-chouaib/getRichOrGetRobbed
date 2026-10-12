@@ -8,6 +8,8 @@
 
 local TweenService = game:GetService("TweenService")
 
+local Sounds = require(script.Parent.Sounds)
+
 local UiStyle = {}
 
 UiStyle.TITLE_FONT = Enum.Font.LuckiestGuy
@@ -94,7 +96,7 @@ function UiStyle.number(parent: Instance, value: string, size: number, color: Co
 	return label
 end
 
--- Petit effet "rebond" au survol et au clic.
+-- Petit effet "rebond" au survol et au clic, avec le son de clic.
 function UiStyle.bounce(button: GuiButton)
 	local scale = Instance.new("UIScale")
 	scale.Parent = button
@@ -106,6 +108,9 @@ function UiStyle.bounce(button: GuiButton)
 	end)
 	button.MouseButton1Down:Connect(function()
 		TweenService:Create(scale, TweenInfo.new(0.06), { Scale = 0.92 }):Play()
+	end)
+	button.Activated:Connect(function()
+		Sounds.play("UiClick")
 	end)
 	button.MouseButton1Up:Connect(function()
 		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1.06 }):Play()

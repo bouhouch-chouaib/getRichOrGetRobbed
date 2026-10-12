@@ -18,6 +18,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local Perks = require(ReplicatedStorage.Shared.Perks)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local MenuKit = require(script.Parent.MenuKit)
 local ScreenScale = require(script.Parent.ScreenScale)
@@ -60,9 +61,8 @@ openButton.Name = "OpenRobuxShop"
 openButton.AnchorPoint = Vector2.new(1, 0.5)
 openButton.Position = UDim2.new(1, -14, 0.42, 0)
 do
-	local star = UiStyle.text(openButton, "⭐", 40)
-	star.Size = UDim2.new(1, 0, 0.62, 0)
-	star.ZIndex = 2
+	local gem = Icons.image(openButton, "Robux", UDim2.new(0.7, 0, 0.6, 0), UDim2.fromScale(0.15, 0.02))
+	gem.ZIndex = 2
 	local label = UiStyle.text(openButton, "Robux", 22, WHITE, BODY_FONT)
 	label.Position = UDim2.fromScale(0, 0.58)
 	label.Size = UDim2.new(1, 0, 0.38, 0)
@@ -157,9 +157,7 @@ local function rowFor(item: Config.MonetizationItem, isPass: boolean, order: num
 	local kind = UiStyle.text(card, if isPass then "Pour toujours" else "Achat", 18, WHITE, BODY_FONT)
 	kind.Position = UDim2.fromOffset(6, 40)
 	kind.Size = UDim2.new(1, -12, 0, 22)
-	local icon = UiStyle.text(card, item.Icon, 90)
-	icon.Position = UDim2.fromOffset(0, 66)
-	icon.Size = UDim2.new(1, 0, 0, 120)
+	Icons.image(card, item.Icon, UDim2.new(1, -60, 0, 116), UDim2.fromOffset(30, 66))
 	local descriptionBox = Instance.new("Frame")
 	descriptionBox.BackgroundColor3 = Color3.new(0, 0, 0)
 	descriptionBox.BackgroundTransparency = 0.55
@@ -302,7 +300,7 @@ end
 ReplicatedStorage:GetAttributeChangedSignal("LuckBoostAt"):Connect(function()
 	local by = ReplicatedStorage:GetAttribute("LuckBoostBy")
 	Sounds.play("RareDrop")
-	Toast.show(string.format("🌟 %s OFFRE UN BOOST DE CHANCE x2 À TOUT LE SERVEUR !", TextFormat.upper(tostring(by))), Color3.fromRGB(150, 255, 120))
+	Toast.show(string.format("%s OFFRE UN BOOST DE CHANCE x2 À TOUT LE SERVEUR !", TextFormat.upper(tostring(by))), Color3.fromRGB(150, 255, 120))
 end)
 
 task.spawn(function()
@@ -310,7 +308,7 @@ task.spawn(function()
 		local remaining = Perks.ServerLuckRemaining()
 		boostBanner.Visible = remaining > 0
 		if remaining > 0 then
-			boostBanner.Text = string.format("🌟 CHANCE x2 : %d:%02d", remaining // 60, math.floor(remaining % 60))
+			boostBanner.Text = string.format("CHANCE x2 : %d:%02d", remaining // 60, math.floor(remaining % 60))
 		end
 		if shopWindow.isOpen() then
 			refresh() -- les chances changent quand le boost commence ou finit

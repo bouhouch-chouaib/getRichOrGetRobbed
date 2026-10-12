@@ -12,7 +12,9 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local MenuKit = require(script.Parent.MenuKit)
+local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
 local UiStyle = require(script.Parent.UiStyle)
 
@@ -22,18 +24,6 @@ local WHITE = Color3.new(1, 1, 1)
 local BLACK = Color3.new(0, 0, 0)
 local GREY = Color3.fromRGB(150, 150, 160)
 local REWARD_GREEN = Color3.fromRGB(24, 74, 36)
-
--- Emblème de chaque rareté (carte de gauche).
-local RARITY_ICONS: { [string]: string } = {
-	Commun = "🌱",
-	Inhabituel = "🍀",
-	Rare = "💧",
-	Epique = "🔮",
-	Legendaire = "🔥",
-	Mythique = "🌸",
-	Divin = "✨",
-	Sigma = "👑",
-}
 
 type Cell = { entry: PetCatalog.Pet, button: TextButton, viewport: ViewportFrame?, shownDiscovered: boolean? }
 
@@ -68,9 +58,8 @@ function IndexMenu.create(gui: Instance): Index
 		name.Position = UDim2.fromOffset(4, 10)
 		name.Size = UDim2.new(1, -8, 0, 36)
 		name.TextScaled = true
-		local icon = UiStyle.text(card, RARITY_ICONS[rarity.Id] or "⭐", 70)
-		icon.Position = UDim2.fromOffset(0, 60)
-		icon.Size = UDim2.new(1, 0, 0, 110)
+		-- Emblème de la rareté (shared/Icons : pousse, trèfle, goutte, orbe, flamme, fleur, étoile, couronne).
+		Icons.image(card, rarity.Id, UDim2.new(1, -30, 0, 120), UDim2.fromOffset(15, 56))
 		local bonus = UiStyle.text(card, string.format("Points x%s", tostring(rarity.Multiplier)), 18, WHITE, UiStyle.BODY_FONT)
 		bonus.Position = UDim2.fromOffset(4, 196)
 		bonus.Size = UDim2.new(1, -8, 0, 24)
@@ -131,9 +120,7 @@ function IndexMenu.create(gui: Instance): Index
 	-- Bandeau du bas : tout réclamer.
 	local claimAll = UiStyle.button(content, "", UDim2.fromOffset(594, 58), UiStyle.Colors.Cyan, 1)
 	claimAll.Position = UDim2.fromOffset(0, 390)
-	local claimAllIcon = UiStyle.text(claimAll, "📘", 40)
-	claimAllIcon.Position = UDim2.fromOffset(8, 0)
-	claimAllIcon.Size = UDim2.new(0, 60, 1, 0)
+	local claimAllIcon = Icons.image(claimAll, "Index", UDim2.fromOffset(62, 62), UDim2.fromOffset(6, -6))
 	claimAllIcon.ZIndex = 2
 	local claimAllText = UiStyle.text(claimAll, "", 34, WHITE)
 	claimAllText.Position = UDim2.fromOffset(60, 0)
@@ -144,6 +131,7 @@ function IndexMenu.create(gui: Instance): Index
 			Remotes.ClaimIndex:FireServer()
 		else
 			Toast.show("RIEN À RÉCLAMER : DÉCOUVRE DE NOUVEAUX FAMILIERS !", UiStyle.Colors.Red)
+			Sounds.play("Error")
 		end
 	end)
 
@@ -190,9 +178,8 @@ function IndexMenu.create(gui: Instance): Index
 	local rewardChip = UiStyle.panel(rewardBox, UDim2.new(1, -20, 0, 52))
 	rewardChip.Position = UDim2.fromOffset(10, 38)
 	rewardChip.ZIndex = 3
-	local rewardIcon = UiStyle.text(rewardChip, "💵", 30)
-	rewardIcon.Size = UDim2.new(0, 50, 1, 0)
-	rewardIcon.ZIndex = 3
+	local rewardIcon = Icons.image(rewardChip, "Money", UDim2.fromOffset(46, 46), UDim2.fromOffset(4, 3))
+	rewardIcon.ZIndex = 4
 	local rewardAmount = UiStyle.number(rewardChip, "", 28, UiStyle.Colors.Money)
 	rewardAmount.Position = UDim2.fromOffset(46, 0)
 	rewardAmount.Size = UDim2.new(1, -52, 1, 0)
@@ -261,7 +248,7 @@ function IndexMenu.create(gui: Instance): Index
 			claimCaption.Text = "RÉCLAMER !"
 			UiStyle.setButtonColor(claimButton, UiStyle.Colors.Green)
 		elseif claimed[petId] then
-			claimCaption.Text = "RÉCLAMÉ ✓"
+			claimCaption.Text = "RÉCLAMÉ"
 			UiStyle.setButtonColor(claimButton, GREY)
 		else
 			claimCaption.Text = "À DÉCOUVRIR"
@@ -277,6 +264,7 @@ function IndexMenu.create(gui: Instance): Index
 		local owned = MenuKit.number("Pet_" .. petId)
 		if owned <= 0 then
 			Toast.show("PAS ENCORE À TOI !", UiStyle.Colors.Red)
+			Sounds.play("Error")
 			return
 		end
 		local list = MenuKit.equipped()
@@ -288,6 +276,7 @@ function IndexMenu.create(gui: Instance): Index
 			Toast.show("ÉQUIPÉ ! BONUS DE POINTS, MAIS IL NE RAPPORTE PLUS D'ARGENT", UiStyle.Colors.Gold)
 		else
 			Toast.show("PLUS DE PLACE ! DÉSÉQUIPE UN FAMILIER", UiStyle.Colors.Red)
+			Sounds.play("Error")
 		end
 	end)
 

@@ -11,6 +11,7 @@ local TweenService = game:GetService("TweenService")
 
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local Sounds = require(script.Parent.Sounds)
 local UiStyle = require(script.Parent.UiStyle)
 
 local MenuKit = {}
@@ -141,6 +142,9 @@ function MenuKit.window(parent: Instance, title: string, size: Vector2, headerCo
 				openWindow.close()
 			end
 			openWindow = window
+			if not frame.Visible then
+				Sounds.play("WindowOpen")
+			end
 			frame.Visible = true
 			built.scale.Scale = 0.6
 			TweenService:Create(built.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()

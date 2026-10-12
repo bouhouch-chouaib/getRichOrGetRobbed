@@ -10,7 +10,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local MenuKit = require(script.Parent.MenuKit)
+local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
 local UiStyle = require(script.Parent.UiStyle)
 
@@ -141,9 +143,7 @@ function ShopMenu.create(gui: Instance): Shop
 		level.Position = UDim2.fromOffset(6, 38)
 		level.Size = UDim2.new(1, -12, 0, 22)
 
-		local icon = UiStyle.text(card, item.Icon, 86)
-		icon.Position = UDim2.fromOffset(0, 62)
-		icon.Size = UDim2.new(1, 0, 0, 110)
+		Icons.image(card, item.Icon, UDim2.new(1, -60, 0, 112), UDim2.fromOffset(30, 62))
 
 		local descriptionBox = Instance.new("Frame")
 		descriptionBox.BackgroundColor3 = Color3.new(0, 0, 0)
@@ -196,6 +196,7 @@ function ShopMenu.create(gui: Instance): Shop
 			end
 			if MenuKit.number("Money") < price then
 				Toast.show("PAS ASSEZ D'ARGENT !", UiStyle.Colors.Red)
+				Sounds.play("Error")
 				return
 			end
 			Remotes.BuyUpgrade:FireServer(item.Id)

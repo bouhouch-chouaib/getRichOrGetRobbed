@@ -17,6 +17,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
@@ -63,7 +64,10 @@ local function addVipTag(character: Model)
 	label.Font = Enum.Font.LuckiestGuy
 	label.TextScaled = true
 	label.TextColor3 = Color3.fromRGB(255, 215, 60)
-	label.Text = "👑 VIP"
+	label.Text = "VIP"
+	label.Position = UDim2.fromScale(0.3, 0)
+	label.Size = UDim2.fromScale(0.7, 1)
+	Icons.image(tag, "Crown", UDim2.fromScale(0.3, 1))
 	local outline = Instance.new("UIStroke")
 	outline.Thickness = 2.5
 	outline.Parent = label

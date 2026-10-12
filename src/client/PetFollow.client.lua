@@ -117,7 +117,7 @@ local function rebuildCarried(player: Player)
 		label.Parent = sign
 		return label
 	end
-	line("🚨 " .. TextFormat.upper(entry.Name), rarity.Color, 0, 0.55)
+	line("VOL ! " .. TextFormat.upper(entry.Name), rarity.Color, 0, 0.55)
 	local timer = line("", Color3.fromRGB(255, 90, 90), 0.55, 0.45)
 	-- Le voleur lui-même voit son objectif dans la consigne du HUD (l'étiquette serait cachée par le titre).
 	sign.Enabled = player ~= localPlayer

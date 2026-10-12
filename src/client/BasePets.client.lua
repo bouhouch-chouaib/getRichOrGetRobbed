@@ -19,6 +19,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
@@ -134,7 +135,10 @@ local function playArrival(shown: Shown, arrivedAt: number)
 	label.Font = Enum.Font.LuckiestGuy
 	label.TextScaled = true
 	label.TextColor3 = color
-	label.Text = "✨ NOUVEAU ✨"
+	label.Text = "NOUVEAU !"
+	label.Position = UDim2.fromScale(0.2, 0)
+	label.Size = UDim2.fromScale(0.8, 1)
+	Icons.image(tag, "Sparkle", UDim2.fromScale(0.2, 1))
 	local outline = Instance.new("UIStroke")
 	outline.Thickness = 2.5
 	outline.Parent = label

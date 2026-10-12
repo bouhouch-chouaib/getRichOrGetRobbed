@@ -13,6 +13,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local SessionData = require(script.Parent.SessionData)
 
@@ -112,9 +113,12 @@ local function buildFace(screen: BasePart, face: Enum.NormalId)
 	title.Name = "Title"
 	title.Position = UDim2.fromScale(0.05, 0.02)
 	title.Size = UDim2.fromScale(0.9, 0.13)
-	title.Text = "🏆 LES PLUS RICHES"
+	title.Text = "LES PLUS RICHES"
 	styleText(title, RANK_COLORS[1], Enum.TextXAlignment.Center)
 	title.Parent = gui
+	for _, x in ipairs({ 0.04, 0.84 }) do
+		Icons.image(gui, "Trophy", UDim2.fromScale(0.12, 0.13), UDim2.fromScale(x, 0.02))
+	end
 
 	local subtitle = Instance.new("TextLabel")
 	subtitle.Name = "Subtitle"
