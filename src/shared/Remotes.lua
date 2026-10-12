@@ -64,6 +64,8 @@ return {
 	-- La bulle est créée par le client (client/BasePets) car elle suit le familier chez lui seulement :
 	-- une bulle du serveur serait refusée par Roblox dès que le familier s'éloigne de son repère.
 	StealPet = remote("StealPet"),
+	-- Client -> serveur : () le joueur saute ou touche ARRÊTER pour descendre du tapis / du banc.
+	StopTraining = remote("StopTraining"),
 	-- Serveur -> victime ou tous : (kind: string, thiefName: string, victimName: string, petId: string)
 	-- kind : "Started", "Stolen", "Recovered", "Returned" (à la victime), "Announce" (à tous, vol rare réussi).
 	StealNotice = remote("StealNotice"),

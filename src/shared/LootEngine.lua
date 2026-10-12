@@ -4,6 +4,7 @@
 --   - Minimum 1 tirage dès qu'un point a été marqué.
 --   - Plus le score est haut, plus les raretés hautes ont de poids (chance plafonnée).
 --   - Pitié : après PityPulls tirages sans rareté >= PityMinRarity, ce palier est garanti.
+--   - Dans une rareté, les familiers pas encore possédés sortent Config.Loot.NewPetWeight fois plus souvent.
 
 local Config = require(script.Parent.Config)
 local PetCatalog = require(script.Parent.PetCatalog)
@@ -60,12 +61,26 @@ local function rollRarity(luck: number, minIndex: number): number
 	return #Config.Rarities
 end
 
-local function pickPet(rarityIndex: number): string
+export type Owned = { [string]: number } -- petId -> quantité possédée (sauvegarde du joueur)
+
+-- owned : familiers déjà possédés (y compris ceux tirés juste avant dans la même série).
+local function pickPet(rarityIndex: number, owned: Owned): string
 	-- Si une rareté n'a aucun familier, on descend jusqu'à en trouver un.
 	for index = rarityIndex, 1, -1 do
 		local bucket = PetCatalog.ByRarity[Config.Rarities[index].Id]
 		if bucket and #bucket > 0 then
-			return bucket[rng:NextInteger(1, #bucket)].Id
+			local total = 0
+			for _, entry in ipairs(bucket) do
+				total += if (owned[entry.Id] or 0) > 0 then 1 else Config.Loot.NewPetWeight
+			end
+			local roll = rng:NextNumber() * total
+			for _, entry in ipairs(bucket) do
+				roll -= if (owned[entry.Id] or 0) > 0 then 1 else Config.Loot.NewPetWeight
+				if roll <= 0 then
+					return entry.Id
+				end
+			end
+			return bucket[#bucket].Id
 		end
 	end
 	return PetCatalog.List[1].Id
@@ -88,8 +103,10 @@ function LootEngine.odds(luck: number): { number }
 end
 
 -- Effectue `pulls` tirages avec cette chance (tirages achetés, ou ceux d'une manche).
-function LootEngine.rollPulls(pulls: number, pity: number, luck: number): Outcome
+-- owned : familiers du joueur (non modifié : une copie suit les tirages de la série).
+function LootEngine.rollPulls(pulls: number, pity: number, luck: number, owned: Owned?): Outcome
 	local outcome: Outcome = { results = {}, pulls = 0, pity = pity, drops = {} }
+	local have: Owned = table.clone(owned or {})
 	for _ = 1, pulls do
 		outcome.pity += 1
 		local minIndex = if outcome.pity >= Config.Loot.PityPulls then Config.Loot.PityMinRarity else 1
@@ -97,7 +114,8 @@ function LootEngine.rollPulls(pulls: number, pity: number, luck: number): Outcom
 		if rarityIndex >= Config.Loot.PityMinRarity then
 			outcome.pity = 0
 		end
-		local petId = pickPet(rarityIndex)
+		local petId = pickPet(rarityIndex, have)
+		have[petId] = (have[petId] or 0) + 1
 		outcome.results[petId] = (outcome.results[petId] or 0) + 1
 		table.insert(outcome.drops, petId)
 	end
@@ -108,9 +126,9 @@ end
 
 -- score : points de la manche (déjà multipliés). pity : compteur actuel du joueur.
 -- luckBonus : bonus de chance externe (passe "Chance Chanceuse", boost serveur : shared/Perks), 0 par défaut.
-function LootEngine.roll(score: number, pity: number, luckBonus: number?): Outcome
+function LootEngine.roll(score: number, pity: number, luckBonus: number?, owned: Owned?): Outcome
 	local luck = math.min(score * Config.Loot.LuckPerPoint, Config.Loot.MaxLuck) + (luckBonus or 0)
-	return LootEngine.rollPulls(LootEngine.countPulls(score), pity, luck)
+	return LootEngine.rollPulls(LootEngine.countPulls(score), pity, luck, owned)
 end
 
 return LootEngine

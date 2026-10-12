@@ -119,7 +119,7 @@ end
 
 -- Tirages achetés : même moteur que les manches, avec la chance de base des tirages achetés + bonus (Perks).
 local function grantPulls(player: Player, pulls: number)
-	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), M.PullLuck + Perks.LuckBonus(player))
+	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), M.PullLuck + Perks.LuckBonus(player), SessionData.GetOwnedPets(player))
 	SessionData.SetPity(player, outcome.pity)
 	SessionData.AddPets(player, outcome.results)
 	-- L'affichage tourne à part : une erreur visuelle ne doit JAMAIS faire refuser un achat déjà accordé

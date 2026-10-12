@@ -292,7 +292,8 @@ local function refresh()
 		table.insert(lines, string.format('<font color="#%s">%s</font> : %s', rarity.Color:ToHex(), TextFormat.upper(rarity.Name), formatPercent(odds[index])))
 	end
 	table.insert(lines, string.format(
-		'<font size="14">Chaque familier d\'une rareté a la même chance. Garantie : un Épique ou mieux au plus tard au %de tirage sans en avoir eu.</font>',
+		'<font size="14">Dans une rareté, un familier que tu n\'as pas encore a %d fois plus de chances que ceux que tu as déjà. Garantie : un Épique ou mieux au plus tard au %de tirage sans en avoir eu.</font>',
+		Config.Loot.NewPetWeight,
 		Config.Loot.PityPulls
 	))
 	oddsLabel.Text = table.concat(lines, "\n")

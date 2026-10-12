@@ -17,6 +17,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local SessionData = require(script.Parent.SessionData)
+local TrainingController = require(script.Parent.TrainingController)
 
 local WeaponController = {}
 
@@ -140,6 +141,7 @@ local function hit(victim: Player, from: Vector3, def: Config.WeaponDef)
 		return
 	end
 	immuneUntil[victim] = os.clock() + WEAPONS.HitImmunity
+	TrainingController.Stop(victim) -- frappé sur le tapis / le banc : il en descend (sinon il serait ancré)
 
 	ItemInteraction.ReleaseHeld(victim) -- objets lâchés ; un vol en cours échoue (StealController)
 	if character then

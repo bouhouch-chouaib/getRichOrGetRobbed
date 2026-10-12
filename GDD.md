@@ -32,6 +32,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   +15 % par rang du familier dans sa rareté : `PetCatalog.GetIncome`).
 - **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
   Chance légèrement augmentée par le score. **Pitié** : Épique+ garanti au 60e tirage sans Épique+.
+  **Nouveaux d'abord** : dans une rareté, un familier pas encore possédé pèse `Config.Loot.NewPetWeight` (5) contre 1
+  (`LootEngine.rollPulls(..., owned)`, owned = `SessionData.GetOwnedPets`) ; les chances par rareté ne changent pas
+  (affiché dans la boutique Robux).
 - **Annonce serveur** pour tout drop Légendaire ou mieux.
 - **Acquisition visible** : après un tirage, une fusion ou un vol réussi, `BasePetsController.Celebrate(joueur, petIds)` met la base
   à jour tout de suite et pose `ArrivedAt` (heure serveur) sur le repère des familiers concernés. Tous les clients (`client/BasePets`)
@@ -68,6 +71,15 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - XP pour passer au niveau suivant = 5 × 1,12^niveau (niveau 10 en ~1,5 min, niveau 30 en ~20 min, niveau 60 en plusieurs heures).
 - Stations achetées en boutique, posées hors de la base : **tapis de course** (gauche, Vitesse) et **banc de muscu** (droite, Force).
   5 niveaux chacune (bois → pierre → fer → or → diamant) = XP ×1 / ×2 / ×3,5 / ×6 / ×10. Utilisables à tout moment par le propriétaire.
+- **Façon Steal an Egg** (depuis le 12 oct.) : marcher sur la station → le serveur (`TrainingController`) **ancre** le
+  HumanoidRootPart (debout sur le tapis face à la console, ou allongé sur le dos sur le banc) et écrit l'attribut `Training`
+  ("Treadmill" / "Bench"). XP chaque seconde ; attributs `TrainingGain` + `TrainingPulse` → `client/TrainingFx` affiche
+  "+X 👟" / "+X 💪" au-dessus de la tête (pour tout le monde). Tapis : animation de course de Roblox jouée par le client du
+  joueur (répliquée). Banc : développé couché animé par chaque client pour chaque joueur allongé (`Transform` des
+  articulations dans `Stepped` — Motor6D **ou AnimationConstraint**, le nouveau squelette des avatars), barre qui suit les
+  mains, grognement `Config.Sounds.Effects.Effort` à chaque poussée, `PlatformStand` pendant l'exercice. Descendre : sauter
+  ou bouton ARRÊTER (`Remotes.StopTraining`) ; il faut quitter la station avant d'y remonter. Un coup d'arme fait descendre.
+  Plus de tapis roulant physique (il repoussait le joueur).
 - Lancer : vitesse = ThrowPower × (35 % + 65 % × charge). Au départ, portée ~22 studs : il faut s'approcher du trou.
 
 ## Économie et base

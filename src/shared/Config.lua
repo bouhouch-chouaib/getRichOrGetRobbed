@@ -116,7 +116,9 @@ Config.Training = {
 		{ Name = "Or", Color = Color3.fromRGB(255, 200, 40), Material = Enum.Material.Foil },
 		{ Name = "Diamant", Color = Color3.fromRGB(120, 230, 255), Material = Enum.Material.Glass },
 	},
-	BeltSpeed = 14, -- vitesse du tapis roulant qui repousse le joueur
+	-- Animations (client/TrainingFx) : course sur place et développé couché.
+	RunAnimSpeed = 1.3, -- vitesse de l'animation de course sur le tapis
+	BenchRepTime = 1.6, -- secondes par répétition au banc (un grognement d'effort à chaque poussée)
 }
 
 -- Tirages : un objet avalé rapporte sa valeur (Config.ItemTiers) × multiplicateur des familiers équipés.
@@ -129,6 +131,9 @@ Config.Loot = {
 	PityPulls = 60, -- au plus tard au 60e tirage sans Épique+, un Épique+ est garanti
 	PityMinRarity = 4, -- index de rareté garanti par la pitié (4 = Épique)
 	AnnounceMinRarity = 5, -- annonce serveur à partir de cet index (5 = Légendaire)
+	-- Dans une rareté, un familier que le joueur n'a PAS encore a ce poids (1 pour ceux déjà possédés) :
+	-- la collection avance bien plus vite. Les chances de chaque rareté ne changent pas.
+	NewPetWeight = 5,
 }
 
 -- Familiers.
@@ -267,6 +272,7 @@ Config.Sounds = {
 		Purchase = { Id = 9044783668, Volume = 0.7 }, -- petit jingle : achat
 		LevelUp = { Id = 1844016113, Volume = 0.6 }, -- jingle : niveau de Vitesse / Force
 		Knockback = { Id = 9113564868, Volume = 0.8 }, -- paf ! : éjecté par le dôme
+		Effort = { Id = 9120416707, Volume = 0.7 }, -- grognement d'effort au banc de muscu (Pro Sound Effects)
 	} :: { [string]: SoundDef },
 }
 

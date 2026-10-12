@@ -620,6 +620,12 @@ function SessionData.AddPets(player: Player, newPets: { [string]: number })
 end
 
 -- Nombre d'exemplaires de petId non équipés (utilisables pour une fusion).
+-- Familiers possédés (petId -> quantité). Lecture seule : ne pas modifier la table renvoyée.
+function SessionData.GetOwnedPets(player: Player): { [string]: number }
+	local data = storage[player]
+	return if data then data.pets else {}
+end
+
 function SessionData.GetSpareCount(player: Player, petId: string): number
 	local data = storage[player]
 	if not data then

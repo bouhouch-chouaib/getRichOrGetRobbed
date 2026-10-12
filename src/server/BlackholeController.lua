@@ -229,7 +229,7 @@ local function distributeRewards()
 	for _, player in ipairs(Players:GetPlayers()) do
 		local score = math.floor(SessionData.GetRoundScore(player) * 10) / 10
 		-- Chance et argent en plus selon les passes et le boost de chance serveur (shared/Perks).
-		local outcome = LootEngine.roll(score, SessionData.GetPity(player), Perks.LuckBonus(player))
+		local outcome = LootEngine.roll(score, SessionData.GetPity(player), Perks.LuckBonus(player), SessionData.GetOwnedPets(player))
 		local money = math.floor(score * Config.Economy.MoneyPerPoint * Perks.MoneyMultiplier(player))
 		SessionData.SetPity(player, outcome.pity)
 		if outcome.pulls > 0 then
