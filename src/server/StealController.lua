@@ -8,6 +8,8 @@
 --   - Le voleur le porte dans le dos (attribut "CarryingPet", affiché par client/PetFollow), est ralenti
 --     (attribut "SpeedMultiplier") et ne peut plus ramasser d'objet. Un seul familier à la fois.
 --   - Arrivé dans SA base : le familier change de propriétaire.
+--   - La victime quitte le jeu pendant le vol : le voleur GAGNE le familier tout de suite ("VictimLeft"), transféré
+--     juste avant la dernière sauvegarde de la victime (SessionData.OnLeaving) : quitter ne protège pas ses familiers.
 --   - Échec, le familier rentre chez sa victime : voleur KO (dôme, arme d'un autre joueur) / mort / réapparu
 --     (ItemInteraction.HeldReleased),
 --     voleur ou victime qui quitte le serveur, transport trop long (Config.Steal.MaxCarryTime).
@@ -21,7 +23,6 @@
 -- Le transfert se fait en UNE étape serveur sans attente (RemovePets puis AddPets), seulement si les deux sauvegardes
 -- sont chargées (verrou de session tenu), puis les deux profils sont sauvegardés (victime d'abord).
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -98,7 +99,8 @@ local function finish(carry: Carry, outcome: Outcome)
 	end
 	carries[carry.thief] = nil
 
-	if outcome == "Success" then
+	local transfer = outcome == "Success" or outcome == "VictimLeft"
+	if transfer then
 		-- Transfert en une seule étape, sans aucune attente entre le retrait et l'ajout.
 		local ok = SessionData.IsLoaded(carry.victim)
 			and SessionData.IsLoaded(carry.thief)
@@ -129,7 +131,7 @@ local function finish(carry: Carry, outcome: Outcome)
 	if notice and victim.Parent then
 		Remotes.StealNotice:FireClient(victim, notice, thief.DisplayName, victim.DisplayName, carry.petId)
 	end
-	if outcome == "Success" then
+	if transfer and outcome ~= "Gone" then
 		local entry = PetCatalog.ById[carry.petId]
 		if entry and (Config.RarityIndex[entry.Rarity] or 0) >= Config.Loot.AnnounceMinRarity then
 			Remotes.StealNotice:FireAllClients("Announce", thief.DisplayName, victim.DisplayName, carry.petId)
@@ -137,7 +139,7 @@ local function finish(carry: Carry, outcome: Outcome)
 	end
 	print(string.format("[Steal] %s -> %s : %s (%s)", victim.Name, thief.Name, carry.petId, outcome))
 
-	if outcome == "Success" then
+	if transfer and outcome ~= "Gone" then
 		-- Les deux profils sont écrits tout de suite : la victime d'abord (si le serveur plantait entre les deux,
 		-- le familier serait perdu par le voleur, jamais dupliqué).
 		task.spawn(function()
@@ -269,8 +271,8 @@ function StealController.Init()
 		end
 	end)
 
-	-- La victime part : tous les vols de ses familiers sont annulés.
-	Players.PlayerRemoving:Connect(function(player: Player)
+	-- La victime part : les voleurs gagnent ses familiers en cours de vol, avant sa dernière sauvegarde.
+	SessionData.OnLeaving(function(player: Player)
 		for _, carry in pairs(carries) do
 			if carry.victim == player then
 				finish(carry, "VictimLeft")

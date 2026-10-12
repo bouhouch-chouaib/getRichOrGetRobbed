@@ -891,7 +891,7 @@ local STEAL_MESSAGES: { [string]: { text: string, color: Color3 } } = {
 	Success = { text = "%s EST À TOI !", color = Color3.fromRGB(110, 240, 70) },
 	KO = { text = "LÂCHÉ ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
 	Timeout = { text = "TROP LENT ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
-	VictimLeft = { text = "SON PROPRIÉTAIRE EST PARTI ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
+	VictimLeft = { text = "SON PROPRIÉTAIRE A FUI : %s EST À TOI !", color = Color3.fromRGB(110, 240, 70) },
 	Gone = { text = "PLUS LÀ : %s !", color = Color3.fromRGB(255, 90, 90) },
 	Recovered = { text = "RATTRAPÉ ! SON PROPRIÉTAIRE A REPRIS : %s", color = Color3.fromRGB(255, 90, 90) },
 }

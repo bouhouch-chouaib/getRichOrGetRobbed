@@ -59,7 +59,7 @@ return {
 	-- Serveur -> client : (petId: string) résultat de la fusion.
 	FusionResult = remote("FusionResult"),
 	-- Serveur -> voleur : (outcome: string, petId: string) fin d'un vol de familier
-	-- ("Success", "KO", "Timeout", "VictimLeft", "Gone", "Recovered" : voir server/StealController).
+	-- ("Success", "KO", "Timeout", "VictimLeft" = la victime a quitté, le voleur gagne, "Gone", "Recovered" : voir server/StealController).
 	StealResult = remote("StealResult"),
 	-- Client -> serveur : (anchor: BasePart) le joueur a validé la bulle [E] "Voler" d'un familier de base.
 	-- La bulle est créée par le client (client/BasePets) car elle suit le familier chez lui seulement :

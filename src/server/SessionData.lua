@@ -43,6 +43,8 @@ local MAX_RECEIPTS = 100 -- on garde les 100 derniers achats (largement assez po
 local SessionData = {}
 
 local storage: { [Player]: PlayerData } = {}
+-- Appelés au départ d'un joueur, AVANT sa dernière sauvegarde (voir SessionData.OnLeaving).
+local leavingCallbacks: { (Player) -> () } = {}
 
 ----------------------------------------------------------------------
 -- Sauvegarde (DataStore)
@@ -499,6 +501,15 @@ function SessionData.Init()
 	end)
 	Players.PlayerAdded:Connect(onPlayerAdded)
 	Players.PlayerRemoving:Connect(function(player)
+		-- Ce qui doit encore modifier son profil (ex. vol en cours) passe avant la dernière sauvegarde.
+		for _, callback in ipairs(leavingCallbacks) do
+			local ok, err = pcall(function()
+				callback(player)
+			end)
+			if not ok then
+				warn("[SessionData] Erreur au départ de " .. player.Name .. " : " .. tostring(err))
+			end
+		end
 		savePlayer(player, true)
 		storage[player] = nil
 	end)
@@ -531,6 +542,12 @@ function SessionData.Init()
 			task.wait(0.2)
 		end
 	end)
+end
+
+-- callback(player) est appelé au départ du joueur, juste AVANT sa dernière sauvegarde : ses données sont encore là
+-- et toute modification faite dedans (sans attendre) est enregistrée. Ne doit pas bloquer (pas de wait).
+function SessionData.OnLeaving(callback: (Player) -> ())
+	table.insert(leavingCallbacks, callback)
 end
 
 function SessionData.Get(player: Player): PlayerData?

@@ -105,8 +105,10 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   (c'était la cause des vols qui « ne marchaient pas »). Le voleur le porte dans le dos (attribut `CarryingPet` + `CarryingUntil`, affiché
   par `client/PetFollow` pour tout le monde, étiquette nom + temps restant), est ralenti ×0,9 (attribut `SpeedMultiplier`, appliqué
   par `SessionData`) et ne peut plus ramasser d'objet ni sortir d'arme. Arrivé dans **sa** base : transfert. Échec (le familier rentre) :
-  KO (dôme ou arme) / mort / réapparition / départ du voleur (`ItemInteraction.HeldReleased`), départ de la victime, 60 s écoulées
-  (la base d'en face est à ~430 studs).
+  KO (dôme ou arme) / mort / réapparition / départ du voleur (`ItemInteraction.HeldReleased`), 60 s écoulées
+  (la base d'en face est à ~430 studs). **La victime quitte le jeu pendant le vol** (depuis le 12 oct.) : le voleur GAGNE le
+  familier tout de suite (résultat "VictimLeft"), transféré par `SessionData.OnLeaving` juste AVANT la dernière sauvegarde
+  de la victime — quitter ne protège plus ses familiers.
   Anti-duplication : pendant le transport le familier reste à la victime, seulement **réservé** (`BasePetsController.Reserve`,
   caché de sa base) ; transfert en une étape serveur (`RemovePets` puis `AddPets`) seulement si les deux sauvegardes sont chargées
   (`SessionData.IsLoaded`), puis sauvegarde immédiate de la victime puis du voleur. Résultat envoyé au voleur : `Remotes.StealResult`.
