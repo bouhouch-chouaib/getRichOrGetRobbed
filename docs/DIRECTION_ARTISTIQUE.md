@@ -20,8 +20,8 @@ LEGO) : sol, murs, clôtures, machines, panneaux, **et même les fenêtres d'int
 - Familiers et œufs : **voxels** (petits cubes) recouverts de tenons, contours nets, pas de formes lisses.
 - Interface : texture de tenons en léger relief dans le fond des fenêtres et des cartes.
 
-Aujourd'hui notre `MapGenerator` fait l'inverse : surfaces lisses (`SurfaceType.Smooth`) et matières réalistes
-(Wood, WoodPlanks, Grass, Metal). **À remplacer par du Plastic + texture de tenons + couleurs vives.**
+Fait le 13 oct. : `MapGenerator` construit tout en Plastic à tenons (`studify`), sols en damier de dalles posées
+sur un sol invisible (les tenons ne s'affichent que sur du Plastic et des faces planes, pas sur les cylindres).
 
 ## 2. Palette relevée sur les captures (valeurs approchées)
 
@@ -99,3 +99,37 @@ Règle : couleurs **pures et saturées**, peu de pastel, pas de marron terne. Le
 3. Modèles : générer avec `generate_mesh` (comme les 14 familiers Sigma/Divins), ou modèles gratuits de la
    boutique Roblox **sans scripts** (les vérifier et supprimer leurs scripts avant usage).
 4. Performance mobile : texture de tenons partagée, pas de particules sur les communs, limiter les pièces.
+
+---
+
+## 8. Plan validé avec Chouaib (13 oct. 2026)
+
+**Le cœur du jeu ne change pas** : voler les autres joueurs et nourrir le trou noir. Le visuel et les paliers
+servent ce cœur, ils ne le remplacent pas. **Pas de couloir de zones** (refusé).
+
+- **Structure** : la carte reste **circulaire** autour du trou noir (arène ronde, 8 bases en anneau, 4 kiosques).
+- **Mondes par palier (joueur)** : quand un joueur dépasse le niveau max de son palier, il passe au suivant.
+  C'est **sa base** qui change de monde (sol, clôtures, décor, lumière, sons) : Prairie → Désert → Volcan →
+  Glace → Abysses → Cosmos → Divin (liste à confirmer). Les 8 bases restent côte à côte : on voit les bases
+  épiques des autres, elles deviennent des cibles. Ascension (rebirth) : à décider.
+- **Trou noir par palier (serveur)** : un seul trou noir, partagé, qui monte de palier avec une jauge
+  commune (objets avalés sur le serveur). De plus en plus épique, une mécanique légère par palier, **sans rendre
+  le jeu impossible** (effets courts, rares, jamais punitifs) :
+
+  | Palier | Aspect | Mécanique (légère) |
+  |---|---|---|
+  | 1 Éveil | vortex violet | boucle actuelle |
+  | 2 Éruption | bord de lave | quelques roches ×3 recrachées dans l'arène |
+  | 3 Cible | anneaux qui tournent | centre de la cible = ×2 points |
+  | 4 Abysses | tentacules en cubes | rattrapent les lancers un peu courts ; rarement, font lâcher un objet |
+  | 5 Gravité | disque de matière, éclairs | attire doucement les objets au sol ; pluie de météorites |
+  | 6 Supernova | pulsations | combo de lancers d'affilée |
+  | 7 Divin | or et blanc | jackpot ×5 pendant 10 s, annoncé |
+  | Effondrement | implosion | grosse digestion, familier rare aux meilleurs, retour au palier 1 |
+
+- **Qualité visée** : chaque élément améliorable a beaucoup de niveaux (20 à 30) avec un nouveau modèle tous
+  les ~5 niveaux, de plus en plus épique, toujours en blocs à tenons ; créatures en voxels détaillés ; effets
+  et sons travaillés.
+- **Ordre de travail** : 1) passe tenons + palette (fait le 13 oct.) ; 2) une base du palier 1 en qualité
+  finale (ZONE SÛRE, cercles au sol, tapis et banc à paliers visuels) ; 3) interface ; 4) mondes des paliers ;
+  5) familiers en voxels + auras ; 6) paliers du trou noir.

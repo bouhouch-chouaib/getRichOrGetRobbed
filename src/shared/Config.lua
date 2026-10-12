@@ -112,10 +112,10 @@ Config.Training = {
 	StationRates = { 1, 2, 3.5, 6, 10, 16, 25, 40 },
 	-- Matière de la station selon son niveau. Glow = true : la station brille et lâche des étincelles (niveaux 6 à 8).
 	StationMaterials = {
-		{ Name = "Bois", Color = Color3.fromRGB(150, 100, 55), Material = Enum.Material.Wood },
-		{ Name = "Pierre", Color = Color3.fromRGB(140, 140, 145), Material = Enum.Material.Slate },
-		{ Name = "Fer", Color = Color3.fromRGB(180, 185, 195), Material = Enum.Material.DiamondPlate },
-		{ Name = "Or", Color = Color3.fromRGB(255, 200, 40), Material = Enum.Material.Foil },
+		{ Name = "Bois", Color = Color3.fromRGB(150, 100, 55), Material = Enum.Material.Plastic },
+		{ Name = "Pierre", Color = Color3.fromRGB(140, 140, 145), Material = Enum.Material.Plastic },
+		{ Name = "Fer", Color = Color3.fromRGB(180, 185, 195), Material = Enum.Material.Plastic },
+		{ Name = "Or", Color = Color3.fromRGB(255, 200, 40), Material = Enum.Material.Plastic },
 		{ Name = "Diamant", Color = Color3.fromRGB(120, 230, 255), Material = Enum.Material.Glass },
 		{ Name = "Émeraude", Color = Color3.fromRGB(60, 230, 120), Material = Enum.Material.Glass, Glow = true },
 		{ Name = "Rubis", Color = Color3.fromRGB(255, 60, 90), Material = Enum.Material.Glass, Glow = true },

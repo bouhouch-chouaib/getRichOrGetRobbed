@@ -64,7 +64,7 @@ rojo build -o test.rbxlx
 
 ## État actuel (fait)
 
-Boucle Feeding 45 s (nuit éclaircie) / Digesting 60 s (jour) • map prairie (herbe, chemins de terre, clôtures bois, arbres) •
+Boucle Feeding 45 s (nuit éclaircie) / Digesting 60 s (jour) • map en briques à tenons façon Steal an Egg (damier, mur d'enceinte, clôtures en X, arbres en cubes, nuit bleu nuit ; plan des paliers dans `docs/DIRECTION_ARTISTIQUE.md` §8) •
 8 bases, bouton de verrouillage 60 s (expulsion des intrus) • argent + boutique à niveaux (Treadmill, Bench,
 ItemQuality, Backpack, LongLock) • entraînement Vitesse/Force par niveaux (XP ×1,12/niveau) sur stations hors base •
 objets à valeur (6 types, kit de départ 5 objets, 1 objet/2 s en Feeding) • sac à dos (plusieurs objets portés) •

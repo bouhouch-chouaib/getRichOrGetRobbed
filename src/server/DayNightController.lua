@@ -5,6 +5,7 @@
 
 local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
 local GameLoopManager = require(script.Parent.GameLoopManager)
 
@@ -18,15 +19,17 @@ type Preset = {
 	Ambient: Color3,
 	OutdoorAmbient: Color3,
 	Exposure: number,
+	CloudCover: number, -- nuages du Terrain : moins la nuit, sinon ils sortent gris foncé
 }
 
 local PRESETS: { [string]: Preset } = {
-	Feeding = { -- nuit : ciel étoilé mais arène bien lisible (lumière lunaire bleutée forte)
-		ClockTime = 0,
+	Feeding = { -- nuit : ciel bleu nuit étoilé (début de nuit, jamais noir), arène bien lisible
+		ClockTime = 19.4,
 		Brightness = 2.2,
 		Ambient = Color3.fromRGB(150, 155, 190),
 		OutdoorAmbient = Color3.fromRGB(165, 170, 210),
 		Exposure = 0.4,
+		CloudCover = 0.12,
 	},
 	Digesting = { -- jour
 		ClockTime = 14,
@@ -34,6 +37,7 @@ local PRESETS: { [string]: Preset } = {
 		Ambient = Color3.fromRGB(120, 120, 120),
 		OutdoorAmbient = Color3.fromRGB(140, 140, 140),
 		Exposure = 0,
+		CloudCover = 0.55,
 	},
 }
 
@@ -50,6 +54,8 @@ local function apply(preset: Preset)
 	local startAmbient = Lighting.Ambient
 	local startOutdoor = Lighting.OutdoorAmbient
 	local startExposure = Lighting.ExposureCompensation
+	local clouds = Workspace.Terrain:FindFirstChildOfClass("Clouds")
+	local startCover = if clouds then clouds.Cover else preset.CloudCover
 	local elapsed = 0
 
 	local connection: RBXScriptConnection
@@ -65,6 +71,9 @@ local function apply(preset: Preset)
 		Lighting.Ambient = startAmbient:Lerp(preset.Ambient, alpha)
 		Lighting.OutdoorAmbient = startOutdoor:Lerp(preset.OutdoorAmbient, alpha)
 		Lighting.ExposureCompensation = startExposure + (preset.Exposure - startExposure) * alpha
+		if clouds then
+			clouds.Cover = startCover + (preset.CloudCover - startCover) * alpha
+		end
 		if alpha >= 1 then
 			connection:Disconnect()
 		end
@@ -79,6 +88,10 @@ function DayNightController.Init()
 	Lighting.Ambient = night.Ambient
 	Lighting.OutdoorAmbient = night.OutdoorAmbient
 	Lighting.ExposureCompensation = night.Exposure
+	local clouds = Workspace.Terrain:FindFirstChildOfClass("Clouds")
+	if clouds then
+		clouds.Cover = night.CloudCover
+	end
 
 	GameLoopManager.ServerEvent.Event:Connect(function(eventName: string, state: string)
 		local preset = PRESETS[state]

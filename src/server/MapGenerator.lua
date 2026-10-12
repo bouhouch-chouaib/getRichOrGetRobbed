@@ -1,12 +1,18 @@
 --!strict
--- MapGenerator : construit l'arène (prairie, chemins de terre, trou noir, bases clôturées, arbres).
+-- MapGenerator : construit l'arène (prairie, chemins, trou noir, bases clôturées, arbres, mur d'enceinte).
 -- Ne contient aucune logique de jeu : il ne fait que poser les pièces.
 -- L'éclairage jour/nuit est géré par DayNightController.
 --
+-- Style (docs/DIRECTION_ARTISTIQUE.md) : briques à tenons partout. Les tenons de Roblox ne s'affichent
+-- que sur la matière Plastic et sur les faces planes : on construit donc en blocs, et les sols sont des
+-- damiers de blocs purement visuels posés sur un sol invisible qui, lui, porte les collisions.
+--
 -- Structure générée :
 -- Workspace.Map
---   ArenaFloor, HoleDirt, HoleRing, BlackholeZone (+ Aura), BlackholeCore (+ Light), BlackholeHalo, BlackholeDome
---   Paths (Folder), Trees (Folder), Kiosks (Folder : boutique + machine de fusion entre deux bases)
+--   ArenaFloor (invisible, collisions), Floor (Folder : dalles du damier), Wall (Folder : enceinte circulaire)
+--   HoleRing, BlackholeZone (+ Aura), BlackholeCore (+ Light), BlackholeHalo, BlackholeDome
+--   Paths (Folder, vide : les chemins sont des dalles de couleur), Trees (Folder),
+--   Kiosks (Folder : boutique + machine de fusion entre deux bases)
 --   Leaderboard (Model) : tableau des plus riches (Screen rempli par LeaderboardController)
 --   LooseItems (Folder) : objets ramassés / lancés
 --   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Pallets,
@@ -25,19 +31,49 @@ local ARENA = Config.Arena
 -- Une Part "Cylinder" a son axe sur X : on la couche pour en faire un disque horizontal.
 local FLAT = CFrame.Angles(0, 0, math.pi / 2)
 
+-- Palette relevée sur les captures de référence (docs/DIRECTION_ARTISTIQUE.md §2) : couleurs pures et saturées.
+-- Les paires A / B forment les damiers.
 local COLORS = {
-	Grass = Color3.fromRGB(96, 178, 72),
-	BaseGrass = Color3.fromRGB(120, 196, 88),
-	Dirt = Color3.fromRGB(150, 108, 66),
-	WoodRail = Color3.fromRGB(150, 102, 58),
-	WoodPost = Color3.fromRGB(112, 74, 42),
-	Trunk = Color3.fromRGB(110, 76, 46),
-	Leaves = Color3.fromRGB(64, 150, 62),
+	GrassA = Color3.fromRGB(150, 228, 58),
+	GrassB = Color3.fromRGB(122, 210, 46),
+	PathA = Color3.fromRGB(246, 214, 128),
+	PathB = Color3.fromRGB(232, 194, 104),
+	HoleA = Color3.fromRGB(70, 46, 112),
+	HoleB = Color3.fromRGB(52, 34, 88),
+	WallA = Color3.fromRGB(202, 145, 86),
+	WallB = Color3.fromRGB(185, 125, 73),
+	WallTop = Color3.fromRGB(110, 214, 42),
+	Stone = Color3.fromRGB(205, 198, 186),
+	WoodRail = Color3.fromRGB(216, 128, 42),
+	WoodPost = Color3.fromRGB(96, 76, 70),
+	WoodCap = Color3.fromRGB(124, 102, 95),
+	Trunk = Color3.fromRGB(138, 90, 51),
+	LeavesA = Color3.fromRGB(80, 198, 58),
+	LeavesB = Color3.fromRGB(60, 170, 46),
+	LeavesC = Color3.fromRGB(104, 218, 74),
 }
 
 local FENCE_HEIGHT = 4
 local FENCE_GAP = 14 -- largeur de l'entrée côté trou noir
+local TILE = 12 -- côté d'une dalle du damier de l'arène
+local BASE_TILE = 8 -- côté d'une dalle du damier des bases (56 / 8 = 7 dalles)
+local WALL_HEIGHT = 36
+local WALL_THICKNESS = 10
+local WALL_ROW = 12 -- hauteur d'une rangée du damier du mur
 
+-- Tenons sur les 6 faces (ils ne s'affichent qu'en Plastic).
+local function studify(part: BasePart)
+	part.Material = Enum.Material.Plastic
+	part.TopSurface = Enum.SurfaceType.Studs
+	part.BottomSurface = Enum.SurfaceType.Studs
+	part.FrontSurface = Enum.SurfaceType.Studs
+	part.BackSurface = Enum.SurfaceType.Studs
+	part.LeftSurface = Enum.SurfaceType.Studs
+	part.RightSurface = Enum.SurfaceType.Studs
+end
+
+-- Par défaut, toute pièce est un bloc de Plastic à tenons. Les appelants ne changent la matière que pour
+-- les effets (Neon, Glass, ForceField).
 local function makePart(name: string, size: Vector3, cframe: CFrame, color: Color3, parent: Instance): Part
 	local part = Instance.new("Part")
 	part.Name = name
@@ -45,9 +81,7 @@ local function makePart(name: string, size: Vector3, cframe: CFrame, color: Colo
 	part.Size = size
 	part.CFrame = cframe
 	part.Color = color
-	part.Material = Enum.Material.SmoothPlastic
-	part.TopSurface = Enum.SurfaceType.Smooth
-	part.BottomSurface = Enum.SurfaceType.Smooth
+	studify(part)
 	part.Parent = parent
 	return part
 end
@@ -96,24 +130,121 @@ local function applyLighting()
 	sky.StarCount = 3000
 	sky.Parent = Lighting
 
+	-- Air léger et bleuté : il ne doit pas ternir les couleurs (la référence est très saturée).
 	local atmosphere = Instance.new("Atmosphere")
-	atmosphere.Density = 0.3
-	atmosphere.Offset = 0.25
-	atmosphere.Color = Color3.fromRGB(199, 199, 199)
-	atmosphere.Decay = Color3.fromRGB(106, 112, 125)
+	atmosphere.Density = 0.22
+	atmosphere.Offset = 0.2
+	atmosphere.Color = Color3.fromRGB(205, 225, 255)
+	atmosphere.Decay = Color3.fromRGB(120, 150, 200)
 	atmosphere.Glare = 0
 	atmosphere.Haze = 0
 	atmosphere.Parent = Lighting
+
+	-- Les néons « bavent » un peu, couleurs légèrement poussées.
+	local bloom = Instance.new("BloomEffect")
+	bloom.Intensity = 0.5
+	bloom.Size = 24
+	bloom.Threshold = 1.4
+	bloom.Parent = Lighting
+
+	local grading = Instance.new("ColorCorrectionEffect")
+	grading.Saturation = 0.15
+	grading.Contrast = 0.05
+	grading.Parent = Lighting
+
+	-- Gros cumulus blancs (nuages dynamiques du Terrain).
+	local terrain = Workspace.Terrain
+	local clouds = terrain:FindFirstChildOfClass("Clouds") or Instance.new("Clouds")
+	clouds.Cover = 0.55
+	clouds.Density = 0.75
+	clouds.Color = Color3.new(1, 1, 1)
+	clouds.Parent = terrain
+end
+
+-- Vrai si le point (x, z) est sur un chemin entre le trou noir et une base.
+local function isOnPath(x: number, z: number): boolean
+	local startRadius = ARENA.HoleRadius + 8
+	local endRadius = ARENA.BaseRingRadius - ARENA.BaseSize.Z / 2 + 2
+	for index = 0, ARENA.BaseCount - 1 do
+		local angle = index * (math.pi * 2 / ARENA.BaseCount)
+		local along = x * math.cos(angle) + z * math.sin(angle)
+		local across = math.abs(-x * math.sin(angle) + z * math.cos(angle))
+		if along > startRadius and along < endRadius and across < 8 then
+			return true
+		end
+	end
+	return false
+end
+
+-- Vrai si le point (x, z) est caché sous la plateforme d'une base (inutile d'y poser une dalle).
+local function isUnderBase(x: number, z: number): boolean
+	local half = ARENA.BaseSize.X / 2 - TILE / 2
+	for index = 0, ARENA.BaseCount - 1 do
+		local angle = index * (math.pi * 2 / ARENA.BaseCount)
+		local dx = x - math.cos(angle) * ARENA.BaseRingRadius
+		local dz = z - math.sin(angle) * ARENA.BaseRingRadius
+		local along = dx * math.cos(angle) + dz * math.sin(angle)
+		local across = -dx * math.sin(angle) + dz * math.cos(angle)
+		if math.abs(along) < half and math.abs(across) < half then
+			return true
+		end
+	end
+	return false
+end
+
+-- Damier de dalles à tenons : purement visuel, posé sur le sol invisible ArenaFloor.
+local function createFloor(map: Folder)
+	local floor = makeDisc("ArenaFloor", ARENA.FloorRadius, 4, 0, COLORS.GrassA, map)
+	floor.Transparency = 1
+
+	local folder = Instance.new("Folder")
+	folder.Name = "Floor"
+	local count = math.ceil(ARENA.FloorRadius / TILE)
+	for gx = -count, count - 1 do
+		for gz = -count, count - 1 do
+			local x = (gx + 0.5) * TILE
+			local z = (gz + 0.5) * TILE
+			local radius = math.sqrt(x * x + z * z)
+			-- Les dalles du bord dépassent sous le mur d'enceinte : pas de trou au pied du mur.
+			if radius <= ARENA.FloorRadius + TILE / 2 and not isUnderBase(x, z) then
+				local even = (gx + gz) % 2 == 0
+				local color = if radius < ARENA.HoleRadius + 12
+					then (if even then COLORS.HoleA else COLORS.HoleB)
+					elseif isOnPath(x, z) then (if even then COLORS.PathA else COLORS.PathB)
+					else (if even then COLORS.GrassA else COLORS.GrassB)
+				local tile = makePart("Tile", Vector3.new(TILE, 1, TILE), CFrame.new(x, -0.5, z), color, folder)
+				tile.CastShadow = false
+				makeGhost(tile)
+			end
+		end
+	end
+	folder.Parent = map
+end
+
+-- Mur d'enceinte circulaire en damier, liseré d'herbe sur le dessus (comme les murs de la référence).
+local function createWall(map: Folder)
+	local folder = Instance.new("Folder")
+	folder.Name = "Wall"
+	local radius = ARENA.FloorRadius + WALL_THICKNESS / 2 - 2
+	local segments = math.ceil(math.pi * 2 * radius / TILE)
+	local width = math.pi * 2 * radius / segments + 0.4 -- léger chevauchement : pas de fente entre deux blocs
+	local rows = WALL_HEIGHT // WALL_ROW
+	for index = 0, segments - 1 do
+		local angle = index * (math.pi * 2 / segments)
+		local position = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+		local origin = CFrame.lookAt(position, Vector3.zero)
+		for row = 0, rows - 1 do
+			local color = if (index + row) % 2 == 0 then COLORS.WallA else COLORS.WallB
+			local block = makePart("Block", Vector3.new(width, WALL_ROW, WALL_THICKNESS), origin * CFrame.new(0, (row + 0.5) * WALL_ROW, 0), color, folder)
+			block.CastShadow = row == rows - 1 -- seule la rangée du haut projette l'ombre du mur
+		end
+		makePart("GrassTop", Vector3.new(width, 1.5, WALL_THICKNESS + 1), origin * CFrame.new(0, WALL_HEIGHT + 0.75, 0), COLORS.WallTop, folder)
+	end
+	folder.Parent = map
 end
 
 local function createBlackhole(map: Folder)
 	local feeding = Config.Colors.Feeding
-
-	makeDisc("ArenaFloor", ARENA.FloorRadius, 4, 0, COLORS.Grass, map).Material = Enum.Material.Grass
-
-	local dirt = makeDisc("HoleDirt", ARENA.HoleRadius + 10, 0.2, 0.15, COLORS.Dirt, map)
-	dirt.Material = Enum.Material.Ground
-	makeGhost(dirt)
 
 	local ring = makeDisc("HoleRing", ARENA.HoleRadius + 3, 0.3, 0.3, feeding, map)
 	ring.Material = Enum.Material.Neon
@@ -166,52 +297,32 @@ local function createBlackhole(map: Folder)
 	makeGhost(dome)
 end
 
--- Chemin de terre entre une base et le trou noir.
-local function createPath(direction: Vector3, folder: Folder)
-	local startRadius = ARENA.HoleRadius + 8
-	local endRadius = ARENA.BaseRingRadius - ARENA.BaseSize.Z / 2 + 2
-	local middle = (startRadius + endRadius) / 2
-	local path = makePart(
-		"Path",
-		Vector3.new(12, 0.2, endRadius - startRadius),
-		CFrame.lookAt(direction * middle + Vector3.new(0, 0.1, 0), Vector3.new(0, 0.1, 0)),
-		COLORS.Dirt,
-		folder
-	)
-	path.Material = Enum.Material.Ground
-	makeGhost(path)
-end
-
--- Clôture en bois entre deux points (coordonnées XZ locales à la base).
+-- Clôture en bois entre deux points (coordonnées XZ locales à la base) : deux lisses, une croix entre
+-- chaque paire de poteaux, poteaux sombres coiffés d'un chapeau (style ranch de la référence).
 local function createFenceLine(origin: CFrame, top: number, from: Vector2, to: Vector2, folder: Folder)
 	local length = (to - from).Magnitude
 	local a = Vector3.new(from.X, 0, from.Y)
 	local b = Vector3.new(to.X, 0, to.Y)
 	local middle = (a + b) / 2
+	local low = Vector3.new(0, top + 0.9, 0)
+	local high = Vector3.new(0, top + FENCE_HEIGHT - 0.6, 0)
 
-	for _, height in ipairs({ 1.4, 3 }) do
-		local y = Vector3.new(0, top + height, 0)
-		local rail = makePart(
-			"Rail",
-			Vector3.new(0.4, 0.6, length),
-			origin * CFrame.lookAt(middle + y, b + y),
-			COLORS.WoodRail,
-			folder
-		)
-		rail.Material = Enum.Material.Wood
+	for _, y in ipairs({ low, high }) do
+		makePart("Rail", Vector3.new(0.5, 0.7, length), origin * CFrame.lookAt(middle + y, b + y), COLORS.WoodRail, folder)
 	end
 
-	local postCount = math.max(1, math.ceil(length / 6))
+	local postCount = math.max(1, math.ceil(length / 7))
 	for index = 0, postCount do
 		local point = a:Lerp(b, index / postCount)
-		local post = makePart(
-			"Post",
-			Vector3.new(1, FENCE_HEIGHT, 1),
-			origin * CFrame.new(point + Vector3.new(0, top + FENCE_HEIGHT / 2, 0)),
-			COLORS.WoodPost,
-			folder
-		)
-		post.Material = Enum.Material.Wood
+		makePart("Post", Vector3.new(1.2, FENCE_HEIGHT, 1.2), origin * CFrame.new(point + Vector3.new(0, top + FENCE_HEIGHT / 2, 0)), COLORS.WoodPost, folder)
+		makePart("Cap", Vector3.new(1.6, 0.5, 1.6), origin * CFrame.new(point + Vector3.new(0, top + FENCE_HEIGHT + 0.25, 0)), COLORS.WoodCap, folder)
+		if index < postCount then
+			local nextPoint = a:Lerp(b, (index + 1) / postCount)
+			for _, ends in ipairs({ { point + low, nextPoint + high }, { point + high, nextPoint + low } }) do
+				local span = ends[2] - ends[1]
+				makePart("Brace", Vector3.new(0.45, 0.55, span.Magnitude), origin * CFrame.lookAt((ends[1] + ends[2]) / 2, ends[2]), COLORS.WoodRail, folder)
+			end
+		end
 	end
 end
 
@@ -230,37 +341,21 @@ local function createFence(origin: CFrame, top: number, base: Model)
 	createFenceLine(origin, top, Vector2.new(gap, -h), Vector2.new(h, -h), folder)
 end
 
+-- Arbre en cubes : tronc carré, feuillage de blocs empilés en trois verts.
 local function createTree(position: Vector3, scale: number, folder: Folder)
 	local trunkHeight = 10 * scale
-	local trunk = makePart(
-		"Trunk",
-		Vector3.new(trunkHeight, 2.5 * scale, 2.5 * scale),
-		CFrame.new(position + Vector3.new(0, trunkHeight / 2, 0)) * FLAT,
-		COLORS.Trunk,
-		folder
-	)
-	trunk.Shape = Enum.PartType.Cylinder
-	trunk.Material = Enum.Material.Wood
+	makePart("Trunk", Vector3.new(2.6, trunkHeight, 2.6) * Vector3.new(scale, 1, scale), CFrame.new(position + Vector3.new(0, trunkHeight / 2, 0)), COLORS.Trunk, folder)
 
-	local leaves = makePart(
-		"Leaves",
-		Vector3.one * 12 * scale,
-		CFrame.new(position + Vector3.new(0, trunkHeight + 3 * scale, 0)),
-		COLORS.Leaves,
-		folder
-	)
-	leaves.Shape = Enum.PartType.Ball
-	leaves.Material = Enum.Material.Grass
-
-	local top = makePart(
-		"Leaves",
-		Vector3.one * 8 * scale,
-		CFrame.new(position + Vector3.new(1.5 * scale, trunkHeight + 8 * scale, -1 * scale)),
-		COLORS.Leaves,
-		folder
-	)
-	top.Shape = Enum.PartType.Ball
-	top.Material = Enum.Material.Grass
+	local y = trunkHeight
+	local leaves = {
+		{ size = Vector3.new(12, 5, 12), offset = Vector3.new(0, 2.5, 0), color = COLORS.LeavesB },
+		{ size = Vector3.new(9, 4, 9), offset = Vector3.new(0.5, 6.5, -0.5), color = COLORS.LeavesA },
+		{ size = Vector3.new(5, 3, 5), offset = Vector3.new(-0.5, 10, 0.5), color = COLORS.LeavesC },
+		{ size = Vector3.new(4, 3, 4), offset = Vector3.new(5, 3.5, 4), color = COLORS.LeavesA },
+	}
+	for _, leaf in ipairs(leaves) do
+		makePart("Leaves", leaf.size * scale, CFrame.new(position + Vector3.new(0, y, 0) + leaf.offset * scale), leaf.color, folder)
+	end
 end
 
 local function createTrees(map: Folder)
@@ -323,7 +418,6 @@ local function createTreadmill(cframe: CFrame, base: Model)
 	local model = Instance.new("Model")
 	model.Name = "Treadmill"
 	local belt = makePart("Zone", Vector3.new(10, 0.6, 20), cframe * CFrame.new(0, 0.3, 0), Color3.fromRGB(45, 45, 50), model)
-	belt.Material = Enum.Material.Fabric
 	for _, side in ipairs({ -5.5, 5.5 }) do
 		tint(makePart("Rail", Vector3.new(1, 1.2, 20), cframe * CFrame.new(side, 0.6, 0), COLORS.WoodPost, model))
 		tint(makePart("Handle", Vector3.new(0.6, 3.5, 0.6), cframe * CFrame.new(side, 2.3, -9), COLORS.WoodPost, model))
@@ -338,7 +432,6 @@ local function createBench(cframe: CFrame, base: Model)
 	local model = Instance.new("Model")
 	model.Name = "Bench"
 	local mat = makePart("Zone", Vector3.new(12, 0.3, 16), cframe * CFrame.new(0, 0.15, 0), Color3.fromRGB(45, 45, 50), model)
-	mat.Material = Enum.Material.Fabric
 	tint(makePart("Seat", Vector3.new(3, 1, 9), cframe * CFrame.new(0, 2, 1), COLORS.WoodPost, model))
 	for _, z in ipairs({ -2.5, 4.5 }) do
 		tint(makePart("Leg", Vector3.new(2.4, 1.6, 1), cframe * CFrame.new(0, 0.8, z), COLORS.WoodPost, model))
@@ -396,13 +489,10 @@ local function createShop(cframe: CFrame, parent: Instance)
 	local dark = COLORS.WoodPost
 
 	local counter = makePart("Counter", Vector3.new(12, 3.5, 3), cframe * CFrame.new(0, 1.75, -1.5), wood, model)
-	counter.Material = Enum.Material.WoodPlanks
-	local top = makePart("CounterTop", Vector3.new(12.6, 0.4, 3.6), cframe * CFrame.new(0, 3.7, -1.5), dark, model)
-	top.Material = Enum.Material.Wood
-	local back = makePart("BackWall", Vector3.new(12, 8, 0.8), cframe * CFrame.new(0, 4, 4), wood, model)
-	back.Material = Enum.Material.WoodPlanks
+	makePart("CounterTop", Vector3.new(12.6, 0.4, 3.6), cframe * CFrame.new(0, 3.7, -1.5), dark, model)
+	makePart("BackWall", Vector3.new(12, 8, 0.8), cframe * CFrame.new(0, 4, 4), wood, model)
 	for _, y in ipairs({ 3.5, 6 }) do
-		makePart("Shelf", Vector3.new(11, 0.3, 1.6), cframe * CFrame.new(0, y, 3), dark, model).Material = Enum.Material.Wood
+		makePart("Shelf", Vector3.new(11, 0.3, 1.6), cframe * CFrame.new(0, y, 3), dark, model)
 	end
 	-- Marchandise sur les étagères (petites caisses et sacs colorés).
 	local goods = { Color3.fromRGB(255, 200, 40), Color3.fromRGB(90, 200, 255), Color3.fromRGB(255, 110, 110), Color3.fromRGB(130, 230, 110) }
@@ -413,16 +503,13 @@ local function createShop(cframe: CFrame, parent: Instance)
 	end
 	for _, x in ipairs({ -6, 6 }) do
 		for _, z in ipairs({ -3, 4 }) do
-			local post = makePart("Post", Vector3.new(9, 0.7, 0.7), cframe * CFrame.new(x, 4.5, z) * FLAT, dark, model)
-			post.Shape = Enum.PartType.Cylinder
-			post.Material = Enum.Material.Wood
+			makePart("Post", Vector3.new(0.8, 9, 0.8), cframe * CFrame.new(x, 4.5, z), dark, model)
 		end
 	end
 	-- Auvent rayé rouge / blanc, incliné vers l'avant.
 	for index = 0, 6 do
 		local color = if index % 2 == 0 then Color3.fromRGB(230, 50, 50) else Color3.fromRGB(250, 245, 235)
-		local stripe = makePart("Awning", Vector3.new(2, 0.3, 9), cframe * CFrame.new(-6 + index * 2, 9.4, 0.4) * CFrame.Angles(math.rad(-14), 0, 0), color, model)
-		stripe.Material = Enum.Material.Fabric
+		makePart("Awning", Vector3.new(2, 0.3, 9), cframe * CFrame.new(-6 + index * 2, 9.4, 0.4) * CFrame.Angles(math.rad(-14), 0, 0), color, model)
 	end
 	makeGhost(makePart("Hitbox", Vector3.new(12, 1, 1), cframe * CFrame.new(0, 2, -3.5), wood, model))
 	local hitbox = model:FindFirstChild("Hitbox") :: BasePart
@@ -442,7 +529,6 @@ local function createFusionMachine(cframe: CFrame, parent: Instance)
 
 	local platform = makePart("Platform", Vector3.new(1, 12, 12), cframe * CFrame.new(0, 0.5, 0.5) * FLAT, darkMetal, model)
 	platform.Shape = Enum.PartType.Cylinder
-	platform.Material = Enum.Material.DiamondPlate
 
 	for _, x in ipairs({ -3.6, 3.6 }) do
 		local tube = makePart("Tube", Vector3.new(8, 3, 3), cframe * CFrame.new(x, 5, 2) * FLAT, Color3.fromRGB(200, 230, 255), model)
@@ -455,12 +541,10 @@ local function createFusionMachine(cframe: CFrame, parent: Instance)
 		for _, y in ipairs({ 1.2, 9.2 }) do
 			local cap = makePart("Cap", Vector3.new(0.8, 3.6, 3.6), cframe * CFrame.new(x, y, 2) * FLAT, metal, model)
 			cap.Shape = Enum.PartType.Cylinder
-			cap.Material = Enum.Material.Metal
 		end
 		-- Tuyau entre la cuve et la chambre centrale.
 		local pipe = makePart("Pipe", Vector3.new(3.4, 0.6, 0.6), cframe * CFrame.new(x / 2, 8.4, 2), metal, model)
 		pipe.Shape = Enum.PartType.Cylinder
-		pipe.Material = Enum.Material.Metal
 	end
 
 	local chamber = makePart("Chamber", Vector3.new(5, 5, 5), cframe * CFrame.new(0, 6, 2), Color3.fromRGB(220, 235, 255), model)
@@ -487,11 +571,9 @@ local function createFusionMachine(cframe: CFrame, parent: Instance)
 	light.Parent = core
 	local stand = makePart("Stand", Vector3.new(3.5, 1.4, 1.4), cframe * CFrame.new(0, 2.4, 2) * FLAT, metal, model)
 	stand.Shape = Enum.PartType.Cylinder
-	stand.Material = Enum.Material.Metal
 
 	-- Console de commande devant la machine.
 	local console = makePart("Console", Vector3.new(5, 3, 2), cframe * CFrame.new(0, 1.5, -3.5), darkMetal, model)
-	console.Material = Enum.Material.Metal
 	local screen = makePart("Screen", Vector3.new(4, 1.4, 0.2), cframe * CFrame.new(0, 3.2, -3.6) * CFrame.Angles(math.rad(-30), 0, 0), Color3.fromRGB(80, 255, 140), model)
 	screen.Material = Enum.Material.Neon
 	for index, color in ipairs({ Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 220, 60), Color3.fromRGB(90, 200, 255) }) do
@@ -519,8 +601,7 @@ local function createKiosks(map: Folder)
 		local origin = CFrame.lookAt(position, Vector3.zero)
 		local kiosk = Instance.new("Model")
 		kiosk.Name = "Kiosk_" .. (pair + 1)
-		local floor = makePart("Floor", Vector3.new(36, 0.2, 18), origin * CFrame.new(0, 0.1, 0.5), Color3.fromRGB(150, 140, 125), kiosk)
-		floor.Material = Enum.Material.Cobblestone
+		makePart("Floor", Vector3.new(36, 0.2, 18), origin * CFrame.new(0, 0.1, 0.5), COLORS.Stone, kiosk)
 		createShop(origin * CFrame.new(-9, 0.2, 0), kiosk)
 		createFusionMachine(origin * CFrame.new(9, 0.2, 0), kiosk)
 		kiosk.Parent = folder
@@ -538,26 +619,23 @@ local function createLeaderboard(map: Folder)
 	local model = Instance.new("Model")
 	model.Name = "Leaderboard"
 
-	local floor = makePart("Floor", Vector3.new(40, 0.2, 14), origin * CFrame.new(0, 0.1, 0), Color3.fromRGB(150, 140, 125), model)
-	floor.Material = Enum.Material.Cobblestone
+	makePart("Floor", Vector3.new(40, 0.2, 14), origin * CFrame.new(0, 0.1, 0), COLORS.Stone, model)
 	for _, x in ipairs({ -16.5, 16.5 }) do
-		local post = makePart("Post", Vector3.new(2, 27, 2), origin * CFrame.new(x, 13.5, 0), COLORS.WoodPost, model)
-		post.Material = Enum.Material.Wood
+		makePart("Post", Vector3.new(2, 27, 2), origin * CFrame.new(x, 13.5, 0), COLORS.WoodPost, model)
 	end
 	-- Cadre en bois autour de l'écran (30 x 18 studs).
-	local frame = makePart("Frame", Vector3.new(32, 20, 1), origin * CFrame.new(0, 15, 0), COLORS.WoodRail, model)
-	frame.Material = Enum.Material.WoodPlanks
+	makePart("Frame", Vector3.new(32, 20, 1), origin * CFrame.new(0, 15, 0), COLORS.WoodRail, model)
+	-- Écran lisse : le SurfaceGui du classement s'affiche dessus.
 	local screen = makePart("Screen", Vector3.new(30, 18, 1.4), origin * CFrame.new(0, 15, 0), Color3.fromRGB(40, 32, 60), model)
 	screen.Material = Enum.Material.SmoothPlastic
-	local roof = makePart("Roof", Vector3.new(36, 1, 4), origin * CFrame.new(0, 25.5, 0), COLORS.WoodPost, model)
-	roof.Material = Enum.Material.Wood
+	screen.FrontSurface = Enum.SurfaceType.Smooth
+	screen.BackSurface = Enum.SurfaceType.Smooth
+	makePart("Roof", Vector3.new(36, 1, 4), origin * CFrame.new(0, 25.5, 0), COLORS.WoodPost, model)
 	-- Trophée doré au sommet.
 	local gold = Color3.fromRGB(255, 200, 40)
 	local cup = makePart("Trophy", Vector3.new(3.2, 3.2, 3.2), origin * CFrame.new(0, 28.6, 0), gold, model)
 	cup.Shape = Enum.PartType.Ball
-	cup.Material = Enum.Material.Foil
-	local foot = makePart("TrophyFoot", Vector3.new(2.2, 1, 2.2), origin * CFrame.new(0, 26.5, 0), gold, model)
-	foot.Material = Enum.Material.Foil
+	makePart("TrophyFoot", Vector3.new(2.2, 1, 2.2), origin * CFrame.new(0, 26.5, 0), gold, model)
 	model.Parent = map
 end
 
@@ -571,23 +649,23 @@ local function createPallet(cframe: CFrame, parent: Instance)
 	local dark = COLORS.WoodPost
 	local half = PALLET_SIZE / 2
 	for _, x in ipairs({ -half + 0.5, 0, half - 0.5 }) do
-		makePart("Runner", Vector3.new(1, 0.5, PALLET_SIZE), cframe * CFrame.new(x, 0.25, 0), dark, model).Material = Enum.Material.Wood
+		makePart("Runner", Vector3.new(1, 0.5, PALLET_SIZE), cframe * CFrame.new(x, 0.25, 0), dark, model)
 	end
 	for index = 0, 4 do
 		local z = -half + 0.8 + index * (PALLET_SIZE - 1.6) / 4
-		makePart("Board", Vector3.new(PALLET_SIZE, 0.3, 1.4), cframe * CFrame.new(0, 0.65, z), light, model).Material = Enum.Material.WoodPlanks
+		makePart("Board", Vector3.new(PALLET_SIZE, 0.3, 1.4), cframe * CFrame.new(0, 0.65, z), light, model)
 	end
 	-- Plateau plein (sous les lattes) pour que les petits objets ne passent pas entre elles.
-	makePart("Deck", Vector3.new(PALLET_SIZE - 0.2, 0.2, PALLET_SIZE - 0.2), cframe * CFrame.new(0, 0.55, 0), dark, model).Material = Enum.Material.Wood
+	makePart("Deck", Vector3.new(PALLET_SIZE - 0.2, 0.2, PALLET_SIZE - 0.2), cframe * CFrame.new(0, 0.55, 0), dark, model)
 	-- Petit rebord.
 	for _, side in ipairs({ -1, 1 }) do
-		makePart("Lip", Vector3.new(PALLET_SIZE, 0.45, 0.3), cframe * CFrame.new(0, 1, side * (half - 0.15)), dark, model).Material = Enum.Material.Wood
-		makePart("Lip", Vector3.new(0.3, 0.45, PALLET_SIZE), cframe * CFrame.new(side * (half - 0.15), 1, 0), dark, model).Material = Enum.Material.Wood
+		makePart("Lip", Vector3.new(PALLET_SIZE, 0.45, 0.3), cframe * CFrame.new(0, 1, side * (half - 0.15)), dark, model)
+		makePart("Lip", Vector3.new(0.3, 0.45, PALLET_SIZE), cframe * CFrame.new(side * (half - 0.15), 1, 0), dark, model)
 	end
 	model.Parent = parent
 end
 
-local function createBase(index: number, map: Folder, paths: Folder): Model
+local function createBase(index: number, map: Folder): Model
 	local angle = (index - 1) * (math.pi * 2 / ARENA.BaseCount)
 	local position = Vector3.new(math.cos(angle) * ARENA.BaseRingRadius, 0, math.sin(angle) * ARENA.BaseRingRadius)
 	-- Repère local de la base : -Z (LookVector) pointe vers le trou noir, Y = 0 au niveau du sol.
@@ -595,14 +673,27 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	local size = ARENA.BaseSize
 	local color = Config.BaseColors[(index - 1) % #Config.BaseColors + 1]
 
-	createPath(position.Unit, paths)
-
 	local base = Instance.new("Model")
 	base.Name = "Base_" .. index
 	base:SetAttribute("BaseIndex", index)
 
-	local platform = makePart("BasePart", size, origin * CFrame.new(0, size.Y / 2, 0), COLORS.BaseGrass, base)
-	platform.Material = Enum.Material.Grass
+	-- Plateforme invisible (collisions, repère des familiers) recouverte d'un damier de dalles visuelles.
+	local platform = makePart("BasePart", size, origin * CFrame.new(0, size.Y / 2, 0), COLORS.GrassA, base)
+	platform.Transparency = 1
+	local tiles = Instance.new("Folder")
+	tiles.Name = "Floor"
+	local count = math.floor(size.X / BASE_TILE)
+	for gx = 0, count - 1 do
+		for gz = 0, count - 1 do
+			local x = (gx + 0.5) * BASE_TILE - size.X / 2
+			local z = (gz + 0.5) * BASE_TILE - size.Z / 2
+			local tileColor = if (gx + gz) % 2 == 0 then COLORS.GrassA else COLORS.GrassB
+			local tile = makePart("Tile", Vector3.new(BASE_TILE, size.Y, BASE_TILE), origin * CFrame.new(x, size.Y / 2, z), tileColor, tiles)
+			tile.CastShadow = false
+			makeGhost(tile)
+		end
+	end
+	tiles.Parent = base
 
 	local top = size.Y -- hauteur du dessus de la plateforme
 
@@ -614,7 +705,6 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 	spawn.Size = Vector3.new(8, 1, 8)
 	spawn.CFrame = origin * CFrame.new(0, top + 0.5, 18)
 	spawn.Color = color
-	spawn.Material = Enum.Material.SmoothPlastic
 	-- Invisible : elle sert seulement de point d'apparition (le nom du joueur flotte au-dessus).
 	spawn.Transparency = 1
 	spawn.CanCollide = false
@@ -656,7 +746,6 @@ local function createBase(index: number, map: Folder, paths: Folder): Model
 
 	local half = size.X / 2 - 0.5
 	local gate = makePart("Gate", Vector3.new(FENCE_GAP, FENCE_HEIGHT - 0.5, 0.6), origin * CFrame.new(0, top + (FENCE_HEIGHT - 0.5) / 2, -half), COLORS.WoodRail, base)
-	gate.Material = Enum.Material.WoodPlanks
 	gate.Transparency = 1
 	makeGhost(gate)
 
@@ -727,6 +816,9 @@ function MapGenerator.generate(): { Model }
 	createKiosks(map)
 	createLeaderboard(map)
 
+	createFloor(map)
+	createWall(map)
+
 	local paths = Instance.new("Folder")
 	paths.Name = "Paths"
 	paths.Parent = map
@@ -741,7 +833,7 @@ function MapGenerator.generate(): { Model }
 
 	local bases = {}
 	for index = 1, ARENA.BaseCount do
-		table.insert(bases, createBase(index, map, paths))
+		table.insert(bases, createBase(index, map))
 	end
 
 	map.Parent = Workspace

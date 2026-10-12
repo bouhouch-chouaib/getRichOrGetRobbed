@@ -225,7 +225,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - `src/server` → `ServerScriptService.Server`
   - `Main.server.lua` : initialise tout, démarre la boucle en dernier.
   - `GameLoopManager` : timer + `ServerEvent` (`"StateChanged"`, `"Tick"`) ; publie `GameState` / `TimeRemaining` en attributs de `ReplicatedStorage`.
-  - `MapGenerator` : prairie, chemins de terre, arbres, trou noir, dôme, 8 bases clôturées en bois.
+  - `MapGenerator` : arène ronde en damier de dalles à tenons (sol invisible dessous), mur d'enceinte circulaire, chemins
+    en dalles beiges, arbres en cubes, trou noir, dôme, 8 bases clôturées (clôtures de ranch en X). Style : docs/DIRECTION_ARTISTIQUE.md.
   - `DayNightController` : nuit pendant le Feeding, jour pendant la Digestion (transition de 4 s).
   - `BaseManager` : une base par joueur (`BaseIndex` sur le Player, `OwnerName` sur la base), spawn sur sa base.
   - `ItemSpawner` : objets dans les bases occupées pendant le Feeding.
