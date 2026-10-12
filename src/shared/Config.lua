@@ -158,7 +158,6 @@ export type MonetizationItem = {
 	Description: string,
 	Price: number,
 	Pulls: number?, -- produits "tirages" : nombre de tirages accordés
-	Keys: number?, -- produits "clés" : nombre de clés accordées (Config.Keys)
 }
 
 Config.Monetization = {
@@ -173,7 +172,6 @@ Config.Monetization = {
 		{ Key = "ServerLuck", Id = 3717917081, Icon = "🌟", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
 		{ Key = "Pull1", Id = 3717917143, Icon = "🎲", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
 		{ Key = "Pull10", Id = 3717917239, Icon = "🎰", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
-		{ Key = "Keys3", Id = 0, Icon = "🗝", Name = "3 CLÉS", Description = "Chaque clé ouvre une base fermée pendant 10 s, même si le propriétaire la referme.", Price = 99, Keys = 3 },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,
 	VipMoneyMultiplier = 1.25,
@@ -231,24 +229,6 @@ Config.Lock = {
 	LongDuration = 10, -- avec l'amélioration "LongLock"
 	ButtonRadius = 4,
 }
-
--- Clés : ouvrent une base adverse FERMÉE pendant Duration secondes, même si son propriétaire la referme
--- (server/LockController). Une clé est consommée à chaque usage. Achat : boutique d'argent ou pack Robux ("Keys3").
-Config.Keys = {
-	Duration = 10, -- secondes d'ouverture forcée
-	MaxOwned = 20, -- au plus 20 clés en réserve
-	-- Prix en argent = le plus grand de MinPrice et IncomeSeconds secondes de revenu du joueur : reste un vrai choix,
-	-- du début de partie aux familiers Sigma.
-	MinPrice = 5000,
-	IncomeSeconds = 180,
-	UseDistance = 14, -- distance max au portail pour utiliser une clé (studs, vérifiée par le serveur)
-	HoldDuration = 0.6, -- temps d'appui sur [E] pour crocheter
-}
-
--- Prix d'une clé en argent pour un joueur qui gagne `income` $/s.
-function Config.GetKeyPrice(income: number): number
-	return math.max(Config.Keys.MinPrice, math.floor(income * Config.Keys.IncomeSeconds))
-end
 
 -- Vol de familiers : [E] sur un familier d'une base adverse déverrouillée, à ramener dans sa propre base.
 Config.Steal = {

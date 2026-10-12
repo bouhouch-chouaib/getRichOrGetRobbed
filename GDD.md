@@ -116,13 +116,6 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   voleur ; attribut `CarryingFrom` = UserId de la victime. Chez la victime seulement (`client/PetFollow`) : bulle visible et voleur
   entouré de rouge (Highlight, visible à travers les murs). Le serveur vérifie que c'est la victime, vivante, à moins de 18 studs
   (`Config.Steal.RecoverMaxDistance`) → le familier rentre (résultat "Recovered").
-- **Clés** (`Config.Keys`, 12 oct.) : ouvrent une base adverse **fermée** pendant 10 s, même si le propriétaire repasse
-  sur le bouton (`LockController` : `forcedUntil`, attribut de base `ForcedOpenUntil`, pas d'expulsion, vol possible ;
-  ensuite la base se referme si le compte à rebours du propriétaire tourne encore). Bulle [E] (0,6 s) créée par
-  `client/BaseKeys` sur le portail, `Remotes.UseKey(base)` vérifié par le serveur (distance 14 studs, clé en réserve).
-  Réserve sauvegardée (`keys`, attribut `Keys`). Achat : boutique d'argent (`Remotes.BuyKey`, prix =
-  max(5 000 $, 180 s de revenu) via `Config.GetKeyPrice`, réserve plafonnée à 20) ou produit Robux "Keys3" (3 clés,
-  jamais plafonné). Le propriétaire et l'utilisateur sont prévenus (`StealNotice` "KeyUsed" / "KeyOpened").
 - **Armes de PvP** (`WeaponController`, réglages `Config.Weapons`, achetées dans la boutique d'argent : `WeaponSlap` Gant à claques
   2 K$, `WeaponPan` Poêle cosmique 250 K$, `WeaponShockwave` Bâton à ondes 20 M$) : un `Tool` par arme possédée (niveau 1 de
   l'amélioration, donc sauvegardé), redonné à chaque réapparition. Clic → le serveur choisit la cible (le plus proche devant soi,

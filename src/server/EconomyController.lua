@@ -75,21 +75,8 @@ local function onBuy(player: Player, itemId: unknown)
 	end
 end
 
--- Clé achetée avec l'argent du jeu (prix selon le revenu du joueur, voir Config.GetKeyPrice).
-local function onBuyKey(player: Player)
-	if SessionData.GetKeys(player) >= Config.Keys.MaxOwned then
-		return
-	end
-	local price = Config.GetKeyPrice(EconomyController.GetIncome(player))
-	if SessionData.SpendMoney(player, price) then
-		SessionData.AddKeys(player, 1)
-		print(string.format("[Shop] %s a acheté une clé (%d $)", player.Name, price))
-	end
-end
-
 function EconomyController.Init()
 	Remotes.BuyUpgrade.OnServerEvent:Connect(onBuy)
-	Remotes.BuyKey.OnServerEvent:Connect(onBuyKey)
 
 	task.spawn(function()
 		while true do

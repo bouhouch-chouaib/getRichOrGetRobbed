@@ -32,7 +32,6 @@ export type PlayerData = {
 	pity: number,
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
-	keys: number, -- clés en réserve (Config.Keys)
 	receipts: { string }, -- derniers achats Robux accordés (PurchaseId) : jamais deux fois le même (MonetizationController)
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
 }
@@ -103,7 +102,6 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		upgrades = data.upgrades,
 		tutorialDone = data.tutorialDone,
 		receipts = data.receipts,
-		keys = data.keys,
 		session = session,
 	}
 end
@@ -269,7 +267,6 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	end
 	data.money = numberOr(saved.money, 0) + data.money
 	data.pity = numberOr(saved.pity, 0)
-	data.keys = math.max(math.floor(numberOr(saved.keys, 0)), 0) + data.keys
 	if type(saved.pets) == "table" then
 		for savedId, count in pairs(saved.pets) do
 			-- Les anciens Id (familiers renommés) sont convertis : le joueur garde ses familiers.
@@ -368,7 +365,6 @@ local function sync(player: Player)
 	player:SetAttribute("Equipped", table.concat(data.equipped, ","))
 	player:SetAttribute("EquipSlots", data.equipSlots)
 	player:SetAttribute("TutorialDone", data.tutorialDone)
-	player:SetAttribute("Keys", data.keys)
 	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
 	for id, level in pairs(data.upgrades) do
 		player:SetAttribute("Upgrade_" .. id, level)
@@ -466,7 +462,6 @@ local function onPlayerAdded(player: Player)
 		pity = 0,
 		upgrades = {},
 		tutorialDone = false,
-		keys = 0,
 		receipts = {},
 		loaded = false,
 	}
@@ -592,31 +587,6 @@ function SessionData.AddReceipt(player: Player, purchaseId: string)
 end
 
 -- Tutoriel terminé ou passé (demandé par le client : sans enjeu, aucune vérification nécessaire).
--- Clés (Config.Keys). Le plafond Config.Keys.MaxOwned ne s'applique qu'aux achats avec l'argent (EconomyController) :
--- des clés payées en Robux ne sont jamais refusées.
-function SessionData.GetKeys(player: Player): number
-	local data = storage[player]
-	return if data then data.keys else 0
-end
-
-function SessionData.AddKeys(player: Player, amount: number)
-	local data = storage[player]
-	if data then
-		data.keys += amount
-		sync(player)
-	end
-end
-
-function SessionData.SpendKey(player: Player): boolean
-	local data = storage[player]
-	if not data or data.keys < 1 then
-		return false
-	end
-	data.keys -= 1
-	sync(player)
-	return true
-end
-
 function SessionData.SetTutorialDone(player: Player)
 	local data = storage[player]
 	if data and not data.tutorialDone then

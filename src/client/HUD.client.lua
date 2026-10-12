@@ -388,38 +388,6 @@ for index, item in ipairs(Config.Shop) do
 	buyButtons[item.Id] = buy
 end
 
--- Clé : achat à l'unité (prix selon le revenu du joueur, Config.GetKeyPrice), affichée après les améliorations.
-local keyCard = makeCard(shopList, 96, #Config.Shop + 1)
-local keyName = text(keyCard, "🗝 CLÉ", 24, Color3.fromRGB(255, 200, 50))
-keyName.Position = UDim2.fromOffset(14, 8)
-keyName.Size = UDim2.new(1, -180, 0, 30)
-keyName.TextXAlignment = Enum.TextXAlignment.Left
-local keyCount = text(keyCard, "", 16, Color3.fromRGB(120, 210, 255))
-keyCount.AnchorPoint = Vector2.new(1, 0)
-keyCount.Position = UDim2.new(1, -12, 0, 4)
-keyCount.Size = UDim2.fromOffset(140, 18)
-keyCount.ZIndex = 2
-do
-	local description = Instance.new("TextLabel")
-	description.BackgroundTransparency = 1
-	description.Font = BODY_FONT
-	description.TextSize = 16
-	description.TextColor3 = Color3.fromRGB(60, 50, 40)
-	description.TextWrapped = true
-	description.TextXAlignment = Enum.TextXAlignment.Left
-	description.TextYAlignment = Enum.TextYAlignment.Top
-	description.Text = string.format("Ouvre une base FERMÉE pendant %d s, même si son propriétaire la referme. [E] devant son portail.", Config.Keys.Duration)
-	description.Position = UDim2.fromOffset(14, 42)
-	description.Size = UDim2.new(1, -180, 0, 46)
-	description.Parent = keyCard
-end
-local keyBuy = chunkyButton(keyCard, "", UDim2.fromOffset(140, 56), Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40), 26)
-keyBuy.AnchorPoint = Vector2.new(1, 0.5)
-keyBuy.Position = UDim2.new(1, -12, 0.5, 8)
-keyBuy.Activated:Connect(function()
-	Remotes.BuyKey:FireServer()
-end)
-
 ----------------------------------------------------------------------
 -- Fenêtre Familiers
 ----------------------------------------------------------------------
@@ -817,20 +785,6 @@ local function updatePhase()
 end
 
 local function updateShop(money: number)
-	local keys = numberAttribute("Keys")
-	local keyPrice = Config.GetKeyPrice(numberAttribute("Income"))
-	keyCount.Text = string.format("TU EN AS : %d", keys)
-	local keyCaption = keyBuy:FindFirstChild("Caption") :: TextLabel
-	local keyGradient = keyBuy:FindFirstChildOfClass("UIGradient") :: UIGradient
-	if keys >= Config.Keys.MaxOwned then
-		keyCaption.Text = "PLEIN"
-		keyGradient.Color = ColorSequence.new(Color3.fromRGB(190, 190, 190), Color3.fromRGB(120, 120, 120))
-	else
-		keyCaption.Text = formatMoney(keyPrice)
-		keyGradient.Color = if money >= keyPrice
-			then ColorSequence.new(Color3.fromRGB(120, 240, 90), Color3.fromRGB(40, 170, 40))
-			else ColorSequence.new(Color3.fromRGB(255, 110, 110), Color3.fromRGB(190, 40, 40))
-	end
 	for _, item in ipairs(Config.Shop) do
 		local buy = buyButtons[item.Id]
 		local caption = buy:FindFirstChild("Caption") :: TextLabel
@@ -918,10 +872,6 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 		Toast.show(string.format("RÉCUPÉRÉ : %s !", pet), Color3.fromRGB(110, 240, 70))
 	elseif kind == "Returned" then
 		Toast.show(string.format("DE RETOUR DANS TA BASE : %s !", pet), Color3.fromRGB(110, 240, 70))
-	elseif kind == "KeyUsed" then
-		Toast.show(string.format("🗝 %s A OUVERT TA BASE AVEC UNE CLÉ ! (%d s)", thief, Config.Keys.Duration), Color3.fromRGB(255, 90, 90))
-	elseif kind == "KeyOpened" then
-		Toast.show(string.format("🗝 BASE OUVERTE PENDANT %d s : VOLE VITE !", Config.Keys.Duration), Color3.fromRGB(255, 220, 60))
 	elseif kind == "Announce" then
 		local entry = PetCatalog.ById[petId]
 		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
