@@ -16,6 +16,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Joints = require(script.Parent.Joints)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
 
@@ -24,6 +25,12 @@ local DEFAULT_RUN = "rbxassetid://913376220" -- course R15 de Roblox (si le scri
 local POPUP_DISTANCE = 90
 
 local player = Players.LocalPlayer
+
+-- Plus la station est haute en niveau, plus on court / pousse vite.
+local function animSpeed(target: Player, upgrade: string): number
+	local level = target:GetAttribute("Upgrade_" .. upgrade)
+	return 1 + TRAINING.AnimSpeedPerLevel * math.max((if type(level) == "number" then level else 1) - 1, 0)
+end
 
 ----------------------------------------------------------------------
 -- Bouton ARRÊTER + saut
@@ -106,7 +113,7 @@ local function updateLocalTraining()
 			track.Priority = Enum.AnimationPriority.Action
 			track.Looped = true
 			track:Play(0.2)
-			track:AdjustSpeed(TRAINING.RunAnimSpeed)
+			track:AdjustSpeed(TRAINING.RunAnimSpeed * animSpeed(player, "Treadmill"))
 			runTrack = track
 		end
 	elseif runTrack then
@@ -235,16 +242,8 @@ local function stopLifter(target: Player)
 	-- Les articulations reprennent les animations normales d'elles-mêmes (Transform est réécrit à chaque image).
 end
 
--- Articulation animable : Motor6D (ancien squelette) ou AnimationConstraint (nouveau squelette des avatars Roblox).
-type Joint = { Transform: CFrame }
-local function motor(character: Model, partName: string, motorName: string): Joint?
-	local part = character:FindFirstChild(partName)
-	local joint = part and part:FindFirstChild(motorName)
-	if joint and (joint:IsA("Motor6D") or joint:IsA("AnimationConstraint")) then
-		return joint :: any
-	end
-	return nil
-end
+local motor = Joints.get
+
 
 -- Après les animations de Roblox (Stepped) : on impose la pose du développé couché.
 RunService.Stepped:Connect(function()
@@ -255,7 +254,8 @@ RunService.Stepped:Connect(function()
 			continue
 		end
 		-- push : 0 = barre sur la poitrine, 1 = bras tendus.
-		local phase = ((now - lifter.start) / TRAINING.BenchRepTime) % 1
+		local repTime = TRAINING.BenchRepTime / animSpeed(target, "Bench")
+		local phase = ((now - lifter.start) / repTime) % 1
 		local push = 0.5 - 0.5 * math.cos(phase * math.pi * 2)
 
 		-- Bras vers le ciel (l'avant du personnage allongé), coudes pliés quand la barre descend.
@@ -300,7 +300,7 @@ RunService.Stepped:Connect(function()
 		end
 
 		-- Grognement d'effort au début de chaque poussée.
-		local rep = math.floor((now - lifter.start) / TRAINING.BenchRepTime + 0.5)
+		local rep = math.floor((now - lifter.start) / repTime + 0.5)
 		if rep > lifter.lastRep then
 			lifter.lastRep = rep
 			local head = character:FindFirstChild("Head")

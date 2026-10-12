@@ -24,6 +24,7 @@
         "StealResult": { "$className": "RemoteEvent" },
         "StealPet": { "$className": "RemoteEvent" },
         "StopTraining": { "$className": "RemoteEvent" },
+        "WeaponFx": { "$className": "RemoteEvent" },
         "StealNotice": { "$className": "RemoteEvent" },
         "TutorialDone": { "$className": "RemoteEvent" }
       }

@@ -368,13 +368,31 @@ Remotes.ItemGrabbed.OnClientEvent:Connect(function(item: Instance)
 	end
 end)
 
-Remotes.Knockback.OnClientEvent:Connect(function(velocity: Vector3)
+local tumbleUntil = 0
+
+Remotes.Knockback.OnClientEvent:Connect(function(velocity: Vector3, tumble: number?)
 	releaseAll()
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if root and root:IsA("BasePart") then
 		root.AssemblyLinearVelocity = Vector3.zero
 		root:ApplyImpulse(velocity * root.AssemblyMass)
+		-- Coup d'arme : KO cartoon, le personnage part en vrille puis se relève.
+		if type(tumble) == "number" and humanoid then
+			humanoid.PlatformStand = true
+			local flat = Vector3.new(velocity.X, 0, velocity.Z)
+			local axis = if flat.Magnitude > 0.01 then flat.Unit:Cross(Vector3.yAxis) else Vector3.xAxis
+			root.AssemblyAngularVelocity = axis * -12
+			local token = os.clock() + tumble
+			tumbleUntil = token
+			task.delay(tumble, function()
+				if tumbleUntil == token and humanoid.Parent then
+					humanoid.PlatformStand = false
+					humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+				end
+			end)
+		end
 	end
 end)
 

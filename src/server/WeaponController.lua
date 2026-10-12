@@ -2,9 +2,11 @@
 -- WeaponController : armes de PvP achetées dans la boutique (Config.Shop, Id "Weapon..."), réglages Config.Weapons.
 --   - Une arme achetée est un Tool rangé dans l'inventaire du joueur (barre en bas, touches 1, 2, 3), redonné à
 --     chaque réapparition. La possession est le niveau d'amélioration (1 = achetée) : déjà sauvegardé par SessionData.
---   - Clic avec l'arme en main : le SERVEUR cherche la cible (le joueur le plus proche devant soi, ou tous ceux autour
---     pour une arme de zone), l'éjecte comme le dôme (assis + Remotes.Knockback appliqué par son client) et lui fait
---     tout lâcher (ItemInteraction.ReleaseHeld) : un voleur touché perd le familier qu'il portait (StealController).
+--   - Clic avec l'arme en main : tous les clients animent le geste (Remotes.WeaponFx "Swing", client/WeaponFx). Au moment
+--     fort du geste (StrikeAt), le SERVEUR cherche la cible (le joueur le plus proche devant soi, ou tous ceux autour
+--     pour une arme de zone), l'éjecte (Remotes.Knockback avec durée de KO : son client le fait tourner dans les airs) et
+--     lui fait tout lâcher (ItemInteraction.ReleaseHeld) : un voleur touché perd le familier qu'il portait (StealController).
+--     Impact vu par tous : onomatopée, étoiles (Remotes.WeaponFx "Hit").
 --   - Mains : une arme en main empêche de ramasser un objet ou de voler (ItemInteraction, StealController) ; porter
 --     un objet ou un familier volé empêche de sortir une arme (rangée tout de suite ici).
 
@@ -132,8 +134,9 @@ local function getRoot(character: Model?): BasePart?
 	return if root and root:IsA("BasePart") then root else nil
 end
 
--- Éjecte la victime loin de "from" et lui fait tout lâcher.
-local function hit(victim: Player, from: Vector3, def: Config.WeaponDef)
+-- Éjecte la victime loin de "from" et lui fait tout lâcher. Son client la fait tourner dans les airs pendant
+-- def.Stun secondes (Remotes.Knockback avec durée de KO) ; tout le monde voit l'impact (Remotes.WeaponFx "Hit").
+local function hit(victim: Player, from: Vector3, weaponId: string, def: Config.WeaponDef)
 	local character = victim.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	local root = getRoot(character)
@@ -147,11 +150,11 @@ local function hit(victim: Player, from: Vector3, def: Config.WeaponDef)
 	if character then
 		humanoid:UnequipTools()
 	end
-	humanoid.Sit = true
 	root.CFrame += Vector3.new(0, 1, 0)
 	local flat = Vector3.new(root.Position.X - from.X, 0, root.Position.Z - from.Z)
 	local direction = if flat.Magnitude > 0.01 then flat.Unit else root.CFrame.LookVector * -1
-	Remotes.Knockback:FireClient(victim, direction * def.Push + Vector3.new(0, def.Up, 0))
+	Remotes.Knockback:FireClient(victim, direction * def.Push + Vector3.new(0, def.Up, 0), def.Stun)
+	Remotes.WeaponFx:FireAllClients("Hit", victim, weaponId)
 
 	local sound = Instance.new("Sound")
 	sound.SoundId = HIT_SOUND
@@ -160,12 +163,6 @@ local function hit(victim: Player, from: Vector3, def: Config.WeaponDef)
 	sound:Play()
 	sound.Ended:Once(function()
 		sound:Destroy()
-	end)
-
-	task.delay(def.Stun, function()
-		if humanoid.Parent then
-			humanoid.Sit = false
-		end
 	end)
 end
 
@@ -193,27 +190,11 @@ local function shockwaveEffect(position: Vector3, radius: number)
 	tween:Play()
 end
 
-local function onActivated(player: Player, tool: Tool, def: Config.WeaponDef)
+-- Le coup part au moment fort du geste (def.StrikeAt) : on cherche la cible à cet instant-là.
+local function strike(player: Player, tool: Tool, weaponId: string, def: Config.WeaponDef)
 	local root = getRoot(player.Character)
-	if not root or tool.Parent ~= player.Character or not tool.Enabled then
+	if not root or tool.Parent ~= player.Character then
 		return
-	end
-	tool.Enabled = false
-	task.delay(def.Cooldown, function()
-		tool.Enabled = true
-	end)
-
-	-- Animation de coup du script "Animate" de Roblox (StringValue "toolanim").
-	local anim = Instance.new("StringValue")
-	anim.Name = "toolanim"
-	anim.Value = "Slash"
-	anim.Parent = tool
-	task.delay(0.3, function()
-		anim:Destroy()
-	end)
-	local swing = tool:FindFirstChild("Swing", true)
-	if swing and swing:IsA("Sound") then
-		swing:Play()
 	end
 	if def.Area then
 		shockwaveEffect(root.Position, def.Range)
@@ -231,7 +212,7 @@ local function onActivated(player: Player, tool: Tool, def: Config.WeaponDef)
 			local distance = offset.Magnitude
 			if distance <= reach then
 				if def.Area then
-					hit(other, root.Position, def)
+					hit(other, root.Position, weaponId, def)
 				else
 					local flat = Vector3.new(offset.X, 0, offset.Z)
 					-- Devant soi (cône large) ; tout près, même un peu de côté.
@@ -245,8 +226,27 @@ local function onActivated(player: Player, tool: Tool, def: Config.WeaponDef)
 		end
 	end
 	if best then
-		hit(best, root.Position, def)
+		hit(best, root.Position, weaponId, def)
 	end
+end
+
+local function onActivated(player: Player, tool: Tool, weaponId: string, def: Config.WeaponDef)
+	local root = getRoot(player.Character)
+	if not root or tool.Parent ~= player.Character or not tool.Enabled then
+		return
+	end
+	tool.Enabled = false
+	task.delay(def.Cooldown, function()
+		tool.Enabled = true
+	end)
+
+	-- Le geste est animé par chaque client (client/WeaponFx), le son part avec lui.
+	Remotes.WeaponFx:FireAllClients("Swing", player, weaponId)
+	local swing = tool:FindFirstChild("Swing", true)
+	if swing and swing:IsA("Sound") then
+		swing:Play()
+	end
+	task.delay(def.SwingTime * def.StrikeAt, strike, player, tool, weaponId, def)
 end
 
 ----------------------------------------------------------------------
@@ -279,7 +279,7 @@ local function giveWeapons(player: Player)
 		if def and SessionData.GetUpgradeLevel(player, item.Id) >= 1 and not hasTool(player, item.Id) then
 			local tool = buildTool(item.Id)
 			tool.Activated:Connect(function()
-				onActivated(player, tool, def)
+				onActivated(player, tool, item.Id, def)
 			end)
 			tool.Parent = backpack
 		end

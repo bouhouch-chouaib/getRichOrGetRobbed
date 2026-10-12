@@ -43,7 +43,8 @@ return {
 	ItemGrabbed = remote("ItemGrabbed"),
 	-- Client -> serveur : (item: BasePart) le client vient de lancer l'item qu'il tenait.
 	ThrowItem = remote("ThrowItem"),
-	-- Serveur -> client : (velocity: Vector3) éjection par le dôme, appliquée par le client propriétaire du personnage.
+	-- Serveur -> client : (velocity: Vector3, tumble: number?) éjection (dôme, arme), appliquée par le client propriétaire
+	-- du personnage. tumble = durée du KO d'une arme : le personnage tourne dans les airs puis se relève.
 	Knockback = remote("Knockback"),
 	-- Serveur -> client : (score: number, pulls: number, results: { [string]: number }, money: number)
 	RewardsGranted = remote("RewardsGranted"),
@@ -66,6 +67,8 @@ return {
 	StealPet = remote("StealPet"),
 	-- Client -> serveur : () le joueur saute ou touche ARRÊTER pour descendre du tapis / du banc.
 	StopTraining = remote("StopTraining"),
+	-- Serveur -> tous : ("Swing" | "Hit", player: Player, weaponId: string) geste d'une arme / impact sur une victime.
+	WeaponFx = remote("WeaponFx"),
 	-- Serveur -> victime ou tous : (kind: string, thiefName: string, victimName: string, petId: string)
 	-- kind : "Started", "Stolen", "Recovered", "Returned" (à la victime), "Announce" (à tous, vol rare réussi).
 	StealNotice = remote("StealNotice"),

@@ -70,7 +70,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Deux stats à niveaux : **Vitesse** (WalkSpeed 16 + 0,5/niveau) et **Force** (vitesse de lancer max 70 + 3/niveau), max niveau 60.
 - XP pour passer au niveau suivant = 5 × 1,12^niveau (niveau 10 en ~1,5 min, niveau 30 en ~20 min, niveau 60 en plusieurs heures).
 - Stations achetées en boutique, posées hors de la base : **tapis de course** (gauche, Vitesse) et **banc de muscu** (droite, Force).
-  5 niveaux chacune (bois → pierre → fer → or → diamant) = XP ×1 / ×2 / ×3,5 / ×6 / ×10. Utilisables à tout moment par le propriétaire.
+  8 niveaux chacune (bois → pierre → fer → or → diamant → émeraude → rubis → cosmique) = XP ×1 / ×2 / ×3,5 / ×6 / ×10 / ×16 / ×25 / ×40
+  (prix ×120 par niveau) ; niveaux 6 à 8 : la station brille et lâche des étincelles ; on court / pousse 12 % plus vite par
+  niveau (`Config.Training.AnimSpeedPerLevel`). Utilisables à tout moment par le propriétaire.
 - **Façon Steal an Egg** (depuis le 12 oct.) : marcher sur la station → le serveur (`TrainingController`) **ancre** le
   HumanoidRootPart (debout sur le tapis face à la console, ou allongé sur le dos sur le banc) et écrit l'attribut `Training`
   ("Treadmill" / "Bench"). XP chaque seconde ; attributs `TrainingGain` + `TrainingPulse` → `client/TrainingFx` affiche
@@ -118,6 +120,11 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   ou tout le monde autour pour l'onde), l'éjecte (assis + `Remotes.Knockback`) et lui fait tout lâcher (`ReleaseHeld`) : un voleur
   touché perd le familier. Immunité 2 s après un coup. Mains exclusives : arme en main → pas de ramassage ni de vol (serveur +
   bulles cachées côté client) ; objets portés ou familier volé → l'arme sortie est rangée (serveur + message côté client).
+  Animations (12 oct.) : `Remotes.WeaponFx` ("Swing" / "Hit", à tous). Le geste est animé par chaque client (`client/WeaponFx` :
+  images clés bras / coude / torse, revers "Slap", coup par-dessus la tête "Smash", bâton frappé au sol "Slam", traînée
+  blanche) ; le coup part à `StrikeAt` du geste (`SwingTime`). La victime part en vrille (`Remotes.Knockback` avec durée de
+  KO → `PlatformStand` + rotation par son client, puis `GettingUp`), onomatopée ("PAF !", "BONK !", "BOUM !"), gerbe d'étoiles
+  et étoiles qui tournent au-dessus de la tête. Articulations : `client/Joints` (Motor6D ou AnimationConstraint).
 - **Annonces** (`Remotes.StealNotice`) : à la victime "Started" (début), puis "Stolen" / "Recovered" / "Returned" (KO ou temps
   écoulé) ; à tout le serveur "Announce" pour un vol réussi de rareté >= `Config.Loot.AnnounceMinRarity` (Légendaire).
 

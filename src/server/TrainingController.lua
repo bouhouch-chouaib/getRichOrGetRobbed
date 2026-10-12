@@ -150,6 +150,47 @@ local function render(station: Station, level: number)
 			end
 		end
 	end
+	-- Hauts niveaux (Émeraude, Rubis, Cosmique) : lumière + étincelles à la couleur de la matière.
+	local glowing = visible and look.Glow == true
+	local sparkles = station.zone:FindFirstChild("StationSparkles")
+	local light = station.zone:FindFirstChild("StationLight")
+	if glowing then
+		if not sparkles then
+			local emitter = Instance.new("ParticleEmitter")
+			emitter.Name = "StationSparkles"
+			emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			emitter.Rate = 14
+			emitter.Lifetime = NumberRange.new(0.8, 1.6)
+			emitter.Speed = NumberRange.new(2, 5)
+			emitter.SpreadAngle = Vector2.new(25, 25)
+			emitter.EmissionDirection = Enum.NormalId.Top
+			emitter.Size = NumberSequence.new(0.6, 0)
+			emitter.LightEmission = 1
+			emitter.Parent = station.zone
+			sparkles = emitter
+		end
+		if not light then
+			local point = Instance.new("PointLight")
+			point.Name = "StationLight"
+			point.Range = 14
+			point.Brightness = 1.5
+			point.Parent = station.zone
+			light = point
+		end
+		if sparkles and sparkles:IsA("ParticleEmitter") then
+			sparkles.Color = ColorSequence.new(look.Color)
+		end
+		if light and light:IsA("PointLight") then
+			light.Color = look.Color
+		end
+	else
+		if sparkles then
+			sparkles:Destroy()
+		end
+		if light then
+			light:Destroy()
+		end
+	end
 	if station.sign then
 		station.sign.Enabled = visible
 	end

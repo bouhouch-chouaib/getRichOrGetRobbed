@@ -103,22 +103,28 @@ Config.Knockback = {
 -- XP pour passer du niveau L au niveau L+1 = XPBase × XPGrowth^L (progression longue).
 -- XP gagnée par seconde sur la station = StationRates[niveau de la station].
 export type StatConfig = { Base: number, PerLevel: number, MaxLevel: number }
+export type StationLook = { Name: string, Color: Color3, Material: Enum.Material, Glow: boolean? }
 Config.Training = {
 	Speed = { Base = 16, PerLevel = 0.5, MaxLevel = 60 } :: StatConfig, -- WalkSpeed
 	Strength = { Base = 70, PerLevel = 3, MaxLevel = 60 } :: StatConfig, -- vitesse de lancer max
 	XPBase = 5,
 	XPGrowth = 1.12,
-	StationRates = { 1, 2, 3.5, 6, 10 },
+	StationRates = { 1, 2, 3.5, 6, 10, 16, 25, 40 },
+	-- Matière de la station selon son niveau. Glow = true : la station brille et lâche des étincelles (niveaux 6 à 8).
 	StationMaterials = {
 		{ Name = "Bois", Color = Color3.fromRGB(150, 100, 55), Material = Enum.Material.Wood },
 		{ Name = "Pierre", Color = Color3.fromRGB(140, 140, 145), Material = Enum.Material.Slate },
 		{ Name = "Fer", Color = Color3.fromRGB(180, 185, 195), Material = Enum.Material.DiamondPlate },
 		{ Name = "Or", Color = Color3.fromRGB(255, 200, 40), Material = Enum.Material.Foil },
 		{ Name = "Diamant", Color = Color3.fromRGB(120, 230, 255), Material = Enum.Material.Glass },
-	},
+		{ Name = "Émeraude", Color = Color3.fromRGB(60, 230, 120), Material = Enum.Material.Glass, Glow = true },
+		{ Name = "Rubis", Color = Color3.fromRGB(255, 60, 90), Material = Enum.Material.Glass, Glow = true },
+		{ Name = "Cosmique", Color = Color3.fromRGB(170, 80, 255), Material = Enum.Material.Neon, Glow = true },
+	} :: { StationLook },
 	-- Animations (client/TrainingFx) : course sur place et développé couché.
-	RunAnimSpeed = 1.3, -- vitesse de l'animation de course sur le tapis
-	BenchRepTime = 1.6, -- secondes par répétition au banc (un grognement d'effort à chaque poussée)
+	RunAnimSpeed = 1.3, -- vitesse de l'animation de course sur le tapis (niveau 1)
+	BenchRepTime = 1.6, -- secondes par répétition au banc (niveau 1 ; un grognement d'effort à chaque poussée)
+	AnimSpeedPerLevel = 0.12, -- chaque niveau de station au-dessus de 1 : on court / pousse 12 % plus vite
 }
 
 -- Tirages : un objet avalé rapporte sa valeur (Config.ItemTiers) × multiplicateur des familiers équipés.
@@ -291,8 +297,8 @@ export type ShopItem = {
 
 -- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Cours dessus : +vitesse. Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 500, PriceGrowth = 120 },
-	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Monte dessus : +force (lancers plus loin). Chaque niveau entraîne plus vite.", MaxLevel = 5, BasePrice = 500, PriceGrowth = 120 },
+	{ Id = "Treadmill", Icon = "🏃", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 8 niveaux, du bois au cosmique : chaque niveau entraîne plus vite.", MaxLevel = 8, BasePrice = 500, PriceGrowth = 120 },
+	{ Id = "Bench", Icon = "🏋", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 8 niveaux, du bois au cosmique.", MaxLevel = 8, BasePrice = 500, PriceGrowth = 120 },
 	{ Id = "ItemQuality", Icon = "🍀", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
 	{ Id = "Backpack", Icon = "🎒", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
 	{ Id = "LongLock", Icon = "🔒", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
@@ -303,11 +309,15 @@ Config.Shop = {
 } :: { ShopItem }
 
 export type WeaponDef = {
+	Swing: string, -- geste (client/WeaponFx) : "Slap" (revers), "Smash" (coup par-dessus la tête), "Slam" (bâton frappé au sol)
+	SwingTime: number, -- durée du geste (s)
+	StrikeAt: number, -- moment du coup dans le geste (0 à 1) : la cible est touchée à cet instant
+	Word: string, -- onomatopée affichée sur la victime
 	Range: number, -- portée en studs (rayon de l'onde pour une arme de zone)
 	Area: boolean, -- true : touche tout le monde autour ; false : le joueur le plus proche devant soi
 	Push: number, -- vitesse d'éjection horizontale
 	Up: number, -- vitesse d'éjection vers le haut
-	Stun: number, -- secondes assis (sans contrôle)
+	Stun: number, -- secondes KO (la victime tourne dans les airs puis se relève)
 	Cooldown: number, -- secondes entre deux coups
 }
 
@@ -315,9 +325,9 @@ export type WeaponDef = {
 -- Toucher un joueur lui fait lâcher ses objets ; un voleur touché perd le familier qu'il portait (il rentre chez lui).
 Config.Weapons = {
 	List = {
-		WeaponSlap = { Range = 7, Area = false, Push = 60, Up = 28, Stun = 0.8, Cooldown = 1.2 },
-		WeaponPan = { Range = 8, Area = false, Push = 100, Up = 42, Stun = 1.6, Cooldown = 1.6 },
-		WeaponShockwave = { Range = 16, Area = true, Push = 85, Up = 45, Stun = 1.2, Cooldown = 8 },
+		WeaponSlap = { Swing = "Slap", SwingTime = 0.42, StrikeAt = 0.5, Word = "PAF !", Range = 7, Area = false, Push = 60, Up = 28, Stun = 0.9, Cooldown = 1.2 },
+		WeaponPan = { Swing = "Smash", SwingTime = 0.5, StrikeAt = 0.55, Word = "BONK !", Range = 8, Area = false, Push = 100, Up = 42, Stun = 1.6, Cooldown = 1.6 },
+		WeaponShockwave = { Swing = "Slam", SwingTime = 0.6, StrikeAt = 0.6, Word = "BOUM !", Range = 16, Area = true, Push = 85, Up = 45, Stun = 1.2, Cooldown = 8 },
 	} :: { [string]: WeaponDef },
 	HitImmunity = 2, -- secondes pendant lesquelles un joueur touché ne peut pas être retouché
 	RangeMargin = 3, -- studs de marge sur la portée (latence)
