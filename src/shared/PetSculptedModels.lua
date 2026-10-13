@@ -2,9 +2,9 @@
 -- Authored silhouettes for the complete catalogue. Front is -Z; units are unscaled studs.
 local S = require(script.Parent.PetSculpt)
 local Catalog = require(script.Parent.PetCatalog)
-local Config = require(script.Parent.Config)
 local FX = require(script.Parent.PetSculptedEffects)
 local Motion = require(script.Parent.PetMotion)
+local PetSizes = require(script.Parent.PetSizes)
 local Models = {}
 local V, CF, A = Vector3.new, CFrame.new, CFrame.Angles
 local rgb = Color3.fromRGB
@@ -1110,15 +1110,14 @@ function Models.Build(e: Pet): Model
 	else
 		object(m, e, c, kind)
 	end
-	-- Centre visible geometry before adding effects. Height-normalization keeps base spacing predictable.
+	-- Centre visible geometry before adding effects, then apply the size scale (shared/PetSizes).
 	local box, size = m:GetBoundingBox()
 	for _, d in ipairs(m:GetChildren()) do
 		if d:IsA("BasePart") and d ~= root then
 			d.CFrame = CF(-box.Position) * d.CFrame
 		end
 	end
-	local scale = Config.Pets.RarityScale[Config.RarityIndex[e.Rarity] or 1] or 1
-	m:ScaleTo(3.2 * scale / math.max(size.Y, 0.1))
+	m:ScaleTo(PetSizes.ScaleFor(e.Id, e.Rarity, size))
 	local visualBox, visualSize = m:GetBoundingBox()
 	m:SetAttribute("BodyCenter", visualBox.Position / m:GetScale())
 	m:SetAttribute("BodySize", visualSize / m:GetScale())

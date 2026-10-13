@@ -8,6 +8,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 
 local PetWander = {}
 
@@ -54,9 +55,14 @@ function PetWander.styleFor(petId: string): string
 	return "Walk"
 end
 
--- Un point au hasard dans la zone de promenade (hors des coins).
-function PetWander.randomSpot(rng: Random): Vector2
+-- Un point au hasard dans la zone de promenade (hors des coins). Avec petId, les grands familiers
+-- (shared/PetSizes) restent plus près du centre pour ne pas déborder de la clôture.
+function PetWander.randomSpot(rng: Random, petId: string?): Vector2
 	local area = PetWander.AREA
+	if petId then
+		local entry = PetCatalog.ById[petId]
+		area = math.max(2, area - math.max(0, PetSizes.Radius(petId, entry and entry.Rarity) - 4))
+	end
 	for _ = 1, 20 do
 		local spot = Vector2.new(rng:NextNumber(-area, area), rng:NextNumber(-area, area))
 		if not (math.abs(spot.X) > CRATE_ZONE and math.abs(spot.Y) > CRATE_ZONE) then

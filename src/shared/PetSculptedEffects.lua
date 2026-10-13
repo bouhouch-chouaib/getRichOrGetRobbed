@@ -68,7 +68,7 @@ function FX.Add(m: Model, e: Catalog.Pet, box: CFrame, size: Vector3)
 	elseif e.Id == "PanthereNeon" then
 		color = Color3.fromRGB(255, 44, 199)
 	end
-	local h = math.clamp(size.Y / 3, 0.75, 3)
+	local h = math.clamp(size.Y / 3, 0.75, 12) -- grows with the pet (shared/PetSizes)
 	local radius = math.max(size.X, size.Z) * 0.42
 	local bottom = box.Position.Y - size.Y / 2
 	local top = box.Position.Y + size.Y / 2
@@ -135,7 +135,7 @@ function FX.Add(m: Model, e: Catalog.Pet, box: CFrame, size: Vector3)
 			lamp.Name = "AuraLight"
 			lamp.Color = color
 			lamp.Brightness = 0.45
-			lamp.Range = math.min(size.Y * 1.4, 14)
+			lamp.Range = math.min(size.Y * 1.4, 40)
 			lamp.Shadows = false
 			lamp:SetAttribute("Aura", true)
 			lamp.Parent = root

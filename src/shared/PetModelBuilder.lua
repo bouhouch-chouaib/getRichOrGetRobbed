@@ -10,7 +10,7 @@
 -- Le modèle retourné est ancré, sans collision, avec un PrimaryPart "Root" invisible à l'origine
 -- (le familier regarde vers -Z). On le place avec model:PivotTo().
 -- Style (15 oct., docs/DIRECTION_ARTISTIQUE.md §5) : les modèles de remplacement sont en VOXELS (tout en blocs à tenons,
--- yeux carrés), la taille dépend de la rareté (Config.Pets.RarityScale) et les raretés Épique+ ont une AURA (particules,
+-- yeux carrés), la taille vient de l'échelle shared/PetSizes et les raretés Épique+ ont une AURA (particules,
 -- lumière, anneau au sol, auréole...). Les pièces de l'aura portent l'attribut "Aura" (retirées des aperçus 2D).
 
 local AssetService = game:GetService("AssetService")
@@ -22,6 +22,7 @@ local PetCatalog = require(script.Parent.PetCatalog)
 local PetMeshes = require(script.Parent.PetMeshes)
 local PetModelColors = require(script.Parent.PetModelColors)
 local PetSculptedModels = require(script.Parent.PetSculptedModels)
+local PetSizes = require(script.Parent.PetSizes)
 
 local PetModelBuilder = {}
 
@@ -421,14 +422,9 @@ local function finalize(model: Model)
 	end
 end
 
--- Hauteur visée d'un familier selon sa rareté (même gabarit que les modèles de remplacement).
-local function rarityScale(rarityId: string): number
-	local rarityIndex = Config.RarityIndex[rarityId] or 1
-	return Config.Pets.RarityScale[rarityIndex] or 1
-end
-
-local function targetHeight(rarityId: string): number
-	return 3.2 * rarityScale(rarityId)
+-- Hauteur visée d'un familier (échelle shared/PetSizes). Les modèles procéduraux sont construits pour 3,2 studs.
+local function targetHeight(entry: PetCatalog.Pet): number
+	return PetSizes.Studs(entry.Id, entry.Rarity)
 end
 
 ----------------------------------------------------------------------
@@ -593,7 +589,7 @@ function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
 
 	-- La rotation autour de l'axe vertical ne change pas la hauteur : contentSize.Y reste valable.
 	local heightScale = custom:GetAttribute("HeightScale")
-	local wanted = targetHeight(entry.Rarity) * (if type(heightScale) == "number" then heightScale else 1)
+	local wanted = targetHeight(entry) * (if type(heightScale) == "number" then heightScale else 1)
 	if contentSize.Y > 0 then
 		model:ScaleTo(wanted / contentSize.Y)
 	end
@@ -689,8 +685,8 @@ function PetModelBuilder.Build(petId: string): Model?
 	addExtra(model, look, anchors)
 	addEffect(root, look)
 
-	-- Taille selon la rareté (les plus rares dépassent largement l'avatar), puis aura.
-	model:ScaleTo(rarityScale(entry.Rarity))
+	-- Taille de l'échelle (les plus rares dépassent largement l'avatar), puis aura.
+	model:ScaleTo(targetHeight(entry) / 3.2)
 	addAura(model, root, entry.Rarity)
 
 	finalize(model)

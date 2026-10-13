@@ -29,6 +29,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local BasePetsController = require(script.Parent.BasePetsController)
@@ -205,7 +206,8 @@ local function tryStart(anchor: BasePart, thief: Player)
 		return
 	end
 	local offset = root.Position - petPosition
-	if Vector2.new(offset.X, offset.Z).Magnitude > STEAL.MaxDistance then
+	local entry = PetCatalog.ById[petId]
+	if Vector2.new(offset.X, offset.Z).Magnitude > STEAL.MaxDistance + PetSizes.Radius(petId, entry and entry.Rarity) then
 		return
 	end
 
@@ -225,7 +227,7 @@ local function tryStart(anchor: BasePart, thief: Player)
 	SessionData.RefreshSpeed(thief)
 
 	-- Bulle "Reprendre" sur le voleur : un simple appui suffit (la victime court après lui).
-	local entry = PetCatalog.ById[petId]
+	entry = PetCatalog.ById[petId]
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "RecoverPrompt"
 	prompt.ActionText = "Reprendre"

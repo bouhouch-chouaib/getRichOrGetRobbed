@@ -216,10 +216,25 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 - `PetModelBuilder` : les 61 modèles de remplacement sont en **voxels** (toutes les pièces en blocs, tenons sur les
   blocs larges, yeux carrés avec reflet). Les 14 vrais modèles 3D (`PetMeshes`) sont inchangés.
-- Taille selon la rareté (`Config.Pets.RarityScale` : x0,9 Commun ... x2,8 Sigma), y compris pour les modèles 3D.
+- (Remplacé le 13 oct. par la taille par familier, voir ci-dessous.)
 - **Auras** à partir d'Épique (`AURAS` dans `PetModelBuilder`, pièces marquées attribut `Aura`) : fumée violette +
   anneau au sol (Épique), flammes + lumière (Légendaire), étincelles roses (Mythique), auréole + paillettes (Divin),
   auréole dorée + 8 rayons de lumière autour (Sigma). Retirées des aperçus des fenêtres (`MenuKit.petViewport`).
+
+## Familiers sculptés et échelle des tailles (13 oct.)
+
+- Modèles refaits avec Codex : `PetSculpt`, `PetSculptedModels`, `PetSculptedEffects`, `PetMotion`,
+  `client/PetAuraAnimator` (détails : `docs/PET_VISUAL_REWORK.md`). `Config.Pets.ModelStyle = "Sculpted"`.
+- **Échelle** (`shared/PetSizes`) : unité **J = la taille d'un joueur (5 studs)**. Chaque rareté a sa tranche, sans
+  chevauchement : Commun 0,7-1 J, Inhabituel 1-1,3, Rare 1,3-1,7, Épique 1,8-2,4, Légendaire 2,5-3,2, Mythique 3,3-4,2,
+  Divin 4,4-5,5, Sigma 6-7,5 J. Chaque familier a SA taille dans sa tranche (`PetSizes.Heights`) : un pigeon 0,7 J,
+  un T-Rex de poche 4,4 J, la Baleine Galaxie 7,5 J. La taille est la hauteur ; les familiers longs sont limités à
+  2 x leur taille en longueur et 52 studs au sol (la base fait 56).
+- Les grands familiers se promènent plus près du centre de la base (`PetWander.randomSpot(rng, petId)`), se volent
+  depuis leur flanc (bulle et contrôle serveur élargis de `PetSizes.Radius`), sont réduits à 2 J quand ils suivent le
+  joueur et à 1,4 J quand on les porte après un vol. Les effets (particules, lumière) grandissent avec eux.
+- Toise : `lune run tools/check-pets.luau . sortie` (vérifie aussi que chaque familier a sa taille dans sa tranche)
+  puis `python tools/pet-size-chart.py sortie a.jpg b.jpg`.
 
 ## Mondes (paliers)
 

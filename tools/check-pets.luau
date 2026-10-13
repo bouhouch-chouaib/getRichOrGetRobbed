@@ -106,6 +106,7 @@ end
 local catalog = loadModule("PetCatalog")
 local config = loadModule("Config")
 local builder = loadModule("PetModelBuilder")
+local sizes = loadModule("PetSizes")
 local function vec(v)
 	return { v.X, v.Y, v.Z }
 end
@@ -135,15 +136,26 @@ for _, e in catalog.List do
 	assert(m.PrimaryPart.Name == "Root" and m.PrimaryPart.Transparency == 1, e.Id .. ": root")
 	local box, size = builder.BodyBounds(m)
 	assert(box.Position.Magnitude < 0.002, e.Id .. ": centering")
-	local wanted = 3.2 * config.Pets.RarityScale[config.RarityIndex[e.Rarity]]
-	assert(math.abs(size.Y - wanted) < 0.003, e.Id .. ": height")
+	-- Échelle shared/PetSizes : la hauteur visée, sauf si le familier est trop long (alors la longueur est limitée).
+	local band = assert(sizes.Bands[e.Rarity], e.Rarity .. ": size band")
+	local j = assert(sizes.Heights[e.Id], e.Id .. ": missing size")
+	assert(j >= band[1] and j <= band[2], e.Id .. ": size outside its rarity band")
+	local wanted = sizes.Studs(e.Id, e.Rarity)
+	local long = math.max(size.X, size.Z)
+	assert(size.Y <= wanted + 0.003, e.Id .. ": height")
+	assert(long <= sizes.MAX_FOOTPRINT + 0.003 and long <= wanted * sizes.LONG_RATIO + 0.003, e.Id .. ": length")
+	assert(
+		math.abs(size.Y - wanted) < 0.003
+			or math.abs(long - math.min(sizes.MAX_FOOTPRINT, wanted * sizes.LONG_RATIO)) < 0.003,
+		e.Id .. ": scale"
+	)
 	local count, emitters, rate = 0, 0, 0
 	for _, q in m:GetDescendants() do
 		if q:IsA("BasePart") then
 			count += 1
 			assert(q.Anchored and not q.CanCollide and not q.CanTouch and not q.CanQuery, e.Id .. ": physics")
 			assert(q.Size.X > 0 and q.Size.Y > 0 and q.Size.Z > 0, e.Id .. ": dimensions")
-			assert(q.CFrame.Position.Magnitude < 100, e.Id .. ": position")
+			assert(q.CFrame.Position.Magnitude < 120, e.Id .. ": position")
 		elseif q:IsA("ParticleEmitter") then
 			emitters += 1
 			rate += q.Rate

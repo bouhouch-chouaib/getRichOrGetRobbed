@@ -14,6 +14,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 
 -- Positions derrière le joueur selon le nombre de familiers équipés (X, Z).
@@ -37,7 +38,8 @@ local followers: { [Player]: { Follower } } = {}
 -- Familier volé porté dans le dos : position par rapport au HumanoidRootPart (derrière les épaules).
 local CARRY_OFFSET = CFrame.new(0, 1.2, 1.6)
 local CARRY_SCALE = 0.6 -- plus petit que dans la base : un gros familier ne cache pas la vue du voleur
-type Carried = { model: Model, timer: TextLabel, mine: boolean } -- mine : c'est MON familier qu'il porte
+local CARRY_MAX = PetSizes.CARRY_MAX * PetSizes.PLAYER -- studs : hauteur max dans le dos du voleur
+type Carried = { model: Model, timer: TextLabel, mine: boolean, offset: CFrame } -- mine : c'est MON familier qu'il porte
 local carried: { [Player]: Carried } = {}
 
 local localPlayer = Players.LocalPlayer
@@ -62,6 +64,12 @@ local function rebuild(player: Player)
 	for petId in string.gmatch(equipped, "[^,]+") do
 		local model = PetModelBuilder.Build(petId)
 		if model then
+			-- Les géants de la base sont réduits quand ils suivent le joueur (sinon ils cachent la vue).
+			local _, fullSize = PetModelBuilder.BodyBounds(model)
+			local followMax = PetSizes.FOLLOW_MAX * PetSizes.PLAYER
+			if fullSize.Y > followMax then
+				model:ScaleTo(model:GetScale() * followMax / fullSize.Y)
+			end
 			local bodyBox, bodySize = PetModelBuilder.BodyBounds(model)
 			model:SetAttribute("OwnerUserId", player.UserId) -- client/InvisibilityFx
 			model.Parent = folder
@@ -93,7 +101,8 @@ local function rebuildCarried(player: Player)
 	if not model or not entry or not root then
 		return
 	end
-	model:ScaleTo(model:GetScale() * CARRY_SCALE)
+	local _, fullSize = PetModelBuilder.BodyBounds(model)
+	model:ScaleTo(model:GetScale() * math.min(CARRY_SCALE, CARRY_MAX / math.max(fullSize.Y, 0.1)))
 	local _, size = PetModelBuilder.BodyBounds(model)
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 	local sign = Instance.new("BillboardGui")
@@ -139,7 +148,9 @@ local function rebuildCarried(player: Player)
 	end
 
 	model.Parent = folder
-	carried[player] = { model = model, timer = timer, mine = mine }
+	-- Plus il est grand, plus il est porté haut et loin du dos (il ne traverse pas le voleur).
+	local offset = CARRY_OFFSET * CFrame.new(0, math.max(0, size.Y / 2 - 1.5), math.max(0, size.Z / 2 - 1.2))
+	carried[player] = { model = model, timer = timer, mine = mine, offset = offset }
 end
 
 local function watch(player: Player)
@@ -204,7 +215,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if root and root:IsA("BasePart") then
 			-- Tourné vers l'arrière, comme s'il était hissé sur le dos.
-			entry.model:PivotTo(root.CFrame * CARRY_OFFSET * CFrame.Angles(0, math.pi, 0))
+			entry.model:PivotTo(root.CFrame * entry.offset * CFrame.Angles(0, math.pi, 0))
 			-- Bulle "Reprendre" (posée par le serveur) : visible seulement par la victime.
 			local prompt = root:FindFirstChild("RecoverPrompt")
 			if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled ~= entry.mine then

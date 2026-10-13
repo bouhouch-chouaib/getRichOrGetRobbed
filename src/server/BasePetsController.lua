@@ -75,7 +75,7 @@ local function addPet(state: BaseState, petId: string, count: number)
 	anchor.CanTouch = false
 	anchor.CanQuery = false
 	anchor.CastShadow = false
-	local spot = PetWander.randomSpot(rng)
+	local spot = PetWander.randomSpot(rng, petId)
 	anchor.CFrame = PetWander.groundOf(state.platform) * CFrame.new(spot.X, 0.5, spot.Y)
 	local leg: PetWander.Leg = { from = spot, to = spot, start = now(), duration = 0 }
 	anchor:SetAttribute("PetId", petId)
@@ -161,10 +161,10 @@ end
 local function updateWalks()
 	local time = now()
 	for _, state in pairs(states) do
-		for _, pet in pairs(state.pets) do
+		for petId, pet in pairs(state.pets) do
 			if time >= pet.nextLegAt then
 				local from = PetWander.positionAt(pet.leg, time)
-				local to = PetWander.randomSpot(rng)
+				local to = PetWander.randomSpot(rng, petId)
 				local duration = (to - from).Magnitude / pet.style.speed
 				pet.leg = { from = from, to = to, start = time, duration = duration }
 				pet.nextLegAt = time + duration + rng:NextNumber(pet.style.minWait, pet.style.maxWait)

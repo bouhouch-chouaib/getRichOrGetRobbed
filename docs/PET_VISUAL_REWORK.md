@@ -21,11 +21,17 @@ Les corps gardent leurs couleurs en Plastic ; le néon sert aux incrustations, y
 Les communs n'ont aucun émetteur. Les autres ont au maximum trois émetteurs et 22 particules/s dans cette version.
 Le maximum mesuré est 169 BaseParts par familier, décor d'aura inclus. Ces budgets ne constituent pas une mesure de FPS.
 
+## Tailles (13 oct.)
+
+L'échelle est dans `src/shared/PetSizes.lua` (unité J = un joueur, 5 studs ; une tranche par rareté, une taille
+par familier). `PetSculptedModels.Build` applique `PetSizes.ScaleFor`. `PetMotion.lua`, requis mais absent du
+commit Codex, a été ajouté (conversion des pivots d'articulation, sans animation).
+
 ## Vérification reproductible
 
 `lune run tools/check-pets.luau . <dossier-de-sortie>` construit les 75 familiers à partir des vrais modules
 avec les types Roblox de Lune. Il vérifie : couverture du catalogue et anciens Id, déterminisme, centrage,
-hauteur par rareté, pièces non physiques, budgets, dimensions après transport et déplacement.
+taille de l'échelle PetSizes (tranche de la rareté, longueur limitée), pièces non physiques, budgets, dimensions après transport et déplacement.
 Les méthodes Model de transformation sont simulées dans ce test : il ne remplace pas Studio.
 
 Le fichier `tools/pet-gallery.project.json` construit une place de revue isolée :

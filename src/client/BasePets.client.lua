@@ -23,6 +23,7 @@ local Icons = require(ReplicatedStorage.Shared.Icons)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
@@ -232,7 +233,8 @@ local function addPet(display: BaseDisplay, anchor: Instance)
 	prompt.ObjectText = if entry then entry.Name else petId
 	prompt.KeyboardKeyCode = Enum.KeyCode.E
 	prompt.HoldDuration = Config.Steal.HoldDuration
-	prompt.MaxActivationDistance = Config.Steal.PromptDistance
+	-- Un géant se vole depuis son flanc, pas seulement depuis son centre.
+	prompt.MaxActivationDistance = Config.Steal.PromptDistance + PetSizes.Radius(petId, entry and entry.Rarity) * 0.8
 	prompt.RequiresLineOfSight = false
 	prompt.Enabled = false -- RenderStepped l'active si le vol est possible
 	prompt.Triggered:Connect(function()
