@@ -1,6 +1,6 @@
 --!strict
 -- Icons : icônes 2D du jeu (style cartoon, gros contour noir), à la place des émojis.
--- Dessinées par tools/icons/make_icons.py (fichiers dans assets/icons), envoyées sur Roblox le 13 oct. 2026.
+-- Dessinées par tools/icons/make_icons.py (fichiers dans assets/icons), envoyées sur Roblox le 13 oct. 2026 (Bat, Grapple : 14 oct.).
 -- Pour en changer une : modifier le script, le relancer, renvoyer l'image (Studio > Asset Manager, ou l'outil MCP
 -- upload_image) et remplacer son Id ci-dessous.
 --
@@ -37,6 +37,8 @@ local IDS: { [string]: string } = {
 	Flame = "rbxassetid://128273954517653",
 	Flower = "rbxassetid://139511093415127",
 	Trophy = "rbxassetid://107983506276240",
+	Bat = "rbxassetid://92089666736729",
+	Grapple = "rbxassetid://122249795654523",
 }
 
 -- Autres noms utiles : raretés (Id de Config.Rarities), améliorations (Config.Shop), produits Robux (Key).
@@ -51,9 +53,8 @@ local ALIASES: { [string]: string } = {
 	Sigma = "Crown",
 	ItemQuality = "Clover",
 	LongLock = "Lock",
-	WeaponSlap = "Glove",
-	WeaponPan = "Pan",
-	WeaponShockwave = "Staff",
+	WeaponBat = "Bat",
+	WeaponGrapple = "Grapple",
 	DoubleMoney = "Money",
 	VIP = "Crown",
 	ExtraBackpack = "Backpack",

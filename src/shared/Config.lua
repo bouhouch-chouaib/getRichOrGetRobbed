@@ -330,6 +330,12 @@ Config.Sounds = {
 		ModelUnlock = { Id = 9043151109, Volume = 0.6 }, -- jingle : nouveau modèle de tapis / banc
 		PhaseFeeding = { Id = 1841324020, Volume = 0.6 }, -- jingle : le trou noir a faim
 		PhaseDigesting = { Id = 9045119921, Volume = 0.6 }, -- jingle malicieux : il digère, le moment du vol
+		-- Armes (joués en 3D à l'endroit de l'action, entendus par les joueurs proches).
+		BatSwing = { Id = 9120711836, Volume = 0.7, Pitch = 0.85 }, -- whoosh de la batte
+		BatHit = { Id = 9125380872, Volume = 0.9 }, -- « crac » de batte en bois (Pro Sound Effects)
+		GrappleFire = { Id = 9120711836, Volume = 0.8, Pitch = 0.6 }, -- whoosh grave : le crochet part
+		GrappleLatch = { Id = 9113760542, Volume = 0.9, Pitch = 1.2 }, -- clac métallique : le crochet accroche
+		GrappleReel = { Id = 9118138365, Volume = 0.6, Pitch = 1.8 }, -- cliquetis rapide : la corde se rembobine
 	} :: { [string]: SoundDef },
 }
 
@@ -350,34 +356,56 @@ Config.Shop = {
 	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
 	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
 	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
-	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2, 3).
-	{ Id = "WeaponSlap", Icon = "Glove", Name = "Gant à claques", Description = "ARME : une claque qui repousse un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },
-	{ Id = "WeaponPan", Icon = "Pan", Name = "Poêle cosmique", Description = "ARME : un gros coup de poêle. Repousse bien plus loin et assomme plus longtemps.", MaxLevel = 1, BasePrice = 250e3, PriceGrowth = 1 },
-	{ Id = "WeaponShockwave", Icon = "Staff", Name = "Bâton à ondes", Description = "ARME : une onde de choc qui repousse TOUS les joueurs autour de toi (recharge 8 s).", MaxLevel = 1, BasePrice = 20e6, PriceGrowth = 1 },
+	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2).
+	{ Id = "WeaponBat", Icon = "Bat", Name = "Batte", Description = "ARME : un grand coup de batte qui envoie valser un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },
+	{ Id = "WeaponGrapple", Icon = "Grapple", Name = "Grappin", Description = "ARME : vise un joueur et tire : le crochet l'attrape et le ramène jusqu'à toi. Parfait pour rattraper un voleur !", MaxLevel = 1, BasePrice = 150e3, PriceGrowth = 1 },
 } :: { ShopItem }
 
-export type WeaponDef = {
-	Swing: string, -- geste (client/WeaponFx) : "Slap" (revers), "Smash" (coup par-dessus la tête), "Slam" (bâton frappé au sol)
-	SwingTime: number, -- durée du geste (s)
+export type BatDef = {
+	SwingTime: number, -- durée du geste complet (s)
 	StrikeAt: number, -- moment du coup dans le geste (0 à 1) : la cible est touchée à cet instant
 	Word: string, -- onomatopée affichée sur la victime
-	Range: number, -- portée en studs (rayon de l'onde pour une arme de zone)
-	Area: boolean, -- true : touche tout le monde autour ; false : le joueur le plus proche devant soi
+	Range: number, -- portée en studs
 	Push: number, -- vitesse d'éjection horizontale
 	Up: number, -- vitesse d'éjection vers le haut
 	Stun: number, -- secondes KO (la victime tourne dans les airs puis se relève)
 	Cooldown: number, -- secondes entre deux coups
 }
+export type GrappleDef = {
+	Range: number, -- portée du crochet (studs)
+	AimCone: number, -- tolérance de visée (degrés autour de la direction visée)
+	HookSpeed: number, -- vitesse du crochet en vol (studs/s), pour l'animation
+	PullSpeed: number, -- vitesse à laquelle la victime est ramenée
+	PullTime: number, -- durée maximale de la traction (s)
+	StopDistance: number, -- la victime s'arrête à cette distance devant le tireur
+	Cooldown: number,
+}
 
--- Armes de PvP (server/WeaponController). Une arme en main = pas de ramassage d'objet, et inversement.
--- Toucher un joueur lui fait lâcher ses objets ; un voleur touché perd le familier qu'il portait (il rentre chez lui).
+-- Armes de PvP (server/WeaponController, client/WeaponFx). Une arme en main = pas de ramassage d'objet, et inversement.
+-- Le combo : le grappin ramène un voleur, la batte lui fait lâcher le familier.
 Config.Weapons = {
-	List = {
-		WeaponSlap = { Swing = "Slap", SwingTime = 0.42, StrikeAt = 0.5, Word = "PAF !", Range = 7, Area = false, Push = 60, Up = 28, Stun = 0.9, Cooldown = 1.2 },
-		WeaponPan = { Swing = "Smash", SwingTime = 0.5, StrikeAt = 0.55, Word = "BONK !", Range = 8, Area = false, Push = 100, Up = 42, Stun = 1.6, Cooldown = 1.6 },
-		WeaponShockwave = { Swing = "Slam", SwingTime = 0.6, StrikeAt = 0.6, Word = "BOUM !", Range = 16, Area = true, Push = 85, Up = 45, Stun = 1.2, Cooldown = 8 },
-	} :: { [string]: WeaponDef },
-	HitImmunity = 2, -- secondes pendant lesquelles un joueur touché ne peut pas être retouché
+	Bat = {
+		SwingTime = 0.55,
+		StrikeAt = 0.45,
+		Word = "BONK !",
+		Range = 8,
+		Push = 95,
+		Up = 40,
+		Stun = 1.4,
+		Cooldown = 1.1,
+	} :: BatDef,
+	Grapple = {
+		Range = 55,
+		AimCone = 14,
+		HookSpeed = 220,
+		PullSpeed = 85,
+		PullTime = 1.1,
+		StopDistance = 5,
+		Cooldown = 5,
+	} :: GrappleDef,
+	-- Anciennes armes (sauvegardes d'avant le 13 oct.) : converties à la lecture.
+	OldWeapons = { WeaponSlap = { "WeaponBat" }, WeaponPan = { "WeaponBat" }, WeaponShockwave = { "WeaponBat", "WeaponGrapple" } } :: { [string]: { string } },
+	HitImmunity = 2, -- secondes pendant lesquelles un joueur touché ne peut pas être retouché (batte et grappin)
 	RangeMargin = 3, -- studs de marge sur la portée (latence)
 }
 

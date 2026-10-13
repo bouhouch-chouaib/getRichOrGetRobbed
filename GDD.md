@@ -130,17 +130,24 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   voleur ; attribut `CarryingFrom` = UserId de la victime. Chez la victime seulement (`client/PetFollow`) : bulle visible et voleur
   entouré de rouge (Highlight, visible à travers les murs). Le serveur vérifie que c'est la victime, vivante, à moins de 18 studs
   (`Config.Steal.RecoverMaxDistance`) → le familier rentre (résultat "Recovered").
-- **Armes de PvP** (`WeaponController`, réglages `Config.Weapons`, achetées dans la boutique d'argent : `WeaponSlap` Gant à claques
-  2 K$, `WeaponPan` Poêle cosmique 250 K$, `WeaponShockwave` Bâton à ondes 20 M$) : un `Tool` par arme possédée (niveau 1 de
-  l'amélioration, donc sauvegardé), redonné à chaque réapparition. Clic → le serveur choisit la cible (le plus proche devant soi,
-  ou tout le monde autour pour l'onde), l'éjecte (assis + `Remotes.Knockback`) et lui fait tout lâcher (`ReleaseHeld`) : un voleur
-  touché perd le familier. Immunité 2 s après un coup. Mains exclusives : arme en main → pas de ramassage ni de vol (serveur +
-  bulles cachées côté client) ; objets portés ou familier volé → l'arme sortie est rangée (serveur + message côté client).
-  Animations (12 oct.) : `Remotes.WeaponFx` ("Swing" / "Hit", à tous). Le geste est animé par chaque client (`client/WeaponFx` :
-  images clés bras / coude / torse, revers "Slap", coup par-dessus la tête "Smash", bâton frappé au sol "Slam", traînée
-  blanche) ; le coup part à `StrikeAt` du geste (`SwingTime`). La victime part en vrille (`Remotes.Knockback` avec durée de
-  KO → `PlatformStand` + rotation par son client, puis `GettingUp`), onomatopée ("PAF !", "BONK !", "BOUM !"), gerbe d'étoiles
-  et étoiles qui tournent au-dessus de la tête. Articulations : `client/Joints` (Motor6D ou AnimationConstraint).
+- **Armes de PvP** (14 oct. : deux armes seulement ; `WeaponController`, `client/WeaponFx`, réglages `Config.Weapons.Bat` /
+  `.Grapple`, achetées dans la boutique d'argent : `WeaponBat` Batte 2 K$, `WeaponGrapple` Grappin 150 K$). Un `Tool` par arme
+  possédée (niveau 1 de l'amélioration, donc sauvegardé), redonné à chaque réapparition. Anciennes armes converties à la lecture
+  (`Config.Weapons.OldWeapons` : gant / poêle -> batte, bâton -> batte + grappin). Combo : le grappin ramène un voleur, la batte lui
+  fait lâcher le familier.
+  - **Batte** : clic -> `Remotes.WeaponFx("Swing")` à tous ; au moment fort (`StrikeAt` de `SwingTime`) le serveur prend le joueur
+    le plus proche devant soi, l'éjecte (`Remotes.Knockback` avec durée de KO : vrille puis `GettingUp`) et lui fait tout lâcher
+    (`ReleaseHeld`) : un voleur touché perd le familier. Immunité 2 s. Animation (vérifiée en jeu par mesure de la direction de la
+    batte) : batte posée sur l'épaule en main, vrai swing de baseball à deux mains (batte loin derrière, coup devant à hauteur de
+    taille, accompagnement à gauche), traînée pendant la frappe, micro-pause à l'impact, flash, « BONK ! », étoiles, zoom caméra.
+    Réglage des gestes : attribut Workspace `WeaponFxSlowMotion` (ralenti).
+  - **Grappin** : clic lu par le client (`client/WeaponFx`) -> `Remotes.UseGrapple(direction)` ; le serveur choisit la cible (cône
+    `AimCone` autour de la visée, portée `Range`, pas de mur, pas dans sa propre base, pas déjà attrapé il y a peu), puis
+    `Remotes.WeaponFx("Grapple", tireur, id, point, victime?)` à tous (crochet qui vole avec sa corde, accroche, suit la victime,
+    revient ; « CHOPÉ ! ») et `Remotes.Grappled(tireur, durée)` à la victime : son client la ramène devant le tireur
+    (`PlatformStand`, vitesse imposée). Visée : bras tendu, viseur, joueur ciblable entouré (Highlight, mêmes règles qu'au serveur).
+  - Mains exclusives : arme en main -> pas de ramassage ni de vol ; objets portés ou familier volé -> l'arme sortie est rangée.
+    Articulations : `client/Joints` (Motor6D ou AnimationConstraint).
 - **Annonces** (`Remotes.StealNotice`) : à la victime "Started" (début), puis "Stolen" / "Recovered" / "Returned" (KO ou temps
   écoulé) ; à tout le serveur "Announce" pour un vol réussi de rareté >= `Config.Loot.AnnounceMinRarity` (Légendaire).
 

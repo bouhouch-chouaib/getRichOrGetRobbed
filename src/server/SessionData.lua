@@ -290,6 +290,15 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 				data.upgrades[id] = math.max(data.upgrades[id] or 0, value)
 			end
 		end
+		-- Anciennes armes (gant, poêle, bâton) : remplacées par la batte et le grappin.
+		for oldId, newIds in pairs(Config.Weapons.OldWeapons) do
+			if (data.upgrades[oldId] or 0) > 0 then
+				data.upgrades[oldId] = nil
+				for _, newId in ipairs(newIds) do
+					data.upgrades[newId] = 1
+				end
+			end
+		end
 	end
 	-- Les sauvegardes d'avant le tutoriel n'ont pas ce champ : un joueur qui a déjà joué (familiers ou argent)
 	-- ne doit pas le revoir.

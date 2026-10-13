@@ -28,7 +28,7 @@ type Category = { label: string, color: Color3, ids: { string } }
 local CATEGORIES: { Category } = {
 	{ label = "Entraînement", color = UiStyle.Colors.Cyan, ids = { "Treadmill", "Bench" } },
 	{ label = "Bonus", color = UiStyle.Colors.Green, ids = { "ItemQuality", "Backpack", "LongLock" } },
-	{ label = "Armes", color = Color3.fromRGB(240, 70, 90), ids = { "WeaponSlap", "WeaponPan", "WeaponShockwave" } },
+	{ label = "Armes", color = Color3.fromRGB(240, 70, 90), ids = { "WeaponBat", "WeaponGrapple" } },
 }
 
 -- Couleur de chaque carte.
@@ -38,9 +38,8 @@ local CARD_COLORS: { [string]: Color3 } = {
 	ItemQuality = Color3.fromRGB(70, 210, 60),
 	Backpack = Color3.fromRGB(235, 70, 70),
 	LongLock = Color3.fromRGB(150, 80, 255),
-	WeaponSlap = Color3.fromRGB(255, 100, 180),
-	WeaponPan = Color3.fromRGB(150, 160, 185),
-	WeaponShockwave = Color3.fromRGB(255, 190, 30),
+	WeaponBat = Color3.fromRGB(230, 130, 50),
+	WeaponGrapple = Color3.fromRGB(70, 170, 255),
 }
 
 local itemsById: { [string]: Config.ShopItem } = {}

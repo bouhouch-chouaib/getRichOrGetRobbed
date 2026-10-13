@@ -508,6 +508,53 @@ def trophy(c):
     c.poly(star_points(512, 360, 110, 50), shade(gold, 0.45), out=12)
 
 
+@icon("Bat")
+def bat(c):
+    wood, dark, tape = hexc("E0A05C"), hexc("B0703A"), hexc("FF4057")
+    sub = c.layer()
+    # Batte en diagonale : manche fin en bas, fût large en haut.
+    sub.rrect((470, 520, 554, 900), 40, hexc("2E3240"))
+    sub.rrect((460, 780, 564, 830), 20, tape, out=12)
+    sub.rrect((455, 640, 569, 690), 20, tape, out=12)
+    sub.poly([(470, 540), (554, 540), (600, 180), (424, 180)], wood)
+    sub.ellipse((424, 90, 600, 260), wood)
+    sub.rrect((436, 300, 588, 340), 14, tape, out=12)
+    sub.ellipse((440, 880, 584, 940), dark)
+    sub.shine((455, 150, 500, 420), 140)
+    c.paste(sub, -35, (512, 520))
+    # Traits de mouvement.
+    for y, x0 in [(330, 760), (430, 800), (530, 810)]:
+        c.stroke_line([(x0, y), (x0 + 130, y - 40)], hexc("FFF3B0"), 26, out=12)
+
+
+@icon("Grapple")
+def grapple(c):
+    blue, dark, steel, rope = hexc("3C96FF"), hexc("2E3240"), hexc("C9CED9"), hexc("A5652F")
+    # Corde qui ondule vers le crochet.
+    c.d.line([(560, 420), (640, 330), (700, 360), (770, 260)], fill=BLACK, width=26 + 2 * OUT, joint="curve")
+    c.d.line([(560, 420), (640, 330), (700, 360), (770, 260)], fill=rope, width=26, joint="curve")
+    # Crochet à trois griffes recourbées autour d'un moyeu.
+    cx, cy = 790, 230
+    for start in (-150, -30, 90):
+        box = (cx - 135, cy - 135, cx + 135, cy + 135)
+        c.d.arc(box, start, start + 75, fill=BLACK, width=36 + 2 * OUT)
+        c.d.arc(box, start, start + 75, fill=steel, width=36)
+        a = math.radians(start + 75)
+        tx, ty = cx + math.cos(a) * 135, cy + math.sin(a) * 135
+        c.circle(tx, ty, 26, steel, out=14)
+    c.circle(cx, cy, 72, steel)
+    c.circle(cx, cy, 30, hexc("8A93A6"), out=0)
+    # Pistolet.
+    c.rrect((150, 420, 640, 600), 50, blue)
+    c.rrect((150, 470, 640, 510), 10, GOLD, out=12)
+    c.rrect((560, 450, 700, 570), 30, steel)
+    grip = c.layer()
+    grip.rrect((230, 560, 360, 860), 40, dark)
+    c.paste(grip, -12, (300, 600))
+    c.circle(470, 610, 60, rope)
+    c.shine((200, 440, 420, 470), 140)
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     rendered = []

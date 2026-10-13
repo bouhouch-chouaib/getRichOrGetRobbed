@@ -72,8 +72,15 @@ return {
 	StealPet = remote("StealPet"),
 	-- Client -> serveur : () le joueur saute ou touche ARRÊTER pour descendre du tapis / du banc.
 	StopTraining = remote("StopTraining"),
-	-- Serveur -> tous : ("Swing" | "Hit", player: Player, weaponId: string) geste d'une arme / impact sur une victime.
+	-- Serveur -> tous : effets des armes (client/WeaponFx) :
+	--   ("Swing", attaquant, "WeaponBat")                    coup de batte
+	--   ("Hit", victime, "WeaponBat", attaquant)             impact
+	--   ("Grapple", tireur, "WeaponGrapple", point, victime?) crochet tiré (victime = nil : raté)
 	WeaponFx = remote("WeaponFx"),
+	-- Client -> serveur : (direction: Vector3) tir du grappin dans cette direction (le serveur choisit la cible).
+	UseGrapple = remote("UseGrapple"),
+	-- Serveur -> victime : (tireur: Player, durée: number) tu es ramené(e) devant le tireur.
+	Grappled = remote("Grappled"),
 	-- Serveur -> victime ou tous : (kind: string, thiefName: string, victimName: string, petId: string)
 	-- kind : "Started", "Stolen", "Recovered", "Returned" (à la victime), "Announce" (à tous, vol rare réussi).
 	StealNotice = remote("StealNotice"),
