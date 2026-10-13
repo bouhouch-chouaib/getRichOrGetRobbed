@@ -212,6 +212,15 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Serveurs : 8 joueurs maximum (une base chacun). `BaseManager` renvoie un 9e joueur avec un message « serveur plein ».
 - `shared/TextFormat.upper` : majuscules avec accents (remplace `:upper()` partout).
 
+## Familiers : style voxel et auras (15 oct.)
+
+- `PetModelBuilder` : les 61 modèles de remplacement sont en **voxels** (toutes les pièces en blocs, tenons sur les
+  blocs larges, yeux carrés avec reflet). Les 14 vrais modèles 3D (`PetMeshes`) sont inchangés.
+- Taille selon la rareté (`Config.Pets.RarityScale` : x0,9 Commun ... x2,8 Sigma), y compris pour les modèles 3D.
+- **Auras** à partir d'Épique (`AURAS` dans `PetModelBuilder`, pièces marquées attribut `Aura`) : fumée violette +
+  anneau au sol (Épique), flammes + lumière (Légendaire), étincelles roses (Mythique), auréole + paillettes (Divin),
+  auréole dorée + 8 rayons de lumière autour (Sigma). Retirées des aperçus des fenêtres (`MenuKit.petViewport`).
+
 ## Mondes (paliers)
 
 - 15 oct. : 7 mondes (`Config.Worlds`) : Prairie, Désert 1 M$, Volcan 40 M$, Glace 1,5 B$, Abysses 75 B$, Cosmos 4 T$,

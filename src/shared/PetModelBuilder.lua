@@ -6,6 +6,9 @@
 -- 3. Sinon, on assemble un modèle de remplacement à partir de formes de base (PetCatalog.Look).
 -- Le modèle retourné est ancré, sans collision, avec un PrimaryPart "Root" invisible à l'origine
 -- (le familier regarde vers -Z). On le place avec model:PivotTo().
+-- Style (15 oct., docs/DIRECTION_ARTISTIQUE.md §5) : les modèles de remplacement sont en VOXELS (tout en blocs à tenons,
+-- yeux carrés), la taille dépend de la rareté (Config.Pets.RarityScale) et les raretés Épique+ ont une AURA (particules,
+-- lumière, anneau au sol, auréole...). Les pièces de l'aura portent l'attribut "Aura" (retirées des aperçus 2D).
 
 local AssetService = game:GetService("AssetService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -37,14 +40,17 @@ type Anchors = {
 	width: number, -- demi-largeur du corps (pour les ailes)
 }
 
-local function part(model: Model, shape: Enum.PartType, size: Vector3, cframe: CFrame, color: Color3, neon: boolean?): Part
+-- Toute pièce est un BLOC (style voxel) : boules et cylindres deviennent des pavés de même taille. Les blocs assez
+-- larges portent des tenons sur le dessus.
+local function part(model: Model, _shape: Enum.PartType, size: Vector3, cframe: CFrame, color: Color3, neon: boolean?): Part
 	local p = Instance.new("Part")
-	p.Shape = shape
+	p.Shape = Enum.PartType.Block
 	p.Size = size
 	p.CFrame = cframe
 	p.Color = color
-	p.Material = if neon then Enum.Material.Neon else Enum.Material.SmoothPlastic
-	p.TopSurface = Enum.SurfaceType.Smooth
+	p.Material = if neon then Enum.Material.Neon else Enum.Material.Plastic
+	local studded = not neon and size.X >= 0.9 and size.Z >= 0.9
+	p.TopSurface = if studded then Enum.SurfaceType.Studs else Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	p.Parent = model
 	return p
@@ -55,16 +61,18 @@ local BLOCK, BALL, CYL = Enum.PartType.Block, Enum.PartType.Ball, Enum.PartType.
 local UPRIGHT = CFrame.Angles(0, 0, math.pi / 2)
 local FORWARD = CFrame.Angles(0, math.pi / 2, 0)
 
+-- Yeux carrés façon pixel : un carré noir avec un reflet blanc (grands yeux : blanc puis pupille noire).
 local function eyes(model: Model, head: CFrame, size: number, big: boolean?)
-	local eyeSize = size * (if big then 0.42 else 0.24)
+	local eyeSize = size * (if big then 0.36 else 0.22)
+	local depth = 0.08
 	for _, side in ipairs({ -1, 1 }) do
-		local offset = CFrame.new(side * size * 0.24, size * 0.1, -size * 0.48)
+		local offset = CFrame.new(side * size * 0.24, size * 0.1, -size * 0.5 - depth / 2)
 		if big then
-			part(model, BALL, Vector3.one * eyeSize, head * offset * CFrame.new(0, size * 0.15, 0), WHITE)
-			part(model, BALL, Vector3.one * eyeSize * 0.5, head * offset * CFrame.new(0, size * 0.15, -eyeSize * 0.4), EYE)
+			part(model, BLOCK, Vector3.new(eyeSize, eyeSize, depth), head * offset * CFrame.new(0, size * 0.12, 0), WHITE)
+			part(model, BLOCK, Vector3.new(eyeSize * 0.5, eyeSize * 0.5, depth), head * offset * CFrame.new(0, size * 0.1, -depth), EYE)
 		else
-			part(model, BALL, Vector3.one * eyeSize, head * offset, EYE)
-			part(model, BALL, Vector3.one * eyeSize * 0.35, head * offset * CFrame.new(eyeSize * 0.15, eyeSize * 0.15, -eyeSize * 0.4), WHITE)
+			part(model, BLOCK, Vector3.new(eyeSize, eyeSize * 1.2, depth), head * offset, EYE)
+			part(model, BLOCK, Vector3.new(eyeSize * 0.4, eyeSize * 0.4, depth), head * offset * CFrame.new(eyeSize * 0.18, eyeSize * 0.25, -depth * 0.6), WHITE)
 		end
 	end
 end
@@ -410,9 +418,126 @@ local function finalize(model: Model)
 end
 
 -- Hauteur visée d'un familier selon sa rareté (même gabarit que les modèles de remplacement).
-local function targetHeight(rarityId: string): number
+local function rarityScale(rarityId: string): number
 	local rarityIndex = Config.RarityIndex[rarityId] or 1
-	return 3.2 * (0.8 + rarityIndex * 0.06)
+	return Config.Pets.RarityScale[rarityIndex] or 1
+end
+
+local function targetHeight(rarityId: string): number
+	return 3.2 * rarityScale(rarityId)
+end
+
+----------------------------------------------------------------------
+-- Auras de rareté (Épique et au-delà)
+----------------------------------------------------------------------
+
+type AuraDef = {
+	Color: Color3,
+	Color2: Color3,
+	Texture: string,
+	Rate: number,
+	Speed: NumberRange,
+	Size: number,
+	Rise: number, -- accélération vers le haut des particules
+	Light: number, -- portée de la lumière (0 = pas de lumière)
+	Ring: boolean, -- anneau lumineux au sol
+	Halo: boolean, -- auréole au-dessus de la tête
+	Rays: boolean, -- rayons dorés tout autour
+}
+
+local SPARKLE = "rbxasset://textures/particles/sparkles_main.dds"
+local FIRE = "rbxasset://textures/particles/fire_main.dds"
+local SMOKE = "rbxasset://textures/particles/smoke_main.dds"
+
+local AURAS: { [string]: AuraDef } = {
+	Epique = { Color = Color3.fromRGB(180, 80, 255), Color2 = Color3.fromRGB(110, 40, 200), Texture = SMOKE, Rate = 6, Speed = NumberRange.new(0.5, 1.2), Size = 1.4, Rise = 1.5, Light = 0, Ring = true, Halo = false, Rays = false },
+	Legendaire = { Color = Color3.fromRGB(255, 170, 40), Color2 = Color3.fromRGB(255, 80, 20), Texture = FIRE, Rate = 14, Speed = NumberRange.new(1, 2.5), Size = 1.2, Rise = 4, Light = 12, Ring = true, Halo = false, Rays = false },
+	Mythique = { Color = Color3.fromRGB(255, 80, 150), Color2 = Color3.fromRGB(255, 200, 240), Texture = SPARKLE, Rate = 18, Speed = NumberRange.new(3, 6), Size = 0.7, Rise = 0, Light = 14, Ring = true, Halo = false, Rays = false },
+	Divin = { Color = Color3.fromRGB(140, 255, 245), Color2 = Color3.new(1, 1, 1), Texture = SPARKLE, Rate = 20, Speed = NumberRange.new(0.5, 1.5), Size = 0.8, Rise = -1, Light = 16, Ring = true, Halo = true, Rays = false },
+	Sigma = { Color = Color3.fromRGB(255, 215, 60), Color2 = Color3.fromRGB(255, 255, 200), Texture = SPARKLE, Rate = 26, Speed = NumberRange.new(1, 3), Size = 1, Rise = 2, Light = 20, Ring = true, Halo = true, Rays = true },
+}
+
+local function auraPart(model: Model, size: Vector3, cframe: CFrame, color: Color3, transparency: number): Part
+	local p = Instance.new("Part")
+	p.Name = "AuraPart"
+	p.Size = size
+	p.CFrame = cframe
+	p.Color = color
+	p.Material = Enum.Material.Neon
+	p.Transparency = transparency
+	p.CastShadow = false
+	p:SetAttribute("Aura", true)
+	p.Parent = model
+	return p
+end
+
+-- Ajoute l'aura de la rareté au modèle déjà mis à sa taille finale.
+local function addAura(model: Model, root: BasePart, rarityId: string)
+	local def = AURAS[rarityId]
+	if not def then
+		return
+	end
+	local box, size = model:GetBoundingBox()
+	local center = root.CFrame:ToObjectSpace(box)
+	local radius = math.max(size.X, size.Z) / 2 + 0.6
+	local bottom = center.Position.Y - size.Y / 2
+	local top = center.Position.Y + size.Y / 2
+
+	local emitter = Instance.new("ParticleEmitter")
+	emitter.Name = "Aura"
+	emitter.Texture = def.Texture
+	emitter.Color = ColorSequence.new(def.Color, def.Color2)
+	emitter.LightEmission = 0.8
+	emitter.Rate = def.Rate
+	emitter.Speed = def.Speed
+	emitter.Lifetime = NumberRange.new(0.8, 1.6)
+	emitter.SpreadAngle = Vector2.new(180, 180)
+	emitter.Acceleration = Vector3.new(0, def.Rise, 0)
+	emitter.Size = NumberSequence.new(def.Size * math.max(size.Y / 3, 1), 0)
+	emitter.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.2, 0.25), NumberSequenceKeypoint.new(1, 1) })
+	emitter.Shape = Enum.ParticleEmitterShape.Box
+	emitter.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+	-- L'émetteur couvre le corps du familier : on le pose sur une pièce invisible de la taille du familier.
+	local volume = Instance.new("Part")
+	volume.Name = "AuraVolume"
+	volume.Size = size * 0.8
+	volume.CFrame = root.CFrame * center
+	volume.Transparency = 1
+	volume:SetAttribute("Aura", true)
+	volume.Parent = model
+	emitter.Parent = volume
+
+	if def.Light > 0 then
+		local light = Instance.new("PointLight")
+		light.Name = "AuraLight"
+		light.Color = def.Color
+		light.Range = def.Light
+		light.Brightness = 1.2
+		light.Parent = volume
+	end
+	if def.Ring then
+		-- Anneau carré lumineux au sol (4 barres) + dalle pâle.
+		local y = bottom + 0.06
+		for _, angle in ipairs({ 0, math.pi / 2, math.pi, -math.pi / 2 }) do
+			local offset = CFrame.Angles(0, angle, 0) * CFrame.new(0, 0, -radius)
+			auraPart(model, Vector3.new(radius * 2 + 0.3, 0.12, 0.3), root.CFrame * CFrame.new(center.Position.X, y, center.Position.Z) * offset, def.Color, 0.15)
+		end
+		auraPart(model, Vector3.new(radius * 2, 0.06, radius * 2), root.CFrame * CFrame.new(center.Position.X, y - 0.02, center.Position.Z), def.Color, 0.75)
+	end
+	if def.Halo then
+		local haloRadius = math.max(size.X, size.Z) * 0.28 + 0.4
+		for _, angle in ipairs({ 0, math.pi / 2, math.pi, -math.pi / 2 }) do
+			local offset = CFrame.Angles(0, angle, 0) * CFrame.new(0, 0, -haloRadius)
+			auraPart(model, Vector3.new(haloRadius * 2 + 0.25, 0.2, 0.25), root.CFrame * CFrame.new(center.Position.X, top + 0.8, center.Position.Z) * offset, def.Color2, 0)
+		end
+	end
+	if def.Rays then
+		for index = 0, 7 do
+			local angle = index / 8 * math.pi * 2
+			local ray = auraPart(model, Vector3.new(0.25, size.Y * 1.2, 0.25), root.CFrame * CFrame.new(center.Position.X, bottom + size.Y * 0.6, center.Position.Z) * CFrame.Angles(0, angle, 0) * CFrame.new(0, 0, -radius - 0.4), def.Color, 0.35)
+			ray.Name = "AuraRay"
+		end
+	end
 end
 
 -- Prépare un modèle 3D importé (ReplicatedStorage.PetModels.<Id>) pour qu'il se comporte comme les autres :
@@ -469,6 +594,7 @@ function normalizeCustom(custom: Model, entry: PetCatalog.Pet): Model
 		model:ScaleTo(wanted / contentSize.Y)
 	end
 
+	addAura(model, root, entry.Rarity)
 	finalize(model)
 	addEffect(root, entry.Look)
 	model:SetAttribute("Float", entry.Look.Float == true)
@@ -555,9 +681,9 @@ function PetModelBuilder.Build(petId: string): Model?
 	addExtra(model, look, anchors)
 	addEffect(root, look)
 
-	-- Les raretés hautes sont un peu plus grandes.
-	local rarityIndex = Config.RarityIndex[entry.Rarity] or 1
-	model:ScaleTo(0.8 + rarityIndex * 0.06)
+	-- Taille selon la rareté (les plus rares dépassent largement l'avatar), puis aura.
+	model:ScaleTo(rarityScale(entry.Rarity))
+	addAura(model, root, entry.Rarity)
 
 	finalize(model)
 	model:SetAttribute("Float", look.Float == true)

@@ -92,7 +92,7 @@ function MenuKit.petViewport(parent: Instance, petId: string, silhouette: boolea
 	local model = PetModelBuilder.Build(petId)
 	if model then
 		for _, descendant in ipairs(model:GetDescendants()) do
-			if descendant:IsA("ParticleEmitter") or descendant:IsA("BillboardGui") then
+			if descendant:IsA("ParticleEmitter") or descendant:IsA("BillboardGui") or descendant:GetAttribute("Aura") then
 				descendant:Destroy()
 			elseif silhouette and descendant:IsA("BasePart") then
 				descendant.Color = Color3.fromRGB(20, 20, 30)

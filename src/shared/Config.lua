@@ -167,6 +167,9 @@ Config.Loot = {
 Config.Pets = {
 	EquipSlots = 1, -- familiers équipés (multiplicateur + suivent le joueur)
 	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
+	-- Taille selon la rareté (index de Config.Rarities) : comme dans les jeux de référence, les plus rares sont bien plus
+	-- grands que l'avatar (un Sigma fait près de 3 fois un Commun).
+	RarityScale = { 0.9, 1, 1.15, 1.35, 1.6, 1.9, 2.3, 2.8 },
 }
 
 -- Monétisation (Robux). Id = numéro du pass / produit créé sur create.roblox.com (0 = pas encore créé : affiché "BIENTÔT").

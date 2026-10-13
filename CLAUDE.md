@@ -86,6 +86,9 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
+**15 oct. : familiers en voxels** (blocs à tenons, yeux carrés), taille selon la rareté (`Config.Pets.RarityScale`),
+auras Épique+ (anneau au sol, flammes, étincelles, auréole, rayons). Vérifié en jeu (rangée d'un familier par rareté, Index).
+
 ## À vérifier en priorité (état au 12 oct. 2026, fin de session Claude)
 
 - 14 oct. : armes remplacées par **batte + grappin** (voir GDD). Vérifiés en jeu (solo) : achat, pose et swing de la batte
