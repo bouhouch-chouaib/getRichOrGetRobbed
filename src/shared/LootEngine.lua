@@ -5,6 +5,9 @@
 --   - Plus le score est haut, plus les raretés hautes ont de poids (chance plafonnée).
 --   - Pitié : après PityPulls tirages sans rareté >= PityMinRarity, ce palier est garanti.
 --   - Dans une rareté, les familiers pas encore possédés sortent Config.Loot.NewPetWeight fois plus souvent.
+--   - Rang de tirage (Config.Loot.Ranks, selon les tirages faits depuis le début) : un tirage sous la rareté
+--     plancher monte au plancher (les raretés au-dessus gardent exactement leurs chances).
+--   - progress : où en est la barre « prochain tirage » (affichée en direct par le HUD).
 
 local Config = require(script.Parent.Config)
 local PetCatalog = require(script.Parent.PetCatalog)
@@ -22,6 +25,55 @@ export type Outcome = {
 
 local rng = Random.new()
 
+-- Barre « prochain tirage » : tirages déjà gagnés avec ce score, et avancement (0 à 1) vers le suivant.
+-- Même règle que countPulls (le 1er tirage est offert dès le premier point).
+function LootEngine.progress(score: number): (number, number)
+	local pulls = 0
+	local cost = Config.Loot.PullCost
+	local spent = 0
+	while score - spent >= cost do
+		spent += cost
+		pulls += 1
+		cost *= 1 + Config.Loot.PullCostGrowth
+	end
+	if pulls == 0 and score > 0 then
+		-- Tirage offert : la barre avance vers le 2e (coût des deux premiers).
+		return 1, score / (cost + cost * (1 + Config.Loot.PullCostGrowth))
+	end
+	return pulls, (score - spent) / cost
+end
+
+-- Chance de la manche (poids des raretés hautes) : grandit avec le score, plafonnée, + bonus des passes.
+function LootEngine.luck(score: number, luckBonus: number?): number
+	return math.min(score * Config.Loot.LuckPerPoint, Config.Loot.MaxLuck) + (luckBonus or 0)
+end
+
+-- Rang de tirage selon les tirages faits depuis le début (index dans Config.Loot.Ranks).
+function LootEngine.rank(totalPulls: number): number
+	local index = 1
+	for i, rank in ipairs(Config.Loot.Ranks) do
+		if totalPulls >= rank.Pulls then
+			index = i
+		end
+	end
+	return index
+end
+
+-- Rareté plancher réelle : celle du rang, mais une rareté reste tant que tous ses familiers ne sont pas découverts.
+function LootEngine.floor(totalPulls: number, discovered: { [string]: boolean }): number
+	local target = Config.Loot.Ranks[LootEngine.rank(totalPulls)].Floor
+	local floorIndex = 1
+	while floorIndex < target do
+		for _, entry in ipairs(PetCatalog.ByRarity[Config.Rarities[floorIndex].Id] or {}) do
+			if not discovered[entry.Id] then
+				return floorIndex
+			end
+		end
+		floorIndex += 1
+	end
+	return floorIndex
+end
+
 -- Nombre de tirages pour un score donné (coût croissant).
 function LootEngine.countPulls(score: number): number
 	if score <= 0 then
@@ -38,17 +90,29 @@ function LootEngine.countPulls(score: number): number
 	return math.max(1, pulls)
 end
 
--- Tire un index de rareté parmi [minIndex, #Rarities].
-local function rollRarity(luck: number, minIndex: number): number
+-- Poids de chaque rareté avec cette chance et ce plancher : les raretés sous le plancher donnent leur poids au plancher.
+local function rarityWeights(luck: number, floorIndex: number): { number }
 	local weights = {}
-	local total = 0
 	for index, rarity in ipairs(Config.Rarities) do
-		local weight = 0
-		if index >= minIndex then
-			weight = if index == 1 then rarity.Weight else rarity.Weight * (1 + luck)
+		weights[index] = if index == 1 then rarity.Weight else rarity.Weight * (1 + luck)
+	end
+	for index = 1, math.min(floorIndex, #weights) - 1 do
+		weights[floorIndex] += weights[index]
+		weights[index] = 0
+	end
+	return weights
+end
+
+-- Tire un index de rareté parmi [minIndex, #Rarities].
+local function rollRarity(luck: number, minIndex: number, floorIndex: number): number
+	local weights = rarityWeights(luck, floorIndex)
+	local total = 0
+	for index, weight in ipairs(weights) do
+		if index < minIndex then
+			weights[index] = 0
+		else
+			total += weight
 		end
-		weights[index] = weight
-		total += weight
 	end
 
 	local roll = rng:NextNumber() * total
@@ -86,14 +150,12 @@ local function pickPet(rarityIndex: number, owned: Owned): string
 	return PetCatalog.List[1].Id
 end
 
--- Probabilité de chaque rareté pour un tirage avec cette chance (hors garantie de la pitié).
+-- Probabilité de chaque rareté pour un tirage avec cette chance et ce plancher (hors garantie de la pitié).
 -- Sert à afficher les chances exactes avant un achat de tirage (règle Roblox sur les objets aléatoires payants).
-function LootEngine.odds(luck: number): { number }
-	local weights = {}
+function LootEngine.odds(luck: number, floorIndex: number?): { number }
+	local weights = rarityWeights(luck, floorIndex or 1)
 	local total = 0
-	for index, rarity in ipairs(Config.Rarities) do
-		local weight = if index == 1 then rarity.Weight else rarity.Weight * (1 + luck)
-		weights[index] = weight
+	for _, weight in ipairs(weights) do
 		total += weight
 	end
 	for index, weight in ipairs(weights) do
@@ -103,14 +165,14 @@ function LootEngine.odds(luck: number): { number }
 end
 
 -- Effectue `pulls` tirages avec cette chance (tirages achetés, ou ceux d'une manche).
--- owned : familiers du joueur (non modifié : une copie suit les tirages de la série).
-function LootEngine.rollPulls(pulls: number, pity: number, luck: number, owned: Owned?): Outcome
+-- owned : familiers du joueur (non modifié : une copie suit les tirages de la série). floorIndex : rareté plancher.
+function LootEngine.rollPulls(pulls: number, pity: number, luck: number, owned: Owned?, floorIndex: number?): Outcome
 	local outcome: Outcome = { results = {}, pulls = 0, pity = pity, drops = {} }
 	local have: Owned = table.clone(owned or {})
 	for _ = 1, pulls do
 		outcome.pity += 1
 		local minIndex = if outcome.pity >= Config.Loot.PityPulls then Config.Loot.PityMinRarity else 1
-		local rarityIndex = rollRarity(luck, minIndex)
+		local rarityIndex = rollRarity(luck, minIndex, floorIndex or 1)
 		if rarityIndex >= Config.Loot.PityMinRarity then
 			outcome.pity = 0
 		end
@@ -126,9 +188,8 @@ end
 
 -- score : points de la manche (déjà multipliés). pity : compteur actuel du joueur.
 -- luckBonus : bonus de chance externe (passe "Chance Chanceuse", boost serveur : shared/Perks), 0 par défaut.
-function LootEngine.roll(score: number, pity: number, luckBonus: number?, owned: Owned?): Outcome
-	local luck = math.min(score * Config.Loot.LuckPerPoint, Config.Loot.MaxLuck) + (luckBonus or 0)
-	return LootEngine.rollPulls(LootEngine.countPulls(score), pity, luck, owned)
+function LootEngine.roll(score: number, pity: number, luckBonus: number?, owned: Owned?, floorIndex: number?): Outcome
+	return LootEngine.rollPulls(LootEngine.countPulls(score), pity, LootEngine.luck(score, luckBonus), owned, floorIndex)
 end
 
 return LootEngine

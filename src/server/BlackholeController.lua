@@ -15,13 +15,13 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
-local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
-local BasePetsController = require(script.Parent.BasePetsController)
 local BlackholeTiers = require(script.Parent.BlackholeTiers)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
+local EconomyController = require(script.Parent.EconomyController)
+local PullRewards = require(script.Parent.PullRewards)
 local SessionData = require(script.Parent.SessionData)
 
 local BlackholeController = {}
@@ -235,32 +235,23 @@ end
 -- Récompenses
 ----------------------------------------------------------------------
 
+-- Argent des points de la manche : MoneyPerPoint par point, ou une fraction du revenu du joueur si c'est plus.
+local function pointsMoney(player: Player, score: number): number
+	local perPoint = math.max(Config.Economy.MoneyPerPoint, EconomyController.GetIncome(player) * Config.Economy.IncomeSecondsPerPoint)
+	return math.floor(score * perPoint * Perks.MoneyMultiplier(player))
+end
+
 local function distributeRewards()
 	for _, player in ipairs(Players:GetPlayers()) do
 		local score = math.floor(SessionData.GetRoundScore(player) * 10) / 10
-		-- Chance et argent en plus selon les passes et le boost de chance serveur (shared/Perks).
-		local outcome = LootEngine.roll(score, SessionData.GetPity(player), Perks.LuckBonus(player), SessionData.GetOwnedPets(player))
-		local money = math.floor(score * Config.Economy.MoneyPerPoint * Perks.MoneyMultiplier(player))
-		SessionData.SetPity(player, outcome.pity)
-		if outcome.pulls > 0 then
-			SessionData.AddPets(player, outcome.results)
-			SessionData.AddMoney(player, money)
-			-- Les nouveaux familiers apparaissent dans la base, visibles par tous (donne envie de venir les voler).
-			local newPets = {}
-			for petId in pairs(outcome.results) do
-				table.insert(newPets, petId)
-			end
-			BasePetsController.Celebrate(player, newPets)
-		end
-		print(string.format("[Blackhole] %s : %.1f points -> %d tirage(s), +%d$", player.Name, score, outcome.pulls, money))
-		Remotes.RewardsGranted:FireClient(player, score, outcome.pulls, outcome.results, money)
-
-		-- Gros drop : annonce à tout le serveur.
-		for _, petId in ipairs(outcome.drops) do
-			local entry = PetCatalog.ById[petId]
-			if entry and (Config.RarityIndex[entry.Rarity] or 0) >= Config.Loot.AnnounceMinRarity then
-				Remotes.Announcement:FireAllClients(player.DisplayName, petId)
-			end
+		local pulls = LootEngine.countPulls(score)
+		if pulls > 0 then
+			-- Chance selon le score + passes et boost serveur (shared/Perks) ; rang, doublons : server/PullRewards.
+			local money = pointsMoney(player, score)
+			PullRewards.Grant(player, pulls, LootEngine.luck(score, Perks.LuckBonus(player)), money, score)
+			print(string.format("[Blackhole] %s : %.1f points -> %d tirage(s), +%d$", player.Name, score, pulls, money))
+		else
+			Remotes.RewardsGranted:FireClient(player, score, 0, {}, 0)
 		end
 	end
 	SessionData.ResetRoundScores()

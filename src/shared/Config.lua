@@ -161,6 +161,22 @@ Config.Loot = {
 	-- Dans une rareté, un familier que le joueur n'a PAS encore a ce poids (1 pour ceux déjà possédés) :
 	-- la collection avance bien plus vite. Les chances de chaque rareté ne changent pas.
 	NewPetWeight = 5,
+	-- Rang de tirage (13 oct.) : selon les tirages faits depuis le début (attribut TotalPulls). Floor = rareté
+	-- minimale : un tirage plus bas « monte » à cette rareté (les chances des raretés au-dessus ne changent pas).
+	-- Une rareté ne disparaît que si le joueur a découvert TOUS ses familiers (l'Index reste complétable).
+	Ranks = {
+		{ Pulls = 0, Floor = 1, Name = "APPRENTI" },
+		{ Pulls = 150, Floor = 2, Name = "DOMPTEUR" }, -- plus de Communs
+		{ Pulls = 600, Floor = 3, Name = "MAÎTRE" }, -- plus d'Inhabituels
+	},
+	-- Doublons : au-delà de KeepCopies exemplaires d'un même familier, les suivants sont vendus tout de suite
+	-- (SellSeconds secondes du revenu de ce familier, x bonus du monde et des passes ; le jeter dans le trou rapporte plus).
+	KeepCopies = 5,
+	SellSeconds = 300,
+	-- Ouverture des tirages (client/PullReveal) : au plus RevealCards capsules montrées une par une, les autres résumées.
+	RevealCards = 8,
+	RevealStep = 0.28, -- secondes entre deux capsules
+	RevealHold = 2.2, -- secondes d'affichage une fois toutes ouvertes
 }
 
 -- Familiers.
@@ -265,7 +281,10 @@ Config.Leaderboard = {
 
 -- Argent : revenu passif des familiers + bonus de fin de digestion.
 Config.Economy = {
-	MoneyPerPoint = 15, -- chaque point marqué rapporte aussi de l'argent à la digestion
+	-- Chaque point marqué rapporte aussi de l'argent à la digestion : MoneyPerPoint, ou IncomeSecondsPerPoint
+	-- secondes du revenu du joueur si c'est plus (l'argent du trou suit la progression).
+	MoneyPerPoint = 15,
+	IncomeSecondsPerPoint = 0.1,
 }
 
 -- Verrouillage de base (bouton au sol, comme Steal a Brainrot).

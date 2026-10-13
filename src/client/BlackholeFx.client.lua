@@ -557,7 +557,7 @@ anchor.Name = "GaugeAnchor"
 local board = Instance.new("BillboardGui")
 board.Name = "HoleGauge"
 -- Taille en studs : un panneau dans le monde, petit de loin (ne cache pas le HUD), grand de près.
-board.Size = UDim2.fromScale(46, 15.5)
+board.Size = UDim2.fromScale(46, 19.5)
 board.LightInfluence = 0
 board.MaxDistance = 1200
 board.Adornee = anchor
@@ -586,10 +586,10 @@ local function label(parent: Instance, text: string, y: number, height: number, 
 	return l
 end
 
-local title = label(board, "", 0, 0.34, Color3.new(1, 1, 1))
+local title = label(board, "", 0, 0.27, Color3.new(1, 1, 1))
 local bar = Instance.new("Frame")
-bar.Position = UDim2.fromScale(0.06, 0.38)
-bar.Size = UDim2.fromScale(0.88, 0.26)
+bar.Position = UDim2.fromScale(0.06, 0.3)
+bar.Size = UDim2.fromScale(0.88, 0.21)
 bar.BackgroundColor3 = Color3.fromRGB(25, 22, 40)
 bar.Parent = board
 local barCorner = Instance.new("UICorner")
@@ -609,7 +609,10 @@ local fillGradient = Instance.new("UIGradient")
 fillGradient.Parent = fill
 local amount = label(bar, "", 0.08, 0.84, Color3.new(1, 1, 1))
 amount.ZIndex = 2
-local hint = label(board, "", 0.68, 0.3, Color3.new(1, 1, 1))
+local hint = label(board, "", 0.54, 0.24, Color3.new(1, 1, 1))
+-- Les 3 meilleurs contributeurs du cycle (attribut HoleTop, server/BlackholeTiers) : ils gagnent les cadeaux de
+-- l'effondrement (Config.Blackhole.Collapse.Rewards).
+local top = label(board, "", 0.8, 0.2, Color3.fromRGB(255, 210, 60))
 
 local function refreshGauge()
 	local tier = (ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number
@@ -637,9 +640,14 @@ local function refreshGauge()
 		hint.Text = if tier < #HOLE.Tiers then def.Hint else def.Hint .. " Remplis la jauge : effondrement !"
 		hint.TextColor3 = Color3.new(1, 1, 1)
 	end
+	local entries = {}
+	for name, value in string.gmatch((ReplicatedStorage:GetAttribute("HoleTop") or "") :: string, "([^=|]+)=(%d+)") do
+		table.insert(entries, string.format("%d. %s %s", #entries + 1, tostring(name), tostring(value)))
+	end
+	top.Text = if #entries > 0 then "TOP 3 (CADEAUX À L'EFFONDREMENT) : " .. table.concat(entries, "  ") else ""
 end
 
-for _, name in ipairs({ "HoleTier", "HoleGauge", "HoleNeed", "HoleCollapse", "HoleJackpotUntil" }) do
+for _, name in ipairs({ "HoleTier", "HoleGauge", "HoleNeed", "HoleCollapse", "HoleJackpotUntil", "HoleTop" }) do
 	ReplicatedStorage:GetAttributeChangedSignal(name):Connect(refreshGauge)
 end
 ReplicatedStorage:GetAttributeChangedSignal("HoleTier"):Connect(function()

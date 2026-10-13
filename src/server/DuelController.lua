@@ -25,7 +25,6 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local DuelStats = require(ReplicatedStorage.Shared.DuelStats)
-local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
@@ -35,6 +34,7 @@ local BasePetsController = require(script.Parent.BasePetsController)
 local EconomyController = require(script.Parent.EconomyController)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local PowerController = require(script.Parent.PowerController)
+local PullRewards = require(script.Parent.PullRewards)
 local SessionData = require(script.Parent.SessionData)
 
 local DuelController = {}
@@ -215,21 +215,7 @@ end
 ----------------------------------------------------------------------
 
 local function grantPulls(player: Player, pulls: number)
-	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), Perks.LuckBonus(player), SessionData.GetOwnedPets(player))
-	SessionData.SetPity(player, outcome.pity)
-	SessionData.AddPets(player, outcome.results)
-	local newPets = {}
-	for petId in pairs(outcome.results) do
-		table.insert(newPets, petId)
-	end
-	BasePetsController.Celebrate(player, newPets)
-	Remotes.RewardsGranted:FireClient(player, 0, outcome.pulls, outcome.results, 0)
-	for _, petId in ipairs(outcome.drops) do
-		local entry = PetCatalog.ById[petId]
-		if entry and (Config.RarityIndex[entry.Rarity] or 0) >= Config.Loot.AnnounceMinRarity then
-			Remotes.Announcement:FireAllClients(player.DisplayName, petId)
-		end
-	end
+	PullRewards.Grant(player, pulls, Perks.LuckBonus(player))
 end
 
 -- Accorde la case `index` au gagnant. Renvoie le texte affiché (et false si c'est « Relance »).

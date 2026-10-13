@@ -3,7 +3,8 @@
 --   - au milieu à gauche : gros boutons Boutique (vert) et Index (cyan) avec pastilles rouges ;
 --   - en bas à gauche : Force, Vitesse et argent en gros chiffres italiques ;
 --   - en bas à droite : l'horloge de la manche (lune = on nourrit le trou noir, soleil = il digère) ;
---   - en haut : bandeau de phase qui apparaît à chaque changement, points de la manche, carte des tirages ;
+--   - en haut : bandeau de phase qui apparaît à chaque changement, barre « prochain tirage » (tirages gagnés
+--     pendant la manche, chance, garantie Épique), carte des tirages (client/PullReveal ouvre les capsules) ;
 --   - en bas au centre : la consigne.
 -- Les fenêtres sont dans client/ShopMenu, client/IndexMenu et client/FusionMenu (socle client/MenuKit).
 -- Ce script relie tout aux attributs répliqués et aux messages du serveur.
@@ -17,6 +18,8 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
+local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
+local Perks = require(ReplicatedStorage.Shared.Perks)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
@@ -28,6 +31,7 @@ local MenuKit = require(script.Parent.MenuKit)
 local WorldMenu = require(script.Parent.WorldMenu)
 local ScreenScale = require(script.Parent.ScreenScale)
 local ShopMenu = require(script.Parent.ShopMenu)
+local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
 local UiStyle = require(script.Parent.UiStyle)
 
@@ -83,12 +87,59 @@ local phaseScale = Instance.new("UIScale")
 phaseScale.Scale = 0.7
 phaseScale.Parent = phaseTitle
 
-local pointsPill = UiStyle.panel(gui, UDim2.fromOffset(230, 44))
+-- Au chargement de la sauvegarde, niveaux et améliorations passent de 0 à leur valeur : pas de message pour ça.
+-- On attend que la sauvegarde soit chargée (ou 8 s si elle ne se charge pas, ex. Studio sans accès API).
+local hudStarted = os.clock()
+local function dataReady(): boolean
+	return player:GetAttribute("DataLoaded") == true or os.clock() - hudStarted > 8
+end
+
+-- Barre « prochain tirage » : chaque objet avalé la remplit ; pleine = +1 tirage (ouverts à la digestion).
+local pointsPill = UiStyle.panel(gui, UDim2.fromOffset(360, 84))
 pointsPill.AnchorPoint = Vector2.new(0.5, 0)
 pointsPill.Position = UDim2.new(0.5, 0, 0, 124)
 pointsPill.BackgroundColor3 = UiStyle.Colors.WindowBody
+Icons.image(pointsPill, "Gift", UDim2.fromOffset(50, 50), UDim2.fromOffset(4, 2))
 local pointsLabel = UiStyle.number(pointsPill, "", 28, UiStyle.Colors.Gold)
-pointsLabel.Size = UDim2.fromScale(1, 1)
+pointsLabel.Position = UDim2.fromOffset(58, 2)
+pointsLabel.Size = UDim2.new(1, -64, 0, 30)
+pointsLabel.TextXAlignment = Enum.TextXAlignment.Left
+local pullBar = Instance.new("Frame")
+pullBar.Position = UDim2.fromOffset(58, 36)
+pullBar.Size = UDim2.new(1, -68, 0, 14)
+pullBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+UiStyle.corner(pullBar, 5)
+UiStyle.stroke(pullBar, 2, BLACK, true)
+pullBar.Parent = pointsPill
+local pullFill = Instance.new("Frame")
+pullFill.Size = UDim2.fromScale(0, 1)
+pullFill.BackgroundColor3 = UiStyle.Colors.Gold
+UiStyle.corner(pullFill, 5)
+pullFill.Parent = pullBar
+local pullInfo = text(pointsPill, "", 15, WHITE, BODY_FONT)
+pullInfo.Position = UDim2.fromOffset(6, 56)
+pullInfo.Size = UDim2.new(1, -12, 0, 22)
+-- « +1 TIRAGE ! » qui s'envole quand la barre se remplit.
+local function popPull(count: number)
+	local pop = UiStyle.number(gui, string.format("+%d TIRAGE%s !", count, if count > 1 then "S" else ""), 30, UiStyle.Colors.Gold)
+	pop.AnchorPoint = Vector2.new(0.5, 0)
+	pop.Position = UDim2.new(0.5, 0, 0, 214)
+	pop.Size = UDim2.fromOffset(300, 36)
+	local scale = Instance.new("UIScale")
+	scale.Scale = 0.4
+	scale.Parent = pop
+	TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	local rise = TweenService:Create(pop, TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{ Position = UDim2.new(0.5, 0, 0, 170), TextTransparency = 1 })
+	task.delay(0.35, function()
+		rise:Play()
+	end)
+	task.delay(1.6, function()
+		pop:Destroy()
+	end)
+	Sounds.play("HoleBonus")
+end
+local shownPulls = 0
 
 local hintLabel = text(gui, "", 18, WHITE, BODY_FONT)
 hintLabel.AnchorPoint = Vector2.new(0.5, 1)
@@ -210,7 +261,7 @@ worldsButton.Activated:Connect(worlds.window.toggle)
 
 -- Petite carte sous le bandeau (à la place des points, cachés pendant la digestion). Elle ne ferme aucune
 -- fenêtre, glisse puis disparaît seule (ou au clic). Les familiers, eux, tombent dans la base.
-local REWARD_CARD_TIME = 5
+local REWARD_CARD_TIME = 7
 local rewardCard = Instance.new("TextButton")
 rewardCard.Name = "RewardCard"
 rewardCard.AnchorPoint = Vector2.new(0.5, 0)
@@ -318,7 +369,19 @@ local function updateStats()
 		row.ui.label.Text = if bonus > 0 then string.format("NV %d +%d", level, bonus) else string.format("NV %d", level)
 		row.ui.fill.Size = UDim2.fromScale(if needed > 0 then math.clamp(numberAttribute(row.stat .. "XP") / needed, 0, 1) else 1, 1)
 	end
-	pointsLabel.Text = string.format("POINTS  %.1f", numberAttribute("RoundScore"))
+	-- Barre de tirage : tirages déjà gagnés cette manche, avancement vers le suivant, chance et garantie.
+	local score = numberAttribute("RoundScore")
+	local pulls, progress = LootEngine.progress(score)
+	pointsLabel.Text = string.format("%d TIRAGE%s", pulls, if pulls > 1 then "S" else "")
+	TweenService:Create(pullFill, TweenInfo.new(0.2), { Size = UDim2.fromScale(math.clamp(progress, 0, 1), 1) }):Play()
+	if pulls > shownPulls and dataReady() and ReplicatedStorage:GetAttribute("GameState") == "Feeding" then
+		popPull(pulls - shownPulls)
+	end
+	shownPulls = pulls
+	local luck = LootEngine.luck(score, Perks.LuckBonus(player))
+	local pityLeft = math.max(1, Config.Loot.PityPulls - numberAttribute("Pity"))
+	local luckText = string.gsub(string.format("%.2f", 1 + luck), "%.", ",")
+	pullInfo.Text = string.format("CHANCE x%s  •  ÉPIQUE GARANTI DANS %d TIRAGE%s", luckText, pityLeft, if pityLeft > 1 then "S" else "")
 
 	shop.refresh()
 	index.refresh()
@@ -429,41 +492,79 @@ player:GetAttributeChangedSignal("Money"):Connect(function()
 end)
 
 local rewardToken = 0
-local function showRewards(score: number, pulls: number, results: { [string]: number }, money: number?)
+-- Résumé des tirages (server/PullRewards) : familiers gagnés (« NOUVEAU » en premier), doublons vendus, argent,
+-- et le rang de tirage. Les capsules s'ouvrent en même temps en bas de l'écran (client/PullReveal).
+local function showRewards(score: number, pulls: number, results: { [string]: number }, money: number?, details: any?)
 	rewardToken += 1
 	local token = rewardToken
 
 	if pulls == 0 then
 		rewardHeadline.Text = "IL A ENCORE FAIM..."
-		rewardBody.Text = "0 POINT CETTE MANCHE"
+		rewardBody.Text = "AUCUN OBJET AVALÉ CETTE MANCHE : LANCE-LUI DES OBJETS !"
 	else
 		local plural = if pulls > 1 then "S" else ""
 		rewardHeadline.Text = if score == 0
-			then string.format("%d TIRAGE%s !", pulls, plural) -- tirages achetés en Robux (pas de points de manche)
-			else string.format("%.1f POINTS  •  %d TIRAGE%s", score, pulls, plural)
-		-- Familiers gagnés, du plus rare au plus commun (4 lignes max).
-		local drops = {}
+			then string.format("%d TIRAGE%s !", pulls, plural) -- tirages achetés en Robux ou gagnés en duel
+			else string.format("%d TIRAGE%s  •  %s POINTS", pulls, plural, (string.gsub(string.format("%.1f", score), "%.", ",")))
+		local newIds: { [string]: boolean } = {}
+		local soldCount, soldMoney = 0, 0
+		local drops = if type(details) == "table" and type(details.drops) == "table" then details.drops else {}
+		for _, drop in ipairs(drops) do
+			if type(drop) == "table" and type(drop.Id) == "string" then
+				if drop.New == true then
+					newIds[drop.Id] = true
+				end
+				if type(drop.Sold) == "number" then
+					soldCount += 1
+					soldMoney += drop.Sold
+				end
+			end
+		end
+		-- Familiers gardés : les nouveaux d'abord, puis du plus rare au plus commun (4 lignes max).
+		local kept = {}
 		for petId, count in pairs(results) do
 			local entry = PetCatalog.ById[petId]
 			if entry then
-				table.insert(drops, { entry = entry, count = count, rank = Config.RarityIndex[entry.Rarity] })
+				table.insert(kept, { entry = entry, count = count, rank = Config.RarityIndex[entry.Rarity], new = newIds[petId] == true })
 			end
 		end
-		table.sort(drops, function(a, b)
+		table.sort(kept, function(a, b)
+			if a.new ~= b.new then
+				return a.new
+			end
 			return a.rank > b.rank
 		end)
 		local lines = {}
-		for order, drop in ipairs(drops) do
+		for order, drop in ipairs(kept) do
 			if order > 4 then
-				table.insert(lines, string.format("+ %d AUTRES...", #drops - 4))
+				table.insert(lines, string.format("+ %d AUTRES...", #kept - 4))
 				break
 			end
 			local rarity = Config.Rarities[drop.rank]
-			table.insert(lines, string.format('<font color="#%s">+%d %s</font>', rarity.Color:ToHex(), drop.count, TextFormat.upper(drop.entry.Name)))
+			table.insert(lines, string.format('<font color="#%s">+%d %s</font>%s', rarity.Color:ToHex(), drop.count,
+				TextFormat.upper(drop.entry.Name), if drop.new then ' <font color="#FFD23C">NOUVEAU !</font>' else ""))
 		end
-		if money and money > 0 then
-			table.insert(lines, string.format('<font color="#%s">+%s</font>', MONEY:ToHex(), NumberFormat.money(money)))
+		if soldCount > 0 then
+			table.insert(lines, string.format('<font color="#B4B4C0">%d DOUBLON%s VENDU%s (déjà %d) : </font><font color="#%s">+%s</font>',
+				soldCount, if soldCount > 1 then "S" else "", if soldCount > 1 then "S" else "", Config.Loot.KeepCopies,
+				MONEY:ToHex(), NumberFormat.money(soldMoney)))
 		end
+		if money and money > soldMoney then
+			table.insert(lines, string.format('<font color="#%s">+%s</font>', MONEY:ToHex(), NumberFormat.money(money - soldMoney)))
+		end
+		-- Rang de tirage : ce qui a disparu des tirages, et le prochain palier.
+		local total = numberAttribute("TotalPulls")
+		local rankIndex = LootEngine.rank(total)
+		local nextRank = Config.Loot.Ranks[rankIndex + 1]
+		local rankLine = "RANG " .. Config.Loot.Ranks[rankIndex].Name
+		local floorIndex = if type(details) == "table" and type(details.floor) == "number" then details.floor else 1
+		if floorIndex > 1 then
+			rankLine ..= " : TIRAGES À PARTIR DE " .. TextFormat.upper(Config.Rarities[floorIndex].Name)
+		end
+		if nextRank then
+			rankLine ..= string.format("  •  %s À %d TIRAGES (%d)", nextRank.Name, nextRank.Pulls, total)
+		end
+		table.insert(lines, '<font color="#9BDCFF">' .. rankLine .. "</font>")
 		rewardBody.Text = table.concat(lines, "\n")
 	end
 
@@ -572,12 +673,6 @@ local STATION_HINTS: { [string]: string } = {
 	Treadmill = " : À GAUCHE DE TA BASE !",
 	Bench = " : À DROITE DE TA BASE !",
 }
--- Au chargement de la sauvegarde, niveaux et améliorations passent de 0 à leur valeur : pas de message pour ça.
--- On attend que la sauvegarde soit chargée (ou 8 s si elle ne se charge pas, ex. Studio sans accès API).
-local hudStarted = os.clock()
-local function dataReady(): boolean
-	return player:GetAttribute("DataLoaded") == true or os.clock() - hudStarted > 8
-end
 
 for _, item in ipairs(Config.Shop) do
 	player:GetAttributeChangedSignal("Upgrade_" .. item.Id):Connect(function()

@@ -7,7 +7,8 @@
 --   RoundScore, Money, Upgrade_<Id> (niveau), Capacity (objets portables),
 --   SpeedLevel/SpeedXP/SpeedXPNeeded/Speed (WalkSpeed), StrengthLevel/StrengthXP/StrengthXPNeeded/ThrowPower,
 --   Pet_<PetId> (quantité possédée), Equipped ("id1,id2"), Multiplier, EquipSlots,
---   SpeedBonus/StrengthBonus (niveaux donnés par les familiers équipés, shared/PetStats)
+--   SpeedBonus/StrengthBonus (niveaux donnés par les familiers équipés, shared/PetStats),
+--   Pity (tirages depuis le dernier Épique+), TotalPulls (tirages faits depuis le début : le rang, Config.Loot.Ranks)
 
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
@@ -32,6 +33,7 @@ export type PlayerData = {
 	equipped: { string }, -- petIds équipés (un même Id peut apparaître plusieurs fois si possédé en plusieurs exemplaires)
 	equipSlots: number,
 	pity: number,
+	totalPulls: number, -- tirages faits depuis le début (rang de tirage : Config.Loot.Ranks)
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
 	keys: number, -- clés en réserve (Config.Keys, achetées en Robux)
@@ -105,6 +107,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		pets = data.pets,
 		equipped = data.equipped,
 		pity = data.pity,
+		totalPulls = data.totalPulls,
 		upgrades = data.upgrades,
 		stationScale = 25, -- tapis et banc sur 25 niveaux (avant : 8, converti à la lecture)
 		tutorialDone = data.tutorialDone,
@@ -278,6 +281,7 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	end
 	data.money = numberOr(saved.money, 0) + data.money
 	data.pity = numberOr(saved.pity, 0)
+	data.totalPulls = math.max(0, math.floor(numberOr(saved.totalPulls, -1)))
 	data.keys = math.max(math.floor(numberOr(saved.keys, 0)), 0) + data.keys
 	data.tier = math.clamp(math.floor(numberOr(saved.tier, 1)), 1, #Config.Worlds)
 	data.world = math.clamp(math.floor(numberOr(saved.world, data.tier)), 1, data.tier)
@@ -329,6 +333,13 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 				table.insert(data.indexClaimed, petId)
 			end
 		end
+	end
+	if saved.totalPulls == nil then
+		local owned = 0
+		for _, count in pairs(data.pets) do
+			owned += count
+		end
+		data.totalPulls = owned -- sauvegarde d'avant le rang : chaque familier possédé compte comme un tirage fait
 	end
 	if type(saved.equipped) == "table" then
 		data.equipped = {}
@@ -411,6 +422,8 @@ local function sync(player: Player)
 	player:SetAttribute("Tier", data.tier)
 	player:SetAttribute("World", data.world)
 	player:SetAttribute("IndexClaimed", table.concat(data.indexClaimed, ","))
+	player:SetAttribute("Pity", data.pity)
+	player:SetAttribute("TotalPulls", data.totalPulls)
 	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
 	for id, level in pairs(data.upgrades) do
 		player:SetAttribute("Upgrade_" .. id, level)
@@ -506,6 +519,7 @@ local function onPlayerAdded(player: Player)
 		equipped = {},
 		equipSlots = Config.Pets.EquipSlots,
 		pity = 0,
+		totalPulls = 0,
 		upgrades = {},
 		tutorialDone = false,
 		keys = 0,
@@ -871,7 +885,39 @@ function SessionData.SetPity(player: Player, pity: number)
 	local data = storage[player]
 	if data then
 		data.pity = pity
+		player:SetAttribute("Pity", pity)
 	end
+end
+
+-- Tirages faits depuis le début (le rang de tirage en dépend : Config.Loot.Ranks).
+function SessionData.GetTotalPulls(player: Player): number
+	local data = storage[player]
+	return if data then data.totalPulls else 0
+end
+
+function SessionData.AddTotalPulls(player: Player, pulls: number)
+	local data = storage[player]
+	if data and pulls > 0 then
+		data.totalPulls += pulls
+		player:SetAttribute("TotalPulls", data.totalPulls)
+	end
+end
+
+-- Familiers déjà découverts : possédés maintenant, ou récompense d'Index réclamée (même s'ils ont été volés).
+function SessionData.GetDiscovered(player: Player): { [string]: boolean }
+	local data = storage[player]
+	local discovered: { [string]: boolean } = {}
+	if data then
+		for petId, count in pairs(data.pets) do
+			if count > 0 then
+				discovered[petId] = true
+			end
+		end
+		for _, petId in ipairs(data.indexClaimed) do
+			discovered[petId] = true
+		end
+	end
+	return discovered
 end
 
 -- Ajoute de l'XP d'entraînement. Gère les passages de niveau (plusieurs d'un coup si besoin).

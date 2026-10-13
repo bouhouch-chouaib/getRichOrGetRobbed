@@ -53,7 +53,27 @@ local function need(): number
 	return math.max(1, math.floor(HOLE.GaugeNeed[tier] * players ^ HOLE.PlayerScaling + 0.5))
 end
 
+-- Les 3 meilleurs contributeurs du cycle (cadeaux de l'effondrement), affichés sur la jauge : « Nom=12|Nom=8 ».
+local function topText(): string
+	local ranking: { { name: string, amount: number } } = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		local amount = contributions[player.UserId]
+		if amount and amount > 0 then
+			table.insert(ranking, { name = player.DisplayName, amount = amount })
+		end
+	end
+	table.sort(ranking, function(a, b)
+		return a.amount > b.amount
+	end)
+	local parts = {}
+	for index = 1, math.min(#ranking, #HOLE.Collapse.Rewards) do
+		table.insert(parts, string.format("%s=%d", ranking[index].name, math.floor(ranking[index].amount)))
+	end
+	return table.concat(parts, "|")
+end
+
 local function publish()
+	ReplicatedStorage:SetAttribute("HoleTop", topText())
 	ReplicatedStorage:SetAttribute("HoleTier", tier)
 	ReplicatedStorage:SetAttribute("HoleGauge", math.floor(gauge * 10 + 0.5) / 10)
 	ReplicatedStorage:SetAttribute("HoleNeed", need())

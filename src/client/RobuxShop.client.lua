@@ -265,15 +265,17 @@ local function refresh()
 			UiStyle.setButtonColor(row.buy, ROBUX_PURPLE)
 		end
 	end
-	local odds = LootEngine.odds(M.PullLuck + Perks.LuckBonus(player))
+	-- Chances exactes pour CE joueur : chance des tirages achetés + bonus, et sa rareté plancher (rang de tirage).
+	local odds = LootEngine.odds(M.PullLuck + Perks.LuckBonus(player), MenuKit.pullFloor())
 	local lines = {}
 	for index, rarity in ipairs(Config.Rarities) do
 		table.insert(lines, string.format('<font color="#%s">%s</font> : %s', rarity.Color:ToHex(), TextFormat.upper(rarity.Name), formatPercent(odds[index])))
 	end
 	table.insert(lines, string.format(
-		'<font size="15">Dans une rareté, un familier que tu n\'as pas encore a %d fois plus de chances que ceux que tu as déjà. Garantie : un Épique ou mieux au plus tard au %de tirage sans en avoir eu.</font>',
+		'<font size="15">Dans une rareté, un familier que tu n\'as pas encore a %d fois plus de chances que ceux que tu as déjà. Garantie : un Épique ou mieux au plus tard au %de tirage sans en avoir eu. Ton rang de tirage retire les petites raretés dont tu as découvert tous les familiers. Au-delà de %d exemplaires d\'un familier, les suivants sont vendus automatiquement.</font>',
 		Config.Loot.NewPetWeight,
-		Config.Loot.PityPulls
+		Config.Loot.PityPulls,
+		Config.Loot.KeepCopies
 	))
 	oddsLabel.Text = table.concat(lines, "\n")
 end

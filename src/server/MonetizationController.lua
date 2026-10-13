@@ -18,11 +18,8 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
-local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
-local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
-local Remotes = require(ReplicatedStorage.Shared.Remotes)
-local BasePetsController = require(script.Parent.BasePetsController)
+local PullRewards = require(script.Parent.PullRewards)
 local SessionData = require(script.Parent.SessionData)
 
 local MonetizationController = {}
@@ -126,28 +123,10 @@ local function grantServerLuck(player: Player)
 	ReplicatedStorage:SetAttribute("LuckBoostAt", now) -- change à chaque achat : déclenche l'annonce
 end
 
--- Tirages achetés : même moteur que les manches, avec la chance de base des tirages achetés + bonus (Perks).
+-- Tirages achetés : même moteur que les manches (server/PullRewards : rang, doublons vendus, affichage à part),
+-- avec la chance de base des tirages achetés + bonus (Perks).
 local function grantPulls(player: Player, pulls: number)
-	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), M.PullLuck + Perks.LuckBonus(player), SessionData.GetOwnedPets(player))
-	SessionData.SetPity(player, outcome.pity)
-	SessionData.AddPets(player, outcome.results)
-	-- L'affichage tourne à part : une erreur visuelle ne doit JAMAIS faire refuser un achat déjà accordé
-	-- (Roblox le renverrait et le joueur recevrait ses tirages plusieurs fois).
-	task.spawn(function()
-		local newPets = {}
-		for petId in pairs(outcome.results) do
-			table.insert(newPets, petId)
-		end
-		BasePetsController.Celebrate(player, newPets)
-		-- Même affichage qu'une fin de manche : carte de résultats, ouverture animée si rare (score 0 = tirages achetés).
-		Remotes.RewardsGranted:FireClient(player, 0, outcome.pulls, outcome.results, 0)
-		for _, petId in ipairs(outcome.drops) do
-			local entry = PetCatalog.ById[petId]
-			if entry and (Config.RarityIndex[entry.Rarity] or 0) >= Config.Loot.AnnounceMinRarity then
-				Remotes.Announcement:FireAllClients(player.DisplayName, petId)
-			end
-		end
-	end)
+	PullRewards.Grant(player, pulls, M.PullLuck + Perks.LuckBonus(player))
 end
 
 local function grantProduct(player: Player, product: Config.MonetizationItem)

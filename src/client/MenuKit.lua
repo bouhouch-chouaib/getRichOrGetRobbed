@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local Sounds = require(script.Parent.Sounds)
@@ -65,6 +66,18 @@ end
 -- Découvert = possédé maintenant, ou déjà réclamé dans l'Index (il reste découvert même s'il a été volé).
 function MenuKit.discovered(petId: string, claimed: { [string]: boolean }): boolean
 	return MenuKit.number("Pet_" .. petId) > 0 or claimed[petId] == true
+end
+
+-- Rareté plancher des tirages du joueur (rang de tirage, shared/LootEngine.floor), comme le serveur la calcule.
+function MenuKit.pullFloor(): number
+	local claimed = MenuKit.claimed()
+	local discovered: { [string]: boolean } = {}
+	for _, entry in ipairs(PetCatalog.List) do
+		if MenuKit.discovered(entry.Id, claimed) then
+			discovered[entry.Id] = true
+		end
+	end
+	return LootEngine.floor(MenuKit.number("TotalPulls"), discovered)
 end
 
 -- Nombre de récompenses d'Index qui attendent.

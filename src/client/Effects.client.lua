@@ -457,7 +457,7 @@ local function queueReveal(petId: string)
 end
 
 -- Tirages : on révèle le plus rare obtenu (s'il est au moins Épique).
-Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, _pulls: number, results: { [string]: number })
+Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, pulls: number, results: { [string]: number })
 	local best: string? = nil
 	local bestRank = 0
 	for petId in pairs(results) do
@@ -468,7 +468,8 @@ Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, _pulls: nu
 		end
 	end
 	if best then
-		queueReveal(best)
+		-- Après l'ouverture des capsules (client/PullReveal) : même durée que là-bas.
+		task.delay(0.6 + math.min(pulls, Config.Loot.RevealCards) * Config.Loot.RevealStep, queueReveal, best)
 	end
 end)
 Remotes.FusionResult.OnClientEvent:Connect(queueReveal)
