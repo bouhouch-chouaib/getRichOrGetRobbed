@@ -278,6 +278,11 @@ local function spinWheel(duel: Duel, winner: Side, loser: Side)
 	duel.state = "Wheel"
 	for _ = 1, 5 do
 		local index = rng:NextInteger(1, #DUEL.Wheel)
+		-- Test dans Studio : workspace:SetAttribute("DuelForceWheel", 1) force la case (1 = le familier de l'adversaire).
+		local forced = Workspace:GetAttribute("DuelForceWheel")
+		if RunService:IsStudio() and type(forced) == "number" and DUEL.Wheel[forced] then
+			index = forced
+		end
 		if duel.model then
 			duel.model:SetAttribute("SpinIndex", index)
 			duel.model:SetAttribute("SpinAt", now())
@@ -285,6 +290,7 @@ local function spinWheel(duel: Duel, winner: Side, loser: Side)
 		Remotes.DuelEvent:FireAllClients("Spin", duel.model, index)
 		task.wait(DUEL.SpinTime)
 		local text, final = grant(duel, winner, loser, index)
+		print(string.format("[Duel] roue de %s : case %d (%s) -> %s", winner.player.Name, index, DUEL.Wheel[index].Kind, text))
 		send(winner.player, "Reward", index, text)
 		if final then
 			break
@@ -583,8 +589,20 @@ function DuelController.Init()
 		end
 	end)
 
+	local function watchDeath(player: Player, character: Model)
+		local humanoid = character:WaitForChild("Humanoid", 10)
+		if humanoid and humanoid:IsA("Humanoid") then
+			humanoid.Died:Connect(function()
+				local duel = duelOf[player]
+				if duel and duel.state ~= "Wheel" then
+					forfeit(player, "Left")
+				end
+			end)
+		end
+	end
 	local function watch(player: Player)
-		player.CharacterAdded:Connect(function()
+		player.CharacterAdded:Connect(function(character)
+			task.spawn(watchDeath, player, character)
 			-- Nouveau personnage pendant un duel (réinitialisation) : abandon.
 			local duel = duelOf[player]
 			if duel and duel.state ~= "Wheel" then
@@ -595,6 +613,9 @@ function DuelController.Init()
 	Players.PlayerAdded:Connect(watch)
 	for _, player in ipairs(Players:GetPlayers()) do
 		watch(player)
+		if player.Character then
+			task.spawn(watchDeath, player, player.Character)
+		end
 	end
 	Players.PlayerRemoving:Connect(function(player: Player)
 		forfeit(player, "Left")

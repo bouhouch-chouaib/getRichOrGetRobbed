@@ -88,7 +88,10 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 
 **13 oct. : duels de familiers** (`server/DuelController`, `client/DuelClient`, `client/DuelFx`) : défi [F], choix des
 familiers (une rareté d'écart), arène flottante au-dessus du trou, combat auto + clics, roue du gagnant (1/8 : le familier
-adverse). Analyse statique OK ; **pas encore testé en jeu (il faut 2 joueurs : Studio > Test > Clients et serveurs, 2 joueurs)**.
+adverse). Testé à 2 joueurs le 13 oct. (Studio > Test > Clients et serveurs) : défi, invitation, choix, double validation, combat
+et clics, K.O., roue, retour des joueurs, abandon. Reste à voir : la case « son familier » (forçable dans Studio :
+`workspace:SetAttribute("DuelForceWheel", 1)` côté serveur). Pour donner des familiers aux joueurs de test, un Script
+créé à la volée dans ServerScriptService partage les modules du jeu (pas la barre de commande).
 
 **13 oct. : horloge de la manche en haut au centre** (pastille au-dessus de la consigne de phase et des points, `client/HUD`).
 

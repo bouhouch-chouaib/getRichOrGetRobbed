@@ -34,6 +34,7 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "Duel"
 screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 8
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- comme le HUD : le contenu des fenêtres passe devant leur fond
 screenGui.Parent = player:WaitForChild("PlayerGui")
 local gui = ScreenScale.attach(screenGui)
 
@@ -237,12 +238,23 @@ local function showPet(card: Card, petId: string?, ready: boolean, mine: boolean
 	card.status.TextColor3 = if ready then UiStyle.Colors.Green else RED
 end
 
-local function refreshGrid()
-	for _, child in ipairs(grid:GetChildren()) do
-		if child:IsA("GuiObject") then
-			child:Destroy()
-		end
+-- Les cartes sont construites une seule fois par liste de familiers (les aperçus 3D ne clignotent pas) ;
+-- à chaque changement, seul leur style est mis à jour (choisie, compatible ou grisée).
+type GridCard = { card: TextButton, viewport: ViewportFrame, name: TextLabel }
+local gridCards: { [string]: GridCard } = {}
+local gridKey = ""
+
+local function styleGrid()
+	for petId, entry in pairs(gridCards) do
+		local allowed = otherPick == nil or DuelStats.compatible(petId, otherPick)
+		entry.card.BackgroundColor3 = if petId == myPick then UiStyle.Colors.Orange else UiStyle.Colors.Panel
+		entry.card.BackgroundTransparency = if allowed then 0 else 0.5
+		entry.viewport.ImageTransparency = if allowed then 0 else 0.6
+		entry.name.TextTransparency = if allowed then 0 else 0.5
 	end
+end
+
+local function refreshGrid()
 	local list: { string } = {}
 	for _, entry in ipairs(PetCatalog.List) do
 		if MenuKit.spare(entry.Id) > 0 then
@@ -256,6 +268,18 @@ local function refreshGrid()
 		end
 		return a < b
 	end)
+	local key = table.concat(list, ",")
+	if key == gridKey then
+		styleGrid()
+		return
+	end
+	gridKey = key
+	table.clear(gridCards)
+	for _, child in ipairs(grid:GetChildren()) do
+		if child:IsA("GuiObject") then
+			child:Destroy()
+		end
+	end
 	if #list == 0 then
 		local empty = UiStyle.text(grid, "Tu n'as aucun familier dans ta base (un familier équipé ne peut pas combattre).", 20, WHITE)
 		empty.Size = UDim2.fromOffset(440, 80)
@@ -263,12 +287,10 @@ local function refreshGrid()
 		return
 	end
 	for order, petId in ipairs(list) do
-		local allowed = otherPick == nil or DuelStats.compatible(petId, otherPick)
 		local card = Instance.new("TextButton")
 		card.Text = ""
 		card.LayoutOrder = order
 		card.AutoButtonColor = false
-		card.BackgroundColor3 = if petId == myPick then UiStyle.Colors.Orange else UiStyle.Colors.Panel
 		UiStyle.corner(card, 6)
 		UiStyle.stroke(card, 3, rarityColor(petId), true)
 		card.Parent = grid
@@ -283,13 +305,9 @@ local function refreshGrid()
 		local stats = UiStyle.text(card, string.format("PV %d  ATT %d", hp, attack), 12, WHITE)
 		stats.Position = UDim2.fromOffset(2, 114)
 		stats.Size = UDim2.new(1, -4, 0, 18)
-		if not allowed then
-			card.BackgroundTransparency = 0.5
-			viewport.ImageTransparency = 0.6
-			name.TextTransparency = 0.5
-		end
+		gridCards[petId] = { card = card, viewport = viewport, name = name }
 		card.Activated:Connect(function()
-			if allowed then
+			if otherPick == nil or DuelStats.compatible(petId, otherPick) then
 				Sounds.play("UiClick")
 				action("Pick", petId)
 			else
@@ -297,6 +315,7 @@ local function refreshGrid()
 			end
 		end)
 	end
+	styleGrid()
 end
 
 local function refreshWindow()
@@ -423,9 +442,11 @@ end)
 
 -- Pendant le duel, le HUD (argent, boutons, horloge) est caché : on voit l'arène et la roue en entier.
 local function setHudVisible(visible: boolean)
-	local hud = player.PlayerGui:FindFirstChild("HUD")
-	if hud and hud:IsA("ScreenGui") then
-		hud.Enabled = visible
+	for _, name in ipairs({ "HUD", "Tutorial" }) do
+		local hud = player.PlayerGui:FindFirstChild(name)
+		if hud and hud:IsA("ScreenGui") then
+			hud.Enabled = visible
+		end
 	end
 end
 
@@ -489,6 +510,7 @@ Remotes.DuelEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		end
 	elseif kind == "Pick" and typeof(a) == "Instance" and a:IsA("Player") then
 		phase = "Pick"
+		gridKey = "" -- liste de familiers relue à chaque nouveau duel
 		opponent = a
 		invite.Visible = false
 		deadline = if type(b) == "number" then b else Workspace:GetServerTimeNow() + DUEL.PickTime
