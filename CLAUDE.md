@@ -94,7 +94,7 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 - Vérifiés en jeu (solo) : lancer puis re-ramasser un objet, achat / réapparition des armes, mains exclusives,
   tapis et banc (blocage, course, développé couché, « +X »), tirages « nouveaux d'abord » (simulation 20 000 tirages).
 - Les **clés** (ouvrir une base fermée 10 s) sont revenues le 14 oct., **en Robux uniquement** (49 R$ la clé, produit `Key1`).
-  Produit à créer sur Roblox puis mettre son Id dans `Config.Monetization.Products` (Id = 0 -> « Bientôt »).
+  Produit créé sur Roblox le 14 oct. (Id 3718327246, dans `Config.Monetization.Products`).
 - Chaque changement ne passe dans le vrai jeu qu'après **Publier** dans Studio puis redémarrage des serveurs.
 - Pistes de Chouaib pour la suite : se rapprocher de la direction artistique de Steal an Egg (map faite de vrais modèles 3D
   plutôt que générée par `MapGenerator`, effets, interface) ; voir les conseils de passation dans l'historique.

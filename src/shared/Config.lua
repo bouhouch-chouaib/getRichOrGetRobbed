@@ -193,7 +193,7 @@ Config.Monetization = {
 	Products = {
 		{ Key = "ServerLuck", Id = 3717917081, Icon = "Sparkle", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
 		{ Key = "Pull1", Id = 3717917143, Icon = "Dice", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
-		{ Key = "Key1", Id = 0, Icon = "Key", Name = "CLÉ", Description = "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.", Price = 49, Keys = 1 },
+		{ Key = "Key1", Id = 3718327246, Icon = "Key", Name = "CLÉ", Description = "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.", Price = 49, Keys = 1 },
 		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,

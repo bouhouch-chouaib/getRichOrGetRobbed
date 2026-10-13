@@ -163,7 +163,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   pas d'expulsion, vol possible, même si le propriétaire repasse sur le bouton ; ensuite elle se referme si son compte à rebours
   tourne encore. Sans clé, la bulle affiche « Clé : 49 R$ » et ouvre l'achat ; la clé est utilisée dès que l'achat est validé si
   le joueur est encore devant le portail. Clés sauvegardées (`keys`, attribut `Keys`). Messages `KeyUsed` (propriétaire) /
-  `KeyOpened` (utilisateur). **L'Id du produit est à 0 tant qu'il n'est pas créé sur Roblox** (affiché « Bientôt »).
+  `KeyOpened` (utilisateur). Produit Roblox : Id 3718327246.
 - **Annonces** (`Remotes.StealNotice`) : à la victime "Started" (début), puis "Stolen" / "Recovered" / "Returned" (KO ou temps
   écoulé) ; à tout le serveur "Announce" pour un vol réussi de rareté >= `Config.Loot.AnnounceMinRarity` (Légendaire).
 
