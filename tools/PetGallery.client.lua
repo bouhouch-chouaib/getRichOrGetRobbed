@@ -30,7 +30,7 @@ label.Parent = gui
 local bar = Instance.new("Frame")
 bar.AnchorPoint = Vector2.new(0.5, 1)
 bar.Position = UDim2.new(0.5, 0, 1, -20)
-bar.Size = UDim2.fromOffset(560, 56)
+bar.Size = UDim2.fromOffset(844, 56)
 bar.BackgroundTransparency = 1
 bar.Parent = gui
 local layout = Instance.new("UIListLayout")
@@ -41,6 +41,8 @@ local selected = 1
 local shown: Model? = nil
 local spin = true
 local aura = true
+local animate = true
+local walking = false
 local yaw = 0.55
 local focus = Vector3.zero
 local distance = 18
@@ -55,10 +57,13 @@ local function show()
 	end
 	shown = m
 	local box, size = Builder.BodyBounds(m)
-	m:PivotTo(CFrame.new(0, size.Y / 2 - box.Position.Y + 0.04, 0))
-	focus = Vector3.new(0, size.Y * 0.5, 0)
+	local hover = if m:GetAttribute("MotionFlying") then 0.7 else 0.04
+	m:PivotTo(CFrame.new(0, size.Y / 2 - box.Position.Y + hover, 0))
+	focus = Vector3.new(0, size.Y * 0.5 + hover, 0)
 	distance = math.max(size.Magnitude * 1.25, 8)
 	m:SetAttribute("AuraHidden", not aura)
+	m:SetAttribute("MotionPaused", not animate)
+	m:SetAttribute("MotionSpeed", if walking then 4 else 0)
 	for _, q in ipairs(m:GetDescendants()) do
 		if q:IsA("BasePart") and q:GetAttribute("Aura") and not aura then
 			q.Transparency = 1
@@ -101,6 +106,22 @@ auraButton = button("Auras : oui", function()
 	auraButton.Text = if aura then "Auras : oui" else "Auras : non"
 	show()
 end)
+local motionButton: TextButton
+motionButton = button("Anim. : oui", function()
+	animate = not animate
+	motionButton.Text = if animate then "Anim. : oui" else "Anim. : non"
+	if shown then
+		shown:SetAttribute("MotionPaused", not animate)
+	end
+end)
+local walkButton: TextButton
+walkButton = button("Au repos", function()
+	walking = not walking
+	walkButton.Text = if walking then "En marche" else "Au repos"
+	if shown then
+		shown:SetAttribute("MotionSpeed", if walking then 4 else 0)
+	end
+end)
 UIS.InputBegan:Connect(function(input: InputObject, processed: boolean)
 	if processed then
 		return
@@ -113,7 +134,7 @@ UIS.InputBegan:Connect(function(input: InputObject, processed: boolean)
 end)
 local function resize()
 	local scale = bar:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
-	scale.Scale = math.min(1, camera.ViewportSize.X / 590)
+	scale.Scale = math.min(1, camera.ViewportSize.X / 874)
 	scale.Parent = bar
 end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)

@@ -94,7 +94,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 						)
 						* CFrame.Angles(0, a, math.pi / 4)
 				end
-			elseif type(spin) == "number" then
+			elseif type(spin) == "number" and m:GetAttribute("MotionReady") ~= true then
 				local pos = q:GetAttribute("SpinOrigin")
 				if typeof(pos) == "Vector3" then
 					q.CFrame = root.CFrame * CFrame.new(pos * scale) * CFrame.Angles(0, now * spin, 0)

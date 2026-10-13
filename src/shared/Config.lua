@@ -168,6 +168,9 @@ Config.Pets = {
 	ModelStyle = "Sculpted", -- "Legacy" restores imported meshes and the previous primitives.
 	AuraDistance = 110, -- particles/lights suspended beyond this camera distance
 	AuraUpdateInterval = 0.05, -- one shared 20 Hz visual update
+	MotionDistance = 140, -- articulated motion (client/PetMotion) sleeps beyond this camera distance
+	MotionNearDistance = 60, -- closer than this: posed every frame
+	MotionFarInterval = 0.1, -- between near and sleep distance: posed at 10 Hz
 	EquipSlots = 1, -- familiers équipés (multiplicateur + suivent le joueur)
 	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
 	-- Taille de chaque familier : voir shared/PetSizes (échelle en « tailles de joueur », de 0,5 à 2,9).

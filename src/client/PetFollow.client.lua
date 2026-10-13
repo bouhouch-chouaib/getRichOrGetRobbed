@@ -102,6 +102,7 @@ local function rebuildCarried(player: Player)
 		return
 	end
 	local _, fullSize = PetModelBuilder.BodyBounds(model)
+	model:SetAttribute("MotionCarried", true)
 	model:ScaleTo(model:GetScale() * math.min(CARRY_SCALE, CARRY_MAX / math.max(fullSize.Y, 0.1)))
 	local _, size = PetModelBuilder.BodyBounds(model)
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
@@ -185,7 +186,7 @@ PetModelBuilder.MeshesReady:Connect(function()
 	end
 end)
 
-RunService.RenderStepped:Connect(function(dt: number)
+RunService:BindToRenderStep("PetFollowPlacement", Enum.RenderPriority.Last.Value - 10, function(dt: number)
 	local now = os.clock()
 	local alpha = math.min(1, dt * SMOOTHNESS)
 	for player, list in pairs(followers) do

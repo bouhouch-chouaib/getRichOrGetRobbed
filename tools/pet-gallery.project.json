@@ -5,7 +5,8 @@
     "ReplicatedStorage": {"Shared": {"$path": "../src/shared"}},
     "StarterPlayer": {"StarterPlayerScripts": {
       "PetGallery": {"$path": "PetGallery.client.lua"},
-      "PetAuraAnimator": {"$path": "../src/client/PetAuraAnimator.client.lua"}
+      "PetAuraAnimator": {"$path": "../src/client/PetAuraAnimator.client.lua"},
+      "PetMotion": {"$path": "../src/client/PetMotion.client.lua"}
     }},
     "Workspace": {
       "Floor": {"$className":"Part","$properties":{"Anchored":true,"Size":[300,1,300],"Position":[0,-0.5,0],"Color":[0.15,0.18,0.24]}},

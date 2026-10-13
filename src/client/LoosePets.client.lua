@@ -130,7 +130,7 @@ task.spawn(function()
 	end
 end)
 
-RunService.RenderStepped:Connect(function()
+RunService:BindToRenderStep("LoosePetsPlacement", Enum.RenderPriority.Last.Value - 11, function()
 	local now = Workspace:GetServerTimeNow()
 	local t = os.clock()
 	local handsFree = player:GetAttribute("CarryingPet") == nil

@@ -107,6 +107,25 @@ local catalog = loadModule("PetCatalog")
 local config = loadModule("Config")
 local builder = loadModule("PetModelBuilder")
 local sizes = loadModule("PetSizes")
+local motion = loadModule("PetMotion")
+local motionReport, previews = {}, {}
+local previewIds = {
+	ChienSaucisse = true,
+	DragonAurore = true,
+	BaleineGalaxie = true,
+	FougereFibonacci = true,
+	KrakenBaignoire = true,
+	ChatCoptere = true,
+	Kitsune3Queues = true,
+	TournesolJoyeux = true,
+	SatelliteRonchon = true,
+}
+local function close(a, b, why)
+	local x, y = { a:GetComponents() }, { b:GetComponents() }
+	for i = 1, 12 do
+		assert(math.abs(x[i] - y[i]) < 0.003, why .. " component " .. i)
+	end
+end
 local function vec(v)
 	return { v.X, v.Y, v.Z }
 end
@@ -169,6 +188,88 @@ for _, e in catalog.List do
 	maxParts = math.max(maxParts, count)
 	maxRate = math.max(maxRate, rate)
 	local geo = geometry(m)
+	local rig = motion.Create(m)
+	assert(#rig.parts > 0 and m:GetAttribute("MotionReady"), e.Id .. ": rig missing")
+	for _, q in m:GetChildren() do
+		if q:IsA("BasePart") and q ~= m.PrimaryPart and not q:GetAttribute("Aura") then
+			assert(typeof(q:GetAttribute("MotionRest")) == "CFrame", e.Id .. ": unrigged " .. q.Name)
+		end
+	end
+	local function restFrame(index)
+		local rest = rig.rest[index]
+		return m:GetPivot() * CF(rest.Position * m:GetScale()) * rest.Rotation
+	end
+	local rootBefore = m:GetPivot()
+	local moved, kinds = false, {}
+	local frames = motion.Pose(rig, 0, 0, 0, false, 0)
+	for i, q in rig.parts do
+		close(frames[i], q.CFrame, e.Id .. ": initial rest")
+	end
+	for _, j in rig.joints do
+		kinds[j.kind] = true
+	end
+	local frozen = table.clone(frames)
+	for step = 1, 120 do
+		frames = motion.Pose(rig, 100000 + step / 30, 1 / 30, if step < 40 then 0 elseif step < 80 then 4 else 0, false)
+		for i, q in rig.parts do
+			if
+				(frames[i].Position - frozen[i].Position).Magnitude > 0.001
+				or frames[i].LookVector:Dot(frozen[i].LookVector) < 0.99999
+			then
+				moved = true
+			end
+			q.CFrame = frames[i]
+			assert(frames[i].Position.Magnitude < size.Magnitude * 3 + 5, e.Id .. ": divergent pose")
+		end
+		for _, j in rig.joints do
+			local first = j.members[1]
+			for _, i in j.members do
+				close(
+					frames[first]:ToObjectSpace(frames[i]),
+					restFrame(first):ToObjectSpace(restFrame(i)),
+					e.Id .. ": detached " .. j.kind
+				)
+			end
+		end
+	end
+	assert(moved, e.Id .. ": static pet")
+	close(m:GetPivot(), rootBefore, e.Id .. ": root changed by articulation")
+	local same = table.clone(motion.Pose(rig, 100004, 0, 0, false))
+	for _ = 1, 5 do
+		local repeated = motion.Pose(rig, 100004, 0, 0, false)
+		for i in rig.parts do
+			close(repeated[i], same[i], e.Id .. ": accumulated drift")
+		end
+	end
+	local reset = motion.Pose(rig, 0, 0, 0, false, 0)
+	for i, q in rig.parts do
+		close(reset[i], restFrame(i), e.Id .. ": paused rest")
+		q.CFrame = reset[i]
+	end
+	local kindNames = {}
+	for kind in kinds do
+		table.insert(kindNames, kind)
+	end
+	table.sort(kindNames)
+	table.insert(
+		motionReport,
+		{ id = e.Id, parts = #rig.parts, joints = #rig.joints, kinds = kindNames, passed = true }
+	)
+	if previewIds[e.Id] then
+		local sequence = {}
+		local previewRig = motion.Create(m)
+		for step = 0, 59 do
+			local pose = motion.Pose(previewRig, step / 15, 1 / 15, if e.Id == "ChienSaucisse" then 4 else 0, false)
+			for i, q in previewRig.parts do
+				q.CFrame = pose[i]
+			end
+			table.insert(sequence, geometry(m))
+		end
+		table.insert(previews, { id = e.Id, name = e.Name, size = vec(size), frames = sequence })
+		for i, q in rig.parts do
+			q.CFrame = reset[i]
+		end
+	end
 	local again = assert(builder.Build(e.Id))
 	assert(serde.encode("json", geo) == serde.encode("json", geometry(again)), e.Id .. ": nondeterministic")
 	again:Destroy()
@@ -177,6 +278,15 @@ for _, e in catalog.List do
 	local carryBox, carrySize = builder.BodyBounds(m)
 	assert((carrySize - size * 0.6).Magnitude < 0.003, e.Id .. ": carry scaling")
 	assert((carryBox.Position - V(5, 10, -3)).Magnitude < 0.003, e.Id .. ": carry positioning")
+	local carried = motion.Pose(rig, 3, 1 / 30, 8, true)
+	for i, q in rig.parts do
+		q.CFrame = carried[i]
+		assert((carried[i].Position - m:GetPivot().Position).Magnitude < size.Magnitude, e.Id .. ": carried rig")
+	end
+	local carryReset = motion.Pose(rig, 0, 0, 0, true, 0)
+	for i in rig.parts do
+		close(carryReset[i], restFrame(i), e.Id .. ": scaled/rotated rest")
+	end
 	table.insert(report, { id = e.Id, parts = count, emitters = emitters, rate = rate, size = vec(size) })
 	table.insert(meshes, { id = e.Id, name = e.Name, rarity = e.Rarity, parts = geo, size = vec(size) })
 	m:Destroy()
@@ -190,6 +300,9 @@ for old, new in catalog.Renamed do
 end
 fs.writeFile(output .. "/pet-geometry.json", serde.encode("json", meshes))
 fs.writeFile(output .. "/pet-check-report.json", serde.encode("json", report, true))
+fs.writeFile(output .. "/pet-motion-report.json", serde.encode("json", motionReport, true))
+fs.writeFile(output .. "/pet-motion-preview.json", serde.encode("json", previews))
+print("PASS: 75 animated rigs; 120 frames/pet, rigid groups, no drift, pause/rest, carrying + rotation + rescale.")
 print(
 	string.format(
 		"PASS: %d pets + renamed IDs; deterministic, centered, scaled, noncolliding. Max %d parts, %.1f particles/s.",

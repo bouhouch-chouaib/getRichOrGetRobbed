@@ -464,7 +464,7 @@ Remotes.DuelEvent.OnClientEvent:Connect(function(kind: string, duel: any, a: any
 end)
 
 local lastTick: { [Wheel]: number } = {}
-RunService.RenderStepped:Connect(function(dt: number)
+RunService:BindToRenderStep("DuelPetPlacement", Enum.RenderPriority.Last.Value - 9, function(dt: number)
 	local t = os.clock()
 	for _, arena in pairs(arenas) do
 		for _, fighter in pairs(arena.fighters) do

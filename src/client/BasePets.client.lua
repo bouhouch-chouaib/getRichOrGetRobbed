@@ -351,10 +351,10 @@ local function pose(shown: Shown, dt: number, now: number): CFrame
 		height += math.sin(t * 2) * 0.6
 		roll = math.sin(t * 1.5) * 0.12
 	elseif name == "Plant" then
-		roll = math.sin(t * 1.8) * 0.12
+		roll = if shown.model:GetAttribute("MotionReady") then 0 else math.sin(t * 1.8) * 0.12
 	elseif name == "Spin" then
 		height += math.sin(t * 1.5) * 0.5
-		yaw = t * 1.5
+		yaw = if shown.model:GetAttribute("MotionProfile") == "Top" then shown.heading else t * 1.5
 	end
 	return CFrame.new(position.X, height + shown.bottomOffset, position.Y) * CFrame.Angles(0, yaw, roll)
 end
@@ -376,7 +376,7 @@ end
 
 local NEAR_CHARACTER = 90 -- une base aussi proche du personnage est toujours animée (caméra très reculée)
 
-RunService.RenderStepped:Connect(function(dt: number)
+RunService:BindToRenderStep("BasePetsPlacement", Enum.RenderPriority.Last.Value - 12, function(dt: number)
 	local camera = Workspace.CurrentCamera
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")

@@ -733,6 +733,7 @@ local function plant(m: Model, e: Pet, c: Palette)
 			p(m, "FernStem", V(0.16, 0.4, 0.17), CF(x, y, 0) * A(0, 0, -0.13), GOLD)
 			for _, s in ipairs({ -1, 1 }) do
 				local len = (1 - i / 12) * 1.35
+				local first = #m:GetChildren()
 				for j = 0, 2 do
 					p(
 						m,
@@ -744,6 +745,7 @@ local function plant(m: Model, e: Pet, c: Palette)
 						true
 					)
 				end
+				S.motionSince(m, first, "Frond" .. i .. "_" .. s, CF(x, y, 0), "Leaf", s + i * 0.35)
 			end
 		end
 		S.ring(m, "FernOrbit", CF(0, -0.3, 0), 1.3, 0.11, GOLD, true)
@@ -941,14 +943,17 @@ end
 local function object(m: Model, e: Pet, c: Palette, kind: string)
 	if kind == "Rocks" then
 		for i = -1, 1 do
+			local first = #m:GetChildren()
 			local f = CF(i * 1.2, if i == 0 then 0.4 else 0, 0) * A(0, -i * 0.2, i * 0.1)
 			mass(m, "Asteroid", V(1.15, 1.3, 1.1), f, c.body)
 			S.eyes(m, f, 1, 1.3, true)
 			p(m, "LavaCrack", V(0.09, 0.6, 0.06), f * CF(-0.31, 0.15, -0.63) * A(0, 0, -0.3), c.detail, true)
+			S.motionSince(m, first, "Asteroid" .. i, f, "Companion", i * 1.6)
 		end
 		return
 	elseif kind == "Eclipse" then
 		for _, s in ipairs({ -1, 1 }) do
+			local first = #m:GetChildren()
 			local f = CF(s * 0.84, 0, 0)
 			mass(m, "CelestialTwin", V(1.55, 1.8, 1.1), f, if s < 0 then c.body else c.detail)
 			S.eyes(m, f, 1.3, 1.3, s > 0)
@@ -964,6 +969,7 @@ local function object(m: Model, e: Pet, c: Palette, kind: string)
 					true
 				)
 			end
+			S.motionSince(m, first, "Twin" .. s, f, "Companion", s * 1.6)
 		end
 		return
 	elseif kind == "Top" then
