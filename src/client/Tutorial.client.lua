@@ -55,7 +55,8 @@ local root = ScreenScale.attach(gui)
 local panel = Instance.new("Frame")
 panel.Name = "Panel"
 panel.AnchorPoint = Vector2.new(0.5, 1)
-panel.Position = UDim2.new(0.5, 0, 1, -52)
+-- Au-dessus des boutons d'action et des capsules de tirage (client/PullReveal).
+panel.Position = UDim2.new(0.5, 0, 1, -(ScreenScale.BOTTOM_RESERVED + 140))
 panel.Size = UDim2.fromOffset(660, 78)
 panel.BackgroundColor3 = Color3.new(1, 1, 1)
 panel.Parent = root

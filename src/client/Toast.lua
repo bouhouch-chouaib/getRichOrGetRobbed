@@ -19,7 +19,8 @@ gui.Parent = player:WaitForChild("PlayerGui")
 
 local label = Instance.new("TextLabel")
 label.AnchorPoint = Vector2.new(0.5, 0.5)
-label.Position = UDim2.fromScale(0.5, 0.72)
+-- Au-dessus des capsules de tirage et des boutons d'action du bas.
+label.Position = UDim2.fromScale(0.5, 0.6)
 label.Size = UDim2.fromOffset(800, 50)
 label.BackgroundTransparency = 1
 label.Font = Enum.Font.LuckiestGuy

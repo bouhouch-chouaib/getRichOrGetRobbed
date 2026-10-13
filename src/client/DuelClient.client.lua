@@ -357,7 +357,7 @@ end)
 
 local cheerButton = UiStyle.button(gui, "ENCOURAGE TON FAMILIER !", UDim2.fromOffset(420, 70), UiStyle.Colors.Orange, 30)
 cheerButton.AnchorPoint = Vector2.new(0.5, 1)
-cheerButton.Position = UDim2.new(0.5, 0, 1, -120)
+cheerButton.Position = UDim2.new(0.5, 0, 1, -ScreenScale.BOTTOM_RESERVED)
 cheerButton.Visible = false
 local cheerHint = UiStyle.text(cheerButton, "Clique vite : chaque clic augmente ses dégâts !", 16, UiStyle.Colors.Gold)
 cheerHint.AnchorPoint = Vector2.new(0.5, 0)

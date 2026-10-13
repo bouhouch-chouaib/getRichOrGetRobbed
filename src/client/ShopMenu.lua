@@ -98,7 +98,8 @@ export type Shop = {
 	affordableCount: () -> number,
 }
 
-function ShopMenu.create(gui: Instance): Shop
+-- topStack : pile du haut du HUD (le bandeau du boost de chance serveur y apparaît).
+function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 	local window = MenuKit.window(gui, "Boutique", Vector2.new(740, 480), UiStyle.Colors.Green)
 
 	local row = Instance.new("ScrollingFrame")
@@ -245,7 +246,7 @@ function ShopMenu.create(gui: Instance): Shop
 	end
 
 	-- Onglets Robux, après les catégories d'améliorations.
-	local robux = RobuxShop.create(window.content, cardHeight, gui :: Frame)
+	local robux = RobuxShop.create(window.content, cardHeight, topStack)
 
 	local function showCategory(index: number)
 		row.Visible = index <= #CATEGORIES

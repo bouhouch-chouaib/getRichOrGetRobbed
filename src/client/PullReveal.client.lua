@@ -24,8 +24,11 @@ local UiStyle = require(script.Parent.UiStyle)
 local LOOT = Config.Loot
 local WHITE = Color3.new(1, 1, 1)
 local GREY = Color3.fromRGB(120, 120, 132)
-local CARD = Vector2.new(100, 132)
+-- Sur tactile : capsules plus petites et moins nombreuses (la rangée ne doit pas passer sous le joystick).
+local TOUCH = ScreenScale.isTouch()
+local CARD = if TOUCH then Vector2.new(86, 114) else Vector2.new(100, 132)
 local GAP = 8
+local MAX_CARDS = if TOUCH then math.min(6, LOOT.RevealCards) else LOOT.RevealCards
 
 local player = Players.LocalPlayer
 
@@ -57,7 +60,7 @@ local function pick(drops: { Drop }): { Drop }
 		return a.Sold == nil and b.Sold ~= nil
 	end)
 	local shown = {}
-	for index = 1, math.min(#sorted, LOOT.RevealCards) do
+	for index = 1, math.min(#sorted, MAX_CARDS) do
 		shown[index] = sorted[index]
 	end
 	return shown
@@ -72,7 +75,7 @@ local function capsule(parent: GuiObject, order: number): Frame
 	UiStyle.corner(card, 8)
 	UiStyle.stroke(card, 3, Color3.new(0, 0, 0), true)
 	card.Parent = parent
-	local gift = Icons.image(card, "Gift", UDim2.fromOffset(64, 64), UDim2.fromOffset((CARD.X - 64) / 2, 30))
+	local gift = Icons.image(card, "Gift", UDim2.fromOffset(64, 64), UDim2.fromOffset((CARD.X - 64) / 2, (CARD.Y - 64) / 2))
 	gift.Name = "Gift"
 	return card
 end
@@ -90,15 +93,15 @@ local function open(card: Frame, drop: Drop)
 	UiStyle.gradient(card, UiStyle.lighter(color, 0.3), UiStyle.darker(color, 0.25))
 	local viewport = MenuKit.petViewport(card, drop.Id, false)
 	viewport.Position = UDim2.fromOffset(4, 4)
-	viewport.Size = UDim2.fromOffset(CARD.X - 8, 72)
+	viewport.Size = UDim2.fromOffset(CARD.X - 8, CARD.Y - 60)
 	viewport.ImageTransparency = if sold then 0.45 else 0
 	local name = UiStyle.text(card, TextFormat.upper(entry.Name), 14, WHITE, UiStyle.BODY_FONT)
-	name.Position = UDim2.fromOffset(3, 76)
+	name.Position = UDim2.fromOffset(3, CARD.Y - 56)
 	name.Size = UDim2.fromOffset(CARD.X - 6, 30)
 	name.TextWrapped = true
 	name.TextScaled = true
 	local tag = UiStyle.text(card, "", 16, WHITE)
-	tag.Position = UDim2.fromOffset(2, 106)
+	tag.Position = UDim2.fromOffset(2, CARD.Y - 26)
 	tag.Size = UDim2.fromOffset(CARD.X - 4, 22)
 	tag.TextScaled = true
 	if sold then
@@ -163,7 +166,7 @@ Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, pulls: num
 	row.AutoButtonColor = false
 	row.BackgroundTransparency = 1
 	row.AnchorPoint = Vector2.new(0.5, 1)
-	row.Position = UDim2.new(0.5, 0, 1, -64)
+	row.Position = UDim2.new(0.5, 0, 1, -ScreenScale.BOTTOM_RESERVED)
 	local slots = #shown + (if extra > 0 then 1 else 0)
 	row.Size = UDim2.fromOffset(slots * (CARD.X + GAP) - GAP, CARD.Y)
 	local layout = Instance.new("UIListLayout")

@@ -28,12 +28,13 @@ local root = ScreenScale.attach(gui)
 
 local button = UiStyle.button(root, "JETER DANS LE TROU !", UDim2.fromOffset(340, 64), Color3.fromRGB(170, 60, 255), 30)
 button.AnchorPoint = Vector2.new(0.5, 1)
-button.Position = UDim2.new(0.5, 0, 1, -150)
+button.Position = UDim2.new(0.5, 0, 1, -ScreenScale.BOTTOM_RESERVED)
 button.Visible = false
 local caption = button:FindFirstChild("Caption") :: TextLabel
 local reward = UiStyle.text(button, "", 18, UiStyle.Colors.Gold)
-reward.AnchorPoint = Vector2.new(0.5, 0)
-reward.Position = UDim2.new(0.5, 0, 1, 4)
+-- Au-dessus du bouton (en dessous, il y a la barre d'objets de Roblox).
+reward.AnchorPoint = Vector2.new(0.5, 1)
+reward.Position = UDim2.new(0.5, 0, 0, -4)
 reward.Size = UDim2.new(1.4, 0, 0, 24)
 
 local key = if ScreenScale.isTouch() then "" else "  [E]"

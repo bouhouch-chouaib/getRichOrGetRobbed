@@ -557,7 +557,7 @@ anchor.Name = "GaugeAnchor"
 local board = Instance.new("BillboardGui")
 board.Name = "HoleGauge"
 -- Taille en studs : un panneau dans le monde, petit de loin (ne cache pas le HUD), grand de près.
-board.Size = UDim2.fromScale(46, 19.5)
+board.Size = UDim2.fromScale(38, 16)
 board.LightInfluence = 0
 board.MaxDistance = 1200
 board.Adornee = anchor

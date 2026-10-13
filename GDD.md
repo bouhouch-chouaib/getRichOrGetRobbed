@@ -39,9 +39,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   1 000 = 48, 10 000 = 77), minimum 1 tirage. Chance augmentée par le score (x1 à x2). **Pitié** : Épique+ garanti au 60e
   tirage sans Épique+. **Toutes les sources** (fin de manche, roue des duels, Robux) passent par `server/PullRewards.Grant`.
 - **13 oct. : récompenses lisibles** (retours des testeurs : « on ne comprend pas ce qu'on gagne ») :
-  - **Barre « prochain tirage »** sous l'horloge pendant le Feeding (`client/HUD`, `LootEngine.progress`) : « 3 TIRAGES »,
-    barre vers le suivant, « +1 TIRAGE ! » qui s'envole quand elle se remplit, ligne « CHANCE x1,12 • ÉPIQUE GARANTI DANS
-    23 TIRAGES » (attribut `Pity`).
+  - **Tirages de la manche** dans la pastille de l'horloge pendant le Feeding (`client/HUD`, `LootEngine.progress`) :
+    « 3 TIRAGES » + barre vers le suivant, « +1 TIRAGE ! » qui s'envole quand elle se remplit. La garantie Épique
+    (attribut `Pity`) est rappelée sur la carte de résultats (14 oct. : plus de ligne permanente, l'écran était trop chargé).
   - **Capsules** (`client/PullReveal`) : à la digestion, jusqu'à `RevealCards` (8) capsules s'ouvrent une par une en bas de
     l'écran (« NOUVEAU ! », rareté, ou « VENDU +$ »), les autres résumées « +N AUTRES » ; clic = tout ouvrir. Le grand écran
     des familiers rares (`client/Effects`) passe après.
@@ -452,12 +452,21 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `InteractionController` : tenir, charger, arc de prédiction, lancer, knockback.
   - Icônes : `shared/Icons` (27 icônes 2D cartoon à gros contour noir, dessinées par `tools/icons/make_icons.py`, PNG dans
     `assets/icons`, envoyées sur Roblox ; `Icons.image(parent, nom)`). Plus aucun émoji dans l'interface ni le décor.
-  - `HUD` (13 oct., disposition de la référence) : boutons Boutique / Index à gauche avec pastilles, Force / Vitesse /
-    argent en chiffres italiques en bas à gauche, horloge de manche en haut au centre (au-dessus du bandeau de phase animé et des points).
+  - `HUD` (14 oct., écran désencombré) : boutons Boutique / Index / Mondes à gauche avec pastilles, Force / Vitesse /
+    argent en chiffres italiques en bas à gauche ; en haut au centre UNE pastille (horloge + tirages de la manche) et dessous
+    une pile `TopStack` qui n'affiche que l'utile (boost de chance, consigne 8 s après chaque phase ou objectif du transport,
+    carte des tirages) ; bandeau de phase au milieu seulement au changement. Bas du centre réservé à la barre d'objets
+    (`ScreenScale.BOTTOM_RESERVED` = 100) : boutons d'action (JETER, ARRÊTER, encourager), pilule d'invisibilité et capsules
+    juste au-dessus, tutoriel encore au-dessus, messages (`Toast`) à 60 % de la hauteur.
+    **Tactile** : écran de référence 1280 x 640 (interface un peu plus grande), argent / stats en haut à gauche, menus en
+    tuiles carrées juste dessous (loin du joystick), fenêtres ouvertes entre les tuiles et le bouton de saut et réduites
+    pour tenir (`MenuKit`, `TOUCH_LEFT_RESERVED` / `TOUCH_RIGHT_RESERVED`), 6 capsules max plus petites.
+    **Aperçu téléphone (Studio)** : `workspace:SetAttribute("DebugPhone", Vector2.new(844, 390))` avant Play : chaque
+    interface est dessinée dans un cadre de téléphone, en mode tactile, avec les zones du joystick et du saut.
   - Menus reconstruits façon Steal an Egg : `UiStyle` (fenêtres à tenons, en-tête coloré à rayures, croix rouge, cartes
     vives à rayons de soleil, pastilles), `MenuKit` (une fenêtre à la fois, onglets à droite, aperçus 3D),
-    `ShopMenu` (cartes qui défilent, onglets Entraînement / Bonus / Armes), `IndexMenu`, `FusionMenu`,
-    `RobuxShop` (cartes, onglets Passes / Produits / Chances).
+    `ShopMenu` (cartes qui défilent, onglets Entraînement / Bonus / Combat puis Passes R$ / Produits R$ / Chances fournis par
+    le module `RobuxShop`), `IndexMenu`, `FusionMenu`.
   - `Toast` (ModuleScript) : gros message temporaire au centre de l'écran (`Toast.show(texte, couleur)`).
 
 ## Carte (`Workspace.Map`, générée)

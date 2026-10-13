@@ -212,7 +212,7 @@ local root = ScreenScale.attach(gui)
 
 local pill = UiStyle.panel(root, UDim2.fromOffset(250, 48))
 pill.AnchorPoint = Vector2.new(0.5, 1)
-pill.Position = UDim2.new(0.5, 0, 1, -120)
+pill.Position = UDim2.new(0.5, 0, 1, -ScreenScale.BOTTOM_RESERVED)
 pill.BackgroundColor3 = UiStyle.Colors.WindowBody
 pill.Visible = false
 local pillIcon = Icons.image(pill, "Ghost", UDim2.fromOffset(44, 44), UDim2.fromOffset(4, 2))

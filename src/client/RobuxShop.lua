@@ -48,13 +48,12 @@ export type Panel = {
 }
 
 -- content : zone de contenu de la fenêtre Boutique ; cardHeight : hauteur des cartes ;
--- hud : cadre du HUD (bandeau du boost de chance serveur, sous l'horloge).
-function RobuxShop.create(content: Frame, cardHeight: number, hud: Frame): Panel
-	-- Bandeau du boost de chance serveur (sous l'horloge, discret).
-	local boostBanner = UiStyle.text(hud, "", 20, Color3.fromRGB(150, 255, 120))
+-- topStack : pile du haut du HUD (bandeau du boost de chance serveur, juste sous l'horloge).
+function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): Panel
+	-- Bandeau du boost de chance serveur (discret, seulement pendant le boost).
+	local boostBanner = UiStyle.text(topStack, "", 20, Color3.fromRGB(150, 255, 120))
 	boostBanner.Name = "LuckBoost"
-	boostBanner.AnchorPoint = Vector2.new(0.5, 0)
-	boostBanner.Position = UDim2.new(0.5, 0, 0, 64)
+	boostBanner.LayoutOrder = 1
 	boostBanner.Size = UDim2.fromOffset(300, 24)
 	boostBanner.Visible = false
 

@@ -12,6 +12,7 @@ local TweenService = game:GetService("TweenService")
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
 local UiStyle = require(script.Parent.UiStyle)
 
@@ -142,6 +143,24 @@ export type Window = {
 
 local openWindow: Window? = nil
 
+-- Échelle pour que la fenêtre (et ses onglets à droite) tienne dans l'écran, avec une marge. Sur tactile, elle
+-- s'ouvre à droite des tuiles de menu du HUD (elles restent visibles et touchables).
+local function fit(frame: Frame): number
+	local screen = ScreenScale.virtualSize()
+	local tabs = if frame:FindFirstChild("SideTabs") then 180 else 0
+	local width = frame.Size.X.Offset + tabs
+	local height = frame.Size.Y.Offset
+	local touch = ScreenScale.isTouch()
+	local left = if touch then ScreenScale.TOUCH_LEFT_RESERVED else 0
+	local right = if touch then ScreenScale.TOUCH_RIGHT_RESERVED else 0 -- bouton de saut de Roblox
+	local scale = math.min(1, (screen.X - left - right - 24) / width, (screen.Y - 40) / height)
+	if touch then
+		local start = left + (screen.X - left - right - width * scale) / 2
+		frame.Position = UDim2.new(0, start + frame.Size.X.Offset * scale / 2, 0.52, 0)
+	end
+	return scale
+end
+
 function MenuKit.window(parent: Instance, title: string, size: Vector2, headerColor: Color3): Window
 	local built = UiStyle.window(parent, title, size, headerColor)
 	local frame = built.frame
@@ -160,8 +179,9 @@ function MenuKit.window(parent: Instance, title: string, size: Vector2, headerCo
 				Sounds.play("WindowOpen")
 			end
 			frame.Visible = true
-			built.scale.Scale = 0.6
-			TweenService:Create(built.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+			local scale = fit(frame)
+			built.scale.Scale = 0.6 * scale
+			TweenService:Create(built.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = scale }):Play()
 			for _, callback in ipairs(callbacks) do
 				task.spawn(callback)
 			end

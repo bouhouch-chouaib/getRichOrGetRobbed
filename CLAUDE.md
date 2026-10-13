@@ -75,7 +75,7 @@ multiplicateur additif + suit le joueur (`PetFollow`) • revenu = 10 meilleurs 
 annonces serveur Légendaire+ • familiers qui se baladent dans la base, **trajets décidés par le serveur** (`BasePetsController` + `shared/PetWander` +
 `client/BasePets`, plus de socles ; un familier équipé ne rapporte pas et n'est pas dans la base) • verrou de session anti-duplication •
 palettes à objets + objets sauvages dans l'arène + amélioration Chance • plaque d'apparition invisible •
-verrouillage 5 s relancé à chaque passage • consigne de phase en bas de l'écran •
+verrouillage 5 s relancé à chaque passage • consigne de phase sous l'horloge (8 s) •
 **mobile** : `client/ScreenScale` (UI à l'échelle), bouton LANCER tactile, gâchette R2 manette •
 économie rééquilibrée (revenus bas, prix hauts) • objets non roulants (frottement max) • map agrandie (bases à 215) •
 `Config.StudioGiveAllPets` (false par défaut ; true donne les 75 en Studio pour tester) • sauvegarde DataStore •
@@ -112,7 +112,13 @@ et clics, K.O., roue, retour des joueurs, abandon. Reste à voir : la case « so
 `workspace:SetAttribute("DuelForceWheel", 1)` côté serveur). Pour donner des familiers aux joueurs de test, un Script
 créé à la volée dans ServerScriptService partage les modules du jeu (pas la barre de commande).
 
-**13 oct. : horloge de la manche en haut au centre** (pastille au-dessus de la consigne de phase et des points, `client/HUD`).
+**14 oct. : écran désencombré, surtout sur téléphone** (`client/HUD`, `client/ScreenScale`, `client/MenuKit`) : bouton Robux
+supprimé (son contenu = onglets Passes R$ / Produits R$ / Chances de la Boutique) ; en haut au centre UNE pastille horloge +
+tirages, et dessous une pile (boost, consigne 8 s, carte des tirages) ; bandeau de phase seulement au changement ; bas du centre
+réservé à la barre d'objets (`ScreenScale.BOTTOM_RESERVED`) ; tactile : argent/stats + tuiles de menu en haut à gauche, fenêtres
+ouvertes entre les tuiles et le bouton de saut, mises à l'échelle pour tenir. **Aperçu téléphone dans Studio** :
+`workspace:SetAttribute("DebugPhone", Vector2.new(844, 390))` avant Play (à retirer ensuite : `nil`). Vérifié sur l'aperçu :
+HUD, capsules, Boutique Robux, fenêtre 860 x 560 ; la marge droite des fenêtres (saut) n'a pas encore été photographiée.
 
 **13 oct. : porter, jeter, lâcher** (`server/StealController`, `client/CarryControls`, `client/LoosePets`, `shared/PetPath`) :
 porter son propre familier ou en voler un, vitesse selon force et poids, le jeter dans le trou (récompense selon le familier),

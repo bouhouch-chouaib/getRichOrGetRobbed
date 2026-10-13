@@ -1,11 +1,11 @@
 --!strict
 -- HUD : l'écran de jeu, disposé comme la référence (docs/DIRECTION_ARTISTIQUE.md §3) :
---   - au milieu à gauche : gros boutons Boutique (vert) et Index (cyan) avec pastilles rouges ;
+--   - au milieu à gauche : gros boutons Boutique (vert), Index (cyan), Mondes avec pastilles rouges ;
 --   - en bas à gauche : Force, Vitesse et argent en gros chiffres italiques ;
---   - en bas à droite : l'horloge de la manche (lune = on nourrit le trou noir, soleil = il digère) ;
---   - en haut : bandeau de phase qui apparaît à chaque changement, barre « prochain tirage » (tirages gagnés
---     pendant la manche, chance, garantie Épique), carte des tirages (client/PullReveal ouvre les capsules) ;
---   - en bas au centre : la consigne.
+--   - en haut au centre : une pastille horloge de la manche (lune = on nourrit le trou noir, soleil = il digère)
+--     + tirages gagnés pendant la manche, et dessous une pile (boost, consigne, carte des tirages) ;
+--   - bandeau de phase au milieu, seulement au changement de phase ;
+--   - sur tactile : argent, stats et menus en tuiles en haut à gauche (voir « Disposition » plus bas).
 -- Les fenêtres sont dans client/ShopMenu, client/IndexMenu et client/FusionMenu (socle client/MenuKit).
 -- Ce script relie tout aux attributs répliqués et aux messages du serveur.
 
@@ -19,7 +19,6 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
-local Perks = require(ReplicatedStorage.Shared.Perks)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
@@ -74,17 +73,25 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 local gui = ScreenScale.attach(screenGui)
 local isTouch = ScreenScale.isTouch()
 
+-- Disposition (13 oct. : écran désencombré, surtout sur téléphone ; docs/DIRECTION_ARTISTIQUE.md §3) :
+--   - en haut au centre : UNE pastille (horloge + tirages de la manche) et, dessous, une pile qui n'affiche que
+--     ce qui sert maintenant (boost de chance, consigne quelques secondes, résultats des tirages) ;
+--   - PC : boutons de menu à gauche au milieu, stats et argent en bas à gauche ;
+--   - tactile : argent et stats en haut à gauche, menus en tuiles juste dessous (le joystick de Roblox occupe le
+--     bas gauche, le bouton de saut le bas droit) ;
+--   - le bas du centre (ScreenScale.BOTTOM_RESERVED) reste libre pour la barre d'objets de Roblox.
+local HINT_TIME = 8 -- secondes d'affichage de la consigne après chaque changement de phase
+
 ----------------------------------------------------------------------
--- Haut : bandeau de phase, points de la manche
+-- Haut : bandeau de phase (seulement au changement de phase)
 ----------------------------------------------------------------------
 
--- Bandeau : grand à chaque changement de phase, puis il remonte et rapetisse en titre discret.
 local phaseTitle = text(gui, "", 44)
-phaseTitle.AnchorPoint = Vector2.new(0.5, 0)
-phaseTitle.Position = UDim2.new(0.5, 0, 0, 70) -- sous l'horloge de la manche
-phaseTitle.Size = UDim2.fromOffset(760, 50)
+phaseTitle.AnchorPoint = Vector2.new(0.5, 0.5)
+phaseTitle.Position = UDim2.fromScale(0.5, 0.3)
+phaseTitle.Size = UDim2.fromOffset(760, 60)
+phaseTitle.Visible = false
 local phaseScale = Instance.new("UIScale")
-phaseScale.Scale = 0.7
 phaseScale.Parent = phaseTitle
 
 -- Au chargement de la sauvegarde, niveaux et améliorations passent de 0 à leur valeur : pas de message pour ça.
@@ -94,90 +101,125 @@ local function dataReady(): boolean
 	return player:GetAttribute("DataLoaded") == true or os.clock() - hudStarted > 8
 end
 
--- Barre « prochain tirage » : chaque objet avalé la remplit ; pleine = +1 tirage (ouverts à la digestion).
-local pointsPill = UiStyle.panel(gui, UDim2.fromOffset(360, 84))
-pointsPill.AnchorPoint = Vector2.new(0.5, 0)
-pointsPill.Position = UDim2.new(0.5, 0, 0, 124)
-pointsPill.BackgroundColor3 = UiStyle.Colors.WindowBody
-Icons.image(pointsPill, "Gift", UDim2.fromOffset(50, 50), UDim2.fromOffset(4, 2))
-local pointsLabel = UiStyle.number(pointsPill, "", 28, UiStyle.Colors.Gold)
-pointsLabel.Position = UDim2.fromOffset(58, 2)
-pointsLabel.Size = UDim2.new(1, -64, 0, 30)
+----------------------------------------------------------------------
+-- En haut au centre : la pastille (horloge de la manche + tirages gagnés pendant le Feeding)
+----------------------------------------------------------------------
+
+local CLOCK_WIDTH = 300
+local PULLS_WIDTH = 160
+local clock = UiStyle.panel(gui, UDim2.fromOffset(CLOCK_WIDTH + PULLS_WIDTH, 56))
+clock.Name = "Clock"
+clock.AnchorPoint = Vector2.new(0.5, 0)
+clock.Position = UDim2.new(0.5, 0, 0, 6)
+clock.BackgroundColor3 = UiStyle.Colors.WindowBody
+local clockIcon = Icons.image(clock, "Moon", UDim2.fromOffset(46, 46), UDim2.fromOffset(6, 5))
+local clockNext = text(clock, "", 20, WHITE, BODY_FONT)
+clockNext.Position = UDim2.fromOffset(56, 0)
+clockNext.Size = UDim2.new(0, 96, 1, 0)
+clockNext.TextXAlignment = Enum.TextXAlignment.Left
+local clockLabel = UiStyle.number(clock, "", 32, WHITE)
+clockLabel.Position = UDim2.fromOffset(150, 0)
+clockLabel.Size = UDim2.new(0, CLOCK_WIDTH - 156, 1, 0)
+clockLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Tirages de la manche : chaque objet avalé remplit la barre ; pleine = +1 tirage (ouverts à la digestion).
+local pullsBox = Instance.new("Frame")
+pullsBox.Name = "Pulls"
+pullsBox.BackgroundTransparency = 1
+pullsBox.Position = UDim2.fromOffset(CLOCK_WIDTH, 0)
+pullsBox.Size = UDim2.new(0, PULLS_WIDTH, 1, 0)
+pullsBox.Parent = clock
+local separator = Instance.new("Frame")
+separator.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+separator.BorderSizePixel = 0
+separator.Position = UDim2.fromOffset(0, 8)
+separator.Size = UDim2.new(0, 3, 1, -16)
+separator.Parent = pullsBox
+Icons.image(pullsBox, "Gift", UDim2.fromOffset(40, 40), UDim2.fromOffset(8, 4))
+local pointsLabel = UiStyle.number(pullsBox, "", 24, UiStyle.Colors.Gold)
+pointsLabel.Position = UDim2.fromOffset(50, 4)
+pointsLabel.Size = UDim2.new(1, -56, 0, 28)
 pointsLabel.TextXAlignment = Enum.TextXAlignment.Left
+pointsLabel.TextScaled = true
+do
+	local limit = Instance.new("UITextSizeConstraint")
+	limit.MaxTextSize = 24
+	limit.Parent = pointsLabel
+end
 local pullBar = Instance.new("Frame")
-pullBar.Position = UDim2.fromOffset(58, 36)
-pullBar.Size = UDim2.new(1, -68, 0, 14)
+pullBar.Position = UDim2.fromOffset(52, 36)
+pullBar.Size = UDim2.new(1, -62, 0, 10)
 pullBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-UiStyle.corner(pullBar, 5)
+UiStyle.corner(pullBar, 4)
 UiStyle.stroke(pullBar, 2, BLACK, true)
-pullBar.Parent = pointsPill
+pullBar.Parent = pullsBox
 local pullFill = Instance.new("Frame")
 pullFill.Size = UDim2.fromScale(0, 1)
 pullFill.BackgroundColor3 = UiStyle.Colors.Gold
-UiStyle.corner(pullFill, 5)
+UiStyle.corner(pullFill, 4)
 pullFill.Parent = pullBar
-local pullInfo = text(pointsPill, "", 15, WHITE, BODY_FONT)
-pullInfo.Position = UDim2.fromOffset(6, 56)
-pullInfo.Size = UDim2.new(1, -12, 0, 22)
--- « +1 TIRAGE ! » qui s'envole quand la barre se remplit.
+
+-- « +1 TIRAGE ! » qui s'envole sous la pastille quand la barre se remplit.
 local function popPull(count: number)
-	local pop = UiStyle.number(gui, string.format("+%d TIRAGE%s !", count, if count > 1 then "S" else ""), 30, UiStyle.Colors.Gold)
+	local pop = UiStyle.number(gui, string.format("+%d TIRAGE%s !", count, if count > 1 then "S" else ""), 28, UiStyle.Colors.Gold)
 	pop.AnchorPoint = Vector2.new(0.5, 0)
-	pop.Position = UDim2.new(0.5, 0, 0, 214)
-	pop.Size = UDim2.fromOffset(300, 36)
+	pop.Position = UDim2.new(0.5, PULLS_WIDTH, 0, 66)
+	pop.Size = UDim2.fromOffset(260, 34)
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0.4
 	scale.Parent = pop
 	TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	local rise = TweenService:Create(pop, TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-		{ Position = UDim2.new(0.5, 0, 0, 170), TextTransparency = 1 })
+	local rise = TweenService:Create(pop, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{ Position = UDim2.new(0.5, PULLS_WIDTH, 0, 40), TextTransparency = 1 })
 	task.delay(0.35, function()
 		rise:Play()
 	end)
-	task.delay(1.6, function()
+	task.delay(1.4, function()
 		pop:Destroy()
 	end)
 	Sounds.play("HoleBonus")
 end
 local shownPulls = 0
 
-local hintLabel = text(gui, "", 18, WHITE, BODY_FONT)
-hintLabel.AnchorPoint = Vector2.new(0.5, 1)
-hintLabel.Position = UDim2.new(0.5, 0, 1, -18)
-hintLabel.Size = UDim2.fromOffset(760, 24)
+-- Pile sous la pastille : chaque élément n'apparaît que lorsqu'il sert (pas de blocs vides empilés).
+local topStack = Instance.new("Frame")
+topStack.Name = "TopStack"
+topStack.BackgroundTransparency = 1
+topStack.AnchorPoint = Vector2.new(0.5, 0)
+topStack.Position = UDim2.new(0.5, 0, 0, 68)
+topStack.Size = UDim2.fromOffset(620, 0)
+topStack.AutomaticSize = Enum.AutomaticSize.Y
+topStack.Parent = gui
+do
+	local layout = Instance.new("UIListLayout")
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 4)
+	layout.Parent = topStack
+end
+
+-- Consigne : quelques secondes après chaque changement de phase, et en continu pendant le transport d'un familier.
+local hintLabel = text(topStack, "", 18, WHITE, BODY_FONT)
+hintLabel.Name = "Hint"
+hintLabel.LayoutOrder = 2
+hintLabel.Size = UDim2.new(1, 0, 0, 0)
+hintLabel.AutomaticSize = Enum.AutomaticSize.Y
+hintLabel.TextWrapped = true
+hintLabel.Visible = false
+local phaseChangedAt = 0
 
 ----------------------------------------------------------------------
--- En haut au centre : horloge de la manche (jour / nuit), au-dessus de la consigne de phase
+-- Argent, stats et boutons de menu (PC : à gauche ; tactile : en haut à gauche, en tuiles)
 ----------------------------------------------------------------------
 
-local clock = UiStyle.panel(gui, UDim2.fromOffset(360, 58))
-clock.Name = "Clock"
-clock.AnchorPoint = Vector2.new(0.5, 0)
-clock.Position = UDim2.new(0.5, 0, 0, 6)
-clock.BackgroundColor3 = UiStyle.Colors.WindowBody
-local clockIcon = Icons.image(clock, "Moon", UDim2.fromOffset(50, 50), UDim2.fromOffset(8, 4))
-local clockNext = text(clock, "", 22, WHITE, BODY_FONT)
-clockNext.Position = UDim2.fromOffset(64, 0)
-clockNext.Size = UDim2.new(0, 112, 1, 0)
-clockNext.TextXAlignment = Enum.TextXAlignment.Left
-local clockLabel = UiStyle.number(clock, "", 36, WHITE)
-clockLabel.Position = UDim2.fromOffset(176, 0)
-clockLabel.Size = UDim2.new(1, -184, 1, 0)
-clockLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-----------------------------------------------------------------------
--- Gauche : boutons de menu, stats et argent
-----------------------------------------------------------------------
-
--- Sur tactile, tout est collé en haut à gauche (le joystick occupe le bas gauche).
-local STATS_HEIGHT = 178
+local STATS_HEIGHT = if isTouch then 100 else 178
 
 local statsColumn = Instance.new("Frame")
 statsColumn.Name = "Stats"
 statsColumn.BackgroundTransparency = 1
 statsColumn.AnchorPoint = if isTouch then Vector2.new(0, 0) else Vector2.new(0, 1)
-statsColumn.Position = if isTouch then UDim2.new(0, 16, 0, 10) else UDim2.new(0, 16, 1, -12)
-statsColumn.Size = UDim2.fromOffset(260, STATS_HEIGHT)
+statsColumn.Position = if isTouch then UDim2.new(0, 16, 0, 12) else UDim2.new(0, 16, 1, -12)
+statsColumn.Size = UDim2.fromOffset(300, STATS_HEIGHT)
 statsColumn.Parent = gui
 
 local menuColumn = Instance.new("Frame")
@@ -185,20 +227,23 @@ menuColumn.Name = "Left"
 menuColumn.BackgroundTransparency = 1
 menuColumn.AnchorPoint = if isTouch then Vector2.new(0, 0) else Vector2.new(0, 0.5)
 menuColumn.Position = if isTouch then UDim2.new(0, 16, 0, STATS_HEIGHT + 20) else UDim2.new(0, 16, 0.5, -30)
-menuColumn.Size = UDim2.fromOffset(220, 250)
+menuColumn.Size = if isTouch then UDim2.fromOffset(310, 92) else UDim2.fromOffset(220, 250)
 menuColumn.Parent = gui
 
--- Ligne de stat d'entraînement : icône + « NV 13 » en italique + barre d'XP.
+-- Ligne de stat d'entraînement : icône + « NV 13 » en italique + barre d'XP (plus petite sur tactile).
 type StatRow = { label: TextLabel, fill: Frame }
-local function statRow(y: number, icon: string, color: Color3): StatRow
-	Icons.image(statsColumn, icon, UDim2.fromOffset(42, 42), UDim2.fromOffset(-2, y - 4))
-	local label = UiStyle.number(statsColumn, "", 28, color)
-	label.Position = UDim2.fromOffset(42, y)
-	label.Size = UDim2.new(1, -42, 0, 32)
+local function statRow(x: number, y: number, icon: string, color: Color3): StatRow
+	local iconSize = if isTouch then 30 else 42
+	local textSize = if isTouch then 22 else 28
+	local barWidth = if isTouch then 96 else 170
+	Icons.image(statsColumn, icon, UDim2.fromOffset(iconSize, iconSize), UDim2.fromOffset(x - 2, y - 4))
+	local label = UiStyle.number(statsColumn, "", textSize, color)
+	label.Position = UDim2.fromOffset(x + iconSize, y)
+	label.Size = UDim2.fromOffset(barWidth + 30, textSize + 4)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	local bar = Instance.new("Frame")
-	bar.Position = UDim2.fromOffset(44, y + 33)
-	bar.Size = UDim2.fromOffset(170, 10)
+	bar.Position = UDim2.fromOffset(x + iconSize + 2, y + textSize + 5)
+	bar.Size = UDim2.fromOffset(barWidth, if isTouch then 6 else 10)
 	bar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 	UiStyle.corner(bar, 4)
 	UiStyle.stroke(bar, 2, BLACK, true)
@@ -210,24 +255,37 @@ local function statRow(y: number, icon: string, color: Color3): StatRow
 	fill.Parent = bar
 	return { label = label, fill = fill }
 end
-local strengthRow = statRow(0, "Strength", UiStyle.Colors.Strength)
-local speedRow = statRow(48, "Speed", UiStyle.Colors.Speed)
+local strengthRow = if isTouch then statRow(0, 62, "Strength", UiStyle.Colors.Strength) else statRow(0, 0, "Strength", UiStyle.Colors.Strength)
+local speedRow = if isTouch then statRow(150, 62, "Speed", UiStyle.Colors.Speed) else statRow(0, 48, "Speed", UiStyle.Colors.Speed)
 
-Icons.image(statsColumn, "Money", UDim2.fromOffset(54, 54), UDim2.fromOffset(-4, 98))
-local moneyLabel = UiStyle.number(statsColumn, "$0", 50, MONEY)
-moneyLabel.Position = UDim2.fromOffset(48, 96)
-moneyLabel.Size = UDim2.new(1, 0, 0, 56)
+local MONEY_Y = if isTouch then 0 else 96
+Icons.image(statsColumn, "Money", if isTouch then UDim2.fromOffset(40, 40) else UDim2.fromOffset(54, 54), UDim2.fromOffset(-4, MONEY_Y + 2))
+local moneyLabel = UiStyle.number(statsColumn, "$0", if isTouch then 38 else 50, MONEY)
+moneyLabel.Position = UDim2.fromOffset(if isTouch then 40 else 48, MONEY_Y)
+moneyLabel.Size = UDim2.new(1, -48, 0, if isTouch then 42 else 56)
 moneyLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local incomeLabel = UiStyle.number(statsColumn, "+$0/s", 22, MONEY)
-incomeLabel.Position = UDim2.fromOffset(52, 150)
-incomeLabel.Size = UDim2.new(1, -52, 0, 26)
+local incomeLabel = UiStyle.number(statsColumn, "+$0/s", if isTouch then 18 else 22, MONEY)
+incomeLabel.Position = UDim2.fromOffset(if isTouch then 44 else 52, if isTouch then 40 else 150)
+incomeLabel.Size = UDim2.new(1, -52, 0, if isTouch then 20 else 26)
 incomeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- Gros bouton de menu : icône + nom, pastille rouge de notification.
-local function menuButton(icon: string, name: string, y: number, color: Color3): (TextButton, TextLabel)
+-- Bouton de menu : PC = grand rectangle icône + nom ; tactile = tuile carrée (icône, nom dessous). Pastille rouge.
+local function menuButton(icon: string, name: string, index: number, color: Color3): (TextButton, TextLabel)
+	if isTouch then
+		local tile = UiStyle.button(menuColumn, "", UDim2.fromOffset(92, 92), color, 1)
+		tile.Position = UDim2.fromOffset((index - 1) * 104, 0)
+		local iconImage = Icons.image(tile, icon, UDim2.fromOffset(56, 56), UDim2.fromOffset(18, 4))
+		iconImage.ZIndex = 2
+		local nameLabel = text(tile, name, 18, WHITE, BODY_FONT)
+		nameLabel.Position = UDim2.new(0, 2, 1, -30)
+		nameLabel.Size = UDim2.new(1, -4, 0, 26)
+		nameLabel.TextScaled = true
+		nameLabel.ZIndex = 2
+		return tile, UiStyle.badge(tile)
+	end
 	local button = UiStyle.button(menuColumn, "", UDim2.fromOffset(210, 70), color, 1)
-	button.Position = UDim2.fromOffset(0, y)
+	button.Position = UDim2.fromOffset(0, (index - 1) * 88)
 	local iconImage = Icons.image(button, icon, UDim2.fromOffset(62, 62), UDim2.fromOffset(2, 4))
 	iconImage.ZIndex = 2
 	local nameLabel = text(button, name, 32, WHITE, BODY_FONT)
@@ -238,15 +296,15 @@ local function menuButton(icon: string, name: string, y: number, color: Color3):
 	return button, UiStyle.badge(button)
 end
 
-local shopButton, shopBadge = menuButton("Shop", "Boutique", 0, UiStyle.Colors.Green)
-local indexButton, indexBadge = menuButton("Index", "Index", 88, UiStyle.Colors.Cyan)
-local worldsButton, worldsBadge = menuButton("Planet", "Mondes", 176, Color3.fromRGB(255, 150, 40))
+local shopButton, shopBadge = menuButton("Shop", "Boutique", 1, UiStyle.Colors.Green)
+local indexButton, indexBadge = menuButton("Index", "Index", 2, UiStyle.Colors.Cyan)
+local worldsButton, worldsBadge = menuButton("Planet", "Mondes", 3, Color3.fromRGB(255, 150, 40))
 
 ----------------------------------------------------------------------
 -- Fenêtres
 ----------------------------------------------------------------------
 
-local shop = ShopMenu.create(gui)
+local shop = ShopMenu.create(gui, topStack)
 local index = IndexMenu.create(gui)
 local fusion = FusionMenu.create(gui)
 local worlds = WorldMenu.create(gui)
@@ -259,14 +317,13 @@ worldsButton.Activated:Connect(worlds.window.toggle)
 -- Carte de résultats des tirages (fin de manche)
 ----------------------------------------------------------------------
 
--- Petite carte sous le bandeau (à la place des points, cachés pendant la digestion). Elle ne ferme aucune
--- fenêtre, glisse puis disparaît seule (ou au clic). Les familiers, eux, tombent dans la base.
+-- Petite carte dans la pile du haut. Elle ne ferme aucune fenêtre, disparaît seule (ou au clic). Les familiers
+-- s'ouvrent en capsules en bas (client/PullReveal) puis tombent dans la base.
 local REWARD_CARD_TIME = 7
 local rewardCard = Instance.new("TextButton")
 rewardCard.Name = "RewardCard"
-rewardCard.AnchorPoint = Vector2.new(0.5, 0)
-rewardCard.Position = UDim2.new(0.5, 0, 0, 124)
-rewardCard.Size = UDim2.fromOffset(380, 60)
+rewardCard.LayoutOrder = 3
+rewardCard.Size = UDim2.fromOffset(400, 40)
 rewardCard.AutomaticSize = Enum.AutomaticSize.Y
 rewardCard.BackgroundColor3 = UiStyle.Colors.WindowBody
 rewardCard.AutoButtonColor = false
@@ -274,7 +331,7 @@ rewardCard.Text = ""
 rewardCard.Visible = false
 UiStyle.corner(rewardCard, 8)
 UiStyle.stroke(rewardCard, 4, BLACK, true)
-rewardCard.Parent = gui
+rewardCard.Parent = topStack
 do
 	local padding = Instance.new("UIPadding")
 	padding.PaddingTop = UDim.new(0, 6)
@@ -291,10 +348,11 @@ end
 local rewardHeadline = text(rewardCard, "", 24, UiStyle.Colors.Gold)
 rewardHeadline.Size = UDim2.new(1, 0, 0, 28)
 rewardHeadline.LayoutOrder = 1
-local rewardBody = text(rewardCard, "", 20)
+local rewardBody = text(rewardCard, "", 18)
 rewardBody.Size = UDim2.new(1, 0, 0, 0)
 rewardBody.AutomaticSize = Enum.AutomaticSize.Y
 rewardBody.RichText = true
+rewardBody.TextWrapped = true
 rewardBody.LayoutOrder = 2
 local rewardScale = Instance.new("UIScale")
 rewardScale.Parent = rewardCard
@@ -315,11 +373,20 @@ local shownState: string? = nil
 local function announcePhase(phase: typeof(PHASES.Feeding))
 	phaseTitle.Text = phase.Title
 	phaseTitle.TextColor3 = phase.Color
-	phaseScale.Scale = 1.5
-	TweenService:Create(phaseScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1.2 }):Play()
-	task.delay(2.2, function()
-		if phaseTitle.Text == phase.Title then
-			TweenService:Create(phaseScale, TweenInfo.new(0.4, Enum.EasingStyle.Quad), { Scale = 0.7 }):Play()
+	phaseTitle.TextTransparency = 0
+	phaseTitle.Visible = true
+	phaseScale.Scale = 1.4
+	phaseChangedAt = os.clock()
+	TweenService:Create(phaseScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	local shownAt = phaseChangedAt
+	task.delay(2.4, function()
+		if phaseChangedAt == shownAt then
+			TweenService:Create(phaseTitle, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
+			task.delay(0.5, function()
+				if phaseChangedAt == shownAt then
+					phaseTitle.Visible = false
+				end
+			end)
 		end
 	end)
 end
@@ -343,11 +410,17 @@ local function updatePhase()
 			then string.format("JETTE %s DANS LE TROU NOIR, OU RAMÈNE-LE CHEZ TOI  •  %d s", petName(carryingPet), left)
 			else string.format("RAMÈNE %s DANS TA BASE, OU JETTE-LE DANS LE TROU !  •  %d s", petName(carryingPet), left)
 		hintLabel.TextColor3 = UiStyle.Colors.Gold
+		hintLabel.Visible = true
 	else
 		hintLabel.Text = phase.Hint
 		hintLabel.TextColor3 = WHITE
+		-- La consigne ne reste que quelques secondes (et laisse la place à la carte des tirages).
+		hintLabel.Visible = os.clock() - phaseChangedAt < HINT_TIME and not rewardCard.Visible
 	end
-	pointsPill.Visible = stateName == "Feeding" and not rewardCard.Visible
+	-- Les tirages de la manche ne comptent que pendant le Feeding : la pastille rétrécit pendant la digestion.
+	local feeding = stateName == "Feeding"
+	pullsBox.Visible = feeding
+	clock.Size = UDim2.fromOffset(CLOCK_WIDTH + (if feeding then PULLS_WIDTH else 0), 56)
 
 	local seconds = if type(remaining) == "number" then math.max(0, remaining) else 0
 	clockIcon.Image = Icons.id(phase.Clock) or ""
@@ -369,7 +442,7 @@ local function updateStats()
 		row.ui.label.Text = if bonus > 0 then string.format("NV %d +%d", level, bonus) else string.format("NV %d", level)
 		row.ui.fill.Size = UDim2.fromScale(if needed > 0 then math.clamp(numberAttribute(row.stat .. "XP") / needed, 0, 1) else 1, 1)
 	end
-	-- Barre de tirage : tirages déjà gagnés cette manche, avancement vers le suivant, chance et garantie.
+	-- Tirages déjà gagnés cette manche et avancement vers le suivant.
 	local score = numberAttribute("RoundScore")
 	local pulls, progress = LootEngine.progress(score)
 	pointsLabel.Text = string.format("%d TIRAGE%s", pulls, if pulls > 1 then "S" else "")
@@ -378,10 +451,6 @@ local function updateStats()
 		popPull(pulls - shownPulls)
 	end
 	shownPulls = pulls
-	local luck = LootEngine.luck(score, Perks.LuckBonus(player))
-	local pityLeft = math.max(1, Config.Loot.PityPulls - numberAttribute("Pity"))
-	local luckText = string.gsub(string.format("%.2f", 1 + luck), "%.", ",")
-	pullInfo.Text = string.format("CHANCE x%s  •  ÉPIQUE GARANTI DANS %d TIRAGE%s", luckText, pityLeft, if pityLeft > 1 then "S" else "")
 
 	shop.refresh()
 	index.refresh()
@@ -520,38 +589,29 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 				end
 			end
 		end
-		-- Familiers gardés : les nouveaux d'abord, puis du plus rare au plus commun (4 lignes max).
-		local kept = {}
-		for petId, count in pairs(results) do
-			local entry = PetCatalog.ById[petId]
-			if entry then
-				table.insert(kept, { entry = entry, count = count, rank = Config.RarityIndex[entry.Rarity], new = newIds[petId] == true })
-			end
+		-- Résumé court : les familiers eux-mêmes s'ouvrent en capsules en bas de l'écran (client/PullReveal).
+		local newCount, keptCount = 0, 0
+		for _, count in pairs(results) do
+			keptCount += count
 		end
-		table.sort(kept, function(a, b)
-			if a.new ~= b.new then
-				return a.new
-			end
-			return a.rank > b.rank
-		end)
-		local lines = {}
-		for order, drop in ipairs(kept) do
-			if order > 4 then
-				table.insert(lines, string.format("+ %d AUTRES...", #kept - 4))
-				break
-			end
-			local rarity = Config.Rarities[drop.rank]
-			table.insert(lines, string.format('<font color="#%s">+%d %s</font>%s', rarity.Color:ToHex(), drop.count,
-				TextFormat.upper(drop.entry.Name), if drop.new then ' <font color="#FFD23C">NOUVEAU !</font>' else ""))
+		for _ in pairs(newIds) do
+			newCount += 1
+		end
+		local parts = {}
+		if newCount > 0 then
+			table.insert(parts, string.format('<font color="#FFD23C">%d NOUVEAU%s !</font>', newCount, if newCount > 1 then "X" else ""))
+		end
+		if keptCount > newCount then
+			table.insert(parts, string.format("%d DÉJÀ EU%s", keptCount - newCount, if keptCount - newCount > 1 then "S" else ""))
 		end
 		if soldCount > 0 then
-			table.insert(lines, string.format('<font color="#B4B4C0">%d DOUBLON%s VENDU%s (déjà %d) : </font><font color="#%s">+%s</font>',
-				soldCount, if soldCount > 1 then "S" else "", if soldCount > 1 then "S" else "", Config.Loot.KeepCopies,
+			table.insert(parts, string.format('%d VENDU%s <font color="#%s">+%s</font>', soldCount, if soldCount > 1 then "S" else "",
 				MONEY:ToHex(), NumberFormat.money(soldMoney)))
 		end
 		if money and money > soldMoney then
-			table.insert(lines, string.format('<font color="#%s">+%s</font>', MONEY:ToHex(), NumberFormat.money(money - soldMoney)))
+			table.insert(parts, string.format('<font color="#%s">+%s</font>', MONEY:ToHex(), NumberFormat.money(money - soldMoney)))
 		end
+		local lines = { table.concat(parts, "  •  ") }
 		-- Rang de tirage : ce qui a disparu des tirages, et le prochain palier.
 		local total = numberAttribute("TotalPulls")
 		local rankIndex = LootEngine.rank(total)
@@ -565,11 +625,13 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 			rankLine ..= string.format("  •  %d/%d → %s", total, nextRank.Pulls, nextRank.Name)
 		end
 		table.insert(lines, '<font color="#9BDCFF">' .. rankLine .. "</font>")
+		local pityLeft = math.max(1, Config.Loot.PityPulls - numberAttribute("Pity"))
+		table.insert(lines, string.format('<font color="#C8A0FF">ÉPIQUE OU MIEUX GARANTI DANS %d TIRAGE%s</font>', pityLeft, if pityLeft > 1 then "S" else ""))
 		rewardBody.Text = table.concat(lines, "\n")
 	end
 
 	rewardCard.Visible = true
-	pointsPill.Visible = false
+	hintLabel.Visible = false
 	rewardScale.Scale = 0.6
 	TweenService:Create(rewardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	task.delay(REWARD_CARD_TIME, function()

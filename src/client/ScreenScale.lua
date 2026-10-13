@@ -12,6 +12,7 @@
 -- Chaque interface est alors dessinée dans un cadre de cette taille, en mode tactile, avec les zones du joystick
 -- et du bouton de saut de Roblox (dessinées par-dessus) : on voit ce qui se chevauche sur un téléphone.
 
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -20,9 +21,19 @@ local Workspace = game:GetService("Workspace")
 local ScreenScale = {}
 
 local REFERENCE = Vector2.new(1280, 720)
+-- Sur tactile, un écran de référence moins haut : l'interface est un peu plus grande (lisible au doigt).
+local TOUCH_REFERENCE = Vector2.new(1280, 640)
 local MIN_SCALE = 0.5
 local MAX_SCALE = 1
 local PHONE_INSET = 36 -- px : barre du haut de Roblox sur téléphone (les ScreenGui commencent en dessous)
+
+-- Bas du centre de l'écran laissé libre (pixels de référence) : barre d'objets de Roblox (armes), et sur
+-- téléphone le bas des commandes tactiles. Les boutons d'action du bas se posent juste au-dessus.
+ScreenScale.BOTTOM_RESERVED = 100
+-- Tactile : largeur occupée à gauche par l'argent et les tuiles de menu (client/HUD) ; les fenêtres s'ouvrent à droite.
+ScreenScale.TOUCH_LEFT_RESERVED = 330
+-- Tactile : largeur laissée libre à droite pour le bouton de saut de Roblox.
+ScreenScale.TOUCH_RIGHT_RESERVED = 130
 
 local function debugPhone(): Vector2?
 	if not RunService:IsStudio() then
@@ -50,7 +61,8 @@ end
 
 function ScreenScale.getScale(): number
 	local viewport = viewportSize()
-	local scale = math.min(viewport.X / REFERENCE.X, viewport.Y / REFERENCE.Y)
+	local reference = if ScreenScale.isTouch() then TOUCH_REFERENCE else REFERENCE
+	local scale = math.min(viewport.X / reference.X, viewport.Y / reference.Y)
 	return math.clamp(scale, MIN_SCALE, MAX_SCALE)
 end
 
@@ -58,7 +70,7 @@ end
 function ScreenScale.virtualSize(): Vector2
 	local viewport = viewportSize()
 	local scale = ScreenScale.getScale()
-	local inset = if debugPhone() then PHONE_INSET else 0
+	local inset = if debugPhone() then PHONE_INSET else GuiService:GetGuiInset().Y
 	return Vector2.new(viewport.X / scale, (viewport.Y - inset) / scale)
 end
 
