@@ -86,6 +86,9 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
+**13 oct. : stats des familiers équipés** (`shared/PetStats`, `Config.Pets.EquipBonus`) : niveaux de Vitesse / Force en plus
+selon la rareté et la taille (petit = rapide, gros = fort), en plus du bonus de points ; toujours pas d'argent quand il est équipé.
+
 **13 oct. : échanges entre joueurs** (`server/TradeController`, `client/TradeClient`) : [T], offres de 6 familiers,
 double confirmation (PRÊT puis CONFIRMER après 3 s). Analyse OK, démarrage sans erreur ; **à tester à 2 joueurs**.
 

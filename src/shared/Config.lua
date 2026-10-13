@@ -171,7 +171,15 @@ Config.Pets = {
 	MotionDistance = 140, -- articulated motion (client/PetMotion) sleeps beyond this camera distance
 	MotionNearDistance = 60, -- closer than this: posed every frame
 	MotionFarInterval = 0.1, -- between near and sleep distance: posed at 10 Hz
-	EquipSlots = 1, -- familiers équipés (multiplicateur + suivent le joueur)
+	EquipSlots = 1, -- familiers équipés (multiplicateur de points + stats, suivent le joueur, ne rapportent plus d'argent)
+	-- Stats d'un familier équipé (shared/PetStats) : des niveaux de Vitesse et de Force en plus, tant qu'il est équipé.
+	-- Levels = total par rareté (Commun -> Sigma), partagé selon la taille : petit = surtout Vitesse, gros = surtout Force.
+	EquipBonus = {
+		Levels = { 2, 3, 5, 7, 10, 14, 19, 26 },
+		SpeedShareSmall = 0.8, -- le plus petit de sa rareté : 80 % en Vitesse
+		SpeedShareBig = 0.2, -- le plus gros : 20 % en Vitesse (80 % en Force)
+		MaxLevels = 30, -- plafond par stat, tous familiers équipés confondus
+	},
 	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
 	-- Taille de chaque familier : voir shared/PetSizes (échelle en « tailles de joueur », de 0,5 à 2,9).
 }

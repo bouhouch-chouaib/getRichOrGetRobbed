@@ -21,7 +21,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Raretés (`Config.Rarities`) : Commun 50 %, Inhabituel 25 %, Rare 12 %, Épique 7 %, Légendaire 4 %, Mythique 1,5 %, Divin 0,4 %, Sigma 0,1 %.
 - **Équipé** (1 place de base) : le familier suit le joueur et ajoute un bonus de points, additif :
   ×1,1 / 1,2 / 1,35 / 1,6 / 2 / 3 / 5 / 10 (score = 1 + somme des bonus). **Un familier équipé ne rapporte pas d'argent**
-  et n'est pas dans la base (choix stratégique : bonus de points OU revenu).
+  et n'est pas dans la base (choix stratégique : bonus OU revenu).
+- **Stats d'un familier équipé** (13 oct., `shared/PetStats`, `Config.Pets.EquipBonus`) : il ajoute aussi des **niveaux de
+  Vitesse et de Force** tant qu'il est équipé. Total par rareté : 2 / 3 / 5 / 7 / 10 / 14 / 19 / 26 niveaux (Commun → Sigma),
+  partagé selon sa taille dans sa tranche (`PetSizes`) : le plus petit 80 % Vitesse, le plus gros 80 % Force. Plafond 30 niveaux
+  par stat (tous équipés confondus). Le serveur les ajoute à la vitesse de marche et à la force de lancer (`SessionData`,
+  attributs `SpeedBonus` / `StrengthBonus`) ; affichés dans l'Index (fiche du familier) et dans le HUD (« NV 13 +5 »).
 - **Dans la base** : les 10 meilleurs familiers **non équipés** se baladent librement dans la base, décidés par le **serveur**
   (`BasePetsController` : un repère invisible `Base_N.Pets.<PetId>` par espèce, attributs `PetId`, `Count`, `Seed` et `Walk` =
   trajet en cours ; module partagé `PetWander`). Les clients (`client/BasePets`) calculent la position avec l'horloge commune

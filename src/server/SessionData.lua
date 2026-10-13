@@ -6,7 +6,8 @@
 -- Chaque valeur est recopiée en attribut sur le Player (lu par le HUD) et dans les leaderstats :
 --   RoundScore, Money, Upgrade_<Id> (niveau), Capacity (objets portables),
 --   SpeedLevel/SpeedXP/SpeedXPNeeded/Speed (WalkSpeed), StrengthLevel/StrengthXP/StrengthXPNeeded/ThrowPower,
---   Pet_<PetId> (quantité possédée), Equipped ("id1,id2"), Multiplier, EquipSlots
+--   Pet_<PetId> (quantité possédée), Equipped ("id1,id2"), Multiplier, EquipSlots,
+--   SpeedBonus/StrengthBonus (niveaux donnés par les familiers équipés, shared/PetStats)
 
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
@@ -17,6 +18,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
+local PetStats = require(ReplicatedStorage.Shared.PetStats)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 export type Stat = "Speed" | "Strength"
@@ -359,8 +361,11 @@ local function getStat(player: Player, name: string): IntValue?
 	return nil
 end
 
-local function statValue(stat: string, level: number): number
+-- Valeur d'une stat = niveau d'entraînement + niveaux donnés par les familiers équipés (shared/PetStats).
+local function statValue(data: PlayerData, stat: string): number
 	local statConfig = if stat == "Speed" then Config.Training.Speed else Config.Training.Strength
+	local bonus = PetStats.Sum(data.equipped)
+	local level = data.levels[stat] + (if stat == "Speed" then bonus.Speed else bonus.Strength)
 	return statConfig.Base + statConfig.PerLevel * level
 end
 
@@ -387,8 +392,8 @@ local function sync(player: Player)
 		player:SetAttribute(stat .. "XP", data.xp[stat])
 		player:SetAttribute(stat .. "XPNeeded", Config.GetXPNeeded(level))
 	end
-	player:SetAttribute("Speed", statValue("Speed", data.levels.Speed))
-	player:SetAttribute("ThrowPower", statValue("Strength", data.levels.Strength))
+	player:SetAttribute("Speed", statValue(data, "Speed"))
+	player:SetAttribute("ThrowPower", statValue(data, "Strength"))
 	player:SetAttribute("Capacity", 1 + (data.upgrades.Backpack or 0) + Perks.ExtraCapacity(player))
 	player:SetAttribute("RoundScore", data.roundScore)
 	player:SetAttribute("Money", data.money)
@@ -397,6 +402,9 @@ local function sync(player: Player)
 		player:SetAttribute("Pet_" .. petId, count)
 	end
 	player:SetAttribute("Equipped", table.concat(data.equipped, ","))
+	local bonus = PetStats.Sum(data.equipped)
+	player:SetAttribute("SpeedBonus", bonus.Speed)
+	player:SetAttribute("StrengthBonus", bonus.Strength)
 	player:SetAttribute("EquipSlots", data.equipSlots)
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("Keys", data.keys)
@@ -467,7 +475,7 @@ local function loadPlayer(player: Player)
 			end
 			refreshPerks(player, data)
 			data.loaded = true
-			applySpeed(player, statValue("Speed", data.levels.Speed))
+			applySpeed(player, statValue(data, "Speed"))
 			sync(player)
 			player:SetAttribute("SaveWaiting", nil)
 			player:SetAttribute("DataLoaded", true)
@@ -522,7 +530,7 @@ local function onPlayerAdded(player: Player)
 		local data = storage[player]
 		if data then
 			-- Le Humanoid est créé avec le personnage : on attend la frame suivante par sécurité.
-			task.defer(applySpeed, player, statValue("Speed", data.levels.Speed))
+			task.defer(applySpeed, player, statValue(data, "Speed"))
 		end
 	end)
 
@@ -716,7 +724,7 @@ end
 function SessionData.RefreshSpeed(player: Player)
 	local data = storage[player]
 	if data then
-		applySpeed(player, statValue("Speed", data.levels.Speed))
+		applySpeed(player, statValue(data, "Speed"))
 	end
 end
 
@@ -835,6 +843,7 @@ function SessionData.Equip(player: Player, petId: string): boolean
 		return false
 	end
 	table.insert(data.equipped, petId)
+	applySpeed(player, statValue(data, "Speed")) -- ses stats comptent tout de suite
 	sync(player)
 	return true
 end
@@ -848,6 +857,7 @@ function SessionData.Unequip(player: Player, petId: string)
 	local index = table.find(data.equipped, petId)
 	if index then
 		table.remove(data.equipped, index)
+		applySpeed(player, statValue(data, "Speed"))
 		sync(player)
 	end
 end
@@ -883,7 +893,7 @@ function SessionData.AddTrainingXP(player: Player, stat: Stat, amount: number): 
 		data.xp[stat] = 0
 	end
 	if stat == "Speed" and gained > 0 then
-		applySpeed(player, statValue("Speed", data.levels.Speed))
+		applySpeed(player, statValue(data, "Speed"))
 	end
 	sync(player)
 	return gained

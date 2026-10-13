@@ -2,8 +2,8 @@
 -- IndexMenu : fenêtre INDEX (collection des familiers), sur le modèle de l'index de la référence :
 --   - onglets à droite = les raretés (pastille = récompenses qui attendent dans cette rareté) ;
 --   - à gauche, la carte de la rareté ; au centre, la grille des familiers (silhouette « ??? » tant qu'il
---     n'est pas découvert) et la barre « 3/9 » ; à droite, le familier choisi (3D, revenu, ÉQUIPER) et sa
---     récompense (RÉCLAMER) ; en bas, « RÉCLAMER TOUT (n) ! ».
+--     n'est pas découvert) et la barre « 3/9 » ; à droite, le familier choisi (3D, revenu, stats données
+--     une fois équipé, ÉQUIPER) et sa récompense (RÉCLAMER) ; en bas, « RÉCLAMER TOUT (n) ! ».
 -- Récompenses : Config.Index, validées par le serveur (Remotes.ClaimIndex -> SessionData.ClaimIndex).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetStats = require(ReplicatedStorage.Shared.PetStats)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 local MenuKit = require(script.Parent.MenuKit)
@@ -146,18 +147,31 @@ function IndexMenu.create(gui: Instance): Index
 	local detailViewport: ViewportFrame? = nil
 	local detailKey: string? = nil -- familier + découvert/non affiché (évite de refaire l'aperçu 3D à chaque seconde)
 	local detailName = UiStyle.text(detail, "", 26, WHITE, UiStyle.BODY_FONT)
-	detailName.Position = UDim2.fromOffset(6, 136)
+	detailName.Position = UDim2.fromOffset(6, 112)
 	detailName.Size = UDim2.new(1, -12, 0, 28)
 	detailName.TextScaled = true
 	detailName.ZIndex = 3
 	local detailRarity = UiStyle.text(detail, "", 22, WHITE, UiStyle.BODY_FONT)
-	detailRarity.Position = UDim2.fromOffset(6, 164)
+	detailRarity.Position = UDim2.fromOffset(6, 140)
 	detailRarity.Size = UDim2.new(1, -12, 0, 22)
 	detailRarity.ZIndex = 3
 	local detailIncome = UiStyle.number(detail, "", 24, UiStyle.Colors.Money)
-	detailIncome.Position = UDim2.fromOffset(6, 186)
+	detailIncome.Position = UDim2.fromOffset(6, 160)
 	detailIncome.Size = UDim2.new(1, -12, 0, 26)
 	detailIncome.ZIndex = 3
+	-- Stats données quand il est équipé (shared/PetStats) : icône + « +3 » pour la Vitesse et la Force.
+	local function statChip(icon: string, x: number, color: Color3): TextLabel
+		local image = Icons.image(detail, icon, UDim2.fromOffset(28, 28), UDim2.fromOffset(x, 186))
+		image.ZIndex = 3
+		local label = UiStyle.number(detail, "", 24, color)
+		label.Position = UDim2.fromOffset(x + 30, 186)
+		label.Size = UDim2.fromOffset(70, 28)
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.ZIndex = 3
+		return label
+	end
+	local detailSpeed = statChip("Speed", 14, UiStyle.Colors.Speed)
+	local detailStrength = statChip("Strength", 116, UiStyle.Colors.Strength)
 	local equipButton = UiStyle.button(detail, "", UDim2.new(1, -16, 0, 40), UiStyle.Colors.Cyan, 24)
 	equipButton.Position = UDim2.new(0, 8, 1, -46)
 	equipButton.ZIndex = 3
@@ -220,7 +234,7 @@ function IndexMenu.create(gui: Instance): Index
 			end
 			local viewport = MenuKit.petViewport(detail, petId, not known)
 			viewport.Position = UDim2.fromOffset(8, 6)
-			viewport.Size = UDim2.new(1, -16, 0, 128)
+			viewport.Size = UDim2.new(1, -16, 0, 106)
 			viewport.ZIndex = 3
 			detailViewport = viewport
 		end
@@ -228,6 +242,9 @@ function IndexMenu.create(gui: Instance): Index
 		detailRarity.Text = rarity.Name
 		detailRarity.TextColor3 = UiStyle.lighter(rarity.Color, 0.4)
 		detailIncome.Text = if known then NumberFormat.perSecond(PetCatalog.GetIncome(petId)) else "???"
+		local stats = PetStats.Of(petId)
+		detailSpeed.Text = if known then "+" .. stats.Speed else "?"
+		detailStrength.Text = if known then "+" .. stats.Strength else "?"
 
 		local owned = MenuKit.number("Pet_" .. petId)
 		local caption = equipButton:FindFirstChild("Caption") :: TextLabel
@@ -273,7 +290,11 @@ function IndexMenu.create(gui: Instance): Index
 		elseif #list < MenuKit.number("EquipSlots") then
 			Remotes.EquipPet:FireServer(petId, true)
 			-- Seuls les familiers de la base rapportent : on le rappelle au joueur.
-			Toast.show("ÉQUIPÉ ! BONUS DE POINTS, MAIS IL NE RAPPORTE PLUS D'ARGENT", UiStyle.Colors.Gold)
+			local stats = PetStats.Of(petId)
+			Toast.show(
+				string.format("ÉQUIPÉ ! +%d VITESSE, +%d FORCE, MAIS IL NE RAPPORTE PLUS D'ARGENT", stats.Speed, stats.Strength),
+				UiStyle.Colors.Gold
+			)
 		else
 			Toast.show("PLUS DE PLACE ! DÉSÉQUIPE UN FAMILIER", UiStyle.Colors.Red)
 			Sounds.play("Error")

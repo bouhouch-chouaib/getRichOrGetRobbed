@@ -313,7 +313,9 @@ local function updateStats()
 	for _, row in ipairs({ { stat = "Speed", ui = speedRow }, { stat = "Strength", ui = strengthRow } }) do
 		local level = numberAttribute(row.stat .. "Level")
 		local needed = numberAttribute(row.stat .. "XPNeeded")
-		row.ui.label.Text = string.format("NV %d", level)
+		-- Niveaux donnés par les familiers équipés (shared/PetStats) : « NV 13 +5 ».
+		local bonus = numberAttribute(row.stat .. "Bonus")
+		row.ui.label.Text = if bonus > 0 then string.format("NV %d +%d", level, bonus) else string.format("NV %d", level)
 		row.ui.fill.Size = UDim2.fromScale(if needed > 0 then math.clamp(numberAttribute(row.stat .. "XP") / needed, 0, 1) else 1, 1)
 	end
 	pointsLabel.Text = string.format("POINTS  %.1f", numberAttribute("RoundScore"))
