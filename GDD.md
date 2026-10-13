@@ -35,8 +35,26 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   créature par espèce avec "x2" si plusieurs exemplaires. Ils rapportent de l'argent chaque seconde
   (base 2 / 25 / 400 / 8K / 200K / 6M / 250M / 25B $/s de Commun à Sigma,
   +15 % par rang du familier dans sa rareté : `PetCatalog.GetIncome`).
-- **Tirages** (`LootEngine`) : 1er tirage = 5 points, chaque suivant +8 % (anti-emballement), minimum 1 tirage.
-  Chance légèrement augmentée par le score. **Pitié** : Épique+ garanti au 60e tirage sans Épique+.
+- **Tirages** (`LootEngine`) : 1er tirage = 2 points, chaque suivant +8 % (anti-emballement : 100 points = 20 tirages,
+  1 000 = 48, 10 000 = 77), minimum 1 tirage. Chance augmentée par le score (x1 à x2). **Pitié** : Épique+ garanti au 60e
+  tirage sans Épique+. **Toutes les sources** (fin de manche, roue des duels, Robux) passent par `server/PullRewards.Grant`.
+- **13 oct. : récompenses lisibles** (retours des testeurs : « on ne comprend pas ce qu'on gagne ») :
+  - **Barre « prochain tirage »** sous l'horloge pendant le Feeding (`client/HUD`, `LootEngine.progress`) : « 3 TIRAGES »,
+    barre vers le suivant, « +1 TIRAGE ! » qui s'envole quand elle se remplit, ligne « CHANCE x1,12 • ÉPIQUE GARANTI DANS
+    23 TIRAGES » (attribut `Pity`).
+  - **Capsules** (`client/PullReveal`) : à la digestion, jusqu'à `RevealCards` (8) capsules s'ouvrent une par une en bas de
+    l'écran (« NOUVEAU ! », rareté, ou « VENDU +$ »), les autres résumées « +N AUTRES » ; clic = tout ouvrir. Le grand écran
+    des familiers rares (`client/Effects`) passe après.
+  - **Carte de résultats** : nouveaux d'abord, doublons vendus, argent, rang de tirage et prochain palier.
+  - **Top 3 du trou noir** sur la jauge (attribut `HoleTop`, `BlackholeTiers`) : ceux qui gagneront les cadeaux de l'effondrement.
+- **Rang de tirage** (`Config.Loot.Ranks`, attribut sauvegardé `TotalPulls` = tirages faits depuis le début ; les anciennes
+  sauvegardes comptent leurs familiers) : APPRENTI (0) → DOMPTEUR (150 : plus de Communs) → MAÎTRE (600 : plus d'Inhabituels).
+  Un tirage sous la rareté plancher monte au plancher : les chances des raretés au-dessus ne changent pas (pas d'inflation des
+  rares). Une rareté ne disparaît que si **tous** ses familiers sont découverts (l'Index reste complétable). Indépendant des
+  mondes (ils auront leurs familiers exclusifs). Les chances affichées dans la boutique Robux en tiennent compte.
+- **Doublons vendus** : au-delà de `KeepCopies` (5) exemplaires d'un familier, les suivants sont vendus tout de suite
+  (`SellSeconds` = 300 s de son revenu x monde x passes ; le jeter dans le trou rapporte le double).
+- **Argent des points** : `MoneyPerPoint` (15 $) ou 0,1 s du revenu du joueur par point si c'est plus (`IncomeSecondsPerPoint`).
   **Nouveaux d'abord** : dans une rareté, un familier pas encore possédé pèse `Config.Loot.NewPetWeight` (5) contre 1
   (`LootEngine.rollPulls(..., owned)`, owned = `SessionData.GetOwnedPets`) ; les chances par rareté ne changent pas
   (affiché dans la boutique Robux).
@@ -45,8 +63,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   à jour tout de suite et pose `ArrivedAt` (heure serveur) sur le repère des familiers concernés. Tous les clients (`client/BasePets`)
   jouent l'arrivée : chute depuis 18 studs, gerbe d'étincelles et flash à la couleur de la rareté, étiquette "✨ NOUVEAU ✨" 5 s,
   rayon de lumière si Légendaire+. Seuls les familiers affichés (10 meilleurs non équipés) ont l'effet ; les autres vont dans la collection.
-- **Carte de résultats** (HUD) : petite carte sous le chrono (points, tirages, 4 meilleurs drops, argent), ne ferme aucune fenêtre,
-  disparaît après 5 s ou au clic.
+- **Carte de résultats** (HUD) : petite carte sous le chrono (tirages, points, 4 meilleurs drops, doublons vendus, argent, rang),
+  ne ferme aucune fenêtre, disparaît après 7 s ou au clic.
 - **Machine de fusion** (`FusionController`, bâtiment physique dans chaque kiosque) : 5 familiers non équipés d'une rareté + un coût
   (250 / 15K / 750K / 40M / 2.5B / 250B $) = 1 familier aléatoire de la rareté au-dessus, de Commun jusqu'à Mythique → Divin.
   Le joueur choisit lui-même les 5 familiers dans les cases de la machine (`client/FusionMenu`, bouton « Auto » = doublons

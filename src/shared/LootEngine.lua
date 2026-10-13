@@ -36,9 +36,10 @@ function LootEngine.progress(score: number): (number, number)
 		pulls += 1
 		cost *= 1 + Config.Loot.PullCostGrowth
 	end
-	if pulls == 0 and score > 0 then
-		-- Tirage offert : la barre avance vers le 2e (coût des deux premiers).
-		return 1, score / (cost + cost * (1 + Config.Loot.PullCostGrowth))
+	if pulls <= 1 and score > 0 then
+		-- Le 1er tirage est offert : jusqu'au 2e, la barre avance sur le coût des deux premiers (sans retomber).
+		local first = Config.Loot.PullCost
+		return 1, score / (first + first * (1 + Config.Loot.PullCostGrowth))
 	end
 	return pulls, (score - spent) / cost
 end

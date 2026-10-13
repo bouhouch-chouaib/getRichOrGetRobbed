@@ -86,6 +86,12 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
+**13 oct. : récompenses du trou noir lisibles + fin des doublons inutiles** (`server/PullRewards`, `client/PullReveal`,
+`Config.Loot`) : barre « prochain tirage » en direct, capsules ouvertes une par une, top 3 sur la jauge, rang de tirage
+(plus de Communs à 150 tirages, plus d'Inhabituels à 600, si la rareté est complète), doublons au-delà de 5 vendus,
+argent des points selon le revenu. Vérifié en jeu (solo) : barre, capsules, vente des doublons, top 3. Pas encore fait :
+les mutations (familiers Dorés / Diamant / Arc-en-ciel), prochaine grosse étape proposée.
+
 **13 oct. : stats des familiers équipés** (`shared/PetStats`, `Config.Pets.EquipBonus`) : niveaux de Vitesse / Force en plus
 selon la rareté et la taille (petit = rapide, gros = fort), en plus du bonus de points ; toujours pas d'argent quand il est équipé.
 

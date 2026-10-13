@@ -562,7 +562,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 			rankLine ..= " : TIRAGES À PARTIR DE " .. TextFormat.upper(Config.Rarities[floorIndex].Name)
 		end
 		if nextRank then
-			rankLine ..= string.format("  •  %s À %d TIRAGES (%d)", nextRank.Name, nextRank.Pulls, total)
+			rankLine ..= string.format("  •  %d/%d → %s", total, nextRank.Pulls, nextRank.Name)
 		end
 		table.insert(lines, '<font color="#9BDCFF">' .. rankLine .. "</font>")
 		rewardBody.Text = table.concat(lines, "\n")
