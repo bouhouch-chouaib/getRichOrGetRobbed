@@ -86,6 +86,8 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
+**13 oct. : horloge de la manche en haut au centre** (pastille au-dessus de la consigne de phase et des points, `client/HUD`).
+
 **13 oct. : porter, jeter, lâcher** (`server/StealController`, `client/CarryControls`, `client/LoosePets`, `shared/PetPath`) :
 porter son propre familier ou en voler un, vitesse selon force et poids, le jeter dans le trou (récompense selon le familier),
 le lâcher quand on est frappé (il rentre à pied, n'importe qui peut le reprendre). Vérifié en jeu (solo).
@@ -94,7 +96,7 @@ le lâcher quand on est frappé (il rentre à pied, n'importe qui peut le repren
 un aspect et une mécanique bonus par palier, effondrement après le 7. Vérifié en jeu (solo) : les 7 aspects, annonce,
 lave, météorites, attraction, effondrement, jauge qui se remplit. Test : attribut serveur `DebugHoleTier`.
 
-**15 oct. : familiers en voxels** (blocs à tenons, yeux carrés), taille par familier (13 oct. : échelle `shared/PetSizes`, 0,7 à 7,5 tailles de joueur),
+**15 oct. : familiers en voxels** (blocs à tenons, yeux carrés), taille par familier (13 oct. : échelle `shared/PetSizes`, 0,5 à 2,9 tailles de joueur),
 auras Épique+ (anneau au sol, flammes, étincelles, auréole, rayons). Vérifié en jeu (rangée d'un familier par rareté, Index).
 
 ## À vérifier en priorité (état au 12 oct. 2026, fin de session Claude)

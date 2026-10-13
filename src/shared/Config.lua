@@ -170,7 +170,7 @@ Config.Pets = {
 	AuraUpdateInterval = 0.05, -- one shared 20 Hz visual update
 	EquipSlots = 1, -- familiers équipés (multiplicateur + suivent le joueur)
 	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
-	-- Taille de chaque familier : voir shared/PetSizes (échelle en « tailles de joueur », de 0,7 à 7,5).
+	-- Taille de chaque familier : voir shared/PetSizes (échelle en « tailles de joueur », de 0,5 à 2,9).
 }
 
 -- Monétisation (Robux). Id = numéro du pass / produit créé sur create.roblox.com (0 = pas encore créé : affiché "BIENTÔT").
@@ -308,14 +308,15 @@ Config.Steal = {
 }
 
 -- Porter un familier (volé, ou le sien pris dans sa base) : server/StealController.
---   Poids = taille du familier (shared/PetSizes, en tailles de joueur) ^ WeightExponent : 0,5 pour un pigeon, 56 pour la baleine.
+--   Poids = taille du familier (shared/PetSizes, en tailles de joueur) ^ WeightExponent : 0,1 pour un pigeon, 24 pour la baleine.
 --   Capacité = force de lancer du joueur (attribut ThrowPower, 70 au départ) / StrengthPerCapacity.
 --   Vitesse = 1 / (1 + Slow x poids / capacité), entre MinSpeed et MaxSpeed.
---   Ex. au départ (capacité 7) : Commun 95 %, Légendaire ~50 %, Sigma 30 % ; force 60 (capacité 25) : Légendaire ~78 %.
+--   Ex. au départ (capacité 7) : Commun 95 %, Épique ~85 %, Légendaire ~76 %, Divin ~50 %, Sigma 30 % ;
+--   force 60 (capacité 25) : Divin ~75 %, Sigma ~55 %.
 -- Frappé à la batte, éjecté par le dôme, mort ou trop lent : le porteur LÂCHE le familier, qui rentre à pied vers la base
 -- de son propriétaire (WalkHomeSpeed) ; n'importe qui peut le ramasser en chemin.
 Config.Carry = {
-	WeightExponent = 2,
+	WeightExponent = 3,
 	StrengthPerCapacity = 10,
 	Slow = 0.8,
 	MinSpeed = 0.3,

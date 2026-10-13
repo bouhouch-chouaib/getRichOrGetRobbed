@@ -226,13 +226,13 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Modèles refaits avec Codex : `PetSculpt`, `PetSculptedModels`, `PetSculptedEffects`, `PetMotion`,
   `client/PetAuraAnimator` (détails : `docs/PET_VISUAL_REWORK.md`). `Config.Pets.ModelStyle = "Sculpted"`.
 - **Échelle** (`shared/PetSizes`) : unité **J = la taille d'un joueur (5 studs)**. Chaque rareté a sa tranche, sans
-  chevauchement : Commun 0,7-1 J, Inhabituel 1-1,3, Rare 1,3-1,7, Épique 1,8-2,4, Légendaire 2,5-3,2, Mythique 3,3-4,2,
-  Divin 4,4-5,5, Sigma 6-7,5 J. Chaque familier a SA taille dans sa tranche (`PetSizes.Heights`) : un pigeon 0,7 J,
-  un T-Rex de poche 4,4 J, la Baleine Galaxie 7,5 J. La taille est la hauteur ; les familiers longs sont limités à
-  2 x leur taille en longueur et 52 studs au sol (la base fait 56).
+  chevauchement (resserrée le 13 oct. : avant 0,7 à 7,5 J, la base devenait illisible) : Commun 0,5-0,65 J,
+  Inhabituel 0,65-0,8, Rare 0,8-0,95, Épique 0,95-1,15, Légendaire 1,15-1,4, Mythique 1,4-1,7, Divin 1,75-2,15,
+  Sigma 2,3-2,9 J. Chaque familier a SA taille dans sa tranche (`PetSizes.Heights`) : un pigeon 0,5 J, la Baleine
+  Galaxie 2,9 J. La taille est la hauteur ; les familiers longs sont limités à 2 x leur taille en longueur et 26 studs au sol.
 - Les grands familiers se promènent plus près du centre de la base (`PetWander.randomSpot(rng, petId)`), se volent
   depuis leur flanc (bulle et contrôle serveur élargis de `PetSizes.Radius`), sont réduits à 2 J quand ils suivent le
-  joueur et à 1,4 J quand on les porte après un vol. Les effets (particules, lumière) grandissent avec eux.
+  joueur (1,6 J max) et à 1,4 J quand on les porte. Les effets (particules, lumière) grandissent avec eux.
 - Toise : `lune run tools/check-pets.luau . sortie` (vérifie aussi que chaque familier a sa taille dans sa tranche)
   puis `python tools/pet-size-chart.py sortie a.jpg b.jpg`.
 
@@ -257,9 +257,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 - **Porter le sien** : [E] « Porter » sur un familier de SA base (même bulle client que « Voler », `client/BasePets`). Le
   porter dans sa base ne compte qu'après en être sorti (`wasOutside`) ; y revenir le repose (« Home »).
-- **Vitesse** : poids = taille (`shared/PetSizes`, en J) ^ 2 ; capacité = force de lancer (`ThrowPower`) / 10 ;
-  vitesse = 1 / (1 + 0,8 x poids / capacité), entre 30 % et 95 %. Au départ : Commun ~93 %, Légendaire ~50 %, Sigma 30 % ;
-  force 60 : Légendaire ~78 %. Le temps max de transport s'allonge d'autant (60 s / vitesse, 180 s max). Le message de
+- **Vitesse** : poids = taille (`shared/PetSizes`, en J) ^ 3 ; capacité = force de lancer (`ThrowPower`) / 10 ;
+  vitesse = 1 / (1 + 0,8 x poids / capacité), entre 30 % et 95 %. Au départ : Commun 95 %, Légendaire ~76 %, Divin ~50 %,
+  Sigma 30 % ; force 60 : Divin ~75 %, Sigma ~55 %. Le temps max de transport s'allonge d'autant (60 s / vitesse, 180 s max). Le message de
   départ dit « LÉGER / LOURD / TRÈS LOURD : VITESSE x % ».
 - **Jeter dans le trou** (pendant le Feeding, à moins de 22 studs du bord) : bouton « JETER DANS LE TROU ! » + touche E /
   manette X (`client/CarryControls`, `Remotes.ThrowPet`). Le familier est perdu pour son PROPRIÉTAIRE (le sien ou celui volé à un
@@ -386,7 +386,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - Icônes : `shared/Icons` (27 icônes 2D cartoon à gros contour noir, dessinées par `tools/icons/make_icons.py`, PNG dans
     `assets/icons`, envoyées sur Roblox ; `Icons.image(parent, nom)`). Plus aucun émoji dans l'interface ni le décor.
   - `HUD` (13 oct., disposition de la référence) : boutons Boutique / Index à gauche avec pastilles, Force / Vitesse /
-    argent en chiffres italiques en bas à gauche, horloge de manche en bas à droite, bandeau de phase animé, points.
+    argent en chiffres italiques en bas à gauche, horloge de manche en haut au centre (au-dessus du bandeau de phase animé et des points).
   - Menus reconstruits façon Steal an Egg : `UiStyle` (fenêtres à tenons, en-tête coloré à rayures, croix rouge, cartes
     vives à rayons de soleil, pastilles), `MenuKit` (une fenêtre à la fois, onglets à droite, aperçus 3D),
     `ShopMenu` (cartes qui défilent, onglets Entraînement / Bonus / Armes), `IndexMenu`, `FusionMenu`,

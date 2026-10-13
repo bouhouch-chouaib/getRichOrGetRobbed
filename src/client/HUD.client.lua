@@ -77,7 +77,7 @@ local isTouch = ScreenScale.isTouch()
 -- Bandeau : grand à chaque changement de phase, puis il remonte et rapetisse en titre discret.
 local phaseTitle = text(gui, "", 44)
 phaseTitle.AnchorPoint = Vector2.new(0.5, 0)
-phaseTitle.Position = UDim2.new(0.5, 0, 0, 8)
+phaseTitle.Position = UDim2.new(0.5, 0, 0, 70) -- sous l'horloge de la manche
 phaseTitle.Size = UDim2.fromOffset(760, 50)
 local phaseScale = Instance.new("UIScale")
 phaseScale.Scale = 0.7
@@ -85,7 +85,7 @@ phaseScale.Parent = phaseTitle
 
 local pointsPill = UiStyle.panel(gui, UDim2.fromOffset(230, 44))
 pointsPill.AnchorPoint = Vector2.new(0.5, 0)
-pointsPill.Position = UDim2.new(0.5, 0, 0, 62)
+pointsPill.Position = UDim2.new(0.5, 0, 0, 124)
 pointsPill.BackgroundColor3 = UiStyle.Colors.WindowBody
 local pointsLabel = UiStyle.number(pointsPill, "", 28, UiStyle.Colors.Gold)
 pointsLabel.Size = UDim2.fromScale(1, 1)
@@ -96,24 +96,22 @@ hintLabel.Position = UDim2.new(0.5, 0, 1, -18)
 hintLabel.Size = UDim2.fromOffset(760, 24)
 
 ----------------------------------------------------------------------
--- Bas à droite : horloge de la manche
+-- En haut au centre : horloge de la manche (jour / nuit), au-dessus de la consigne de phase
 ----------------------------------------------------------------------
 
-local clock = Instance.new("Frame")
+local clock = UiStyle.panel(gui, UDim2.fromOffset(360, 58))
 clock.Name = "Clock"
-clock.BackgroundTransparency = 1
-clock.AnchorPoint = Vector2.new(1, 1)
-clock.Position = UDim2.new(1, -16, 1, -10)
-clock.Size = UDim2.fromOffset(300, 80)
-clock.Parent = gui
-local clockIcon = Icons.image(clock, "Moon", UDim2.fromOffset(62, 62), UDim2.fromOffset(0, 16))
-local clockNext = text(clock, "", 20, WHITE, BODY_FONT)
+clock.AnchorPoint = Vector2.new(0.5, 0)
+clock.Position = UDim2.new(0.5, 0, 0, 6)
+clock.BackgroundColor3 = UiStyle.Colors.WindowBody
+local clockIcon = Icons.image(clock, "Moon", UDim2.fromOffset(50, 50), UDim2.fromOffset(8, 4))
+local clockNext = text(clock, "", 22, WHITE, BODY_FONT)
 clockNext.Position = UDim2.fromOffset(64, 0)
-clockNext.Size = UDim2.new(1, -64, 0, 24)
+clockNext.Size = UDim2.new(0, 112, 1, 0)
 clockNext.TextXAlignment = Enum.TextXAlignment.Left
-local clockLabel = UiStyle.number(clock, "", 40, WHITE)
-clockLabel.Position = UDim2.fromOffset(64, 24)
-clockLabel.Size = UDim2.new(1, -64, 0, 50)
+local clockLabel = UiStyle.number(clock, "", 36, WHITE)
+clockLabel.Position = UDim2.fromOffset(176, 0)
+clockLabel.Size = UDim2.new(1, -184, 1, 0)
 clockLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 ----------------------------------------------------------------------
@@ -216,7 +214,7 @@ local REWARD_CARD_TIME = 5
 local rewardCard = Instance.new("TextButton")
 rewardCard.Name = "RewardCard"
 rewardCard.AnchorPoint = Vector2.new(0.5, 0)
-rewardCard.Position = UDim2.new(0.5, 0, 0, 62)
+rewardCard.Position = UDim2.new(0.5, 0, 0, 124)
 rewardCard.Size = UDim2.fromOffset(380, 60)
 rewardCard.AutomaticSize = Enum.AutomaticSize.Y
 rewardCard.BackgroundColor3 = UiStyle.Colors.WindowBody
