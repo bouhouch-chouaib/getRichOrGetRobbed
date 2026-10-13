@@ -407,58 +407,53 @@ Config.Effects = {
 export type SoundDef = { Id: number, Volume: number?, Pitch: number? }
 
 Config.Sounds = {
-	MusicVolume = 0.3,
+	MusicVolume = 0.2, -- 13 oct. : baissée (0,3 avant)
 	EffectsVolume = 0.7,
 	MusicFade = 2, -- secondes de fondu entre deux morceaux
 	-- Musique par monde (attribut "World" du joueur, client/SoundController) : les morceaux du monde s'enchaînent dans un
-	-- ordre mélangé, en fondu. Tous viennent de la bibliothèque APM Music sous licence Roblox (créateur APMOfficial),
-	-- vérifiés le 13 oct. : ils se chargent dans le jeu et durent plus d'une minute. Choisis d'après leur titre et leur
-	-- fiche (pas écoutés) : à remplacer facilement ici si l'un ne colle pas.
+	-- ordre mélangé, en fondu. 13 oct. (2e version) : fond musical CALME et peu répétitif (lo-fi, chill-hop, guitare et
+	-- piano doux, 1 min 30 à 4 min 30), à la place des ukulélés et des musiques orientales / épiques jugés pénibles.
+	-- Bibliothèques sous licence Roblox : APM Music (APMOfficial) et DistroKid (DistrokidOfficial), vérifiées dans le jeu.
 	Playlists = {
-		{
-			{ Id = 1839578771, Volume = 0.8 }, -- "Charming View Ukulele" (APM), 64 s
-			{ Id = 1839580471, Volume = 0.8 }, -- "Happy Forever Ukulele" (APM), 65 s
-			{ Id = 1839727388, Volume = 0.8 }, -- "Gardening" (APM), 95 s
-			{ Id = 1839453894, Volume = 0.8 }, -- "So Kind" (APM), 68 s
-			{ Id = 1845913205, Volume = 0.8 }, -- "Walking On The Beach" (APM, ukulélé hawaïen), 111 s
+		{ -- 1 Prairie : guitare acoustique douce
+			{ Id = 83546335370083, Volume = 0.7 }, -- "Soft Guitar in the Morning Light", 189 s
+			{ Id = 136821672329242, Volume = 0.7 }, -- "Acoustic Guitar in Soft Focus", 183 s
+			{ Id = 121991101341350, Volume = 0.7 }, -- "Soft Café Sunshine", 162 s
+			{ Id = 9046863253, Volume = 0.6 }, -- "Poolside" (APM), 165 s
 		},
-		{ -- 2 Désert : oud et percussions orientales
-			{ Id = 1838890446, Volume = 0.8 }, -- "Sahara Dunes", 103 s
-			{ Id = 1838890545, Volume = 0.8 }, -- "Desert Stories", 118 s
-			{ Id = 1838900880, Volume = 0.8 }, -- "Desert Oasis Solo", 144 s
-			{ Id = 1838890231, Volume = 0.8 }, -- "Middle Eastern Oud", 87 s
-			{ Id = 9040297956, Volume = 0.7 }, -- "Prince Of Persia" (bande-annonce orientale joueuse), 156 s
+		{ -- 2 Désert : chill chaud
+			{ Id = 9046862941, Volume = 0.6 }, -- "Sunset Chill (Bed Version)" (APM), 134 s
+			{ Id = 89402602954424, Volume = 0.7 }, -- "Pastel Corner Life", 199 s
+			{ Id = 136397868028391, Volume = 0.7 }, -- "Warm Hug Melodies", 91 s
+			{ Id = 9046691155, Volume = 0.6 }, -- "Drive-In" (APM), 92 s
 		},
-		{ -- 3 Volcan : épique, héroïque
-			{ Id = 98052506851752, Volume = 0.7 }, -- "Epic Swagger Main", 119 s
-			{ Id = 98460963937178, Volume = 0.7 }, -- "Will Power", 127 s
-			{ Id = 1838990004, Volume = 0.7 }, -- "Heroic Fantasy", 138 s
-			{ Id = 1839424991, Volume = 0.7 }, -- "Wild Force", 76 s
+		{ -- 3 Volcan : chill-hop un peu plus rythmé
+			{ Id = 9044974640, Volume = 0.6 }, -- "Straight Chill Hopper" (APM, Chill Hop), 150 s
+			{ Id = 140218338777776, Volume = 0.7 }, -- "Lofi Chill 1.9", 145 s
+			{ Id = 9046863579, Volume = 0.6 }, -- "City Lights" (APM), 120 s
+			{ Id = 1846722291, Volume = 0.6 }, -- "Close To Home B" (APM), 101 s
 		},
-		{ -- 4 Glace : flocons, clochettes, paysage nordique
-			{ Id = 9046743045, Volume = 0.8 }, -- "Dancing Snowflakes", 139 s
-			{ Id = 1844273489, Volume = 0.8 }, -- "Nordic Landscape", 196 s
-			{ Id = 9038468087, Volume = 0.8 }, -- "Lighting The Tree" (glockenspiel, pizzicati), 99 s
-			{ Id = 9046744547, Volume = 0.8 }, -- "Elf On The Shelf", 85 s
+		{ -- 4 Glace : piano et flûte
+			{ Id = 111630371595891, Volume = 0.7 }, -- "Soft piano, gentle flute, ambient guitar", 240 s
+			{ Id = 138992141339152, Volume = 0.7 }, -- "Velvet evening melodies", 227 s
+			{ Id = 138330265883042, Volume = 0.7 }, -- "Windowlight Coffee Calm", 215 s
 		},
-		{ -- 5 Abysses : sous l'eau, harpes et nappes
-			{ Id = 9043109396, Volume = 0.8 }, -- "The Deep Of A Pond" (harpes sous l'eau), 101 s
-			{ Id = 9044723389, Volume = 0.8 }, -- "Hidden Away (c)" (nappes lumineuses, arpèges), 157 s
-			{ Id = 1842189046, Volume = 0.7 }, -- "Liquid Move (b)" (groove électronique glissant), 120 s
-			{ Id = 1843198406, Volume = 0.8 }, -- "Turquoise Passage", 93 s
-			{ Id = 1838969059, Volume = 0.8 }, -- "Mysterious Discovery", 68 s
+		{ -- 5 Abysses : lo-fi feutré
+			{ Id = 140195496777664, Volume = 0.7 }, -- "Lofi (Rainy Window Reflections)", 276 s
+			{ Id = 140492661889585, Volume = 0.7 }, -- "From morning fog to daylight (lo-fi)", 138 s
+			{ Id = 136088611877555, Volume = 0.7 }, -- "Between cases (cozy lo-fi)", 180 s
 		},
-		{ -- 6 Cosmos : espace, synthés
-			{ Id = 1837260005, Volume = 0.8 }, -- "Kepler Space Probe", 110 s
-			{ Id = 9046572669, Volume = 0.8 }, -- "Distant Star Main", 158 s
-			{ Id = 1846371125, Volume = 0.8 }, -- "Between The Stars C", 100 s
-			{ Id = 1840016117, Volume = 0.7 }, -- "Into the Sun (b)" (étincelles électroniques), 199 s
+		{ -- 6 Cosmos : nappes rêveuses
+			{ Id = 9046864489, Volume = 0.6 }, -- "Violet Clouds" (APM), 136 s
+			{ Id = 9046863579, Volume = 0.6 }, -- "City Lights" (APM), 120 s
+			{ Id = 140218338777776, Volume = 0.7 }, -- "Lofi Chill 1.9", 145 s
+			{ Id = 140492661889585, Volume = 0.7 }, -- "From morning fog to daylight (lo-fi)", 138 s
 		},
-		{ -- 7 Divin : élévation, lumière
-			{ Id = 9039712933, Volume = 0.8 }, -- "Wonderous Revelation" (orchestre qui s'élève), 184 s
-			{ Id = 1847837602, Volume = 0.8 }, -- "Sweep Of The Horizon", 134 s
-			{ Id = 1840734103, Volume = 0.8 }, -- "Cirrus", 177 s
-			{ Id = 1840788058, Volume = 0.8 }, -- "Higher Than The Sun 60 (b)", 64 s
+		{ -- 7 Divin : lumineux et doux
+			{ Id = 9046909601, Volume = 0.6 }, -- "Gonna Be a Good Day - No Drums" (APM), 108 s
+			{ Id = 111630371595891, Volume = 0.7 }, -- "Soft piano, gentle flute, ambient guitar", 240 s
+			{ Id = 136397868028391, Volume = 0.7 }, -- "Warm Hug Melodies", 91 s
+			{ Id = 9046862941, Volume = 0.6 }, -- "Sunset Chill (Bed Version)" (APM), 134 s
 		},
 	} :: { { SoundDef } },
 	MusicDuck = 0.35, -- pendant un petit jingle (changement de phase), la musique descend à 35 %

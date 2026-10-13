@@ -89,7 +89,8 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **13 oct. : échanges entre joueurs** (`server/TradeController`, `client/TradeClient`) : [T], offres de 6 familiers,
 double confirmation (PRÊT puis CONFIRMER après 3 s). Analyse OK, démarrage sans erreur ; **à tester à 2 joueurs**.
 
-**13 oct. : musique des 7 mondes** (`Config.Sounds.Playlists`, APM) : vérifié en jeu, la musique change avec le monde.
+**13 oct. : musique des 7 mondes** (`Config.Sounds.Playlists`) : 2e version calme (lo-fi, guitare, piano), volume 0,2 ; les ukulélés
+et musiques orientales / épiques rendaient fou (Chouaib). Vérifié en jeu.
 
 **13 oct. : retour dans les mondes visités** (attribut `World`, bouton « Y ALLER », bonus de revenu du monde le plus loin)
 et **trou noir aux couleurs du monde** (muret + 8 décors, `client/BlackholeFx`). Vérifié en jeu : achat du Désert, retour en Prairie
