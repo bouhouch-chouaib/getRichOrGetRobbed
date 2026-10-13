@@ -403,7 +403,7 @@ RunService.RenderStepped:Connect(function()
 		camera.CameraType = Enum.CameraType.Scriptable
 		-- Vue de face : les deux familiers, la roue derrière ; légèrement du côté du joueur.
 		local side = if mySide == "A" then -1 else 1
-		camera.CFrame = CFrame.lookAt(center + Vector3.new(side * 8, 15, 54), center + Vector3.new(0, 6, -6))
+		camera.CFrame = CFrame.lookAt(center + Vector3.new(side * 5, 10, 31), center + Vector3.new(0, 7, -6))
 	end
 	-- Bulles « Défier » : seulement si on est libre et l'autre aussi.
 	local free = phase == "Idle" and player:GetAttribute("CarryingPet") == nil and player:GetAttribute("InDuel") == nil
@@ -421,7 +421,16 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+-- Pendant le duel, le HUD (argent, boutons, horloge) est caché : on voit l'arène et la roue en entier.
+local function setHudVisible(visible: boolean)
+	local hud = player.PlayerGui:FindFirstChild("HUD")
+	if hud and hud:IsA("ScreenGui") then
+		hud.Enabled = visible
+	end
+end
+
 local function backToNormal()
+	setHudVisible(true)
 	phase = "Idle"
 	opponent = nil
 	myPick, otherPick, myReady, otherReady = nil, nil, false, false
@@ -501,6 +510,7 @@ Remotes.DuelEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		local center = a:GetAttribute("Center")
 		arenaCenter = if typeof(center) == "Vector3" then center else nil
 		closeWindow()
+		setHudVisible(false)
 		cheerButton.Visible = true
 		Sounds.play("PhaseFeeding")
 		showBanner("3", WHITE, 0.8)

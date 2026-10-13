@@ -29,7 +29,7 @@ local ROCK_A, ROCK_B = rgb(96, 74, 140), rgb(78, 58, 118)
 local SIDE_COLORS = { A = rgb(255, 80, 80), B = rgb(70, 160, 255) }
 local PET_SPOT, PLAYER_SPOT = 11, 30
 local WHEEL_RADIUS = 9
-local MAX_PET_HEIGHT = 10
+local MIN_PET_HEIGHT, MAX_PET_HEIGHT = 6, 10 -- dans l'arène, tous les familiers sont bien visibles
 
 local folder = Instance.new("Folder")
 folder.Name = "DuelFx"
@@ -170,6 +170,11 @@ local function buildWheel(parent: Model, c: Vector3): Wheel
 		local plateZ = -n
 		local plateX = u
 		local plateY = plateZ:Cross(plateX)
+		if plateY:Dot(pivot.UpVector) < -0.01 then
+			-- Moitié droite : on retourne l'étiquette pour qu'elle ne soit pas à l'envers.
+			plateX = -u
+			plateY = plateZ:Cross(plateX)
+		end
 		local plate = block(model, V(WHEEL_RADIUS * 0.72, 2, 0.1), CFrame.fromMatrix(center + u * WHEEL_RADIUS * 0.56 + n * 0.5,
 			plateX, plateY, plateZ), Color3.new(), false)
 		plate.Transparency = 1
@@ -237,8 +242,9 @@ local function buildFighter(arena: Model, c: Vector3, duel: Model, label: string
 	end
 	model:PivotTo(CFrame.identity)
 	local _, size = PetModelBuilder.BodyBounds(model)
-	if size.Y > MAX_PET_HEIGHT then
-		model:ScaleTo(model:GetScale() * MAX_PET_HEIGHT / size.Y)
+	local wanted = math.clamp(size.Y, MIN_PET_HEIGHT, MAX_PET_HEIGHT)
+	if math.abs(wanted - size.Y) > 0.01 then
+		model:ScaleTo(model:GetScale() * wanted / size.Y)
 	end
 	local box, body = PetModelBuilder.BodyBounds(model)
 	local spot = V(c.X + sign * PET_SPOT, c.Y - (box.Position.Y - body.Y / 2), c.Z)
@@ -253,7 +259,6 @@ local function buildFighter(arena: Model, c: Vector3, duel: Model, label: string
 	sign2.Adornee = primary
 	sign2.Size = UDim2.fromScale(10, 3.4)
 	sign2.StudsOffsetWorldSpace = V(0, box.Position.Y + body.Y / 2 + 2.6, 0)
-	sign2.AlwaysOnTop = true
 	sign2.LightInfluence = 0
 	sign2.MaxDistance = 400
 	local player = duel:GetAttribute("Player" .. label)
@@ -313,7 +318,6 @@ local function popDamage(position: Vector3, text: string, color: Color3, big: bo
 	holder.Transparency = 1
 	local gui = Instance.new("BillboardGui")
 	gui.Size = UDim2.fromScale(if big then 9 else 6, if big then 3 else 2.2)
-	gui.AlwaysOnTop = true
 	gui.LightInfluence = 0
 	gui.MaxDistance = 400
 	gui.Parent = holder
