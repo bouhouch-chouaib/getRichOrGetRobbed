@@ -1,6 +1,9 @@
 --!strict
--- PetFollow : affiche les familiers équipés de TOUS les joueurs, qui les suivent, et le familier volé
--- que porte un voleur dans son dos (avec son nom et le temps restant).
+-- PetFollow : affiche les familiers équipés de TOUS les joueurs, qui les suivent, et le familier que porte un
+-- joueur (avec son nom et le temps restant) : tenu à deux mains au-dessus de la tête, bras levés, qui rebondit
+-- un peu à chaque pas. Jeté dans le trou (Remotes.HoleEvent "Sacrifice") : grand geste des deux bras (élan en
+-- arrière, lancer, accompagnement, Config.Sacrifice.Throw) ; les mains le lâchent à Release et client/BlackholeFx
+-- le fait voler depuis là (il retrouve le modèle grâce à l'attribut "HeldBy").
 -- Rendu 100 % local (aucune réplication réseau) à partir des attributs "Equipped", "CarryingPet",
 -- "CarryingUntil" et "CarryingFrom" de chaque Player.
 -- Si le joueur local est la victime ("CarryingFrom" = son UserId) : le voleur est entouré de rouge (visible à
@@ -15,7 +18,9 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
+local Joints = require(script.Parent.Joints)
 
 -- Positions derrière le joueur selon le nombre de familiers équipés (X, Z).
 local SLOTS = {
@@ -35,12 +40,17 @@ folder.Parent = Workspace
 type Follower = { model: Model, float: boolean, current: CFrame?, bottom: number, depth: number }
 local followers: { [Player]: { Follower } } = {}
 
--- Familier volé porté dans le dos : position par rapport au HumanoidRootPart (derrière les épaules).
-local CARRY_OFFSET = CFrame.new(0, 1.2, 1.6)
-local CARRY_SCALE = 0.6 -- plus petit que dans la base : un gros familier ne cache pas la vue du voleur
-local CARRY_MAX = PetSizes.CARRY_MAX * PetSizes.PLAYER -- studs : hauteur max dans le dos du voleur
-type Carried = { model: Model, timer: TextLabel, mine: boolean, offset: CFrame } -- mine : c'est MON familier qu'il porte
+-- Familier porté au-dessus de la tête, posé sur les deux mains.
+local CARRY_SCALE = 0.6 -- plus petit que dans la base : un gros familier ne cache pas la vue du porteur
+local CARRY_MAX = PetSizes.CARRY_MAX * PetSizes.PLAYER -- studs : hauteur max tenu à bout de bras
+local GRIP_SINK = 0.35 -- studs : les mains s'enfoncent un peu sous le familier (il est tenu, pas posé)
+local THROW = Config.Sacrifice.Throw
+-- mine : c'est MON familier qu'il porte ; bottom : du pivot du modèle au bas de son corps
+type Carried = { model: Model, timer: TextLabel, mine: boolean, bottom: number }
 local carried: { [Player]: Carried } = {}
+-- Lancers en cours (le familier reste dans les mains jusqu'à Release, les bras finissent le geste jusqu'à End).
+type Throw = { model: Model?, bottom: number, start: number }
+local throws: { [Player]: Throw } = {}
 
 local localPlayer = Players.LocalPlayer
 
@@ -88,7 +98,7 @@ local function clearCarried(player: Player)
 	carried[player] = nil
 end
 
--- Construit le familier volé et son étiquette (nom en couleur de rareté + temps restant).
+-- Construit le familier porté et son étiquette (nom en couleur de rareté + temps restant).
 local function rebuildCarried(player: Player)
 	clearCarried(player)
 	local petId = player:GetAttribute("CarryingPet")
@@ -103,8 +113,10 @@ local function rebuildCarried(player: Player)
 	end
 	local _, fullSize = PetModelBuilder.BodyBounds(model)
 	model:SetAttribute("MotionCarried", true)
+	model:SetAttribute("HeldBy", player.UserId) -- client/BlackholeFx : le lancer part de là
 	model:ScaleTo(model:GetScale() * math.min(CARRY_SCALE, CARRY_MAX / math.max(fullSize.Y, 0.1)))
-	local _, size = PetModelBuilder.BodyBounds(model)
+	local bodyBox, size = PetModelBuilder.BodyBounds(model)
+	local bottom = size.Y / 2 - model:GetPivot():PointToObjectSpace(bodyBox.Position).Y
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "StolenLabel"
@@ -150,10 +162,34 @@ local function rebuildCarried(player: Player)
 	end
 
 	model.Parent = folder
-	-- Plus il est grand, plus il est porté haut et loin du dos (il ne traverse pas le voleur).
-	local offset = CARRY_OFFSET * CFrame.new(0, math.max(0, size.Y / 2 - 1.5), math.max(0, size.Z / 2 - 1.2))
-	carried[player] = { model = model, timer = timer, mine = mine, offset = offset }
+	carried[player] = { model = model, timer = timer, mine = mine, bottom = bottom }
 end
+
+-- Jeté dans le trou : le familier porté passe dans les lancers (l'attribut CarryingPet s'efface juste après, il ne
+-- doit pas le détruire) ; son étiquette et le contour rouge disparaissent tout de suite.
+Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, _from: any, _petId: any, carrier: any)
+	if kind ~= "Sacrifice" or typeof(carrier) ~= "Instance" or not carrier:IsA("Player") then
+		return
+	end
+	local entry = carried[carrier]
+	local old = throws[carrier]
+	if old and old.model then
+		old.model:Destroy()
+	end
+	if entry then
+		carried[carrier] = nil
+		for _, name in ipairs({ "StolenLabel", "ThiefHighlight" }) do
+			local child = entry.model:FindFirstChild(name)
+			if child then
+				child:Destroy()
+			end
+		end
+		throws[carrier] = { model = entry.model, bottom = entry.bottom, start = os.clock() }
+	else
+		-- Attribut déjà effacé (ordre réseau inhabituel) : on joue quand même le geste, BlackholeFx part de la tête.
+		throws[carrier] = { model = nil, bottom = 0, start = os.clock() }
+	end
+end)
 
 local function watch(player: Player)
 	player:GetAttributeChangedSignal("Equipped"):Connect(function()
@@ -173,6 +209,11 @@ Players.PlayerAdded:Connect(watch)
 Players.PlayerRemoving:Connect(function(player: Player)
 	clear(player)
 	clearCarried(player)
+	local throw = throws[player]
+	if throw and throw.model then
+		throw.model:Destroy()
+	end
+	throws[player] = nil
 end)
 for _, player in ipairs(Players:GetPlayers()) do
 	watch(player)
@@ -185,6 +226,108 @@ PetModelBuilder.MeshesReady:Connect(function()
 		rebuildCarried(player)
 	end
 end)
+
+----------------------------------------------------------------------
+-- Bras : porter à deux mains au-dessus de la tête, puis lancer
+--   pitch : bras levé vers l'avant (90 = tendu devant, 180 = au-dessus de la tête, plus = vers l'arrière)
+--   roll  : bras penché vers la tête (> 0 = vers l'intérieur) ; elbow : coude plié (même sens que pitch)
+--   lean  : torse penché (> 0 = en arrière)
+----------------------------------------------------------------------
+
+type ArmPose = { pitch: number, roll: number, elbow: number, lean: number }
+type ArmKey = { t: number, pose: ArmPose }
+
+local HOLD: ArmPose = { pitch = 168, roll = 14, elbow = 18, lean = 0 }
+local THROW_KEYS: { ArmKey } = {
+	{ t = 0, pose = HOLD },
+	{ t = THROW.WindUp, pose = { pitch = 212, roll = 10, elbow = 62, lean = 14 } }, -- élan : loin derrière la tête
+	{ t = THROW.Release, pose = { pitch = 128, roll = 6, elbow = 4, lean = -10 } }, -- lancer : les mains le lâchent
+	{ t = THROW.Release + 0.15, pose = { pitch = 72, roll = 4, elbow = 10, lean = -16 } }, -- accompagnement
+	{ t = THROW.End, pose = { pitch = 8, roll = 0, elbow = 6, lean = 0 } }, -- retour, bras le long du corps
+}
+
+local function smooth(x: number): number
+	return x * x * (3 - 2 * x)
+end
+
+local function sampleThrow(t: number): ArmPose
+	for index = 1, #THROW_KEYS - 1 do
+		local a, b = THROW_KEYS[index], THROW_KEYS[index + 1]
+		if t <= b.t then
+			local raw = math.clamp((t - a.t) / math.max(b.t - a.t, 1e-3), 0, 1)
+			-- Le lancer part sec (accélère jusqu'au lâcher), le reste est adouci.
+			local k = if index == 2 then raw * raw else smooth(raw)
+			local p, q = a.pose, b.pose
+			return {
+				pitch = p.pitch + (q.pitch - p.pitch) * k,
+				roll = p.roll + (q.roll - p.roll) * k,
+				elbow = p.elbow + (q.elbow - p.elbow) * k,
+				lean = p.lean + (q.lean - p.lean) * k,
+			}
+		end
+	end
+	return THROW_KEYS[#THROW_KEYS].pose
+end
+
+local function applyArms(character: Model, p: ArmPose)
+	for _, side in ipairs({ "Right", "Left" }) do
+		local roll = math.rad(if side == "Right" then p.roll else -p.roll)
+		local shoulder = Joints.get(character, side .. "UpperArm", side .. "Shoulder")
+		if shoulder then
+			shoulder.Transform = CFrame.Angles(0, 0, roll) * CFrame.Angles(math.rad(p.pitch), 0, 0)
+		end
+		local elbow = Joints.get(character, side .. "LowerArm", side .. "Elbow")
+		if elbow then
+			elbow.Transform = CFrame.Angles(math.rad(p.elbow), 0, 0)
+		end
+	end
+	local waist = Joints.get(character, "UpperTorso", "Waist")
+	if waist and p.lean ~= 0 then
+		waist.Transform = CFrame.Angles(math.rad(p.lean), 0, 0)
+	end
+end
+
+-- Après les animations de Roblox (Stepped) : on impose la pose des bras.
+RunService.Stepped:Connect(function()
+	local now = os.clock()
+	for player in pairs(carried) do
+		if player.Character then
+			applyArms(player.Character, HOLD)
+		end
+	end
+	for player, throw in pairs(throws) do
+		local t = now - throw.start
+		if t >= THROW.End then
+			if throw.model then
+				throw.model:Destroy()
+			end
+			throws[player] = nil -- les animations normales reprennent d'elles-mêmes
+		elseif player.Character then
+			applyArms(player.Character, sampleThrow(t))
+		end
+	end
+end)
+
+-- Point de prise : entre les deux mains (ou au-dessus de la tête si l'avatar n'a pas de mains R15).
+local function gripPoint(character: Model, root: BasePart): Vector3
+	local left = character:FindFirstChild("LeftHand")
+	local right = character:FindFirstChild("RightHand")
+	if left and right and left:IsA("BasePart") and right:IsA("BasePart") then
+		return (left.Position + right.Position) / 2 + Vector3.new(0, math.max(left.Size.Y, right.Size.Y) / 2 - GRIP_SINK, 0)
+	end
+	local head = character:FindFirstChild("Head")
+	if head and head:IsA("BasePart") then
+		return head.Position + Vector3.new(0, head.Size.Y / 2 + 1.2, 0)
+	end
+	return root.Position + Vector3.new(0, 4, 0)
+end
+
+-- Le familier tenu, face à l'avant du porteur, posé sur ses mains.
+local function holdAt(model: Model, character: Model, root: BasePart, bottom: number, bob: number)
+	local look = root.CFrame.LookVector
+	local flat = CFrame.lookAt(Vector3.zero, Vector3.new(look.X, 0, look.Z))
+	model:PivotTo(CFrame.new(gripPoint(character, root) + Vector3.new(0, bottom + bob, 0)) * flat.Rotation)
+end
 
 RunService:BindToRenderStep("PetFollowPlacement", Enum.RenderPriority.Last.Value - 10, function(dt: number)
 	local now = os.clock()
@@ -215,9 +358,12 @@ RunService:BindToRenderStep("PetFollowPlacement", Enum.RenderPriority.Last.Value
 	for player, entry in pairs(carried) do
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
-		if root and root:IsA("BasePart") then
-			-- Tourné vers l'arrière, comme s'il était hissé sur le dos.
-			entry.model:PivotTo(root.CFrame * entry.offset * CFrame.Angles(0, math.pi, 0))
+		if character and root and root:IsA("BasePart") then
+			-- Petit rebond à chaque pas quand il marche (le familier pèse dans les bras).
+			local velocity = root.AssemblyLinearVelocity
+			local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+			local bob = if speed > 1 then math.abs(math.sin(now * 9)) * 0.35 * math.min(1, speed / 16) else 0
+			holdAt(entry.model, character, root, entry.bottom, bob)
 			-- Bulle "Reprendre" (posée par le serveur) : visible seulement par la victime.
 			local prompt = root:FindFirstChild("RecoverPrompt")
 			if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled ~= entry.mine then
@@ -227,6 +373,21 @@ RunService:BindToRenderStep("PetFollowPlacement", Enum.RenderPriority.Last.Value
 		local untilTime = player:GetAttribute("CarryingUntil")
 		if type(untilTime) == "number" then
 			entry.timer.Text = string.format("%d s", math.max(0, math.ceil(untilTime - serverNow)))
+		end
+	end
+
+	-- Lancer : le familier suit les mains pendant l'élan, puis disparaît quand BlackholeFx l'a pris en charge.
+	for player, throw in pairs(throws) do
+		local model = throw.model
+		if model then
+			local character = player.Character
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			if now - throw.start >= THROW.Release + 0.05 or not character or not (root and root:IsA("BasePart")) then
+				model:Destroy()
+				throw.model = nil
+			else
+				holdAt(model, character, root, throw.bottom, 0)
+			end
 		end
 	end
 end)

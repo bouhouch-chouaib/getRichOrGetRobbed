@@ -752,30 +752,57 @@ local function popText(position: Vector3, text: string, color: Color3)
 	Debris:AddItem(holder, 1.3)
 end
 
--- Un familier jeté dans le trou : il s'envole en cloche en tournoyant, rétrécit dans le cœur, gerbe d'étincelles.
-type Flight = { model: Model, from: Vector3, born: number, scale: number, color: Color3 }
+-- Un familier jeté dans le trou : le porteur prend son élan (client/PetFollow anime les bras), ses mains le lâchent
+-- (Config.Sacrifice.Throw.Release) ; il part de là, à la même taille, s'envole en cloche en tournoyant, rétrécit dans
+-- le cœur, gerbe d'étincelles.
+type Flight = { model: Model, from: Vector3, rotation: CFrame, born: number, scale: number, color: Color3 }
 local flights: { Flight } = {}
 local FLIGHT_TIME = 1.1
+local RELEASE = Config.Sacrifice.Throw.Release
 
-local function sacrifice(from: Vector3, petId: string, money: number, mine: boolean)
+-- Le familier que tient encore ce joueur (client/PetFollow, attribut "HeldBy"), s'il est affiché.
+local function heldModel(carrier: Player?): Model?
+	local pets = Workspace:FindFirstChild("Pets")
+	if not carrier or not pets then
+		return nil
+	end
+	for _, child in ipairs(pets:GetChildren()) do
+		if child:IsA("Model") and child:GetAttribute("HeldBy") == carrier.UserId then
+			return child
+		end
+	end
+	return nil
+end
+
+local function launch(from: Vector3, petId: string, money: number, mine: boolean, carrier: Player?)
 	local model = PetModelBuilder.Build(petId)
 	local entry = PetCatalog.ById[petId]
 	if not model or not entry then
 		return
 	end
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity] or 1]
-	-- Les très grands familiers sont réduits pour le vol (sinon ils cacheraient tout le trou).
-	local _, size = PetModelBuilder.BodyBounds(model)
-	if size.Y > 12 then
-		model:ScaleTo(model:GetScale() * 12 / size.Y)
+	local start, rotation = from + V(0, 4, 0), CFrame.identity
+	local held = heldModel(carrier)
+	if held then
+		-- Il quitte les mains exactement où il était, à la même taille.
+		local pivot = held:GetPivot()
+		start, rotation = pivot.Position, pivot.Rotation
+		model:ScaleTo(held:GetScale())
+	else
+		-- Les très grands familiers sont réduits pour le vol (sinon ils cacheraient tout le trou).
+		local _, size = PetModelBuilder.BodyBounds(model)
+		if size.Y > 12 then
+			model:ScaleTo(model:GetScale() * 12 / size.Y)
+		end
 	end
-	model:PivotTo(CF(from + V(0, 4, 0)))
+	model:PivotTo(CF(start) * rotation)
 	model.Parent = folder
-	table.insert(flights, { model = model, from = from + V(0, 4, 0), born = os.clock(), scale = model:GetScale(), color = rarity.Color })
+	table.insert(flights, { model = model, from = start, rotation = rotation, born = os.clock(), scale = model:GetScale(), color = rarity.Color })
 	if mine then
+		Sounds.play("Throw")
 		Sounds.play("HoleCatch")
 	else
-		Sounds.playAt("HoleCatch", from)
+		Sounds.playAt("HoleCatch", start)
 	end
 	task.delay(FLIGHT_TIME, function()
 		local burst = emitArea(folder, V(4, 4, 4), CF(0, CORE_Y, 0))
@@ -792,6 +819,11 @@ local function sacrifice(from: Vector3, petId: string, money: number, mine: bool
 	end)
 end
 
+local function sacrifice(from: Vector3, petId: string, money: number, mine: boolean, carrier: Player?)
+	-- Le serveur a déjà validé : on attend juste que les mains le lâchent.
+	task.delay(RELEASE, launch, from, petId, money, mine, carrier)
+end
+
 local function updateFlights()
 	local now = os.clock()
 	for i = #flights, 1, -1 do
@@ -804,7 +836,7 @@ local function updateFlights()
 			local target = V(0, CORE_Y, 0)
 			local position = flight.from:Lerp(target, f) + V(0, math.sin(f * math.pi) * 22, 0)
 			flight.model:ScaleTo(math.max(0.05, flight.scale * (1 - f * 0.85)))
-			flight.model:PivotTo(CF(position) * ANG(f * 7, f * 11, 0))
+			flight.model:PivotTo(CF(position) * flight.rotation * ANG(f * 7, f * 11, 0))
 		end
 	end
 end
@@ -858,7 +890,8 @@ Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 			"À la prochaine digestion : score x%d et familiers offerts aux 3 meilleurs !", HOLE.Collapse.ScoreMultiplier),
 			Color3.fromRGB(255, 80, 80), 3.6)
 	elseif kind == "Sacrifice" and typeof(a) == "Vector3" and type(b) == "string" then
-		sacrifice(a, b, if type(d) == "number" then d else 0, c == localPlayer)
+		local carrier = if typeof(c) == "Instance" and c:IsA("Player") then c else nil
+		sacrifice(a, b, if type(d) == "number" then d else 0, c == localPlayer, carrier)
 	elseif kind == "Collapse" then
 		local names = if type(a) == "table" then a else {}
 		screenFlash(Color3.new(1, 1, 1), 0.9)

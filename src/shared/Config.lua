@@ -342,6 +342,9 @@ Config.Sacrifice = {
 	Range = 22,
 	IncomeSeconds = 600, -- argent = 10 min du revenu de ce familier (x bonus du monde et des passes)
 	Points = { 2, 4, 8, 15, 30, 60, 120, 240 }, -- points du tour (donc tirages) et jauge du trou, selon la rareté
+	-- Geste du lancer (client/PetFollow anime les bras, client/BlackholeFx fait voler le familier) :
+	-- élan en arrière jusqu'à WindUp, les mains le lâchent à Release, bras revenus à End (secondes).
+	Throw = { WindUp = 0.28, Release = 0.4, End = 0.85 },
 }
 
 -- Duels de familiers (server/DuelController, client/DuelClient, client/DuelFx).

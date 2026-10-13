@@ -26,7 +26,7 @@ PetSizes.PLAYER = 5 -- studs : hauteur d'un avatar (1 J)
 PetSizes.LONG_RATIO = 2 -- longueur max = 2 x la taille
 PetSizes.MAX_FOOTPRINT = 26 -- studs : longueur / largeur max au sol (la base fait 56 x 56)
 PetSizes.FOLLOW_MAX = 1.6 -- J : un familier équipé qui suit le joueur ne dépasse pas 2 J (sinon il cache la vue)
-PetSizes.CARRY_MAX = 1.4 -- J : un familier volé porté dans le dos ne dépasse pas 1,4 J
+PetSizes.CARRY_MAX = 1 -- J : un familier porté à bout de bras au-dessus de la tête ne dépasse pas 1 J (il cacherait la vue)
 
 PetSizes.Bands = {
 	Commun = { 0.5, 0.65 },
