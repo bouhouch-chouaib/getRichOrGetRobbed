@@ -407,7 +407,7 @@ Config.Effects = {
 export type SoundDef = { Id: number, Volume: number?, Pitch: number? }
 
 Config.Sounds = {
-	MusicVolume = 0.2, -- 13 oct. : baissée (0,3 avant)
+	MusicVolume = 0.12, -- 13 oct. : baissée deux fois (0,3 puis 0,2)
 	EffectsVolume = 0.7,
 	MusicFade = 2, -- secondes de fondu entre deux morceaux
 	-- Musique par monde (attribut "World" du joueur, client/SoundController) : les morceaux du monde s'enchaînent dans un

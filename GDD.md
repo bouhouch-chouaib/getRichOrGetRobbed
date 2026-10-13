@@ -340,7 +340,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 ## Sons et musique
 
 - 13 oct. : une playlist par monde (`Config.Sounds.Playlists[1..7]`), 2e version : fond CALME (lo-fi, chill-hop, guitare,
-  piano doux ; APM et DistroKid sous licence Roblox), volume musique 0,2. Vérifiés :
+  piano doux ; APM et DistroKid sous licence Roblox), volume musique 0,12. Vérifiés :
   chargés et de plus d'une minute ; choisis sur titre et fiche, pas écoutés). La musique suit l'attribut `World`.
 
 - Tout est côté client. `client/Sounds` (module) : `play(nom)` (son 2D, pour soi), `playAt(nom, position)` (son 3D, Attachment
