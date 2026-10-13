@@ -165,6 +165,9 @@ Config.Loot = {
 
 -- Familiers.
 Config.Pets = {
+	ModelStyle = "Sculpted", -- "Legacy" restores imported meshes and the previous primitives.
+	AuraDistance = 110, -- particles/lights suspended beyond this camera distance
+	AuraUpdateInterval = 0.05, -- one shared 20 Hz visual update
 	EquipSlots = 1, -- familiers équipés (multiplicateur + suivent le joueur)
 	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
 	-- Taille selon la rareté (index de Config.Rarities) : comme dans les jeux de référence, les plus rares sont bien plus

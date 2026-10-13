@@ -1,4 +1,7 @@
 --!strict
+-- Active path: Config.Pets.ModelStyle = "Sculpted" builds all 75 authored block models.
+-- The imported assets and original builder below remain available with "Legacy".
+-- BodyBounds measures only the body, independent of aura animation and carry scaling.
 -- PetModelBuilder : fabrique le modèle 3D d'un familier.
 -- 1. Si le familier a un vrai modèle 3D en assets (shared/PetMeshes), on clone ce modèle (préparé au démarrage
 --    côté client ; tant qu'il n'est pas prêt, on utilise les solutions suivantes, puis MeshesReady est déclenché).
@@ -18,6 +21,7 @@ local Config = require(script.Parent.Config)
 local PetCatalog = require(script.Parent.PetCatalog)
 local PetMeshes = require(script.Parent.PetMeshes)
 local PetModelColors = require(script.Parent.PetModelColors)
+local PetSculptedModels = require(script.Parent.PetSculptedModels)
 
 local PetModelBuilder = {}
 
@@ -642,15 +646,19 @@ local function loadMeshes()
 		meshesReady:Fire()
 	end
 end
-if RunService:IsClient() then
+if RunService:IsClient() and Config.Pets.ModelStyle == "Legacy" then
 	task.spawn(loadMeshes)
 end
 
 -- Construit le modèle du familier petId (nil si l'Id est inconnu).
 function PetModelBuilder.Build(petId: string): Model?
+	petId = PetCatalog.CurrentId(petId)
 	local entry = PetCatalog.ById[petId]
 	if not entry then
 		return nil
+	end
+	if Config.Pets.ModelStyle ~= "Legacy" then
+		return PetSculptedModels.Build(entry)
 	end
 
 	local template = meshTemplates[petId]
@@ -688,6 +696,17 @@ function PetModelBuilder.Build(petId: string): Model?
 	finalize(model)
 	model:SetAttribute("Float", look.Float == true)
 	return model
+end
+
+-- Geometry measurements remain stable as decorative shards orbit or the model is scaled for carrying.
+function PetModelBuilder.BodyBounds(model: Model): (CFrame, Vector3)
+	local center = model:GetAttribute("BodyCenter")
+	local size = model:GetAttribute("BodySize")
+	if typeof(center) == "Vector3" and typeof(size) == "Vector3" then
+		local scale = model:GetScale()
+		return model:GetPivot() * CFrame.new(center * scale), size * scale
+	end
+	return model:GetBoundingBox()
 end
 
 return PetModelBuilder

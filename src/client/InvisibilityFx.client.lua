@@ -79,6 +79,7 @@ local function setLook(target: Player, alpha: number)
 	if pets then
 		for _, model in ipairs(pets:GetChildren()) do
 			if model:GetAttribute("OwnerUserId") == target.UserId then
+				model:SetAttribute("AuraHidden", hidden)
 				for _, object in ipairs(model:GetDescendants()) do
 					onPart(object)
 				end

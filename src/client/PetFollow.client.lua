@@ -24,7 +24,6 @@ local SLOTS = {
 	Vector2.new(-1.5, 6.5),
 	Vector2.new(1.5, 6.5),
 }
-local GROUND_OFFSET = -1.6 -- hauteur par rapport au HumanoidRootPart pour les familiers au sol
 local FLOAT_OFFSET = 1.2 -- pour les familiers qui volent
 local SMOOTHNESS = 10
 
@@ -32,7 +31,7 @@ local folder = Instance.new("Folder")
 folder.Name = "Pets"
 folder.Parent = Workspace
 
-type Follower = { model: Model, float: boolean, current: CFrame? }
+type Follower = { model: Model, float: boolean, current: CFrame?, bottom: number, depth: number }
 local followers: { [Player]: { Follower } } = {}
 
 -- Familier volé porté dans le dos : position par rapport au HumanoidRootPart (derrière les épaules).
@@ -63,9 +62,11 @@ local function rebuild(player: Player)
 	for petId in string.gmatch(equipped, "[^,]+") do
 		local model = PetModelBuilder.Build(petId)
 		if model then
+			local bodyBox, bodySize = PetModelBuilder.BodyBounds(model)
 			model:SetAttribute("OwnerUserId", player.UserId) -- client/InvisibilityFx
 			model.Parent = folder
-			table.insert(list, { model = model, float = model:GetAttribute("Float") == true, current = nil })
+			table.insert(list, { model = model, float = model:GetAttribute("Float") == true, current = nil,
+				bottom = bodySize.Y / 2 - bodyBox.Position.Y, depth = bodySize.Z })
 		end
 	end
 	followers[player] = list
@@ -93,7 +94,7 @@ local function rebuildCarried(player: Player)
 		return
 	end
 	model:ScaleTo(model:GetScale() * CARRY_SCALE)
-	local _, size = model:GetBoundingBox()
+	local _, size = PetModelBuilder.BodyBounds(model)
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "StolenLabel"
@@ -178,14 +179,17 @@ RunService.RenderStepped:Connect(function(dt: number)
 	for player, list in pairs(followers) do
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		for index, follower in ipairs(list) do
 			if root and root:IsA("BasePart") then
 				local slot = SLOTS[(index - 1) % #SLOTS + 1]
-				local height = if follower.float then FLOAT_OFFSET + math.sin(now * 2 + index) * 0.4 else GROUND_OFFSET
+				local hip = if humanoid then humanoid.HipHeight + (if humanoid.RigType == Enum.HumanoidRigType.R6 then 2 else 0) else 2
+				local grounded = -hip - root.Size.Y / 2 + follower.bottom + 0.08
+				local height = if follower.float then math.max(FLOAT_OFFSET, grounded + 0.7) + math.sin(now * 2 + index) * 0.4 else grounded
 				-- On garde seulement l'orientation horizontale du joueur.
 				local look = root.CFrame.LookVector
 				local flat = CFrame.lookAt(root.Position, root.Position + Vector3.new(look.X, 0, look.Z))
-				local target = flat * CFrame.new(slot.X, height, slot.Y)
+				local target = flat * CFrame.new(slot.X, height, math.max(slot.Y, follower.depth * 0.55 + 2.8))
 				local current = follower.current or target
 				current = current:Lerp(target, alpha)
 				follower.current = current

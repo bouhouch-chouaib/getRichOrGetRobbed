@@ -220,7 +220,7 @@ local function addPet(display: BaseDisplay, anchor: Instance)
 	end
 	-- Mesures du modèle à l'origine : bas et haut par rapport à son pivot.
 	model:PivotTo(CFrame.new())
-	local box, size = model:GetBoundingBox()
+	local box, size = PetModelBuilder.BodyBounds(model)
 	local seedValue = anchor:GetAttribute("Seed")
 	local seed = if type(seedValue) == "number" then seedValue else 0
 	local styleName = PetWander.styleFor(petId)
@@ -403,7 +403,7 @@ PetModelBuilder.MeshesReady:Connect(function()
 			local model = PetModelBuilder.Build(shown.model.Name)
 			if model then
 				model:PivotTo(CFrame.new())
-				local box, size = model:GetBoundingBox()
+				local box, size = PetModelBuilder.BodyBounds(model)
 				shown.model:Destroy()
 				shown.model = model
 				shown.bottomOffset = -(box.Position.Y - size.Y / 2)

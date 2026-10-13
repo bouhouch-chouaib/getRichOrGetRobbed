@@ -1,0 +1,16 @@
+{
+  "name": "Galerie des 75 familiers",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {"Shared": {"$path": "../src/shared"}},
+    "StarterPlayer": {"StarterPlayerScripts": {
+      "PetGallery": {"$path": "PetGallery.client.lua"},
+      "PetAuraAnimator": {"$path": "../src/client/PetAuraAnimator.client.lua"}
+    }},
+    "Workspace": {
+      "Floor": {"$className":"Part","$properties":{"Anchored":true,"Size":[300,1,300],"Position":[0,-0.5,0],"Color":[0.15,0.18,0.24]}},
+      "Spawn": {"$className":"SpawnLocation","$properties":{"Anchored":true,"Size":[6,1,6],"Position":[80,2,80],"Transparency":1,"Neutral":true}}
+    },
+    "Lighting": {"$properties":{"ClockTime":14,"Brightness":2,"Ambient":[0.5,0.5,0.6]}}
+  }
+}

@@ -101,10 +101,11 @@ function MenuKit.petViewport(parent: Instance, petId: string, silhouette: boolea
 		end
 		model:PivotTo(CFrame.new())
 		model.Parent = viewport
-		local extent = model:GetExtentsSize().Magnitude
+		local bodyBox, bodySize = PetModelBuilder.BodyBounds(model)
+		local extent = bodySize.Magnitude
 		local camera = Instance.new("Camera")
 		camera.FieldOfView = 40
-		camera.CFrame = CFrame.lookAt(Vector3.new(0.6, 0.45, -1).Unit * extent * 1.45, Vector3.zero)
+		camera.CFrame = CFrame.lookAt(bodyBox.Position + Vector3.new(0.6, 0.4, -1).Unit * extent * 0.95, bodyBox.Position)
 		camera.Parent = viewport
 		viewport.CurrentCamera = camera
 	end

@@ -380,7 +380,7 @@ reveal = function(petId: string)
 	local model = PetModelBuilder.Build(petId)
 	if model then
 		for _, descendant in ipairs(model:GetDescendants()) do
-			if descendant:IsA("ParticleEmitter") then
+			if descendant:IsA("ParticleEmitter") or descendant:GetAttribute("Aura") then
 				descendant:Destroy()
 			end
 		end
@@ -438,9 +438,10 @@ RunService.RenderStepped:Connect(function(dt: number)
 	rays.Rotation += dt * 25
 	local model = spinModel
 	if model and viewport.Visible then
-		local extent = model:GetExtentsSize().Magnitude
+		local bodyBox, bodySize = PetModelBuilder.BodyBounds(model)
+		local extent = bodySize.Magnitude
 		local angle = os.clock() * 1.2
-		viewCamera.CFrame = CFrame.lookAt(Vector3.new(math.sin(angle), 0.35, -math.cos(angle)).Unit * extent * 1.4, Vector3.zero)
+		viewCamera.CFrame = CFrame.lookAt(bodyBox.Position + Vector3.new(math.sin(angle), 0.35, -math.cos(angle)).Unit * extent * 0.95, bodyBox.Position)
 	end
 end)
 
