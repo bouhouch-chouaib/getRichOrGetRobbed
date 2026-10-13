@@ -26,6 +26,8 @@
         "BuyTier": { "$className": "RemoteEvent" },
         "TierReached": { "$className": "RemoteEvent" },
         "HoleEvent": { "$className": "RemoteEvent" },
+        "PickLoosePet": { "$className": "RemoteEvent" },
+        "ThrowPet": { "$className": "RemoteEvent" },
         "Grappled": { "$className": "RemoteEvent" },
         "ClaimIndex": { "$className": "RemoteEvent" },
         "IndexClaimed": { "$className": "RemoteEvent" },

@@ -359,15 +359,19 @@ local function pose(shown: Shown, dt: number, now: number): CFrame
 	return CFrame.new(position.X, height + shown.bottomOffset, position.Y) * CFrame.Angles(0, yaw, roll)
 end
 
--- Le joueur local peut-il voler dans cette base en ce moment ? (simple affichage : le serveur revérifie)
-local function canSteal(base: Model): boolean
-	if Config.Steal.OnlyDuringDigesting and ReplicatedStorage:GetAttribute("GameState") ~= "Digesting" then
-		return false
-	end
-	return base:GetAttribute("BaseIndex") ~= player:GetAttribute("BaseIndex")
-		and base:GetAttribute("Locked") ~= true
-		and player:GetAttribute("CarryingPet") == nil
+-- Le joueur local peut-il prendre un familier de cette base en ce moment ? Chez lui : le PORTER (pour le jeter dans le
+-- trou noir) ; chez un autre : le VOLER. (simple affichage : le serveur revérifie)
+local function canTake(base: Model): (boolean, string)
+	local own = base:GetAttribute("BaseIndex") == player:GetAttribute("BaseIndex")
+	local handsFree = player:GetAttribute("CarryingPet") == nil
 		and not (player.Character and player.Character:FindFirstChildOfClass("Tool")) -- arme en main : mains prises
+	if own then
+		return handsFree, "Porter"
+	end
+	if Config.Steal.OnlyDuringDigesting and ReplicatedStorage:GetAttribute("GameState") ~= "Digesting" then
+		return false, "Voler"
+	end
+	return handsFree and base:GetAttribute("Locked") ~= true, "Voler"
 end
 
 local NEAR_CHARACTER = 90 -- une base aussi proche du personnage est toujours animée (caméra très reculée)
@@ -382,7 +386,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 		local visible = (platform.Position - camera.CFrame.Position).Magnitude < VIEW_DISTANCE
 			or (root ~= nil and root:IsA("BasePart") and (platform.Position - root.Position).Magnitude < NEAR_CHARACTER)
 		local ground = PetWander.groundOf(platform)
-		local stealable = canSteal(display.base)
+		local stealable, action = canTake(display.base)
 		for _, shown in pairs(display.pets) do
 			if visible then
 				shown.model:PivotTo(ground * pose(shown, dt, now))
@@ -393,6 +397,9 @@ RunService.RenderStepped:Connect(function(dt: number)
 			local prompt = shown.prompt
 			if prompt and prompt.Enabled ~= stealable then
 				prompt.Enabled = stealable
+			end
+			if prompt and prompt.ActionText ~= action then
+				prompt.ActionText = action
 			end
 		end
 	end

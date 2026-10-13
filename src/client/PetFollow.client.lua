@@ -128,7 +128,8 @@ local function rebuildCarried(player: Player)
 		label.Parent = sign
 		return label
 	end
-	line("VOL ! " .. TextFormat.upper(entry.Name), rarity.Color, 0, 0.55)
+	local stolen = player:GetAttribute("CarryingOwn") ~= true
+	line((if stolen then "VOL ! " else "") .. TextFormat.upper(entry.Name), rarity.Color, 0, 0.55)
 	local timer = line("", Color3.fromRGB(255, 90, 90), 0.55, 0.45)
 	-- Le voleur lui-même voit son objectif dans la consigne du HUD (l'étiquette serait cachée par le titre).
 	sign.Enabled = player ~= localPlayer
@@ -224,7 +225,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 		end
 		local untilTime = player:GetAttribute("CarryingUntil")
 		if type(untilTime) == "number" then
-			entry.timer.Text = string.format("⏱ %d s", math.max(0, math.ceil(untilTime - serverNow)))
+			entry.timer.Text = string.format("%d s", math.max(0, math.ceil(untilTime - serverNow)))
 		end
 	end
 end)

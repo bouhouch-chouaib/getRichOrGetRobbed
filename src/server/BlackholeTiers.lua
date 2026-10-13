@@ -98,6 +98,11 @@ local function addGauge(player: Player, amount: number)
 	publish()
 end
 
+-- Remplit la jauge commune (familier jeté dans le trou : server/StealController).
+function BlackholeTiers.AddGauge(player: Player, amount: number)
+	addGauge(player, amount)
+end
+
 ----------------------------------------------------------------------
 -- Mécaniques appelées par BlackholeController
 ----------------------------------------------------------------------

@@ -297,14 +297,39 @@ Config.Keys = {
 -- Vol de familiers : [E] sur un familier d'une base adverse déverrouillée, à ramener dans sa propre base.
 Config.Steal = {
 	OnlyDuringDigesting = false, -- false : vol possible à tout moment (nuit comme jour)
-	SpeedMultiplier = 0.9, -- vitesse du voleur pendant le transport (0,6 rendait les vols impossibles)
-	MaxCarryTime = 60, -- au-delà, le familier rentre chez son propriétaire (secondes ; la base d'en face est à ~430 studs)
+	-- La vitesse pendant le transport dépend de la force et du poids du familier : voir Config.Carry.
+	MaxCarryTime = 60, -- à vitesse normale ; plus long si on est ralenti (au-delà, le familier est lâché et rentre seul)
 	HoldDuration = 0.3, -- temps d'appui sur [E] pour voler
 	PromptDistance = 8, -- distance d'affichage de la bulle [E] (studs)
 	MaxDistance = 16, -- distance max acceptée par le serveur (marge pour la latence)
 	-- Défense : la victime rattrape le voleur et appuie sur [E] ("Reprendre") pour récupérer son familier.
 	RecoverPromptDistance = 10, -- distance d'affichage de la bulle "Reprendre" (studs)
 	RecoverMaxDistance = 18, -- distance max acceptée par le serveur (les deux joueurs bougent : marge plus large)
+}
+
+-- Porter un familier (volé, ou le sien pris dans sa base) : server/StealController.
+--   Poids = taille du familier (shared/PetSizes, en tailles de joueur) ^ WeightExponent : 0,5 pour un pigeon, 56 pour la baleine.
+--   Capacité = force de lancer du joueur (attribut ThrowPower, 70 au départ) / StrengthPerCapacity.
+--   Vitesse = 1 / (1 + Slow x poids / capacité), entre MinSpeed et MaxSpeed.
+--   Ex. au départ (capacité 7) : Commun 95 %, Légendaire ~50 %, Sigma 30 % ; force 60 (capacité 25) : Légendaire ~78 %.
+-- Frappé à la batte, éjecté par le dôme, mort ou trop lent : le porteur LÂCHE le familier, qui rentre à pied vers la base
+-- de son propriétaire (WalkHomeSpeed) ; n'importe qui peut le ramasser en chemin.
+Config.Carry = {
+	WeightExponent = 2,
+	StrengthPerCapacity = 10,
+	Slow = 0.8,
+	MinSpeed = 0.3,
+	MaxSpeed = 0.95,
+	MaxCarryTime = 180, -- secondes, même très ralenti
+	WalkHomeSpeed = 9, -- studs/s, familier lâché qui rentre chez lui
+}
+
+-- Jeter un familier porté dans le trou noir (pendant le Feeding, à moins de Range studs du bord) : il est perdu pour
+-- son propriétaire (le sien ou celui d'un autre !) et le porteur gagne une récompense selon le familier.
+Config.Sacrifice = {
+	Range = 22,
+	IncomeSeconds = 600, -- argent = 10 min du revenu de ce familier (x bonus du monde et des passes)
+	Points = { 2, 4, 8, 15, 30, 60, 120, 240 }, -- points du tour (donc tirages) et jauge du trou, selon la rareté
 }
 
 -- Effets de satisfaction (client/Effects) : points qui s'envolent, ouverture des tirages rares, secousses d'écran.
@@ -536,20 +561,36 @@ Config.ItemColors = {
 -- avec les objets avalés (valeur de l'objet, sans multiplicateur des familiers). Pleine, le trou monte d'un palier :
 -- nouvel aspect + une petite mécanique, toujours un bonus, jamais une punition. Après le palier 7, Effondrement à la
 -- digestion suivante (score du tour x2, familiers offerts aux 3 meilleurs contributeurs) puis retour au palier 1.
-export type HoleTier = { Name: string, Color: Color3, Color2: Color3, Hint: string }
+-- Wall = le muret en damier à tenons qui entoure le trou (2 tons + chapeau, comme les murs de l'arène), repris des
+-- palettes des mondes (shared/Worlds) ; TopNeon = le chapeau brille (lave, abysses : comme dans ces mondes).
+export type HoleTier = {
+	Name: string,
+	Color: Color3,
+	Color2: Color3,
+	Hint: string,
+	Wall: { Color3 },
+	TopNeon: boolean?,
+}
 Config.Blackhole = {
 	-- Jauge à remplir pour quitter chaque palier, pour 1 joueur ; multipliée par (nombre de joueurs) ^ PlayerScaling.
 	-- Un joueur seul marque ~10 à 15 points de jauge par tour : ~3 tours par palier au début.
 	GaugeNeed = { 40, 50, 60, 75, 90, 110, 130 },
 	PlayerScaling = 0.6,
 	Tiers = {
-		{ Name = "ÉVEIL", Color = Color3.fromRGB(150, 0, 255), Color2 = Color3.fromRGB(255, 90, 230), Hint = "Le trou noir s'éveille. Nourris-le !" },
-		{ Name = "ÉRUPTION", Color = Color3.fromRGB(255, 110, 20), Color2 = Color3.fromRGB(255, 220, 60), Hint = "Il recrache des roches de lave : x3 points !" },
-		{ Name = "CIBLE", Color = Color3.fromRGB(255, 50, 70), Color2 = Color3.fromRGB(255, 255, 255), Hint = "Vise le centre : points x2 !" },
-		{ Name = "ABYSSES", Color = Color3.fromRGB(0, 200, 190), Color2 = Color3.fromRGB(120, 60, 200), Hint = "Ses tentacules rattrapent les lancers trop courts." },
-		{ Name = "GRAVITÉ", Color = Color3.fromRGB(255, 160, 60), Color2 = Color3.fromRGB(110, 190, 255), Hint = "Il attire les objets et fait pleuvoir des météorites." },
-		{ Name = "SUPERNOVA", Color = Color3.fromRGB(120, 230, 255), Color2 = Color3.fromRGB(255, 120, 220), Hint = "Enchaîne les lancers : combo jusqu'à x2 !" },
-		{ Name = "DIVIN", Color = Color3.fromRGB(255, 205, 50), Color2 = Color3.fromRGB(255, 250, 225), Hint = "Jackpot x5 pendant 10 s, une fois par tour !" },
+		{ Name = "ÉVEIL", Color = Color3.fromRGB(150, 0, 255), Color2 = Color3.fromRGB(255, 90, 230), Hint = "Le trou noir s'éveille. Nourris-le !",
+			Wall = { Color3.fromRGB(150, 70, 230), Color3.fromRGB(125, 55, 200), Color3.fromRGB(255, 120, 230) } },
+		{ Name = "ÉRUPTION", Color = Color3.fromRGB(255, 110, 20), Color2 = Color3.fromRGB(255, 220, 60), Hint = "Il recrache des roches de lave : x3 points !",
+			Wall = { Color3.fromRGB(70, 60, 64), Color3.fromRGB(54, 46, 50), Color3.fromRGB(255, 100, 30) }, TopNeon = true },
+		{ Name = "CIBLE", Color = Color3.fromRGB(255, 50, 70), Color2 = Color3.fromRGB(255, 255, 255), Hint = "Vise le centre : points x2 !",
+			Wall = { Color3.fromRGB(240, 50, 60), Color3.fromRGB(255, 255, 255), Color3.fromRGB(255, 205, 40) } },
+		{ Name = "ABYSSES", Color = Color3.fromRGB(0, 200, 190), Color2 = Color3.fromRGB(120, 60, 200), Hint = "Ses tentacules rattrapent les lancers trop courts.",
+			Wall = { Color3.fromRGB(20, 70, 110), Color3.fromRGB(14, 56, 94), Color3.fromRGB(60, 220, 180) }, TopNeon = true },
+		{ Name = "GRAVITÉ", Color = Color3.fromRGB(255, 160, 60), Color2 = Color3.fromRGB(110, 190, 255), Hint = "Il attire les objets et fait pleuvoir des météorites.",
+			Wall = { Color3.fromRGB(70, 40, 120), Color3.fromRGB(54, 30, 100), Color3.fromRGB(255, 170, 60) } },
+		{ Name = "SUPERNOVA", Color = Color3.fromRGB(120, 230, 255), Color2 = Color3.fromRGB(255, 120, 220), Hint = "Enchaîne les lancers : combo jusqu'à x2 !",
+			Wall = { Color3.fromRGB(60, 150, 230), Color3.fromRGB(40, 120, 210), Color3.fromRGB(255, 255, 255) } },
+		{ Name = "DIVIN", Color = Color3.fromRGB(255, 205, 50), Color2 = Color3.fromRGB(255, 250, 225), Hint = "Jackpot x5 pendant 10 s, une fois par tour !",
+			Wall = { Color3.fromRGB(250, 244, 230), Color3.fromRGB(236, 226, 204), Color3.fromRGB(255, 205, 60) } },
 	} :: { HoleTier },
 	Lava = { Interval = 15, Count = 3, ValueMultiplier = 3, MinRadius = 70, MaxRadius = 125, FlightTime = 2 },
 	Target = { Radius = 14, Multiplier = 2 }, -- point d'impact prévu à moins de 14 studs du centre

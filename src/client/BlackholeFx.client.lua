@@ -19,6 +19,9 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
+local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
@@ -62,10 +65,6 @@ local function block(parent: Instance, size: Vector3, cf: CFrame, color: Color3,
 	end
 	p.Parent = parent
 	return p
-end
-
-local function shade(color: Color3, amount: number): Color3
-	return color:Lerp(Color3.new(0.04, 0.03, 0.08), amount)
 end
 
 local function newModel(name: string, parent: Instance): Model
@@ -165,31 +164,38 @@ type Look = {
 	event: ((kind: string, a: any, b: any) -> ())?,
 }
 
--- Couronne de blocs autour du bord, commune à tous les paliers (aux couleurs du palier).
-local function crown(model: Model, def: Config.HoleTier, rock: Color3?): Model
-	local base = rock or shade(def.Color, 0.55)
-	local c = ring(model, R + 5.5, 44, 3, 1.6, 0.9, base, shade(def.Color, 0.3))
-	-- Un bloc lumineux tous les quatre, un cran plus haut.
-	local glow = ring(model, R + 5.5, 11, 1.2, 0.6, 2, def.Color2, def.Color, true, true)
-	glow.Parent = c
-	c.WorldPivot = CFrame.identity
-	return c
+-- Muret autour du bord, commun à tous les paliers : damier de 2 tons + chapeau, en blocs à tenons, comme les murs de
+-- l'arène (docs/DIRECTION_ARTISTIQUE.md §1-2 : tenons partout, couleurs franches, pas de néon sur les murs sauf la lave
+-- et les abysses, comme dans ces mondes). Il ne tourne pas : c'est un mur.
+local WALL_RADIUS = R + 5.5
+local WALL_COUNT = 44
+local function crown(model: Model, def: Config.HoleTier)
+	local wall = newModel("Wall", model)
+	local width = 2 * math.pi * WALL_RADIUS / WALL_COUNT * 0.98
+	for i = 0, WALL_COUNT - 1 do
+		local a = i * math.pi * 2 / WALL_COUNT
+		for row = 0, 1 do
+			block(wall, V(width, 1.6, 3), ANG(0, a, 0) * CF(0, 0.8 + row * 1.6, -WALL_RADIUS),
+				if (i + row) % 2 == 0 then def.Wall[1] else def.Wall[2])
+		end
+		block(wall, V(width + 0.05, 0.6, 3.6), ANG(0, a, 0) * CF(0, 3.5, -WALL_RADIUS), def.Wall[3], def.TopNeon)
+	end
 end
 
 local builders: { [number]: (Model, Config.HoleTier) -> Look } = {}
 
--- 1 Éveil : vortex de cubes en spirale vers le centre.
+-- 1 Éveil : vortex de cubes à tenons en spirale vers le centre (quelques cubes lumineux comme étincelles).
 builders[1] = function(model, def)
-	local rim = crown(model, def)
+	crown(model, def)
 	local vortex = newModel("Vortex", model)
 	for arm = 0, 3 do
 		for i = 0, 15 do
 			local f = i / 16
 			local radius = (R - 3) * (1 - f) + 9
 			local a = arm * math.pi / 2 + f * 2.8
-			local s = 2.2 - f * 1.2
-			block(vortex, V(s, s, s), ANG(0, a, 0) * CF(0, 1.2 + f * 2.5, -radius) * ANG(f, f * 2, 0),
-				if i % 2 == 0 then def.Color else def.Color2, true)
+			local s = 2.6 - f * 1.4
+			block(vortex, V(s, s, s), ANG(0, a, 0) * CF(0, 1.4 + f * 2.5, -radius) * ANG(f, f * 2, 0),
+				if i % 2 == 0 then def.Wall[1] else def.Wall[3], i % 4 == 3)
 		end
 	end
 	vortex.WorldPivot = CFrame.identity
@@ -198,23 +204,22 @@ builders[1] = function(model, def)
 	return {
 		model = model,
 		update = function(t)
-			rim:PivotTo(ANG(0, t * 0.05, 0))
 			vortex:PivotTo(ANG(0, -t * 0.55, 0))
 		end,
 	}
 end
 
--- 2 Éruption : roches, lave qui pulse, braises ; gerbe de feu quand il recrache.
+-- 2 Éruption : rochers à tenons du monde Volcan, coulée de lave qui pulse, braises ; gerbe de feu quand il recrache.
 builders[2] = function(model, def)
-	local rock = Color3.fromRGB(58, 44, 40)
-	local rim = crown(model, def, rock)
+	crown(model, def)
+	local rockA, rockB = def.Wall[1], def.Wall[2]
 	local lava = ring(model, R + 1.5, 30, 3.5, 0.5, 0.45, def.Color, def.Color2, true, true)
 	for i = 0, 9 do
 		local a = i * math.pi * 2 / 10 + 0.2
-		local base = ANG(0, a, 0) * CF(0, 0, -(R + 10))
+		local base = ANG(0, a, 0) * CF(0, 0, -(R + 11))
 		local h = 4 + (i % 3) * 2
-		block(model, V(6, h, 5), base * CF(0, h / 2, 0), rock)
-		block(model, V(4, h * 0.6, 3.6), base * CF(0.8, h + h * 0.3, 0.4) * ANG(0, 0.4, 0), shade(rock, -0.2))
+		block(model, V(6, h, 5), base * CF(0, h / 2, 0), rockA)
+		block(model, V(4, h * 0.6, 3.6), base * CF(0.8, h + h * 0.3, 0.4) * ANG(0, 0.4, 0), rockB)
 		block(model, V(0.6, h * 0.7, 5.2), base * CF(-1, h / 2, 0), def.Color, true) -- fissure de lave
 	end
 	local area = emitArea(model, V(R * 2, 1, R * 2), CF(0, 1, 0))
@@ -227,7 +232,6 @@ builders[2] = function(model, def)
 	return {
 		model = model,
 		update = function(t)
-			rim:PivotTo(ANG(0, t * 0.03, 0))
 			for i, part in ipairs(lavaParts) do
 				if part:IsA("BasePart") then
 					part.Transparency = 0.1 + 0.25 * (0.5 + 0.5 * math.sin(t * 2.2 + i * 0.7))
@@ -242,25 +246,30 @@ builders[2] = function(model, def)
 	}
 end
 
--- 3 Cible : anneaux qui tournent en sens opposés ; le premier marque la zone x2.
+-- 3 Cible : trois anneaux de blocs rouges et blancs à tenons qui tournent en sens opposés ; le premier marque la
+-- zone x2 (il s'allume un instant quand quelqu'un vise juste).
 builders[3] = function(model, def)
-	local rim = crown(model, def)
-	local inner = ring(model, HOLE.Target.Radius, 18, 2.2, 0.7, 1, def.Color, def.Color2, true, false)
-	local middle = ring(model, 25, 30, 2.4, 0.6, 0.9, def.Color2, shade(def.Color, 0.2), false, false)
-	local outer = ring(model, R - 3, 40, 2.6, 0.6, 0.9, def.Color, def.Color2, true, false)
+	crown(model, def)
+	local red, white = def.Wall[1], def.Wall[2]
+	local inner = ring(model, HOLE.Target.Radius, 18, 2.6, 0.8, 1, red, def.Wall[3])
+	local middle = ring(model, 25, 30, 2.6, 0.7, 0.9, white, red)
+	local outer = ring(model, R - 3, 40, 2.8, 0.7, 0.9, red, white)
 	local innerParts = inner:GetChildren()
 	local flash = 0
 	return {
 		model = model,
 		update = function(t, dt)
-			rim:PivotTo(ANG(0, t * 0.05, 0))
 			inner:PivotTo(ANG(0, t * 0.6, 0))
 			middle:PivotTo(ANG(0, -t * 0.35, 0))
 			outer:PivotTo(ANG(0, t * 0.2, 0))
+			local was = flash > 0
 			flash = math.max(0, flash - dt * 2)
-			for _, part in ipairs(innerParts) do
-				if part:IsA("BasePart") then
-					part.Size = V(part.Size.X, 0.7 + flash * 3, part.Size.Z)
+			if was then
+				for _, part in ipairs(innerParts) do
+					if part:IsA("BasePart") then
+						part.Size = V(part.Size.X, 0.8 + flash * 3, part.Size.Z)
+						part.Material = if flash > 0 then Enum.Material.Neon else Enum.Material.Plastic
+					end
 				end
 			end
 		end,
@@ -272,15 +281,16 @@ builders[3] = function(model, def)
 	}
 end
 
--- 4 Abysses : tentacules en cubes, recalculés à chaque image.
+-- 4 Abysses : tentacules de cubes à tenons couleur corail (palette du monde Abysses), recalculés à chaque image.
 builders[4] = function(model, def)
-	local rim = crown(model, def)
+	crown(model, def)
 	local SEGMENTS, LENGTH = 10, 3.4
+	local CORAL, CORAL_DARK, SUCKER = Color3.fromRGB(255, 120, 140), Color3.fromRGB(230, 90, 160), Color3.fromRGB(255, 225, 200)
 	type Tentacle = { base: CFrame, angle: number, phase: number, segs: { BasePart }, suckers: { BasePart }, slam: number }
 	local tentacles: { Tentacle } = {}
 	for k = 0, 5 do
 		local angle = k * math.pi / 3 + math.pi / 6
-		local root = V(math.sin(angle) * (R + 3), 0.4, math.cos(angle) * (R + 3))
+		local root = V(math.sin(angle) * (R + 2), 0.4, math.cos(angle) * (R + 2))
 		local tentacle: Tentacle = {
 			base = CFrame.lookAt(root, V(0, 0.4, 0)),
 			angle = angle,
@@ -292,8 +302,8 @@ builders[4] = function(model, def)
 		for i = 1, SEGMENTS do
 			local w = 4.6 - (i - 1) * 0.34
 			table.insert(tentacle.segs, block(model, V(w, LENGTH + 0.2, w), CFrame.identity,
-				if i % 3 == 0 then shade(def.Color2, 0.25) else def.Color2))
-			table.insert(tentacle.suckers, block(model, V(w * 0.45, w * 0.45, 0.3), CFrame.identity, def.Color, true))
+				if i % 2 == 0 then CORAL_DARK else CORAL))
+			table.insert(tentacle.suckers, block(model, V(w * 0.5, w * 0.5, 0.4), CFrame.identity, SUCKER))
 		end
 		table.insert(tentacles, tentacle)
 	end
@@ -303,7 +313,6 @@ builders[4] = function(model, def)
 	return {
 		model = model,
 		update = function(t, dt)
-			rim:PivotTo(ANG(0, t * 0.04, 0))
 			for _, tentacle in ipairs(tentacles) do
 				tentacle.slam = math.max(0, tentacle.slam - dt * 1.6)
 				local curl = 1 + math.sin(tentacle.slam * math.pi) * 1.4
@@ -315,7 +324,7 @@ builders[4] = function(model, def)
 					cf = cf * ANG(-bend, 0, sway) * CF(0, LENGTH, 0)
 					local center = cf * CF(0, -LENGTH / 2, 0)
 					seg.CFrame = center
-					tentacle.suckers[i].CFrame = center * CF(0, 0, -seg.Size.Z / 2 - 0.1)
+					tentacle.suckers[i].CFrame = center * CF(0, 0, -seg.Size.Z / 2 - 0.15)
 				end
 			end
 		end,
@@ -334,24 +343,24 @@ builders[4] = function(model, def)
 	}
 end
 
--- 5 Gravité : disque de matière incliné + éclairs.
+-- 5 Gravité : disque de matière incliné (cubes à tenons blancs et orange, quelques-uns lumineux) + éclairs bleus.
 builders[5] = function(model, def)
-	local rim = crown(model, def)
+	crown(model, def)
 	local disc = newModel("Disc", model)
-	local inner = ring(disc, 19, 28, 1.8, 1.4, 0, Color3.fromRGB(255, 245, 220), def.Color, true, true)
-	local outer = ring(disc, 28, 36, 2.2, 1.2, 0, def.Color, shade(def.Color, 0.35), true, false)
+	local inner = ring(disc, 19, 28, 2, 1.6, 0, Color3.fromRGB(255, 245, 225), def.Color, false, true)
+	local outer = ring(disc, 28, 36, 2.4, 1.4, 0, def.Color, def.Wall[1])
 	inner.Parent, outer.Parent = disc, disc
 	disc.WorldPivot = CFrame.identity
 	local bolts = newModel("Bolts", model)
 	local nextBolt = 0
 	local function bolt(t: number)
 		local a = rng:NextNumber(0, math.pi * 2)
-		local from = V(math.sin(a) * (R + 4), 1.5, math.cos(a) * (R + 4))
+		local from = V(math.sin(a) * (R + 4), 3, math.cos(a) * (R + 4))
 		local to = V(rng:NextNumber(-3, 3), CORE_Y + rng:NextNumber(-3, 3), rng:NextNumber(-3, 3))
 		local last = from
 		for i = 1, 6 do
 			local point = if i == 6 then to else from:Lerp(to, i / 6) + V(rng:NextNumber(-3, 3), rng:NextNumber(-2, 4), rng:NextNumber(-3, 3))
-			local part = block(bolts, V(0.45, 0.45, (point - last).Magnitude), CFrame.lookAt((point + last) / 2, point), def.Color2, true)
+			local part = block(bolts, V(0.5, 0.5, (point - last).Magnitude), CFrame.lookAt((point + last) / 2, point), def.Color2, true)
 			Debris:AddItem(part, 0.14)
 			last = point
 		end
@@ -360,7 +369,6 @@ builders[5] = function(model, def)
 	return {
 		model = model,
 		update = function(t)
-			rim:PivotTo(ANG(0, t * 0.05, 0))
 			local tilt = CF(0, CORE_Y, 0) * ANG(0.25, 0, 0.1)
 			inner:PivotTo(tilt * ANG(0, t * 0.9, 0))
 			outer:PivotTo(tilt * ANG(0, t * 0.5, 0))
@@ -371,9 +379,9 @@ builders[5] = function(model, def)
 	}
 end
 
--- 6 Supernova : pointes qui pulsent et ondes de choc régulières.
+-- 6 Supernova : pointes de lumière qui pulsent (un effet : néon) et ondes de choc régulières.
 builders[6] = function(model, def)
-	local rim = crown(model, def)
+	crown(model, def)
 	type Spike = { part: Part, dir: Vector3, phase: number }
 	local spikes: { Spike } = {}
 	for i = 0, 11 do
@@ -393,7 +401,6 @@ builders[6] = function(model, def)
 	return {
 		model = model,
 		update = function(t)
-			rim:PivotTo(ANG(0, t * 0.06, 0))
 			for _, spike in ipairs(spikes) do
 				local length = 12 + 14 * (0.5 + 0.5 * math.sin(t * 2.4 + spike.phase))
 				spike.part.Size = V(2.6, 2.6, length)
@@ -408,12 +415,12 @@ builders[6] = function(model, def)
 	}
 end
 
--- 7 Divin : couronne d'or, anneaux gyroscopiques, rayons de lumière.
+-- 7 Divin : muret blanc et or, anneaux gyroscopiques d'or à tenons, rayons de lumière (effet), paillettes.
 builders[7] = function(model, def)
-	local gold = Color3.fromRGB(230, 170, 30)
-	local rim = crown(model, def, gold)
-	local ringA = ring(model, 15, 26, 1.6, 1.6, 0, def.Color, def.Color2, true, false)
-	local ringB = ring(model, 18.5, 30, 1.4, 1.4, 0, gold, def.Color2, false, true)
+	crown(model, def)
+	local gold = def.Wall[3]
+	local ringA = ring(model, 15, 26, 1.8, 1.8, 0, gold, def.Wall[1])
+	local ringB = ring(model, 18.5, 30, 1.6, 1.6, 0, def.Wall[1], gold)
 	local rays = newModel("Rays", model)
 	for i = 0, 11 do
 		local a = i * math.pi * 2 / 12
@@ -428,7 +435,6 @@ builders[7] = function(model, def)
 	return {
 		model = model,
 		update = function(t)
-			rim:PivotTo(ANG(0, t * 0.05, 0))
 			ringA:PivotTo(CF(0, CORE_Y, 0) * ANG(0, t * 0.7, 0) * ANG(math.pi / 2, 0, 0))
 			ringB:PivotTo(CF(0, CORE_Y, 0) * ANG(0, -t * 0.45, 0) * ANG(math.pi / 2, 0, math.pi / 3) * ANG(0, t * 0.8, 0))
 			rays:PivotTo(ANG(0, t * 0.12, 0))
@@ -680,11 +686,68 @@ local function popText(position: Vector3, text: string, color: Color3)
 	Debris:AddItem(holder, 1.3)
 end
 
+-- Un familier jeté dans le trou : il s'envole en cloche en tournoyant, rétrécit dans le cœur, gerbe d'étincelles.
+type Flight = { model: Model, from: Vector3, born: number, scale: number, color: Color3 }
+local flights: { Flight } = {}
+local FLIGHT_TIME = 1.1
+
+local function sacrifice(from: Vector3, petId: string, money: number, mine: boolean)
+	local model = PetModelBuilder.Build(petId)
+	local entry = PetCatalog.ById[petId]
+	if not model or not entry then
+		return
+	end
+	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity] or 1]
+	-- Les très grands familiers sont réduits pour le vol (sinon ils cacheraient tout le trou).
+	local _, size = PetModelBuilder.BodyBounds(model)
+	if size.Y > 12 then
+		model:ScaleTo(model:GetScale() * 12 / size.Y)
+	end
+	model:PivotTo(CF(from + V(0, 4, 0)))
+	model.Parent = folder
+	table.insert(flights, { model = model, from = from + V(0, 4, 0), born = os.clock(), scale = model:GetScale(), color = rarity.Color })
+	if mine then
+		Sounds.play("HoleCatch")
+	else
+		Sounds.playAt("HoleCatch", from)
+	end
+	task.delay(FLIGHT_TIME, function()
+		local burst = emitArea(folder, V(4, 4, 4), CF(0, CORE_Y, 0))
+		local fx = emitter(burst, SPARK, rarity.Color, 0, 3, 40, 1.2)
+		fx.SpreadAngle = Vector2.new(180, 180)
+		fx:Emit(60)
+		Debris:AddItem(burst, 2)
+		shockwave(rarity.Color, 6, 70, 1)
+		popText(V(0, CORE_Y + 14, 0), "+" .. NumberFormat.money(money), Color3.fromRGB(110, 240, 70))
+		if mine then
+			Sounds.play("HoleBonus")
+			shake(0.4, 0.4)
+		end
+	end)
+end
+
+local function updateFlights()
+	local now = os.clock()
+	for i = #flights, 1, -1 do
+		local flight = flights[i]
+		local f = (now - flight.born) / FLIGHT_TIME
+		if f >= 1 then
+			flight.model:Destroy()
+			table.remove(flights, i)
+		else
+			local target = V(0, CORE_Y, 0)
+			local position = flight.from:Lerp(target, f) + V(0, math.sin(f * math.pi) * 22, 0)
+			flight.model:ScaleTo(math.max(0.05, flight.scale * (1 - f * 0.85)))
+			flight.model:PivotTo(CF(position) * ANG(f * 7, f * 11, 0))
+		end
+	end
+end
+
 ----------------------------------------------------------------------
 -- Événements du serveur
 ----------------------------------------------------------------------
 
-Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c: any)
+Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c: any, d: any)
 	local tier = (ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number
 	local def = HOLE.Tiers[math.clamp(tier, 1, #HOLE.Tiers)]
 	if kind == "TierUp" and type(a) == "number" then
@@ -728,6 +791,8 @@ Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		showBanner("LA JAUGE EST PLEINE !", "EFFONDREMENT IMMINENT", string.format(
 			"À la prochaine digestion : score x%d et familiers offerts aux 3 meilleurs !", HOLE.Collapse.ScoreMultiplier),
 			Color3.fromRGB(255, 80, 80), 3.6)
+	elseif kind == "Sacrifice" and typeof(a) == "Vector3" and type(b) == "string" then
+		sacrifice(a, b, if type(d) == "number" then d else 0, c == localPlayer)
 	elseif kind == "Collapse" then
 		local names = if type(a) == "table" then a else {}
 		screenFlash(Color3.new(1, 1, 1), 0.9)
@@ -766,6 +831,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 		end
 	end
 	updateWaves()
+	updateFlights()
 	-- Secousse.
 	local character = localPlayer.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")

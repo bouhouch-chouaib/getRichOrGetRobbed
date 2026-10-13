@@ -285,12 +285,14 @@ local function updatePhase()
 		announcePhase(phase)
 	end
 
-	-- Pendant le transport d'un familier volé, la consigne devient l'objectif + le temps restant.
+	-- Pendant le transport d'un familier, la consigne devient l'objectif + le temps restant.
 	local carryingPet = player:GetAttribute("CarryingPet")
 	local carryingUntil = player:GetAttribute("CarryingUntil")
 	if carryingPet ~= nil and type(carryingUntil) == "number" then
 		local left = math.max(0, math.ceil(carryingUntil - Workspace:GetServerTimeNow()))
-		hintLabel.Text = string.format("RAMÈNE %s DANS TA BASE !  %d s", petName(carryingPet), left)
+		hintLabel.Text = if player:GetAttribute("CarryingOwn") == true
+			then string.format("JETTE %s DANS LE TROU NOIR, OU RAMÈNE-LE CHEZ TOI  •  %d s", petName(carryingPet), left)
+			else string.format("RAMÈNE %s DANS TA BASE, OU JETTE-LE DANS LE TROU !  •  %d s", petName(carryingPet), left)
 		hintLabel.TextColor3 = UiStyle.Colors.Gold
 	else
 		hintLabel.Text = phase.Hint
@@ -345,23 +347,35 @@ end)
 player:GetAttributeChangedSignal("CarryingPet"):Connect(function()
 	local petId = player:GetAttribute("CarryingPet")
 	if petId ~= nil then
-		Toast.show(string.format("VOLÉ ! RAMÈNE %s DANS TA BASE !", petName(petId)), UiStyle.Colors.Gold)
+		-- Plus le familier est lourd (et moins on est fort), plus on avance lentement (Config.Carry).
+		local speed = player:GetAttribute("SpeedMultiplier")
+		local percent = math.floor((if type(speed) == "number" then speed else 1) * 100 + 0.5)
+		local heavy = if percent <= 50 then "TRÈS LOURD" elseif percent <= 75 then "LOURD" else "LÉGER"
+		if player:GetAttribute("CarryingOwn") == true then
+			Toast.show(string.format("TU PORTES %s  •  %s : VITESSE %d %%", petName(petId), heavy, percent), UiStyle.Colors.Gold)
+		else
+			Toast.show(string.format("VOLÉ ! %s  •  %s : VITESSE %d %%", petName(petId), heavy, percent), UiStyle.Colors.Gold)
+		end
 	end
 	updatePhase() -- la consigne du bas devient l'objectif (ou redevient normale)
 end)
 
 local STEAL_MESSAGES: { [string]: { text: string, color: Color3 } } = {
 	Success = { text = "%s EST À TOI !", color = MONEY },
-	KO = { text = "LÂCHÉ ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
-	Timeout = { text = "TROP LENT ! RETOUR À SA BASE : %s", color = Color3.fromRGB(255, 90, 90) },
+	Home = { text = "%s EST DE RETOUR DANS TA BASE", color = MONEY },
+	Dropped = { text = "LÂCHÉ ! %s RENTRE À SA BASE : RATTRAPE-LE !", color = Color3.fromRGB(255, 90, 90) },
+	Timeout = { text = "TROP LENT ! %s T'ÉCHAPPE ET RENTRE À SA BASE", color = Color3.fromRGB(255, 90, 90) },
 	VictimLeft = { text = "SON PROPRIÉTAIRE A FUI : %s EST À TOI !", color = MONEY },
 	Gone = { text = "PLUS LÀ : %s !", color = Color3.fromRGB(255, 90, 90) },
 	Recovered = { text = "RATTRAPÉ ! SON PROPRIÉTAIRE A REPRIS : %s", color = Color3.fromRGB(255, 90, 90) },
 }
 
-Remotes.StealResult.OnClientEvent:Connect(function(outcome: string, petId: string)
+Remotes.StealResult.OnClientEvent:Connect(function(outcome: string, petId: string, money: number?, points: number?)
 	local message = STEAL_MESSAGES[outcome]
-	if message then
+	if outcome == "Sacrificed" then
+		Toast.show(string.format("%s DÉVORÉ PAR LE TROU NOIR !  +%s  •  +%d POINTS", petName(petId),
+			NumberFormat.money(money or 0), points or 0), UiStyle.Colors.Gold)
+	elseif message then
 		Toast.show(string.format(message.text, petName(petId)), message.color)
 	end
 end)
@@ -381,6 +395,10 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 		Toast.show(string.format("RÉCUPÉRÉ : %s !", pet), MONEY)
 	elseif kind == "Returned" then
 		Toast.show(string.format("DE RETOUR DANS TA BASE : %s !", pet), MONEY)
+	elseif kind == "Dropped" then
+		Toast.show(string.format("%s A LÂCHÉ %s : IL RENTRE À TA BASE, VA LE CHERCHER !", thief, pet), UiStyle.Colors.Gold)
+	elseif kind == "Sacrificed" then
+		Toast.show(string.format("%s A JETÉ %s DANS LE TROU NOIR !", thief, pet), Color3.fromRGB(255, 90, 90))
 	elseif kind == "KeyUsed" then
 		Toast.show(string.format("%s A OUVERT TA BASE AVEC UNE CLÉ ! (%d s)", thief, Config.Keys.Duration), Color3.fromRGB(255, 90, 90))
 	elseif kind == "KeyOpened" then
@@ -389,6 +407,11 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 		local entry = PetCatalog.ById[petId]
 		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
 		Toast.show(string.format("%s A VOLÉ %s À %s !", thief, pet, TextFormat.upper(victimName)), if rarity then rarity.Color else WHITE)
+	elseif kind == "AnnounceSacrifice" then
+		local entry = PetCatalog.ById[petId]
+		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
+		Toast.show(string.format("%s A JETÉ %s DE %s DANS LE TROU NOIR !", thief, pet, TextFormat.upper(victimName)),
+			if rarity then rarity.Color else WHITE)
 	end
 end)
 

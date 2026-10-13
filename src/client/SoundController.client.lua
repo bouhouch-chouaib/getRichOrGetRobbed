@@ -135,11 +135,19 @@ player:GetAttributeChangedSignal("CarryingPet"):Connect(function()
 		Sounds.play("StealStart")
 	end
 end)
+local GOOD_OUTCOMES = { Success = true, VictimLeft = true, Home = true, Sacrificed = true }
 Remotes.StealResult.OnClientEvent:Connect(function(outcome: string)
-	Sounds.play(if outcome == "Success" then "StealSuccess" else "StealFail")
+	Sounds.play(if GOOD_OUTCOMES[outcome] then "StealSuccess" else "StealFail")
 end)
 -- …et côté victime.
-local VICTIM_SOUNDS = { Started = "StealAlarm", Stolen = "StealFail", Recovered = "Recovered", Returned = "Recovered" }
+local VICTIM_SOUNDS = {
+	Started = "StealAlarm",
+	Stolen = "StealFail",
+	Sacrificed = "StealFail",
+	Recovered = "Recovered",
+	Returned = "Recovered",
+	Dropped = "Recovered",
+}
 Remotes.StealNotice.OnClientEvent:Connect(function(kind: string)
 	local sound = VICTIM_SOUNDS[kind]
 	if sound then

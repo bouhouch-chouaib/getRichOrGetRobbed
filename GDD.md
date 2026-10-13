@@ -117,10 +117,10 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   qu'il déplace localement sur le familier, et envoie `Remotes.StealPet(anchor)` (4 demandes/s max). Ne jamais remettre une
   bulle serveur : Roblox refuse un ProximityPrompt validé loin de sa position serveur, et le serveur ne déplace jamais les repères
   (c'était la cause des vols qui « ne marchaient pas »). Le voleur le porte dans le dos (attribut `CarryingPet` + `CarryingUntil`, affiché
-  par `client/PetFollow` pour tout le monde, étiquette nom + temps restant), est ralenti ×0,9 (attribut `SpeedMultiplier`, appliqué
-  par `SessionData`) et ne peut plus ramasser d'objet ni sortir d'arme. Arrivé dans **sa** base : transfert. Échec (le familier rentre) :
-  KO (dôme ou arme) / mort / réapparition / départ du voleur (`ItemInteraction.HeldReleased`), 60 s écoulées
-  (la base d'en face est à ~430 studs). **La victime quitte le jeu pendant le vol** (depuis le 12 oct.) : le voleur GAGNE le
+  par `client/PetFollow` pour tout le monde, étiquette nom + temps restant), est ralenti selon sa force et le poids du familier
+  (13 oct., voir « Porter, jeter, lâcher » ci-dessous ; attribut `SpeedMultiplier`, appliqué par `SessionData`) et ne peut plus
+  ramasser d'objet ni sortir d'arme. Arrivé dans **sa** base : transfert. Frappé (batte), KO du dôme, mort, réapparition, départ
+  (`ItemInteraction.HeldReleased`) ou trop lent : il **lâche** le familier, qui rentre à pied (13 oct.). **La victime quitte le jeu pendant le vol** (depuis le 12 oct.) : le voleur GAGNE le
   familier tout de suite (résultat "VictimLeft"), transféré par `SessionData.OnLeaving` juste AVANT la dernière sauvegarde
   de la victime — quitter ne protège plus ses familiers.
   Anti-duplication : pendant le transport le familier reste à la victime, seulement **réservé** (`BasePetsController.Reserve`,
@@ -253,6 +253,28 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   Les stations (tapis, banc) gardent leur modèle (`StationLooks`). Tout est local : aucune donnée envoyée.
 - Trou noir à paliers : voir la section suivante.
 
+## Porter, jeter, lâcher (13 oct., `server/StealController`, `Config.Carry`, `Config.Sacrifice`)
+
+- **Porter le sien** : [E] « Porter » sur un familier de SA base (même bulle client que « Voler », `client/BasePets`). Le
+  porter dans sa base ne compte qu'après en être sorti (`wasOutside`) ; y revenir le repose (« Home »).
+- **Vitesse** : poids = taille (`shared/PetSizes`, en J) ^ 2 ; capacité = force de lancer (`ThrowPower`) / 10 ;
+  vitesse = 1 / (1 + 0,8 x poids / capacité), entre 30 % et 95 %. Au départ : Commun ~93 %, Légendaire ~50 %, Sigma 30 % ;
+  force 60 : Légendaire ~78 %. Le temps max de transport s'allonge d'autant (60 s / vitesse, 180 s max). Le message de
+  départ dit « LÉGER / LOURD / TRÈS LOURD : VITESSE x % ».
+- **Jeter dans le trou** (pendant le Feeding, à moins de 22 studs du bord) : bouton « JETER DANS LE TROU ! » + touche E /
+  manette X (`client/CarryControls`, `Remotes.ThrowPet`). Le familier est perdu pour son PROPRIÉTAIRE (le sien ou celui volé à un
+  autre !) ; le porteur gagne 10 min du revenu de ce familier (x monde x passes), des points du tour (2 à 240 selon la rareté,
+  donc des tirages) et autant de jauge du trou noir. Animation : il s'envole en tournoyant dans le cœur, étincelles, « +$ »
+  (`client/BlackholeFx`, `HoleEvent "Sacrifice"`). Volé puis jeté : la victime est prévenue ; annonce à tous si Légendaire+.
+- **Lâcher** : porteur frappé à la batte (ou éjecté par le dôme, mort, réapparu, parti, trop lent) -> le familier tombe à
+  sa position et **rentre à pied** vers la base de son propriétaire (9 studs/s) : arc autour du trou dans l'allée puis entrée de la
+  base (`shared/PetPath`, repère `Workspace.Map.LoosePets.<PetId>` + attributs `Path`, `PathStart`, `PathSpeed` ; rendu et bulle
+  locale dans `client/LoosePets`). N'importe qui peut le ramasser en chemin (`Remotes.PickLoosePet`) : « Reprendre » pour son
+  propriétaire, « Voler » pour les autres. Arrivé : il réapparaît dans la base. Propriétaire parti : il disparaît (il est
+  toujours dans sa sauvegarde).
+- Anti-duplication : il reste réservé dans la base de son propriétaire pendant tout ce temps ; chaque réservation est rendue
+  une seule fois (fin d'un transport qui ne le lâche pas, ou fin du retour à pied).
+
 ## Paliers du trou noir (13 oct., `server/BlackholeTiers`, `client/BlackholeFx`, `Config.Blackhole`)
 
 - **Jauge commune au serveur** : chaque objet avalé (lancer valable) ajoute sa valeur (au moins 1, sans multiplicateur).
@@ -269,7 +291,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   une fois par tour, annoncé).
 - **Effondrement** : jauge du palier 7 pleine -> à la digestion suivante, score du tour x2 avant les tirages, puis un
   familier Légendaire au 1er contributeur du cycle et un Épique aux 2e et 3e, puis retour au palier 1.
-- Aspect (client, blocs à tenons) : couronne de blocs au bord dans les couleurs du palier + décor propre (vortex,
+- Aspect (client, blocs à tenons) : muret en damier à tenons au bord (2 tons + chapeau, comme les murs de l'arène, couleurs reprises
+  des mondes : `Wall` dans `Config.Blackhole.Tiers` ; néon seulement pour la lave, les abysses et les effets) + décor propre (vortex,
   roches et lave, anneaux de cible, tentacules animés, disque de matière et éclairs, pointes qui pulsent et ondes de choc,
   anneaux d'or et rayons). L'ancien décor est aspiré dans le cœur au changement. Jauge en panneau au-dessus du trou
   (taille en studs : petite de loin). Bulles « CENTRE ! x2 », « ATTRAPÉ ! », « COMBO x1.5 ».

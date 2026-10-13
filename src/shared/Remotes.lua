@@ -63,8 +63,8 @@ return {
 	ClaimIndex = remote("ClaimIndex"),
 	-- Serveur -> client : (money: number, count: number) récompenses d'Index accordées.
 	IndexClaimed = remote("IndexClaimed"),
-	-- Serveur -> voleur : (outcome: string, petId: string) fin d'un vol de familier
-	-- ("Success", "KO", "Timeout", "VictimLeft" = la victime a quitté, le voleur gagne, "Gone", "Recovered" : voir server/StealController).
+	-- Serveur -> porteur : (outcome: string, petId: string, argent: number, points: number) fin du transport d'un familier
+	-- ("Success", "Home", "Sacrificed", "Dropped", "Timeout", "VictimLeft", "Gone", "Recovered" : voir server/StealController).
 	StealResult = remote("StealResult"),
 	-- Client -> serveur : (anchor: BasePart) le joueur a validé la bulle [E] "Voler" d'un familier de base.
 	-- La bulle est créée par le client (client/BasePets) car elle suit le familier chez lui seulement :
@@ -88,7 +88,8 @@ return {
 	-- Serveur -> victime : (tireur: Player, durée: number) tu es ramené(e) devant le tireur.
 	Grappled = remote("Grappled"),
 	-- Serveur -> victime ou tous : (kind: string, thiefName: string, victimName: string, petId: string)
-	-- kind : "Started", "Stolen", "Recovered", "Returned" (à la victime), "Announce" (à tous, vol rare réussi).
+	-- kind : "Started", "Stolen", "Recovered", "Dropped" (lâché, il rentre à pied), "Returned" (rentré à la base),
+	-- "Sacrificed" (jeté au trou) : au propriétaire ; "Announce" / "AnnounceSacrifice" : à tous, familier rare.
 	StealNotice = remote("StealNotice"),
 	-- Client -> serveur : () tutoriel terminé ou passé (enregistré dans la sauvegarde).
 	TutorialDone = remote("TutorialDone"),
@@ -102,5 +103,10 @@ return {
 	--   ("Jackpot", finServeur)         jackpot x5 (palier 7)
 	--   ("CollapseSoon")                jauge du palier 7 pleine
 	--   ("Collapse", { noms })          effondrement : retour au palier 1, noms des joueurs récompensés
+	--   ("Sacrifice", point, petId, porteur, argent)  un familier est jeté dans le trou (server/StealController)
 	HoleEvent = remote("HoleEvent"),
+	-- Client -> serveur : (repère: Part) ramasser un familier lâché qui rentre à pied (Workspace.Map.LoosePets).
+	PickLoosePet = remote("PickLoosePet"),
+	-- Client -> serveur : () jeter dans le trou noir le familier porté (Feeding, près du bord : server/StealController).
+	ThrowPet = remote("ThrowPet"),
 }
