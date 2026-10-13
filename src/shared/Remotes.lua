@@ -77,6 +77,8 @@ return {
 	--   ("Hit", victime, "WeaponBat", attaquant)             impact
 	--   ("Grapple", tireur, "WeaponGrapple", point, victime?) crochet tiré (victime = nil : raté)
 	WeaponFx = remote("WeaponFx"),
+	-- Client -> serveur : (base: Model) utiliser une clé sur le portail de cette base fermée (server/LockController).
+	UseKey = remote("UseKey"),
 	-- Client -> serveur : (direction: Vector3) tir du grappin dans cette direction (le serveur choisit la cible).
 	UseGrapple = remote("UseGrapple"),
 	-- Serveur -> victime : (tireur: Player, durée: number) tu es ramené(e) devant le tireur.

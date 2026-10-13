@@ -40,6 +40,7 @@ local IDS: { [string]: string } = {
 	Bat = "rbxassetid://92089666736729",
 	Grapple = "rbxassetid://122249795654523",
 	Ghost = "rbxassetid://105946207492948",
+	Key = "rbxassetid://82597263772074",
 }
 
 -- Autres noms utiles : raretés (Id de Config.Rarities), améliorations (Config.Shop), produits Robux (Key).
@@ -65,6 +66,7 @@ local ALIASES: { [string]: string } = {
 	ServerLuck = "Sparkle",
 	Pull1 = "Dice",
 	Pull10 = "Gift",
+	Key1 = "Key",
 	Fusion = "Orb",
 	Robux = "Gem",
 	Leaderboard = "Trophy",

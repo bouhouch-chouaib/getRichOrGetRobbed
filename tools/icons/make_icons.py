@@ -572,6 +572,23 @@ def ghost(c):
         c.poly(star_points(cx, cy, r, r * 0.35, 4, -90), hexc("FFF3B0"), out=12)
 
 
+@icon("Key")
+def key(c):
+    gold = GOLD
+    sub = c.layer()
+    # Anneau, tige, dents.
+    sub.circle(360, 380, 200, gold)
+    sub.circle(360, 380, 90, hexc("2F2E3E"), out=OUT)
+    sub.rrect((500, 340, 900, 430), 30, gold)
+    sub.rrect((760, 420, 820, 560), 16, gold)
+    sub.rrect((640, 420, 700, 520), 16, gold)
+    sub.shine((240, 230, 330, 300), 170)
+    sub.shine((540, 350, 820, 375), 140)
+    c.paste(sub, 35, (512, 512))
+    for cx, cy, r in [(820, 220, 70), (200, 760, 50)]:
+        c.poly(star_points(cx, cy, r, r * 0.35, 4, -90), hexc("FFF3B0"), out=12)
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     rendered = []

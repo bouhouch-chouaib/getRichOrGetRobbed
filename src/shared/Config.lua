@@ -179,6 +179,7 @@ export type MonetizationItem = {
 	Description: string,
 	Price: number,
 	Pulls: number?, -- produits "tirages" : nombre de tirages accordés
+	Keys: number?, -- produits "clés" : nombre de clés accordées (Config.Keys)
 }
 
 Config.Monetization = {
@@ -192,6 +193,7 @@ Config.Monetization = {
 	Products = {
 		{ Key = "ServerLuck", Id = 3717917081, Icon = "Sparkle", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
 		{ Key = "Pull1", Id = 3717917143, Icon = "Dice", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
+		{ Key = "Key1", Id = 0, Icon = "Key", Name = "CLÉ", Description = "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.", Price = 49, Keys = 1 },
 		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,
@@ -256,6 +258,16 @@ Config.Lock = {
 	Duration = 5, -- relancé à chaque fois que le propriétaire repasse sur le bouton
 	LongDuration = 10, -- avec l'amélioration "LongLock"
 	ButtonRadius = 4,
+}
+
+-- Clés (achat en Robux uniquement, produit "Key1" à 49 R$) : ouvrent une base adverse FERMÉE pendant Duration secondes,
+-- même si son propriétaire la referme (server/LockController, bulle client/BaseKeys). Une clé est consommée par usage.
+-- Sans clé, la bulle du portail propose d'en acheter une ; elle est utilisée dès que l'achat est validé.
+Config.Keys = {
+	Duration = 10, -- secondes d'ouverture forcée
+	UseDistance = 14, -- distance max au portail (studs, vérifiée par le serveur avec une marge)
+	HoldDuration = 0.6, -- temps d'appui sur [E] pour crocheter
+	ProtectAfter = 20, -- secondes pendant lesquelles une base qui vient d'être crochetée ne peut pas l'être à nouveau
 }
 
 -- Vol de familiers : [E] sur un familier d'une base adverse déverrouillée, à ramener dans sa propre base.

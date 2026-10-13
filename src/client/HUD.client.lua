@@ -373,6 +373,10 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 		Toast.show(string.format("RÉCUPÉRÉ : %s !", pet), MONEY)
 	elseif kind == "Returned" then
 		Toast.show(string.format("DE RETOUR DANS TA BASE : %s !", pet), MONEY)
+	elseif kind == "KeyUsed" then
+		Toast.show(string.format("%s A OUVERT TA BASE AVEC UNE CLÉ ! (%d s)", thief, Config.Keys.Duration), Color3.fromRGB(255, 90, 90))
+	elseif kind == "KeyOpened" then
+		Toast.show(string.format("BASE OUVERTE PENDANT %d s : VOLE VITE !", Config.Keys.Duration), UiStyle.Colors.Gold)
 	elseif kind == "Announce" then
 		local entry = PetCatalog.ById[petId]
 		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]

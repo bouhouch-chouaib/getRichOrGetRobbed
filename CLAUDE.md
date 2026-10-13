@@ -93,7 +93,8 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
   victime qui quitte pendant un vol (le voleur gagne : testé seulement avec des joueurs simulés).
 - Vérifiés en jeu (solo) : lancer puis re-ramasser un objet, achat / réapparition des armes, mains exclusives,
   tapis et banc (blocage, course, développé couché, « +X »), tirages « nouveaux d'abord » (simulation 20 000 tirages).
-- Les **clés** (ouvrir une base fermée) ont été ajoutées puis **retirées** à la demande de Chouaib (commit de retrait 3e71598).
+- Les **clés** (ouvrir une base fermée 10 s) sont revenues le 14 oct., **en Robux uniquement** (49 R$ la clé, produit `Key1`).
+  Produit à créer sur Roblox puis mettre son Id dans `Config.Monetization.Products` (Id = 0 -> « Bientôt »).
 - Chaque changement ne passe dans le vrai jeu qu'après **Publier** dans Studio puis redémarrage des serveurs.
 - Pistes de Chouaib pour la suite : se rapprocher de la direction artistique de Steal an Egg (map faite de vrais modèles 3D
   plutôt que générée par `MapGenerator`, effets, interface) ; voir les conseils de passation dans l'historique.

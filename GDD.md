@@ -157,6 +157,13 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
     / `InvisibleReadyAt` (heure serveur). Pastille « INVISIBLE 4 s » / « RECHARGE 23 s » pour le joueur.
   - Mains exclusives : arme en main -> pas de ramassage ni de vol ; objets portés ou familier volé -> l'arme sortie est rangée.
     Articulations : `client/Joints` (Motor6D ou AnimationConstraint).
+- **Clés** (14 oct., Robux uniquement : produit `Key1` à 49 R$, `Config.Keys`) : [E] maintenu devant le portail d'une base
+  adverse FERMÉE (bulle `client/BaseKeys`) -> `Remotes.UseKey` ; `LockController` vérifie (base fermée, pas la sienne, distance,
+  clé en réserve, pas crochetée depuis moins de `ProtectAfter` = 20 s) et ouvre la base 10 s (attribut `ForcedOpenUntil`) :
+  pas d'expulsion, vol possible, même si le propriétaire repasse sur le bouton ; ensuite elle se referme si son compte à rebours
+  tourne encore. Sans clé, la bulle affiche « Clé : 49 R$ » et ouvre l'achat ; la clé est utilisée dès que l'achat est validé si
+  le joueur est encore devant le portail. Clés sauvegardées (`keys`, attribut `Keys`). Messages `KeyUsed` (propriétaire) /
+  `KeyOpened` (utilisateur). **L'Id du produit est à 0 tant qu'il n'est pas créé sur Roblox** (affiché « Bientôt »).
 - **Annonces** (`Remotes.StealNotice`) : à la victime "Started" (début), puis "Stolen" / "Recovered" / "Returned" (KO ou temps
   écoulé) ; à tout le serveur "Announce" pour un vol réussi de rareté >= `Config.Loot.AnnounceMinRarity` (Légendaire).
 
