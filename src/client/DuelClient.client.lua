@@ -426,8 +426,9 @@ RunService.RenderStepped:Connect(function()
 	end
 	-- Bulles « Défier » : seulement si on est libre et l'autre aussi.
 	local free = phase == "Idle" and player:GetAttribute("CarryingPet") == nil and player:GetAttribute("InDuel") == nil
+		and player:GetAttribute("InTrade") == nil
 	for other, prompt in pairs(prompts) do
-		local enabled = free and other:GetAttribute("InDuel") == nil
+		local enabled = free and other:GetAttribute("InDuel") == nil and other:GetAttribute("InTrade") == nil
 		if prompt.Enabled ~= enabled then
 			prompt.Enabled = enabled
 		end

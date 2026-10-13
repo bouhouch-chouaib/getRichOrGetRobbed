@@ -31,6 +31,8 @@
         "DuelAction": { "$className": "RemoteEvent" },
         "DuelEvent": { "$className": "RemoteEvent" },
         "GoToWorld": { "$className": "RemoteEvent" },
+        "TradeAction": { "$className": "RemoteEvent" },
+        "TradeEvent": { "$className": "RemoteEvent" },
         "Grappled": { "$className": "RemoteEvent" },
         "ClaimIndex": { "$className": "RemoteEvent" },
         "IndexClaimed": { "$className": "RemoteEvent" },

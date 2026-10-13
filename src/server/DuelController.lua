@@ -121,6 +121,7 @@ end
 -- Le joueur est-il libre pour un duel ? (pas déjà en duel, mains libres, vivant, a une base)
 local function isFree(player: Player): boolean
 	return duelOf[player] == nil
+		and player:GetAttribute("InTrade") == nil
 		and player:GetAttribute("CarryingPet") == nil
 		and BaseManager.GetBase(player) ~= nil
 		and SessionData.IsLoaded(player)

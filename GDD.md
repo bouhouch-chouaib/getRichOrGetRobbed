@@ -275,6 +275,17 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Anti-duplication : il reste réservé dans la base de son propriétaire pendant tout ce temps ; chaque réservation est rendue
   une seule fois (fin d'un transport qui ne le lâche pas, ou fin du retour à pied).
 
+## Échanges de familiers (13 oct., `server/TradeController`, `client/TradeClient`, `Config.Trade`)
+
+- Bulle [T] « Échanger » (manette L1) sur les autres joueurs ; invitation à accepter en 15 s ; 6 s entre deux demandes.
+- Fenêtre ÉCHANGE : chacun met jusqu'à 6 familiers non équipés (ni portés ni en duel) dans son offre, voit celle de
+  l'autre en direct avec le revenu total de chaque côté ; avertissement rouge si on donne plus de 3 fois ce qu'on reçoit.
+- **Double confirmation** : 1) PRÊT des deux -> offres BLOQUÉES ; 2) CONFIRMER cliquable après 3 s de relecture, par
+  les deux. Toute modification (ou « MODIFIER ») annule les validations. Fermer la fenêtre = annuler.
+- Transfert en une étape serveur : revérification, retrait chez A, retrait chez B (A remboursé si échec), ajouts croisés,
+  sauvegarde des deux. Annulé si un familier offert disparaît (vol, fusion), départ, ou 4 min écoulées.
+- Pas d'échange pendant un duel (et pas de duel pendant un échange : attribut `InTrade`).
+
 ## Duels de familiers (13 oct., `server/DuelController`, `client/DuelClient`, `client/DuelFx`, `shared/DuelStats`, `Config.Duel`)
 
 - **Défi** : bulle [F] « Défier en duel » (manette Y) créée localement sur les autres joueurs (12 studs). La cible a 15 s

@@ -120,4 +120,10 @@ return {
 	DuelEvent = remote("DuelEvent"),
 	-- Client -> serveur : (monde: number) retourner dans un monde déjà visité (server/TierController).
 	GoToWorld = remote("GoToWorld"),
+	-- Client -> serveur : échanges (server/TradeController) : ("Request", joueur), ("Answer", accepte), ("Add", petId),
+	-- ("Remove", petId), ("Ready", prêt), ("Confirm"), ("Back"), ("Cancel").
+	TradeAction = remote("TradeAction"),
+	-- Serveur -> client : ("Invite", joueur, fin), ("Waiting", joueur, fin), ("Cancelled", raison), ("Open", autre),
+	-- ("State", monOffre, prêt, confirmé, sonOffre, prêt, confirmé, phase, confirmableÀ), ("Done", reçu, donné, autre).
+	TradeEvent = remote("TradeEvent"),
 }

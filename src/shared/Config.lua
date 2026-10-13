@@ -379,6 +379,20 @@ Config.Duel = {
 	MinIncome = 50, -- argent de la roue = revenu du gagnant par seconde (au moins 50 $/s) x Seconds
 }
 
+-- Échanges de familiers entre joueurs (server/TradeController, client/TradeClient).
+--   [T] « Échanger » sur un joueur -> il accepte -> fenêtre ÉCHANGE : chacun met jusqu'à MaxPets familiers dans son offre
+--   (on voit l'offre de l'autre en direct) -> double confirmation anti-arnaque : 1) les deux cliquent PRÊT (les offres
+--   sont alors bloquées), 2) après ConfirmDelay secondes, les deux cliquent CONFIRMER. Toute modification annule les
+--   validations. Le transfert se fait en une étape côté serveur (et revient en arrière si un familier a disparu).
+Config.Trade = {
+	PromptDistance = 12,
+	RequestCooldown = 6,
+	InviteTime = 15,
+	MaxPets = 6, -- familiers par offre (exemplaires compris)
+	ConfirmDelay = 3, -- secondes de vérification avant que CONFIRMER soit cliquable
+	MaxTime = 240, -- un échange ouvert plus longtemps est annulé
+}
+
 -- Effets de satisfaction (client/Effects) : points qui s'envolent, ouverture des tirages rares, secousses d'écran.
 Config.Effects = {
 	RevealMinRarity = 4, -- ouverture animée à partir de cet index de rareté (4 = Épique)

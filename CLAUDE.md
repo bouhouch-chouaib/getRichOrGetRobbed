@@ -86,6 +86,9 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
+**13 oct. : échanges entre joueurs** (`server/TradeController`, `client/TradeClient`) : [T], offres de 6 familiers,
+double confirmation (PRÊT puis CONFIRMER après 3 s). Analyse OK, démarrage sans erreur ; **à tester à 2 joueurs**.
+
 **13 oct. : musique des 7 mondes** (`Config.Sounds.Playlists`, APM) : vérifié en jeu, la musique change avec le monde.
 
 **13 oct. : retour dans les mondes visités** (attribut `World`, bouton « Y ALLER », bonus de revenu du monde le plus loin)
@@ -139,7 +142,7 @@ OneDrive : dans ce cas, copier les fichiers dans OneDrive (ou aligner après le 
 3. (fait : sauvegarde DataStore)
 4. (fait le 9 oct. : monétisation codée — 5 passes + 3 produits, `MonetizationController`, `client/RobuxShop`, `shared/Perks`).
    Passes/produits créés le 11 oct. et Id remplis dans `Config.Monetization`. Le créateur du jeu possède d'office ses passes chez Roblox : depuis le 12 oct., `Config.Monetization.CreatorOwnsPasses = false` les ignore (il joue sans avantages, comme ses amis).
-5. Échanges entre joueurs (double confirmation anti-arnaque).
+5. (fait le 13 oct. : `TradeController`) Échanges entre joueurs (double confirmation anti-arnaque).
 
 Autres idées notées : vol de familiers dans les bases adverses (colle au nom du jeu), bulle ProximityPrompt
 personnalisée au style cartoon, sauvegarde de la vitesse.
