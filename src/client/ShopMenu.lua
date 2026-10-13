@@ -2,8 +2,9 @@
 -- ShopMenu : fenêtre BOUTIQUE (améliorations de Config.Shop), sur le modèle des boutiques de la référence :
 -- en-tête vert, rangée de grandes cartes colorées qui défile de gauche à droite (rayons de soleil, tenons),
 -- chaque carte = nom, niveau, grosse icône, description, effet « actuel ➜ suivant », bouton de prix.
--- Onglets à droite : Entraînement / Bonus / Armes (pastille « ! » quand un achat est possible).
--- Le serveur valide chaque achat (Remotes.BuyUpgrade).
+-- Onglets à droite : Entraînement / Bonus / Combat (pastille « ! » quand un achat est possible), puis le contenu
+-- Robux (client/RobuxShop) : Passes R$ / Produits R$ / Chances (plus de bouton Robux à part sur l'écran).
+-- Le serveur valide chaque achat (Remotes.BuyUpgrade, MonetizationController pour les Robux).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -12,6 +13,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 local MenuKit = require(script.Parent.MenuKit)
+local RobuxShop = require(script.Parent.RobuxShop)
 local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
 local UiStyle = require(script.Parent.UiStyle)
@@ -242,7 +244,16 @@ function ShopMenu.create(gui: Instance): Shop
 		end
 	end
 
+	-- Onglets Robux, après les catégories d'améliorations.
+	local robux = RobuxShop.create(window.content, cardHeight, gui :: Frame)
+
 	local function showCategory(index: number)
+		row.Visible = index <= #CATEGORIES
+		robux.show(math.max(0, index - #CATEGORIES))
+		if index > #CATEGORIES then
+			robux.refresh()
+			return
+		end
 		for _, child in ipairs(row:GetChildren()) do
 			if child:IsA("GuiObject") then
 				child:Destroy()
@@ -263,8 +274,12 @@ function ShopMenu.create(gui: Instance): Shop
 	for _, category in ipairs(CATEGORIES) do
 		table.insert(tabList, { label = category.label, color = category.color })
 	end
+	table.insert(tabList, { label = "Passes R$", color = UiStyle.Colors.Gold })
+	table.insert(tabList, { label = "Produits R$", color = Color3.fromRGB(200, 40, 240) })
+	table.insert(tabList, { label = "Chances", color = Color3.fromRGB(120, 120, 140) })
 	tabs = MenuKit.sideTabs(window, tabList, showCategory)
 	showCategory(1)
+	window.onOpen(robux.refresh)
 
 	return {
 		window = window,

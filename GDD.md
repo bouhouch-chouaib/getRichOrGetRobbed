@@ -230,7 +230,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   `ProcessReceipt` idempotent : reçu (PurchaseId) noté dans la sauvegarde (`receipts`, 100 derniers), PurchaseGranted seulement
   après une sauvegarde réussie ; l'affichage (carte, ouverture, annonces) tourne à part pour qu'une erreur visuelle ne fasse
   jamais refuser un achat déjà accordé. Studio : `StudioTestPasses` simule des passes possédés.
-- `client/RobuxShop` : bouton ⭐ ROBUX (droite), fenêtre passes / produits (vrai prix lu sur Roblox), **probabilités exactes**
+- `client/RobuxShop` (module, 13 oct. : plus de bouton à part, onglets Passes R$ / Produits R$ / Chances de la Boutique) : passes / produits (vrai prix lu sur Roblox), **probabilités exactes**
   d'un tirage acheté (`LootEngine.odds` avec la chance réelle du joueur) + règle de la pitié ; bandeau du boost serveur.
   Les tirages Robux et leurs chances sont **cachés** si `PolicyService` indique `ArePaidRandomItemsRestricted`
   (pays où les objets aléatoires payants sont interdits) ou si la réponse échoue. Le créateur du jeu possède d'office ses passes.
