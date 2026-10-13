@@ -142,6 +142,61 @@ local function spawnWild()
 	ItemInteraction.Register(item)
 end
 
+-- Objet spécial projeté par le trou noir (server/BlackholeTiers) : "Lava" = roche de lave (valeur x3),
+-- "Meteor" = météorite tombée du ciel. Il part de `position` à la vitesse `velocity` et devient un objet sauvage.
+function ItemSpawner.SpawnSpecial(kind: string, position: Vector3, velocity: Vector3): BasePart?
+	local map = Workspace:FindFirstChild("Map")
+	local wild = map and map:FindFirstChild("WildItems")
+	if not wild or #wild:GetChildren() >= Config.Items.WildMax + 15 then
+		return nil
+	end
+	local tier = rollTier(Config.Items.WildQuality)
+	if kind == "Meteor" then
+		for _, candidate in ipairs(Config.ItemTiers) do
+			if candidate.Id == "Meteorite" then
+				tier = candidate
+			end
+		end
+	end
+	local item = createItem(tier, CFrame.new(position))
+	local value = if kind == "Lava"
+		then tier.Value * Config.Blackhole.Lava.ValueMultiplier
+		else Config.Blackhole.Gravity.MeteorValue
+	local name = if kind == "Lava" then "Roche de lave" else "Météorite"
+	if kind == "Lava" then
+		item.Shape = Enum.PartType.Block
+		item.Size = Vector3.new(2.6, 2.2, 2.4)
+		item.Color = Color3.fromRGB(255, 110, 30)
+		item.Material = Enum.Material.Neon
+	end
+	item:SetAttribute("Value", value)
+	item:SetAttribute("Special", kind)
+	local prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)
+	if prompt then
+		prompt.ObjectText = string.format("%s (+%s)", name, tostring(value))
+	end
+	local fire = Instance.new("ParticleEmitter")
+	fire.Name = "Trail"
+	fire.Texture = "rbxasset://textures/particles/fire_main.dds"
+	fire.Rate = 30
+	fire.Lifetime = NumberRange.new(0.4, 0.8)
+	fire.Speed = NumberRange.new(1, 3)
+	fire.Size = NumberSequence.new(1.6, 0)
+	fire.Color = ColorSequence.new(Color3.fromRGB(255, 200, 80), Color3.fromRGB(255, 70, 20))
+	fire.LightEmission = 1
+	fire.Parent = item
+	-- Les flammes s'éteignent une fois posé (il reste une lueur).
+	task.delay(4, function()
+		if fire.Parent then
+			fire.Rate = 4
+		end
+	end)
+	item.Parent = wild
+	item.AssemblyLinearVelocity = velocity
+	ItemInteraction.Register(item)
+	return item
+end
+
 function ItemSpawner.Init()
 	-- Kit de départ : quelques objets pour marquer ses premiers points.
 	BaseManager.BaseAssigned:Connect(function(_player: Player, base: Model)

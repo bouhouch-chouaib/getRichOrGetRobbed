@@ -19,6 +19,7 @@ local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BasePetsController = require(script.Parent.BasePetsController)
+local BlackholeTiers = require(script.Parent.BlackholeTiers)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local SessionData = require(script.Parent.SessionData)
@@ -69,7 +70,7 @@ local function setColors(color: Color3)
 	local aura = zone:FindFirstChildOfClass("ParticleEmitter")
 	if aura then
 		aura.Color = ColorSequence.new(color)
-		aura.Rate = if color == Config.Colors.Digesting then 150 else 60
+		aura.Rate = if color == Config.Colors.Digesting then 150 else 60 + BlackholeTiers.GetTier() * 12
 	end
 end
 
@@ -110,8 +111,12 @@ local function rejectReason(item: BasePart, owner: Player): string?
 	return nil
 end
 
-local function consume(item: BasePart)
+-- caught : rattrapé par un tentacule (palier 4) juste avant le bord.
+local function consume(item: BasePart, caught: boolean?)
 	item:SetAttribute("Consumed", true)
+	if caught then
+		BlackholeTiers.OnCaught(item)
+	end
 
 	local ownerName = item:GetAttribute("Owner")
 	local found = if type(ownerName) == "string" then Players:FindFirstChild(ownerName) else nil
@@ -119,9 +124,12 @@ local function consume(item: BasePart)
 	if owner then
 		local reason = rejectReason(item, owner)
 		if not reason then
-			-- Points = valeur de l'objet (Config.ItemTiers) × multiplicateur des familiers équipés.
-			local value = item:GetAttribute("Value")
-			SessionData.AddScore(owner, (if type(value) == "number" then value else 1) * SessionData.GetMultiplier(owner))
+			-- Points = valeur de l'objet (Config.ItemTiers) × multiplicateur des familiers équipés × bonus du palier
+			-- du trou noir (centre, combo, jackpot : server/BlackholeTiers, qui remplit aussi la jauge commune).
+			local rawValue = item:GetAttribute("Value")
+			local value = if type(rawValue) == "number" then rawValue else 1
+			local bonus = BlackholeTiers.OnScored(owner, item, value)
+			SessionData.AddScore(owner, value * SessionData.GetMultiplier(owner) * bonus)
 		elseif reason ~= "jamais lancé" then
 			-- Un objet simplement lâché près du trou n'est pas suspect ; le reste est signalé.
 			warn(string.format("[AntiCheat] %s : objet avalé sans points (%s)", owner.Name, reason))
@@ -154,6 +162,8 @@ local function consumeItems()
 			local flatDistance = Vector3.new(position.X, 0, position.Z).Magnitude
 			if flatDistance <= ARENA.HoleRadius and position.Y <= ARENA.HoleConsumeHeight then
 				consume(child)
+			elseif BlackholeTiers.CanCatch(child, flatDistance) then
+				consume(child, true)
 			end
 		end
 	end
@@ -264,13 +274,16 @@ local function applyState(state: string)
 	local dome = find("BlackholeDome")
 	if state == "Feeding" then
 		zone:SetAttribute("CanConsume", true)
-		setColors(Config.Colors.Feeding)
+		setColors(BlackholeTiers.Color())
 		if dome then
 			dome.Transparency = 1
 		end
 	elseif state == "Digesting" then
 		zone:SetAttribute("CanConsume", false)
+		-- Effondrement après le palier 7 : score du tour x2 avant les tirages, cadeaux et retour au palier 1 après.
+		BlackholeTiers.BeforeRewards()
 		distributeRewards()
+		BlackholeTiers.AfterRewards()
 		setColors(Config.Colors.Digesting)
 		if dome then
 			dome.Transparency = 0.35
@@ -294,6 +307,11 @@ function BlackholeController.Init()
 	GameLoopManager.ServerEvent.Event:Connect(function(eventName: string, state: string)
 		if eventName == "StateChanged" then
 			applyState(state)
+		end
+	end)
+	BlackholeTiers.TierChanged:Connect(function()
+		if GameLoopManager.GetState() == "Feeding" then
+			setColors(BlackholeTiers.Color())
 		end
 	end)
 

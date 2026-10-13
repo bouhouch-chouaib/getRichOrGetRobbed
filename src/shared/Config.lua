@@ -374,6 +374,14 @@ Config.Sounds = {
 		GrappleReel = { Id = 9118138365, Volume = 0.6, Pitch = 1.8 }, -- cliquetis rapide : la corde se rembobine
 		Vanish = { Id = 9120711836, Volume = 0.7, Pitch = 1.9 }, -- fffuit aigu : quelqu'un devient invisible
 		Reveal = { Id = 9119668978, Volume = 0.8, Pitch = 0.75 }, -- pop : il réapparaît
+		-- Paliers du trou noir (client/BlackholeFx) : mêmes sons de la bibliothèque Roblox que ci-dessus.
+		HoleTierUp = { Id = 1839881844, Volume = 0.8 }, -- jingle : le trou noir monte d'un palier
+		HoleRumble = { Id = 9113564868, Volume = 0.9, Pitch = 0.45 }, -- paf grave : grondement, éruption
+		HoleBonus = { Id = 9119668796, Volume = 0.7, Pitch = 1.8 }, -- pop très aigu : centre x2, combo
+		HoleCatch = { Id = 9112752639, Volume = 1, Pitch = 0.6 }, -- gros bloup : un tentacule rattrape un objet
+		HoleMeteors = { Id = 9120711836, Volume = 0.9, Pitch = 0.45 }, -- whoosh très grave : météorites
+		HoleJackpot = { Id = 9113704038, Volume = 0.9 }, -- pluie de pièces : jackpot
+		HoleCollapse = { Id = 1841209502, Volume = 0.9, Pitch = 0.7 }, -- scintillement grave : effondrement
 	} :: { [string]: SoundDef },
 }
 
@@ -522,6 +530,34 @@ Config.ItemColors = {
 	Color3.fromRGB(120, 255, 120),
 	Color3.fromRGB(255, 120, 220),
 	Color3.fromRGB(255, 160, 50),
+}
+
+-- Paliers du trou noir (server/BlackholeTiers, client/BlackholeFx) : une jauge COMMUNE à tout le serveur se remplit
+-- avec les objets avalés (valeur de l'objet, sans multiplicateur des familiers). Pleine, le trou monte d'un palier :
+-- nouvel aspect + une petite mécanique, toujours un bonus, jamais une punition. Après le palier 7, Effondrement à la
+-- digestion suivante (score du tour x2, familiers offerts aux 3 meilleurs contributeurs) puis retour au palier 1.
+export type HoleTier = { Name: string, Color: Color3, Color2: Color3, Hint: string }
+Config.Blackhole = {
+	-- Jauge à remplir pour quitter chaque palier, pour 1 joueur ; multipliée par (nombre de joueurs) ^ PlayerScaling.
+	-- Un joueur seul marque ~10 à 15 points de jauge par tour : ~3 tours par palier au début.
+	GaugeNeed = { 40, 50, 60, 75, 90, 110, 130 },
+	PlayerScaling = 0.6,
+	Tiers = {
+		{ Name = "ÉVEIL", Color = Color3.fromRGB(150, 0, 255), Color2 = Color3.fromRGB(255, 90, 230), Hint = "Le trou noir s'éveille. Nourris-le !" },
+		{ Name = "ÉRUPTION", Color = Color3.fromRGB(255, 110, 20), Color2 = Color3.fromRGB(255, 220, 60), Hint = "Il recrache des roches de lave : x3 points !" },
+		{ Name = "CIBLE", Color = Color3.fromRGB(255, 50, 70), Color2 = Color3.fromRGB(255, 255, 255), Hint = "Vise le centre : points x2 !" },
+		{ Name = "ABYSSES", Color = Color3.fromRGB(0, 200, 190), Color2 = Color3.fromRGB(120, 60, 200), Hint = "Ses tentacules rattrapent les lancers trop courts." },
+		{ Name = "GRAVITÉ", Color = Color3.fromRGB(255, 160, 60), Color2 = Color3.fromRGB(110, 190, 255), Hint = "Il attire les objets et fait pleuvoir des météorites." },
+		{ Name = "SUPERNOVA", Color = Color3.fromRGB(120, 230, 255), Color2 = Color3.fromRGB(255, 120, 220), Hint = "Enchaîne les lancers : combo jusqu'à x2 !" },
+		{ Name = "DIVIN", Color = Color3.fromRGB(255, 205, 50), Color2 = Color3.fromRGB(255, 250, 225), Hint = "Jackpot x5 pendant 10 s, une fois par tour !" },
+	} :: { HoleTier },
+	Lava = { Interval = 15, Count = 3, ValueMultiplier = 3, MinRadius = 70, MaxRadius = 125, FlightTime = 2 },
+	Target = { Radius = 14, Multiplier = 2 }, -- point d'impact prévu à moins de 14 studs du centre
+	Tentacles = { Reach = 14, MaxHeight = 10, MaxAge = 5 }, -- objet lancé tombé à moins de 14 studs du bord, depuis < 5 s
+	Gravity = { PullRadius = 150, StopRadius = 52, Speed = 6, MeteorInterval = 18, MeteorCount = 3, MeteorValue = 5 },
+	Combo = { Window = 5, Step = 0.25, Max = 2 }, -- +0,25 par lancer réussi à moins de 5 s du précédent, x2 max
+	Jackpot = { Duration = 10, Multiplier = 5 },
+	Collapse = { ScoreMultiplier = 2, Rewards = { "Legendaire", "Epique", "Epique" } }, -- 1er, 2e, 3e contributeur
 }
 
 Config.Colors = {

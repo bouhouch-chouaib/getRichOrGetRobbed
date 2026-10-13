@@ -92,4 +92,15 @@ return {
 	StealNotice = remote("StealNotice"),
 	-- Client -> serveur : () tutoriel terminé ou passé (enregistré dans la sauvegarde).
 	TutorialDone = remote("TutorialDone"),
+	-- Serveur -> tous : événements des paliers du trou noir (server/BlackholeTiers -> client/BlackholeFx) :
+	--   ("TierUp", palier)              le trou noir monte d'un palier
+	--   ("Spit")                        il recrache des roches de lave (palier 2)
+	--   ("Bullseye", point, joueur)     lancer au centre, x2 (palier 3)
+	--   ("Catch", point)                un tentacule rattrape un objet (palier 4)
+	--   ("Meteors")                     pluie de météorites (palier 5)
+	--   ("Combo", point, joueur, mult)  combo de lancers (palier 6)
+	--   ("Jackpot", finServeur)         jackpot x5 (palier 7)
+	--   ("CollapseSoon")                jauge du palier 7 pleine
+	--   ("Collapse", { noms })          effondrement : retour au palier 1, noms des joueurs récompensés
+	HoleEvent = remote("HoleEvent"),
 }

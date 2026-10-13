@@ -1,0 +1,796 @@
+--!strict
+-- BlackholeFx : l'aspect du trou noir selon son palier (server/BlackholeTiers, Config.Blackhole), en blocs à tenons.
+--   1 Éveil      couronne violette + vortex de cubes qui tourbillonnent vers le centre
+--   2 Éruption   bord de roches et de lave, braises, gerbe de feu quand il recrache des roches
+--   3 Cible      trois anneaux rouges et blancs qui tournent en sens opposés (centre = x2)
+--   4 Abysses    six tentacules en cubes qui ondulent et frappent quand ils rattrapent un objet
+--   5 Gravité    disque de matière incliné qui tourne autour du cœur, éclairs bleus
+--   6 Supernova  pointes de lumière qui pulsent, ondes de choc
+--   7 Divin      couronne d'or, anneaux gyroscopiques, rayons de lumière, paillettes
+-- + la jauge commune au-dessus du trou, les annonces (évolution, jackpot, effondrement) et les bulles de bonus.
+-- Tout est local (aucune donnée envoyée) : le serveur publie l'état en attributs de ReplicatedStorage
+-- (HoleTier, HoleGauge, HoleNeed, HoleCollapse, HoleJackpotUntil) et les moments forts par Remotes.HoleEvent.
+
+local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local ScreenScale = require(script.Parent.ScreenScale)
+local Sounds = require(script.Parent.Sounds)
+
+local HOLE = Config.Blackhole
+local R = Config.Arena.HoleRadius
+local CORE_Y = 9 -- hauteur du cœur noir (server/MapGenerator)
+local localPlayer = Players.LocalPlayer
+local rng = Random.new()
+local V, CF, ANG = Vector3.new, CFrame.new, CFrame.Angles
+
+local folder = Instance.new("Folder")
+folder.Name = "BlackholeFx"
+folder.Parent = Workspace
+
+----------------------------------------------------------------------
+-- Briques
+----------------------------------------------------------------------
+
+local function block(parent: Instance, size: Vector3, cf: CFrame, color: Color3, neon: boolean?, alpha: number?): Part
+	local p = Instance.new("Part")
+	p.Size = size
+	p.CFrame = cf
+	p.Color = color
+	p.Anchored = true
+	p.CanCollide = false
+	p.CanTouch = false
+	p.CanQuery = false
+	p.CastShadow = false
+	p.Transparency = alpha or 0
+	if neon then
+		p.Material = Enum.Material.Neon
+	else
+		p.Material = Enum.Material.Plastic
+		p.TopSurface = Enum.SurfaceType.Studs
+		p.FrontSurface = Enum.SurfaceType.Studs
+		p.BackSurface = Enum.SurfaceType.Studs
+		p.LeftSurface = Enum.SurfaceType.Studs
+		p.RightSurface = Enum.SurfaceType.Studs
+		p.BottomSurface = Enum.SurfaceType.Smooth
+	end
+	p.Parent = parent
+	return p
+end
+
+local function shade(color: Color3, amount: number): Color3
+	return color:Lerp(Color3.new(0.04, 0.03, 0.08), amount)
+end
+
+local function newModel(name: string, parent: Instance): Model
+	local m = Instance.new("Model")
+	m.Name = name
+	m.Parent = parent
+	return m
+end
+
+-- Anneau de `count` blocs autour de l'origine du modèle (plan horizontal), couleurs alternées.
+local function ring(parent: Instance, radius: number, count: number, depth: number, height: number, y: number,
+	colorA: Color3, colorB: Color3, neonA: boolean?, neonB: boolean?): Model
+	local m = newModel("Ring", parent)
+	local width = 2 * math.pi * radius / count * 0.86
+	for i = 0, count - 1 do
+		local a = i * math.pi * 2 / count
+		local even = i % 2 == 0
+		block(m, V(width, height, depth), ANG(0, a, 0) * CF(0, y, -radius), if even then colorA else colorB,
+			if even then neonA else neonB)
+	end
+	m.WorldPivot = CFrame.identity
+	return m
+end
+
+local function emitter(parent: Instance, texture: string, color: Color3, rate: number, size: number, speed: number,
+	life: number): ParticleEmitter
+	local fx = Instance.new("ParticleEmitter")
+	fx.Texture = texture
+	fx.Color = ColorSequence.new(color, color:Lerp(Color3.new(1, 1, 1), 0.5))
+	fx.Rate = rate
+	fx.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, size), NumberSequenceKeypoint.new(1, 0) })
+	fx.Transparency = NumberSequence.new(0.1, 1)
+	fx.Speed = NumberRange.new(speed * 0.5, speed)
+	fx.Lifetime = NumberRange.new(life * 0.6, life)
+	fx.LightEmission = 1
+	fx.SpreadAngle = Vector2.new(25, 25)
+	fx.EmissionDirection = Enum.NormalId.Top
+	fx.Parent = parent
+	return fx
+end
+
+-- Zone invisible qui émet des particules sur toute sa surface (braises, bulles, paillettes).
+local function emitArea(parent: Instance, size: Vector3, cf: CFrame): Part
+	return block(parent, size, cf, Color3.new(), false, 1)
+end
+
+local SPARK = "rbxasset://textures/particles/sparkles_main.dds"
+local FIRE = "rbxasset://textures/particles/fire_main.dds"
+
+----------------------------------------------------------------------
+-- Ondes de choc (palier 6, évolution, effondrement)
+----------------------------------------------------------------------
+
+type Wave = { model: Model, parts: { BasePart }, from: number, to: number, born: number, life: number }
+local waves: { Wave } = {}
+
+local function shockwave(color: Color3, from: number, to: number, life: number)
+	local m = newModel("Wave", folder)
+	local parts: { BasePart } = {}
+	for i = 0, 35 do
+		local part = block(m, V(4, 0.8, 1.2), CFrame.identity, color, true)
+		part:SetAttribute("Angle", i * math.pi * 2 / 36)
+		table.insert(parts, part)
+	end
+	table.insert(waves, { model = m, parts = parts, from = from, to = to, born = os.clock(), life = life })
+end
+
+local function updateWaves()
+	local now = os.clock()
+	for i = #waves, 1, -1 do
+		local wave = waves[i]
+		local f = (now - wave.born) / wave.life
+		if f >= 1 then
+			wave.model:Destroy()
+			table.remove(waves, i)
+		else
+			local eased = 1 - (1 - f) ^ 2
+			local radius = wave.from + (wave.to - wave.from) * eased
+			local width = 2 * math.pi * radius / 36 * 0.8
+			for _, part in ipairs(wave.parts) do
+				local a = part:GetAttribute("Angle") :: number
+				part.Size = V(width, 0.8 + (1 - f) * 2, 1.2)
+				part.CFrame = ANG(0, a, 0) * CF(0, 1.5, -radius)
+				part.Transparency = f
+			end
+		end
+	end
+end
+
+----------------------------------------------------------------------
+-- Aspects des paliers
+----------------------------------------------------------------------
+
+type Look = {
+	model: Model,
+	update: (t: number, dt: number) -> (),
+	event: ((kind: string, a: any, b: any) -> ())?,
+}
+
+-- Couronne de blocs autour du bord, commune à tous les paliers (aux couleurs du palier).
+local function crown(model: Model, def: Config.HoleTier, rock: Color3?): Model
+	local base = rock or shade(def.Color, 0.55)
+	local c = ring(model, R + 5.5, 44, 3, 1.6, 0.9, base, shade(def.Color, 0.3))
+	-- Un bloc lumineux tous les quatre, un cran plus haut.
+	local glow = ring(model, R + 5.5, 11, 1.2, 0.6, 2, def.Color2, def.Color, true, true)
+	glow.Parent = c
+	c.WorldPivot = CFrame.identity
+	return c
+end
+
+local builders: { [number]: (Model, Config.HoleTier) -> Look } = {}
+
+-- 1 Éveil : vortex de cubes en spirale vers le centre.
+builders[1] = function(model, def)
+	local rim = crown(model, def)
+	local vortex = newModel("Vortex", model)
+	for arm = 0, 3 do
+		for i = 0, 15 do
+			local f = i / 16
+			local radius = (R - 3) * (1 - f) + 9
+			local a = arm * math.pi / 2 + f * 2.8
+			local s = 2.2 - f * 1.2
+			block(vortex, V(s, s, s), ANG(0, a, 0) * CF(0, 1.2 + f * 2.5, -radius) * ANG(f, f * 2, 0),
+				if i % 2 == 0 then def.Color else def.Color2, true)
+		end
+	end
+	vortex.WorldPivot = CFrame.identity
+	local area = emitArea(model, V(R * 1.6, 1, R * 1.6), CF(0, 1, 0))
+	emitter(area, SPARK, def.Color2, 14, 1.2, 3, 2)
+	return {
+		model = model,
+		update = function(t)
+			rim:PivotTo(ANG(0, t * 0.05, 0))
+			vortex:PivotTo(ANG(0, -t * 0.55, 0))
+		end,
+	}
+end
+
+-- 2 Éruption : roches, lave qui pulse, braises ; gerbe de feu quand il recrache.
+builders[2] = function(model, def)
+	local rock = Color3.fromRGB(58, 44, 40)
+	local rim = crown(model, def, rock)
+	local lava = ring(model, R + 1.5, 30, 3.5, 0.5, 0.45, def.Color, def.Color2, true, true)
+	for i = 0, 9 do
+		local a = i * math.pi * 2 / 10 + 0.2
+		local base = ANG(0, a, 0) * CF(0, 0, -(R + 10))
+		local h = 4 + (i % 3) * 2
+		block(model, V(6, h, 5), base * CF(0, h / 2, 0), rock)
+		block(model, V(4, h * 0.6, 3.6), base * CF(0.8, h + h * 0.3, 0.4) * ANG(0, 0.4, 0), shade(rock, -0.2))
+		block(model, V(0.6, h * 0.7, 5.2), base * CF(-1, h / 2, 0), def.Color, true) -- fissure de lave
+	end
+	local area = emitArea(model, V(R * 2, 1, R * 2), CF(0, 1, 0))
+	local embers = emitter(area, FIRE, def.Color, 30, 1.4, 12, 1.6)
+	embers.Acceleration = V(0, 6, 0)
+	local mouth = emitArea(model, V(6, 1, 6), CF(0, CORE_Y + 9, 0))
+	local burst = emitter(mouth, FIRE, def.Color2, 0, 6, 60, 1.4)
+	burst.SpreadAngle = Vector2.new(40, 40)
+	local lavaParts = lava:GetChildren()
+	return {
+		model = model,
+		update = function(t)
+			rim:PivotTo(ANG(0, t * 0.03, 0))
+			for i, part in ipairs(lavaParts) do
+				if part:IsA("BasePart") then
+					part.Transparency = 0.1 + 0.25 * (0.5 + 0.5 * math.sin(t * 2.2 + i * 0.7))
+				end
+			end
+		end,
+		event = function(kind)
+			if kind == "Spit" then
+				burst:Emit(70)
+			end
+		end,
+	}
+end
+
+-- 3 Cible : anneaux qui tournent en sens opposés ; le premier marque la zone x2.
+builders[3] = function(model, def)
+	local rim = crown(model, def)
+	local inner = ring(model, HOLE.Target.Radius, 18, 2.2, 0.7, 1, def.Color, def.Color2, true, false)
+	local middle = ring(model, 25, 30, 2.4, 0.6, 0.9, def.Color2, shade(def.Color, 0.2), false, false)
+	local outer = ring(model, R - 3, 40, 2.6, 0.6, 0.9, def.Color, def.Color2, true, false)
+	local innerParts = inner:GetChildren()
+	local flash = 0
+	return {
+		model = model,
+		update = function(t, dt)
+			rim:PivotTo(ANG(0, t * 0.05, 0))
+			inner:PivotTo(ANG(0, t * 0.6, 0))
+			middle:PivotTo(ANG(0, -t * 0.35, 0))
+			outer:PivotTo(ANG(0, t * 0.2, 0))
+			flash = math.max(0, flash - dt * 2)
+			for _, part in ipairs(innerParts) do
+				if part:IsA("BasePart") then
+					part.Size = V(part.Size.X, 0.7 + flash * 3, part.Size.Z)
+				end
+			end
+		end,
+		event = function(kind)
+			if kind == "Bullseye" then
+				flash = 1
+			end
+		end,
+	}
+end
+
+-- 4 Abysses : tentacules en cubes, recalculés à chaque image.
+builders[4] = function(model, def)
+	local rim = crown(model, def)
+	local SEGMENTS, LENGTH = 10, 3.4
+	type Tentacle = { base: CFrame, angle: number, phase: number, segs: { BasePart }, suckers: { BasePart }, slam: number }
+	local tentacles: { Tentacle } = {}
+	for k = 0, 5 do
+		local angle = k * math.pi / 3 + math.pi / 6
+		local root = V(math.sin(angle) * (R + 3), 0.4, math.cos(angle) * (R + 3))
+		local tentacle: Tentacle = {
+			base = CFrame.lookAt(root, V(0, 0.4, 0)),
+			angle = angle,
+			phase = k * 1.3,
+			segs = {},
+			suckers = {},
+			slam = 0,
+		}
+		for i = 1, SEGMENTS do
+			local w = 4.6 - (i - 1) * 0.34
+			table.insert(tentacle.segs, block(model, V(w, LENGTH + 0.2, w), CFrame.identity,
+				if i % 3 == 0 then shade(def.Color2, 0.25) else def.Color2))
+			table.insert(tentacle.suckers, block(model, V(w * 0.45, w * 0.45, 0.3), CFrame.identity, def.Color, true))
+		end
+		table.insert(tentacles, tentacle)
+	end
+	local area = emitArea(model, V(R * 2, 1, R * 2), CF(0, 1, 0))
+	local bubbles = emitter(area, SPARK, def.Color, 18, 1, 5, 2.5)
+	bubbles.Acceleration = V(0, 3, 0)
+	return {
+		model = model,
+		update = function(t, dt)
+			rim:PivotTo(ANG(0, t * 0.04, 0))
+			for _, tentacle in ipairs(tentacles) do
+				tentacle.slam = math.max(0, tentacle.slam - dt * 1.6)
+				local curl = 1 + math.sin(tentacle.slam * math.pi) * 1.4
+				local cf = tentacle.base
+				for i, seg in ipairs(tentacle.segs) do
+					-- Presque droit à la base, de plus en plus courbé vers le bout (crochet au-dessus du trou).
+					local bend = (0.02 + 0.2 * (i / SEGMENTS) ^ 2 + 0.05 * math.sin(t * 1.4 + tentacle.phase + i * 0.5)) * curl
+					local sway = 0.07 * math.sin(t * 0.9 + tentacle.phase + i * 0.35)
+					cf = cf * ANG(-bend, 0, sway) * CF(0, LENGTH, 0)
+					local center = cf * CF(0, -LENGTH / 2, 0)
+					seg.CFrame = center
+					tentacle.suckers[i].CFrame = center * CF(0, 0, -seg.Size.Z / 2 - 0.1)
+				end
+			end
+		end,
+		event = function(kind, position)
+			if kind == "Catch" and typeof(position) == "Vector3" then
+				local best, bestDistance = tentacles[1], math.huge
+				for _, tentacle in ipairs(tentacles) do
+					local distance = (tentacle.base.Position - position).Magnitude
+					if distance < bestDistance then
+						best, bestDistance = tentacle, distance
+					end
+				end
+				best.slam = 1
+			end
+		end,
+	}
+end
+
+-- 5 Gravité : disque de matière incliné + éclairs.
+builders[5] = function(model, def)
+	local rim = crown(model, def)
+	local disc = newModel("Disc", model)
+	local inner = ring(disc, 19, 28, 1.8, 1.4, 0, Color3.fromRGB(255, 245, 220), def.Color, true, true)
+	local outer = ring(disc, 28, 36, 2.2, 1.2, 0, def.Color, shade(def.Color, 0.35), true, false)
+	inner.Parent, outer.Parent = disc, disc
+	disc.WorldPivot = CFrame.identity
+	local bolts = newModel("Bolts", model)
+	local nextBolt = 0
+	local function bolt(t: number)
+		local a = rng:NextNumber(0, math.pi * 2)
+		local from = V(math.sin(a) * (R + 4), 1.5, math.cos(a) * (R + 4))
+		local to = V(rng:NextNumber(-3, 3), CORE_Y + rng:NextNumber(-3, 3), rng:NextNumber(-3, 3))
+		local last = from
+		for i = 1, 6 do
+			local point = if i == 6 then to else from:Lerp(to, i / 6) + V(rng:NextNumber(-3, 3), rng:NextNumber(-2, 4), rng:NextNumber(-3, 3))
+			local part = block(bolts, V(0.45, 0.45, (point - last).Magnitude), CFrame.lookAt((point + last) / 2, point), def.Color2, true)
+			Debris:AddItem(part, 0.14)
+			last = point
+		end
+		nextBolt = t + rng:NextNumber(0.7, 2.2)
+	end
+	return {
+		model = model,
+		update = function(t)
+			rim:PivotTo(ANG(0, t * 0.05, 0))
+			local tilt = CF(0, CORE_Y, 0) * ANG(0.25, 0, 0.1)
+			inner:PivotTo(tilt * ANG(0, t * 0.9, 0))
+			outer:PivotTo(tilt * ANG(0, t * 0.5, 0))
+			if t >= nextBolt then
+				bolt(t)
+			end
+		end,
+	}
+end
+
+-- 6 Supernova : pointes qui pulsent et ondes de choc régulières.
+builders[6] = function(model, def)
+	local rim = crown(model, def)
+	type Spike = { part: Part, dir: Vector3, phase: number }
+	local spikes: { Spike } = {}
+	for i = 0, 11 do
+		local a = i * math.pi * 2 / 12
+		local up = if i % 2 == 0 then 0.45 else -0.05
+		local dir = V(math.sin(a), up, math.cos(a)).Unit
+		table.insert(spikes, {
+			part = block(model, V(2.6, 2.6, 10), CFrame.identity, if i % 2 == 0 then def.Color else def.Color2, true),
+			dir = dir,
+			phase = i * 0.6,
+		})
+	end
+	local area = emitArea(model, V(8, 8, 8), CF(0, CORE_Y, 0))
+	local glitter = emitter(area, SPARK, def.Color, 25, 1.6, 18, 1.2)
+	glitter.SpreadAngle = Vector2.new(180, 180)
+	local nextWave = 0
+	return {
+		model = model,
+		update = function(t)
+			rim:PivotTo(ANG(0, t * 0.06, 0))
+			for _, spike in ipairs(spikes) do
+				local length = 12 + 14 * (0.5 + 0.5 * math.sin(t * 2.4 + spike.phase))
+				spike.part.Size = V(2.6, 2.6, length)
+				local start = V(0, CORE_Y, 0) + spike.dir * 10
+				spike.part.CFrame = CFrame.lookAt(start + spike.dir * length / 2, start + spike.dir * length)
+			end
+			if t >= nextWave then
+				nextWave = t + 2.6
+				shockwave(def.Color, 12, 75, 1.4)
+			end
+		end,
+	}
+end
+
+-- 7 Divin : couronne d'or, anneaux gyroscopiques, rayons de lumière.
+builders[7] = function(model, def)
+	local gold = Color3.fromRGB(230, 170, 30)
+	local rim = crown(model, def, gold)
+	local ringA = ring(model, 15, 26, 1.6, 1.6, 0, def.Color, def.Color2, true, false)
+	local ringB = ring(model, 18.5, 30, 1.4, 1.4, 0, gold, def.Color2, false, true)
+	local rays = newModel("Rays", model)
+	for i = 0, 11 do
+		local a = i * math.pi * 2 / 12
+		-- Pied du rayon contre le cœur, le haut s'écarte vers l'extérieur : une couronne de lumière qui s'ouvre.
+		block(rays, V(2.6, 80, 0.6), ANG(0, a, 0) * CF(0, CORE_Y, -7) * ANG(-0.38, 0, 0) * CF(0, 40, 0), def.Color2, true, 0.72)
+	end
+	rays.WorldPivot = CFrame.identity
+	local area = emitArea(model, V(R * 2, 1, R * 2), CF(0, 1, 0))
+	local glitter = emitter(area, SPARK, def.Color, 30, 1.2, 6, 2.5)
+	glitter.Acceleration = V(0, 2, 0)
+	local rayParts = rays:GetChildren()
+	return {
+		model = model,
+		update = function(t)
+			rim:PivotTo(ANG(0, t * 0.05, 0))
+			ringA:PivotTo(CF(0, CORE_Y, 0) * ANG(0, t * 0.7, 0) * ANG(math.pi / 2, 0, 0))
+			ringB:PivotTo(CF(0, CORE_Y, 0) * ANG(0, -t * 0.45, 0) * ANG(math.pi / 2, 0, math.pi / 3) * ANG(0, t * 0.8, 0))
+			rays:PivotTo(ANG(0, t * 0.12, 0))
+			local jackpot = Workspace:GetServerTimeNow() < (ReplicatedStorage:GetAttribute("HoleJackpotUntil") or 0) :: number
+			local alpha = if jackpot then 0.25 + 0.15 * math.sin(t * 10) else 0.72
+			for _, part in ipairs(rayParts) do
+				if part:IsA("BasePart") then
+					part.Transparency = alpha
+				end
+			end
+		end,
+	}
+end
+
+----------------------------------------------------------------------
+-- Changement de palier : l'ancien aspect s'effondre dans le cœur, le nouveau apparaît dans un flash
+----------------------------------------------------------------------
+
+local current: Look? = nil
+local currentTier = 0
+local dying: { { model: Model, born: number, scale: number } } = {}
+local startClock = os.clock()
+
+local function resizeCore(tier: number)
+	local map = Workspace:FindFirstChild("Map")
+	local halo = map and map:FindFirstChild("BlackholeHalo")
+	if halo and halo:IsA("BasePart") then
+		local size = 24 + (tier - 1) * 3
+		halo.Size = V(size, size, size)
+	end
+end
+
+local function build(tier: number)
+	tier = math.clamp(tier, 1, #HOLE.Tiers)
+	if tier == currentTier then
+		return
+	end
+	if current then
+		table.insert(dying, { model = current.model, born = os.clock(), scale = current.model:GetScale() })
+	end
+	currentTier = tier
+	local model = newModel("Tier" .. tier, folder)
+	current = builders[tier](model, HOLE.Tiers[tier])
+	model.WorldPivot = CFrame.identity
+	resizeCore(tier)
+end
+
+----------------------------------------------------------------------
+-- Jauge au-dessus du trou
+----------------------------------------------------------------------
+
+local anchor = block(folder, V(1, 1, 1), CF(0, 40, 0), Color3.new(), false, 1)
+anchor.Name = "GaugeAnchor"
+local board = Instance.new("BillboardGui")
+board.Name = "HoleGauge"
+-- Taille en studs : un panneau dans le monde, petit de loin (ne cache pas le HUD), grand de près.
+board.Size = UDim2.fromScale(46, 15.5)
+board.LightInfluence = 0
+board.MaxDistance = 1200
+board.Adornee = anchor
+board.Parent = anchor
+
+local function stroke(parent: Instance, thickness: number)
+	local s = Instance.new("UIStroke")
+	s.Thickness = thickness
+	s.Color = Color3.new(0, 0, 0)
+	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+	s.Parent = parent
+	return s
+end
+
+local function label(parent: Instance, text: string, y: number, height: number, color: Color3): TextLabel
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.Position = UDim2.fromScale(0, y)
+	l.Size = UDim2.fromScale(1, height)
+	l.Font = Enum.Font.LuckiestGuy
+	l.TextScaled = true
+	l.TextColor3 = color
+	l.Text = text
+	stroke(l, 3)
+	l.Parent = parent
+	return l
+end
+
+local title = label(board, "", 0, 0.34, Color3.new(1, 1, 1))
+local bar = Instance.new("Frame")
+bar.Position = UDim2.fromScale(0.06, 0.38)
+bar.Size = UDim2.fromScale(0.88, 0.26)
+bar.BackgroundColor3 = Color3.fromRGB(25, 22, 40)
+bar.Parent = board
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0, 10)
+barCorner.Parent = bar
+local barStroke = Instance.new("UIStroke")
+barStroke.Thickness = 3
+barStroke.Parent = bar
+local fill = Instance.new("Frame")
+fill.Size = UDim2.fromScale(0, 1)
+fill.BackgroundColor3 = Color3.new(1, 1, 1)
+fill.Parent = bar
+local fillCorner = Instance.new("UICorner")
+fillCorner.CornerRadius = UDim.new(0, 10)
+fillCorner.Parent = fill
+local fillGradient = Instance.new("UIGradient")
+fillGradient.Parent = fill
+local amount = label(bar, "", 0.08, 0.84, Color3.new(1, 1, 1))
+amount.ZIndex = 2
+local hint = label(board, "", 0.68, 0.3, Color3.new(1, 1, 1))
+
+local function refreshGauge()
+	local tier = (ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number
+	local gauge = (ReplicatedStorage:GetAttribute("HoleGauge") or 0) :: number
+	local need = (ReplicatedStorage:GetAttribute("HoleNeed") or 1) :: number
+	local collapse = ReplicatedStorage:GetAttribute("HoleCollapse") == true
+	local jackpotUntil = (ReplicatedStorage:GetAttribute("HoleJackpotUntil") or 0) :: number
+	local def = HOLE.Tiers[math.clamp(tier, 1, #HOLE.Tiers)]
+	title.Text = string.format("TROU NOIR · PALIER %d · %s", tier, def.Name)
+	title.TextColor3 = def.Color
+	fillGradient.Color = ColorSequence.new(def.Color, def.Color2)
+	local f = math.clamp(gauge / math.max(need, 1), 0, 1)
+	TweenService:Create(fill, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { Size = UDim2.fromScale(math.max(f, 0.04), 1) }):Play()
+	local left = jackpotUntil - Workspace:GetServerTimeNow()
+	if collapse then
+		amount.Text = "PLEIN !"
+		hint.Text = "EFFONDREMENT À LA PROCHAINE DIGESTION !"
+		hint.TextColor3 = Color3.fromRGB(255, 90, 90)
+	elseif left > 0 then
+		amount.Text = string.format("%d / %d", math.floor(gauge), need)
+		hint.Text = string.format("JACKPOT x%d : %d s !", HOLE.Jackpot.Multiplier, math.ceil(left))
+		hint.TextColor3 = def.Color
+	else
+		amount.Text = string.format("%d / %d", math.floor(gauge), need)
+		hint.Text = if tier < #HOLE.Tiers then def.Hint else def.Hint .. " Remplis la jauge : effondrement !"
+		hint.TextColor3 = Color3.new(1, 1, 1)
+	end
+end
+
+for _, name in ipairs({ "HoleTier", "HoleGauge", "HoleNeed", "HoleCollapse", "HoleJackpotUntil" }) do
+	ReplicatedStorage:GetAttributeChangedSignal(name):Connect(refreshGauge)
+end
+ReplicatedStorage:GetAttributeChangedSignal("HoleTier"):Connect(function()
+	build((ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number)
+end)
+
+----------------------------------------------------------------------
+-- Annonces à l'écran
+----------------------------------------------------------------------
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "HoleAnnounce"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 20
+gui.Parent = localPlayer:WaitForChild("PlayerGui")
+
+local flash = Instance.new("Frame")
+flash.Size = UDim2.fromScale(1, 1)
+flash.BackgroundTransparency = 1
+flash.BorderSizePixel = 0
+flash.Parent = gui
+
+local root = ScreenScale.attach(gui)
+local banner = Instance.new("Frame")
+banner.AnchorPoint = Vector2.new(0.5, 0.5)
+banner.Position = UDim2.fromScale(0.5, 0.42)
+banner.Size = UDim2.fromOffset(900, 190)
+banner.BackgroundTransparency = 1
+banner.Visible = false
+banner.Parent = root
+local bannerScale = Instance.new("UIScale")
+bannerScale.Parent = banner
+local bannerTop = label(banner, "", 0, 0.24, Color3.new(1, 1, 1))
+local bannerTitle = label(banner, "", 0.22, 0.5, Color3.new(1, 1, 1))
+local bannerSub = label(banner, "", 0.74, 0.24, Color3.new(1, 1, 1))
+for _, l in ipairs({ bannerTop, bannerTitle, bannerSub }) do
+	local s = l:FindFirstChildOfClass("UIStroke")
+	if s then
+		s.Thickness = if l == bannerTitle then 6 else 4
+	end
+end
+local bannerToken = 0
+
+local function showBanner(top: string, text: string, sub: string, color: Color3, hold: number)
+	bannerToken += 1
+	local token = bannerToken
+	bannerTop.Text, bannerTitle.Text, bannerSub.Text = top, text, sub
+	bannerTitle.TextColor3 = color
+	for _, l in ipairs({ bannerTop, bannerTitle, bannerSub }) do
+		l.TextTransparency = 0
+		local s = l:FindFirstChildOfClass("UIStroke")
+		if s then
+			s.Transparency = 0
+		end
+	end
+	banner.Visible = true
+	bannerScale.Scale = 0.3
+	TweenService:Create(bannerScale, TweenInfo.new(0.45, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	task.delay(hold, function()
+		if token ~= bannerToken then
+			return
+		end
+		local fade = TweenInfo.new(0.5)
+		for _, l in ipairs({ bannerTop, bannerTitle, bannerSub }) do
+			TweenService:Create(l, fade, { TextTransparency = 1 }):Play()
+			local s = l:FindFirstChildOfClass("UIStroke")
+			if s then
+				TweenService:Create(s, fade, { Transparency = 1 }):Play()
+			end
+		end
+		task.delay(0.55, function()
+			if token == bannerToken then
+				banner.Visible = false
+			end
+		end)
+	end)
+end
+
+local function screenFlash(color: Color3, strength: number)
+	flash.BackgroundColor3 = color
+	flash.BackgroundTransparency = 1 - strength
+	TweenService:Create(flash, TweenInfo.new(0.8, Enum.EasingStyle.Quad), { BackgroundTransparency = 1 }):Play()
+end
+
+-- Petite secousse de caméra (décalage du Humanoid, rendu local).
+local shakeUntil, shakePower = 0, 0
+local function shake(power: number, duration: number)
+	shakePower = power
+	shakeUntil = os.clock() + duration
+end
+
+-- Bulle de texte qui monte au-dessus d'un point du monde (centre x2, combo, tentacule).
+local function popText(position: Vector3, text: string, color: Color3)
+	local holder = block(folder, V(1, 1, 1), CF(position + V(0, 3, 0)), Color3.new(), false, 1)
+	local bubble = Instance.new("BillboardGui")
+	bubble.Size = UDim2.fromOffset(240, 60)
+	bubble.AlwaysOnTop = true
+	bubble.LightInfluence = 0
+	bubble.MaxDistance = 260
+	bubble.Parent = holder
+	local l = label(bubble, text, 0, 1, color)
+	TweenService:Create(bubble, TweenInfo.new(1.2, Enum.EasingStyle.Quad), { StudsOffset = V(0, 8, 0) }):Play()
+	local fade = TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	TweenService:Create(l, fade, { TextTransparency = 1 }):Play()
+	local outline = l:FindFirstChildOfClass("UIStroke")
+	if outline then
+		TweenService:Create(outline, fade, { Transparency = 1 }):Play()
+	end
+	Debris:AddItem(holder, 1.3)
+end
+
+----------------------------------------------------------------------
+-- Événements du serveur
+----------------------------------------------------------------------
+
+Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c: any)
+	local tier = (ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number
+	local def = HOLE.Tiers[math.clamp(tier, 1, #HOLE.Tiers)]
+	if kind == "TierUp" and type(a) == "number" then
+		local newDef = HOLE.Tiers[math.clamp(a, 1, #HOLE.Tiers)]
+		build(a)
+		screenFlash(newDef.Color, 0.55)
+		shockwave(newDef.Color, 8, 140, 1.6)
+		shockwave(newDef.Color2, 8, 90, 1.1)
+		shake(0.8, 0.9)
+		Sounds.play("HoleTierUp")
+		Sounds.play("HoleRumble")
+		Sounds.duck(4)
+		showBanner("LE TROU NOIR ÉVOLUE !", string.format("PALIER %d : %s", a, newDef.Name), newDef.Hint, newDef.Color, 3.6)
+	elseif kind == "Spit" then
+		Sounds.playAt("HoleRumble", V(0, CORE_Y, 0))
+		shake(0.3, 0.4)
+	elseif kind == "Bullseye" and typeof(a) == "Vector3" then
+		popText(a, string.format("CENTRE ! x%d", HOLE.Target.Multiplier), def.Color)
+		if b == localPlayer then
+			Sounds.play("HoleBonus")
+		end
+	elseif kind == "Catch" and typeof(a) == "Vector3" then
+		popText(a, "ATTRAPÉ !", def.Color)
+		Sounds.playAt("HoleCatch", a)
+	elseif kind == "Meteors" then
+		Sounds.play("HoleMeteors")
+		showBanner("", "PLUIE DE MÉTÉORITES !", "Ramasse-les : +" .. HOLE.Gravity.MeteorValue .. " points chacune", def.Color, 2.2)
+	elseif kind == "Combo" and typeof(a) == "Vector3" and type(c) == "number" then
+		popText(a, "COMBO x" .. tostring(math.floor(c * 100 + 0.5) / 100), if c >= HOLE.Combo.Max then def.Color2 else def.Color)
+		if b == localPlayer then
+			Sounds.play("HoleBonus")
+		end
+	elseif kind == "Jackpot" then
+		Sounds.play("HoleJackpot")
+		screenFlash(def.Color, 0.35)
+		showBanner("", string.format("JACKPOT x%d !", HOLE.Jackpot.Multiplier),
+			string.format("Pendant %d s, chaque objet avalé vaut %d fois plus !", HOLE.Jackpot.Duration, HOLE.Jackpot.Multiplier), def.Color, 3)
+	elseif kind == "CollapseSoon" then
+		Sounds.play("HoleRumble")
+		shake(0.5, 0.8)
+		showBanner("LA JAUGE EST PLEINE !", "EFFONDREMENT IMMINENT", string.format(
+			"À la prochaine digestion : score x%d et familiers offerts aux 3 meilleurs !", HOLE.Collapse.ScoreMultiplier),
+			Color3.fromRGB(255, 80, 80), 3.6)
+	elseif kind == "Collapse" then
+		local names = if type(a) == "table" then a else {}
+		screenFlash(Color3.new(1, 1, 1), 0.9)
+		shockwave(Color3.new(1, 1, 1), 150, 6, 1.2)
+		shockwave(Color3.fromRGB(255, 80, 80), 6, 160, 1.8)
+		shake(1.2, 1.4)
+		Sounds.play("HoleCollapse")
+		Sounds.play("HoleRumble")
+		Sounds.duck(4)
+		local sub = if #names > 0 then "Cadeaux : " .. table.concat(names, ", ") else "Le trou noir renaît au palier 1."
+		showBanner(string.format("SCORE DU TOUR x%d !", HOLE.Collapse.ScoreMultiplier), "EFFONDREMENT !", sub,
+			Color3.fromRGB(255, 80, 80), 4)
+	end
+	if current and current.event then
+		current.event(kind, a, b)
+	end
+end)
+
+----------------------------------------------------------------------
+
+RunService.RenderStepped:Connect(function(dt: number)
+	local t = os.clock() - startClock
+	if current then
+		current.update(t, dt)
+	end
+	-- L'ancien aspect est aspiré dans le cœur.
+	for i = #dying, 1, -1 do
+		local entry = dying[i]
+		local f = (os.clock() - entry.born) / 0.9
+		if f >= 1 then
+			entry.model:Destroy()
+			table.remove(dying, i)
+		else
+			entry.model:ScaleTo(math.max(0.02, entry.scale * (1 - f) ^ 2))
+			entry.model:PivotTo(ANG(0, f * 6, 0))
+		end
+	end
+	updateWaves()
+	-- Secousse.
+	local character = localPlayer.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		local left = shakeUntil - os.clock()
+		if left > 0 then
+			local p = shakePower * math.min(1, left * 2)
+			humanoid.CameraOffset = V(rng:NextNumber(-p, p), rng:NextNumber(-p, p), rng:NextNumber(-p, p))
+		elseif humanoid.CameraOffset ~= Vector3.zero and shakeUntil > 0 then
+			humanoid.CameraOffset = Vector3.zero
+			shakeUntil = 0
+		end
+	end
+end)
+
+-- Compte à rebours du jackpot sur la jauge.
+task.spawn(function()
+	while true do
+		task.wait(1)
+		local until_ = (ReplicatedStorage:GetAttribute("HoleJackpotUntil") or 0) :: number
+		if until_ > Workspace:GetServerTimeNow() - 1 then
+			refreshGauge()
+		end
+	end
+end)
+
+build((ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number)
+refreshGauge()

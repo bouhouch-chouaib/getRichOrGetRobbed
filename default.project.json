@@ -25,6 +25,7 @@
         "UseKey": { "$className": "RemoteEvent" },
         "BuyTier": { "$className": "RemoteEvent" },
         "TierReached": { "$className": "RemoteEvent" },
+        "HoleEvent": { "$className": "RemoteEvent" },
         "Grappled": { "$className": "RemoteEvent" },
         "ClaimIndex": { "$className": "RemoteEvent" },
         "IndexClaimed": { "$className": "RemoteEvent" },

@@ -251,7 +251,30 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   bulles, étoiles, plumes) changent ; musique `Config.Sounds.Playlists[palier]` (seul le palier 1 a sa playlist pour l'instant).
   Repères : `server/MapGenerator` pose l'attribut `Skin` (rôle de couleur) sur chaque pièce et `DecorSpot` sur les troncs.
   Les stations (tapis, banc) gardent leur modèle (`StationLooks`). Tout est local : aucune donnée envoyée.
-- Trou noir à paliers (collectif, voir docs/DIRECTION_ARTISTIQUE.md §8) : pas encore fait.
+- Trou noir à paliers : voir la section suivante.
+
+## Paliers du trou noir (13 oct., `server/BlackholeTiers`, `client/BlackholeFx`, `Config.Blackhole`)
+
+- **Jauge commune au serveur** : chaque objet avalé (lancer valable) ajoute sa valeur (au moins 1, sans multiplicateur).
+  Jauge à remplir = `GaugeNeed[palier]` x (joueurs ^ 0,6) ; solo : 40, 50, 60, 75, 90, 110, 130 (~3 tours par palier).
+  Pleine : le trou monte d'un palier tout de suite (flash, onde de choc, secousse, « LE TROU NOIR ÉVOLUE ! »).
+  État en attributs de ReplicatedStorage (`HoleTier`, `HoleGauge`, `HoleNeed`, `HoleCollapse`, `HoleJackpotUntil`),
+  moments forts par `Remotes.HoleEvent`. Le palier n'est pas sauvegardé (il appartient au serveur).
+- **Une mécanique par palier, toujours un bonus** :
+  1 Éveil (vortex violet, rien de plus) • 2 Éruption (3 roches de lave x3 recrachées dans l'arène toutes les 15 s,
+  `ItemSpawner.SpawnSpecial`) • 3 Cible (point d'impact prévu à moins de 14 studs du centre : x2) • 4 Abysses
+  (6 tentacules ; un objet lancé tombé à moins de 14 studs du bord, depuis moins de 5 s, est rattrapé et compte) •
+  5 Gravité (objets sauvages attirés jusqu'à 52 studs du centre, sans y tomber ; 3 météorites de 5 points toutes les 18 s) •
+  6 Supernova (combo : +0,25 par lancer réussi à moins de 5 s du précédent, x2 max) • 7 Divin (jackpot x5 pendant 10 s,
+  une fois par tour, annoncé).
+- **Effondrement** : jauge du palier 7 pleine -> à la digestion suivante, score du tour x2 avant les tirages, puis un
+  familier Légendaire au 1er contributeur du cycle et un Épique aux 2e et 3e, puis retour au palier 1.
+- Aspect (client, blocs à tenons) : couronne de blocs au bord dans les couleurs du palier + décor propre (vortex,
+  roches et lave, anneaux de cible, tentacules animés, disque de matière et éclairs, pointes qui pulsent et ondes de choc,
+  anneaux d'or et rayons). L'ancien décor est aspiré dans le cœur au changement. Jauge en panneau au-dessus du trou
+  (taille en studs : petite de loin). Bulles « CENTRE ! x2 », « ATTRAPÉ ! », « COMBO x1.5 ».
+- Test dans Studio : `game.ReplicatedStorage:SetAttribute("DebugHoleTier", 5)` (côté serveur) passe au palier 5 ;
+  8 = jauge du palier 7 pleine (effondrement à la prochaine digestion).
 
 ## Sons et musique
 
