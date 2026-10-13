@@ -644,9 +644,6 @@ for _, name in ipairs({ "HoleTier", "HoleGauge", "HoleNeed", "HoleCollapse", "Ho
 end
 ReplicatedStorage:GetAttributeChangedSignal("HoleTier"):Connect(function()
 	build((ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number)
-buildWorldFrame()
-localPlayer:GetAttributeChangedSignal("World"):Connect(buildWorldFrame)
-localPlayer:GetAttributeChangedSignal("Tier"):Connect(buildWorldFrame)
 end)
 
 ----------------------------------------------------------------------
@@ -936,3 +933,8 @@ end)
 
 build((ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number)
 refreshGauge()
+
+-- Cadre du trou aux couleurs du monde du joueur, reconstruit quand il change de monde.
+buildWorldFrame()
+localPlayer:GetAttributeChangedSignal("World"):Connect(buildWorldFrame)
+localPlayer:GetAttributeChangedSignal("Tier"):Connect(buildWorldFrame)
