@@ -43,13 +43,14 @@ local followers: { [Player]: { Follower } } = {}
 -- Familier porté au-dessus de la tête, posé sur les deux mains.
 local CARRY_SCALE = 0.6 -- plus petit que dans la base : un gros familier ne cache pas la vue du porteur
 local CARRY_MAX = PetSizes.CARRY_MAX * PetSizes.PLAYER -- studs : hauteur max tenu à bout de bras
-local GRIP_SINK = 0.35 -- studs : les mains s'enfoncent un peu sous le familier (il est tenu, pas posé)
+local GRIP_LOW = 0.3 -- les mains le serrent sur les côtés, au tiers bas de son corps
+local HEAD_GAP = 0.15 -- studs : jamais posé sur la tête
 local THROW = Config.Sacrifice.Throw
--- mine : c'est MON familier qu'il porte ; bottom : du pivot du modèle au bas de son corps
-type Carried = { model: Model, timer: TextLabel, mine: boolean, bottom: number }
+-- mine : c'est MON familier qu'il porte ; bottom : du pivot du modèle au bas de son corps ; width / height : son corps
+type Carried = { model: Model, timer: TextLabel, mine: boolean, bottom: number, width: number, height: number }
 local carried: { [Player]: Carried } = {}
 -- Lancers en cours (le familier reste dans les mains jusqu'à Release, les bras finissent le geste jusqu'à End).
-type Throw = { model: Model?, bottom: number, start: number }
+type Throw = { model: Model?, bottom: number, width: number, height: number, start: number }
 local throws: { [Player]: Throw } = {}
 
 local localPlayer = Players.LocalPlayer
@@ -162,7 +163,7 @@ local function rebuildCarried(player: Player)
 	end
 
 	model.Parent = folder
-	carried[player] = { model = model, timer = timer, mine = mine, bottom = bottom }
+	carried[player] = { model = model, timer = timer, mine = mine, bottom = bottom, width = size.X, height = size.Y }
 end
 
 -- Jeté dans le trou : le familier porté passe dans les lancers (l'attribut CarryingPet s'efface juste après, il ne
@@ -184,10 +185,10 @@ Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, _from: any, _petI
 				child:Destroy()
 			end
 		end
-		throws[carrier] = { model = entry.model, bottom = entry.bottom, start = os.clock() }
+		throws[carrier] = { model = entry.model, bottom = entry.bottom, width = entry.width, height = entry.height, start = os.clock() }
 	else
 		-- Attribut déjà effacé (ordre réseau inhabituel) : on joue quand même le geste, BlackholeFx part de la tête.
-		throws[carrier] = { model = nil, bottom = 0, start = os.clock() }
+		throws[carrier] = { model = nil, bottom = 0, width = 1, height = 1, start = os.clock() }
 	end
 end)
 
@@ -230,7 +231,8 @@ end)
 ----------------------------------------------------------------------
 -- Bras : porter à deux mains au-dessus de la tête, puis lancer
 --   pitch : bras levé vers l'avant (90 = tendu devant, 180 = au-dessus de la tête, plus = vers l'arrière)
---   roll  : bras penché vers la tête (> 0 = vers l'intérieur) ; elbow : coude plié (même sens que pitch)
+--   roll  : bras penché vers la tête (> 0 = vers l'intérieur), calculé pour que les mains serrent le familier sur
+--           ses côtés (gripRoll) ; elbow : coude plié (même sens que pitch)
 --   lean  : torse penché (> 0 = en arrière)
 ----------------------------------------------------------------------
 
@@ -240,7 +242,7 @@ type ArmKey = { t: number, pose: ArmPose }
 local HOLD: ArmPose = { pitch = 168, roll = 14, elbow = 18, lean = 0 }
 local THROW_KEYS: { ArmKey } = {
 	{ t = 0, pose = HOLD },
-	{ t = THROW.WindUp, pose = { pitch = 212, roll = 10, elbow = 62, lean = 14 } }, -- élan : loin derrière la tête
+	{ t = THROW.WindUp, pose = { pitch = 200, roll = 10, elbow = 45, lean = 12 } }, -- élan : loin derrière la tête
 	{ t = THROW.Release, pose = { pitch = 128, roll = 6, elbow = 4, lean = -10 } }, -- lancer : les mains le lâchent
 	{ t = THROW.Release + 0.15, pose = { pitch = 72, roll = 4, elbow = 10, lean = -16 } }, -- accompagnement
 	{ t = THROW.End, pose = { pitch = 8, roll = 0, elbow = 6, lean = 0 } }, -- retour, bras le long du corps
@@ -269,6 +271,23 @@ local function sampleThrow(t: number): ArmPose
 	return THROW_KEYS[#THROW_KEYS].pose
 end
 
+-- Inclinaison des bras pour que les mains touchent les côtés d'un familier de cette largeur (d'après la taille de
+-- l'avatar : largeur des épaules, longueur des bras).
+local function gripRoll(character: Model, width: number): number
+	local torso = character:FindFirstChild("UpperTorso")
+	local upper = character:FindFirstChild("RightUpperArm")
+	local lower = character:FindFirstChild("RightLowerArm")
+	local hand = character:FindFirstChild("RightHand")
+	if not (torso and upper and lower and hand and torso:IsA("BasePart") and upper:IsA("BasePart")
+		and lower:IsA("BasePart") and hand:IsA("BasePart")) then
+		return HOLD.roll
+	end
+	local shoulder = torso.Size.X / 2 + upper.Size.X / 2 -- écart épaule - milieu du corps
+	local reach = upper.Size.Y + lower.Size.Y + hand.Size.Y / 2
+	local half = math.clamp(width / 2 + hand.Size.X / 2 - 0.1, 0.35, shoulder + 0.8) -- milieu de la main visé
+	return math.deg(math.asin(math.clamp((shoulder - half) / reach, -0.6, 0.6)))
+end
+
 local function applyArms(character: Model, p: ArmPose)
 	for _, side in ipairs({ "Right", "Left" }) do
 		local roll = math.rad(if side == "Right" then p.roll else -p.roll)
@@ -290,43 +309,52 @@ end
 -- Après les animations de Roblox (Stepped) : on impose la pose des bras.
 RunService.Stepped:Connect(function()
 	local now = os.clock()
-	for player in pairs(carried) do
-		if player.Character then
-			applyArms(player.Character, HOLD)
+	for player, entry in pairs(carried) do
+		local character = player.Character
+		if character then
+			applyArms(character, { pitch = HOLD.pitch, roll = gripRoll(character, entry.width), elbow = HOLD.elbow, lean = HOLD.lean })
 		end
 	end
 	for player, throw in pairs(throws) do
 		local t = now - throw.start
+		local character = player.Character
 		if t >= THROW.End then
 			if throw.model then
 				throw.model:Destroy()
 			end
 			throws[player] = nil -- les animations normales reprennent d'elles-mêmes
-		elseif player.Character then
-			applyArms(player.Character, sampleThrow(t))
+		elseif character then
+			-- Les mains gardent leur prise jusqu'au lâcher, puis suivent le geste.
+			local p = sampleThrow(t)
+			local hold = 1 - math.clamp((t - THROW.WindUp) / (THROW.Release - THROW.WindUp), 0, 1)
+			p.roll += (gripRoll(character, throw.width) - HOLD.roll) * hold
+			applyArms(character, p)
 		end
 	end
 end)
 
--- Point de prise : entre les deux mains (ou au-dessus de la tête si l'avatar n'a pas de mains R15).
-local function gripPoint(character: Model, root: BasePart): Vector3
+-- Bas du familier tenu : les mains le serrent au tiers bas de ses côtés, jamais posé sur la tête (sauf pendant
+-- l'élan du lancer : il passe derrière la tête, collé aux mains) ; au-dessus de la tête si l'avatar n'a pas de
+-- mains R15.
+local function gripBottom(character: Model, root: BasePart, height: number, overHead: boolean): Vector3
+	local head = character:FindFirstChild("Head")
+	local headTop = if head and head:IsA("BasePart") then head.Position.Y + head.Size.Y / 2 else root.Position.Y + 3
 	local left = character:FindFirstChild("LeftHand")
 	local right = character:FindFirstChild("RightHand")
 	if left and right and left:IsA("BasePart") and right:IsA("BasePart") then
-		return (left.Position + right.Position) / 2 + Vector3.new(0, math.max(left.Size.Y, right.Size.Y) / 2 - GRIP_SINK, 0)
+		local middle = (left.Position + right.Position) / 2
+		local y = middle.Y - height * GRIP_LOW
+		return Vector3.new(middle.X, if overHead then math.max(y, headTop + HEAD_GAP) else y, middle.Z)
 	end
-	local head = character:FindFirstChild("Head")
-	if head and head:IsA("BasePart") then
-		return head.Position + Vector3.new(0, head.Size.Y / 2 + 1.2, 0)
-	end
-	return root.Position + Vector3.new(0, 4, 0)
+	local top = if head and head:IsA("BasePart") then head.Position else root.Position
+	return Vector3.new(top.X, headTop + 1.2, top.Z)
 end
 
--- Le familier tenu, face à l'avant du porteur, posé sur ses mains.
-local function holdAt(model: Model, character: Model, root: BasePart, bottom: number, bob: number)
+-- Le familier tenu, face à l'avant du porteur, entre ses mains.
+local function holdAt(model: Model, character: Model, root: BasePart, bottom: number, height: number, bob: number, overHead: boolean)
 	local look = root.CFrame.LookVector
 	local flat = CFrame.lookAt(Vector3.zero, Vector3.new(look.X, 0, look.Z))
-	model:PivotTo(CFrame.new(gripPoint(character, root) + Vector3.new(0, bottom + bob, 0)) * flat.Rotation)
+	model:PivotTo(CFrame.new(gripBottom(character, root, height, overHead) + Vector3.new(0, bottom + bob, 0)) * flat.Rotation)
 end
 
 RunService:BindToRenderStep("PetFollowPlacement", Enum.RenderPriority.Last.Value - 10, function(dt: number)
@@ -363,7 +391,7 @@ RunService:BindToRenderStep("PetFollowPlacement", Enum.RenderPriority.Last.Value
 			local velocity = root.AssemblyLinearVelocity
 			local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
 			local bob = if speed > 1 then math.abs(math.sin(now * 9)) * 0.35 * math.min(1, speed / 16) else 0
-			holdAt(entry.model, character, root, entry.bottom, bob)
+			holdAt(entry.model, character, root, entry.bottom, entry.height, bob, true)
 			-- Bulle "Reprendre" (posée par le serveur) : visible seulement par la victime.
 			local prompt = root:FindFirstChild("RecoverPrompt")
 			if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled ~= entry.mine then
@@ -386,7 +414,7 @@ RunService:BindToRenderStep("PetFollowPlacement", Enum.RenderPriority.Last.Value
 				model:Destroy()
 				throw.model = nil
 			else
-				holdAt(model, character, root, throw.bottom, 0)
+				holdAt(model, character, root, throw.bottom, throw.height, 0, false)
 			end
 		end
 	end

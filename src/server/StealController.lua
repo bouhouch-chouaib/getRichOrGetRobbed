@@ -6,7 +6,7 @@
 --   - [E] (maintenu) sur un familier qui se balade dans une base. Base adverse DÉVERROUILLÉE : on le VOLE. Sa propre
 --     base : on le PORTE (pour le jeter dans le trou noir). Mains libres (ni objet ni arme). La bulle est créée par le
 --     client (client/BasePets) qui envoie Remotes.StealPet -> BasePetsController.PetTriggered.
---   - Le porteur le tient dans le dos (attribut "CarryingPet", affiché par client/PetFollow) et avance plus ou moins vite
+--   - Le porteur le tient à deux mains au-dessus de la tête (attribut "CarryingPet", affiché par client/PetFollow) et avance plus ou moins vite
 --     selon sa force et le poids du familier (Config.Carry, attribut "SpeedMultiplier"). Un seul familier à la fois.
 --   - Voleur arrivé dans SA base : le familier change de propriétaire. Propriétaire revenu dans sa base : il le repose.
 --   - Près du trou noir pendant le Feeding : Remotes.ThrowPet le JETTE dedans. Il est perdu pour son propriétaire et le

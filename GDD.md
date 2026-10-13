@@ -121,7 +121,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   mains libres (ni objet ni arme). La bulle "Voler" est **créée par le client** sur le repère `Base_N.Pets.<PetId>` (client/BasePets),
   qu'il déplace localement sur le familier, et envoie `Remotes.StealPet(anchor)` (4 demandes/s max). Ne jamais remettre une
   bulle serveur : Roblox refuse un ProximityPrompt validé loin de sa position serveur, et le serveur ne déplace jamais les repères
-  (c'était la cause des vols qui « ne marchaient pas »). Le voleur le porte dans le dos (attribut `CarryingPet` + `CarryingUntil`, affiché
+  (c'était la cause des vols qui « ne marchaient pas »). Le voleur le porte à deux mains au-dessus de la tête (13 oct. : bras levés, mains
+  qui le serrent sur les côtés selon sa largeur, petit rebond en marchant ; jeté dans le trou : élan en arrière, lancer et
+  accompagnement des deux bras, il quitte les mains à `Config.Sacrifice.Throw.Release` puis vole vers le trou ; attribut `CarryingPet` + `CarryingUntil`, affiché
   par `client/PetFollow` pour tout le monde, étiquette nom + temps restant), est ralenti selon sa force et le poids du familier
   (13 oct., voir « Porter, jeter, lâcher » ci-dessous ; attribut `SpeedMultiplier`, appliqué par `SessionData`) et ne peut plus
   ramasser d'objet ni sortir d'arme. Arrivé dans **sa** base : transfert. Frappé (batte), KO du dôme, mort, réapparition, départ

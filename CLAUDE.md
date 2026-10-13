@@ -111,6 +111,7 @@ créé à la volée dans ServerScriptService partage les modules du jeu (pas la 
 **13 oct. : porter, jeter, lâcher** (`server/StealController`, `client/CarryControls`, `client/LoosePets`, `shared/PetPath`) :
 porter son propre familier ou en voler un, vitesse selon force et poids, le jeter dans le trou (récompense selon le familier),
 le lâcher quand on est frappé (il rentre à pied, n'importe qui peut le reprendre). Vérifié en jeu (solo).
+Porté à deux mains au-dessus de la tête + geste de lancer des deux bras (`client/PetFollow`, `Config.Sacrifice.Throw`), vérifié en jeu (solo).
 
 **13 oct. : trou noir à 7 paliers** (`server/BlackholeTiers`, `client/BlackholeFx`, `Config.Blackhole`) : jauge commune,
 un aspect et une mécanique bonus par palier, effondrement après le 7. Vérifié en jeu (solo) : les 7 aspects, annonce,
