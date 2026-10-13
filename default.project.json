@@ -23,6 +23,8 @@
         "FusionResult": { "$className": "RemoteEvent" },
         "UseGrapple": { "$className": "RemoteEvent" },
         "UseKey": { "$className": "RemoteEvent" },
+        "BuyTier": { "$className": "RemoteEvent" },
+        "TierReached": { "$className": "RemoteEvent" },
         "Grappled": { "$className": "RemoteEvent" },
         "ClaimIndex": { "$className": "RemoteEvent" },
         "IndexClaimed": { "$className": "RemoteEvent" },

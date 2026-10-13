@@ -75,6 +75,12 @@ end
 
 -- Par défaut, toute pièce est un bloc de Plastic à tenons. Les appelants ne changent la matière que pour
 -- les effets (Neon, Glass, ForceField).
+-- Rôle de chaque couleur de la palette : client/WorldSkin repeint les pièces de ce rôle aux couleurs du monde.
+local SKIN_OF: { [string]: string } = {}
+for role, color in pairs(COLORS) do
+	SKIN_OF[color:ToHex()] = role
+end
+
 local function makePart(name: string, size: Vector3, cframe: CFrame, color: Color3, parent: Instance): Part
 	local part = Instance.new("Part")
 	part.Name = name
@@ -83,6 +89,10 @@ local function makePart(name: string, size: Vector3, cframe: CFrame, color: Colo
 	part.CFrame = cframe
 	part.Color = color
 	studify(part)
+	local role = SKIN_OF[color:ToHex()]
+	if role then
+		part:SetAttribute("Skin", role)
+	end
 	part.Parent = parent
 	return part
 end
@@ -345,7 +355,8 @@ end
 -- Arbre en cubes : tronc carré, feuillage de blocs empilés en trois verts.
 local function createTree(position: Vector3, scale: number, folder: Folder)
 	local trunkHeight = 10 * scale
-	makePart("Trunk", Vector3.new(2.6, trunkHeight, 2.6) * Vector3.new(scale, 1, scale), CFrame.new(position + Vector3.new(0, trunkHeight / 2, 0)), COLORS.Trunk, folder)
+	local trunk = makePart("Trunk", Vector3.new(2.6, trunkHeight, 2.6) * Vector3.new(scale, 1, scale), CFrame.new(position + Vector3.new(0, trunkHeight / 2, 0)), COLORS.Trunk, folder)
+	trunk:SetAttribute("DecorSpot", scale) -- client/WorldSkin y pose le décor du monde (cactus, cristal...)
 
 	local y = trunkHeight
 	local leaves = {

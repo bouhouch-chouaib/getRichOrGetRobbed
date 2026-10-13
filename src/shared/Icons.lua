@@ -41,6 +41,7 @@ local IDS: { [string]: string } = {
 	Grapple = "rbxassetid://122249795654523",
 	Ghost = "rbxassetid://105946207492948",
 	Key = "rbxassetid://82597263772074",
+	Planet = "rbxassetid://76382577989974",
 }
 
 -- Autres noms utiles : raretés (Id de Config.Rarities), améliorations (Config.Shop), produits Robux (Key).

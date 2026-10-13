@@ -260,6 +260,26 @@ Config.Lock = {
 	ButtonRadius = 4,
 }
 
+-- Mondes (paliers) : le joueur paie Price pour voyager au monde suivant (server/TierController, fenêtre client/WorldMenu).
+-- Tout change pour lui (client/WorldSkin) : l'arène entière s'affiche dans SON monde, sa base dans son monde aux yeux de
+-- tous, la musique (Config.Sounds.Playlists[palier]). Chaque monde multiplie son revenu (IncomeMultiplier).
+-- Les couleurs et décors de chaque monde sont dans shared/Worlds (pur visuel).
+export type WorldDef = { Id: string, Name: string, Price: number, IncomeMultiplier: number }
+Config.Worlds = {
+	{ Id = "Prairie", Name = "Prairie", Price = 0, IncomeMultiplier = 1 },
+	{ Id = "Desert", Name = "Désert", Price = 1e6, IncomeMultiplier = 1.5 },
+	{ Id = "Volcan", Name = "Volcan", Price = 40e6, IncomeMultiplier = 2.25 },
+	{ Id = "Glace", Name = "Glace", Price = 1.5e9, IncomeMultiplier = 3.4 },
+	{ Id = "Abysses", Name = "Abysses", Price = 75e9, IncomeMultiplier = 5 },
+	{ Id = "Cosmos", Name = "Cosmos", Price = 4e12, IncomeMultiplier = 7.5 },
+	{ Id = "Divin", Name = "Divin", Price = 250e12, IncomeMultiplier = 11 },
+} :: { WorldDef }
+
+-- Monde (1 à #Config.Worlds) d'un palier quelconque, borné.
+function Config.GetWorld(tier: number): WorldDef
+	return Config.Worlds[math.clamp(math.floor(tier), 1, #Config.Worlds)]
+end
+
 -- Clés (achat en Robux uniquement, produit "Key1" à 49 R$) : ouvrent une base adverse FERMÉE pendant Duration secondes,
 -- même si son propriétaire la referme (server/LockController, bulle client/BaseKeys). Une clé est consommée par usage.
 -- Sans clé, la bulle du portail propose d'en acheter une ; elle est utilisée dès que l'achat est validé.

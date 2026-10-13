@@ -589,6 +589,22 @@ def key(c):
         c.poly(star_points(cx, cy, r, r * 0.35, 4, -90), hexc("FFF3B0"), out=12)
 
 
+@icon("Planet")
+def planet(c):
+    body, ring = hexc("FF9A2E"), hexc("FFD43B")
+    # Anneau arrière, planète, anneau avant.
+    c.d.arc((90, 380, 934, 660), 180, 360, fill=BLACK, width=60 + 2 * OUT)
+    c.d.arc((90, 380, 934, 660), 180, 360, fill=ring, width=60)
+    c.circle(512, 500, 270, body)
+    c.circle(420, 420, 60, shade(body, -0.15), out=0)
+    c.circle(600, 580, 45, shade(body, -0.15), out=0)
+    c.d.arc((90, 380, 934, 660), 0, 180, fill=BLACK, width=60 + 2 * OUT)
+    c.d.arc((90, 380, 934, 660), 0, 180, fill=ring, width=60)
+    c.shine((360, 300, 470, 370), 170)
+    for cx, cy, r in [(840, 200, 70), (180, 230, 50)]:
+        c.poly(star_points(cx, cy, r, r * 0.35, 4, -90), hexc("FFF3B0"), out=12)
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     rendered = []

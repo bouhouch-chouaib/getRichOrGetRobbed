@@ -212,6 +212,23 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Serveurs : 8 joueurs maximum (une base chacun). `BaseManager` renvoie un 9e joueur avec un message « serveur plein ».
 - `shared/TextFormat.upper` : majuscules avec accents (remplace `:upper()` partout).
 
+## Mondes (paliers)
+
+- 15 oct. : 7 mondes (`Config.Worlds`) : Prairie, Désert 1 M$, Volcan 40 M$, Glace 1,5 B$, Abysses 75 B$, Cosmos 4 T$,
+  Divin 250 T$. Le joueur paie le monde suivant dans la fenêtre **Mondes** (bouton orange du HUD, `client/WorldMenu` ->
+  `Remotes.BuyTier` -> `server/TierController` -> `SessionData.AdvanceTier`). Palier sauvegardé (`tier`, attribut `Tier`).
+  Rien n'est perdu au voyage ; chaque monde multiplie le revenu (`IncomeMultiplier` : x1,5 / x2,25 / x3,4 / x5 / x7,5 / x11,
+  appliqué dans `EconomyController.GetIncome`). Arrivée : flash, « MONDE 3 : VOLCAN », son ; annonce aux autres
+  (`Remotes.TierReached`).
+- **Tout change pour le joueur** (`client/WorldSkin`, visuel dans `shared/Worlds`) : l'arène entière (sol, mur rond,
+  chemins, kiosques...) est repeinte dans SON monde ; chaque base est repeinte dans le monde de SON PROPRIÉTAIRE (on voit
+  chez les autres des bases désert, glace, cosmos) ; les arbres sont remplacés par le décor du monde (cactus, roches de lave,
+  cristaux, coraux, astéroïdes qui tournent, colonnes dorées) ; air, teinte, nuages et particules (sable, braises, neige,
+  bulles, étoiles, plumes) changent ; musique `Config.Sounds.Playlists[palier]` (seul le palier 1 a sa playlist pour l'instant).
+  Repères : `server/MapGenerator` pose l'attribut `Skin` (rôle de couleur) sur chaque pièce et `DecorSpot` sur les troncs.
+  Les stations (tapis, banc) gardent leur modèle (`StationLooks`). Tout est local : aucune donnée envoyée.
+- Trou noir à paliers (collectif, voir docs/DIRECTION_ARTISTIQUE.md §8) : pas encore fait.
+
 ## Sons et musique
 
 - Tout est côté client. `client/Sounds` (module) : `play(nom)` (son 2D, pour soi), `playAt(nom, position)` (son 3D, Attachment

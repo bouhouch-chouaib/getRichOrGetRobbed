@@ -53,8 +53,10 @@ function EconomyController.GetIncome(player: Player): number
 	for _, petId in ipairs(EconomyController.GetTopPets(player)) do
 		income += petIncome(petId)
 	end
-	-- Passes 2X Argent et VIP (shared/Perks).
-	return income * Perks.MoneyMultiplier(player)
+	-- Passes 2X Argent et VIP (shared/Perks), puis bonus du monde du joueur (Config.Worlds).
+	local tier = player:GetAttribute("Tier")
+	local world = Config.GetWorld(if type(tier) == "number" then tier else 1)
+	return income * Perks.MoneyMultiplier(player) * world.IncomeMultiplier
 end
 
 EconomyController.GetPetIncome = petIncome

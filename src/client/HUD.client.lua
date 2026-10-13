@@ -25,6 +25,7 @@ local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local FusionMenu = require(script.Parent.FusionMenu)
 local IndexMenu = require(script.Parent.IndexMenu)
 local MenuKit = require(script.Parent.MenuKit)
+local WorldMenu = require(script.Parent.WorldMenu)
 local ScreenScale = require(script.Parent.ScreenScale)
 local ShopMenu = require(script.Parent.ShopMenu)
 local Toast = require(script.Parent.Toast)
@@ -135,7 +136,7 @@ menuColumn.Name = "Left"
 menuColumn.BackgroundTransparency = 1
 menuColumn.AnchorPoint = if isTouch then Vector2.new(0, 0) else Vector2.new(0, 0.5)
 menuColumn.Position = if isTouch then UDim2.new(0, 16, 0, STATS_HEIGHT + 20) else UDim2.new(0, 16, 0.5, -30)
-menuColumn.Size = UDim2.fromOffset(220, 170)
+menuColumn.Size = UDim2.fromOffset(220, 250)
 menuColumn.Parent = gui
 
 -- Ligne de stat d'entraînement : icône + « NV 13 » en italique + barre d'XP.
@@ -190,6 +191,7 @@ end
 
 local shopButton, shopBadge = menuButton("Shop", "Boutique", 0, UiStyle.Colors.Green)
 local indexButton, indexBadge = menuButton("Index", "Index", 88, UiStyle.Colors.Cyan)
+local worldsButton, worldsBadge = menuButton("Planet", "Mondes", 176, Color3.fromRGB(255, 150, 40))
 
 ----------------------------------------------------------------------
 -- Fenêtres
@@ -198,9 +200,11 @@ local indexButton, indexBadge = menuButton("Index", "Index", 88, UiStyle.Colors.
 local shop = ShopMenu.create(gui)
 local index = IndexMenu.create(gui)
 local fusion = FusionMenu.create(gui)
+local worlds = WorldMenu.create(gui)
 
 shopButton.Activated:Connect(shop.window.toggle)
 indexButton.Activated:Connect(index.window.toggle)
+worldsButton.Activated:Connect(worlds.window.toggle)
 
 ----------------------------------------------------------------------
 -- Carte de résultats des tirages (fin de manche)
@@ -320,6 +324,10 @@ local function updateStats()
 		fusion.refresh()
 	end
 	UiStyle.setBadge(shopBadge, if shop.affordableCount() > 0 then "!" else nil)
+	if worlds.window.isOpen() then
+		worlds.refresh()
+	end
+	UiStyle.setBadge(worldsBadge, if worlds.canTravel() then "!" else nil)
 	local claimable = MenuKit.claimableCount()
 	UiStyle.setBadge(indexBadge, if claimable > 0 then tostring(claimable) else nil)
 end
@@ -467,6 +475,20 @@ Remotes.FusionResult.OnClientEvent:Connect(function(petId: string)
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 	fusion.showResult(petId)
 	Toast.show(string.format("FUSION : %s (%s) !", TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
+end)
+
+-- Un joueur arrive dans un nouveau monde : grande célébration pour lui, annonce pour les autres.
+Remotes.TierReached.OnClientEvent:Connect(function(traveller: Player, tier: number)
+	if typeof(traveller) ~= "Instance" or type(tier) ~= "number" then
+		return
+	end
+	local world = Config.GetWorld(tier)
+	if traveller == player then
+		worlds.window.close()
+		WorldMenu.celebrate(gui, tier)
+	else
+		Toast.show(string.format("%s VOYAGE VERS LE MONDE %s !", TextFormat.upper(traveller.DisplayName), TextFormat.upper(world.Name)), Color3.fromRGB(255, 180, 60))
+	end
 end)
 
 -- Récompenses d'Index accordées.

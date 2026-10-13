@@ -79,6 +79,10 @@ return {
 	WeaponFx = remote("WeaponFx"),
 	-- Client -> serveur : (base: Model) utiliser une clé sur le portail de cette base fermée (server/LockController).
 	UseKey = remote("UseKey"),
+	-- Client -> serveur : () voyager au monde suivant (server/TierController paie Config.Worlds[palier + 1].Price).
+	BuyTier = remote("BuyTier"),
+	-- Serveur -> tous : (joueur: Player, palier: number) un joueur vient d'arriver dans un nouveau monde.
+	TierReached = remote("TierReached"),
 	-- Client -> serveur : (direction: Vector3) tir du grappin dans cette direction (le serveur choisit la cible).
 	UseGrapple = remote("UseGrapple"),
 	-- Serveur -> victime : (tireur: Player, durée: number) tu es ramené(e) devant le tireur.
