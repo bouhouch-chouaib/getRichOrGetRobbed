@@ -275,6 +275,24 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Anti-duplication : il reste réservé dans la base de son propriétaire pendant tout ce temps ; chaque réservation est rendue
   une seule fois (fin d'un transport qui ne le lâche pas, ou fin du retour à pied).
 
+## Duels de familiers (13 oct., `server/DuelController`, `client/DuelClient`, `client/DuelFx`, `shared/DuelStats`, `Config.Duel`)
+
+- **Défi** : bulle [F] « Défier en duel » (manette Y) créée localement sur les autres joueurs (12 studs). La cible a 15 s
+  pour ACCEPTER / REFUSER. 6 s entre deux défis. Pas de duel en portant un familier.
+- **Choix** (60 s) : fenêtre DUEL DE FAMILIERS ; chacun choisit un familier de sa base (pas l'équipé), voit celui de
+  l'autre avec ses PV / attaque ; **une rareté d'écart au maximum** (cartes grisées sinon) ; les deux valident « PRÊT »,
+  changer de familier annule les deux validations (pas d'arnaque). Fermer la fenêtre = annuler.
+- **Arène** : jusqu'à 3 arènes en même temps, qui flottent au-dessus du trou noir (y = 165) ; île volante en blocs à
+  tenons (sol en damier violet, muret doré, piliers à flamme, estrades rouge / bleue, rochers en dessous) dessinée par
+  chaque client d'après `Workspace.Duels.Duel_N` (attributs). Les joueurs y sont téléportés et immobilisés, caméra fixe.
+- **Combat** : PV 150 et attaque 12, x (1 + 0,35 par rareté au-dessus de Commun) x (jusqu'à +10 % pour le plus grand de sa
+  tranche de taille) ; les familiers frappent chacun leur tour toutes les 0,55 s, dégâts x 0,8 à 1,2, 12 % de coups
+  critiques x 2 ; chaque clic du joueur (bouton « ENCOURAGE », clic, espace) donne +5 % au prochain coup (+60 % max,
+  8 clics/s comptés). 45 s max (puis le plus de PV en % gagne). Abandon (départ, réinitialisation, ANNULER) = défaite.
+- **Roue** (gagnant) : roue 3D de 8 cases au fond de l'arène, vue par tous : SON FAMILIER (1/8, transfert anti-duplication
+  comme le vol), 2 min d'argent x 2, 5 min, 10 min (revenu du gagnant, 50 $/s minimum), 1 tirage, 3 tirages, RELANCE.
+  Pendant tout le duel, les deux familiers sont réservés dans leur base (ni volables ni fusionnables).
+
 ## Paliers du trou noir (13 oct., `server/BlackholeTiers`, `client/BlackholeFx`, `Config.Blackhole`)
 
 - **Jauge commune au serveur** : chaque objet avalé (lancer valable) ajoute sa valeur (au moins 1, sans multiplicateur).

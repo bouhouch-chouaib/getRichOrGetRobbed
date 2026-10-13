@@ -333,6 +333,49 @@ Config.Sacrifice = {
 	Points = { 2, 4, 8, 15, 30, 60, 120, 240 }, -- points du tour (donc tirages) et jauge du trou, selon la rareté
 }
 
+-- Duels de familiers (server/DuelController, client/DuelClient, client/DuelFx).
+--   [F] « Défier » sur un autre joueur -> il accepte -> chacun choisit un familier (raretés proches : MaxRarityGap) et
+--   valide (les deux voient le choix de l'autre) -> les deux joueurs sont téléportés dans une arène qui flotte au-dessus
+--   du trou noir (visible de toute la map) -> combat automatique, chaque joueur clique pour encourager le sien ->
+--   le gagnant tourne la roue (Wheel, cases de même taille) : 1 case sur 8 = repartir avec le familier de l'adversaire.
+-- Puissance d'un familier : PV = BaseHP et attaque = BaseAttack, x (1 + PerRarity par rareté au-dessus de Commun),
+-- x (1 + SizeBonus x sa place dans la tranche de taille de sa rareté : le plus grand de la tranche a +10 %).
+export type WheelSlot = { Kind: string, Label: string, Color: Color3, Seconds: number?, Pulls: number? }
+Config.Duel = {
+	PromptDistance = 12, -- distance de la bulle « Défier » sur un joueur
+	RequestCooldown = 6, -- secondes entre deux défis lancés par le même joueur
+	InviteTime = 15, -- secondes pour accepter
+	PickTime = 60, -- secondes pour choisir son familier et valider
+	MaxRarityGap = 1, -- une rareté d'écart au maximum
+	ArenaCenter = Vector3.new(0, 165, 0), -- au-dessus du trou noir
+	ArenaSpacing = 120, -- plusieurs duels en même temps : arènes côte à côte
+	MaxArenas = 3,
+	BaseHP = 150,
+	BaseAttack = 12,
+	PerRarity = 0.35,
+	SizeBonus = 0.1,
+	AttackInterval = 0.55, -- les deux familiers frappent chacun leur tour
+	Spread = 0.2, -- dégâts x 0,8 à 1,2
+	CritChance = 0.12,
+	CritMultiplier = 2,
+	CheerPerClick = 0.05, -- +5 % de dégâts par clic depuis le dernier coup
+	CheerMax = 0.6, -- +60 % au plus
+	CheerRate = 8, -- clics comptés par seconde au maximum
+	MaxTime = 45, -- au-delà : le familier qui a le plus de PV (en %) gagne
+	SpinTime = 4.5, -- durée de la roue
+	Wheel = {
+		{ Kind = "Pet", Label = "SON FAMILIER !", Color = Color3.fromRGB(255, 205, 50) },
+		{ Kind = "Money", Label = "2 MIN D'ARGENT", Color = Color3.fromRGB(110, 235, 40), Seconds = 120 },
+		{ Kind = "Pulls", Label = "1 TIRAGE", Color = Color3.fromRGB(54, 204, 254), Pulls = 1 },
+		{ Kind = "Money", Label = "5 MIN D'ARGENT", Color = Color3.fromRGB(80, 200, 60), Seconds = 300 },
+		{ Kind = "Respin", Label = "RELANCE !", Color = Color3.fromRGB(255, 120, 210) },
+		{ Kind = "Money", Label = "2 MIN D'ARGENT", Color = Color3.fromRGB(110, 235, 40), Seconds = 120 },
+		{ Kind = "Pulls", Label = "3 TIRAGES", Color = Color3.fromRGB(168, 40, 252), Pulls = 3 },
+		{ Kind = "Money", Label = "10 MIN D'ARGENT", Color = Color3.fromRGB(255, 160, 40), Seconds = 600 },
+	} :: { WheelSlot },
+	MinIncome = 50, -- argent de la roue = revenu du gagnant par seconde (au moins 50 $/s) x Seconds
+}
+
 -- Effets de satisfaction (client/Effects) : points qui s'envolent, ouverture des tirages rares, secousses d'écran.
 Config.Effects = {
 	RevealMinRarity = 4, -- ouverture animée à partir de cet index de rareté (4 = Épique)

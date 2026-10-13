@@ -315,7 +315,7 @@ end
 
 -- Le joueur peut-il prendre un familier maintenant ? (mains libres, vivant, a une base)
 local function canCarry(player: Player): boolean
-	if carries[player] or leaving[player] or not BaseManager.GetBase(player) or not isAlive(player) then
+	if carries[player] or leaving[player] or player:GetAttribute("InDuel") or not BaseManager.GetBase(player) or not isAlive(player) then
 		return false
 	end
 	-- Arme en main : les mains sont prises (server/WeaponController).

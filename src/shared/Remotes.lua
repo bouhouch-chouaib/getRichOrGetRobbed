@@ -109,4 +109,12 @@ return {
 	PickLoosePet = remote("PickLoosePet"),
 	-- Client -> serveur : () jeter dans le trou noir le familier porté (Feeding, près du bord : server/StealController).
 	ThrowPet = remote("ThrowPet"),
+	-- Client -> serveur : duels de familiers (server/DuelController) : ("Request", joueur), ("Answer", accepte),
+	-- ("Pick", petId), ("Ready", prêt), ("Cheer"), ("Cancel").
+	DuelAction = remote("DuelAction"),
+	-- Serveur -> client(s) : ("Invite", joueur, fin), ("Waiting", joueur, fin), ("Cancelled", raison), ("Pick", adversaire,
+	-- fin), ("State", monFamilier, prêt, sonFamilier, prêt, fin), ("Start", arène, "A"/"B"), ("Announce", nomA, nomB, petA,
+	-- petB), ("Hit", arène, "A"/"B", dégâts, critique, encouragement), ("End", arène, gagnant, abandon), ("Won"/"Lost", nom),
+	-- ("Spin", arène, case), ("Reward", case, texte), ("PetWon", gagnant, perdant, petId).
+	DuelEvent = remote("DuelEvent"),
 }

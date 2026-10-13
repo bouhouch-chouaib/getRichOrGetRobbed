@@ -28,6 +28,8 @@
         "HoleEvent": { "$className": "RemoteEvent" },
         "PickLoosePet": { "$className": "RemoteEvent" },
         "ThrowPet": { "$className": "RemoteEvent" },
+        "DuelAction": { "$className": "RemoteEvent" },
+        "DuelEvent": { "$className": "RemoteEvent" },
         "Grappled": { "$className": "RemoteEvent" },
         "ClaimIndex": { "$className": "RemoteEvent" },
         "IndexClaimed": { "$className": "RemoteEvent" },

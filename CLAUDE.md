@@ -86,6 +86,10 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
+**13 oct. : duels de familiers** (`server/DuelController`, `client/DuelClient`, `client/DuelFx`) : défi [F], choix des
+familiers (une rareté d'écart), arène flottante au-dessus du trou, combat auto + clics, roue du gagnant (1/8 : le familier
+adverse). Analyse statique OK ; **pas encore testé en jeu (il faut 2 joueurs : Studio > Test > Clients et serveurs, 2 joueurs)**.
+
 **13 oct. : horloge de la manche en haut au centre** (pastille au-dessus de la consigne de phase et des points, `client/HUD`).
 
 **13 oct. : porter, jeter, lâcher** (`server/StealController`, `client/CarryControls`, `client/LoosePets`, `shared/PetPath`) :
