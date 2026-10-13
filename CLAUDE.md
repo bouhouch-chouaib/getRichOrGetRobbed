@@ -87,7 +87,8 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 
 - 14 oct. : armes remplacées par **batte + grappin** (voir GDD). Vérifiés en jeu (solo) : achat, pose et swing de la batte
   (direction mesurée image par image), tir du grappin dans le vide et retour du crochet. **À tester à 2 joueurs** : coup de
-  batte sur quelqu'un, grappin qui attrape et ramène un joueur, victime qui part en vrille.
+  batte sur quelqu'un, grappin qui attrape et ramène un joueur, victime qui part en vrille. Pouvoir d'invisibilité (6 s,
+  recharge 45 s, brisé par toute action) : vérifié en solo (achat, activation, fin, recharge) ; à voir à 2 joueurs (rendu vu par les autres).
 - **À tester à 2 joueurs** : vol (bulle client + `Remotes.StealPet`), défense « Reprendre », coups d'armes sur un voleur,
   victime qui quitte pendant un vol (le voleur gagne : testé seulement avec des joueurs simulés).
 - Vérifiés en jeu (solo) : lancer puis re-ramasser un objet, achat / réapparition des armes, mains exclusives,

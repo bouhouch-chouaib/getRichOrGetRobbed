@@ -21,6 +21,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
+local PowerController = require(script.Parent.PowerController)
 local SessionData = require(script.Parent.SessionData)
 local TrainingController = require(script.Parent.TrainingController)
 
@@ -33,7 +34,8 @@ local SOUNDS = Config.Sounds.Effects
 
 local BAT_ID = "WeaponBat"
 local GRAPPLE_ID = "WeaponGrapple"
-local WEAPON_IDS = { BAT_ID, GRAPPLE_ID }
+local POWER_ID = "PowerInvisible" -- pouvoir d'invisibilité (server/PowerController), rangé avec les armes
+local WEAPON_IDS = { BAT_ID, GRAPPLE_ID, POWER_ID }
 
 local immuneUntil: { [Player]: number } = {} -- batte : pas deux coups de suite sur le même joueur
 local grappleImmuneUntil: { [Player]: number } = {} -- grappin : pas rattrapé en boucle
@@ -137,6 +139,22 @@ local function buildGrapple(tool: Tool)
 	attachment(handle, "Muzzle", Vector3.new(0, 0.75, -2.35))
 end
 
+-- Orbe fantôme (pouvoir d'invisibilité) : sphère violette translucide, cœur lumineux, petits yeux de fantôme.
+local function buildOrb(tool: Tool)
+	local handle = makeHandle(tool, Vector3.new(0.5, 0.5, 0.5), Color3.fromRGB(40, 30, 60))
+	local shell = piece(tool, handle, "Shell", Vector3.new(1.3, 1.3, 1.3), CFrame.new(0, 0.75, 0), Color3.fromRGB(190, 150, 255), Enum.PartType.Ball, Enum.Material.Glass)
+	shell.Transparency = 0.35
+	local core = piece(tool, handle, "Core", Vector3.new(0.75, 0.75, 0.75), CFrame.new(0, 0.75, 0), Color3.fromRGB(160, 90, 255), Enum.PartType.Ball, Enum.Material.Neon)
+	for _, x in ipairs({ -0.17, 0.17 }) do
+		piece(tool, handle, "Eye", Vector3.new(0.12, 0.2, 0.08), CFrame.new(x, 0.82, -0.36), Color3.fromRGB(20, 10, 40))
+	end
+	local light = Instance.new("PointLight")
+	light.Color = core.Color
+	light.Range = 7
+	light.Brightness = 1.2
+	light.Parent = core
+end
+
 local function buildTool(weaponId: string): Tool
 	local item = shopItems[weaponId]
 	local tool = Instance.new("Tool")
@@ -145,7 +163,10 @@ local function buildTool(weaponId: string): Tool
 	tool.CanBeDropped = false
 	tool.RequiresHandle = true
 	tool:SetAttribute("WeaponId", weaponId)
-	if weaponId == BAT_ID then
+	if weaponId == POWER_ID then
+		buildOrb(tool)
+		tool.Grip = CFrame.new(0, 0, 0.2)
+	elseif weaponId == BAT_ID then
 		buildBat(tool)
 		-- Batte dans le prolongement de l'avant-bras (la pose « sur l'épaule » et le coup : client/WeaponFx).
 		tool.Grip = CFrame.new(0, -0.55, 0) * CFrame.Angles(math.rad(90), 0, 0)
@@ -228,6 +249,7 @@ local function batHit(attacker: Player, victim: Player, from: Vector3)
 		return
 	end
 	immuneUntil[victim] = os.clock() + WEAPONS.HitImmunity
+	PowerController.Reveal(victim)
 	TrainingController.Stop(victim) -- frappé sur le tapis / le banc : il en descend (sinon il serait ancré)
 	ItemInteraction.ReleaseHeld(victim) -- objets lâchés ; un vol en cours échoue (StealController)
 	humanoid:UnequipTools()
@@ -278,6 +300,7 @@ local function onBatActivated(player: Player, tool: Tool)
 	task.delay(BAT.Cooldown, function()
 		tool.Enabled = true
 	end)
+	PowerController.Reveal(player)
 	Remotes.WeaponFx:FireAllClients("Swing", player, BAT_ID)
 	local handle = tool:FindFirstChild("Handle")
 	if handle and handle:IsA("BasePart") then
@@ -323,6 +346,7 @@ local function onUseGrapple(player: Player, direction: unknown)
 		return
 	end
 	grappleReadyAt[player] = now + GRAPPLE.Cooldown
+	PowerController.Reveal(player)
 	tool.Enabled = false
 	task.delay(GRAPPLE.Cooldown, function()
 		tool.Enabled = true
@@ -364,6 +388,7 @@ local function onUseGrapple(player: Player, direction: unknown)
 	local victim = best :: Player
 	local victimRoot = getRoot(victim.Character) :: BasePart
 	grappleImmuneUntil[victim] = now + GRAPPLE.PullTime + 1.5
+	PowerController.Reveal(victim)
 	TrainingController.Stop(victim)
 	Remotes.WeaponFx:FireAllClients("Grapple", player, GRAPPLE_ID, victimRoot.Position, victim)
 	-- Le crochet met un peu de temps à arriver : la traction commence à l'impact.
@@ -410,6 +435,10 @@ local function giveWeapons(player: Player)
 			if weaponId == BAT_ID then
 				tool.Activated:Connect(function()
 					onBatActivated(player, tool)
+				end)
+			elseif weaponId == POWER_ID then
+				tool.Activated:Connect(function()
+					PowerController.Activate(player)
 				end)
 			end
 			-- Grappin : le clic est lu par le client (il faut la direction visée) -> Remotes.UseGrapple.

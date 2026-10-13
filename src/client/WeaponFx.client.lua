@@ -634,7 +634,9 @@ local function findTarget(head: BasePart, aim: Vector3): Player?
 	for _, other in ipairs(Players:GetPlayers()) do
 		local otherRoot = rootOf(other.Character)
 		local humanoid = other.Character and other.Character:FindFirstChildOfClass("Humanoid")
-		if other ~= player and otherRoot and humanoid and humanoid.Health > 0 then
+		local invisibleUntil = other:GetAttribute("InvisibleUntil")
+		local hidden = type(invisibleUntil) == "number" and invisibleUntil > Workspace:GetServerTimeNow()
+		if other ~= player and otherRoot and humanoid and humanoid.Health > 0 and not hidden then
 			local offset = otherRoot.Position - head.Position
 			local distance = offset.Magnitude
 			local dot = if distance > 0 then aim:Dot(offset.Unit) else -1

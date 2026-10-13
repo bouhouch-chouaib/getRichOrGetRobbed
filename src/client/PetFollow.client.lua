@@ -63,6 +63,7 @@ local function rebuild(player: Player)
 	for petId in string.gmatch(equipped, "[^,]+") do
 		local model = PetModelBuilder.Build(petId)
 		if model then
+			model:SetAttribute("OwnerUserId", player.UserId) -- client/InvisibilityFx
 			model.Parent = folder
 			table.insert(list, { model = model, float = model:GetAttribute("Float") == true, current = nil })
 		end

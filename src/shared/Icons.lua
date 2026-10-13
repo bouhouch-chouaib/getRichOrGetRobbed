@@ -39,6 +39,7 @@ local IDS: { [string]: string } = {
 	Trophy = "rbxassetid://107983506276240",
 	Bat = "rbxassetid://92089666736729",
 	Grapple = "rbxassetid://122249795654523",
+	Ghost = "rbxassetid://105946207492948",
 }
 
 -- Autres noms utiles : raretés (Id de Config.Rarities), améliorations (Config.Shop), produits Robux (Key).
@@ -55,6 +56,7 @@ local ALIASES: { [string]: string } = {
 	LongLock = "Lock",
 	WeaponBat = "Bat",
 	WeaponGrapple = "Grapple",
+	PowerInvisible = "Ghost",
 	DoubleMoney = "Money",
 	VIP = "Crown",
 	ExtraBackpack = "Backpack",

@@ -34,6 +34,7 @@ local BaseManager = require(script.Parent.BaseManager)
 local BasePetsController = require(script.Parent.BasePetsController)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
+local PowerController = require(script.Parent.PowerController)
 local SessionData = require(script.Parent.SessionData)
 
 local StealController = {}
@@ -212,6 +213,7 @@ local function tryStart(anchor: BasePart, thief: Player)
 	-- (ReleaseHeld déclenche HeldReleased, qui ferait sinon échouer ce vol tout de suite).
 	ItemInteraction.ReleaseHeld(thief)
 
+	PowerController.Reveal(thief) -- voler brise l'invisibilité : on s'approche en douce, mais on repart à découvert
 	local deadline = now() + STEAL.MaxCarryTime
 	local carry: Carry = { thief = thief, victim = victim, victimBase = victimBase, petId = petId, deadline = deadline, prompt = nil }
 	carries[thief] = carry

@@ -19,6 +19,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local PowerController = require(script.Parent.PowerController)
 local SessionData = require(script.Parent.SessionData)
 
 local ItemInteraction = {}
@@ -128,6 +129,7 @@ local function onPromptTriggered(item: BasePart, player: Player)
 	end)
 
 	Remotes.ItemGrabbed:FireClient(player, item)
+	PowerController.Reveal(player) -- ramasser brise l'invisibilité
 end
 
 -- À appeler pour chaque item créé (par ItemSpawner).

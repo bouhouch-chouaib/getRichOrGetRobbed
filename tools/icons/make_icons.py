@@ -555,6 +555,23 @@ def grapple(c):
     c.shine((200, 440, 420, 470), 140)
 
 
+@icon("Ghost")
+def ghost(c):
+    body = hexc("C8B4FF")
+    # Corps de fantôme : tête ronde, bas ondulé.
+    c.poly([(230, 480), (794, 480), (794, 860), (700, 800), (606, 880), (512, 800), (418, 880), (324, 800), (230, 860)], body, out=0)
+    c.circle(512, 470, 282, body, out=0)
+    pts = [(230, 470), (230, 860), (324, 800), (418, 880), (512, 800), (606, 880), (700, 800), (794, 860), (794, 470)]
+    c.d.line(pts, fill=BLACK, width=OUT, joint="curve")
+    c.d.arc((230, 188, 794, 752), 180, 360, fill=BLACK, width=OUT)
+    c.ellipse((390, 400, 470, 520), hexc("2A1F45"), out=0)
+    c.ellipse((554, 400, 634, 520), hexc("2A1F45"), out=0)
+    c.ellipse((470, 560, 554, 640), hexc("2A1F45"), out=0)
+    c.shine((300, 280, 400, 380), 170)
+    for cx, cy, r in [(840, 230, 70), (170, 300, 50)]:
+        c.poly(star_points(cx, cy, r, r * 0.35, 4, -90), hexc("FFF3B0"), out=12)
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     rendered = []

@@ -336,6 +336,8 @@ Config.Sounds = {
 		GrappleFire = { Id = 9120711836, Volume = 0.8, Pitch = 0.6 }, -- whoosh grave : le crochet part
 		GrappleLatch = { Id = 9113760542, Volume = 0.9, Pitch = 1.2 }, -- clac métallique : le crochet accroche
 		GrappleReel = { Id = 9118138365, Volume = 0.6, Pitch = 1.8 }, -- cliquetis rapide : la corde se rembobine
+		Vanish = { Id = 9120711836, Volume = 0.7, Pitch = 1.9 }, -- fffuit aigu : quelqu'un devient invisible
+		Reveal = { Id = 9119668978, Volume = 0.8, Pitch = 0.75 }, -- pop : il réapparaît
 	} :: { [string]: SoundDef },
 }
 
@@ -358,6 +360,7 @@ Config.Shop = {
 	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2).
 	{ Id = "WeaponBat", Icon = "Bat", Name = "Batte", Description = "ARME : un grand coup de batte qui envoie valser un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },
+	{ Id = "PowerInvisible", Icon = "Ghost", Name = "Invisibilité", Description = "POUVOIR : 6 s presque invisible pour t'approcher en douce. Se brise dès que tu ramasses, voles, frappes ou te fais toucher. Recharge 45 s.", MaxLevel = 1, BasePrice = 500e3, PriceGrowth = 1 },
 	{ Id = "WeaponGrapple", Icon = "Grapple", Name = "Grappin", Description = "ARME : vise un joueur et tire : le crochet l'attrape et le ramène jusqu'à toi. Parfait pour rattraper un voleur !", MaxLevel = 1, BasePrice = 150e3, PriceGrowth = 1 },
 } :: { ShopItem }
 
@@ -405,6 +408,16 @@ Config.Weapons = {
 	} :: GrappleDef,
 	-- Anciennes armes (sauvegardes d'avant le 13 oct.) : converties à la lecture.
 	OldWeapons = { WeaponSlap = { "WeaponBat" }, WeaponPan = { "WeaponBat" }, WeaponShockwave = { "WeaponBat", "WeaponGrapple" } } :: { [string]: { string } },
+	-- Pouvoir d'invisibilité (server/PowerController, client/InvisibilityFx). Pensé pour ne pas être frustrant :
+	-- court, long à recharger, imparfait (silhouette visible de près, étincelles aux pieds) et brisé par toute action.
+	Invisibility = {
+		Duration = 6,
+		Cooldown = 45, -- compté depuis l'activation
+		SelfTransparency = 0.6, -- ce que le joueur voit de lui-même
+		FarTransparency = 0.96, -- vu par les autres, de loin : presque rien
+		NearTransparency = 0.72, -- vu par les autres à moins de NearDistance : une silhouette fantomatique
+		NearDistance = 10,
+	},
 	HitImmunity = 2, -- secondes pendant lesquelles un joueur touché ne peut pas être retouché (batte et grappin)
 	RangeMargin = 3, -- studs de marge sur la portée (latence)
 }

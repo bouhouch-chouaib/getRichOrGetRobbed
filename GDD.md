@@ -146,6 +146,15 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
     `Remotes.WeaponFx("Grapple", tireur, id, point, victime?)` à tous (crochet qui vole avec sa corde, accroche, suit la victime,
     revient ; « CHOPÉ ! ») et `Remotes.Grappled(tireur, durée)` à la victime : son client la ramène devant le tireur
     (`PlatformStand`, vitesse imposée). Visée : bras tendu, viseur, joueur ciblable entouré (Highlight, mêmes règles qu'au serveur).
+  - **Pouvoir d'invisibilité** (14 oct., `PowerInvisible` 500 K$, objet « orbe fantôme » rangé avec les armes ;
+    `server/PowerController`, `client/InvisibilityFx`, réglages `Config.Weapons.Invisibility`) : clic -> 6 s presque invisible,
+    recharge 45 s depuis l'activation. Pensé pour ne pas être frustrant : soi-même à 60 % de transparence ; les autres le voient à
+    96 % de loin mais à 72 % à moins de 10 studs (silhouette), étincelles aux pieds quand il bouge, fumée + son à la disparition et
+    à la réapparition ; nom, étiquettes et familiers équipés cachés. **Brisé** par : ramasser un objet (`ItemInteraction`),
+    commencer un vol (`StealController`), frapper / tirer au grappin, être touché (`WeaponController`) -> `PowerController.Reveal`.
+    Impossible en portant un familier volé. L'orbe est rangé à l'activation (mains libres pour voler... ce qui le brise). La batte et
+    le grappin touchent toujours un joueur invisible ; seule la surbrillance de visée du grappin l'ignore. Attributs `InvisibleUntil`
+    / `InvisibleReadyAt` (heure serveur). Pastille « INVISIBLE 4 s » / « RECHARGE 23 s » pour le joueur.
   - Mains exclusives : arme en main -> pas de ramassage ni de vol ; objets portés ou familier volé -> l'arme sortie est rangée.
     Articulations : `client/Joints` (Motor6D ou AnimationConstraint).
 - **Annonces** (`Remotes.StealNotice`) : à la victime "Started" (début), puis "Stolen" / "Recovered" / "Returned" (KO ou temps

@@ -28,7 +28,7 @@ type Category = { label: string, color: Color3, ids: { string } }
 local CATEGORIES: { Category } = {
 	{ label = "Entraînement", color = UiStyle.Colors.Cyan, ids = { "Treadmill", "Bench" } },
 	{ label = "Bonus", color = UiStyle.Colors.Green, ids = { "ItemQuality", "Backpack", "LongLock" } },
-	{ label = "Armes", color = Color3.fromRGB(240, 70, 90), ids = { "WeaponBat", "WeaponGrapple" } },
+	{ label = "Combat", color = Color3.fromRGB(240, 70, 90), ids = { "WeaponBat", "WeaponGrapple", "PowerInvisible" } },
 }
 
 -- Couleur de chaque carte.
@@ -40,6 +40,7 @@ local CARD_COLORS: { [string]: Color3 } = {
 	LongLock = Color3.fromRGB(150, 80, 255),
 	WeaponBat = Color3.fromRGB(230, 130, 50),
 	WeaponGrapple = Color3.fromRGB(70, 170, 255),
+	PowerInvisible = Color3.fromRGB(150, 90, 240),
 }
 
 local itemsById: { [string]: Config.ShopItem } = {}
@@ -79,7 +80,7 @@ end
 local function effectText(item: Config.ShopItem, level: number): string
 	local now = effectAt(item.Id, level)
 	if not now then
-		return if level > 0 then "Dans ton inventaire" else "Arme de combat"
+		return if level > 0 then "Dans ton inventaire" elseif item.Id:sub(1, 5) == "Power" then "Pouvoir" else "Arme de combat"
 	end
 	if level >= item.MaxLevel then
 		return now
