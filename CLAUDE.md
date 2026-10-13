@@ -86,6 +86,9 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
+**13 oct. : retour dans les mondes visités** (attribut `World`, bouton « Y ALLER », bonus de revenu du monde le plus loin)
+et **trou noir aux couleurs du monde** (muret + 8 décors, `client/BlackholeFx`). Analyse OK, pas encore vérifié en jeu.
+
 **13 oct. : duels de familiers** (`server/DuelController`, `client/DuelClient`, `client/DuelFx`) : défi [F], choix des
 familiers (une rareté d'écart), arène flottante au-dessus du trou, combat auto + clics, roue du gagnant (1/8 : le familier
 adverse). Testé à 2 joueurs le 13 oct. (Studio > Test > Clients et serveurs) : défi, invitation, choix, double validation, combat

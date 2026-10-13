@@ -81,7 +81,8 @@ return {
 	UseKey = remote("UseKey"),
 	-- Client -> serveur : () voyager au monde suivant (server/TierController paie Config.Worlds[palier + 1].Price).
 	BuyTier = remote("BuyTier"),
-	-- Serveur -> tous : (joueur: Player, palier: number) un joueur vient d'arriver dans un nouveau monde.
+	-- Serveur -> tous : (joueur: Player, palier: number, retour: boolean?) un joueur vient d'arriver dans un nouveau monde
+	-- (retour = true : il revient dans un monde déjà visité, envoyé à lui seul).
 	TierReached = remote("TierReached"),
 	-- Client -> serveur : (direction: Vector3) tir du grappin dans cette direction (le serveur choisit la cible).
 	UseGrapple = remote("UseGrapple"),
@@ -117,4 +118,6 @@ return {
 	-- petB), ("Hit", arène, "A"/"B", dégâts, critique, encouragement), ("End", arène, gagnant, abandon), ("Won"/"Lost", nom),
 	-- ("Spin", arène, case), ("Reward", case, texte), ("PetWon", gagnant, perdant, petId).
 	DuelEvent = remote("DuelEvent"),
+	-- Client -> serveur : (monde: number) retourner dans un monde déjà visité (server/TierController).
+	GoToWorld = remote("GoToWorld"),
 }

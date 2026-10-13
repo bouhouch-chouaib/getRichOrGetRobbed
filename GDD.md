@@ -317,6 +317,15 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Test dans Studio : `game.ReplicatedStorage:SetAttribute("DebugHoleTier", 5)` (côté serveur) passe au palier 5 ;
   8 = jauge du palier 7 pleine (effondrement à la prochaine digestion).
 
+- **Retour dans un monde déjà visité** (13 oct.) : fenêtre Mondes, bouton « Y ALLER » sur les mondes déjà débloqués
+  (`Remotes.GoToWorld` -> `TierController` -> `SessionData.SetWorld`). Gratuit. Deux valeurs sauvegardées : `tier` (attribut
+  `Tier`) = le monde le plus loin débloqué, qui garde le bonus de revenu ; `world` (attribut `World`) = le monde où le joueur
+  se trouve : apparence de l'arène et de sa base (`client/WorldSkin`), musique, cadre du trou noir. Acheter le monde suivant
+  y emmène directement.
+- **Trou noir aux couleurs du monde** (13 oct.) : le muret autour du trou prend la palette du monde du joueur (WallA / WallB /
+  WallTop, chapeau lumineux si le monde l'a) et 8 décors du monde l'entourent (buissons, cactus, roches de lave, cristaux,
+  coraux, astéroïdes qui flottent, colonnes d'or). Le décor du palier du trou (vortex, tentacules...) se pose par-dessus.
+
 ## Sons et musique
 
 - Tout est côté client. `client/Sounds` (module) : `play(nom)` (son 2D, pour soi), `playAt(nom, position)` (son 3D, Attachment

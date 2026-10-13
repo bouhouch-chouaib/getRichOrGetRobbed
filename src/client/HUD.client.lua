@@ -499,14 +499,14 @@ Remotes.FusionResult.OnClientEvent:Connect(function(petId: string)
 end)
 
 -- Un joueur arrive dans un nouveau monde : grande célébration pour lui, annonce pour les autres.
-Remotes.TierReached.OnClientEvent:Connect(function(traveller: Player, tier: number)
+Remotes.TierReached.OnClientEvent:Connect(function(traveller: Player, tier: number, revisit: boolean?)
 	if typeof(traveller) ~= "Instance" or type(tier) ~= "number" then
 		return
 	end
 	local world = Config.GetWorld(tier)
 	if traveller == player then
 		worlds.window.close()
-		WorldMenu.celebrate(gui, tier)
+		WorldMenu.celebrate(gui, tier, revisit == true)
 	else
 		Toast.show(string.format("%s VOYAGE VERS LE MONDE %s !", TextFormat.upper(traveller.DisplayName), TextFormat.upper(world.Name)), Color3.fromRGB(255, 180, 60))
 	end

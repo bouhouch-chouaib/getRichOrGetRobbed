@@ -605,8 +605,8 @@ Config.ItemColors = {
 -- avec les objets avalés (valeur de l'objet, sans multiplicateur des familiers). Pleine, le trou monte d'un palier :
 -- nouvel aspect + une petite mécanique, toujours un bonus, jamais une punition. Après le palier 7, Effondrement à la
 -- digestion suivante (score du tour x2, familiers offerts aux 3 meilleurs contributeurs) puis retour au palier 1.
--- Wall = le muret en damier à tenons qui entoure le trou (2 tons + chapeau, comme les murs de l'arène), repris des
--- palettes des mondes (shared/Worlds) ; TopNeon = le chapeau brille (lave, abysses : comme dans ces mondes).
+-- Wall = 3 couleurs du décor du palier (roches de l'Éruption, anneaux de la Cible, or du Divin...). Le muret autour du
+-- trou, lui, prend les couleurs du MONDE de chaque joueur (client/BlackholeFx, shared/Worlds). TopNeon : plus utilisé.
 export type HoleTier = {
 	Name: string,
 	Color: Color3,

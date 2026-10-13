@@ -30,6 +30,7 @@
         "ThrowPet": { "$className": "RemoteEvent" },
         "DuelAction": { "$className": "RemoteEvent" },
         "DuelEvent": { "$className": "RemoteEvent" },
+        "GoToWorld": { "$className": "RemoteEvent" },
         "Grappled": { "$className": "RemoteEvent" },
         "ClaimIndex": { "$className": "RemoteEvent" },
         "IndexClaimed": { "$className": "RemoteEvent" },

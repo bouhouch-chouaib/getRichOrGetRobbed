@@ -37,12 +37,13 @@ local function onIncrease(name: string, sound: string)
 	end)
 end
 
--- Musique : la playlist du palier du joueur (attribut "Tier", 1 tant que les paliers n'existent pas).
+-- Musique : la playlist du monde où se trouve le joueur (attribut "World", sinon "Tier").
 local function updateMusic()
-	local tier = player:GetAttribute("Tier")
-	Sounds.setPlaylist(if type(tier) == "number" then tier else 1)
+	local world = player:GetAttribute("World") or player:GetAttribute("Tier")
+	Sounds.setPlaylist(if type(world) == "number" then world else 1)
 end
 player:GetAttributeChangedSignal("Tier"):Connect(updateMusic)
+player:GetAttributeChangedSignal("World"):Connect(updateMusic)
 updateMusic()
 
 -- Changement de phase : petit jingle (la musique baisse pendant ce temps).

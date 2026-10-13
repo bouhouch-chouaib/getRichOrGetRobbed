@@ -28,9 +28,10 @@ local decorFolder: Folder? = nil
 local decorKind: string? = nil
 local spinning: { { part: Part, origin: CFrame, speed: number } } = {}
 
+-- Monde où se trouve le joueur (attribut "World" : il peut être retourné dans un monde déjà visité), sinon son palier.
 local function tierOf(target: Player?): number
-	local tier = target and target:GetAttribute("Tier")
-	return if type(tier) == "number" then tier else 1
+	local world = target and (target:GetAttribute("World") or target:GetAttribute("Tier"))
+	return if type(world) == "number" then world else 1
 end
 
 local function lookOf(tier: number): Worlds.Look
@@ -356,6 +357,7 @@ end
 
 local function watchPlayer(other: Player)
 	other:GetAttributeChangedSignal("Tier"):Connect(markDirty)
+	other:GetAttributeChangedSignal("World"):Connect(markDirty)
 	other:GetAttributeChangedSignal("BaseIndex"):Connect(markDirty)
 	markDirty()
 end

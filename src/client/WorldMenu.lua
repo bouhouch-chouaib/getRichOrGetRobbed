@@ -1,8 +1,9 @@
 --!strict
 -- WorldMenu : fenêtre MONDES. Les 7 mondes (Config.Worlds) en grandes cartes qui défilent, comme la boutique :
 -- nom, numéro, aperçu du paysage (sol, mur, crête aux couleurs du monde, shared/Worlds), bonus de revenu, et
---   « TU ES ICI » (monde actuel), « VISITÉ » (déjà passé), bouton « VOYAGER $prix » (monde suivant), « VERROUILLÉ » (après).
--- Le voyage est validé par le serveur (Remotes.BuyTier -> server/TierController).
+--   « TU ES ICI » (monde actuel), « Y ALLER » (déjà visité : retour gratuit, Remotes.GoToWorld), bouton
+--   « VOYAGER $prix » (monde suivant), « VERROUILLÉ » (après). Le bonus de revenu reste celui du monde le plus loin.
+-- Le voyage est validé par le serveur (Remotes.BuyTier / GoToWorld -> server/TierController).
 -- Arrivée (Remotes.TierReached) : flash, grand titre du monde, son ; annonce chez les autres joueurs.
 
 local Players = game:GetService("Players")
@@ -28,9 +29,16 @@ local PRAIRIE = Worlds.Looks.Prairie
 
 local player = Players.LocalPlayer
 
+-- Monde le plus loin débloqué (bonus de revenu).
 local function tier(): number
 	local value = player:GetAttribute("Tier")
 	return if type(value) == "number" then value else 1
+end
+
+-- Monde où le joueur se trouve (on peut revenir dans un monde déjà visité).
+local function currentWorld(): number
+	local value = player:GetAttribute("World")
+	return if type(value) == "number" then value else tier()
 end
 
 local function lookOf(index: number): Worlds.Look
@@ -146,6 +154,11 @@ function WorldMenu.create(gui: Instance): Menu
 			caption.FontFace = UiStyle.NUMBER_FONT
 		end
 		button.Activated:Connect(function()
+			if index <= tier() and index ~= currentWorld() then
+				Sounds.play("UiClick")
+				Remotes.GoToWorld:FireServer(index)
+				return
+			end
 			if index ~= tier() + 1 then
 				return
 			end
@@ -161,19 +174,20 @@ function WorldMenu.create(gui: Instance): Menu
 
 	local function refresh()
 		local current = tier()
+		local here = currentWorld()
 		local money = MenuKit.number("Money")
 		for _, card in ipairs(cards) do
 			local world = Config.Worlds[card.index]
 			local caption = card.button:FindFirstChild("Caption") :: TextLabel
 			card.button.Visible = true
-			if card.index == current then
+			if card.index == here then
 				card.status.Text = "TU ES ICI"
 				caption.Text = "ACTUEL"
 				UiStyle.setButtonColor(card.button, UiStyle.Colors.Cyan)
-			elseif card.index < current then
-				card.status.Text = "VISITÉ"
-				caption.Text = "VISITÉ"
-				UiStyle.setButtonColor(card.button, GREY)
+			elseif card.index <= current then
+				card.status.Text = "DÉJÀ VISITÉ"
+				caption.Text = "Y ALLER"
+				UiStyle.setButtonColor(card.button, UiStyle.Colors.Green)
 			elseif card.index == current + 1 then
 				card.status.Text = "VOYAGER POUR"
 				caption.Text = NumberFormat.money(world.Price)
@@ -189,7 +203,7 @@ function WorldMenu.create(gui: Instance): Menu
 	window.onOpen(function()
 		refresh()
 		-- Montre directement le monde actuel et le suivant.
-		row.CanvasPosition = Vector2.new(math.max(0, (tier() - 1) * (CARD_WIDTH + 12) - 20), 0)
+		row.CanvasPosition = Vector2.new(math.max(0, (currentWorld() - 1) * (CARD_WIDTH + 12) - 20), 0)
 	end)
 
 	return {
@@ -206,7 +220,8 @@ end
 -- Arrivée dans un nouveau monde
 ----------------------------------------------------------------------
 
-function WorldMenu.celebrate(gui: Instance, index: number)
+-- revisit = retour dans un monde déjà visité : pas de nouveau bonus de revenu, juste « DE RETOUR ».
+function WorldMenu.celebrate(gui: Instance, index: number, revisit: boolean?)
 	local world = Config.GetWorld(index)
 	local look = Worlds.Looks[world.Id] or PRAIRIE
 	local flash = Instance.new("Frame")
@@ -222,7 +237,8 @@ function WorldMenu.celebrate(gui: Instance, index: number)
 	title.Position = UDim2.fromScale(0.5, 0.38)
 	title.Size = UDim2.fromOffset(1100, 90)
 	title.ZIndex = 51
-	local subtitle = UiStyle.number(gui, "Revenu x" .. tostring(world.IncomeMultiplier) .. " !", 40, UiStyle.Colors.Money)
+	local subtitle = UiStyle.number(gui, if revisit then "De retour !" else "Revenu x" .. tostring(world.IncomeMultiplier) .. " !", 40,
+		UiStyle.Colors.Money)
 	subtitle.AnchorPoint = Vector2.new(0.5, 0.5)
 	subtitle.Position = UDim2.fromScale(0.5, 0.48)
 	subtitle.Size = UDim2.fromOffset(700, 50)

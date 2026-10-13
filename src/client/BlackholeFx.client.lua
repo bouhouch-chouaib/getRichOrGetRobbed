@@ -23,6 +23,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Worlds = require(ReplicatedStorage.Shared.Worlds)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
 
@@ -164,29 +165,100 @@ type Look = {
 	event: ((kind: string, a: any, b: any) -> ())?,
 }
 
--- Muret autour du bord, commun à tous les paliers : damier de 2 tons + chapeau, en blocs à tenons, comme les murs de
--- l'arène (docs/DIRECTION_ARTISTIQUE.md §1-2 : tenons partout, couleurs franches, pas de néon sur les murs sauf la lave
--- et les abysses, comme dans ces mondes). Il ne tourne pas : c'est un mur.
+-- Cadre du trou, aux couleurs du MONDE du joueur (shared/Worlds, comme le reste de la map qu'il voit) : un muret en
+-- damier de 2 tons + chapeau, en blocs à tenons, comme le mur d'enceinte (docs/DIRECTION_ARTISTIQUE.md §1-2), et 8
+-- petits décors du monde tout autour (buissons, cactus, roches de lave, cristaux, coraux, astéroïdes, colonnes).
+-- Le décor du PALIER (vortex, lave, cible, tentacules...) est commun à tout le serveur et se pose par-dessus.
 local WALL_RADIUS = R + 5.5
 local WALL_COUNT = 44
-local function crown(model: Model, def: Config.HoleTier)
-	local wall = newModel("Wall", model)
+local PRAIRIE_WALL = { Color3.fromRGB(202, 145, 86), Color3.fromRGB(185, 125, 73), Color3.fromRGB(110, 214, 42) }
+
+local function worldIndex(): number
+	local value = localPlayer:GetAttribute("World") or localPlayer:GetAttribute("Tier")
+	return if type(value) == "number" then value else 1
+end
+
+local function prop(parent: Instance, kind: string, at: CFrame, spinning: { { part: Part, origin: CFrame, phase: number } })
+	local rgb = Color3.fromRGB
+	if kind == "Cactus" then
+		block(parent, V(4, 0.8, 4), at * CF(0, 0.4, 0), rgb(250, 214, 130))
+		block(parent, V(1.6, 5.5, 1.6), at * CF(0, 3.5, 0), rgb(80, 180, 80))
+		block(parent, V(1.2, 2.4, 1.2), at * CF(1.4, 3.8, 0), rgb(70, 160, 70))
+		block(parent, V(1.2, 1.8, 1.2), at * CF(-1.4, 3, 0), rgb(70, 160, 70))
+		block(parent, V(0.6, 0.6, 0.6), at * CF(0, 6.5, 0), rgb(255, 120, 200))
+	elseif kind == "LavaRock" then
+		block(parent, V(4, 2.6, 3.4), at * CF(0, 1.3, 0), rgb(70, 60, 64))
+		block(parent, V(2.6, 1.8, 2.4), at * CF(0.4, 3.4, 0.2) * ANG(0, 0.5, 0), rgb(54, 46, 50))
+		block(parent, V(0.5, 2, 3.6), at * CF(-0.6, 1.4, 0), rgb(255, 110, 30), true)
+	elseif kind == "IceCrystal" then
+		block(parent, V(3.6, 0.8, 3.6), at * CF(0, 0.4, 0), rgb(240, 248, 255))
+		block(parent, V(1.2, 5, 1.2), at * CF(0, 3, 0) * ANG(0, 0, 0.15), rgb(150, 210, 245))
+		block(parent, V(0.9, 3.4, 0.9), at * CF(1, 2.2, 0.4) * ANG(0.2, 0, -0.4), rgb(200, 235, 255))
+		block(parent, V(0.8, 2.6, 0.8), at * CF(-1, 1.8, -0.3) * ANG(-0.2, 0, 0.45), rgb(124, 190, 235))
+	elseif kind == "Coral" then
+		block(parent, V(3.4, 0.8, 3.4), at * CF(0, 0.4, 0), rgb(230, 210, 150))
+		block(parent, V(1, 4, 1), at * CF(0, 2.6, 0), rgb(255, 120, 140))
+		block(parent, V(0.8, 2.4, 0.8), at * CF(0.9, 3.4, 0) * ANG(0, 0, -0.5), rgb(230, 90, 160))
+		block(parent, V(0.8, 2, 0.8), at * CF(-0.9, 3, 0) * ANG(0, 0, 0.55), rgb(255, 150, 90))
+		block(parent, V(0.6, 0.6, 0.6), at * CF(0, 4.9, 0), rgb(90, 230, 200), true)
+	elseif kind == "Asteroid" then
+		local rock = block(parent, V(2.6, 2.2, 2.4), at * CF(0, 5, 0), rgb(110, 80, 170))
+		local small = block(parent, V(1.2, 1.2, 1.2), at * CF(1.8, 7, 0.6), rgb(150, 110, 220))
+		table.insert(spinning, { part = rock, origin = at * CF(0, 5, 0), phase = at.Position.X })
+		table.insert(spinning, { part = small, origin = at * CF(1.8, 7, 0.6), phase = at.Position.Z })
+	elseif kind == "Pillar" then
+		block(parent, V(2.6, 0.7, 2.6), at * CF(0, 0.35, 0), rgb(255, 205, 60))
+		block(parent, V(1.6, 5.6, 1.6), at * CF(0, 3.5, 0), rgb(250, 248, 240))
+		block(parent, V(2.6, 0.7, 2.6), at * CF(0, 6.6, 0), rgb(255, 205, 60))
+	else -- Prairie : un buisson en cubes et une fleur
+		block(parent, V(3.2, 2.4, 3.2), at * CF(0, 1.2, 0), rgb(80, 198, 58))
+		block(parent, V(2, 1.2, 2), at * CF(0.3, 3, 0.2), rgb(104, 218, 74))
+		block(parent, V(0.7, 0.7, 0.7), at * CF(-0.8, 2.6, -1), rgb(255, 90, 90))
+		block(parent, V(0.7, 0.7, 0.7), at * CF(1, 2.2, 1.1), rgb(255, 230, 80))
+	end
+end
+
+type Frame = { model: Model, spinning: { { part: Part, origin: CFrame, phase: number } } }
+local worldFrame: Frame? = nil
+local frameWorld = 0
+
+local function buildWorldFrame()
+	local index = worldIndex()
+	if index == frameWorld then
+		return
+	end
+	frameWorld = index
+	if worldFrame then
+		worldFrame.model:Destroy()
+	end
+	local look = Worlds.Looks[Config.GetWorld(index).Id] or Worlds.Looks.Prairie
+	local palette = look.Palette
+	local wallA = palette.WallA or PRAIRIE_WALL[1]
+	local wallB = palette.WallB or PRAIRIE_WALL[2]
+	local top = palette.WallTop or PRAIRIE_WALL[3]
+	local topNeon = look.Neon ~= nil and look.Neon.WallTop == true
+	local model = newModel("WorldFrame", folder)
 	local width = 2 * math.pi * WALL_RADIUS / WALL_COUNT * 0.98
 	for i = 0, WALL_COUNT - 1 do
 		local a = i * math.pi * 2 / WALL_COUNT
 		for row = 0, 1 do
-			block(wall, V(width, 1.6, 3), ANG(0, a, 0) * CF(0, 0.8 + row * 1.6, -WALL_RADIUS),
-				if (i + row) % 2 == 0 then def.Wall[1] else def.Wall[2])
+			block(model, V(width, 1.6, 3), ANG(0, a, 0) * CF(0, 0.8 + row * 1.6, -WALL_RADIUS),
+				if (i + row) % 2 == 0 then wallA else wallB)
 		end
-		block(wall, V(width + 0.05, 0.6, 3.6), ANG(0, a, 0) * CF(0, 3.5, -WALL_RADIUS), def.Wall[3], def.TopNeon)
+		block(model, V(width + 0.05, 0.6, 3.6), ANG(0, a, 0) * CF(0, 3.5, -WALL_RADIUS), top, topNeon)
 	end
+	local spinning = {}
+	for k = 0, 7 do
+		local a = k * math.pi / 4 + math.pi / 8
+		prop(model, look.Decor, ANG(0, a, 0) * CF(0, 0, -(WALL_RADIUS + 5)), spinning)
+	end
+	worldFrame = { model = model, spinning = spinning }
 end
 
 local builders: { [number]: (Model, Config.HoleTier) -> Look } = {}
 
 -- 1 Éveil : vortex de cubes à tenons en spirale vers le centre (quelques cubes lumineux comme étincelles).
 builders[1] = function(model, def)
-	crown(model, def)
 	local vortex = newModel("Vortex", model)
 	for arm = 0, 3 do
 		for i = 0, 15 do
@@ -211,7 +283,6 @@ end
 
 -- 2 Éruption : rochers à tenons du monde Volcan, coulée de lave qui pulse, braises ; gerbe de feu quand il recrache.
 builders[2] = function(model, def)
-	crown(model, def)
 	local rockA, rockB = def.Wall[1], def.Wall[2]
 	local lava = ring(model, R + 1.5, 30, 3.5, 0.5, 0.45, def.Color, def.Color2, true, true)
 	for i = 0, 9 do
@@ -249,7 +320,6 @@ end
 -- 3 Cible : trois anneaux de blocs rouges et blancs à tenons qui tournent en sens opposés ; le premier marque la
 -- zone x2 (il s'allume un instant quand quelqu'un vise juste).
 builders[3] = function(model, def)
-	crown(model, def)
 	local red, white = def.Wall[1], def.Wall[2]
 	local inner = ring(model, HOLE.Target.Radius, 18, 2.6, 0.8, 1, red, def.Wall[3])
 	local middle = ring(model, 25, 30, 2.6, 0.7, 0.9, white, red)
@@ -283,7 +353,6 @@ end
 
 -- 4 Abysses : tentacules de cubes à tenons couleur corail (palette du monde Abysses), recalculés à chaque image.
 builders[4] = function(model, def)
-	crown(model, def)
 	local SEGMENTS, LENGTH = 10, 3.4
 	local CORAL, CORAL_DARK, SUCKER = Color3.fromRGB(255, 120, 140), Color3.fromRGB(230, 90, 160), Color3.fromRGB(255, 225, 200)
 	type Tentacle = { base: CFrame, angle: number, phase: number, segs: { BasePart }, suckers: { BasePart }, slam: number }
@@ -345,7 +414,6 @@ end
 
 -- 5 Gravité : disque de matière incliné (cubes à tenons blancs et orange, quelques-uns lumineux) + éclairs bleus.
 builders[5] = function(model, def)
-	crown(model, def)
 	local disc = newModel("Disc", model)
 	local inner = ring(disc, 19, 28, 2, 1.6, 0, Color3.fromRGB(255, 245, 225), def.Color, false, true)
 	local outer = ring(disc, 28, 36, 2.4, 1.4, 0, def.Color, def.Wall[1])
@@ -381,7 +449,6 @@ end
 
 -- 6 Supernova : pointes de lumière qui pulsent (un effet : néon) et ondes de choc régulières.
 builders[6] = function(model, def)
-	crown(model, def)
 	type Spike = { part: Part, dir: Vector3, phase: number }
 	local spikes: { Spike } = {}
 	for i = 0, 11 do
@@ -417,7 +484,6 @@ end
 
 -- 7 Divin : muret blanc et or, anneaux gyroscopiques d'or à tenons, rayons de lumière (effet), paillettes.
 builders[7] = function(model, def)
-	crown(model, def)
 	local gold = def.Wall[3]
 	local ringA = ring(model, 15, 26, 1.8, 1.8, 0, gold, def.Wall[1])
 	local ringB = ring(model, 18.5, 30, 1.6, 1.6, 0, def.Wall[1], gold)
@@ -578,6 +644,9 @@ for _, name in ipairs({ "HoleTier", "HoleGauge", "HoleNeed", "HoleCollapse", "Ho
 end
 ReplicatedStorage:GetAttributeChangedSignal("HoleTier"):Connect(function()
 	build((ReplicatedStorage:GetAttribute("HoleTier") or 1) :: number)
+buildWorldFrame()
+localPlayer:GetAttributeChangedSignal("World"):Connect(buildWorldFrame)
+localPlayer:GetAttributeChangedSignal("Tier"):Connect(buildWorldFrame)
 end)
 
 ----------------------------------------------------------------------
@@ -832,6 +901,13 @@ RunService.RenderStepped:Connect(function(dt: number)
 	end
 	updateWaves()
 	updateFlights()
+	-- Astéroïdes du cadre (monde Cosmos) : ils flottent et tournent doucement.
+	local frame = worldFrame
+	if frame then
+		for _, spin in ipairs(frame.spinning) do
+			spin.part.CFrame = spin.origin * CF(0, math.sin(t * 1.3 + spin.phase) * 0.8, 0) * ANG(t * 0.4, t * 0.6 + spin.phase, 0)
+		end
+	end
 	-- Secousse.
 	local character = localPlayer.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")

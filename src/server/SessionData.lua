@@ -33,7 +33,8 @@ export type PlayerData = {
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
 	keys: number, -- clés en réserve (Config.Keys, achetées en Robux)
-	tier: number, -- monde atteint (Config.Worlds), 1 = Prairie
+	tier: number, -- monde atteint (Config.Worlds), 1 = Prairie : le plus loin débloqué (bonus de revenu)
+	world: number, -- monde où le joueur se trouve (déjà visité, <= tier) : l'apparence et la musique
 	receipts: { string }, -- derniers achats Robux accordés (PurchaseId) : jamais deux fois le même (MonetizationController)
 	indexClaimed: { string }, -- familiers dont la récompense d'Index a été réclamée (ils restent « découverts » même volés)
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
@@ -108,6 +109,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		receipts = data.receipts,
 		keys = data.keys,
 		tier = data.tier,
+		world = data.world,
 		indexClaimed = data.indexClaimed,
 		session = session,
 	}
@@ -276,6 +278,7 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	data.pity = numberOr(saved.pity, 0)
 	data.keys = math.max(math.floor(numberOr(saved.keys, 0)), 0) + data.keys
 	data.tier = math.clamp(math.floor(numberOr(saved.tier, 1)), 1, #Config.Worlds)
+	data.world = math.clamp(math.floor(numberOr(saved.world, data.tier)), 1, data.tier)
 	if type(saved.pets) == "table" then
 		for savedId, count in pairs(saved.pets) do
 			-- Les anciens Id (familiers renommés) sont convertis : le joueur garde ses familiers.
@@ -398,6 +401,7 @@ local function sync(player: Player)
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("Keys", data.keys)
 	player:SetAttribute("Tier", data.tier)
+	player:SetAttribute("World", data.world)
 	player:SetAttribute("IndexClaimed", table.concat(data.indexClaimed, ","))
 	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
 	for id, level in pairs(data.upgrades) do
@@ -498,6 +502,7 @@ local function onPlayerAdded(player: Player)
 		tutorialDone = false,
 		keys = 0,
 		tier = 1,
+		world = 1,
 		receipts = {},
 		indexClaimed = {},
 		loaded = false,
@@ -641,8 +646,20 @@ function SessionData.AdvanceTier(player: Player): number?
 	end
 	data.money -= price
 	data.tier += 1
+	data.world = data.tier -- on arrive dans le nouveau monde
 	sync(player)
 	return data.tier
+end
+
+-- Retour dans un monde déjà visité (gratuit). Retourne true si le joueur a changé de monde.
+function SessionData.SetWorld(player: Player, world: number): boolean
+	local data = storage[player]
+	if not data or not data.loaded or world ~= math.floor(world) or world < 1 or world > data.tier or world == data.world then
+		return false
+	end
+	data.world = world
+	sync(player)
+	return true
 end
 
 -- Clés (Config.Keys), achetées en Robux : jamais refusées ni plafonnées.
