@@ -393,9 +393,10 @@ Config.Sounds = {
 	MusicVolume = 0.3,
 	EffectsVolume = 0.7,
 	MusicFade = 2, -- secondes de fondu entre deux morceaux
-	-- Musique par palier (attribut "Tier" du joueur, 1 tant que les paliers n'existent pas) : les morceaux du palier
-	-- s'enchaînent dans un ordre mélangé, en fondu. Palier 1 : morceaux calmes (bibliothèque APM sous licence Roblox).
-	-- Les paliers suivants seront ajoutés avec leurs mondes (Playlists[2], [3]...) ; sans liste, on garde le palier 1.
+	-- Musique par monde (attribut "World" du joueur, client/SoundController) : les morceaux du monde s'enchaînent dans un
+	-- ordre mélangé, en fondu. Tous viennent de la bibliothèque APM Music sous licence Roblox (créateur APMOfficial),
+	-- vérifiés le 13 oct. : ils se chargent dans le jeu et durent plus d'une minute. Choisis d'après leur titre et leur
+	-- fiche (pas écoutés) : à remplacer facilement ici si l'un ne colle pas.
 	Playlists = {
 		{
 			{ Id = 1839578771, Volume = 0.8 }, -- "Charming View Ukulele" (APM), 64 s
@@ -403,6 +404,44 @@ Config.Sounds = {
 			{ Id = 1839727388, Volume = 0.8 }, -- "Gardening" (APM), 95 s
 			{ Id = 1839453894, Volume = 0.8 }, -- "So Kind" (APM), 68 s
 			{ Id = 1845913205, Volume = 0.8 }, -- "Walking On The Beach" (APM, ukulélé hawaïen), 111 s
+		},
+		{ -- 2 Désert : oud et percussions orientales
+			{ Id = 1838890446, Volume = 0.8 }, -- "Sahara Dunes", 103 s
+			{ Id = 1838890545, Volume = 0.8 }, -- "Desert Stories", 118 s
+			{ Id = 1838900880, Volume = 0.8 }, -- "Desert Oasis Solo", 144 s
+			{ Id = 1838890231, Volume = 0.8 }, -- "Middle Eastern Oud", 87 s
+			{ Id = 9040297956, Volume = 0.7 }, -- "Prince Of Persia" (bande-annonce orientale joueuse), 156 s
+		},
+		{ -- 3 Volcan : épique, héroïque
+			{ Id = 98052506851752, Volume = 0.7 }, -- "Epic Swagger Main", 119 s
+			{ Id = 98460963937178, Volume = 0.7 }, -- "Will Power", 127 s
+			{ Id = 1838990004, Volume = 0.7 }, -- "Heroic Fantasy", 138 s
+			{ Id = 1839424991, Volume = 0.7 }, -- "Wild Force", 76 s
+		},
+		{ -- 4 Glace : flocons, clochettes, paysage nordique
+			{ Id = 9046743045, Volume = 0.8 }, -- "Dancing Snowflakes", 139 s
+			{ Id = 1844273489, Volume = 0.8 }, -- "Nordic Landscape", 196 s
+			{ Id = 9038468087, Volume = 0.8 }, -- "Lighting The Tree" (glockenspiel, pizzicati), 99 s
+			{ Id = 9046744547, Volume = 0.8 }, -- "Elf On The Shelf", 85 s
+		},
+		{ -- 5 Abysses : sous l'eau, harpes et nappes
+			{ Id = 9043109396, Volume = 0.8 }, -- "The Deep Of A Pond" (harpes sous l'eau), 101 s
+			{ Id = 9044723389, Volume = 0.8 }, -- "Hidden Away (c)" (nappes lumineuses, arpèges), 157 s
+			{ Id = 1842189046, Volume = 0.7 }, -- "Liquid Move (b)" (groove électronique glissant), 120 s
+			{ Id = 1843198406, Volume = 0.8 }, -- "Turquoise Passage", 93 s
+			{ Id = 1838969059, Volume = 0.8 }, -- "Mysterious Discovery", 68 s
+		},
+		{ -- 6 Cosmos : espace, synthés
+			{ Id = 1837260005, Volume = 0.8 }, -- "Kepler Space Probe", 110 s
+			{ Id = 9046572669, Volume = 0.8 }, -- "Distant Star Main", 158 s
+			{ Id = 1846371125, Volume = 0.8 }, -- "Between The Stars C", 100 s
+			{ Id = 1840016117, Volume = 0.7 }, -- "Into the Sun (b)" (étincelles électroniques), 199 s
+		},
+		{ -- 7 Divin : élévation, lumière
+			{ Id = 9039712933, Volume = 0.8 }, -- "Wonderous Revelation" (orchestre qui s'élève), 184 s
+			{ Id = 1847837602, Volume = 0.8 }, -- "Sweep Of The Horizon", 134 s
+			{ Id = 1840734103, Volume = 0.8 }, -- "Cirrus", 177 s
+			{ Id = 1840788058, Volume = 0.8 }, -- "Higher Than The Sun 60 (b)", 64 s
 		},
 	} :: { { SoundDef } },
 	MusicDuck = 0.35, -- pendant un petit jingle (changement de phase), la musique descend à 35 %

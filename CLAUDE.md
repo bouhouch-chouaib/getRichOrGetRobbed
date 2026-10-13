@@ -86,6 +86,8 @@ bulles [E] des objets recalées au-dessus de l'objet côté client (`ItemPromptA
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
+**13 oct. : musique des 7 mondes** (`Config.Sounds.Playlists`, APM) : vérifié en jeu, la musique change avec le monde.
+
 **13 oct. : retour dans les mondes visités** (attribut `World`, bouton « Y ALLER », bonus de revenu du monde le plus loin)
 et **trou noir aux couleurs du monde** (muret + 8 décors, `client/BlackholeFx`). Vérifié en jeu : achat du Désert, retour en Prairie
 (revenu du Désert gardé), muret et décors qui changent. Fenêtre Mondes (« Y ALLER ») pas photographiée.

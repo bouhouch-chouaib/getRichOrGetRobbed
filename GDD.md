@@ -328,6 +328,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 ## Sons et musique
 
+- 13 oct. : une playlist par monde (`Config.Sounds.Playlists[1..7]`, morceaux APM sous licence Roblox, vérifiés :
+  chargés et de plus d'une minute ; choisis sur titre et fiche, pas écoutés). La musique suit l'attribut `World`.
+
 - Tout est côté client. `client/Sounds` (module) : `play(nom)` (son 2D, pour soi), `playAt(nom, position)` (son 3D, Attachment
   dans Terrain, entendu jusqu'à ~140 studs), `setPlaylist(palier)` (13 oct. : une playlist par palier, `Config.Sounds.Playlists`,
   morceaux mélangés enchaînés en fondu de 2 s ; palier 1 = 5 morceaux calmes APM ; attribut joueur `Tier`, 1 par défaut),
