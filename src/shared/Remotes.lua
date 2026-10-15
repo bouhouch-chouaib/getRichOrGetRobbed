@@ -48,7 +48,8 @@ return {
 	Knockback = remote("Knockback"),
 	-- Serveur -> client : (score: number, pulls: number, results: { [string]: number }, money: number)
 	RewardsGranted = remote("RewardsGranted"),
-	-- Server only: (ownerUserId, rarityId, nestCFrame, hatchedPets). No client hatch request.
+	-- Serveur -> clients : (ownerUserId, clé de l'œuf, rareté, CFrame du nid, petId, dansLaBase: boolean).
+	-- Un message par œuf éclos (server/EggController). Aucun client ne peut demander une éclosion.
 	EggHatched = remote("EggHatched"),
 	-- Client -> serveur : (itemId: string) achat d'une amélioration de Config.Shop.
 	BuyUpgrade = remote("BuyUpgrade"),

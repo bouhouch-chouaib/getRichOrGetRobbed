@@ -201,6 +201,13 @@ function BasePetsController.Celebrate(player: Player, petIds: { string }, hatchS
 	end
 end
 
+-- Vrai si ce familier est affiché dans la base du joueur (un des 10 meilleurs, voir wantedPets).
+function BasePetsController.IsShown(player: Player, petId: string): boolean
+	local base = BaseManager.GetBase(player)
+	local state = if base then states[base] else nil
+	return state ~= nil and state.pets[petId] ~= nil
+end
+
 -- Position officielle (monde) d'un familier de base, au niveau du sol. nil si ce n'est pas un repère de familier.
 function BasePetsController.GetPetPosition(anchor: Instance): Vector3?
 	for _, state in pairs(states) do

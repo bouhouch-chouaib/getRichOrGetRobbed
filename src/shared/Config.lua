@@ -5,9 +5,13 @@
 local Config = {}
 
 -- Incubation parallèle, en secondes réelles (continue hors ligne).
+-- Chaque œuf a son nid dans la couveuse de la base (shared/BaseLayout : 12 nids, les premiers à éclore d'abord).
+-- BuildUp : secondes de montée en tension avant l'éclosion (tremble, s'élève, brille), par rareté (Commun -> Sigma).
+-- L'éclosion elle-même est de plus en plus spectaculaire avec la rareté (client/Eggs).
 Config.Eggs = {
-    Seconds = { Commun = 15, Inhabituel = 30, Rare = 60, Epique = 180, Legendaire = 300, Mythique = 600, Divin = 1200, Sigma = 1800 } :: { [string]: number },
-    ViewDistance = 140,
+	Seconds = { Commun = 15, Inhabituel = 30, Rare = 60, Epique = 180, Legendaire = 300, Mythique = 600, Divin = 1200, Sigma = 1800 } :: { [string]: number },
+	BuildUp = { 2, 2.5, 3, 3.5, 4, 5, 6, 7 },
+	ViewDistance = 140,
 }
 
 -- Durées des phases (secondes).
@@ -32,20 +36,20 @@ Config.Arena = {
 	DomeRadius = 55, -- rayon du dôme répulsif pendant la digestion
 	BaseCount = 8,
 	BaseRingRadius = 215, -- distance du centre au centre des bases (~150 studs entre l'entrée et le trou)
-	BaseSize = Vector3.new(56, 1, 56),
+	BaseSize = Vector3.new(84, 1, 84), -- 15 oct. : agrandie (avant 56) ; plan dans shared/BaseLayout
 }
 
 -- Apparition des objets (par base occupée).
 Config.Items = {
 	StarterCount = 5, -- objets offerts dans la base à l'arrivée d'un joueur
 	SpawnInterval = 2, -- pendant le Feeding, un objet apparaît toutes les 2 s dans chaque base occupée
-	MaxPerBase = 12, -- 4 palettes : ~3 objets par palette
+	MaxPerBase = 12, -- 2 palettes à l'avant de la base : ~6 objets par palette
 	-- Objets "sauvages" dans l'arène (hors des bases), ramassables par tout le monde pendant le Feeding.
 	WildInterval = 4, -- un objet sauvage toutes les 4 s
 	WildMax = 25,
 	WildQuality = 2, -- équivaut à 2 niveaux de Chance : un peu plus précieux que dans les bases
 	WildMinRadius = 70, -- hors du dôme
-	WildMaxRadius = 170, -- avant les bases et les kiosques
+	WildMaxRadius = 160, -- avant les bases (bord intérieur à 173) et les kiosques
 	MaxLooseItems = 80, -- au-delà, les plus vieux objets abandonnés sont nettoyés
 	QualityBoost = 0.5, -- par niveau de "Chance" : poids des objets précieux ×(1 + 0.5 × niveau)^rang
 }

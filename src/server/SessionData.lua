@@ -797,16 +797,17 @@ function SessionData.GetRewardOwned(player: Player): { [string]: number }
 	return if data then EggIncubation.Owned(data.pets, data.eggs) else {}
 end
 
-function SessionData.HatchEggs(player: Player, time: number): { [string]: number }
+-- Fait éclore les œufs arrivés à échéance. Renvoie (petId -> quantité, lots éclos).
+function SessionData.HatchEggs(player: Player, time: number): ({ [string]: number }, { EggIncubation.Egg })
 	local data = storage[player]
-	if not data or not data.loaded then return {} end
-	local pending, hatched = EggIncubation.Collect(data.eggs, time)
+	if not data or not data.loaded then return {}, {} end
+	local pending, hatched, done = EggIncubation.Collect(data.eggs, time)
 	if next(hatched) then
 		data.eggs = pending
 		for petId, count in pairs(hatched) do data.pets[petId] = (data.pets[petId] or 0) + count end
 		sync(player)
 	end
-	return hatched
+	return hatched, done
 end
 
 function SessionData.AddPets(player: Player, newPets: { [string]: number })

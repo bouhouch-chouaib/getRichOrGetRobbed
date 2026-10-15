@@ -480,5 +480,13 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 ## Pas encore dans le MVP
 
-- Familiers visibles physiquement dans la base, œufs + incubateur, vol d'un objet dans les mains d'un autre joueur.
+- Familiers visibles physiquement dans la base, vol d'un objet dans les mains d'un autre joueur.
+- (fait le 15 oct.) Œufs + couveuse : voir `docs/INCUBATION.md`.
+
+## Bases (15 oct.)
+
+- 84 x 84 (avant 56), plan dans `shared/BaseLayout` (une seule source pour la carte, les familiers et les œufs) :
+  entrée côté trou noir avec « ZONE SÛRE », **2 palettes à objets à l'avant** (de chaque côté du bouton de verrouillage),
+  la **prairie** au milieu où se promènent les familiers (`PetWander`), la **couveuse** au fond (sol de paille, rebord
+  ouvert au milieu, 12 nids, panneau « COUVEUSE » avec le nom du propriétaire au-dessus).
 - Sauvegarde DataStore, familiers visibles / équipables, support mobile du lancer.

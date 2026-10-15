@@ -316,7 +316,7 @@ end
 local session = loadModule("SessionData")
 session.Init()
 session.AddEggs(player, { [byRank[1]] = 2 })
-assert(next(session.HatchEggs(player, os.time() + 10000)) == nil, "unloaded profile cannot hatch")
+assert(next((session.HatchEggs(player, os.time() + 10000))) == nil, "unloaded profile cannot hatch")
 local early = session.GetEggs(player)[1]
 records.u_1234 = { pets = { [byRank[2]] = 1 }, eggs = { eggs.Create(byRank[3], 1, 0, "saved") }, money = 100 }
 tasks[1].f(table.unpack(tasks[1].args)) -- actual loadPlayer, no autosave loop
@@ -394,16 +394,17 @@ tasks[1].f(table.unpack(tasks[1].args))
 assert(rejoined.IsLoaded(player))
 local before = rejoined.GetRewardOwned(player)
 rejoined.HatchEggs(player, os.time() + 10000)
-assert(#rejoined.GetEggs(player) == 0 and next(rejoined.HatchEggs(player, os.time() + 10000)) == nil)
+assert(#rejoined.GetEggs(player) == 0 and next((rejoined.HatchEggs(player, os.time() + 10000))) == nil)
 for id, count in pairs(before) do
 	assert(rejoined.GetOwnedPets(player)[id] == count)
 end
 assert(rejoined.Get(player).upgrades.AstralAura == 1, "permanent aura survives reconnect")
 
--- Actual controller: anchors show counts only, hatching replicates once, vacant bases clear their nests.
+-- Actual controller (15 oct.) : one nest per egg, nests kept until the hatch, one hatch event per egg,
+-- the pet leaves its nest, vacant bases clear their nests.
 local base = r.Instance.new("Model")
 local platform = r.Instance.new("Part")
-platform.Name, platform.Size, platform.Parent = "BasePart", V(56, 1, 56), base
+platform.Name, platform.Size, platform.Parent = "BasePart", config.Arena.BaseSize, base
 local owner = player
 cache.BaseManager = {
 	GetOwner = function()
@@ -411,19 +412,27 @@ cache.BaseManager = {
 	end,
 }
 local celebrated = 0
+local layout = loadModule("BaseLayout")
 cache.BasePetsController = {
 	Celebrate = function(_, ids, spots)
 		celebrated += #ids
 		for _, spot in pairs(spots) do
-			assert(math.abs(spot.Y) <= 22)
+			assert(math.abs(spot.X) <= layout.HALF and math.abs(spot.Y) <= layout.HALF, "hatch spot inside the base")
 		end
 	end,
+	IsShown = function()
+		return true
+	end,
 }
-local hatchEvents = 0
+local hatchEvents, inBaseEvents = 0, 0
 cache.Remotes.EggHatched = {
-	FireAllClients = function(_, userId, rarity, cf, pets)
-		assert(userId == player.UserId and typeof(cf) == "CFrame" and next(pets) and config.RarityIndex[rarity])
+	FireAllClients = function(_, userId, key, rarity, cf, petId, inBase)
+		assert(userId == player.UserId and type(key) == "string" and typeof(cf) == "CFrame")
+		assert(config.RarityIndex[rarity] and catalog.ById[petId].Rarity == rarity)
 		hatchEvents += 1
+		if inBase then
+			inBaseEvents += 1
+		end
 	end,
 }
 cache.Remotes.Announcement = { FireAllClients = function() end }
@@ -434,20 +443,38 @@ mockTask.wait = coroutine.yield
 local loop = coroutine.create(tasks[#tasks].f)
 assert(coroutine.resume(loop))
 local folder = base:FindFirstChild("Eggs")
-assert(
-	#folder:GetChildren() == 2 and folder.Commun:GetAttribute("Count") == 3 and not folder.Commun:GetAttribute("PetId")
-)
+local nestsUsed = {}
+for _, anchor in ipairs(folder:GetChildren()) do
+	assert(anchor:GetAttribute("Rarity") and not anchor:GetAttribute("PetId"), "eggs keep their pet secret")
+	local nest = anchor:GetAttribute("Nest")
+	assert(nest and not nestsUsed[nest], "one egg per nest")
+	nestsUsed[nest] = true
+end
+assert(#folder:GetChildren() == 4, "each egg is shown, not one per rarity")
 assert(hatchEvents == 0)
+-- A new egg does not move the others.
+local before = {}
+for _, anchor in ipairs(folder:GetChildren()) do
+	before[anchor.Name] = anchor:GetAttribute("Nest")
+end
+rejoined.AddEggs(player, { [byRank[2]] = 1 })
+assert(coroutine.resume(loop))
+assert(#folder:GetChildren() == 5)
+for name, nest in pairs(before) do
+	assert(folder:FindFirstChild(name):GetAttribute("Nest") == nest, "nests are kept until the hatch")
+end
 for _, egg in ipairs(rejoined.GetEggs(player)) do
 	egg.startedAt, egg.readyAt = 0, 0
 end
 assert(coroutine.resume(loop))
-assert(#folder:GetChildren() == 0 and hatchEvents == 2 and celebrated == 2)
+assert(#folder:GetChildren() == 0 and hatchEvents == 5 and celebrated == 3)
+assert(inBaseEvents == 3, "one pet per species walks out of its nest")
 assert(coroutine.resume(loop))
-assert(hatchEvents == 2 and celebrated == 2, "subsequent ticks do not replay hatches")
-rejoined.AddEggs(player, { [byRank[2]] = 1 })
+assert(hatchEvents == 5 and celebrated == 3, "subsequent ticks do not replay hatches")
+-- More eggs than nests: the rest wait for a free nest.
+rejoined.AddEggs(player, { [byRank[1]] = layout.MAX_NESTS + 3 })
 assert(coroutine.resume(loop))
-assert(#folder:GetChildren() == 1)
+assert(#folder:GetChildren() == layout.MAX_NESTS and folder:GetAttribute("Waiting") == 3)
 owner = nil
 assert(coroutine.resume(loop))
 assert(#folder:GetChildren() == 0, "vacated bases remove all egg visuals")

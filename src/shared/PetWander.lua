@@ -7,13 +7,16 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local BaseLayout = require(ReplicatedStorage.Shared.BaseLayout)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 
 local PetWander = {}
 
-PetWander.AREA = 22 -- demi-taille de la zone de promenade (la base fait 56 x 56, clôture comprise)
-local CRATE_ZONE = 13 -- les coins (palettes à objets) sont évités
+-- Zone de promenade : la prairie au milieu de la base (shared/BaseLayout), entre les palettes de l'avant et la
+-- couveuse du fond.
+local ZONE_CENTER = BaseLayout.PetZoneCenter
+local ZONE_HALF = BaseLayout.PetZoneHalf
 
 export type Style = {
 	speed: number, -- studs / s
@@ -55,21 +58,17 @@ function PetWander.styleFor(petId: string): string
 	return "Walk"
 end
 
--- Un point au hasard dans la zone de promenade (hors des coins). Avec petId, les grands familiers
--- (shared/PetSizes) restent plus près du centre pour ne pas déborder de la clôture.
+-- Un point au hasard dans la prairie. Avec petId, les grands familiers (shared/PetSizes) restent plus près du
+-- centre pour ne pas déborder sur la clôture, les palettes ou la couveuse.
 function PetWander.randomSpot(rng: Random, petId: string?): Vector2
-	local area = PetWander.AREA
+	local margin = 0
 	if petId then
 		local entry = PetCatalog.ById[petId]
-		area = math.max(2, area - math.max(0, PetSizes.Radius(petId, entry and entry.Rarity) - 4))
+		margin = math.max(0, PetSizes.Radius(petId, entry and entry.Rarity) - 4)
 	end
-	for _ = 1, 20 do
-		local spot = Vector2.new(rng:NextNumber(-area, area), rng:NextNumber(-area, area))
-		if not (math.abs(spot.X) > CRATE_ZONE and math.abs(spot.Y) > CRATE_ZONE) then
-			return spot
-		end
-	end
-	return Vector2.zero
+	local halfX = math.max(2, ZONE_HALF.X - margin)
+	local halfZ = math.max(2, ZONE_HALF.Y - margin)
+	return ZONE_CENTER + Vector2.new(rng:NextNumber(-halfX, halfX), rng:NextNumber(-halfZ, halfZ))
 end
 
 -- Un trajet : de `from` à `to`, départ à `start` (horloge serveur), pendant `duration` secondes.

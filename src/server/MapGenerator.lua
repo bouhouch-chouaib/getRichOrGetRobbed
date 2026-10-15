@@ -17,12 +17,14 @@
 --   LooseItems (Folder) : objets ramassés / lancés
 --   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Pallets,
 --                              SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
---                              SpawnPoints (Folder), ItemSpawns (Folder)
+--                              SpawnPoints (Folder), ItemSpawns (Folder), Incubator (Folder : couveuse, nids Nest_1..12).
+--                              Plan de la base (entrée, palettes, prairie, couveuse) : shared/BaseLayout.
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
+local BaseLayout = require(ReplicatedStorage.Shared.BaseLayout)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 
@@ -57,7 +59,7 @@ local COLORS = {
 local FENCE_HEIGHT = 4
 local FENCE_GAP = 14 -- largeur de l'entrée côté trou noir
 local TILE = 12 -- côté d'une dalle du damier de l'arène
-local BASE_TILE = 8 -- côté d'une dalle du damier des bases (56 / 8 = 7 dalles)
+local BASE_TILE = 7 -- côté d'une dalle du damier des bases (84 / 7 = 12 dalles)
 local WALL_HEIGHT = 36
 local WALL_THICKNESS = 10
 local WALL_ROW = 12 -- hauteur d'une rangée du damier du mur
@@ -720,7 +722,7 @@ end
 
 -- Palette en bois basse : plateau de lattes sur 3 chevrons, avec un petit rebord pour que les objets
 -- ne roulent pas par terre. Les objets restent bien accessibles (pas de parois hautes).
-local PALLET_SIZE = 8
+local PALLET_SIZE = 9
 local function createPallet(cframe: CFrame, parent: Instance)
 	local model = Instance.new("Model")
 	model.Name = "Pallet"
@@ -742,6 +744,65 @@ local function createPallet(cframe: CFrame, parent: Instance)
 		makePart("Lip", Vector3.new(0.3, 0.45, PALLET_SIZE), cframe * CFrame.new(side * (half - 0.15), 1, 0), dark, model)
 	end
 	model.Parent = parent
+end
+
+-- Couveuse au fond de la base (shared/BaseLayout) : sol de paille, rebord en bois ouvert au milieu, 12 nids et un
+-- panneau « COUVEUSE ». Les œufs posés dans les nids sont affichés par client/Eggs (server/EggController).
+local STRAW = Color3.fromRGB(240, 202, 96)
+local STRAW_DARK = Color3.fromRGB(200, 148, 56)
+local function createIncubator(origin: CFrame, top: number, base: Model): BasePart
+	local folder = Instance.new("Folder")
+	folder.Name = "Incubator"
+	local center = BaseLayout.IncubatorCenter
+	local half = BaseLayout.IncubatorHalf
+	local floor = makePart("Straw", Vector3.new(half.X * 2, 0.2, half.Y * 2), origin * CFrame.new(center.X, top + 0.1, center.Y), STRAW, folder)
+	makeGhost(floor)
+	-- Rebord côté prairie, ouvert au milieu (les familiers éclos en sortent), et sur les côtés.
+	local frontZ = center.Y - half.Y
+	local opening = 7
+	for _, side in ipairs({ -1, 1 }) do
+		local length = half.X - opening
+		local curb = makePart("Curb", Vector3.new(length, 0.9, 0.9), origin * CFrame.new(side * (opening + length / 2), top + 0.45, frontZ), COLORS.WoodRail, folder)
+		makeGhost(curb)
+		local sideCurb = makePart("Curb", Vector3.new(0.9, 0.9, half.Y * 2), origin * CFrame.new(side * half.X, top + 0.45, center.Y), COLORS.WoodRail, folder)
+		makeGhost(sideCurb)
+		local post = makePart("CurbPost", Vector3.new(1.4, 1.6, 1.4), origin * CFrame.new(side * opening, top + 0.8, frontZ), COLORS.WoodPost, folder)
+		makeGhost(post)
+	end
+	-- Les nids : couronne de paille foncée + lit de paille clair.
+	for index = 1, BaseLayout.MAX_NESTS do
+		local spot = BaseLayout.Nest(index)
+		local cframe = origin * CFrame.new(spot.X, top, spot.Y)
+		local ring = makePart("Nest_" .. index, Vector3.new(0.7, 5.4, 5.4), cframe * CFrame.new(0, 0.35, 0) * FLAT, STRAW_DARK, folder)
+		ring.Shape = Enum.PartType.Cylinder
+		makeGhost(ring)
+		local bed = makePart("NestBed", Vector3.new(0.76, 4.2, 4.2), cframe * CFrame.new(0, 0.38, 0) * FLAT, STRAW, folder)
+		bed.Shape = Enum.PartType.Cylinder
+		makeGhost(bed)
+	end
+	-- Panneau contre la clôture du fond, lisible depuis l'entrée.
+	local boardCFrame = origin * CFrame.new(0, top + 6.5, BaseLayout.HALF - 1.6)
+	local board = makePart("IncubatorSign", Vector3.new(24, 4.6, 0.6), boardCFrame, COLORS.WoodPost, folder)
+	makeGhost(board)
+	for _, side in ipairs({ -1, 1 }) do
+		local post = makePart("SignPost", Vector3.new(1, 6.5, 1), origin * CFrame.new(side * 10, top + 3.25, BaseLayout.HALF - 1.6), COLORS.WoodPost, folder)
+		makeGhost(post)
+	end
+	local surface = Instance.new("SurfaceGui")
+	surface.Face = Enum.NormalId.Front -- -Z de la pièce : vers l'intérieur de la base
+	surface.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	surface.PixelsPerStud = 24
+	surface.LightInfluence = 0.3
+	surface.MaxDistance = 200
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = "COUVEUSE"
+	styleSignText(label, STRAW)
+	label.Parent = surface
+	surface.Parent = board
+	folder.Parent = base
+	return board
 end
 
 local function createBase(index: number, map: Folder): Model
@@ -777,12 +838,13 @@ local function createBase(index: number, map: Folder): Model
 	local top = size.Y -- hauteur du dessus de la plateforme
 
 	createFence(origin, top, base)
+	local incubatorSign = createIncubator(origin, top, base)
 
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "SpawnLocation"
 	spawn.Anchored = true
 	spawn.Size = Vector3.new(8, 1, 8)
-	spawn.CFrame = origin * CFrame.new(0, top + 0.5, 18)
+	spawn.CFrame = origin * CFrame.new(BaseLayout.Spawn.X, top + 0.5, BaseLayout.Spawn.Y)
 	spawn.Color = color
 	-- Invisible : elle sert seulement de point d'apparition (le nom du joueur flotte au-dessus).
 	spawn.Transparency = 1
@@ -794,13 +856,13 @@ local function createBase(index: number, map: Folder): Model
 	spawn.Parent = base
 
 	-- Zone de sécurité : invisible pour l'instant (pas encore de gameplay associé).
-	local safeZone = makePart("SafeZone", Vector3.new(16, 8, 16), origin * CFrame.new(0, top + 4, 18), color, base)
+	local safeZone = makePart("SafeZone", Vector3.new(16, 8, 16), origin * CFrame.new(BaseLayout.Spawn.X, top + 4, BaseLayout.Spawn.Y), color, base)
 	safeZone.Transparency = 1
 	makeGhost(safeZone)
 
 	-- Bouton de verrouillage au sol (géré par LockController) + portail affiché quand la base est fermée.
 	-- Socle carré sombre bordé de bandes jaunes et noires, gros bouton rond par-dessus.
-	local buttonCFrame = origin * CFrame.new(0, top, -17)
+	local buttonCFrame = origin * CFrame.new(BaseLayout.Lock.X, top, BaseLayout.Lock.Y)
 	local pedestal = Instance.new("Model")
 	pedestal.Name = "LockPedestal"
 	makePart("Plate", Vector3.new(10, 0.5, 10), buttonCFrame * CFrame.new(0, 0.25, 0), Color3.fromRGB(52, 54, 66), pedestal)
@@ -883,7 +945,8 @@ local function createBase(index: number, map: Folder): Model
 	local pallets = Instance.new("Folder")
 	pallets.Name = "Pallets"
 	pallets.Parent = base
-	for _, offset in ipairs({ Vector2.new(-19, -19), Vector2.new(19, -19), Vector2.new(-19, 19), Vector2.new(19, 19) }) do
+	-- 2 palettes à objets, à l'avant de la base de chaque côté du bouton de verrouillage (shared/BaseLayout).
+	for _, offset in ipairs(BaseLayout.Pallets) do
 		local palletCFrame = origin * CFrame.new(offset.X, top, offset.Y)
 		createPallet(palletCFrame, pallets)
 		-- Point d'apparition au-dessus du centre de la palette : l'objet tombe dessus.
@@ -898,9 +961,10 @@ local function createBase(index: number, map: Folder): Model
 
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "OwnerSign"
-	sign.Adornee = spawn
+	-- Au-dessus du panneau de la couveuse, au fond : le nom se voit de loin sans cacher les œufs ni les familiers.
+	sign.Adornee = incubatorSign
 	sign.Size = UDim2.fromScale(30, 6)
-	sign.StudsOffsetWorldSpace = Vector3.new(0, 14, 0)
+	sign.StudsOffsetWorldSpace = Vector3.new(0, 9, 0)
 	sign.LightInfluence = 0
 	sign.MaxDistance = 500
 	local label = Instance.new("TextLabel")

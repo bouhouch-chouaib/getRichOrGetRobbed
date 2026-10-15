@@ -476,13 +476,10 @@ end)
 Remotes.FusionResult.OnClientEvent:Connect(function(petId: string, egg: boolean?)
 	if not egg then queueReveal(petId) end
 end)
-Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, _rarity: string, _cf: CFrame, pets: { [string]: number })
-	if ownerId ~= Players.LocalPlayer.UserId then return end
-	local best: string? = nil
-	local rank = 0
-	for id in pairs(pets) do
-		local pet = PetCatalog.ById[id]
-		if pet and Config.RarityIndex[pet.Rarity] > rank then best, rank = id, Config.RarityIndex[pet.Rarity] end
+-- Éclosion d'un de mes œufs (client/Eggs joue l'explosion dans la base) : le grand écran du familier rare passe
+-- ensuite, quand l'explosion est finie.
+Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, _key: string, _rarity: string, _cf: CFrame, petId: string)
+	if ownerId == Players.LocalPlayer.UserId and type(petId) == "string" then
+		task.delay(2.2, queueReveal, petId)
 	end
-	if best then task.delay(1, queueReveal, best) end
 end)

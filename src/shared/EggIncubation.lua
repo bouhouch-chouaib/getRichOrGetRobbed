@@ -77,16 +77,43 @@ function Eggs.Create(petId: string, count: number, time: number, id: string): Eg
 	}
 end
 
-function Eggs.Collect(queue: { Egg }, time: number): ({ Egg }, { [string]: number })
-	local pending: { Egg }, hatched: { [string]: number } = {}, {}
+-- Sépare les œufs prêts : (en attente, familiers éclos petId -> quantité, liste des lots éclos).
+function Eggs.Collect(queue: { Egg }, time: number): ({ Egg }, { [string]: number }, { Egg })
+	local pending: { Egg }, hatched: { [string]: number }, done: { Egg } = {}, {}, {}
 	for _, egg in ipairs(queue) do
 		if egg.readyAt <= time then
 			hatched[egg.petId] = (hatched[egg.petId] or 0) + egg.count
+			table.insert(done, egg)
 		else
 			table.insert(pending, egg)
 		end
 	end
-	return pending, hatched
+	return pending, hatched, done
+end
+
+-- Un exemplaire d'un lot : chaque œuf a son propre nid (server/EggController). La clé reste la même jusqu'à
+-- l'éclosion.
+function Eggs.UnitKey(egg: Egg, index: number): string
+	return egg.id .. "#" .. index
+end
+
+-- Les œufs dans l'ordre d'éclosion (les plus proches d'abord), un par exemplaire.
+export type Unit = { key: string, petId: string, startedAt: number, readyAt: number }
+function Eggs.Units(queue: { Egg }): { Unit }
+	local sorted = table.clone(queue)
+	table.sort(sorted, function(a, b)
+		if a.readyAt ~= b.readyAt then
+			return a.readyAt < b.readyAt
+		end
+		return a.id < b.id
+	end)
+	local units: { Unit } = {}
+	for _, egg in ipairs(sorted) do
+		for index = 1, egg.count do
+			table.insert(units, { key = Eggs.UnitKey(egg, index), petId = egg.petId, startedAt = egg.startedAt, readyAt = egg.readyAt })
+		end
+	end
+	return units
 end
 
 function Eggs.Owned(pets: { [string]: number }, queue: { Egg }): { [string]: number }
@@ -112,11 +139,6 @@ function Eggs.Summary(queue: { Egg }): { [string]: Batch }
 		end
 	end
 	return result
-end
-
--- Eight compact nests in two rows, between the rear pallets, away from the spawn/gate.
-function Eggs.Slot(index: number): Vector2
-	return Vector2.new(((index - 1) % 4 - 1.5) * 6, -23 + math.floor((index - 1) / 4) * 6)
 end
 
 return Eggs
