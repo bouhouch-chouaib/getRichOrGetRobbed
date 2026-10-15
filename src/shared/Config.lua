@@ -5,13 +5,30 @@
 local Config = {}
 
 -- Incubation parallèle, en secondes réelles (continue hors ligne).
--- Chaque œuf a son nid dans la couveuse de la base (shared/BaseLayout : 12 nids, les premiers à éclore d'abord).
+-- Chaque œuf a son nid dans la couveuse de la base (shared/BaseLayout : 10 nids, les premiers à éclore d'abord).
 -- BuildUp : secondes de montée en tension avant l'éclosion (tremble, s'élève, brille), par rareté (Commun -> Sigma).
 -- L'éclosion elle-même est de plus en plus spectaculaire avec la rareté (client/Eggs).
 Config.Eggs = {
 	Seconds = { Commun = 15, Inhabituel = 30, Rare = 60, Epique = 180, Legendaire = 300, Mythique = 600, Divin = 1200, Sigma = 1800 } :: { [string]: number },
 	BuildUp = { 2, 2.5, 3, 3.5, 4, 5, 6, 7 },
 	ViewDistance = 140,
+}
+
+-- Machine d'évolution (couveuse au fond de la base, shared/BaseLayout) : le joueur y met un de ses œufs. Il n'éclot
+-- plus tout seul ; plus il reste, plus le familier qui en sortira peut être évolué (3 stades). Le joueur choisit quand
+-- l'ouvrir. Hasard : à l'entrée, chaque œuf reçoit en secret un stade maximum (MaxStageWeights) ; quand une tentative
+-- d'évolution échoue (ou qu'il atteint Ultime), la machine affiche qu'il n'évoluera plus.
+Config.Evolution = {
+	Names = { "", "Évolué", "Ultime" }, -- ajouté au nom du familier
+	IncomeMultiplier = { 1, 3, 8 }, -- revenu x3 au stade Évolué, x8 au stade Ultime
+	SizeMultiplier = { 1, 1.18, 1.36 }, -- un peu plus grand à chaque stade
+	MaxStageWeights = { 40, 42, 18 }, -- 40 % n'évolueront pas, 42 % s'arrêteront à Évolué, 18 % iront jusqu'à Ultime
+	-- Attente avant chaque tentative (passer au stade 2, puis au stade 3), en multiples de la durée d'éclosion normale
+	-- de sa rareté (Config.Eggs.Seconds) : un œuf Commun tente après 1 min puis 3 min, un Sigma après 2 h puis 6 h.
+	StageTimeFactor = { 4, 12 },
+	TimeJitter = 0.25, -- +/- 25 % au hasard sur chaque attente
+	Slots = 1, -- œufs dans la machine en même temps
+	UseDistance = 18, -- studs : distance max pour utiliser la machine
 }
 
 -- Durées des phases (secondes).

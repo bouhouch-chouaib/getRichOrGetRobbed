@@ -29,6 +29,8 @@ export type Pet = {
 	Category: string,
 	Description: string,
 	Look: Look,
+	Stage: number?, -- 2 = Évolué, 3 = Ultime (familier sorti de la machine d'évolution) ; nil = stade normal
+	BaseId: string?, -- l'espèce de départ d'un familier évolué
 }
 
 local rgb = Color3.fromRGB
@@ -174,13 +176,52 @@ for _, entry in ipairs(list) do
 	table.insert(bucket, entry)
 end
 
+-- Familiers évolués (machine d'évolution, Config.Evolution) : chaque espèce a 2 formes de plus, « <Id>__E2 » (Évolué)
+-- et « <Id>__E3 » (Ultime). Ils sont dans ById (tout le jeu les connaît : base, échanges, vols, duels, sauvegarde)
+-- mais PAS dans List / ByRarity : ils ne sortent pas des tirages et n'ont pas de case à eux dans l'Index.
+-- Everything = List + formes évoluées (fenêtres qui montrent les familiers possédés : échanges, duels).
+PetCatalog.Everything = table.clone(list)
+for _, entry in ipairs(list) do
+	for stage = 2, #Config.Evolution.Names do
+		local variant: Pet = {
+			Id = entry.Id .. "__E" .. stage,
+			Name = entry.Name .. " " .. Config.Evolution.Names[stage],
+			Rarity = entry.Rarity,
+			Category = entry.Category,
+			Description = entry.Description,
+			Look = entry.Look,
+			Stage = stage,
+			BaseId = entry.Id,
+		}
+		PetCatalog.ById[variant.Id] = variant
+		table.insert(PetCatalog.Everything, variant)
+	end
+end
+
+-- Id de la forme d'une espèce à ce stade (1 = l'espèce elle-même).
+function PetCatalog.Variant(petId: string, stage: number): string
+	local entry = PetCatalog.ById[petId]
+	local baseId = if entry and entry.BaseId then entry.BaseId else petId
+	return if stage <= 1 then baseId else baseId .. "__E" .. stage
+end
+
+-- Stade d'un familier (1 = normal).
+function PetCatalog.Stage(petId: string): number
+	local entry = PetCatalog.ById[petId]
+	return if entry and entry.Stage then entry.Stage else 1
+end
+
 -- Revenu par seconde d'un familier sur un socle : base de sa rareté, +15 % par rang dans sa rareté
--- (ordre du catalogue), pour que chaque familier ait sa propre valeur.
+-- (ordre du catalogue), pour que chaque familier ait sa propre valeur ; x Config.Evolution.IncomeMultiplier s'il est évolué.
 local incomes: { [string]: number } = {}
 for rarityId, bucket in pairs(PetCatalog.ByRarity) do
 	local rarity = Config.Rarities[Config.RarityIndex[rarityId]]
 	for rank, entry in ipairs(bucket) do
-		incomes[entry.Id] = if rarity then math.floor(rarity.Income * (1 + (rank - 1) * 0.15)) else 0
+		local income = if rarity then math.floor(rarity.Income * (1 + (rank - 1) * 0.15)) else 0
+		incomes[entry.Id] = income
+		for stage = 2, #Config.Evolution.Names do
+			incomes[entry.Id .. "__E" .. stage] = math.floor(income * Config.Evolution.IncomeMultiplier[stage])
+		end
 	end
 end
 

@@ -647,11 +647,76 @@ if RunService:IsClient() and Config.Pets.ModelStyle == "Legacy" then
 end
 
 -- Construit le modèle du familier petId (nil si l'Id est inconnu).
+-- Familier évolué (Config.Evolution) : le modèle de son espèce, plus grand, avec un anneau de lumière aux pieds ;
+-- au stade Ultime, une couronne d'éclats dorés qui flotte au-dessus de la tête et plus d'étincelles.
+local EVOLUTION_GOLD = Color3.fromRGB(255, 214, 70)
+local function applyEvolution(model: Model, entry: PetCatalog.Pet)
+	local stage = entry.Stage or 1
+	model.Name = entry.Id
+	model:ScaleTo(model:GetScale() * (Config.Evolution.SizeMultiplier[stage] or 1))
+	local box, size = PetModelBuilder.BodyBounds(model)
+	local pivot = model:GetPivot()
+	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity] or 1]
+	local color = if stage >= 3 then EVOLUTION_GOLD else rarity.Color
+	local bottom = pivot:PointToObjectSpace(box.Position).Y - size.Y / 2
+	local width = math.max(size.X, size.Z) * 1.15 + 1
+	local glow = Instance.new("Part")
+	glow.Name = "EvolutionRing"
+	glow.Shape = Enum.PartType.Cylinder
+	glow.Size = Vector3.new(0.12, width, width)
+	glow.CFrame = pivot * CFrame.new(0, bottom + 0.08, 0) * CFrame.Angles(0, 0, math.pi / 2)
+	glow.Color = color
+	glow.Material = Enum.Material.Neon
+	glow.Transparency = 0.45
+	glow:SetAttribute("Aura", true)
+	glow.Parent = model
+	local root = model.PrimaryPart
+	if root then
+		local sparkles = Instance.new("ParticleEmitter")
+		sparkles.Name = "EvolutionSparkles"
+		sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		sparkles.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
+		sparkles.Rate = if stage >= 3 then 10 else 4
+		sparkles.Lifetime = NumberRange.new(0.8, 1.5)
+		sparkles.Speed = NumberRange.new(0.5, 1.5)
+		sparkles.SpreadAngle = Vector2.new(180, 180)
+		sparkles.LightEmission = 0.8
+		sparkles.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25 + stage * 0.05), NumberSequenceKeypoint.new(1, 0) })
+		sparkles:SetAttribute("Aura", true)
+		sparkles.Parent = root
+	end
+	if stage >= 3 then
+		-- Couronne : 8 éclats dorés en cercle au-dessus de la tête.
+		local top = pivot:PointToObjectSpace(box.Position).Y + size.Y / 2 + 0.8
+		local radius = math.clamp(math.min(size.X, size.Z) * 0.35, 0.6, 2.4)
+		for index = 1, 8 do
+			local angle = index * math.pi / 4
+			local shard = Instance.new("Part")
+			shard.Name = "EvolutionCrown"
+			shard.Size = Vector3.new(0.35, 0.6, 0.35) * math.max(1, radius / 1.2)
+			shard.CFrame = pivot * CFrame.new(math.cos(angle) * radius, top, math.sin(angle) * radius) * CFrame.Angles(0, -angle, 0)
+			shard.Color = EVOLUTION_GOLD
+			shard.Material = Enum.Material.Neon
+			shard:SetAttribute("Aura", true)
+			shard.Parent = model
+		end
+	end
+	finalize(model)
+	model:SetAttribute("EvolutionStage", stage)
+end
+
 function PetModelBuilder.Build(petId: string): Model?
 	petId = PetCatalog.CurrentId(petId)
 	local entry = PetCatalog.ById[petId]
 	if not entry then
 		return nil
+	end
+	if entry.BaseId then
+		local model = PetModelBuilder.Build(entry.BaseId)
+		if model then
+			applyEvolution(model, entry)
+		end
+		return model
 	end
 	if Config.Pets.ModelStyle ~= "Legacy" then
 		return PetSculptedModels.Build(entry)

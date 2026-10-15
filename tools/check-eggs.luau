@@ -436,6 +436,47 @@ cache.Remotes.EggHatched = {
 	end,
 }
 cache.Remotes.Announcement = { FireAllClients = function() end }
+cache.Remotes.Evolution = { FireAllClients = function() end, OnServerEvent = signal() }
+
+-- Evolution machine (Config.Evolution): one egg leaves the nests, never hatches on its own, evolves up to its
+-- secret limit, then hatches as the evolved form chosen by the player.
+local now = os.time()
+rejoined.AddEggs(player, { [byRank[3]] = 2 })
+local lot
+for _, egg in ipairs(rejoined.GetEggs(player)) do
+	if egg.petId == byRank[3] and egg.count == 2 then
+		lot = egg
+	end
+end
+assert(lot, "a lot of two eggs")
+assert(rejoined.StartEvolution(player, lot.id .. "#2", now), "egg enters the machine")
+assert(not rejoined.StartEvolution(player, lot.id .. "#1", now), "one egg at a time")
+local evolving = assert(rejoined.GetEvolving(player))
+assert(lot.count == 1 and evolving.count == 1 and evolving.evolve.stage == 1, "only one egg of the lot moved")
+assert(#eggs.Units({ evolving }) == 0, "the machine egg has no nest")
+local _, hatchedNow = eggs.Collect({ evolving }, now + 10 ^ 7)
+assert(next(hatchedNow) == nil, "the machine egg never hatches on its own")
+evolving.evolve.maxStage = 2
+assert(rejoined.TickEvolution(player, now) == nil, "nothing before the first attempt")
+assert(rejoined.TickEvolution(player, evolving.evolve.nextAt) == "Evolved" and evolving.evolve.stage == 2)
+assert(rejoined.TickEvolution(player, evolving.evolve.nextAt) == "Maxed" and evolving.evolve.done, "secret limit reached")
+assert(rejoined.TickEvolution(player, now + 10 ^ 7) == nil, "no attempt after the limit")
+local evolvedId = assert(rejoined.HatchEvolving(player))
+assert(evolvedId == byRank[3] .. "__E2" and catalog.ById[evolvedId].Stage == 2, "hatches as the Évolué form")
+assert(catalog.GetIncome(evolvedId) == catalog.GetIncome(byRank[3]) * config.Evolution.IncomeMultiplier[2])
+assert(rejoined.GetEvolving(player) == nil and rejoined.Get(player).pets[evolvedId] == 1)
+local maxed = 0
+for i = 1, 1000 do
+	if eggs.RollMaxStage((i - 0.5) / 1000) == #config.Evolution.Names then
+		maxed += 1
+	end
+end
+assert(maxed > 100 and maxed < 260, "most eggs never reach Ultime")
+-- Saved evolution survives a reload.
+local saved = eggs.Merge({ { id = "x", petId = byRank[1], count = 1, startedAt = 1, readyAt = 2,
+	evolve = { stage = 2, maxStage = 3, nextAt = 99, done = false } } }, {})
+assert(saved[1].evolve and saved[1].evolve.stage == 2 and saved[1].evolve.maxStage == 3)
+table.clear(rejoined.GetEggs(player))
 rejoined.AddEggs(player, { [byRank[1]] = 3, [byRank[8]] = 1 })
 local controller = loadModule("EggController")
 controller.Init({ base })

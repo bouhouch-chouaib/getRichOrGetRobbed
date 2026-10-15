@@ -20,6 +20,8 @@
 --
 -- La taille est la HAUTEUR. Les familiers longs (serpents, poissons, baleine) sont limités en longueur
 -- (LONG_RATIO x leur taille, MAX_FOOTPRINT au total) pour laisser de la place dans la base (56 x 56).
+local Config = require(script.Parent.Config)
+
 local PetSizes = {}
 
 PetSizes.PLAYER = 5 -- studs : hauteur d'un avatar (1 J)
@@ -133,14 +135,21 @@ PetSizes.Heights = {
 	BaleineGalaxie = 2.9, -- le plus grand familier du jeu
 } :: { [string]: number }
 
--- Taille d'un familier en J (milieu de la tranche de sa rareté s'il n'est pas dans la table).
+-- Taille d'un familier en J (milieu de la tranche de sa rareté s'il n'est pas dans la table). Un familier évolué
+-- (« <Id>__E2 », PetCatalog) est plus grand que son espèce : x Config.Evolution.SizeMultiplier.
 function PetSizes.Of(petId: string, rarityId: string?): number
+	local baseId, stage = string.match(petId, "^(.-)__E(%d)$")
+	local multiplier = 1
+	if baseId and stage then
+		petId = baseId
+		multiplier = Config.Evolution.SizeMultiplier[tonumber(stage) or 1] or 1
+	end
 	local h = PetSizes.Heights[petId]
 	if h then
-		return h
+		return h * multiplier
 	end
 	local band = PetSizes.Bands[rarityId or "Commun"] or PetSizes.Bands.Commun
-	return (band[1] + band[2]) / 2
+	return (band[1] + band[2]) / 2 * multiplier
 end
 
 -- Taille en studs.

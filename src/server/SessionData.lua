@@ -420,7 +420,9 @@ local function sync(player: Player)
 	local eggCount, nextHatch = 0, math.huge
 	for _, egg in ipairs(data.eggs) do
 		eggCount += egg.count
-		nextHatch = math.min(nextHatch, egg.readyAt)
+		if not egg.evolve then -- l'œuf de la machine d'évolution n'éclot pas tout seul
+			nextHatch = math.min(nextHatch, egg.readyAt)
+		end
 	end
 	player:SetAttribute("EggCount", eggCount)
 	player:SetAttribute("NextHatchAt", if eggCount > 0 then nextHatch else 0)
@@ -797,6 +799,94 @@ function SessionData.GetRewardOwned(player: Player): { [string]: number }
 	return if data then EggIncubation.Owned(data.pets, data.eggs) else {}
 end
 
+----------------------------------------------------------------------
+-- Machine d'évolution (Config.Evolution) : un œuf y entre, évolue au fil du temps, le joueur l'ouvre quand il veut.
+----------------------------------------------------------------------
+
+local evolutionRng = Random.new()
+
+-- L'œuf actuellement dans la machine (nil si elle est vide).
+function SessionData.GetEvolving(player: Player): EggIncubation.Egg?
+	local data = storage[player]
+	if not data then return nil end
+	for _, egg in ipairs(data.eggs) do
+		if egg.evolve then
+			return egg
+		end
+	end
+	return nil
+end
+
+-- Met dans la machine l'œuf de la clé donnée (« lot#n », shared/EggIncubation.UnitKey). Refusé si la machine est pleine,
+-- si l'œuf n'existe plus ou s'il est déjà à l'heure d'éclore. Sans attente.
+function SessionData.StartEvolution(player: Player, key: string, time: number): boolean
+	local data = storage[player]
+	if not data or not data.loaded or SessionData.GetEvolving(player) then
+		return false
+	end
+	local lotId, index = string.match(key, "^(.+)#(%d+)$")
+	local unit = tonumber(index)
+	if not lotId or not unit then
+		return false
+	end
+	for position, egg in ipairs(data.eggs) do
+		if egg.id == lotId and not egg.evolve and unit >= 1 and unit <= egg.count and egg.readyAt > time then
+			local rarity = PetCatalog.ById[egg.petId].Rarity
+			local evolve: EggIncubation.Evolve = {
+				stage = 1,
+				maxStage = EggIncubation.RollMaxStage(evolutionRng:NextNumber()),
+				nextAt = time + EggIncubation.EvolveDelay(rarity, 1, evolutionRng:NextNumber()),
+				done = false,
+			}
+			if egg.count == 1 then
+				egg.evolve = evolve
+			else
+				-- Un seul exemplaire du lot entre dans la machine.
+				egg.count -= 1
+				table.insert(data.eggs, position + 1, {
+					id = HttpService:GenerateGUID(false),
+					petId = egg.petId,
+					count = 1,
+					startedAt = egg.startedAt,
+					readyAt = egg.readyAt,
+					evolve = evolve,
+				})
+			end
+			sync(player)
+			return true
+		end
+	end
+	return false
+end
+
+-- Tentative d'évolution si c'est l'heure : "Evolved" ou "Maxed" (voir EggIncubation.TryEvolve), sinon nil.
+function SessionData.TickEvolution(player: Player, time: number): string?
+	local egg = SessionData.GetEvolving(player)
+	if not egg then return nil end
+	local result = EggIncubation.TryEvolve(egg, time, evolutionRng:NextNumber())
+	if result then
+		sync(player)
+	end
+	return result
+end
+
+-- Ouvre l'œuf de la machine : le familier, à son stade, rejoint le joueur (sans attente). Renvoie son Id.
+function SessionData.HatchEvolving(player: Player): string?
+	local data = storage[player]
+	if not data or not data.loaded then return nil end
+	for index, egg in ipairs(data.eggs) do
+		local evolve = egg.evolve
+		if evolve then
+			table.remove(data.eggs, index)
+			local petId = PetCatalog.Variant(egg.petId, evolve.stage)
+			data.pets[petId] = (data.pets[petId] or 0) + 1
+			sync(player)
+			return petId
+		end
+	end
+	return nil
+end
+
 -- Fait éclore les œufs arrivés à échéance. Renvoie (petId -> quantité, lots éclos).
 function SessionData.HatchEggs(player: Player, time: number): ({ [string]: number }, { EggIncubation.Egg })
 	local data = storage[player]
@@ -959,6 +1049,10 @@ function SessionData.GetDiscovered(player: Player): { [string]: boolean }
 		for petId, count in pairs(data.pets) do
 			if count > 0 then
 				discovered[petId] = true
+				local entry = PetCatalog.ById[petId]
+				if entry and entry.BaseId then
+					discovered[entry.BaseId] = true -- un familier évolué fait découvrir son espèce
+				end
 			end
 		end
 		for _, petId in ipairs(data.indexClaimed) do

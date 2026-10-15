@@ -290,7 +290,8 @@ local gridKey = ""
 
 local function refreshGrid()
 	local list: { string } = {}
-	for _, entry in ipairs(PetCatalog.List) do
+	-- Everything : les espèces et leurs formes évoluées (machine d'évolution).
+	for _, entry in ipairs(PetCatalog.Everything) do
 		if MenuKit.spare(entry.Id) > 0 then
 			table.insert(list, entry.Id)
 		end

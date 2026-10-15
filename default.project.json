@@ -17,6 +17,7 @@
         "Knockback": { "$className": "RemoteEvent" },
         "RewardsGranted": { "$className": "RemoteEvent" },
         "EggHatched": { "$className": "RemoteEvent" },
+        "Evolution": { "$className": "RemoteEvent" },
         "BuyUpgrade": { "$className": "RemoteEvent" },
         "EquipPet": { "$className": "RemoteEvent" },
         "Announcement": { "$className": "RemoteEvent" },

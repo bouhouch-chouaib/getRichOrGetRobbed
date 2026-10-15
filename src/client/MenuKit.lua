@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Config = require(ReplicatedStorage.Shared.Config)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
@@ -66,7 +67,16 @@ end
 
 -- Découvert = possédé maintenant, ou déjà réclamé dans l'Index (il reste découvert même s'il a été volé).
 function MenuKit.discovered(petId: string, claimed: { [string]: boolean }): boolean
-	return MenuKit.number("Pet_" .. petId) > 0 or claimed[petId] == true
+	if MenuKit.number("Pet_" .. petId) > 0 or claimed[petId] == true then
+		return true
+	end
+	-- Une forme évoluée possédée (Config.Evolution) fait aussi découvrir l'espèce.
+	for stage = 2, #Config.Evolution.Names do
+		if MenuKit.number("Pet_" .. petId .. "__E" .. stage) > 0 then
+			return true
+		end
+	end
+	return false
 end
 
 -- Rareté plancher des tirages du joueur (rang de tirage, shared/LootEngine.floor), comme le serveur la calcule.

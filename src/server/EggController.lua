@@ -1,7 +1,7 @@
 --!strict
 -- EggController : les œufs de chaque base, au rythme de l'horloge du SERVEUR (aucun client ne peut faire éclore).
 --   - Chaque œuf (un exemplaire d'un lot) a SON nid dans la couveuse au fond de la base (shared/BaseLayout,
---     12 nids). Les 12 premiers à éclore sont posés ; les suivants attendent qu'un nid se libère (attribut
+--     10 nids). Les 10 premiers à éclore sont posés ; les suivants attendent qu'un nid se libère (attribut
 --     "Waiting" du dossier Base_N.Eggs, affiché « +N ŒUFS » par client/Eggs).
 --   - Un nid garde son œuf jusqu'à l'éclosion : l'arrivée de nouveaux œufs ne déplace pas les anciens.
 --   - Repère invisible Base_N.Eggs.<clé> (tag "IncubatingEgg") : Rarity, OwnerUserId, StartedAt, ReadyAt, Nest.
@@ -9,6 +9,10 @@
 --   - À l'échéance : les œufs deviennent des familiers (SessionData.HatchEggs, sans attente), le familier sort de son
 --     nid s'il fait partie des familiers affichés dans la base (BasePetsController.Celebrate), puis un
 --     Remotes.EggHatched par œuf : client/Eggs joue l'éclosion, de plus en plus spectaculaire avec la rareté.
+--   - Machine d'évolution (Config.Evolution) : le propriétaire y met un œuf (Remotes.Evolution "Insert"), il n'éclot plus
+--     tout seul et tente d'évoluer au fil du temps (SessionData.TickEvolution) ; il l'ouvre quand il veut ("Hatch").
+--     La capsule est dehors, derrière la base (Base_N.EvolutionCapsule) ; l'état est publié sur sa pièce
+--     "EvolutionMachine" : Occupied, Rarity, Stage, NextAt, Done, OwnerUserId (le stade maximum reste secret).
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BaseLayout = require(ReplicatedStorage.Shared.BaseLayout)
@@ -27,6 +31,7 @@ type Nests = { byKey: { [string]: number }, byNest: { [number]: string } }
 type Event = { key: string, petId: string, nest: number? }
 
 local MAX_EVENTS = 24 -- éclosions jouées en même temps au plus (retour après une longue absence)
+local EVOLUTION = Config.Evolution
 
 local function nestCFrame(ground: CFrame, nest: number): CFrame
 	local spot = BaseLayout.Nest(nest)
@@ -47,6 +52,28 @@ function EggController.Init(bases: { Model })
 		nests[base] = { byKey = {}, byNest = {} }
 	end
 
+	local function machineOf(base: Model): BasePart?
+		local capsule = base:FindFirstChild("EvolutionCapsule")
+		local machine = capsule and capsule:FindFirstChild("EvolutionMachine")
+		return if machine and machine:IsA("BasePart") then machine else nil
+	end
+
+	-- État de la machine d'évolution, publié pour tous les clients (le stade maximum reste secret).
+	local function publishMachine(base: Model, player: Player?)
+		local machine = machineOf(base)
+		if not machine then
+			return
+		end
+		local egg = if player then SessionData.GetEvolving(player) else nil
+		local evolve = egg and egg.evolve
+		machine:SetAttribute("OwnerUserId", if player then player.UserId else nil)
+		machine:SetAttribute("Occupied", evolve ~= nil)
+		machine:SetAttribute("Rarity", if egg then Catalog.ById[egg.petId].Rarity else nil)
+		machine:SetAttribute("Stage", if evolve then evolve.stage else nil)
+		machine:SetAttribute("NextAt", if evolve and not evolve.done then evolve.nextAt else nil)
+		machine:SetAttribute("Done", if evolve then evolve.done else nil)
+	end
+
 	local function tickBase(base: Model)
 		local folder = folders[base]
 		local state = nests[base]
@@ -57,6 +84,7 @@ function EggController.Init(bases: { Model })
 				folder:SetAttribute("Waiting", nil)
 				nests[base] = { byKey = {}, byNest = {} }
 			end
+			publishMachine(base, nil)
 			return
 		end
 		if not SessionData.IsLoaded(player) then
@@ -126,7 +154,18 @@ function EggController.Init(bases: { Model })
 			end
 		end
 
-		-- 2. Les nids : chaque œuf garde le sien, les nouveaux prennent les nids libres dans l'ordre d'éclosion.
+		-- 2. La machine d'évolution : une tentative si c'est l'heure.
+		local machine = machineOf(base)
+		local result = SessionData.TickEvolution(player, os.time())
+		local evolving = SessionData.GetEvolving(player)
+		local evolve = evolving and evolving.evolve
+		if result and machine and evolving and evolve then
+			Remotes.Evolution:FireAllClients(player.UserId, result, evolve.stage, machine.CFrame,
+				Catalog.ById[evolving.petId].Rarity)
+		end
+		publishMachine(base, player)
+
+		-- 3. Les nids : chaque œuf garde le sien, les nouveaux prennent les nids libres dans l'ordre d'éclosion.
 		local units = Eggs.Units(SessionData.GetEggs(player))
 		local pending: { [string]: Eggs.Unit } = {}
 		for _, unit in ipairs(units) do
@@ -158,7 +197,7 @@ function EggController.Init(bases: { Model })
 		end
 		folder:SetAttribute("Waiting", if waiting > 0 then waiting else nil)
 
-		-- 3. Les repères : un par œuf posé.
+		-- 4. Les repères : un par œuf posé.
 		for _, child in ipairs(folder:GetChildren()) do
 			if not state.byKey[child.Name] then
 				child:Destroy()
@@ -184,6 +223,47 @@ function EggController.Init(bases: { Model })
 			CollectionService:AddTag(anchor, "IncubatingEgg")
 		end
 	end
+
+	-- Demandes du propriétaire à SA machine (le serveur vérifie tout : base, distance, œuf, place libre).
+	local lastRequest: { [Player]: number } = {}
+	Remotes.Evolution.OnServerEvent:Connect(function(player: Player, action: unknown, key: unknown)
+		local clock = os.clock()
+		if clock - (lastRequest[player] or 0) < 0.5 then
+			return
+		end
+		lastRequest[player] = clock
+		local base = BaseManager.GetBase(player)
+		local machine = if base then machineOf(base) else nil
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if not base or not machine or not root or not root:IsA("BasePart") then
+			return
+		end
+		if (root.Position - machine.Position).Magnitude > EVOLUTION.UseDistance + 6 then
+			return
+		end
+		if action == "Insert" and type(key) == "string" then
+			if SessionData.StartEvolution(player, key, os.time()) then
+				local egg = SessionData.GetEvolving(player)
+				Remotes.Evolution:FireAllClients(player.UserId, "Inserted", 1, machine.CFrame,
+					if egg then Catalog.ById[egg.petId].Rarity else "Commun", key)
+				publishMachine(base, player)
+			end
+		elseif action == "Hatch" then
+			local petId = SessionData.HatchEvolving(player)
+			if petId then
+				-- L'éclosion part de la capsule ; le familier (s'il est affiché) arrive dans la prairie, près d'elle.
+				BasePets.Celebrate(player, { petId }, { [petId] = BaseLayout.EvolutionExit })
+				local cf = machine.CFrame * CFrame.new(0, machine.Size.Y / 2, 0)
+				Remotes.EggHatched:FireAllClients(player.UserId, "machine", Catalog.ById[petId].Rarity, cf, petId,
+					BasePets.IsShown(player, petId))
+				if rank(petId) + Catalog.Stage(petId) - 1 >= Config.Loot.AnnounceMinRarity then
+					Remotes.Announcement:FireAllClients(player.DisplayName, petId)
+				end
+				publishMachine(base, player)
+			end
+		end
+	end)
 
 	task.spawn(function()
 		while true do

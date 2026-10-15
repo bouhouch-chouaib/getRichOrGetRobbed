@@ -23,6 +23,16 @@ Les durées se règlent dans `Config.Eggs.Seconds`. Elles sont fixées à l’at
 
 Avant éclosion, aucun revenu, équipement, fusion, échange ou vol n’est possible. Les œufs sont pris en compte dans la limite des cinq exemplaires par familier pour la vente automatique des doublons. La découverte dans l’Index intervient à l’éclosion. L’identité du familier est tirée par le serveur à l’attribution ; l’interface montre l’œuf en attendant.
 
+## Capsule d’évolution (15 oct.)
+
+Chaque base a une **capsule d’évolution** dehors, derrière la clôture du fond (côté droit) : un cylindre de stase de science-fiction (socle de métal, cylindre de verre avec brume froide, anneaux lumineux qui pulsent, tuyaux, émetteur, console « ÉVOLUTION »). Réglages : `Config.Evolution`.
+
+- Le propriétaire choisit un de ses œufs en couveuse (bulle [E] « Mettre un œuf », fenêtre de choix) : l’œuf vole jusqu’à la capsule. Il **n’éclot plus tout seul** : le joueur se prive de son familier pour tenter d’en avoir un meilleur.
+- **3 stades** : Normal → Évolué (revenu x3, plus grand, anneau lumineux) → Ultime (revenu x8, plus grand, anneau et couronne d’éclats dorés). Les formes évoluées sont des familiers à part entière (`<Id>__E2`, `<Id>__E3` dans `PetCatalog.ById`, pas dans les tirages ni dans l’Index) : base, échanges, vols, duels, revenu.
+- **Hasard** : à l’entrée, chaque œuf reçoit en secret un stade maximum (`MaxStageWeights` : 40 % n’évolueront pas, 42 % s’arrêteront à Évolué, 18 % iront jusqu’à Ultime). Les tentatives ont lieu après 4 puis 12 fois la durée d’éclosion normale de la rareté (± 25 %). Quand une tentative échoue, la capsule affiche « IL N’ÉVOLUERA PLUS » (« ÉVOLUTION MAXIMALE ! » au stade Ultime).
+- Le joueur l’ouvre quand il veut (bulle [E] « Faire éclore », à maintenir) : l’éclosion part de la capsule avec le spectacle des raretés au-dessus (« ÉCLOSION ÉPIQUE ÉVOLUÉ ! »), et le familier rentre dans la prairie.
+- Serveur : `SessionData.StartEvolution / TickEvolution / HatchEvolving`, `EggController` (état publié sur `Base_N.EvolutionCapsule.EvolutionMachine`, `Remotes.Evolution`) ; client : `client/EvolutionMachine`. Un œuf à la fois.
+
 ## Sauvegarde et serveur
 
 `SessionData.eggs` contient des lots avec identifiant unique, familier, quantité, début et échéance UTC. Les anciennes sauvegardes sans ce champ restent compatibles ; le DataStore v2 est conservé. Le retrait des œufs et l’ajout des familiers s’effectuent sans suspension, dans la même opération. Les tables de sauvegarde sont copiées avant `UpdateAsync`, pour empêcher un reçu concurrent d’être enregistré sans sa récompense.

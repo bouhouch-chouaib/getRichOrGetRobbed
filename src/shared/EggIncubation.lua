@@ -4,7 +4,11 @@ local Config = require(script.Parent.Config)
 local Catalog = require(script.Parent.PetCatalog)
 local Eggs = {}
 
-export type Egg = { id: string, petId: string, count: number, startedAt: number, readyAt: number }
+-- evolve : l'œuf est dans la machine d'évolution (Config.Evolution) — il n'éclot plus tout seul.
+--   stage = stade actuel (1 à 3), maxStage = plafond secret tiré au hasard, nextAt = prochaine tentative (UTC),
+--   done = il n'évoluera plus (limite atteinte).
+export type Evolve = { stage: number, maxStage: number, nextAt: number, done: boolean }
+export type Egg = { id: string, petId: string, count: number, startedAt: number, readyAt: number, evolve: Evolve? }
 export type Batch = { count: number, startedAt: number, readyAt: number }
 
 local function finite(n: any): boolean
@@ -46,6 +50,17 @@ function Eggs.Merge(saved: any, current: { Egg }): { Egg }
 				continue
 			end
 			seen[raw.id] = true
+			local evolve: Evolve? = nil
+			local e = raw.evolve
+			if type(e) == "table" and finite(e.stage) and finite(e.maxStage) and finite(e.nextAt) then
+				local stages = #Config.Evolution.Names
+				evolve = {
+					stage = math.clamp(math.floor(e.stage), 1, stages),
+					maxStage = math.clamp(math.floor(e.maxStage), 1, stages),
+					nextAt = e.nextAt,
+					done = e.done == true,
+				}
+			end
 			table.insert(
 				result,
 				{
@@ -54,6 +69,7 @@ function Eggs.Merge(saved: any, current: { Egg }): { Egg }
 					count = math.floor(raw.count),
 					startedAt = raw.startedAt,
 					readyAt = raw.readyAt,
+					evolve = evolve,
 				}
 			)
 		end
@@ -81,7 +97,7 @@ end
 function Eggs.Collect(queue: { Egg }, time: number): ({ Egg }, { [string]: number }, { Egg })
 	local pending: { Egg }, hatched: { [string]: number }, done: { Egg } = {}, {}, {}
 	for _, egg in ipairs(queue) do
-		if egg.readyAt <= time then
+		if egg.readyAt <= time and not egg.evolve then -- dans la machine : c'est le joueur qui décide
 			hatched[egg.petId] = (hatched[egg.petId] or 0) + egg.count
 			table.insert(done, egg)
 		else
@@ -89,6 +105,50 @@ function Eggs.Collect(queue: { Egg }, time: number): ({ Egg }, { [string]: numbe
 		end
 	end
 	return pending, hatched, done
+end
+
+-- Attente avant la tentative d'évolution suivante (depuis le stade `stage`), avec un peu de hasard.
+function Eggs.EvolveDelay(rarity: string, stage: number, roll: number): number
+	local factor = Config.Evolution.StageTimeFactor[stage] or Config.Evolution.StageTimeFactor[1]
+	local jitter = 1 + (roll * 2 - 1) * Config.Evolution.TimeJitter
+	return Eggs.Duration(rarity) * factor * jitter
+end
+
+-- Plafond secret d'un œuf qui entre dans la machine (roll entre 0 et 1).
+function Eggs.RollMaxStage(roll: number): number
+	local weights = Config.Evolution.MaxStageWeights
+	local total = 0
+	for _, weight in ipairs(weights) do
+		total += weight
+	end
+	local pick = roll * total
+	for stage, weight in ipairs(weights) do
+		pick -= weight
+		if pick < 0 then
+			return stage
+		end
+	end
+	return #weights
+end
+
+-- Une tentative d'évolution si c'est l'heure : "Evolved" (stade +1), "Maxed" (il n'évoluera plus) ou nil.
+function Eggs.TryEvolve(egg: Egg, time: number, roll: number): string?
+	local evolve = egg.evolve
+	if not evolve or evolve.done or time < evolve.nextAt then
+		return nil
+	end
+	local stages = #Config.Evolution.Names
+	if evolve.stage < evolve.maxStage and evolve.stage < stages then
+		evolve.stage += 1
+		if evolve.stage >= stages then
+			evolve.done = true -- Ultime : rien au-dessus
+		else
+			evolve.nextAt = time + Eggs.EvolveDelay(Catalog.ById[egg.petId].Rarity, evolve.stage, roll)
+		end
+		return "Evolved"
+	end
+	evolve.done = true
+	return "Maxed"
 end
 
 -- Un exemplaire d'un lot : chaque œuf a son propre nid (server/EggController). La clé reste la même jusqu'à
@@ -100,7 +160,12 @@ end
 -- Les œufs dans l'ordre d'éclosion (les plus proches d'abord), un par exemplaire.
 export type Unit = { key: string, petId: string, startedAt: number, readyAt: number }
 function Eggs.Units(queue: { Egg }): { Unit }
-	local sorted = table.clone(queue)
+	local sorted = {}
+	for _, egg in ipairs(queue) do
+		if not egg.evolve then -- l'œuf de la machine d'évolution n'a pas de nid
+			table.insert(sorted, egg)
+		end
+	end
 	table.sort(sorted, function(a, b)
 		if a.readyAt ~= b.readyAt then
 			return a.readyAt < b.readyAt

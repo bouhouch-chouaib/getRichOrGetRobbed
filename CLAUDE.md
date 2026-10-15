@@ -92,6 +92,14 @@ les œufs dans leurs nids, la montée en tension, l'éclosion Divine (colonne de
 la base de haut. Test hors Studio : `lune run tools/check-eggs.luau . <sortie>` (PASS). Pas vu : éclosions à 2 joueurs,
 le « +1 NOM » d'un familier hors des 10 affichés, sur téléphone.
 
+**15 oct. : capsule d'évolution** (`Config.Evolution`, `client/EvolutionMachine`, `docs/INCUBATION.md`) : cylindre de stase
+dehors derrière chaque base ; on y met un œuf (il n'éclot plus tout seul), il tente d'évoluer au fil du temps (Normal → Évolué x3
+→ Ultime x8), plafond secret tiré au hasard (« IL N'ÉVOLUERA PLUS »), on l'ouvre quand on veut. Formes évoluées = `<Id>__E2/__E3`
+(`PetCatalog.Everything`, `PetCatalog.Variant/Stage`). Vérifié en jeu (solo) : capsule, œuf en stase, évolution, limite atteinte,
+éclosion « ÉPIQUE ÉVOLUÉ », familiers évolués dans la base (anneau, couronne Ultime), sauvegarde d'une partie à l'autre.
+Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remote), à 2 joueurs, sur téléphone. Pas encore possible :
+équiper un familier évolué depuis l'Index (il n'y a pas de case).
+
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 

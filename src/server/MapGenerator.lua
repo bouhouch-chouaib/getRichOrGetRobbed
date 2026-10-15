@@ -805,6 +805,79 @@ local function createIncubator(origin: CFrame, top: number, base: Model): BasePa
 	return board
 end
 
+-- Capsule d'évolution (Config.Evolution), dehors derrière la base : un cylindre de stase de science-fiction.
+-- Socle de métal à tenons, anneau inférieur, cylindre de verre (la brume froide et l'œuf sont ajoutés par
+-- client/EvolutionMachine), trois anneaux lumineux, tuyaux, chapeau avec émetteur, console à écran devant.
+-- La pièce "EvolutionMachine" (le socle) porte l'état publié par server/EggController et la bulle [E] du client.
+local METAL = Color3.fromRGB(150, 158, 176)
+local METAL_DARK = Color3.fromRGB(58, 62, 78)
+local STASIS = Color3.fromRGB(70, 230, 255)
+local function createEvolutionCapsule(origin: CFrame, base: Model)
+	local model = Instance.new("Model")
+	model.Name = "EvolutionCapsule"
+	local spot = BaseLayout.EvolutionCapsule
+	local cframe = origin * CFrame.new(spot.X, 0, spot.Y) * CFrame.Angles(0, math.pi, 0) -- console tournée vers la base
+	local function piece(name: string, size: Vector3, offset: CFrame, color: Color3): Part
+		local part = makePart(name, size, cframe * offset, color, model)
+		makeGhost(part)
+		return part
+	end
+	local pad = piece("EvolutionMachine", Vector3.new(11, 1.2, 11), CFrame.new(0, 0.6, 0), METAL_DARK)
+	pad.CanCollide = true
+	pad.CanQuery = true -- la bulle [E] du client s'y accroche
+	for _, corner in ipairs({ Vector2.new(-1, -1), Vector2.new(1, -1), Vector2.new(-1, 1), Vector2.new(1, 1) }) do
+		piece("Foot", Vector3.new(2, 0.8, 2), CFrame.new(corner.X * 4.6, 1.4, corner.Y * 4.6), STASIS):SetAttribute("Light", true)
+	end
+	local lowRing = piece("LowerRing", Vector3.new(1.2, 8.6, 8.6), CFrame.new(0, 1.8, 0) * FLAT, METAL)
+	lowRing.Shape = Enum.PartType.Cylinder
+	local glass = piece("StasisGlass", Vector3.new(9.5, 6.4, 6.4), CFrame.new(0, 2.4 + 4.75, 0) * FLAT, Color3.fromRGB(200, 245, 255))
+	glass.Shape = Enum.PartType.Cylinder
+	glass.Material = Enum.Material.Glass
+	glass.Transparency = 0.6
+	for index, height in ipairs({ 3.4, 7.1, 10.8 }) do
+		local band = piece("StasisRing" .. index, Vector3.new(0.35, 7, 7), CFrame.new(0, height, 0) * FLAT, STASIS)
+		band.Shape = Enum.PartType.Cylinder
+		band.Material = Enum.Material.Neon
+		band.Transparency = 0.25
+	end
+	local cap = piece("Cap", Vector3.new(1.4, 8.6, 8.6), CFrame.new(0, 12.6, 0) * FLAT, METAL)
+	cap.Shape = Enum.PartType.Cylinder
+	piece("CapTop", Vector3.new(5, 1, 5), CFrame.new(0, 13.8, 0), METAL_DARK)
+	piece("Emitter", Vector3.new(1.2, 2.4, 1.2), CFrame.new(0, 15.5, 0), METAL)
+	local tip = piece("EmitterTip", Vector3.new(1.6, 1.6, 1.6), CFrame.new(0, 17.4, 0), STASIS)
+	tip.Material = Enum.Material.Neon
+	-- Tuyaux de chaque côté, du socle au chapeau.
+	for _, side in ipairs({ -1, 1 }) do
+		local pipe = piece("Pipe", Vector3.new(11, 1, 1), CFrame.new(side * 4.4, 7, 2.6) * CFrame.Angles(0, 0, math.pi / 2), METAL_DARK)
+		pipe.Shape = Enum.PartType.Cylinder
+		piece("PipeClamp", Vector3.new(1.6, 0.6, 1.6), CFrame.new(side * 4.4, 4, 2.6), METAL)
+		piece("PipeClamp", Vector3.new(1.6, 0.6, 1.6), CFrame.new(side * 4.4, 10, 2.6), METAL)
+	end
+	-- Console inclinée devant, avec son écran.
+	piece("ConsoleBase", Vector3.new(5, 3, 2), CFrame.new(0, 1.5, -6.6), METAL_DARK)
+	local screen = piece("ConsoleScreen", Vector3.new(4.6, 2.6, 0.4), CFrame.new(0, 3.6, -6.9) * CFrame.Angles(math.rad(-35), 0, 0), Color3.fromRGB(20, 40, 60))
+	local screenGui = Instance.new("SurfaceGui")
+	screenGui.Face = Enum.NormalId.Front
+	screenGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	screenGui.PixelsPerStud = 40
+	screenGui.LightInfluence = 0
+	screenGui.MaxDistance = 120
+	local screenLabel = Instance.new("TextLabel")
+	screenLabel.Name = "Label"
+	screenLabel.Size = UDim2.fromScale(1, 1)
+	screenLabel.BackgroundTransparency = 1
+	screenLabel.Text = "ÉVOLUTION"
+	styleSignText(screenLabel, STASIS)
+	screenLabel.Parent = screenGui
+	screenGui.Parent = screen
+	for index = -1, 1 do
+		local button = piece("ConsoleButton", Vector3.new(0.6, 0.3, 0.6), CFrame.new(index * 1.4, 3.05, -5.7), if index == 0 then Color3.fromRGB(255, 80, 80) else STASIS)
+		button.Material = Enum.Material.Neon
+	end
+	model.PrimaryPart = pad
+	model.Parent = base
+end
+
 local function createBase(index: number, map: Folder): Model
 	local angle = (index - 1) * (math.pi * 2 / ARENA.BaseCount)
 	local position = Vector3.new(math.cos(angle) * ARENA.BaseRingRadius, 0, math.sin(angle) * ARENA.BaseRingRadius)
@@ -936,6 +1009,7 @@ local function createBase(index: number, map: Folder): Model
 	-- Stations d'entraînement à l'extérieur de la base (cachées tant qu'elles ne sont pas achetées) :
 	-- tapis de course à gauche (Vitesse), banc de développé couché à droite (Force).
 	-- TrainingController gère l'affichage, la matière selon le niveau et l'XP.
+	createEvolutionCapsule(origin, base)
 	createTreadmill(origin * CFrame.new(-half - 10, 0, -4), -1, base)
 	createBench(origin * CFrame.new(half + 10, 0, -4), 1, base)
 

@@ -8,7 +8,7 @@
 --     gerbe, ondes de choc, colonne de lumière, rayons, confettis ; pour le propriétaire : secousse, flash, bandeau.
 --   - Le familier : s'il fait partie des familiers affichés dans la base, il sort du nid et se promène
 --     (client/BasePets) ; sinon il apparaît un instant au-dessus du nid (« +1 NOM ») puis rejoint la collection.
---   - « +N ŒUFS EN ATTENTE » sur le panneau de la couveuse quand les 12 nids sont pleins.
+--   - « +N ŒUFS EN ATTENTE » sur le panneau de la couveuse quand les 10 nids sont pleins.
 -- Tout est local (aucune requête au serveur) et limité aux œufs proches de la caméra.
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
@@ -227,6 +227,10 @@ local function add(instance: Instance)
 	}
 	shown[instance] = egg
 	byKey[instance.Name] = egg
+	-- Un œuf qui part dans la machine d'évolution (client/EvolutionMachine le fait voler) quitte son nid tout de suite.
+	instance:GetAttributeChangedSignal("Leaving"):Connect(function()
+		remove(instance)
+	end)
 	-- Petit nuage de paille à l'atterrissage, et un « pop » si c'est mon œuf.
 	task.delay(start + DROP_TIME - clock, function()
 		if shown[instance] ~= egg then
@@ -599,7 +603,11 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 		return
 	end
 	local rarity = Config.Rarities[rank]
-	local fx = SPECTACLE[rank]
+	-- Un familier évolué (machine d'évolution) éclot avec le spectacle des raretés au-dessus.
+	local stage = Catalog.Stage(petId)
+	local fx = SPECTACLE[math.min(#SPECTACLE, rank + stage - 1)]
+	local title = "ÉCLOSION " .. TextFormat.upper(rarity.Name)
+		.. (if stage > 1 then " " .. TextFormat.upper(Config.Evolution.Names[stage]) else "") .. " !"
 	local mine = ownerId == player.UserId
 	if mine then
 		queueToast(TextFormat.upper(entry.Name), rank, rarity.Color)
@@ -629,7 +637,7 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 	if not near then
 		shell:Destroy()
 		if mine and fx.banner then
-			showBanner("ÉCLOSION " .. TextFormat.upper(rarity.Name) .. " !", rarity.Color)
+			showBanner(title, rarity.Color)
 		end
 		return
 	end
@@ -712,7 +720,7 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 		screenFlash(0.25 + (rank - 6) * 0.15)
 	end
 	if mine and fx.banner then
-		showBanner("ÉCLOSION " .. TextFormat.upper(rarity.Name) .. " !", rarity.Color)
+		showBanner(title, rarity.Color)
 	end
 
 	-- 5. Le familier : il sort du nid (client/BasePets) ou s'affiche un instant puis rejoint la collection.

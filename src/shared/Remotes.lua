@@ -51,6 +51,10 @@ return {
 	-- Serveur -> clients : (ownerUserId, clé de l'œuf, rareté, CFrame du nid, petId, dansLaBase: boolean).
 	-- Un message par œuf éclos (server/EggController). Aucun client ne peut demander une éclosion.
 	EggHatched = remote("EggHatched"),
+	-- Machine d'évolution (server/EggController) :
+	--   client -> serveur : ("Insert", clé de l'œuf) mettre un de ses œufs, ("Hatch") ouvrir celui de la machine ;
+	--   serveur -> clients : (ownerUserId, "Inserted" | "Evolved" | "Maxed", stade, CFrame de la machine, rareté, clé?).
+	Evolution = remote("Evolution"),
 	-- Client -> serveur : (itemId: string) achat d'une amélioration de Config.Shop.
 	BuyUpgrade = remote("BuyUpgrade"),
 	-- Client -> serveur : (petId: string, equip: boolean) équiper / déséquiper un familier.
