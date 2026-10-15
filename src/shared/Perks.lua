@@ -41,6 +41,16 @@ function Perks.ExtraEquipSlots(player: Player): number
 	return if Perks.HasPass(player, "EquipPlus2") then M.ExtraEquipSlots else 0
 end
 
+-- Niveau de l'aimant à objets : celui acheté dans la boutique (attribut Upgrade_Magnet), ou le maximum avec le passe.
+function Perks.MagnetLevel(player: Player): number
+	local radius = Config.Magnet.Radius
+	if Perks.HasPass(player, Config.Magnet.PassKey) then
+		return #radius
+	end
+	local level = player:GetAttribute("Upgrade_Magnet")
+	return if type(level) == "number" then math.clamp(level, 0, #radius) else 0
+end
+
 function Perks.LockBonus(player: Player): number
 	return if Perks.HasPass(player, "VIP") then M.VipLockBonus else 0
 end

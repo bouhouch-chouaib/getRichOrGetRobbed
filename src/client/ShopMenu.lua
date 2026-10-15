@@ -29,7 +29,7 @@ type Category = { label: string, color: Color3, ids: { string } }
 
 local CATEGORIES: { Category } = {
 	{ label = "Entraînement", color = UiStyle.Colors.Cyan, ids = { "Treadmill", "Bench" } },
-	{ label = "Bonus", color = UiStyle.Colors.Green, ids = { "ItemQuality", "Backpack", "LongLock" } },
+	{ label = "Bonus", color = UiStyle.Colors.Green, ids = { "ItemQuality", "Backpack", "Magnet", "LongLock" } },
 	{ label = "Combat", color = Color3.fromRGB(240, 70, 90), ids = { "WeaponBat", "WeaponGrapple", "PowerInvisible" } },
 }
 
@@ -40,6 +40,7 @@ local CARD_COLORS: { [string]: Color3 } = {
 	ItemQuality = Color3.fromRGB(70, 210, 60),
 	Backpack = Color3.fromRGB(235, 70, 70),
 	LongLock = Color3.fromRGB(150, 80, 255),
+	Magnet = Color3.fromRGB(255, 80, 120),
 	WeaponBat = Color3.fromRGB(230, 130, 50),
 	WeaponGrapple = Color3.fromRGB(70, 170, 255),
 	PowerInvisible = Color3.fromRGB(150, 90, 240),
@@ -73,6 +74,8 @@ local function effectAt(id: string, level: number): string?
 	elseif id == "Backpack" then
 		local count = 1 + level
 		return count .. " objet" .. (if count > 1 then "s" else "")
+	elseif id == "Magnet" then
+		return if level > 0 then "Portée " .. Config.Magnet.Radius[math.min(level, #Config.Magnet.Radius)] .. " studs" else "Aucun aimant"
 	elseif id == "LongLock" then
 		return "Verrou " .. (if level > 0 then Config.Lock.LongDuration else Config.Lock.Duration) .. " s"
 	end

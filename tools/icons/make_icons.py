@@ -605,6 +605,21 @@ def planet(c):
         c.poly(star_points(cx, cy, r, r * 0.35, 4, -90), hexc("FFF3B0"), out=12)
 
 
+@icon("Magnet")
+def magnet(c):
+    red, silver = hexc("E8323C"), hexc("DDE2EC")
+    # Aimant en fer à cheval, pôles en bas : jambes rouges, embouts argentés, arc rouge en haut.
+    for x0 in (250, 640):
+        c.rrect((x0, 410, x0 + 134, 700), 8, red)
+        c.rrect((x0, 690, x0 + 134, 830), 12, silver)
+    c.d.arc((250, 150, 774, 674), 180, 360, fill=BLACK, width=134 + 2 * OUT)
+    c.d.arc((250 + OUT, 150 + OUT, 774 - OUT, 674 - OUT), 180, 360, fill=red, width=134 - OUT)
+    c.shine((300, 230, 430, 300), 170)
+    # Petits éclats attirés entre les pôles.
+    for cx, cy, r in [(512, 880, 60), (380, 930, 40), (650, 930, 40)]:
+        c.poly(star_points(cx, cy, r, r * 0.35, 4, -90), hexc("FFF3B0"), out=12)
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     rendered = []

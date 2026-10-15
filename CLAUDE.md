@@ -92,6 +92,12 @@ les œufs dans leurs nids, la montée en tension, l'éclosion Divine (colonne de
 la base de haut. Test hors Studio : `lune run tools/check-eggs.luau . <sortie>` (PASS). Pas vu : éclosions à 2 joueurs,
 le « +1 NOM » d'un familier hors des 10 affichés, sur téléphone.
 
+**15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, passe Robux `AutoMagnet`) :
+les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`, mêmes règles que [E]). Vérifié en jeu (solo) :
+achat de 3 niveaux, objet attiré depuis 9 studs. **À faire par Chouaib** : créer le passe « AIMANT MAX » sur Roblox et mettre son Id
+dans `Config.Monetization.GamePasses` (Id = 0 => « Bientôt »). Icône d'aimant dessinée (`assets/icons/Magnet.png`) mais pas encore
+envoyée sur Roblox : la Boutique utilise l'icône « Orb » en attendant.
+
 **15 oct. : capsule d'évolution** (`Config.Evolution`, `client/EvolutionMachine`, `docs/INCUBATION.md`) : cylindre de stase
 dehors derrière chaque base ; on y met un œuf (il n'éclot plus tout seul), il tente d'évoluer au fil du temps (Normal → Évolué x3
 → Ultime x8), plafond secret tiré au hasard (« IL N'ÉVOLUERA PLUS »), on l'ouvre quand on veut. Formes évoluées = `<Id>__E2/__E3`

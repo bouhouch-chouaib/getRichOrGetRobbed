@@ -131,6 +131,10 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `Treadmill` (5 niv.), `Bench` (5 niv.) : stations d'entraînement.
   - `ItemQuality` (10 niv.) : objets plus précieux.
   - `Backpack` (4 niv.) : +1 objet porté par niveau (le 1er en main, les autres empilés dans le dos, lancés un par un).
+  - `Magnet` (5 niv., 15 oct.) : aimant à objets, les objets proches sautent tout seuls dans les mains / le sac (portée 7, 10,
+    13, 16, 20 studs ; `Config.Magnet`). Aussi en Robux : passe `AutoMagnet` = niveau maximum pour toujours (`Perks.MagnetLevel`).
+    Le serveur (`ItemInteraction`) prend l'objet le plus proche par le même chemin que [E] (mêmes règles : mains libres, pas
+    de familier porté, pas d'arme en main), ignore les objets des autres bases et ceux qu'on vient de lancer (2 s).
   - `LongLock` : base fermée 10 s au lieu de 5 s.
 - **Bouton de verrouillage** (comme Steal a Brainrot) : au centre de la base devant la porte ; le propriétaire marche sur le gros bouton rouge → portail fermé pendant 5 s
   (relancé à chaque passage sur le bouton), tout autre joueur à l'intérieur est expulsé devant l'entrée.

@@ -9,6 +9,8 @@
 --   3. Au lancer, le client détruit le weld, applique l'impulsion et prévient le serveur (ThrowItem).
 --   4. Lâcher forcé (KO, mort, départ) : le serveur efface "Holder", le client le détecte et lâche.
 -- Sac à dos : un joueur peut porter 1 + niveau "Backpack" objets (le 1er en main, les autres dans le dos).
+-- Aimant à objets (Config.Magnet, niveau Perks.MagnetLevel) : le serveur ramasse pour le joueur l'objet le plus proche
+-- dans sa portée, par le même chemin que la bulle [E] (mêmes règles). Les objets des autres bases sont ignorés.
 -- Anti-triche : à chaque lancer, le serveur note qui, d'où (position de son personnage côté serveur), quand et avec
 -- quelle puissance max ; BlackholeController vérifie ces infos (GetThrowInfo) avant de donner des points.
 
@@ -198,6 +200,78 @@ function ItemInteraction.Init()
 	for _, player in ipairs(Players:GetPlayers()) do
 		onPlayerAdded(player)
 	end
+
+	-- Aimant à objets : quelques fois par seconde, l'objet le plus proche dans la portée de chaque joueur équipé.
+	local MAGNET = Config.Magnet
+	local lastPull: { [Player]: number } = {}
+	Players.PlayerRemoving:Connect(function(player: Player)
+		lastPull[player] = nil
+	end)
+	local function candidates(player: Player): { BasePart }
+		local list: { BasePart } = {}
+		local map = Workspace:FindFirstChild("Map")
+		if not map then
+			return list
+		end
+		local function addFrom(folder: Instance?)
+			if folder then
+				for _, child in ipairs(folder:GetChildren()) do
+					if child:IsA("BasePart") then
+						table.insert(list, child)
+					end
+				end
+			end
+		end
+		addFrom(map:FindFirstChild("LooseItems"))
+		addFrom(map:FindFirstChild("WildItems"))
+		-- Les palettes de SA base seulement (les objets des autres bases sont à eux).
+		for _, base in ipairs(map:GetChildren()) do
+			if base:IsA("Model") and base:GetAttribute("OwnerName") == player.Name then -- server/BaseManager
+				addFrom(base:FindFirstChild("ItemSpawns"))
+			end
+		end
+		return list
+	end
+	task.spawn(function()
+		while true do
+			task.wait(0.15)
+			local now = os.clock()
+			for _, player in ipairs(Players:GetPlayers()) do
+				local level = Perks.MagnetLevel(player)
+				if level <= 0 or now - (lastPull[player] or 0) < MAGNET.Interval then
+					continue
+				end
+				if #(held[player] or {}) >= getCapacity(player) or player:GetAttribute("CarryingPet") then
+					continue
+				end
+				local character = player.Character
+				local root = character and character:FindFirstChild("HumanoidRootPart")
+				if not root or not root:IsA("BasePart") then
+					continue
+				end
+				local radius = MAGNET.Radius[level]
+				local best: BasePart? = nil
+				local bestDistance = radius
+				for _, item in ipairs(candidates(player)) do
+					if item:GetAttribute("Holder") or item:GetAttribute("Consumed") then
+						continue
+					end
+					local throw = throws[item]
+					if throw and throw.thrower == player and now - throw.time < MAGNET.IgnoreOwnThrow then
+						continue
+					end
+					local distance = (item.Position - root.Position).Magnitude
+					if distance < bestDistance then
+						best, bestDistance = item, distance
+					end
+				end
+				if best then
+					lastPull[player] = now
+					onPromptTriggered(best, player)
+				end
+			end
+		end
+	end)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		ItemInteraction.ReleaseHeld(player)
 		lastThrow[player] = nil
