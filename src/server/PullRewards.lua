@@ -5,7 +5,8 @@
 --   - Doublons : au-delà de Config.Loot.KeepCopies exemplaires d'un même familier, le suivant est vendu tout de
 --     suite (Config.Loot.SellSeconds secondes de son revenu, x bonus du monde et des passes).
 --   - Le client reçoit Remotes.RewardsGranted(score, tirages, familiers gardés, argent total, détails) ; détails =
---     { drops = { { Id, New, Sold } } dans l'ordre, sold = argent des ventes, floor, rank } (client/PullReveal).
+--     { drops = { { Id, New, Sold, Egg } } dans l'ordre, sold, floor, rank, eggs = true } (client/PullReveal).
+-- Les récompenses gardées entrent en incubation ; les annonces de familiers attendent leur éclosion.
 -- Les données sont modifiées tout de suite ; l'affichage tourne à part (une erreur d'affichage ne doit jamais
 -- faire échouer un achat déjà accordé).
 
@@ -16,13 +17,12 @@ local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
-local BasePetsController = require(script.Parent.BasePetsController)
 local SessionData = require(script.Parent.SessionData)
 
 local PullRewards = {}
 
-export type Drop = { Id: string, New: boolean, Sold: number? }
-export type Details = { drops: { Drop }, sold: number, floor: number, rank: number }
+export type Drop = { Id: string, New: boolean, Sold: number?, Egg: boolean? }
+export type Details = { drops: { Drop }, sold: number, floor: number, rank: number, eggs: boolean }
 
 -- Prix de vente automatique d'un doublon.
 function PullRewards.SellValue(player: Player, petId: string): number
@@ -38,7 +38,7 @@ end
 -- pulls tirages avec cette chance ; extraMoney (argent des points de la manche) et score servent à l'affichage.
 function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMoney: number?, score: number?): Details
 	local discovered = SessionData.GetDiscovered(player)
-	local owned = SessionData.GetOwnedPets(player)
+	local owned = SessionData.GetRewardOwned(player) -- pending eggs count toward the duplicate limit
 	local floorIndex = LootEngine.floor(SessionData.GetTotalPulls(player), discovered)
 	local rankIndex = LootEngine.rank(SessionData.GetTotalPulls(player))
 	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), luck, owned, floorIndex)
@@ -55,39 +55,24 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 			table.insert(drops, { Id = petId, New = false, Sold = value })
 		else
 			kept[petId] = (kept[petId] or 0) + 1
-			table.insert(drops, { Id = petId, New = isNew })
+			table.insert(drops, { Id = petId, New = isNew, Egg = true })
 		end
 	end
 
 	SessionData.SetPity(player, outcome.pity)
 	SessionData.AddTotalPulls(player, outcome.pulls)
 	if next(kept) then
-		SessionData.AddPets(player, kept)
+		SessionData.AddEggs(player, kept)
 	end
 	local money = sold + (extraMoney or 0)
 	if money > 0 then
 		SessionData.AddMoney(player, money)
 	end
 
-	local details: Details = { drops = drops, sold = sold, floor = floorIndex, rank = rankIndex }
+	local details: Details = { drops = drops, sold = sold, floor = floorIndex, rank = rankIndex, eggs = true }
 	task.spawn(function()
 		local ok, err = pcall(function()
-			local newPets = {}
-			for petId in pairs(kept) do
-				table.insert(newPets, petId)
-			end
-			if #newPets > 0 then
-				-- Les nouveaux familiers tombent dans la base, visibles par tous (donne envie de venir les voler).
-				BasePetsController.Celebrate(player, newPets)
-			end
 			Remotes.RewardsGranted:FireClient(player, score or 0, outcome.pulls, kept, money, details)
-			-- Gros drop : annonce à tout le serveur.
-			for _, petId in ipairs(outcome.drops) do
-				local entry = PetCatalog.ById[petId]
-				if entry and (Config.RarityIndex[entry.Rarity] or 0) >= Config.Loot.AnnounceMinRarity then
-					Remotes.Announcement:FireAllClients(player.DisplayName, petId)
-				end
-			end
 		end)
 		if not ok then
 			warn("[PullRewards] affichage : " .. tostring(err))

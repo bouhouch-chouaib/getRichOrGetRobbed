@@ -180,7 +180,7 @@ end
 -- meilleurs) n'ont pas d'effet : ils rejoignent seulement la collection.
 local LANDING_PAUSE = 2.5
 
-function BasePetsController.Celebrate(player: Player, petIds: { string })
+function BasePetsController.Celebrate(player: Player, petIds: { string }, hatchSpots: { [string]: Vector2 }?)
 	local base = BaseManager.GetBase(player)
 	local state = if base then states[base] else nil
 	if not state then
@@ -191,10 +191,11 @@ function BasePetsController.Celebrate(player: Player, petIds: { string })
 	for _, petId in ipairs(petIds) do
 		local pet = state.pets[petId]
 		if pet then
-			local spot = PetWander.positionAt(pet.leg, time)
+			local spot = (hatchSpots and hatchSpots[petId]) or PetWander.positionAt(pet.leg, time)
 			pet.leg = { from = spot, to = spot, start = time, duration = 0 }
 			pet.nextLegAt = time + LANDING_PAUSE
 			pet.anchor:SetAttribute("Walk", PetWander.encode(pet.leg))
+			pet.anchor:SetAttribute("Hatched", hatchSpots ~= nil)
 			pet.anchor:SetAttribute("ArrivedAt", time)
 		end
 	end

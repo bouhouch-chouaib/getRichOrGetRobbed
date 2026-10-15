@@ -26,6 +26,10 @@ local UiStyle = require(script.Parent.UiStyle)
 
 local M = Config.Monetization
 local player = Players.LocalPlayer
+local auraProductId = 0
+for _, product in ipairs(M.Products) do
+	if product.Key == "AstralAura" then auraProductId = product.Id end
+end
 
 local BODY_FONT = UiStyle.BODY_FONT
 local WHITE = Color3.new(1, 1, 1)
@@ -115,6 +119,7 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 	type Row = { item: Config.MonetizationItem, isPass: boolean, buy: TextButton, price: number }
 	local rows: { Row } = {}
 
+	local auraPending = false
 	local function rowFor(item: Config.MonetizationItem, isPass: boolean, order: number)
 		local color = CARD_COLORS[(order - 1) % #CARD_COLORS + 1]
 		local card = UiStyle.brightCard(if isPass then passRow else productRow, UDim2.fromOffset(CARD_WIDTH, cardHeight), color)
@@ -129,7 +134,7 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 		local nameLimit = Instance.new("UITextSizeConstraint")
 		nameLimit.MaxTextSize = 24
 		nameLimit.Parent = name
-		local kind = UiStyle.text(card, if isPass then "Pour toujours" else "Achat", 18, WHITE, BODY_FONT)
+		local kind = UiStyle.text(card, if isPass or item.Key == "AstralAura" then "Pour toujours" else "Achat", 18, WHITE, BODY_FONT)
 		kind.Position = UDim2.fromOffset(6, 40)
 		kind.Size = UDim2.new(1, -12, 0, 22)
 		Icons.image(card, item.Icon, UDim2.new(1, -60, 0, 116), UDim2.fromOffset(30, 66))
@@ -161,13 +166,18 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 		table.insert(rows, row)
 
 		buy.Activated:Connect(function()
-			if item.Id == 0 or (isPass and Perks.HasPass(player, item.Key)) then
+			if item.Id == 0 or (isPass and Perks.HasPass(player, item.Key)) or (item.Key == "AstralAura" and (Perks.HasAura(player) or auraPending or player:GetAttribute("DataLoaded") ~= true)) then
 				return
 			end
 			if isPass then
 				MarketplaceService:PromptGamePassPurchase(player, item.Id)
 			else
-				MarketplaceService:PromptProductPurchase(player, item.Id)
+				if item.Key == "AstralAura" then auraPending = true end
+				local ok = pcall(function() MarketplaceService:PromptProductPurchase(player, item.Id) end)
+				if not ok then
+					if item.Key == "AstralAura" then auraPending = false end
+					Toast.show("L’achat n’a pas pu s’ouvrir. Réessaie.", GOLD)
+				end
 			end
 		end)
 
@@ -224,7 +234,7 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 
 	local function refresh()
 		for _, row in ipairs(rows) do
-			local owned = row.isPass and Perks.HasPass(player, row.item.Key)
+			local owned = (row.isPass and Perks.HasPass(player, row.item.Key)) or (row.item.Key == "AstralAura" and Perks.HasAura(player))
 			local caption = row.buy:FindFirstChild("Caption") :: TextLabel
 			if row.item.Id == 0 then
 				caption.Text = "Bientôt"
@@ -232,6 +242,9 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 			elseif owned then
 				caption.Text = "Possédé"
 				UiStyle.setButtonColor(row.buy, UiStyle.Colors.Cyan)
+			elseif row.item.Key == "AstralAura" and (auraPending or player:GetAttribute("DataLoaded") ~= true) then
+				caption.Text = if auraPending then "Validation…" else "Chargement…"
+				UiStyle.setButtonColor(row.buy, Color3.fromRGB(150, 150, 160))
 			else
 				caption.Text = "R$ " .. row.price
 				UiStyle.setButtonColor(row.buy, ROBUX_PURPLE)
@@ -257,6 +270,14 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 	-- Passes obtenus, boost de chance serveur
 	----------------------------------------------------------------------
 
+	MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId: number, productId: number, purchased: boolean)
+		if userId == player.UserId and productId == auraProductId and not purchased then auraPending = false; refresh() end
+	end)
+	player:GetAttributeChangedSignal("DataLoaded"):Connect(refresh)
+	player:GetAttributeChangedSignal("Upgrade_" .. Config.PlayerAura.UnlockId):Connect(function()
+		auraPending = false
+		refresh()
+	end)
 	local started = os.clock()
 	for _, pass in ipairs(M.GamePasses) do
 		player:GetAttributeChangedSignal("Pass_" .. pass.Key):Connect(function()

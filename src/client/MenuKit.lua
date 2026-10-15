@@ -97,6 +97,22 @@ end
 -- Aperçu 3D
 ----------------------------------------------------------------------
 
+function MenuKit.eggViewport(parent: Instance, rarityId: string): ViewportFrame
+	local viewport = Instance.new("ViewportFrame")
+	viewport.BackgroundTransparency = 1
+	viewport.Ambient = Color3.fromRGB(200, 200, 200)
+	viewport.LightColor = Color3.new(1, 1, 1)
+	viewport.Parent = parent
+	local model = require(ReplicatedStorage.Shared.EggModelBuilder).Build(rarityId)
+	model.Parent = viewport
+	local box, size = model:GetBoundingBox()
+	local camera = Instance.new("Camera")
+	camera.FieldOfView = 40
+	camera.CFrame = CFrame.lookAt(box.Position + Vector3.new(.5, .3, -1).Unit * size.Magnitude * .95, box.Position)
+	camera.Parent, viewport.CurrentCamera = viewport, camera
+	return viewport
+end
+
 function MenuKit.petViewport(parent: Instance, petId: string, silhouette: boolean): ViewportFrame
 	local viewport = Instance.new("ViewportFrame")
 	viewport.BackgroundTransparency = 1

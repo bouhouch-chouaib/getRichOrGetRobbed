@@ -32,7 +32,7 @@ local SLOT_GAP = 10
 export type Fusion = {
 	window: MenuKit.Window,
 	refresh: () -> (),
-	showResult: (petId: string) -> (),
+	showResult: (petId: string, egg: boolean?) -> (),
 }
 
 function FusionMenu.create(gui: Instance): Fusion
@@ -494,7 +494,7 @@ function FusionMenu.create(gui: Instance): Fusion
 		refresh()
 	end)
 
-	local function showResult(petId: string)
+	local function showResult(petId: string, egg: boolean?)
 		local entry = PetCatalog.ById[petId]
 		if not entry then
 			return
@@ -506,14 +506,14 @@ function FusionMenu.create(gui: Instance): Fusion
 		if chamberViewport then
 			chamberViewport:Destroy()
 		end
-		local viewport = MenuKit.petViewport(chamber, petId, false)
+		local viewport = if egg then MenuKit.eggViewport(chamber, entry.Rarity) else MenuKit.petViewport(chamber, petId, false)
 		viewport.Position = UDim2.fromOffset(6, 4)
 		viewport.Size = UDim2.new(1, -12, 1, -30)
 		viewport.ZIndex = 5
 		chamberViewport = viewport
 		chamberMark.Visible = false
 		local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
-		chamberLabel.Text = entry.Name
+		chamberLabel.Text = if egg then "ŒUF " .. rarity.Name else entry.Name
 		chamberLabel.TextColor3 = rarity.Color
 		chamberGlow.Color = rarity.Color
 		chamberScale.Scale = 0.5

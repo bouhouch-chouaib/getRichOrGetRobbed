@@ -598,10 +598,12 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 			newCount += 1
 		end
 		local parts = {}
-		if newCount > 0 then
+		if type(details) == "table" and details.eggs and keptCount > 0 then
+			table.insert(parts, string.format("%d ŒUF%s EN INCUBATION DANS TA BASE", keptCount, if keptCount > 1 then "S" else ""))
+		elseif newCount > 0 then
 			table.insert(parts, string.format('<font color="#FFD23C">%d NOUVEAU%s !</font>', newCount, if newCount > 1 then "X" else ""))
 		end
-		if keptCount > newCount then
+		if not (type(details) == "table" and details.eggs) and keptCount > newCount then
 			table.insert(parts, string.format("%d DÉJÀ EU%s", keptCount - newCount, if keptCount - newCount > 1 then "S" else ""))
 		end
 		if soldCount > 0 then
@@ -653,14 +655,14 @@ Remotes.Announcement.OnClientEvent:Connect(function(playerName: string, petId: s
 end)
 
 -- Fusion réussie : la chambre de la machine montre le nouveau familier.
-Remotes.FusionResult.OnClientEvent:Connect(function(petId: string)
+Remotes.FusionResult.OnClientEvent:Connect(function(petId: string, egg: boolean?)
 	local entry = PetCatalog.ById[petId]
 	if not entry then
 		return
 	end
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
-	fusion.showResult(petId)
-	Toast.show(string.format("FUSION : %s (%s) !", TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
+	fusion.showResult(petId, egg)
+	Toast.show(if egg then "FUSION : ŒUF " .. TextFormat.upper(rarity.Name) .. " EN INCUBATION DANS TA BASE !" else string.format("FUSION : %s (%s) !", TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
 end)
 
 -- Un joueur arrive dans un nouveau monde : grande célébration pour lui, annonce pour les autres.

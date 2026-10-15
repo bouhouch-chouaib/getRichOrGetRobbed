@@ -16,6 +16,11 @@ function Perks.HasPass(player: Player, key: string): boolean
 	return player:GetAttribute("Pass_" .. key) == true
 end
 
+function Perks.HasAura(player: Player): boolean
+	local level = player:GetAttribute("Upgrade_" .. Config.PlayerAura.UnlockId)
+	return type(level) == "number" and level >= 1
+end
+
 -- Multiplie tout l'argent gagné (revenu des familiers et gains des tirages).
 function Perks.MoneyMultiplier(player: Player): number
 	local multiplier = 1

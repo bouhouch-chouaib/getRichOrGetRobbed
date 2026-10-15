@@ -457,7 +457,8 @@ local function queueReveal(petId: string)
 end
 
 -- Tirages : on révèle le plus rare obtenu (s'il est au moins Épique).
-Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, pulls: number, results: { [string]: number })
+Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, pulls: number, results: { [string]: number }, _money: number?, details: any)
+	if type(details) == "table" and details.eggs then return end
 	local best: string? = nil
 	local bestRank = 0
 	for petId in pairs(results) do
@@ -472,4 +473,16 @@ Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, pulls: num
 		task.delay(0.6 + math.min(pulls, Config.Loot.RevealCards) * Config.Loot.RevealStep, queueReveal, best)
 	end
 end)
-Remotes.FusionResult.OnClientEvent:Connect(queueReveal)
+Remotes.FusionResult.OnClientEvent:Connect(function(petId: string, egg: boolean?)
+	if not egg then queueReveal(petId) end
+end)
+Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, _rarity: string, _cf: CFrame, pets: { [string]: number })
+	if ownerId ~= Players.LocalPlayer.UserId then return end
+	local best: string? = nil
+	local rank = 0
+	for id in pairs(pets) do
+		local pet = PetCatalog.ById[id]
+		if pet and Config.RarityIndex[pet.Rarity] > rank then best, rank = id, Config.RarityIndex[pet.Rarity] end
+	end
+	if best then task.delay(1, queueReveal, best) end
+end)

@@ -17,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local EggIncubation = require(ReplicatedStorage.Shared.EggIncubation)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local PetStats = require(ReplicatedStorage.Shared.PetStats)
@@ -29,6 +30,7 @@ export type PlayerData = {
 	xp: { [string]: number }, -- Stat -> XP vers le prochain niveau
 	roundScore: number,
 	money: number,
+	eggs: { EggIncubation.Egg }, -- récompenses en incubation, jamais utilisables comme familiers
 	pets: { [string]: number }, -- petId -> quantité
 	equipped: { string }, -- petIds équipés (un même Id peut apparaître plusieurs fois si possédé en plusieurs exemplaires)
 	equipSlots: number,
@@ -96,26 +98,28 @@ local function storeKey(userId: number): string
 	return "u_" .. userId
 end
 
--- Ce qui est écrit dans le DataStore (le score de manche n'est pas sauvegardé).
+-- Snapshot des données (le score de manche n'est pas sauvegardé).
+-- Copier les tables empêche un reçu ajouté pendant UpdateAsync de précéder sa récompense dans cette sauvegarde.
 -- session = nil : la sauvegarde est libérée (le joueur a quitté ce serveur).
 local function serialize(data: PlayerData, session: SessionLock?): { [string]: any }
 	return {
 		version = 2, -- 2 : ajout du verrou de session
-		levels = data.levels,
-		xp = data.xp,
+		levels = table.clone(data.levels),
+		xp = table.clone(data.xp),
 		money = data.money,
-		pets = data.pets,
-		equipped = data.equipped,
+		pets = table.clone(data.pets), -- snapshot cohérent avec la file d’œufs pendant un UpdateAsync
+		eggs = table.clone(data.eggs),
+		equipped = table.clone(data.equipped),
 		pity = data.pity,
 		totalPulls = data.totalPulls,
-		upgrades = data.upgrades,
+		upgrades = table.clone(data.upgrades),
 		stationScale = 25, -- tapis et banc sur 25 niveaux (avant : 8, converti à la lecture)
 		tutorialDone = data.tutorialDone,
-		receipts = data.receipts,
+		receipts = table.clone(data.receipts),
 		keys = data.keys,
 		tier = data.tier,
 		world = data.world,
-		indexClaimed = data.indexClaimed,
+		indexClaimed = table.clone(data.indexClaimed),
 		session = session,
 	}
 end
@@ -294,6 +298,7 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 			end
 		end
 	end
+	data.eggs = EggIncubation.Merge(saved.eggs, data.eggs)
 	if type(saved.upgrades) == "table" then
 		for id, level in pairs(saved.upgrades) do
 			if type(id) == "string" and type(level) == "number" then
@@ -412,6 +417,13 @@ local function sync(player: Player)
 	for petId, count in pairs(data.pets) do
 		player:SetAttribute("Pet_" .. petId, count)
 	end
+	local eggCount, nextHatch = 0, math.huge
+	for _, egg in ipairs(data.eggs) do
+		eggCount += egg.count
+		nextHatch = math.min(nextHatch, egg.readyAt)
+	end
+	player:SetAttribute("EggCount", eggCount)
+	player:SetAttribute("NextHatchAt", if eggCount > 0 then nextHatch else 0)
 	player:SetAttribute("Equipped", table.concat(data.equipped, ","))
 	local bonus = PetStats.Sum(data.equipped)
 	player:SetAttribute("SpeedBonus", bonus.Speed)
@@ -516,6 +528,7 @@ local function onPlayerAdded(player: Player)
 		roundScore = 0,
 		money = 0,
 		pets = {},
+		eggs = {},
 		equipped = {},
 		equipSlots = Config.Pets.EquipSlots,
 		pity = 0,
@@ -760,6 +773,40 @@ function SessionData.ResetRoundScores()
 		data.roundScore = 0
 		sync(player)
 	end
+end
+
+-- These methods never yield: a hatch removes eggs and credits pets in one transaction.
+function SessionData.AddEggs(player: Player, rewards: { [string]: number })
+	local data = storage[player]
+	if not data then return end
+	local time = os.time()
+	for petId, count in pairs(rewards) do
+		local egg = EggIncubation.Create(petId, count, time, HttpService:GenerateGUID(false))
+		if egg then table.insert(data.eggs, egg) end
+	end
+	sync(player)
+end
+
+function SessionData.GetEggs(player: Player): { EggIncubation.Egg }
+	local data = storage[player]
+	return if data then data.eggs else {}
+end
+
+function SessionData.GetRewardOwned(player: Player): { [string]: number }
+	local data = storage[player]
+	return if data then EggIncubation.Owned(data.pets, data.eggs) else {}
+end
+
+function SessionData.HatchEggs(player: Player, time: number): { [string]: number }
+	local data = storage[player]
+	if not data or not data.loaded then return {} end
+	local pending, hatched = EggIncubation.Collect(data.eggs, time)
+	if next(hatched) then
+		data.eggs = pending
+		for petId, count in pairs(hatched) do data.pets[petId] = (data.pets[petId] or 0) + count end
+		sync(player)
+	end
+	return hatched
 end
 
 function SessionData.AddPets(player: Player, newPets: { [string]: number })

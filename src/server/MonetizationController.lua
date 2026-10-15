@@ -130,7 +130,9 @@ local function grantPulls(player: Player, pulls: number)
 end
 
 local function grantProduct(player: Player, product: Config.MonetizationItem)
-	if product.Key == "ServerLuck" then
+	if product.Key == "AstralAura" then
+		SessionData.SetUpgradeLevel(player, Config.PlayerAura.UnlockId, 1)
+	elseif product.Key == "ServerLuck" then
 		grantServerLuck(player)
 	elseif product.Pulls then
 		grantPulls(player, product.Pulls)

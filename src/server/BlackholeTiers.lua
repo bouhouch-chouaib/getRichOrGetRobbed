@@ -23,7 +23,6 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
-local BasePetsController = require(script.Parent.BasePetsController)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local ItemSpawner = require(script.Parent.ItemSpawner)
@@ -294,9 +293,7 @@ function BlackholeTiers.AfterRewards()
 		local pool = PetCatalog.ByRarity[rarity]
 		if entry and pool and #pool > 0 then
 			local pet = pool[rng:NextInteger(1, #pool)]
-			SessionData.AddPets(entry.player, { [pet.Id] = 1 })
-			BasePetsController.Celebrate(entry.player, { pet.Id })
-			Remotes.Announcement:FireAllClients(entry.player.DisplayName, pet.Id)
+			SessionData.AddEggs(entry.player, { [pet.Id] = 1 })
 			table.insert(winners, entry.player.DisplayName)
 		end
 	end

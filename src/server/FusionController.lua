@@ -10,7 +10,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
-local BasePetsController = require(script.Parent.BasePetsController)
 local SessionData = require(script.Parent.SessionData)
 
 local FusionController = {}
@@ -75,7 +74,7 @@ local function onFuse(player: Player, rarityIndex: unknown, chosen: unknown)
 	end
 	local cost = Config.Fusion.Costs[rarityIndex]
 	local data = SessionData.Get(player)
-	if not cost or not data or data.money < cost then
+	if not cost or not data or not data.loaded or data.money < cost then
 		return
 	end
 
@@ -96,14 +95,10 @@ local function onFuse(player: Player, rarityIndex: unknown, chosen: unknown)
 	SessionData.SpendMoney(player, cost)
 
 	local result = nextBucket[rng:NextInteger(1, #nextBucket)]
-	SessionData.AddPets(player, { [result.Id] = 1 })
-	BasePetsController.Celebrate(player, { result.Id })
-	Remotes.FusionResult:FireClient(player, result.Id)
+	SessionData.AddEggs(player, { [result.Id] = 1 })
+	Remotes.FusionResult:FireClient(player, result.Id, true)
 	print(string.format("[Fusion] %s : %d %s -> %s", player.Name, Config.Fusion.Count, Config.Rarities[rarityIndex].Name, result.Name))
 
-	if rarityIndex + 1 >= Config.Loot.AnnounceMinRarity then
-		Remotes.Announcement:FireAllClients(player.DisplayName, result.Id)
-	end
 end
 
 function FusionController.Init()

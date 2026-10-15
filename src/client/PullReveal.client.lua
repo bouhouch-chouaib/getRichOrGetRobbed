@@ -21,6 +21,7 @@ local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
 local UiStyle = require(script.Parent.UiStyle)
 
+local Eggs = require(ReplicatedStorage.Shared.EggIncubation)
 local LOOT = Config.Loot
 local WHITE = Color3.new(1, 1, 1)
 local GREY = Color3.fromRGB(120, 120, 132)
@@ -40,7 +41,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = player:WaitForChild("PlayerGui")
 local root = ScreenScale.attach(gui)
 
-type Drop = { Id: string, New: boolean, Sold: number? }
+type Drop = { Id: string, New: boolean, Sold: number?, Egg: boolean? }
 
 local current: GuiObject? = nil
 local token = 0
@@ -91,11 +92,11 @@ local function open(card: Frame, drop: Drop)
 	local color = if sold then GREY else rarity.Color
 	card.BackgroundColor3 = WHITE
 	UiStyle.gradient(card, UiStyle.lighter(color, 0.3), UiStyle.darker(color, 0.25))
-	local viewport = MenuKit.petViewport(card, drop.Id, false)
+	local viewport = if drop.Egg then MenuKit.eggViewport(card, entry.Rarity) else MenuKit.petViewport(card, drop.Id, false)
 	viewport.Position = UDim2.fromOffset(4, 4)
 	viewport.Size = UDim2.fromOffset(CARD.X - 8, CARD.Y - 60)
 	viewport.ImageTransparency = if sold then 0.45 else 0
-	local name = UiStyle.text(card, TextFormat.upper(entry.Name), 14, WHITE, UiStyle.BODY_FONT)
+	local name = UiStyle.text(card, TextFormat.upper(if drop.Egg then "ŒUF " .. rarity.Name else entry.Name), 14, WHITE, UiStyle.BODY_FONT)
 	name.Position = UDim2.fromOffset(3, CARD.Y - 56)
 	name.Size = UDim2.fromOffset(CARD.X - 6, 30)
 	name.TextWrapped = true
@@ -107,6 +108,8 @@ local function open(card: Frame, drop: Drop)
 	if sold then
 		tag.Text = "VENDU +" .. NumberFormat.money(drop.Sold :: number)
 		tag.TextColor3 = UiStyle.Colors.Money
+	elseif drop.Egg then
+		tag.Text = "ÉCLOSION · " .. Eggs.Time(Eggs.Duration(entry.Rarity))
 	elseif drop.New then
 		tag.Text = "NOUVEAU !"
 		tag.TextColor3 = UiStyle.Colors.Gold
@@ -146,7 +149,7 @@ Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, pulls: num
 	local drops: { Drop } = {}
 	for _, drop in ipairs(details.drops) do
 		if type(drop) == "table" and type(drop.Id) == "string" and PetCatalog.ById[drop.Id] then
-			table.insert(drops, { Id = drop.Id, New = drop.New == true, Sold = if type(drop.Sold) == "number" then drop.Sold else nil })
+			table.insert(drops, { Id = drop.Id, New = drop.New == true, Egg = drop.Egg == true, Sold = if type(drop.Sold) == "number" then drop.Sold else nil })
 		end
 	end
 	if #drops == 0 then

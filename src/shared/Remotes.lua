@@ -48,6 +48,8 @@ return {
 	Knockback = remote("Knockback"),
 	-- Serveur -> client : (score: number, pulls: number, results: { [string]: number }, money: number)
 	RewardsGranted = remote("RewardsGranted"),
+	-- Server only: (ownerUserId, rarityId, nestCFrame, hatchedPets). No client hatch request.
+	EggHatched = remote("EggHatched"),
 	-- Client -> serveur : (itemId: string) achat d'une amélioration de Config.Shop.
 	BuyUpgrade = remote("BuyUpgrade"),
 	-- Client -> serveur : (petId: string, equip: boolean) équiper / déséquiper un familier.

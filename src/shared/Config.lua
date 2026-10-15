@@ -4,6 +4,12 @@
 
 local Config = {}
 
+-- Incubation parallèle, en secondes réelles (continue hors ligne).
+Config.Eggs = {
+    Seconds = { Commun = 15, Inhabituel = 30, Rare = 60, Epique = 180, Legendaire = 300, Mythique = 600, Divin = 1200, Sigma = 1800 } :: { [string]: number },
+    ViewDistance = 140,
+}
+
 -- Durées des phases (secondes).
 Config.Durations = {
 	Feeding = 45, -- trou noir ouvert
@@ -222,10 +228,12 @@ Config.Monetization = {
 		{ Key = "LuckyLuck", Id = 2026568802, Icon = "Clover", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
 	} :: { MonetizationItem },
 	Products = {
+		{ Key = "AstralAura", Id = 3718429232, Icon = "Sparkle", Name = "AURA ASTRALE", Description = "Cristaux lumineux, étoiles cyan et violettes, et une traînée quand tu cours. Activée automatiquement, pour toujours.", Price = 19 },
+
 		{ Key = "ServerLuck", Id = 3717917081, Icon = "Sparkle", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
-		{ Key = "Pull1", Id = 3717917143, Icon = "Dice", Name = "TIRAGE INSTANTANÉ", Description = "1 tirage de familier tout de suite.", Price = 49, Pulls = 1 },
+		{ Key = "Pull1", Id = 3717917143, Icon = "Dice", Name = "TIRAGE INSTANTANÉ", Description = "1 œuf de familier. Délai d’éclosion selon sa rareté.", Price = 49, Pulls = 1 },
 		{ Key = "Key1", Id = 3718327246, Icon = "Key", Name = "CLÉ", Description = "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.", Price = 49, Keys = 1 },
-		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 TIRAGES", Description = "10 tirages de familiers tout de suite.", Price = 399, Pulls = 10 },
+		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 TIRAGES", Description = "10 œufs de familiers. Éclosion en parallèle selon leur rareté.", Price = 399, Pulls = 10 },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,
 	VipMoneyMultiplier = 1.25,
@@ -243,7 +251,20 @@ Config.Monetization = {
 	CreatorOwnsPasses = false,
 }
 
--- Machine de fusion : Count familiers d'une même rareté -> 1 familier aléatoire de la rareté au-dessus.
+-- Cosmétique du personnage : produit permanent AstralAura, validé par le serveur.
+-- Le reçu valide le déblocage sauvegardé dans les améliorations.
+Config.PlayerAura = {
+	UnlockId = "AstralAura",
+	Primary = Color3.fromRGB(72, 232, 255),
+	Secondary = Color3.fromRGB(174, 88, 255),
+	RunSpeed = 8,
+	ViewDistance = 120,
+	UpdateInterval = 1 / 30,
+	TrailLifetime = 0.5,
+	TeleportDistance = 14,
+}
+
+-- Machine de fusion : Count familiers -> un œuf de la rareté supérieure.
 -- Possible jusqu'à MaxFromRarity (6 = Mythique -> Divin). Le Sigma ne s'obtient que par chance.
 Config.Fusion = {
 	Count = 5,

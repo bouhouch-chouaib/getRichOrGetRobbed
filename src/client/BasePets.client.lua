@@ -112,7 +112,8 @@ local function playArrival(shown: Shown, arrivedAt: number)
 	if now - arrivedAt > ARRIVAL_WINDOW then
 		return
 	end
-	shown.arrivedAt = arrivedAt
+	local hatched = shown.anchor:GetAttribute("Hatched") == true
+	shown.arrivedAt = if hatched then nil else arrivedAt
 	local model = shown.model
 	local entry = PetCatalog.ById[model.Name]
 	local root = model.PrimaryPart
@@ -136,7 +137,7 @@ local function playArrival(shown: Shown, arrivedAt: number)
 	label.Font = Enum.Font.LuckiestGuy
 	label.TextScaled = true
 	label.TextColor3 = color
-	label.Text = "NOUVEAU !"
+	label.Text = if hatched then "ÉCLOSION !" else "NOUVEAU !"
 	label.Position = UDim2.fromScale(0.2, 0)
 	label.Size = UDim2.fromScale(0.8, 1)
 	Icons.image(tag, "Sparkle", UDim2.fromScale(0.2, 1))
@@ -147,7 +148,7 @@ local function playArrival(shown: Shown, arrivedAt: number)
 	tag.Parent = model
 	Debris:AddItem(tag, NEW_TAG_TIME)
 
-	task.delay(math.max(0, arrivedAt + DROP_TIME - now), function()
+	task.delay(if hatched then 0 else math.max(0, arrivedAt + DROP_TIME - now), function()
 		if not model.Parent then
 			return
 		end
