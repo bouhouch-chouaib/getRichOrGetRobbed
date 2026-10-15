@@ -5,6 +5,8 @@
 --     n'est pas découvert) et la barre « 3/9 » ; à droite, le familier choisi (3D, revenu, stats données
 --     une fois équipé, ÉQUIPER) et sa récompense (RÉCLAMER) ; en bas, « RÉCLAMER TOUT (n) ! ».
 -- Récompenses : Config.Index, validées par le serveur (Remotes.ClaimIndex -> SessionData.ClaimIndex).
+-- Formes évoluées (capsule d'évolution, Config.Evolution) : onglets ★ / ★★ / ★★★ sur la fiche du familier (aperçu, revenu,
+-- stats, équiper, récompense de chaque forme), étoiles sur la case quand on en possède une, compteur « Évolutions ».
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -68,8 +70,8 @@ function IndexMenu.create(gui: Instance): Index
 		income.Position = UDim2.fromOffset(4, 222)
 		income.Size = UDim2.new(1, -8, 0, 28)
 		local total = UiStyle.text(card, "", 16, WHITE, UiStyle.BODY_FONT)
-		total.Position = UDim2.new(0, 4, 1, -54)
-		total.Size = UDim2.new(1, -8, 0, 46)
+		total.Position = UDim2.new(0, 4, 1, -72)
+		total.Size = UDim2.new(1, -8, 0, 64)
 		total.TextWrapped = true
 		collectionLabel = total
 		rarityCard = card
@@ -145,6 +147,26 @@ function IndexMenu.create(gui: Instance): Index
 	local detailGradient = UiStyle.gradient(detail, WHITE, WHITE)
 	detail.BackgroundColor3 = WHITE
 	local detailViewport: ViewportFrame? = nil
+	-- Forme affichée : 1 = normale, 2 = Évolué, 3 = Ultime (PetCatalog.Variant).
+	local selectedStage = 1
+	local STAGES = #Config.Evolution.Names
+	local GOLD = Color3.fromRGB(255, 214, 70)
+	local function formOf(petId: string, stage: number): string
+		return PetCatalog.Variant(petId, stage)
+	end
+	local formButtons: { TextButton } = {}
+	local refreshDetail: () -> ()
+	for stage = 1, STAGES do
+		local width = (226 - 16 - (STAGES - 1) * 4) / STAGES
+		local button = UiStyle.button(detail, string.rep("★", stage), UDim2.fromOffset(width, 22), GREY, 16)
+		button.Position = UDim2.fromOffset(8 + (stage - 1) * (width + 4), 4)
+		button.ZIndex = 4
+		button.Activated:Connect(function()
+			selectedStage = stage
+			refreshDetail()
+		end)
+		formButtons[stage] = button
+	end
 	local detailKey: string? = nil -- familier + découvert/non affiché (évite de refaire l'aperçu 3D à chaque seconde)
 	local detailName = UiStyle.text(detail, "", 26, WHITE, UiStyle.BODY_FONT)
 	detailName.Position = UDim2.fromOffset(6, 112)
@@ -206,6 +228,26 @@ function IndexMenu.create(gui: Instance): Index
 		return not claimed[petId] and MenuKit.number("Pet_" .. petId) > 0
 	end
 
+	-- Une forme évoluée est « connue » si on l'a (ou si sa récompense a été réclamée) ; la forme normale suit l'espèce.
+	local function formKnown(petId: string, stage: number, claimed: { [string]: boolean }): boolean
+		if stage <= 1 then
+			return MenuKit.discovered(petId, claimed)
+		end
+		local form = formOf(petId, stage)
+		return MenuKit.number("Pet_" .. form) > 0 or claimed[form] == true
+	end
+
+	-- Récompenses qui attendent pour cette espèce, toutes formes comprises.
+	local function waitingFor(petId: string, claimed: { [string]: boolean }): number
+		local count = 0
+		for stage = 1, STAGES do
+			if canClaim(formOf(petId, stage), claimed) then
+				count += 1
+			end
+		end
+		return count
+	end
+
 	local function equippedCount(petId: string): number
 		local count = 0
 		for _, id in ipairs(MenuKit.equipped()) do
@@ -216,14 +258,20 @@ function IndexMenu.create(gui: Instance): Index
 		return count
 	end
 
-	local function refreshDetail()
-		local petId = selectedId
-		local entry = if petId then PetCatalog.ById[petId] else nil
-		if not petId or not entry then
+	refreshDetail = function()
+		local speciesId = selectedId
+		if not speciesId or not PetCatalog.ById[speciesId] then
 			return
 		end
 		local claimed = MenuKit.claimed()
-		local known = MenuKit.discovered(petId, claimed)
+		-- Onglets de forme : couleur si on la possède, gris sinon, contour blanc sur celle affichée.
+		for stage, button in ipairs(formButtons) do
+			local owned = MenuKit.number("Pet_" .. formOf(speciesId, stage)) > 0
+			UiStyle.setButtonColor(button, if stage == selectedStage then GOLD elseif owned then UiStyle.Colors.Cyan else GREY)
+		end
+		local petId = formOf(speciesId, selectedStage)
+		local entry = PetCatalog.ById[petId]
+		local known = formKnown(speciesId, selectedStage, claimed)
 		local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 		detailGradient.Color = ColorSequence.new(UiStyle.lighter(rarity.Color, 0.25), UiStyle.darker(rarity.Color, 0.35))
 		local key = petId .. (if known then "+" else "-")
@@ -233,8 +281,8 @@ function IndexMenu.create(gui: Instance): Index
 				detailViewport:Destroy()
 			end
 			local viewport = MenuKit.petViewport(detail, petId, not known)
-			viewport.Position = UDim2.fromOffset(8, 6)
-			viewport.Size = UDim2.new(1, -16, 0, 106)
+			viewport.Position = UDim2.fromOffset(8, 28)
+			viewport.Size = UDim2.new(1, -16, 0, 84)
 			viewport.ZIndex = 3
 			detailViewport = viewport
 		end
@@ -274,7 +322,7 @@ function IndexMenu.create(gui: Instance): Index
 	end
 
 	equipButton.Activated:Connect(function()
-		local petId = selectedId
+		local petId = if selectedId then formOf(selectedId, selectedStage) else nil
 		if not petId then
 			return
 		end
@@ -302,7 +350,7 @@ function IndexMenu.create(gui: Instance): Index
 	end)
 
 	claimButton.Activated:Connect(function()
-		local petId = selectedId
+		local petId = if selectedId then formOf(selectedId, selectedStage) else nil
 		if petId and canClaim(petId, MenuKit.claimed()) then
 			Remotes.ClaimIndex:FireServer(petId)
 		end
@@ -353,12 +401,27 @@ function IndexMenu.create(gui: Instance): Index
 				count.Text = if owned > 0 then "x" .. owned else ""
 			end
 			local tag = cell.button:FindFirstChild("Equipped")
+			local anyEquipped = false
+			local best = 1
+			for stage = 1, STAGES do
+				local form = formOf(entry.Id, stage)
+				if table.find(equipped, form) then
+					anyEquipped = true
+				end
+				if stage > 1 and MenuKit.number("Pet_" .. form) > 0 then
+					best = stage
+				end
+			end
 			if tag and tag:IsA("TextLabel") then
-				tag.Visible = table.find(equipped, entry.Id) ~= nil
+				tag.Visible = anyEquipped
+			end
+			local stars = cell.button:FindFirstChild("Stars")
+			if stars and stars:IsA("TextLabel") then
+				stars.Text = if best > 1 then string.rep("★", best) else ""
 			end
 			local badge = cell.button:FindFirstChild("Badge")
 			if badge and badge:IsA("TextLabel") then
-				UiStyle.setBadge(badge, if canClaim(entry.Id, claimed) then "!" else nil)
+				UiStyle.setBadge(badge, if waitingFor(entry.Id, claimed) > 0 then "!" else nil)
 			end
 		end
 		local total = #cells
@@ -368,6 +431,7 @@ function IndexMenu.create(gui: Instance): Index
 
 	local function select(petId: string)
 		selectedId = petId
+		selectedStage = 1
 		refreshCells()
 		refreshDetail()
 	end
@@ -418,6 +482,12 @@ function IndexMenu.create(gui: Instance): Index
 			tag.TextXAlignment = Enum.TextXAlignment.Left
 			tag.ZIndex = 4
 			tag.Visible = false
+			local stars = UiStyle.text(button, "", 15, GOLD)
+			stars.Name = "Stars"
+			stars.AnchorPoint = Vector2.new(0.5, 0)
+			stars.Position = UDim2.new(0.5, 0, 0, 18)
+			stars.Size = UDim2.fromOffset(60, 16)
+			stars.ZIndex = 5
 			UiStyle.badge(button)
 
 			button.Activated:Connect(function()
@@ -451,15 +521,19 @@ function IndexMenu.create(gui: Instance): Index
 	local function refresh()
 		local claimed = MenuKit.claimed()
 		local discoveredTotal = 0
+		local evolvedTotal = 0
 		for index, rarity in ipairs(Config.Rarities) do
 			local waiting = 0
 			for _, entry in ipairs(PetCatalog.ByRarity[rarity.Id] or {}) do
 				if MenuKit.discovered(entry.Id, claimed) then
 					discoveredTotal += 1
 				end
-				if canClaim(entry.Id, claimed) then
-					waiting += 1
+				for stage = 2, STAGES do
+					if formKnown(entry.Id, stage, claimed) then
+						evolvedTotal += 1
+					end
 				end
+				waiting += waitingFor(entry.Id, claimed)
 			end
 			tabs.setBadge(index, if waiting > 0 then tostring(waiting) else nil)
 		end
@@ -469,9 +543,11 @@ function IndexMenu.create(gui: Instance): Index
 		if collectionLabel then
 			local multiplier = MenuKit.player:GetAttribute("Multiplier")
 			collectionLabel.Text = string.format(
-				"Collection %d/%d\nÉquipés %d/%d • x%.2f",
+				"Collection %d/%d\nÉvolutions %d/%d\nÉquipés %d/%d • x%.2f",
 				discoveredTotal,
 				#PetCatalog.List,
+				evolvedTotal,
+				#PetCatalog.List * (STAGES - 1),
 				#MenuKit.equipped(),
 				MenuKit.number("EquipSlots"),
 				if type(multiplier) == "number" then multiplier else 1

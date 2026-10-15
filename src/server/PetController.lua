@@ -37,7 +37,8 @@ function PetController.Init()
 			total = SessionData.ClaimIndex(player, petId)
 			count = if total > 0 then 1 else 0
 		elseif petId == nil then
-			for _, entry in ipairs(PetCatalog.List) do
+			-- Tout réclamer : les espèces et leurs formes évoluées (capsule d'évolution).
+			for _, entry in ipairs(PetCatalog.Everything) do
 				local reward = SessionData.ClaimIndex(player, entry.Id)
 				if reward > 0 then
 					total += reward

@@ -107,16 +107,27 @@ function Eggs.Collect(queue: { Egg }, time: number): ({ Egg }, { [string]: numbe
 	return pending, hatched, done
 end
 
--- Attente avant la tentative d'évolution suivante (depuis le stade `stage`), avec un peu de hasard.
-function Eggs.EvolveDelay(rarity: string, stage: number, roll: number): number
+-- Attente avant la tentative d'évolution suivante (depuis le stade `stage`), avec un peu de hasard. tier = niveau du
+-- joueur (monde le plus loin) : plus il est haut, plus la capsule va vite (Config.Evolution.SpeedPerTier).
+function Eggs.EvolveDelay(rarity: string, stage: number, roll: number, tier: number?): number
 	local factor = Config.Evolution.StageTimeFactor[stage] or Config.Evolution.StageTimeFactor[1]
 	local jitter = 1 + (roll * 2 - 1) * Config.Evolution.TimeJitter
-	return Eggs.Duration(rarity) * factor * jitter
+	local speed = 1 - Config.Evolution.SpeedPerTier * (math.max(1, tier or 1) - 1)
+	return Eggs.Duration(rarity) * factor * jitter * math.max(0.2, speed)
+end
+
+-- Chances (poids) de chaque stade maximum pour une capsule de ce niveau.
+function Eggs.MaxStageWeights(tier: number?): { number }
+	local weights = table.clone(Config.Evolution.MaxStageWeights)
+	local shift = math.min(weights[1], Config.Evolution.UltimeWeightPerTier * (math.max(1, tier or 1) - 1))
+	weights[1] -= shift
+	weights[#weights] += shift
+	return weights
 end
 
 -- Plafond secret d'un œuf qui entre dans la machine (roll entre 0 et 1).
-function Eggs.RollMaxStage(roll: number): number
-	local weights = Config.Evolution.MaxStageWeights
+function Eggs.RollMaxStage(roll: number, tier: number?): number
+	local weights = Eggs.MaxStageWeights(tier)
 	local total = 0
 	for _, weight in ipairs(weights) do
 		total += weight
@@ -132,7 +143,7 @@ function Eggs.RollMaxStage(roll: number): number
 end
 
 -- Une tentative d'évolution si c'est l'heure : "Evolved" (stade +1), "Maxed" (il n'évoluera plus) ou nil.
-function Eggs.TryEvolve(egg: Egg, time: number, roll: number): string?
+function Eggs.TryEvolve(egg: Egg, time: number, roll: number, tier: number?): string?
 	local evolve = egg.evolve
 	if not evolve or evolve.done or time < evolve.nextAt then
 		return nil
@@ -143,7 +154,7 @@ function Eggs.TryEvolve(egg: Egg, time: number, roll: number): string?
 		if evolve.stage >= stages then
 			evolve.done = true -- Ultime : rien au-dessus
 		else
-			evolve.nextAt = time + Eggs.EvolveDelay(Catalog.ById[egg.petId].Rarity, evolve.stage, roll)
+			evolve.nextAt = time + Eggs.EvolveDelay(Catalog.ById[egg.petId].Rarity, evolve.stage, roll, tier)
 		end
 		return "Evolved"
 	end

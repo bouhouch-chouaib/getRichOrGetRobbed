@@ -67,6 +67,8 @@ function EggController.Init(bases: { Model })
 		local egg = if player then SessionData.GetEvolving(player) else nil
 		local evolve = egg and egg.evolve
 		machine:SetAttribute("OwnerUserId", if player then player.UserId else nil)
+		-- Niveau de la capsule = monde le plus loin atteint par le propriétaire (client/EvolutionMachine la décore).
+		machine:SetAttribute("CapsuleTier", if player then SessionData.GetTier(player) else nil)
 		machine:SetAttribute("Occupied", evolve ~= nil)
 		machine:SetAttribute("Rarity", if egg then Catalog.ById[egg.petId].Rarity else nil)
 		machine:SetAttribute("Stage", if evolve then evolve.stage else nil)

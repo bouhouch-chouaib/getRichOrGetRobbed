@@ -834,8 +834,9 @@ function SessionData.StartEvolution(player: Player, key: string, time: number): 
 			local rarity = PetCatalog.ById[egg.petId].Rarity
 			local evolve: EggIncubation.Evolve = {
 				stage = 1,
-				maxStage = EggIncubation.RollMaxStage(evolutionRng:NextNumber()),
-				nextAt = time + EggIncubation.EvolveDelay(rarity, 1, evolutionRng:NextNumber()),
+				-- La capsule suit le niveau du joueur (monde le plus loin) : meilleures chances, plus rapide.
+				maxStage = EggIncubation.RollMaxStage(evolutionRng:NextNumber(), data.tier),
+				nextAt = time + EggIncubation.EvolveDelay(rarity, 1, evolutionRng:NextNumber(), data.tier),
 				done = false,
 			}
 			if egg.count == 1 then
@@ -863,7 +864,8 @@ end
 function SessionData.TickEvolution(player: Player, time: number): string?
 	local egg = SessionData.GetEvolving(player)
 	if not egg then return nil end
-	local result = EggIncubation.TryEvolve(egg, time, evolutionRng:NextNumber())
+	local data = storage[player]
+	local result = EggIncubation.TryEvolve(egg, time, evolutionRng:NextNumber(), if data then data.tier else 1)
 	if result then
 		sync(player)
 	end

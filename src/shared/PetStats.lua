@@ -25,9 +25,11 @@ function PetStats.Of(petId: string): Bonus
 		return { Speed = 0, Strength = 0 }
 	end
 	local bonus = Config.Pets.EquipBonus
-	local total = bonus.Levels[Config.RarityIndex[entry.Rarity] or 1] or 0
+	-- Un familier évolué (machine d'évolution) donne plus : x Config.Evolution.PowerMultiplier.
+	local power = Config.Evolution.PowerMultiplier[entry.Stage or 1] or 1
+	local total = math.floor((bonus.Levels[Config.RarityIndex[entry.Rarity] or 1] or 0) * power + 0.5)
 	local band = PetSizes.Bands[entry.Rarity] or PetSizes.Bands.Commun
-	local size = PetSizes.Of(petId, entry.Rarity)
+	local size = PetSizes.Of(entry.BaseId or petId, entry.Rarity) -- le partage Vitesse / Force suit l'espèce
 	local t = if band[2] > band[1] then math.clamp((size - band[1]) / (band[2] - band[1]), 0, 1) else 0.5
 	local speed = math.floor(total * (bonus.SpeedShareSmall + (bonus.SpeedShareBig - bonus.SpeedShareSmall) * t) + 0.5)
 	return { Speed = speed, Strength = total - speed }

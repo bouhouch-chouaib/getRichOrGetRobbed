@@ -28,6 +28,8 @@ function DuelStats.of(petId: string): (number, number)
 		place = math.clamp((PetSizes.Of(petId, entry and entry.Rarity) - band[1]) / (band[2] - band[1]), 0, 1)
 	end
 	scale *= 1 + DUEL.SizeBonus * place
+	-- Un familier évolué (machine d'évolution) est plus fort.
+	scale *= Config.Evolution.PowerMultiplier[if entry then entry.Stage or 1 else 1] or 1
 	return math.floor(DUEL.BaseHP * scale + 0.5), math.floor(DUEL.BaseAttack * scale + 0.5)
 end
 

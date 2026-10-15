@@ -29,6 +29,15 @@ Config.Evolution = {
 	TimeJitter = 0.25, -- +/- 25 % au hasard sur chaque attente
 	Slots = 1, -- œufs dans la machine en même temps
 	UseDistance = 18, -- studs : distance max pour utiliser la machine
+	-- Un familier évolué est aussi plus fort : stats données quand il est équipé (shared/PetStats) et puissance en duel
+	-- (shared/DuelStats) x PowerMultiplier.
+	PowerMultiplier = { 1, 1.4, 2 },
+	-- La capsule suit le niveau du joueur (le monde le plus loin atteint, attribut Tier) : de plus en plus grande et
+	-- épique (client/EvolutionMachine), et meilleure. Par monde au-dessus de la Prairie : tentatives SpeedPerTier plus
+	-- tôt (-6 %), et UltimeWeightPerTier points de chance passent de « n'évoluera pas » à « Ultime ».
+	-- Divin (monde 7) : tentatives 36 % plus tôt, 30 % de chances d'aller jusqu'à Ultime (au lieu de 18 %).
+	SpeedPerTier = 0.06,
+	UltimeWeightPerTier = 2,
 }
 
 -- Durées des phases (secondes).

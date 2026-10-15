@@ -97,8 +97,10 @@ dehors derrière chaque base ; on y met un œuf (il n'éclot plus tout seul), il
 → Ultime x8), plafond secret tiré au hasard (« IL N'ÉVOLUERA PLUS »), on l'ouvre quand on veut. Formes évoluées = `<Id>__E2/__E3`
 (`PetCatalog.Everything`, `PetCatalog.Variant/Stage`). Vérifié en jeu (solo) : capsule, œuf en stase, évolution, limite atteinte,
 éclosion « ÉPIQUE ÉVOLUÉ », familiers évolués dans la base (anneau, couronne Ultime), sauvegarde d'une partie à l'autre.
-Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remote), à 2 joueurs, sur téléphone. Pas encore possible :
-équiper un familier évolué depuis l'Index (il n'y a pas de case).
+Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remote), à 2 joueurs, sur téléphone.
+**Capsule par niveau de monde** (`client/CapsuleDecor`, attribut `CapsuleTier`, `Config.Evolution.SpeedPerTier / UltimeWeightPerTier`) :
+7 versions de plus en plus grandes et épiques (photographiées en jeu) et de plus en plus efficaces. **Familiers évolués complets** :
+Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stats et duel x1,4 / x2, étiquette dorée dans la base.
 
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.

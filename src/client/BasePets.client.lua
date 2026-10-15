@@ -79,10 +79,11 @@ local function setLabel(shown: Shown)
 	local countValue = shown.anchor:GetAttribute("Count")
 	local count = if type(countValue) == "number" then countValue else 1
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
+	local stage = entry.Stage or 1 -- familier évolué (capsule d'évolution) : une ligne dorée en plus
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "PetLabel"
 	sign.Adornee = root
-	sign.Size = UDim2.fromScale(7, 2.2)
+	sign.Size = UDim2.fromScale(7, if stage > 1 then 3 else 2.2)
 	sign.StudsOffsetWorldSpace = Vector3.new(0, shown.topOffset + 1.4, 0)
 	sign.AlwaysOnTop = true
 	sign.LightInfluence = 0
@@ -101,8 +102,15 @@ local function setLabel(shown: Shown)
 		outline.Parent = label
 		label.Parent = sign
 	end
-	line(TextFormat.upper(entry.Name) .. (if count > 1 then " x" .. count else ""), rarity.Color, 0, 0.55)
-	line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.55, 0.45)
+	if stage > 1 then
+		local name = TextFormat.upper(PetCatalog.ById[entry.BaseId or petId].Name)
+		line(string.rep("★", stage) .. " " .. TextFormat.upper(Config.Evolution.Names[stage]), Color3.fromRGB(255, 214, 70), 0, 0.3)
+		line(name .. (if count > 1 then " x" .. count else ""), rarity.Color, 0.3, 0.4)
+		line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.7, 0.3)
+	else
+		line(TextFormat.upper(entry.Name) .. (if count > 1 then " x" .. count else ""), rarity.Color, 0, 0.55)
+		line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.55, 0.45)
+	end
 	sign.Parent = shown.model
 end
 

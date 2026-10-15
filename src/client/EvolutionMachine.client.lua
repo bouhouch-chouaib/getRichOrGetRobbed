@@ -7,6 +7,8 @@
 --     « IL N'ÉVOLUERA PLUS » quand l'œuf a atteint sa limite (secrète, tirée au hasard).
 --   - Bulle [E] pour le propriétaire : « Mettre un œuf » (fenêtre de choix parmi ses œufs en couveuse) ou
 --     « Faire éclore » (à maintenir). Le serveur revérifie tout (Remotes.Evolution).
+--   - La capsule suit le niveau du propriétaire (monde le plus loin, attribut CapsuleTier) : de plus en plus grande et
+--     épique, au thème de son monde (client/CapsuleDecor), avec son bonus (Config.Evolution.SpeedPerTier...).
 --   - Effets : l'œuf choisi vole de son nid à la machine ; gerbe et message à chaque évolution ; nuage gris quand
 --     il a atteint sa limite. L'éclosion elle-même est jouée par client/Eggs.
 local Debris = game:GetService("Debris")
@@ -20,6 +22,7 @@ local Eggs = require(ReplicatedStorage.Shared.EggIncubation)
 local Builder = require(ReplicatedStorage.Shared.EggModelBuilder)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
+local CapsuleDecor = require(script.Parent.CapsuleDecor)
 local MenuKit = require(script.Parent.MenuKit)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
@@ -49,6 +52,23 @@ local function stars(stage: number): string
 	return string.rep("★", stage) .. string.rep("☆", #EVOLUTION.Names - stage)
 end
 
+-- Bonus de la capsule à ce niveau : chances d'aller jusqu'à Ultime (%) et tentatives plus tôt (%).
+local function tierBonus(tier: number): (number, number)
+	local weights = Eggs.MaxStageWeights(tier)
+	local total = 0
+	for _, weight in ipairs(weights) do
+		total += weight
+	end
+	local ultime = math.floor(weights[#weights] / math.max(total, 1) * 100 + 0.5)
+	local faster = math.floor(EVOLUTION.SpeedPerTier * (tier - 1) * 100 + 0.5)
+	return ultime, faster
+end
+
+local function myTier(): number
+	local tier = player:GetAttribute("Tier")
+	return if type(tier) == "number" then tier else 1
+end
+
 local function stageColor(rarityId: string, stage: number): Color3
 	local rarity = Config.Rarities[Config.RarityIndex[rarityId] or 1]
 	return if stage >= 3 then GOLD elseif stage == 2 then rarity.Color:Lerp(WHITE, 0.45) else rarity.Color
@@ -67,7 +87,7 @@ screen.Parent = player:WaitForChild("PlayerGui")
 local root = ScreenScale.attach(screen)
 local window = MenuKit.window(root, "Capsule d'évolution", Vector2.new(780, 440), PURPLE)
 local explain = UiStyle.text(window.content, "", 17, WHITE, UiStyle.BODY_FONT)
-explain.Size = UDim2.new(1, 0, 0, 66)
+explain.Size = UDim2.new(1, 0, 0, 70)
 explain.TextWrapped = true
 explain.TextYAlignment = Enum.TextYAlignment.Top
 explain.ZIndex = 3
@@ -113,7 +133,14 @@ local function myBase(): Model?
 	return nil
 end
 
+local BASE_EXPLAIN = explain.Text
+
 local function openPicker()
+	local tier = myTier()
+	local ultime, faster = tierBonus(tier)
+	local worldName = TextFormat.upper(Config.Worlds[math.clamp(tier, 1, #Config.Worlds)].Name)
+	explain.Text = BASE_EXPLAIN .. string.format("\nTa capsule %s : %d %% de chances d'aller jusqu'à ULTIME%s.", worldName, ultime,
+		if faster > 0 then string.format(", évolution %d %% plus rapide", faster) else "")
 	for _, child in ipairs(row:GetChildren()) do
 		if child:IsA("GuiObject") then
 			child:Destroy()
@@ -191,6 +218,9 @@ type Machine = {
 	prompt: ProximityPrompt?,
 	rings: { BasePart }, -- anneaux lumineux du cylindre (ils pulsent quand la capsule est occupée)
 	mist: ParticleEmitter, -- brume froide dans le cylindre
+	capsule: Model,
+	decor: CapsuleDecor.Decor?,
+	decorTier: number?,
 }
 local machines: { Machine } = {}
 local EGG_HEIGHT = 5.2 -- studs au-dessus du socle : le milieu du cylindre de verre
@@ -230,7 +260,30 @@ local function refreshPrompt(machine: Machine)
 	prompt.HoldDuration = if occupied then 1.2 else 0 -- ouvrir l'œuf se confirme en maintenant la touche
 end
 
-local function addMachine(part: BasePart, capsule: Instance)
+-- Niveau de la capsule (monde le plus loin de son propriétaire) : taille, couleur et décor.
+local function applyTier(machine: Machine)
+	local owned = machine.part:GetAttribute("OwnerUserId") ~= nil
+	local rawTier = machine.part:GetAttribute("CapsuleTier")
+	local tier = if owned and type(rawTier) == "number" then rawTier else 1
+	if machine.decorTier == tier then
+		return
+	end
+	machine.decorTier = tier
+	if machine.decor then
+		machine.decor.folder:Destroy()
+	end
+	machine.capsule:ScaleTo(CapsuleDecor.Scale(tier))
+	local accent = CapsuleDecor.Accent(tier)
+	for _, child in ipairs(machine.capsule:GetChildren()) do
+		if child:IsA("BasePart") and (child.Name == "Foot" or child.Name == "EmitterTip"
+			or (child.Name == "ConsoleButton" and child.Color.R < 0.9)) then
+			child.Color = accent
+		end
+	end
+	machine.decor = CapsuleDecor.Build(machine.part, tier, visuals)
+end
+
+local function addMachine(part: BasePart, capsule: Model)
 	local light = Instance.new("PointLight")
 	light.Range, light.Brightness, light.Color, light.Shadows = 14, 0, PURPLE, false
 	light.Parent = part
@@ -282,6 +335,9 @@ local function addMachine(part: BasePart, capsule: Instance)
 		prompt = nil,
 		rings = rings,
 		mist = mist,
+		capsule = capsule,
+		decor = nil,
+		decorTier = nil,
 	}
 	gui.Parent = part
 	table.insert(machines, machine)
@@ -290,7 +346,13 @@ local function addMachine(part: BasePart, capsule: Instance)
 			refreshPrompt(machine)
 		end)
 	end
+	for _, name in ipairs({ "OwnerUserId", "CapsuleTier" }) do
+		part:GetAttributeChangedSignal(name):Connect(function()
+			applyTier(machine)
+		end)
+	end
 	refreshPrompt(machine)
+	applyTier(machine)
 end
 
 task.spawn(function()
@@ -298,7 +360,7 @@ task.spawn(function()
 	local function watch(base: Instance)
 		local capsule = base:WaitForChild("EvolutionCapsule", 30)
 		local part = capsule and capsule:WaitForChild("EvolutionMachine", 30)
-		if part and part:IsA("BasePart") and capsule then
+		if part and part:IsA("BasePart") and capsule and capsule:IsA("Model") then
 			addMachine(part, capsule)
 		end
 	end
@@ -325,6 +387,13 @@ RunService.Heartbeat:Connect(function(dt)
 		local rarityId = part:GetAttribute("Rarity")
 		local stage = part:GetAttribute("Stage")
 		local near = camera ~= nil and (camera.CFrame.Position - part.Position).Magnitude < 160
+		local decor = machine.decor
+		local scale = if decor then decor.scale else 1
+		local accent = if decor then decor.accent else PURPLE
+		if decor and near then
+			decor.update(clock)
+		end
+		machine.gui.StudsOffsetWorldSpace = V(0, 21 * scale + (if (machine.decorTier or 1) >= 7 then 4 else 0), 0)
 		if not occupied or type(rarityId) ~= "string" or type(stage) ~= "number" then
 			if machine.egg then
 				machine.egg:Destroy()
@@ -333,12 +402,18 @@ RunService.Heartbeat:Connect(function(dt)
 			machine.light.Brightness = 0
 			machine.mist.Rate = 0
 			for _, band in ipairs(machine.rings) do
-				band.Transparency = 0.6
+				band.Color = accent
+				band.Transparency = 0.45
 			end
 			local mine = part:GetAttribute("OwnerUserId") == player.UserId
-			machine.title.Text = "ÉVOLUTION"
-			machine.stageLabel.Text = ""
+			local tier = machine.decorTier or 1
+			local ultime, faster = tierBonus(tier)
+			machine.title.Text = "CAPSULE " .. TextFormat.upper(Config.Worlds[math.clamp(tier, 1, #Config.Worlds)].Name)
+			machine.title.TextColor3 = accent
+			machine.stageLabel.Text = string.format("ULTIME %d %%", ultime) .. (if faster > 0 then string.format("  •  %d %% PLUS RAPIDE", faster) else "")
+			machine.stageLabel.TextColor3 = GOLD
 			machine.status.Text = if mine then "[E] METS UN ŒUF POUR LE FAIRE ÉVOLUER" else ""
+			machine.status.TextColor3 = WHITE
 			machine.gui.Enabled = part:GetAttribute("OwnerUserId") ~= nil
 			continue
 		end
@@ -350,7 +425,7 @@ RunService.Heartbeat:Connect(function(dt)
 				machine.egg:Destroy()
 			end
 			local egg = Builder.Build(rarityId)
-			egg:ScaleTo(1.25 + stage * 0.18)
+			egg:ScaleTo((1.25 + stage * 0.18) * scale)
 			for _, piece in ipairs(egg:GetDescendants()) do
 				if piece:IsA("BasePart") then
 					piece.Anchored, piece.CanCollide, piece.CanQuery, piece.CanTouch = true, false, false, false
@@ -372,10 +447,11 @@ RunService.Heartbeat:Connect(function(dt)
 		local egg = machine.egg
 		if egg then
 			local hover = 0.6 + math.sin(clock * 2) * 0.25
-			egg:PivotTo(part.CFrame * CF(0, part.Size.Y / 2 + EGG_HEIGHT - 2.5 + hover, 0) * ANG(0, clock * (0.6 + stage * 0.4), 0))
+			egg:PivotTo(part.CFrame * CF(0, part.Size.Y / 2 + (EGG_HEIGHT - 2.5 + hover) * scale, 0) * ANG(0, clock * (0.6 + stage * 0.4), 0))
 		end
 		machine.light.Color = color
-		machine.light.Brightness = 1 + stage * 0.8 + math.sin(clock * 3) * 0.3
+		machine.light.Brightness = 1 + stage * 0.8 + (machine.decorTier or 1) * 0.25 + math.sin(clock * 3) * 0.3
+		machine.light.Range = 14 + (machine.decorTier or 1) * 2
 		machine.mist.Rate = 4 + stage * 2
 		for index, band in ipairs(machine.rings) do
 			band.Color = color
