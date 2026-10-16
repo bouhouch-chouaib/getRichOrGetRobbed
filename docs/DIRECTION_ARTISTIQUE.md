@@ -75,6 +75,8 @@ Règle : couleurs **pures et saturées**, peu de pastel, pas de marron terne. Le
 - **HUD** : tuiles carrées à tenons 2 par 2 (Boutique, Index, Mondes, Bonus) + une large Rebirth arc-en-ciel animée ;
   icônes qui se balancent. **Offres Robux** à droite (`client/OffersPanel`, PC seulement) : icône sur rayons qui
   tournent, prix en pastille verte, tournent toutes les 9 s, cachées quand une fenêtre est ouverte.
+- **Une seule police partout : FredokaOne** (titres, textes, chiffres ; LuckiestGuy et les chiffres en italique ont été
+  retirés le 16 oct.). Icône Rebirth = boucle rouge et blanche dessinée par `tools/icons/make_rebirth_icon.py`.
 - **Messages** (`client/Toast`) : bandeaux colorés effacés sur les côtés, qui s'empilent (3 max).
 - **Cadeau du jour** : cartes avec pastille d'état (REÇU / AUJOURD'HUI / BLOQUÉ), jour 7 arc-en-ciel, rayons derrière
   le cadeau du jour.
