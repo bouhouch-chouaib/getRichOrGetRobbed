@@ -108,8 +108,11 @@ Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remo
 7 versions de plus en plus grandes et épiques (photographiées en jeu) et de plus en plus efficaces. **Familiers évolués complets** :
 Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stats et duel x1,4 / x2, étiquette dorée dans la base.
 
-**16 oct. : mutations** (`Config.Mutations`, `client/RainbowPets`, GDD « Mutations ») : Doré 4 % x2, Diamant 1 % x5,
-Arc-en-ciel 0,2 % x10, tirées à chaque tirage du trou noir ; ids `<Id>__MGold` (avec évolution `<Id>__E3__MRainbow`).
+**16 oct. : mutations SECRÈTES** (`Config.Mutations`, `client/RainbowPets`, GDD « Mutations ») : Doré 1/4 000 x2,
+Diamant 1/25 000 x5, Arc-en-ciel 1/150 000 x10, seulement sur les tirages gratuits (jamais Robux : chances à afficher) ;
+pas dans l'Index ni nulle part dans le jeu (demande de Chouaib : la surprise doit être énorme) ; éclosion surprise
+(`mutationReveal`) ; ids `<Id>__MGold` (avec évolution `<Id>__E3__MRainbow`). Vérifié en jeu : la révélation Arc-en-ciel et
+Diamant, l'annonce, l'Index sans mutation.
 Vérifié en jeu (solo) : aspect des 3 mutations dans la base (y compris un familier blanc), dégradé arc-en-ciel qui défile,
 éclosion d'un œuf Diamant (bandeau « ÉCLOSION RARE DIAMANT ! », familier qui sort du nid), Index (rangée — / OR / DIAM. / ARC,
 revenu x10, losanges). Pas vu : l'annonce à tout le serveur, à 2 joueurs, sur téléphone.

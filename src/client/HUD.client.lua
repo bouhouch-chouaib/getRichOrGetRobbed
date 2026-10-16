@@ -651,6 +651,12 @@ Remotes.Announcement.OnClientEvent:Connect(function(playerName: string, petId: s
 		return
 	end
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
+	local mutation = if entry.Mutation then Config.Mutations[Config.MutationIndex[entry.Mutation]] else nil
+	if mutation then
+		Toast.show(string.format("INCROYABLE ! %s A OBTENU %s (%s) !", TextFormat.upper(playerName),
+			TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), mutation.Color)
+		return
+	end
 	Toast.show(string.format("%s A OBTENU %s (%s) !", TextFormat.upper(playerName), TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
 end)
 

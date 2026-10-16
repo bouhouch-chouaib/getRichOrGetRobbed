@@ -736,8 +736,8 @@ end
 -- Retourne l'argent gagné (0 si rien à réclamer).
 function SessionData.ClaimIndex(player: Player, petId: string): number
 	local data = storage[player]
-	if not data or not data.loaded or not PetCatalog.ById[petId] then
-		return 0
+	if not data or not data.loaded or not PetCatalog.ById[petId] or PetCatalog.ById[petId].Mutation then
+		return 0 -- les mutations (secrètes) n'ont pas de récompense d'Index
 	end
 	if table.find(data.indexClaimed, petId) or (data.pets[petId] or 0) <= 0 then
 		return 0

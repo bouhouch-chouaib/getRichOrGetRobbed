@@ -95,7 +95,7 @@ function MenuKit.claimableCount(): number
 	local claimed = MenuKit.claimed()
 	local count = 0
 	for _, entry in ipairs(PetCatalog.Everything) do
-		if not claimed[entry.Id] and MenuKit.number("Pet_" .. entry.Id) > 0 then
+		if not entry.Mutation and not claimed[entry.Id] and MenuKit.number("Pet_" .. entry.Id) > 0 then
 			count += 1
 		end
 	end

@@ -126,7 +126,7 @@ end
 -- Tirages achetés : même moteur que les manches (server/PullRewards : rang, doublons vendus, affichage à part),
 -- avec la chance de base des tirages achetés + bonus (Perks).
 local function grantPulls(player: Player, pulls: number)
-	PullRewards.Grant(player, pulls, M.PullLuck + Perks.LuckBonus(player))
+	PullRewards.Grant(player, pulls, M.PullLuck + Perks.LuckBonus(player), nil, nil, true)
 end
 
 local function grantProduct(player: Player, product: Config.MonetizationItem)

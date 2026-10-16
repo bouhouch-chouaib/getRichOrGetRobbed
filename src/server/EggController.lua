@@ -151,7 +151,7 @@ function EggController.Init(bases: { Model })
 			table.sort(ids, function(a, b)
 				return rank(a) > rank(b)
 			end)
-			-- (sauf une mutation rare : Diamant, Arc-en-ciel, annoncée quelle que soit la rareté)
+			-- (sauf une mutation secrète, toujours annoncée quelle que soit la rareté)
 			local announced = ids[1]
 			for _, petId in ipairs(ids) do
 				local mutation = Catalog.Mutation(petId)
@@ -269,7 +269,7 @@ function EggController.Init(bases: { Model })
 				local cf = machine.CFrame * CFrame.new(0, machine.Size.Y / 2, 0)
 				Remotes.EggHatched:FireAllClients(player.UserId, "machine", Catalog.ById[petId].Rarity, cf, petId,
 					BasePets.IsShown(player, petId))
-				if rank(petId) + Catalog.Stage(petId) - 1 >= Config.Loot.AnnounceMinRarity then
+				if rank(petId) + Catalog.Stage(petId) - 1 >= Config.Loot.AnnounceMinRarity or Catalog.Mutation(petId) then
 					Remotes.Announcement:FireAllClients(player.DisplayName, petId)
 				end
 				publishMachine(base, player)

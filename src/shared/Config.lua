@@ -14,15 +14,18 @@ Config.Eggs = {
 	ViewDistance = 140,
 }
 
--- Mutations (16 oct.) : un familier qui sort d'un tirage a une petite chance d'être Doré, Diamant ou Arc-en-ciel.
--- Tirée en secret quand l'œuf est attribué (server/PullRewards), révélée à l'éclosion. Aspect unique (shared/PetModelBuilder,
--- client/RainbowPets), revenu multiplié (Income), annonce à tout le serveur à partir de Diamant. Se cumule avec l'évolution.
--- Un doublon muté n'est jamais vendu : c'est un autre familier (« <Id>__MGold »...).
+-- Mutations (16 oct.) : SECRET. Rien dans le jeu n'en parle (pas d'Index, pas de chances affichées) : un familier qui
+-- sort d'un tirage GRATUIT (trou noir, duel ; jamais un tirage acheté en Robux, dont les chances doivent être affichées)
+-- a une chance infime d'être Doré, Diamant ou Arc-en-ciel. Tirée quand l'œuf est attribué (server/PullRewards), le client
+-- ne le sait qu'à l'éclosion : œuf normal, puis surprise énorme (client/Eggs, mutationReveal). Aspect unique
+-- (shared/PetModelBuilder, client/RainbowPets), revenu multiplié (Income), annonce à tout le serveur. Se cumule avec
+-- l'évolution. Un muté n'est jamais vendu comme doublon : c'est un autre familier (« <Id>__MGold »...).
+-- Chance fixe par familier tiré (pas de bonus de chance : les passes Robux ne doivent pas jouer dessus).
 export type Mutation = { Id: string, Name: string, Chance: number, Income: number, Color: Color3, Announce: boolean }
 Config.Mutations = {
-	{ Id = "Gold", Name = "Doré", Chance = 0.04, Income = 2, Color = Color3.fromRGB(255, 200, 40), Announce = false },
-	{ Id = "Diamond", Name = "Diamant", Chance = 0.01, Income = 5, Color = Color3.fromRGB(140, 230, 255), Announce = true },
-	{ Id = "Rainbow", Name = "Arc-en-ciel", Chance = 0.002, Income = 10, Color = Color3.fromRGB(255, 100, 210), Announce = true },
+	{ Id = "Gold", Name = "Doré", Chance = 1 / 4000, Income = 2, Color = Color3.fromRGB(255, 200, 40), Announce = true },
+	{ Id = "Diamond", Name = "Diamant", Chance = 1 / 25000, Income = 5, Color = Color3.fromRGB(140, 230, 255), Announce = true },
+	{ Id = "Rainbow", Name = "Arc-en-ciel", Chance = 1 / 150000, Income = 10, Color = Color3.fromRGB(255, 100, 210), Announce = true },
 } :: { Mutation }
 Config.MutationIndex = {} :: { [string]: number }
 for index, mutation in ipairs(Config.Mutations) do

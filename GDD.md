@@ -252,18 +252,25 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 ## Mutations (16 oct., `Config.Mutations`)
 
-- 3 mutations, une au plus par familier, tirées à chaque tirage du trou noir (`PullRewards.RollMutation`, chance
-  x (1 + Chance x 0,5)) : **Doré** 4 % (revenu x2), **Diamant** 1 % (x5), **Arc-en-ciel** 0,2 % (x10).
+- **SECRET** (demande de Chouaib) : rien dans le jeu n'en parle, ni l'Index (pas d'onglet, pas de récompense, pas de
+  compteur), ni les chances affichées. Ultra rares, pour que le joueur qui en tire une hallucine.
+- 3 mutations, une au plus par familier, tirées pour chaque familier d'un tirage **gratuit** (trou noir, roue des duels ;
+  `PullRewards.RollMutation`, chance fixe, sans bonus de chance) : **Doré** 1/4 000 (revenu x2), **Diamant** 1/25 000 (x5),
+  **Arc-en-ciel** 1/150 000 (x10). **Jamais sur un tirage acheté en Robux** (`Grant(..., paid = true)`) : Roblox exige
+  d'afficher toutes les chances des objets aléatoires payants, et la mutation doit rester secrète.
+- Le client ne reçoit que l'espèce dans `RewardsGranted` (carte des tirages = œuf normal) ; un muté n'est jamais vendu
+  comme doublon.
 - Identifiant : `<Id>__M<Mutation>`, combiné avec l'évolution : `<Id>__E3__MRainbow` (`PetCatalog.Compose`,
   `WithMutation`, `Mutation`, `FormsOf[espèce]` = les 12 formes). Revenu = base x évolution x mutation. Une mutation
   reste quand l'œuf évolue dans la capsule (`PetCatalog.Variant`). Les doublons se comptent forme par forme.
 - Aspect (`PetModelBuilder.applyMutation`) : Doré = or brillant (Foil), Diamant = cristal bleu translucide (Glass),
   Arc-en-ciel = dégradé du bas vers le haut qui défile (`client/RainbowPets`, tag `RainbowPet`) ; le visage (pièces
   `EyeSocket`, `Iris`, `Pupil`, `Mouth`...) ne change pas ; étincelles à la couleur de la mutation.
-- Éclosion : spectacle d'une rareté au-dessus par mutation (Doré +1, Diamant +2, Arc-en-ciel +3), bandeau
-  « ÉCLOSION RARE DIAMANT ! » à la couleur de la mutation. Annonce à tout le serveur pour Diamant et Arc-en-ciel.
-- Base : ligne de couleur au-dessus du nom. Index : 2e rangée d'onglets (— / OR / DIAM. / ARC), losange de couleur
-  sur la case, compteur « Mutations », une récompense par forme.
+- Éclosion (`client/Eggs`, `mutationReveal`) : l'œuf éclot comme un œuf normal de sa rareté, puis l'écran
+  s'assombrit, la musique se tait, la caméra tourne autour du nid, et explosion aux couleurs de la mutation (colonne
+  géante, 8 ondes, rayons, confettis, 3 répliques, secousse) avec « MUTATION SECRÈTE ! », le nom, « REVENU xN » en dégradé
+  qui défile. Annonce spéciale à tout le serveur (« INCROYABLE ! ... »), toutes mutations.
+- Base : ligne de couleur au-dessus du nom. Rien dans l'Index.
 
 ## Familiers sculptés et échelle des tailles (13 oct.)
 

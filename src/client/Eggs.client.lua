@@ -596,6 +596,196 @@ local function queueToast(name: string, rank: number, color: Color3)
 	end
 end
 
+----------------------------------------------------------------------
+-- Mutation secrète (Config.Mutations) : l'œuf éclot comme un œuf normal de sa rareté... puis, une seconde plus tard,
+-- tout s'arrête (écran sombre, silence), la caméra vient sur le nid et ça explose aux couleurs de la mutation :
+-- colonne de lumière géante, ondes de choc, rayons, confettis, 3 répliques, secousse, et en grand
+-- « MUTATION SECRÈTE ! », le nom du familier, « REVENU xN ». Les joueurs proches voient les effets dans le monde.
+----------------------------------------------------------------------
+
+local RAINBOW_SEQUENCE = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 70, 70)),
+	ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 170, 40)),
+	ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 240, 60)),
+	ColorSequenceKeypoint.new(0.6, Color3.fromRGB(70, 230, 110)),
+	ColorSequenceKeypoint.new(0.8, Color3.fromRGB(70, 170, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 90, 255)),
+})
+
+local revealRoot = Instance.new("Frame")
+revealRoot.Name = "MutationReveal"
+revealRoot.BackgroundTransparency = 1
+revealRoot.Size = UDim2.fromScale(1, 1)
+revealRoot.Visible = false
+revealRoot.Parent = bannerRoot
+local function revealLabel(y: number, height: number, width: number): (TextLabel, UIScale, UIGradient)
+	local label = Instance.new("TextLabel")
+	label.AnchorPoint = Vector2.new(0.5, 0.5)
+	label.Position = UDim2.fromScale(0.5, y)
+	label.Size = UDim2.fromOffset(width, height)
+	label.BackgroundTransparency = 1
+	label.Font, label.TextScaled = Enum.Font.LuckiestGuy, true
+	label.TextColor3 = WHITE
+	outline(label, 5)
+	local scale = Instance.new("UIScale")
+	scale.Parent = label
+	local gradient = Instance.new("UIGradient")
+	gradient.Parent = label
+	label.Parent = revealRoot
+	return label, scale, gradient
+end
+local revealTitle, revealTitleScale, revealTitleGradient = revealLabel(0.22, 96, 980)
+local revealName, revealNameScale, revealNameGradient = revealLabel(0.36, 64, 900)
+local revealIncome, revealIncomeScale, revealIncomeGradient = revealLabel(0.47, 48, 600)
+local revealToken = 0
+
+local function popIn(label: TextLabel, scale: UIScale, delay: number)
+	task.delay(delay, function()
+		label.Visible = true
+		label.TextTransparency = 0
+		scale.Scale = 2.4
+		TweenService:Create(scale, TweenInfo.new(0.45, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	end)
+end
+
+-- La caméra du propriétaire tourne lentement autour du nid pendant la révélation.
+local function focusCamera(center: Vector3, duration: number)
+	local camera = Workspace.CurrentCamera
+	if not camera or camera.CameraType ~= Enum.CameraType.Custom or player:GetAttribute("InDuel") ~= nil then
+		return
+	end
+	local start = os.clock()
+	local from = camera.CFrame
+	local look = (center - from.Position) * V(1, 0, 1)
+	local baseAngle = if look.Magnitude > 0.1 then math.atan2(-look.X, -look.Z) else 0
+	camera.CameraType = Enum.CameraType.Scriptable
+	RunService:BindToRenderStep("MutationReveal", Enum.RenderPriority.Camera.Value + 1, function()
+		local t = os.clock() - start
+		if t >= duration then
+			RunService:UnbindFromRenderStep("MutationReveal")
+			camera.CameraType = Enum.CameraType.Custom
+			return
+		end
+		local angle = baseAngle + t * 0.45
+		local distance = 20 - math.min(t, 1.2) * 4
+		local goal = CFrame.lookAt(center + V(math.sin(angle) * distance, 7, math.cos(angle) * distance), center + V(0, 1.5, 0))
+		camera.CFrame = if t < 0.5 then from:Lerp(goal, TweenService:GetValue(t / 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)) else goal
+	end)
+end
+
+local function mutationReveal(ground: CFrame, center: Vector3, petId: string, mutation: Config.Mutation, mine: boolean, near: boolean)
+	local entry = Catalog.ById[petId]
+	if not entry then
+		return
+	end
+	local rainbow = mutation.Id == "Rainbow"
+	local color = mutation.Color
+	local sequence = if rainbow
+		then RAINBOW_SEQUENCE
+		else ColorSequence.new({
+			ColorSequenceKeypoint.new(0, color),
+			ColorSequenceKeypoint.new(0.5, WHITE),
+			ColorSequenceKeypoint.new(1, color),
+		})
+	local function hue(index: number): Color3
+		return if rainbow then Color3.fromHSV((index * 0.13) % 1, 0.8, 1) else (if index % 2 == 0 then WHITE else color)
+	end
+
+	-- 1. Le calme avant la tempête : l'écran s'assombrit, la musique se tait.
+	task.delay(0.7, function()
+		if mine then
+			Sounds.duck(6)
+			flash.BackgroundColor3 = Color3.new(0, 0, 0)
+			flash.BackgroundTransparency = 0.45
+			if near then
+				focusCamera(center, 5.2)
+			end
+		end
+	end)
+
+	-- 2. L'explosion, puis 3 répliques.
+	task.delay(1.15, function()
+		if mine then
+			flash.BackgroundColor3 = if rainbow then WHITE else color
+			screenFlash(0.95)
+			shake(1.6, 1.4)
+			Sounds.play("HoleTierUp")
+			Sounds.play("RareDrop")
+		elseif near then
+			Sounds.playAt("HoleTierUp", center)
+		end
+		if not near then
+			return
+		end
+		pillar(ground, color, 12)
+		rays(ground, color, 10)
+		for index = 1, 8 do
+			ring(ground, hue(index), 10 + index * 6, (index - 1) * 0.1)
+		end
+		emitAt(center, SPARK, sequence, 220, NumberRange.new(16, 32), 0.7, NumberRange.new(1, 2))
+		emitAt(center + V(0, 4, 0), SPARK, RAINBOW_SEQUENCE, 160, NumberRange.new(12, 24), 0.6, NumberRange.new(1.4, 2.6))
+		for wave = 1, 3 do
+			task.delay(wave * 0.8, function()
+				emitAt(center + V(0, 2 + wave * 2, 0), SPARK, sequence, 90, NumberRange.new(10, 22), 0.55, NumberRange.new(0.8, 1.6))
+				ring(ground, hue(wave + 3), 30 + wave * 8, 0)
+				if mine then
+					shake(0.6, 0.35)
+				end
+			end)
+		end
+	end)
+
+	-- 3. Les textes, l'un après l'autre.
+	if not mine then
+		return
+	end
+	revealToken += 1
+	local token = revealToken
+	task.delay(1.15, function()
+		if token ~= revealToken then
+			return
+		end
+		revealTitle.Text = "MUTATION SECRÈTE !"
+		revealName.Text = TextFormat.upper(entry.Name)
+		revealIncome.Text = string.format("REVENU x%d", mutation.Income)
+		for _, gradient in ipairs({ revealTitleGradient, revealNameGradient, revealIncomeGradient }) do
+			gradient.Color = sequence
+		end
+		revealTitle.Visible, revealName.Visible, revealIncome.Visible = false, false, false
+		revealRoot.Visible = true
+		popIn(revealTitle, revealTitleScale, 0)
+		popIn(revealName, revealNameScale, 0.9)
+		popIn(revealIncome, revealIncomeScale, 1.7)
+		-- Les couleurs défilent sur les textes.
+		local start = os.clock()
+		local connection: RBXScriptConnection
+		connection = RunService.RenderStepped:Connect(function()
+			if token ~= revealToken or not revealRoot.Visible then
+				connection:Disconnect()
+				return
+			end
+			local offset = ((os.clock() - start) * 0.6) % 2 - 1
+			for _, gradient in ipairs({ revealTitleGradient, revealNameGradient, revealIncomeGradient }) do
+				gradient.Offset = Vector2.new(offset, 0)
+			end
+		end)
+	end)
+	task.delay(6.2, function()
+		if token ~= revealToken then
+			return
+		end
+		for _, label in ipairs({ revealTitle, revealName, revealIncome }) do
+			TweenService:Create(label, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
+		end
+		task.delay(0.5, function()
+			if token == revealToken then
+				revealRoot.Visible = false
+				flash.BackgroundColor3 = WHITE
+			end
+		end)
+	end)
+end
+
 Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, rarityId: string, cf: CFrame, petId: string, inBase: boolean)
 	local rank = Config.RarityIndex[rarityId]
 	local entry = Catalog.ById[petId]
@@ -603,19 +793,17 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 		return
 	end
 	local rarity = Config.Rarities[rank]
-	-- Un familier évolué (machine d'évolution) ou muté (Doré +1, Diamant +2, Arc-en-ciel +3) éclot avec le spectacle des
-	-- raretés au-dessus ; la mutation donne sa couleur au bandeau.
+	-- Un familier évolué (machine d'évolution) éclot avec le spectacle des raretés au-dessus. Un familier muté éclot
+	-- d'abord comme un familier normal (secret), puis vient la surprise (mutationReveal).
 	local stage = Catalog.Stage(petId)
 	local mutationId = Catalog.Mutation(petId)
-	local mutationIndex = if mutationId then Config.MutationIndex[mutationId] or 0 else 0
-	local mutation = if mutationIndex > 0 then Config.Mutations[mutationIndex] else nil
-	local fx = SPECTACLE[math.min(#SPECTACLE, rank + stage - 1 + mutationIndex)]
+	local mutation = if mutationId then Config.Mutations[Config.MutationIndex[mutationId] or 1] else nil
+	local fx = SPECTACLE[math.min(#SPECTACLE, rank + stage - 1)]
 	local title = "ÉCLOSION " .. TextFormat.upper(rarity.Name)
-		.. (if stage > 1 then " " .. TextFormat.upper(Config.Evolution.Names[stage]) else "")
-		.. (if mutation then " " .. TextFormat.upper(mutation.Name) else "") .. " !"
-	local bannerColor = if mutation then mutation.Color else rarity.Color
+		.. (if stage > 1 then " " .. TextFormat.upper(Config.Evolution.Names[stage]) else "") .. " !"
+	local bannerColor = rarity.Color
 	local mine = ownerId == player.UserId
-	if mine then
+	if mine and not mutation then
 		queueToast(TextFormat.upper(entry.Name), rank, rarity.Color)
 	end
 
@@ -642,8 +830,11 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 	local near = camera ~= nil and (camera.CFrame.Position - cf.Position).Magnitude <= Config.Eggs.ViewDistance
 	if not near then
 		shell:Destroy()
-		if mine and (fx.banner or mutation) then
+		if mine and fx.banner and not mutation then
 			showBanner(title, bannerColor)
+		end
+		if mutation then
+			mutationReveal(cf, cf.Position + V(0, 2, 0), petId, mutation, mine, false)
 		end
 		return
 	end
@@ -655,6 +846,9 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 		end)
 	end
 	local center = eggPivot.Position + V(0, EGG_HEIGHT * eggScale(rank) / 2, 0)
+	if mutation then
+		mutationReveal(cf, center, petId, mutation, mine, true)
+	end
 
 	-- 1. La coquille éclate : les morceaux partent en tournant et s'effacent.
 	local spread = 2 + rank * 0.6
@@ -725,7 +919,7 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 	if mine and fx.flash then
 		screenFlash(0.25 + (rank - 6) * 0.15)
 	end
-	if mine and (fx.banner or mutation) then
+	if mine and fx.banner and not mutation then
 		showBanner(title, bannerColor)
 	end
 

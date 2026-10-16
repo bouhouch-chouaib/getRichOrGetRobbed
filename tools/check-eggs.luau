@@ -363,6 +363,28 @@ session.AddEggs(player, { [byRank[1]] = 2 }) -- 2 pets + 2 eggs, only one more s
 local details = rewards.Grant(player, 2, 0)
 assert(details.eggs and details.drops[1].Egg and details.drops[2].Sold and details.sold > 0)
 assert(session.GetOwnedPets(player)[byRank[1]] == 2 and session.GetRewardOwned(player)[byRank[1]] == 5)
+
+-- Secret mutations: free pulls can mutate (never sold as duplicates), the client only learns it at hatching, paid
+-- pulls never mutate.
+do
+	local goldId = byRank[1] .. "__MGold"
+	local goldChance = config.Mutations[1].Chance
+	config.Mutations[1].Chance = 1
+	local before = session.GetRewardOwned(player)[goldId] or 0
+	local shown = rewards.Grant(player, 2, 0)
+	assert((session.GetRewardOwned(player)[goldId] or 0) == before + 2, "free pulls can mutate, never sold")
+	assert(shown.drops[1].Id == byRank[1] and shown.drops[2].Id == byRank[1], "the client never sees the mutation before hatching")
+	rewards.Grant(player, 2, 0, nil, nil, true)
+	assert((session.GetRewardOwned(player)[goldId] or 0) == before + 2, "paid pulls never mutate")
+	config.Mutations[1].Chance = goldChance
+	-- Leave the save as it was for the next checks.
+	local eggs = session.GetEggs(player)
+	for index = #eggs, 1, -1 do
+		if eggs[index].petId == goldId then
+			table.remove(eggs, index)
+		end
+	end
+end
 local monetization = loadModule("MonetizationController")
 local decision = r.Enum.ProductPurchaseDecision
 local info = { PlayerId = 1234, ProductId = 3718429232, PurchaseId = "aura-1" }

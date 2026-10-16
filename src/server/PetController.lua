@@ -39,7 +39,7 @@ function PetController.Init()
 		elseif petId == nil then
 			-- Tout réclamer : les espèces et leurs formes évoluées (capsule d'évolution).
 			for _, entry in ipairs(PetCatalog.Everything) do
-				local reward = SessionData.ClaimIndex(player, entry.Id)
+				local reward = if entry.Mutation then 0 else SessionData.ClaimIndex(player, entry.Id)
 				if reward > 0 then
 					total += reward
 					count += 1
