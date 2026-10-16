@@ -153,6 +153,46 @@ function UiStyle.sway(object: GuiObject, amount: number)
 	swayers[object] = { base = object.Rotation, amount = amount, phase = math.random() * math.pi * 2 }
 end
 
+-- Reflet en diagonale qui traverse un bouton au survol. C'est un dégradé posé sur un cadre de la taille du bouton,
+-- aux mêmes coins arrondis : il reste toujours DANS le bouton, même penché (ClipsDescendants ne coupe plus rien dès
+-- qu'un objet est tourné : un reflet qui se déplace dépassait du bouton).
+function UiStyle.addSweep(button: GuiObject, radius: number)
+	local sweep = Instance.new("Frame")
+	sweep.Name = "Sweep"
+	sweep.BackgroundColor3 = WHITE
+	sweep.BorderSizePixel = 0
+	sweep.Size = UDim2.fromScale(1, 1)
+	sweep.ZIndex = button.ZIndex
+	UiStyle.corner(sweep, radius)
+	local band = Instance.new("UIGradient")
+	band.Rotation = 20
+	band.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.38, 1),
+		NumberSequenceKeypoint.new(0.45, 0.6),
+		NumberSequenceKeypoint.new(0.5, 0.35),
+		NumberSequenceKeypoint.new(0.55, 0.6),
+		NumberSequenceKeypoint.new(0.6, 1),
+		NumberSequenceKeypoint.new(0.66, 1),
+		NumberSequenceKeypoint.new(0.69, 0.7),
+		NumberSequenceKeypoint.new(0.72, 1),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	band.Offset = Vector2.new(-1.2, 0)
+	band.Parent = sweep
+	sweep.Parent = button
+end
+
+-- Fait passer le reflet (UiStyle.addSweep) d'un bord à l'autre.
+function UiStyle.sweep(button: GuiObject)
+	local sweep = button:FindFirstChild("Sweep")
+	local band = sweep and sweep:FindFirstChildOfClass("UIGradient")
+	if band then
+		band.Offset = Vector2.new(-1.2, 0)
+		TweenService:Create(band, TweenInfo.new(0.5, Enum.EasingStyle.Quad), { Offset = Vector2.new(1.2, 0) }):Play()
+	end
+end
+
 -- Petit effet au survol (grossit et penche, reflet qui balaie) et au clic (s'écrase), avec le son de clic.
 function UiStyle.bounce(button: GuiButton)
 	local scale = Instance.new("UIScale")
@@ -161,12 +201,7 @@ function UiStyle.bounce(button: GuiButton)
 	button.MouseEnter:Connect(function()
 		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1.07 }):Play()
 		TweenService:Create(button, TweenInfo.new(0.12), { Rotation = hoverTilt }):Play()
-		local clip = button:FindFirstChild("Clip")
-		local sweep = clip and clip:FindFirstChild("Sweep")
-		if sweep and sweep:IsA("ImageLabel") then
-			sweep.Position = UDim2.new(-0.6, 0, 0, 0)
-			TweenService:Create(sweep, TweenInfo.new(0.45, Enum.EasingStyle.Quad), { Position = UDim2.new(1.1, 0, 0, 0) }):Play()
-		end
+		UiStyle.sweep(button)
 	end)
 	button.MouseLeave:Connect(function()
 		TweenService:Create(scale, TweenInfo.new(0.12), { Scale = 1 }):Play()
@@ -331,21 +366,7 @@ function UiStyle.button(parent: Instance, label: string, size: UDim2, color: Col
 	UiStyle.corner(lip, 8)
 	lip.Parent = button
 
-	-- Reflet en diagonale qui traverse le bouton au survol (dans un cadre qui le coupe aux bords).
-	local clip = Instance.new("Frame")
-	clip.Name = "Clip"
-	clip.BackgroundTransparency = 1
-	clip.Size = UDim2.fromScale(1, 1)
-	clip.ClipsDescendants = true
-	clip.Parent = button
-	local sweep = Instance.new("ImageLabel")
-	sweep.Name = "Sweep"
-	sweep.BackgroundTransparency = 1
-	sweep.Size = UDim2.fromScale(0.5, 1)
-	sweep.Position = UDim2.new(-0.6, 0, 0, 0)
-	sweep.Image = TEX.Shine
-	sweep.ImageTransparency = 0.35
-	sweep.Parent = clip
+	UiStyle.addSweep(button, 8)
 
 	local caption = UiStyle.text(button, label, textSize)
 	caption.Name = "Caption"

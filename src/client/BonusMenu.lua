@@ -385,9 +385,9 @@ function BonusMenu.create(gui: Instance): Menu
 	end
 
 	tabs = MenuKit.sideTabs(window, {
-		{ label = "Cadeau du jour", color = GOLD },
-		{ label = "Quêtes", color = Color3.fromRGB(110, 200, 90) },
-		{ label = "Codes", color = Color3.fromRGB(90, 170, 255) },
+		{ label = "Cadeau du jour", color = GOLD, icon = "Gift" },
+		{ label = "Quêtes", color = Color3.fromRGB(110, 200, 90), icon = "Trophy" },
+		{ label = "Codes", color = Color3.fromRGB(90, 170, 255), icon = "Key" },
 	}, function(index: number)
 		for pageIndex, page in ipairs(pages) do
 			page.Visible = pageIndex == index

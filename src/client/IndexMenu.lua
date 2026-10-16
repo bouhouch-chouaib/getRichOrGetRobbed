@@ -517,7 +517,7 @@ function IndexMenu.create(gui: Instance): Index
 	----------------------------------------------------------------------
 	local tabList: { MenuKit.Tab } = {}
 	for _, rarity in ipairs(Config.Rarities) do
-		table.insert(tabList, { label = rarity.Name, color = rarity.Color })
+		table.insert(tabList, { label = rarity.Name, color = rarity.Color, icon = rarity.Id })
 	end
 	local tabs = MenuKit.sideTabs(window, tabList, function(index: number)
 		rarityIndex = index

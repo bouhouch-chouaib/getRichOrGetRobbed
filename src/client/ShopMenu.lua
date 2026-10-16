@@ -25,12 +25,12 @@ local CHIP = Color3.fromRGB(70, 70, 82)
 local GREY = Color3.fromRGB(150, 150, 160)
 local CARD_WIDTH = 214
 
-type Category = { label: string, color: Color3, ids: { string } }
+type Category = { label: string, icon: string, color: Color3, ids: { string } }
 
 local CATEGORIES: { Category } = {
-	{ label = "Entraînement", color = UiStyle.Colors.Cyan, ids = { "Treadmill", "Bench" } },
-	{ label = "Bonus", color = UiStyle.Colors.Green, ids = { "ItemQuality", "Backpack", "Magnet", "LongLock" } },
-	{ label = "Combat", color = Color3.fromRGB(240, 70, 90), ids = { "WeaponBat", "WeaponGrapple", "PowerInvisible" } },
+	{ label = "Entraînement", icon = "Treadmill", color = UiStyle.Colors.Cyan, ids = { "Treadmill", "Bench" } },
+	{ label = "Bonus", icon = "Clover", color = UiStyle.Colors.Green, ids = { "ItemQuality", "Backpack", "Magnet", "LongLock" } },
+	{ label = "Combat", icon = "Bat", color = Color3.fromRGB(240, 70, 90), ids = { "WeaponBat", "WeaponGrapple", "PowerInvisible" } },
 }
 
 -- Couleur de chaque carte.
@@ -276,11 +276,11 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 
 	local tabList: { MenuKit.Tab } = {}
 	for _, category in ipairs(CATEGORIES) do
-		table.insert(tabList, { label = category.label, color = category.color })
+		table.insert(tabList, { label = category.label, color = category.color, icon = category.icon })
 	end
-	table.insert(tabList, { label = "Passes R$", color = UiStyle.Colors.Gold })
-	table.insert(tabList, { label = "Produits R$", color = Color3.fromRGB(200, 40, 240) })
-	table.insert(tabList, { label = "Chances", color = Color3.fromRGB(120, 120, 140) })
+	table.insert(tabList, { label = "Passes R$", color = UiStyle.Colors.Gold, icon = "Crown" })
+	table.insert(tabList, { label = "Produits R$", color = Color3.fromRGB(200, 40, 240), icon = "Gift" })
+	table.insert(tabList, { label = "Chances", color = Color3.fromRGB(120, 120, 140), icon = "Dice" })
 	tabs = MenuKit.sideTabs(window, tabList, showCategory)
 	showCategory(1)
 	window.onOpen(robux.refresh)

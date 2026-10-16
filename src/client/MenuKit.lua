@@ -11,6 +11,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
@@ -174,7 +175,7 @@ local openWindow: Window? = nil
 -- s'ouvre à droite des tuiles de menu du HUD (elles restent visibles et touchables).
 local function fit(frame: Frame): number
 	local screen = ScreenScale.virtualSize()
-	local tabs = if frame:FindFirstChild("SideTabs") then 180 else 0
+	local tabs = if frame:FindFirstChild("SideTabs") then 206 else 0
 	local width = frame.Size.X.Offset + tabs
 	local height = frame.Size.Y.Offset
 	local touch = ScreenScale.isTouch()
@@ -305,72 +306,223 @@ end
 -- Onglets latéraux
 ----------------------------------------------------------------------
 
-export type Tab = { label: string, color: Color3 }
+export type Tab = { label: string, color: Color3, icon: string? }
 export type Tabs = {
 	select: (index: number) -> (),
 	setBadge: (index: number, value: string?) -> (),
 	selected: () -> number,
 }
 
--- Colonne d'onglets à droite de la fenêtre. onSelect(index) est appelé à chaque changement.
+-- Colonne d'onglets à droite de la fenêtre (16 oct. : refaits façon packs « Studs UI »). Chaque onglet : couleur en
+-- relief, tenons, reflet, grosse icône qui déborde à gauche, nom en gros. L'onglet choisi se colle à la fenêtre avec
+-- une flèche qui pointe dessus, grossit, brille (halo + contour blanc) ; les autres sont un peu éteints et décalés, et
+-- ressortent au survol. onSelect(index) est appelé à chaque changement.
+local TAB_WIDTH = 176
+local TAB_OUT = 14 -- décalage vers la droite des onglets non choisis
 function MenuKit.sideTabs(window: Window, tabs: { Tab }, onSelect: (index: number) -> ()): Tabs
 	local column = Instance.new("Frame")
 	column.Name = "SideTabs"
 	column.BackgroundTransparency = 1
-	column.Position = UDim2.new(1, 12, 0, 70)
-	column.Size = UDim2.new(0, 160, 1, -70)
+	column.Position = UDim2.new(1, 6, 0, 70)
+	column.Size = UDim2.new(0, TAB_WIDTH + TAB_OUT + 10, 1, -70)
 	column.Parent = window.frame
-	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 8)
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Parent = column
 
-	local tabHeight = math.clamp(math.floor((window.frame.Size.Y.Offset - 90) / #tabs) - 8, 34, 64)
-	local buttons: { TextButton } = {}
+	local gap = 8
+	local tabHeight = math.clamp(math.floor((window.frame.Size.Y.Offset - 80) / #tabs) - gap, 36, 66)
+	type TabUi = {
+		button: TextButton,
+		holder: Frame,
+		scale: UIScale,
+		shade: UIGradient,
+		border: UIStroke,
+		icon: ImageLabel?,
+		caption: TextLabel,
+		arrow: Frame,
+		glow: ImageLabel,
+		color: Color3,
+	}
+	local items: { TabUi } = {}
 	local badges: { TextLabel } = {}
 	local current = 1
+	local hovered: number? = nil
+	local WHITE = Color3.new(1, 1, 1)
+	local BLACK = Color3.new(0, 0, 0)
 
-	local function refresh()
-		for index, button in ipairs(buttons) do
+	local function refresh(animate: boolean)
+		for index, ui in ipairs(items) do
 			local active = index == current
-			local border = button:FindFirstChild("Border")
-			if border and border:IsA("UIStroke") then
-				border.Color = if active then Color3.new(1, 1, 1) else Color3.new(0, 0, 0)
-				border.Thickness = if active then 4 else 3
+			local hot = hovered == index
+			local x = if active then 0 elseif hot then TAB_OUT / 2 else TAB_OUT
+			local info = TweenInfo.new(if animate then 0.22 else 0, Enum.EasingStyle.Back)
+			TweenService:Create(ui.holder, info, { Position = UDim2.fromOffset(x, (index - 1) * (tabHeight + gap)) }):Play()
+			TweenService:Create(ui.scale, info, { Scale = if active then 1.08 elseif hot then 1.03 else 0.97 }):Play()
+			ui.shade.Color = UiStyle.buttonColors(if active then ui.color
+				elseif hot then ui.color:Lerp(Color3.fromRGB(70, 70, 90), 0.2)
+				else ui.color:Lerp(Color3.fromRGB(60, 60, 80), 0.45))
+			ui.border.Color = if active then WHITE else BLACK
+			ui.border.Thickness = if active then 4 else 3
+			ui.caption.TextTransparency = if active then 0 else 0.15
+			local icon = ui.icon
+			if icon then
+				icon.ImageTransparency = if active then 0 else 0.2
+				local side = tabHeight * (if active then 1.25 else 1.05)
+				TweenService:Create(icon, info, { Size = UDim2.fromOffset(side, side) }):Play()
 			end
-			button.Size = UDim2.fromOffset(if active then 160 else 146, tabHeight)
+			ui.arrow.Visible = active
+			ui.glow.Visible = active
 		end
 	end
 
 	for index, tab in ipairs(tabs) do
-		local button = UiStyle.button(column, "", UDim2.fromOffset(146, tabHeight), tab.color, 1)
-		button.LayoutOrder = index
-		local border = button:FindFirstChildOfClass("UIStroke")
-		if border then
-			border.Name = "Border"
+		-- Support (position animée) > bouton (taille fixe, grossit avec son UIScale).
+		local holder = Instance.new("Frame")
+		holder.Name = "Tab" .. index
+		holder.BackgroundTransparency = 1
+		holder.Size = UDim2.fromOffset(TAB_WIDTH, tabHeight)
+		holder.Position = UDim2.fromOffset(TAB_OUT, (index - 1) * (tabHeight + gap))
+		holder.Parent = column
+
+		-- Halo derrière l'onglet choisi.
+		local glow = Instance.new("ImageLabel")
+		glow.Name = "Glow"
+		glow.BackgroundTransparency = 1
+		glow.AnchorPoint = Vector2.new(0.5, 0.5)
+		glow.Position = UDim2.fromScale(0.5, 0.5)
+		glow.Size = UDim2.new(1, 50, 1, 40)
+		glow.Image = UiStyle.Textures.Glow
+		glow.ImageColor3 = UiStyle.lighter(tab.color, 0.3)
+		glow.ImageTransparency = 0.15
+		glow.Visible = false
+		glow.Parent = holder
+
+		local button = Instance.new("TextButton")
+		button.Name = "Button"
+		button.AutoButtonColor = false
+		button.Text = ""
+		button.BackgroundColor3 = WHITE
+		button.Size = UDim2.fromScale(1, 1)
+		button.ZIndex = 2
+		UiStyle.corner(button, 10)
+		local border = UiStyle.stroke(button, 3, BLACK, true)
+		border.Name = "Border"
+		local shade = UiStyle.gradient(button, WHITE, WHITE)
+		shade.Color = UiStyle.buttonColors(tab.color)
+		button.Parent = holder
+		local scale = Instance.new("UIScale")
+		scale.Parent = button
+
+		-- Décor : tenons (taille du bouton, rien ne dépasse), reflet en haut, lèvre sombre en bas, reflet au survol.
+		local studs = Instance.new("Frame")
+		studs.BackgroundTransparency = 1
+		studs.Size = UDim2.fromScale(1, 1)
+		studs.ZIndex = 2
+		studs.Parent = button
+		UiStyle.studs(studs, WHITE, 16, 0.86)
+		local shine = Instance.new("Frame")
+		shine.BackgroundColor3 = WHITE
+		shine.BackgroundTransparency = 0.75
+		shine.BorderSizePixel = 0
+		shine.Position = UDim2.fromOffset(5, 3)
+		shine.Size = UDim2.new(1, -10, 0.32, 0)
+		shine.ZIndex = 2
+		UiStyle.corner(shine, 6)
+		shine.Parent = button
+		local lip = Instance.new("Frame")
+		lip.BackgroundColor3 = BLACK
+		lip.BackgroundTransparency = 0.78
+		lip.BorderSizePixel = 0
+		lip.AnchorPoint = Vector2.new(0, 1)
+		lip.Position = UDim2.fromScale(0, 1)
+		lip.Size = UDim2.new(1, 0, 0, 6)
+		lip.ZIndex = 2
+		UiStyle.corner(lip, 10)
+		lip.Parent = button
+		UiStyle.addSweep(button, 10)
+
+		-- Grosse icône qui déborde à gauche.
+		local icon: ImageLabel? = nil
+		local textLeft = 12
+		if tab.icon then
+			local image = Icons.image(button, tab.icon, UDim2.fromOffset(tabHeight * 1.05, tabHeight * 1.05))
+			image.AnchorPoint = Vector2.new(0.5, 0.5)
+			image.Position = UDim2.new(0, tabHeight * 0.3, 0.5, 0)
+			image.Rotation = -8
+			image.ZIndex = 4
+			UiStyle.sway(image, 4)
+			icon = image
+			textLeft = math.floor(tabHeight * 0.85)
 		end
-		local caption = UiStyle.text(button, tab.label, if tabHeight < 44 then 18 else 24, Color3.new(1, 1, 1), UiStyle.BODY_FONT)
-		caption.Size = UDim2.new(1, -10, 1, 0)
-		caption.Position = UDim2.fromOffset(5, 0)
+		local caption = UiStyle.text(button, tab.label, 26, WHITE, UiStyle.TITLE_FONT)
+		caption.Name = "Caption"
+		caption.Position = UDim2.fromOffset(textLeft, 0)
+		caption.Size = UDim2.new(1, -textLeft - 20, 1, -4) -- place pour la pastille rouge en haut à droite
+		caption.TextXAlignment = if tab.icon then Enum.TextXAlignment.Left else Enum.TextXAlignment.Center
 		caption.TextScaled = true
-		caption.ZIndex = 2
+		caption.TextWrapped = false -- une seule ligne : le texte rétrécit pour tenir
+		caption.ZIndex = 4
 		local limit = Instance.new("UITextSizeConstraint")
-		limit.MaxTextSize = if tabHeight < 44 then 18 else 24
+		limit.MaxTextSize = math.min(26, math.floor(tabHeight * 0.48))
 		limit.Parent = caption
-		buttons[index] = button
-		badges[index] = UiStyle.badge(button)
+
+		-- Flèche blanche à contour noir qui pointe vers la fenêtre.
+		local arrow = Instance.new("Frame")
+		arrow.Name = "Arrow"
+		arrow.AnchorPoint = Vector2.new(0.5, 0.5)
+		arrow.Position = UDim2.new(0, -2, 0.5, 0)
+		arrow.Size = UDim2.fromOffset(18, 18)
+		arrow.Rotation = 45
+		arrow.BackgroundColor3 = WHITE
+		arrow.BorderSizePixel = 0
+		arrow.ZIndex = 1
+		arrow.Visible = false
+		UiStyle.corner(arrow, 3)
+		UiStyle.stroke(arrow, 3, BLACK, true)
+		arrow.Parent = button
+
+		items[index] = {
+			button = button,
+			holder = holder,
+			scale = scale,
+			shade = shade,
+			border = border,
+			icon = icon,
+			caption = caption,
+			arrow = arrow,
+			glow = glow,
+			color = tab.color,
+		}
+		local badge = UiStyle.badge(button)
+		badge.Position = UDim2.new(1, 2, 0, 2)
+		badge.Size = UDim2.fromOffset(28, 28)
+		badges[index] = badge
+
+		button.MouseEnter:Connect(function()
+			hovered = index
+			UiStyle.sweep(button)
+			refresh(true)
+		end)
+		button.MouseLeave:Connect(function()
+			if hovered == index then
+				hovered = nil
+				refresh(true)
+			end
+		end)
+		button.MouseButton1Down:Connect(function()
+			TweenService:Create(scale, TweenInfo.new(0.06), { Scale = 0.94 }):Play()
+		end)
 		button.Activated:Connect(function()
+			Sounds.play("UiClick")
 			current = index
-			refresh()
+			refresh(true)
 			onSelect(index)
 		end)
 	end
-	refresh()
+	refresh(false)
 
 	return {
 		select = function(index: number)
 			current = index
-			refresh()
+			refresh(true)
 			onSelect(index)
 		end,
 		setBadge = function(index: number, value: string?)
