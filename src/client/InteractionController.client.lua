@@ -121,7 +121,7 @@ end
 local throwLabel = Instance.new("TextLabel")
 throwLabel.BackgroundTransparency = 1
 throwLabel.Size = UDim2.fromScale(1, 1)
-throwLabel.Font = Enum.Font.LuckiestGuy
+throwLabel.Font = Enum.Font.FredokaOne
 throwLabel.TextSize = 34
 throwLabel.TextColor3 = Color3.new(1, 1, 1)
 throwLabel.Text = "LANCER"

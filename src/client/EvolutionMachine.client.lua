@@ -316,7 +316,7 @@ local function addMachine(part: BasePart, capsule: Model)
 		local label = Instance.new("TextLabel")
 		label.BackgroundTransparency = 1
 		label.Position, label.Size = UDim2.fromScale(0, y), UDim2.fromScale(1, height)
-		label.Font, label.TextScaled = Enum.Font.LuckiestGuy, true
+		label.Font, label.TextScaled = Enum.Font.FredokaOne, true
 		label.TextColor3 = color
 		label.TextWrapped = true
 		outline(label, 2.5)

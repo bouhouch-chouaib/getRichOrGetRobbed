@@ -21,10 +21,11 @@ local Sounds = require(script.Parent.Sounds)
 
 local UiStyle = {}
 
-UiStyle.TITLE_FONT = Enum.Font.LuckiestGuy
+UiStyle.TITLE_FONT = Enum.Font.FredokaOne
 UiStyle.BODY_FONT = Enum.Font.FredokaOne
--- Montserrat Black Italic : les gros chiffres du HUD.
-UiStyle.NUMBER_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
+-- 16 oct. : une seule police partout (titres, textes, chiffres), la ronde et épaisse des en-têtes de fenêtres, comme
+-- dans les packs de référence (Chouaib trouvait l'ancienne, LuckiestGuy + chiffres en italique, moche).
+UiStyle.NUMBER_FONT = Font.fromEnum(Enum.Font.FredokaOne)
 
 -- Textures (assets/ui, envoyées sur Roblox le 16 oct. 2026).
 UiStyle.Textures = {

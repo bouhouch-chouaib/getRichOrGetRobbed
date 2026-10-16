@@ -242,7 +242,7 @@ local function comicWord(head: BasePart, word: string, color: Color3?)
 	label.Position = UDim2.fromScale(0.5, 0.5)
 	label.Size = UDim2.fromScale(0.2, 0.2)
 	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.LuckiestGuy
+	label.Font = Enum.Font.FredokaOne
 	label.TextScaled = true
 	label.Text = word
 	label.TextColor3 = color or WORD_COLORS[math.random(1, #WORD_COLORS)]

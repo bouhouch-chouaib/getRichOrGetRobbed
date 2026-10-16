@@ -94,7 +94,7 @@ function Toast.show(message: string, color: Color3?)
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
 	label.Position = UDim2.fromScale(0.5, 0.5)
 	label.Size = UDim2.new(0.74, 0, 0, HEIGHT - 10)
-	label.Font = Enum.Font.LuckiestGuy
+	label.Font = Enum.Font.FredokaOne
 	label.Text = message
 	label.TextColor3 = WHITE
 	label.TextScaled = true

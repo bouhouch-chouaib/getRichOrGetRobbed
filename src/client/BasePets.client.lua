@@ -95,7 +95,7 @@ local function setLabel(shown: Shown)
 		label.BackgroundTransparency = 1
 		label.Position = UDim2.fromScale(0, y)
 		label.Size = UDim2.fromScale(1, height)
-		label.Font = Enum.Font.LuckiestGuy
+		label.Font = Enum.Font.FredokaOne
 		label.TextScaled = true
 		label.TextColor3 = color
 		label.Text = text
@@ -146,7 +146,7 @@ local function playArrival(shown: Shown, arrivedAt: number)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 1)
-	label.Font = Enum.Font.LuckiestGuy
+	label.Font = Enum.Font.FredokaOne
 	label.TextScaled = true
 	label.TextColor3 = color
 	label.Text = if hatched then "ÉCLOSION !" else "NOUVEAU !"

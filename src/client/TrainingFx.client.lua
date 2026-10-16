@@ -50,7 +50,7 @@ stopButton.Position = UDim2.new(0.5, 0, 1, -ScreenScale.BOTTOM_RESERVED)
 stopButton.Size = UDim2.fromOffset(220, 60)
 stopButton.BackgroundColor3 = Color3.new(1, 1, 1)
 stopButton.AutoButtonColor = false
-stopButton.Font = Enum.Font.LuckiestGuy
+stopButton.Font = Enum.Font.FredokaOne
 stopButton.Text = "⏹ ARRÊTER"
 stopButton.TextSize = 28
 stopButton.TextColor3 = Color3.new(1, 1, 1)
@@ -162,7 +162,7 @@ local function popup(target: Player)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(0.68, 1)
-	label.Font = Enum.Font.LuckiestGuy
+	label.Font = Enum.Font.FredokaOne
 	label.TextScaled = true
 	label.TextXAlignment = Enum.TextXAlignment.Right
 	label.Text = "+" .. formatGain(gain)

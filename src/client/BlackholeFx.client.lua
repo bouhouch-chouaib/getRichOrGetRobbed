@@ -577,7 +577,7 @@ local function label(parent: Instance, text: string, y: number, height: number, 
 	l.BackgroundTransparency = 1
 	l.Position = UDim2.fromScale(0, y)
 	l.Size = UDim2.fromScale(1, height)
-	l.Font = Enum.Font.LuckiestGuy
+	l.Font = Enum.Font.FredokaOne
 	l.TextScaled = true
 	l.TextColor3 = color
 	l.Text = text

@@ -48,6 +48,7 @@ local IDS: { [string]: string } = {
 	Egg = "rbxassetid://103958195138100",
 	Magnet = "rbxassetid://119453006180668",
 	Vortex = "rbxassetid://123384108390618",
+	Rebirth = "rbxassetid://119573642945952", -- dessinée par tools/icons/make_rebirth_icon.py
 }
 
 -- Autres noms utiles : raretés (Id de Config.Rarities), améliorations (Config.Shop), produits Robux (Key).
@@ -75,7 +76,6 @@ local ALIASES: { [string]: string } = {
 	Pull10 = "Gift",
 	Key1 = "Key",
 	Fusion = "Orb",
-	Rebirth = "Crown",
 	Bonus = "Gift",
 	Daily = "Gift",
 	Quests = "Trophy",

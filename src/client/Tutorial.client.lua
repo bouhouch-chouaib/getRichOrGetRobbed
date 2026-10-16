@@ -92,7 +92,7 @@ local function label(font: Enum.Font, size: number, y: number, height: number): 
 	text.Parent = panel
 	return text
 end
-local titleLabel = label(Enum.Font.LuckiestGuy, 26, 8, 30)
+local titleLabel = label(Enum.Font.FredokaOne, 26, 8, 30)
 local hintLabel = label(Enum.Font.FredokaOne, 16, 40, 32)
 
 local skipButton = Instance.new("TextButton")
@@ -101,7 +101,7 @@ skipButton.AnchorPoint = Vector2.new(1, 0.5)
 skipButton.Position = UDim2.new(1, -12, 0.5, 0)
 skipButton.Size = UDim2.fromOffset(100, 40)
 skipButton.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
-skipButton.Font = Enum.Font.LuckiestGuy
+skipButton.Font = Enum.Font.FredokaOne
 skipButton.TextSize = 20
 skipButton.TextColor3 = Color3.new(1, 1, 1)
 skipButton.Text = "PASSER"
@@ -136,7 +136,7 @@ do
 	local arrow = Instance.new("TextLabel")
 	arrow.BackgroundTransparency = 1
 	arrow.Size = UDim2.fromScale(1, 1)
-	arrow.Font = Enum.Font.LuckiestGuy
+	arrow.Font = Enum.Font.FredokaOne
 	arrow.TextScaled = true
 	arrow.TextColor3 = GOLD
 	arrow.Text = "⬇"

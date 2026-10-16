@@ -297,7 +297,7 @@ local shopButton, shopBadge = menuButton("Shop", "Boutique", 1, UiStyle.Colors.G
 local indexButton, indexBadge = menuButton("Index", "Index", 2, UiStyle.Colors.Cyan)
 local worldsButton, worldsBadge = menuButton("Planet", "Mondes", 3, Color3.fromRGB(95, 110, 255))
 local bonusButton, bonusBadge = menuButton("Gift", "Bonus", 4, Color3.fromRGB(255, 196, 40))
-local rebirthButton, rebirthBadge = menuButton("Crown", "Rebirth", 5, Color3.fromRGB(170, 90, 255))
+local rebirthButton, rebirthBadge = menuButton("Rebirth", "Rebirth", 5, Color3.fromRGB(170, 90, 255))
 -- Rebirth : dégradé arc-en-ciel qui défile (comme la grande tuile « roue » des packs de référence).
 do
 	local rainbow = rebirthButton:FindFirstChildOfClass("UIGradient")

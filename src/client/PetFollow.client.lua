@@ -132,7 +132,7 @@ local function rebuildCarried(player: Player)
 		label.BackgroundTransparency = 1
 		label.Position = UDim2.fromScale(0, y)
 		label.Size = UDim2.fromScale(1, height)
-		label.Font = Enum.Font.LuckiestGuy
+		label.Font = Enum.Font.FredokaOne
 		label.TextScaled = true
 		label.TextColor3 = color
 		label.Text = text

@@ -155,7 +155,7 @@ local function add(instance: Instance)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 0.4)
-	label.Font, label.TextScaled = Enum.Font.LuckiestGuy, true
+	label.Font, label.TextScaled = Enum.Font.FredokaOne, true
 	label.TextColor3 = rarity.Color
 	label.Text = "ŒUF " .. TextFormat.upper(rarity.Name)
 	outline(label, 2)
@@ -163,7 +163,7 @@ local function add(instance: Instance)
 	local timer = Instance.new("TextLabel")
 	timer.BackgroundTransparency = 1
 	timer.Position, timer.Size = UDim2.fromScale(0, 0.4), UDim2.fromScale(1, 0.36)
-	timer.Font, timer.TextScaled = Enum.Font.LuckiestGuy, true
+	timer.Font, timer.TextScaled = Enum.Font.FredokaOne, true
 	timer.TextColor3 = WHITE
 	outline(timer, 2)
 	timer.Parent = gui
@@ -350,7 +350,7 @@ local function watchBase(base: Instance)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 1)
-	label.Font, label.TextScaled = Enum.Font.LuckiestGuy, true
+	label.Font, label.TextScaled = Enum.Font.FredokaOne, true
 	label.TextColor3 = Color3.fromRGB(255, 210, 60)
 	outline(label, 3)
 	label.Parent = gui
@@ -416,7 +416,7 @@ banner.AnchorPoint = Vector2.new(0.5, 0.5)
 banner.Position = UDim2.fromScale(0.5, 0.32)
 banner.Size = UDim2.fromOffset(820, 70)
 banner.BackgroundTransparency = 1
-banner.Font, banner.TextScaled = Enum.Font.LuckiestGuy, true
+banner.Font, banner.TextScaled = Enum.Font.FredokaOne, true
 banner.Visible = false
 outline(banner, 4)
 banner.Parent = bannerRoot
@@ -550,14 +550,14 @@ local function showcase(petId: string, ground: CFrame, rarityColor: Color3)
 	local name = Instance.new("TextLabel")
 	name.BackgroundTransparency = 1
 	name.Size = UDim2.fromScale(1, 0.6)
-	name.Font, name.TextScaled = Enum.Font.LuckiestGuy, true
+	name.Font, name.TextScaled = Enum.Font.FredokaOne, true
 	name.TextColor3, name.Text = rarityColor, "+1 " .. TextFormat.upper(entry.Name)
 	outline(name, 3)
 	name.Parent = gui
 	local hint = Instance.new("TextLabel")
 	hint.BackgroundTransparency = 1
 	hint.Position, hint.Size = UDim2.fromScale(0, 0.6), UDim2.fromScale(1, 0.4)
-	hint.Font, hint.TextScaled = Enum.Font.LuckiestGuy, true
+	hint.Font, hint.TextScaled = Enum.Font.FredokaOne, true
 	hint.TextColor3, hint.Text = WHITE, "DANS TA COLLECTION"
 	outline(hint, 2)
 	hint.Parent = gui
@@ -624,7 +624,7 @@ local function revealLabel(y: number, height: number, width: number): (TextLabel
 	label.Position = UDim2.fromScale(0.5, y)
 	label.Size = UDim2.fromOffset(width, height)
 	label.BackgroundTransparency = 1
-	label.Font, label.TextScaled = Enum.Font.LuckiestGuy, true
+	label.Font, label.TextScaled = Enum.Font.FredokaOne, true
 	label.TextColor3 = WHITE
 	outline(label, 5)
 	local scale = Instance.new("UIScale")

@@ -89,7 +89,7 @@ local function floatText(position: Vector3, text: string, color: Color3)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 1)
-	label.Font = Enum.Font.LuckiestGuy
+	label.Font = Enum.Font.FredokaOne
 	label.TextScaled = true
 	label.TextColor3 = color
 	label.Text = text
@@ -225,7 +225,7 @@ box.Name = "Box"
 box.AnchorPoint = Vector2.new(0.5, 0.5)
 box.Position = UDim2.fromScale(0.5, 0.5)
 box.Size = UDim2.fromOffset(170, 170)
-box.Font = Enum.Font.LuckiestGuy
+box.Font = Enum.Font.FredokaOne
 box.Text = "?"
 box.TextSize = 110
 box.TextColor3 = Color3.new(1, 1, 1)
@@ -269,7 +269,7 @@ local function bigText(name: string, size: number, y: number): TextLabel
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
 	label.Position = UDim2.new(0.5, 0, 0.5, y)
 	label.Size = UDim2.fromOffset(900, size + 10)
-	label.Font = Enum.Font.LuckiestGuy
+	label.Font = Enum.Font.FredokaOne
 	label.TextSize = size
 	label.TextColor3 = Color3.new(1, 1, 1)
 	local outline = Instance.new("UIStroke")
