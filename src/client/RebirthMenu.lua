@@ -45,7 +45,7 @@ local function text(parent: Instance, value: string, size: number, color: Color3
 end
 
 function RebirthMenu.create(gui: Instance): Menu
-	local window = MenuKit.window(gui, "Rebirth", Vector2.new(780, 470), PURPLE)
+	local window = MenuKit.window(gui, "Rebirth", Vector2.new(780, 470), PURPLE, "Crown")
 
 	-- À gauche : le gain.
 	local gain = UiStyle.brightCard(window.content, UDim2.new(0.44, -6, 1, -80), PURPLE)

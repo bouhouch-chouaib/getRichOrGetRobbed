@@ -282,7 +282,7 @@ Config.Monetization = {
 		{ Key = "DoubleMoney", Id = 2025998871, Icon = "Money", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
 		{ Key = "VIP", Id = 2026292822, Icon = "Crown", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
 		-- Id = 0 tant que le passe n'est pas créé sur Roblox (bouton « Bientôt »).
-		{ Key = "AutoMagnet", Id = 0, Icon = "Orb", Name = "AIMANT MAX", Description = "Aimant à objets au niveau maximum tout de suite, pour toujours : les objets sautent dans tes mains de loin.", Price = 199 },
+		{ Key = "AutoMagnet", Id = 0, Icon = "Magnet", Name = "AIMANT MAX", Description = "Aimant à objets au niveau maximum tout de suite, pour toujours : les objets sautent dans tes mains de loin.", Price = 199 },
 		{ Key = "ExtraBackpack", Id = 2025176879, Icon = "Backpack", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
 		{ Key = "EquipPlus2", Id = 2025296892, Icon = "Paw", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
 		{ Key = "LuckyLuck", Id = 2026568802, Icon = "Clover", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
@@ -632,7 +632,7 @@ Config.Shop = {
 	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
 	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
 	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
-	{ Id = "Magnet", Icon = "Orb", Name = "Aimant à objets", Description = "Les objets proches sautent tout seuls dans tes mains et ton sac, sans appuyer sur [E]. Plus de portée à chaque niveau.", MaxLevel = 5, BasePrice = 20e3, PriceGrowth = 9 },
+	{ Id = "Magnet", Icon = "Magnet", Name = "Aimant à objets", Description = "Les objets proches sautent tout seuls dans tes mains et ton sac, sans appuyer sur [E]. Plus de portée à chaque niveau.", MaxLevel = 5, BasePrice = 20e3, PriceGrowth = 9 },
 	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2).
 	{ Id = "WeaponBat", Icon = "Bat", Name = "Batte", Description = "ARME : un grand coup de batte qui envoie valser un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },

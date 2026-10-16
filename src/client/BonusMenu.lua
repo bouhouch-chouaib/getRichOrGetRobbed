@@ -107,7 +107,7 @@ local function label(parent: Instance, value: string, size: number, color: Color
 end
 
 function BonusMenu.create(gui: Instance): Menu
-	local window = MenuKit.window(gui, "Bonus", Vector2.new(800, 470), HEADER)
+	local window = MenuKit.window(gui, "Bonus", Vector2.new(800, 470), HEADER, "Gift")
 	local pages: { Frame } = {}
 	for index = 1, 3 do
 		local page = Instance.new("Frame")
@@ -135,28 +135,67 @@ function BonusMenu.create(gui: Instance): Menu
 	cardLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	cardLayout.Padding = UDim.new(0, 8)
 	cardLayout.Parent = cardRow
-	type DayCard = { card: Frame, status: TextLabel, reward: TextLabel, scale: UIScale, glow: UIStroke }
+	-- Carte d'un jour (façon packs « Studs UI ») : « JOUR n », grosse icône, récompense, pastille d'état en bas
+	-- (REÇU vert, AUJOURD'HUI doré qui pulse, BLOQUÉ gris). Le jour 7, plus grand, est multicolore.
+	type DayCard = { card: Frame, icon: ImageLabel, rays: ImageLabel, chip: TextLabel, reward: TextLabel, scale: UIScale,
+		border: UIStroke? }
 	local dayCards: { DayCard } = {}
 	for day, reward in ipairs(Config.Daily.Rewards) do
 		local big = day == #Config.Daily.Rewards
-		local card = UiStyle.brightCard(cardRow, UDim2.fromOffset(if big then 118 else 92, 220), if big then GOLD else Color3.fromRGB(90, 170, 255))
+		local card = UiStyle.brightCard(cardRow, UDim2.fromOffset(if big then 124 else 90, 222), if big then GOLD else Color3.fromRGB(80, 160, 255))
 		card.LayoutOrder = day
-		label(card, "JOUR " .. day, 22, WHITE, UDim2.fromOffset(4, 6), UDim2.new(1, -8, 0, 26))
-		Icons.image(card, if reward.Pulls then "Gift" else "Money", UDim2.fromOffset(56, 56), UDim2.new(0.5, -28, 0, 40))
-		local rewardLabel = UiStyle.number(card, "", 18, WHITE)
-		rewardLabel.Position = UDim2.fromOffset(4, 102)
-		rewardLabel.Size = UDim2.new(1, -8, 0, 60)
+		if big then
+			local rainbow = card:FindFirstChildOfClass("UIGradient")
+			if rainbow then
+				rainbow.Rotation = 45
+				rainbow.Color = ColorSequence.new({
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 140)),
+					ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 200, 60)),
+					ColorSequenceKeypoint.new(0.55, Color3.fromRGB(110, 230, 90)),
+					ColorSequenceKeypoint.new(0.8, Color3.fromRGB(80, 170, 255)),
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 90, 255)),
+				})
+			end
+		end
+		label(card, "JOUR " .. day, if big then 28 else 22, WHITE, UDim2.fromOffset(2, 6), UDim2.new(1, -4, 0, 28))
+		local iconSize = if big then 92 else 62
+		local iconHolder = Instance.new("Frame")
+		iconHolder.BackgroundTransparency = 1
+		iconHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+		iconHolder.Position = UDim2.new(0.5, 0, 0, 38 + iconSize / 2)
+		iconHolder.Size = UDim2.fromOffset(iconSize, iconSize)
+		iconHolder.Parent = card
+		local rays = UiStyle.rays(iconHolder, GOLD, iconSize * 1.7, 40)
+		rays.Visible = false
+		local icon = Icons.image(iconHolder, if big then "Crown" elseif reward.Pulls then "Gift" else "Money", UDim2.fromScale(1, 1))
+		icon.ZIndex = 3
+		UiStyle.sway(icon, 6)
+		local rewardLabel = UiStyle.number(card, "", if big then 20 else 16, WHITE)
+		rewardLabel.Position = UDim2.fromOffset(2, 40 + iconSize)
+		rewardLabel.Size = UDim2.new(1, -4, 0, 46)
 		rewardLabel.TextWrapped = true
-		local status = label(card, "", 18, WHITE, UDim2.new(0, 4, 1, -46), UDim2.new(1, -8, 0, 40))
-		status.TextWrapped = true
+		local chip = UiStyle.text(card, "", 15, WHITE, UiStyle.TITLE_FONT)
+		chip.AnchorPoint = Vector2.new(0.5, 1)
+		chip.Position = UDim2.new(0.5, 0, 1, -8)
+		chip.Size = UDim2.new(1, -12, 0, 26)
+		chip.BackgroundTransparency = 0
+		chip.BackgroundColor3 = WHITE
+		chip.TextScaled = true
+		UiStyle.corner(chip, 6)
+		UiStyle.stroke(chip, 2.5, BLACK, true)
+		local chipShade = UiStyle.gradient(chip, WHITE, WHITE)
+		chipShade.Name = "Shade"
 		local scale = Instance.new("UIScale")
 		scale.Parent = card
-		local glow = Instance.new("UIStroke")
-		glow.Thickness = 0
-		glow.Color = WHITE
-		glow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		glow.Parent = card
-		dayCards[day] = { card = card, status = status, reward = rewardLabel, scale = scale, glow = glow }
+		dayCards[day] = { card = card, icon = icon, rays = rays, chip = chip, reward = rewardLabel, scale = scale,
+			border = card:FindFirstChildOfClass("UIStroke") }
+	end
+	local function setChip(chip: TextLabel, text: string, color: Color3)
+		chip.Text = text
+		local shade = chip:FindFirstChild("Shade")
+		if shade and shade:IsA("UIGradient") then
+			shade.Color = UiStyle.buttonColors(color)
+		end
 	end
 	local dailyButton = UiStyle.button(dailyPage, "RÉCLAMER !", UDim2.fromOffset(440, 64), UiStyle.Colors.Green, 32)
 	dailyButton.AnchorPoint = Vector2.new(0.5, 1)
@@ -284,15 +323,22 @@ function BonusMenu.create(gui: Instance): Menu
 			ui.reward.Text = rewardText(Config.Daily.Rewards[day], Config.Daily.MinMoney)
 			local done = if claimDay then day < claimDay else day <= streak
 			local isToday = claimDay == day
-			ui.status.Text = if done then "REÇU" elseif isToday then "AUJOURD'HUI !" elseif day == nextDay then "DEMAIN" else ""
-			ui.status.TextColor3 = if done then MONEY elseif isToday then GOLD else WHITE
-			ui.glow.Thickness = if isToday then 4 else 0
-			ui.card.BackgroundTransparency = 0
-			for _, child in ipairs(ui.card:GetDescendants()) do
-				if child:IsA("ImageLabel") then
-					child.ImageTransparency = if done then 0.5 else 0
-				end
+			if done then
+				setChip(ui.chip, "REÇU", UiStyle.Colors.Green)
+			elseif isToday then
+				setChip(ui.chip, "AUJOURD'HUI", GOLD)
+			elseif day == nextDay then
+				setChip(ui.chip, "DEMAIN", Color3.fromRGB(120, 120, 135))
+			else
+				setChip(ui.chip, "BLOQUÉ", Color3.fromRGB(120, 120, 135))
 			end
+			ui.icon.ImageTransparency = if done then 0.45 else 0
+			ui.rays.Visible = isToday
+			if ui.border then
+				ui.border.Color = if isToday then WHITE else BLACK
+				ui.border.Thickness = if isToday then 5 else 4
+			end
+			ui.scale.Scale = if isToday then 1.06 else 1
 		end
 		local caption = dailyButton:FindFirstChild("Caption") :: TextLabel
 		if claimDay then

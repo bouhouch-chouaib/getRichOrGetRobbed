@@ -30,6 +30,7 @@ local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local FusionMenu = require(script.Parent.FusionMenu)
 local IndexMenu = require(script.Parent.IndexMenu)
 local MenuKit = require(script.Parent.MenuKit)
+local OffersPanel = require(script.Parent.OffersPanel)
 local WorldMenu = require(script.Parent.WorldMenu)
 local ScreenScale = require(script.Parent.ScreenScale)
 local ShopMenu = require(script.Parent.ShopMenu)
@@ -229,10 +230,10 @@ local menuColumn = Instance.new("Frame")
 menuColumn.Name = "Left"
 menuColumn.BackgroundTransparency = 1
 menuColumn.AnchorPoint = if isTouch then Vector2.new(0, 0) else Vector2.new(0, 0.5)
--- PC : 5 boutons de 58 (pas de 66) centrés un peu au-dessus du milieu, pour laisser la place aux stats en bas à gauche
--- même sur un écran bas (630 de haut).
-menuColumn.Position = if isTouch then UDim2.new(0, 16, 0, STATS_HEIGHT + 20) else UDim2.new(0, 16, 0.5, -95)
-menuColumn.Size = if isTouch then UDim2.fromOffset(310, 196) else UDim2.fromOffset(220, 322)
+-- PC : tuiles carrées 2 par 2 + une large (Rebirth) en dessous, un peu au-dessus du milieu, pour laisser la place aux
+-- stats en bas à gauche même sur un écran bas (630 de haut). Tactile : 3 tuiles par rangée.
+menuColumn.Position = if isTouch then UDim2.new(0, 16, 0, STATS_HEIGHT + 20) else UDim2.new(0, 16, 0.5, -105)
+menuColumn.Size = if isTouch then UDim2.fromOffset(310, 196) else UDim2.fromOffset(222, 304)
 menuColumn.Parent = gui
 
 -- Ligne de stat d'entraînement : icône + « NV 13 » en italique + barre d'XP (plus petite sur tactile).
@@ -264,9 +265,9 @@ local strengthRow = if isTouch then statRow(0, 62, "Strength", UiStyle.Colors.St
 local speedRow = if isTouch then statRow(150, 62, "Speed", UiStyle.Colors.Speed) else statRow(0, 48, "Speed", UiStyle.Colors.Speed)
 
 local MONEY_Y = if isTouch then 0 else 96
-Icons.image(statsColumn, "Money", if isTouch then UDim2.fromOffset(40, 40) else UDim2.fromOffset(54, 54), UDim2.fromOffset(-4, MONEY_Y + 2))
-local moneyLabel = UiStyle.number(statsColumn, "$0", if isTouch then 38 else 50, MONEY)
-moneyLabel.Position = UDim2.fromOffset(if isTouch then 40 else 48, MONEY_Y)
+Icons.image(statsColumn, "Money", if isTouch then UDim2.fromOffset(46, 46) else UDim2.fromOffset(62, 62), UDim2.fromOffset(-8, MONEY_Y - 2))
+local moneyLabel = UiStyle.number(statsColumn, "$0", if isTouch then 38 else 52, MONEY)
+moneyLabel.Position = UDim2.fromOffset(if isTouch then 42 else 56, MONEY_Y)
 moneyLabel.Size = UDim2.new(1, -48, 0, if isTouch then 42 else 56)
 moneyLabel.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -275,38 +276,45 @@ incomeLabel.Position = UDim2.fromOffset(if isTouch then 44 else 52, if isTouch t
 incomeLabel.Size = UDim2.new(1, -52, 0, if isTouch then 20 else 26)
 incomeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- Bouton de menu : PC = grand rectangle icône + nom (en colonne) ; tactile = tuile carrée (icône, nom dessous), 3 par
--- rangée. Pastille rouge.
+-- Bouton de menu (16 oct., façon packs « Studs UI ») : tuile colorée à tenons, grosse icône qui se balance, nom en bas.
+-- PC : 4 tuiles carrées 2 par 2, la 5e large en dessous ; tactile : 3 tuiles par rangée. Pastille rouge.
 local function menuButton(icon: string, name: string, index: number, color: Color3): (TextButton, TextLabel)
+	local tile: TextButton
 	if isTouch then
-		local tile = UiStyle.button(menuColumn, "", UDim2.fromOffset(92, 92), color, 1)
+		tile = UiStyle.tile(menuColumn, icon, name, UDim2.fromOffset(92, 92), color, 18)
 		tile.Position = UDim2.fromOffset(((index - 1) % 3) * 104, ((index - 1) // 3) * 104)
-		local iconImage = Icons.image(tile, icon, UDim2.fromOffset(56, 56), UDim2.fromOffset(18, 4))
-		iconImage.ZIndex = 2
-		local nameLabel = text(tile, name, 18, WHITE, BODY_FONT)
-		nameLabel.Position = UDim2.new(0, 2, 1, -30)
-		nameLabel.Size = UDim2.new(1, -4, 0, 26)
-		nameLabel.TextScaled = true
-		nameLabel.ZIndex = 2
-		return tile, UiStyle.badge(tile)
+	elseif index <= 4 then
+		tile = UiStyle.tile(menuColumn, icon, name, UDim2.fromOffset(104, 104), color, 22)
+		tile.Position = UDim2.fromOffset(((index - 1) % 2) * 116, ((index - 1) // 2) * 116)
+	else
+		tile = UiStyle.tile(menuColumn, icon, name, UDim2.fromOffset(220, 68), color, 34)
+		tile.Position = UDim2.fromOffset(0, 2 * 116)
 	end
-	local button = UiStyle.button(menuColumn, "", UDim2.fromOffset(210, 58), color, 1)
-	button.Position = UDim2.fromOffset(0, (index - 1) * 66)
-	local iconImage = Icons.image(button, icon, UDim2.fromOffset(54, 54), UDim2.fromOffset(4, 2))
-	iconImage.ZIndex = 2
-	local nameLabel = text(button, name, 30, WHITE, BODY_FONT)
-	nameLabel.Position = UDim2.fromOffset(60, 0)
-	nameLabel.Size = UDim2.new(1, -66, 1, 0)
-	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	nameLabel.ZIndex = 2
-	return button, UiStyle.badge(button)
+	return tile, UiStyle.badge(tile)
 end
 
 local shopButton, shopBadge = menuButton("Shop", "Boutique", 1, UiStyle.Colors.Green)
 local indexButton, indexBadge = menuButton("Index", "Index", 2, UiStyle.Colors.Cyan)
-local worldsButton, worldsBadge = menuButton("Planet", "Mondes", 3, Color3.fromRGB(255, 150, 40))
-local bonusButton, bonusBadge = menuButton("Gift", "Bonus", 4, Color3.fromRGB(255, 200, 40))
+local worldsButton, worldsBadge = menuButton("Planet", "Mondes", 3, Color3.fromRGB(95, 110, 255))
+local bonusButton, bonusBadge = menuButton("Gift", "Bonus", 4, Color3.fromRGB(255, 196, 40))
 local rebirthButton, rebirthBadge = menuButton("Crown", "Rebirth", 5, Color3.fromRGB(170, 90, 255))
+-- Rebirth : dégradé arc-en-ciel qui défile (comme la grande tuile « roue » des packs de référence).
+do
+	local rainbow = rebirthButton:FindFirstChildOfClass("UIGradient")
+	if rainbow then
+		rainbow.Rotation = 0
+		rainbow.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 120)),
+			ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 170, 40)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(120, 220, 70)),
+			ColorSequenceKeypoint.new(0.75, Color3.fromRGB(70, 160, 255)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 80, 255)),
+		})
+		TweenService:Create(rainbow, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+			{ Offset = Vector2.new(0.25, 0) }):Play()
+		rainbow.Offset = Vector2.new(-0.25, 0)
+	end
+end
 
 ----------------------------------------------------------------------
 -- Fenêtres
@@ -317,6 +325,16 @@ local index = IndexMenu.create(gui)
 local fusion = FusionMenu.create(gui)
 local worlds = WorldMenu.create(gui)
 local bonus = BonusMenu.create(gui)
+-- Offres Robux à droite (PC seulement : sur tactile, le bouton de saut occupe le bas droit).
+local offers = if isTouch then nil else OffersPanel.create(gui)
+if offers then
+	task.spawn(function()
+		while true do
+			task.wait(0.2)
+			offers.setHidden(MenuKit.anyOpen())
+		end
+	end)
+end
 local rebirth = RebirthMenu.create(gui)
 
 shopButton.Activated:Connect(shop.window.toggle)

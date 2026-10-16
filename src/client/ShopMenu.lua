@@ -103,7 +103,7 @@ export type Shop = {
 
 -- topStack : pile du haut du HUD (le bandeau du boost de chance serveur y apparaît).
 function ShopMenu.create(gui: Instance, topStack: Frame): Shop
-	local window = MenuKit.window(gui, "Boutique", Vector2.new(740, 480), UiStyle.Colors.Green)
+	local window = MenuKit.window(gui, "Boutique", Vector2.new(740, 480), UiStyle.Colors.Green, "Shop")
 
 	local row = Instance.new("ScrollingFrame")
 	row.Name = "Cards"

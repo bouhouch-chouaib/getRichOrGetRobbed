@@ -38,7 +38,7 @@ export type Index = {
 }
 
 function IndexMenu.create(gui: Instance): Index
-	local window = MenuKit.window(gui, "Index des familiers", Vector2.new(860, 560), UiStyle.Colors.Cyan)
+	local window = MenuKit.window(gui, "Index des familiers", Vector2.new(860, 560), UiStyle.Colors.Cyan, "Index")
 	local content = window.content
 
 	local rarityIndex = 1
@@ -145,6 +145,10 @@ function IndexMenu.create(gui: Instance): Index
 	local detail = UiStyle.panel(content, UDim2.fromOffset(226, 262))
 	detail.Position = UDim2.fromOffset(602, 0)
 	detail.ZIndex = 2
+	local relief = detail:FindFirstChildOfClass("UIGradient")
+	if relief then
+		relief:Destroy() -- remplacé par le dégradé de la rareté
+	end
 	local detailGradient = UiStyle.gradient(detail, WHITE, WHITE)
 	detail.BackgroundColor3 = WHITE
 	local detailViewport: ViewportFrame? = nil

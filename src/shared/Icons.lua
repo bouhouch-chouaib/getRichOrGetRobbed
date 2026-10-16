@@ -1,6 +1,8 @@
 --!strict
 -- Icons : icônes 2D du jeu (style cartoon, gros contour noir), à la place des émojis.
--- Dessinées par tools/icons/make_icons.py (fichiers dans assets/icons), envoyées sur Roblox le 13 oct. 2026 (Bat, Grapple : 14 oct.).
+-- 16 oct. 2026 : 25 icônes refaites avec ForgeGUI (style 3D brillant, contour bleu nuit), fichiers et planches dans
+-- assets/icons/forgegui (découpées par tools/icons/split_sheet.py). Les autres (Moon, Sun, Gem, Orb...) restent celles
+-- dessinées par tools/icons/make_icons.py (assets/icons), envoyées sur Roblox le 13 oct. 2026.
 -- Pour en changer une : modifier le script, le relancer, renvoyer l'image (Studio > Asset Manager, ou l'outil MCP
 -- upload_image) et remplacer son Id ci-dessous.
 --
@@ -10,38 +12,42 @@
 local Icons = {}
 
 local IDS: { [string]: string } = {
-	Money = "rbxassetid://91110366747369",
-	Speed = "rbxassetid://132477081520067",
-	Strength = "rbxassetid://121158244909319",
-	Shop = "rbxassetid://101581761518184",
-	Index = "rbxassetid://120484593986364",
+	Money = "rbxassetid://120294685654176",
+	Speed = "rbxassetid://100047468856973",
+	Strength = "rbxassetid://124589074285402",
+	Shop = "rbxassetid://113919414219031",
+	Index = "rbxassetid://125686942568588",
 	Gem = "rbxassetid://84139374110884",
 	Moon = "rbxassetid://121659576635942",
 	Sun = "rbxassetid://72023085029713",
-	Lock = "rbxassetid://115612879795139",
-	Clover = "rbxassetid://84937227204758",
-	Backpack = "rbxassetid://135010403309652",
+	Lock = "rbxassetid://94480767029726",
+	Clover = "rbxassetid://134744661584434",
+	Backpack = "rbxassetid://77822544324446",
 	Glove = "rbxassetid://95466240074631",
 	Pan = "rbxassetid://131364115437055",
 	Staff = "rbxassetid://133667236186744",
-	Treadmill = "rbxassetid://76463554286414",
-	Bench = "rbxassetid://133620722794765",
-	Paw = "rbxassetid://101519963001658",
-	Crown = "rbxassetid://102859175789901",
-	Sparkle = "rbxassetid://138689117361812",
-	Dice = "rbxassetid://140671322908945",
-	Gift = "rbxassetid://78096265944480",
+	Treadmill = "rbxassetid://97536347003616",
+	Bench = "rbxassetid://101740565772948",
+	Paw = "rbxassetid://123202543786812",
+	Crown = "rbxassetid://105501070074353",
+	Sparkle = "rbxassetid://83274576810315",
+	Dice = "rbxassetid://125051226501039",
+	Gift = "rbxassetid://99816460887795",
 	Sprout = "rbxassetid://116798474026167",
 	Drop = "rbxassetid://107647214324977",
 	Orb = "rbxassetid://106598175990265",
 	Flame = "rbxassetid://128273954517653",
-	Flower = "rbxassetid://139511093415127",
-	Trophy = "rbxassetid://107983506276240",
-	Bat = "rbxassetid://92089666736729",
-	Grapple = "rbxassetid://122249795654523",
-	Ghost = "rbxassetid://105946207492948",
-	Key = "rbxassetid://82597263772074",
-	Planet = "rbxassetid://76382577989974",
+	Flower = "rbxassetid://117275542680011",
+	Trophy = "rbxassetid://77141479133178",
+	Bat = "rbxassetid://79098626399920",
+	Grapple = "rbxassetid://122509806695966",
+	Ghost = "rbxassetid://137004430827671",
+	Key = "rbxassetid://124911338485757",
+	Planet = "rbxassetid://128878823846627",
+	-- Nouvelles (16 oct., ForgeGUI)
+	Egg = "rbxassetid://103958195138100",
+	Magnet = "rbxassetid://119453006180668",
+	Vortex = "rbxassetid://123384108390618",
 }
 
 -- Autres noms utiles : raretés (Id de Config.Rarities), améliorations (Config.Shop), produits Robux (Key).
@@ -69,6 +75,13 @@ local ALIASES: { [string]: string } = {
 	Pull10 = "Gift",
 	Key1 = "Key",
 	Fusion = "Orb",
+	Rebirth = "Crown",
+	Bonus = "Gift",
+	Daily = "Gift",
+	Quests = "Trophy",
+	Codes = "Key",
+	Pulls = "Vortex",
+	AutoMagnet = "Magnet",
 	Robux = "Gem",
 	Leaderboard = "Trophy",
 }

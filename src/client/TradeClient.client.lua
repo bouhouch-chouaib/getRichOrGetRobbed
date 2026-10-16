@@ -154,7 +154,7 @@ end)
 -- Fenêtre d'échange
 ----------------------------------------------------------------------
 
-local window = MenuKit.window(gui, "Échange", Vector2.new(900, 560), UiStyle.Colors.Cyan)
+local window = MenuKit.window(gui, "Échange", Vector2.new(900, 560), UiStyle.Colors.Cyan, "Paw")
 local content = window.content
 local COLUMN = 420
 

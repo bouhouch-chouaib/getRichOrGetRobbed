@@ -36,7 +36,7 @@ export type Fusion = {
 }
 
 function FusionMenu.create(gui: Instance): Fusion
-	local window = MenuKit.window(gui, "Machine de fusion", Vector2.new(720, 540), UiStyle.Colors.Purple)
+	local window = MenuKit.window(gui, "Machine de fusion", Vector2.new(720, 540), UiStyle.Colors.Purple, "Sparkle")
 	local content = window.content
 	local width = window.frame.Size.X.Offset - 32
 

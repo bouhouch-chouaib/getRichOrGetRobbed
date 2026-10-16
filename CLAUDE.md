@@ -108,6 +108,12 @@ Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remo
 7 versions de plus en plus grandes et épiques (photographiées en jeu) et de plus en plus efficaces. **Familiers évolués complets** :
 Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stats et duel x1,4 / x2, étiquette dorée dans la base.
 
+**16 oct. : refonte de l'interface** (docs/DIRECTION_ARTISTIQUE.md §3.1, d'après 3 vidéos de packs « Studs UI ») :
+25 icônes ForgeGUI, textures (`assets/ui`), fenêtres / boutons / tuiles / pastilles / bandeaux refaits dans `UiStyle`,
+animations et flou dans `MenuKit`, offres Robux à droite (`client/OffersPanel`). Vérifié en jeu (PC) : HUD, Boutique (+
+Passes R$), Index, Mondes, Bonus, Rebirth, bandeaux. Pas vu : sur téléphone, Fusion / Duel / Échange / Capsule.
+⚠️ Studio avait des scripts en double (copie Rojo périmée + copie neuve) : vérifier les doublons après un ajout de fichier.
+
 **16 oct. : rétention** (GDD « Rétention », `server/ProgressionController`, `server/Quests`, `client/BonusMenu`,
 `client/RebirthMenu`) : boutons Bonus (cadeau du jour sur 7 jours, 3 quêtes du jour, codes cadeaux) et Rebirth (monde Divin
 + $1Qa : on perd argent, mondes, Boutique sauf armes ; revenu x(1+n) à vie, +1 familier dans la base), +10 % de revenu par

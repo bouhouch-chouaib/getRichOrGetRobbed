@@ -59,6 +59,26 @@ Règle : couleurs **pures et saturées**, peu de pastel, pas de marron terne. Le
 - **Annonces** : bandeau centré en haut (« RUN!! » rouge, nom de zone à l'entrée de chaque zone, apparition
   d'un œuf rare dans tout le serveur), texte coloré par rareté.
 
+### 3.1 Refonte du 16 oct. 2026 (packs « Studs UI » montrés par Chouaib, analysés image par image)
+
+- **Icônes** : 25 icônes 3D brillantes à contour bleu nuit générées avec ForgeGUI (planches de 8, découpées par
+  `tools/icons/split_sheet.py`, fichiers dans `assets/icons/forgegui`), Ids dans `shared/Icons`. Le compte gratuit
+  ForgeGUI (10 000 crédits) a permis 4 générations (~2 500 crédits l'une) : le reste des icônes (Moon, Sun, Gem,
+  Orb...) garde les anciennes.
+- **Textures** (`tools/icons/make_ui_textures.py`, `assets/ui`) : tenon en relief, éclats de lumière, rayons, halo,
+  ombre, reflet ; Ids dans `UiStyle.Textures`.
+- **Fenêtres** (`UiStyle.window`) : ombre douce, corps gris-bleu à tenons en relief, en-tête coloré avec éclats et
+  bande d'ombre, grosse icône penchée qui déborde ; ouverture : monte du bas avec rebond, icône élastique, **décor
+  flouté** (`MenuKit`, BlurEffect) ; fermeture rapide qui rétrécit.
+- **Boutons** : dégradé 3 tons, reflet en haut, lèvre sombre en bas, reflet qui balaie au survol, penchent et
+  grossissent au survol, s'écrasent au clic. Pastilles rouges qui pulsent.
+- **HUD** : tuiles carrées à tenons 2 par 2 (Boutique, Index, Mondes, Bonus) + une large Rebirth arc-en-ciel animée ;
+  icônes qui se balancent. **Offres Robux** à droite (`client/OffersPanel`, PC seulement) : icône sur rayons qui
+  tournent, prix en pastille verte, tournent toutes les 9 s, cachées quand une fenêtre est ouverte.
+- **Messages** (`client/Toast`) : bandeaux colorés effacés sur les côtés, qui s'empilent (3 max).
+- **Cadeau du jour** : cartes avec pastille d'état (REÇU / AUJOURD'HUI / BLOQUÉ), jour 7 arc-en-ciel, rayons derrière
+  le cadeau du jour.
+
 ## 4. Le monde
 
 - **Structure** : un très long couloir encadré de hauts murs, découpé en **zones à thème** qui s'enchaînent

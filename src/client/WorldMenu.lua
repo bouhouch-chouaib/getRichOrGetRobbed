@@ -96,7 +96,7 @@ local function landscape(parent: Instance, look: Worlds.Look)
 end
 
 function WorldMenu.create(gui: Instance): Menu
-	local window = MenuKit.window(gui, "Mondes", Vector2.new(800, 480), Color3.fromRGB(255, 150, 40))
+	local window = MenuKit.window(gui, "Mondes", Vector2.new(800, 480), Color3.fromRGB(255, 150, 40), "Planet")
 
 	local row = Instance.new("ScrollingFrame")
 	row.BackgroundTransparency = 1

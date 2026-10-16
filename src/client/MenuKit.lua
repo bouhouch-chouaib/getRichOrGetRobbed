@@ -1,10 +1,12 @@
 --!strict
 -- MenuKit : socle commun des menus (client/ShopMenu, client/IndexMenu, client/FusionMenu, client/RobuxShop).
---   - une seule fenêtre ouverte à la fois, ouverture animée ;
+--   - une seule fenêtre ouverte à la fois ; ouverture animée (16 oct. : elle monte du bas avec un rebond, son icône
+--     se balance, le décor derrière devient flou), fermeture rapide qui rétrécit ;
 --   - onglets latéraux collés à droite de la fenêtre (comme « Monde / Limité » dans la référence) ;
 --   - lecture des attributs du joueur (argent, familiers, équipés) ;
 --   - aperçu 3D d'un familier (silhouette noire s'il n'est pas encore découvert).
 
+local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -182,14 +184,29 @@ local function fit(frame: Frame): number
 	if touch then
 		local start = left + (screen.X - left - right - width * scale) / 2
 		frame.Position = UDim2.new(0, start + frame.Size.X.Offset * scale / 2, 0.52, 0)
+	else
+		frame.Position = UDim2.fromScale(0.5, 0.52)
 	end
 	return scale
 end
 
-function MenuKit.window(parent: Instance, title: string, size: Vector2, headerColor: Color3): Window
-	local built = UiStyle.window(parent, title, size, headerColor)
+-- Flou du décor derrière une fenêtre ouverte (effet local au joueur).
+local blur = Instance.new("BlurEffect")
+blur.Name = "MenuBlur"
+blur.Size = 0
+blur.Parent = Lighting
+local BLUR_SIZE = 14
+local function setBlur(on: boolean)
+	TweenService:Create(blur, TweenInfo.new(0.25, Enum.EasingStyle.Quad), { Size = if on then BLUR_SIZE else 0 }):Play()
+end
+
+-- icon : nom d'une icône (shared/Icons) affichée en grand dans l'en-tête.
+function MenuKit.window(parent: Instance, title: string, size: Vector2, headerColor: Color3, icon: string?): Window
+	local built = UiStyle.window(parent, title, size, headerColor, icon)
 	local frame = built.frame
 	local callbacks: { () -> () } = {}
+	local opened = false
+	local token = 0
 	local window: Window
 	window = {
 		frame = frame,
@@ -200,13 +217,27 @@ function MenuKit.window(parent: Instance, title: string, size: Vector2, headerCo
 				openWindow.close()
 			end
 			openWindow = window
-			if not frame.Visible then
+			token += 1
+			if not opened then
 				Sounds.play("WindowOpen")
 			end
+			opened = true
 			frame.Visible = true
+			setBlur(true)
 			local scale = fit(frame)
-			built.scale.Scale = 0.6 * scale
-			TweenService:Create(built.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = scale }):Play()
+			local target = frame.Position
+			-- Monte du bas avec un rebond.
+			frame.Position = target + UDim2.fromOffset(0, 70)
+			built.scale.Scale = 0.7 * scale
+			TweenService:Create(built.scale, TweenInfo.new(0.32, Enum.EasingStyle.Back), { Scale = scale }):Play()
+			TweenService:Create(frame, TweenInfo.new(0.32, Enum.EasingStyle.Back), { Position = target }):Play()
+			local headerIcon = built.icon
+			if headerIcon then
+				headerIcon.Rotation = -35
+				headerIcon.Size = UDim2.fromOffset(40, 40)
+				TweenService:Create(headerIcon, TweenInfo.new(0.5, Enum.EasingStyle.Elastic),
+					{ Rotation = -10, Size = UDim2.fromOffset(96, 96) }):Play()
+			end
 			for _, callback in ipairs(callbacks) do
 				task.spawn(callback)
 			end
@@ -214,25 +245,54 @@ function MenuKit.window(parent: Instance, title: string, size: Vector2, headerCo
 		close = function()
 			if openWindow == window then
 				openWindow = nil
+				setBlur(false)
 			end
-			frame.Visible = false
+			if not opened then
+				return
+			end
+			opened = false
+			token += 1
+			local current = token
+			local scale = built.scale.Scale
+			TweenService:Create(built.scale, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+				{ Scale = scale * 0.8 }):Play()
+			task.delay(0.12, function()
+				if current == token then
+					frame.Visible = false
+				end
+			end)
 		end,
 		toggle = function()
-			if frame.Visible then
+			if opened then
 				window.close()
 			else
 				window.open()
 			end
 		end,
 		isOpen = function()
-			return frame.Visible
+			return opened
 		end,
 		onOpen = function(callback: () -> ())
 			table.insert(callbacks, callback)
 		end,
 	}
 	built.closeButton.Activated:Connect(window.close)
+	-- Fenêtre cachée par un autre script (Visible = false) : elle compte comme fermée (sinon le flou resterait).
+	frame:GetPropertyChangedSignal("Visible"):Connect(function()
+		if not frame.Visible and opened then
+			opened = false
+			if openWindow == window then
+				openWindow = nil
+				setBlur(false)
+			end
+		end
+	end)
 	return window
+end
+
+-- Une fenêtre est-elle ouverte ?
+function MenuKit.anyOpen(): boolean
+	return openWindow ~= nil
 end
 
 function MenuKit.closeAll()

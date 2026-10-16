@@ -150,7 +150,7 @@ end)
 -- Fenêtre de choix
 ----------------------------------------------------------------------
 
-local window = MenuKit.window(gui, "Duel de familiers", Vector2.new(860, 540), UiStyle.Colors.Orange)
+local window = MenuKit.window(gui, "Duel de familiers", Vector2.new(860, 540), UiStyle.Colors.Orange, "Bat")
 local content = window.content
 
 local grid = Instance.new("ScrollingFrame")
