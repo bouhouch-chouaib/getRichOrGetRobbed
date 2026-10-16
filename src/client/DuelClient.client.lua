@@ -443,11 +443,21 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- Pendant le duel, le HUD (argent, boutons, horloge) est caché : on voit l'arène et la roue en entier.
+-- On ne réaffiche ensuite que ce qui était affiché avant (sinon le panneau vide du tutoriel réapparaissait).
+local hiddenGuis: { ScreenGui } = {}
 local function setHudVisible(visible: boolean)
+	if visible then
+		for _, hud in ipairs(hiddenGuis) do
+			hud.Enabled = true
+		end
+		table.clear(hiddenGuis)
+		return
+	end
 	for _, name in ipairs({ "HUD", "Tutorial" }) do
 		local hud = player.PlayerGui:FindFirstChild(name)
-		if hud and hud:IsA("ScreenGui") then
-			hud.Enabled = visible
+		if hud and hud:IsA("ScreenGui") and hud.Enabled then
+			hud.Enabled = false
+			table.insert(hiddenGuis, hud)
 		end
 	end
 end

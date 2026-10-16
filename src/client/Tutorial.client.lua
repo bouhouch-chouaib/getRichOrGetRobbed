@@ -312,6 +312,9 @@ end)
 -- Position de la flèche et du rayon à chaque image.
 RunService.RenderStepped:Connect(function()
 	if step == 0 then
+		if gui.Enabled then
+			gui.Enabled = false -- réaffiché par erreur ailleurs alors que le tutoriel est fini
+		end
 		return
 	end
 	local rootPart = getRoot()
