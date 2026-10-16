@@ -13,6 +13,8 @@
       "Remotes": {
         "$className": "Folder",
         "ItemGrabbed": { "$className": "RemoteEvent" },
+        "Bonus": { "$className": "RemoteEvent" },
+        "BonusResult": { "$className": "RemoteEvent" },
         "ThrowItem": { "$className": "RemoteEvent" },
         "Knockback": { "$className": "RemoteEvent" },
         "RewardsGranted": { "$className": "RemoteEvent" },

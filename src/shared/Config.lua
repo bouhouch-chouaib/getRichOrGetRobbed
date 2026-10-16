@@ -808,6 +808,93 @@ Config.Blackhole = {
 	Collapse = { ScoreMultiplier = 2, Rewards = { "Legendaire", "Epique", "Epique" } }, -- 1er, 2e, 3e contributeur
 }
 
+----------------------------------------------------------------------
+-- Rétention (16 oct.) : cadeau du jour, quêtes du jour, codes cadeaux, bonus d'amis, Rebirth.
+-- server/ProgressionController (+ server/Quests pour la progression), fenêtres client/BonusMenu et client/RebirthMenu.
+-- Les récompenses en argent sont en SECONDES DE REVENU du joueur (attribut "Income") : elles valent autant au début
+-- qu'à la fin du jeu. MinMoney = plancher pour un joueur qui ne gagne encore presque rien.
+-- Les tirages donnés sont des tirages gratuits (server/PullRewards) : des œufs, comme au trou noir.
+----------------------------------------------------------------------
+
+export type BonusReward = { Seconds: number?, Pulls: number? }
+
+-- Cadeau du jour : un par jour (jour UTC), 7 jours d'affilée puis on recommence au jour 1. Un jour manqué = retour au jour 1.
+Config.Daily = {
+	MinMoney = 500,
+	Rewards = {
+		{ Seconds = 300 }, -- jour 1 : 5 min de revenu
+		{ Pulls = 1 },
+		{ Seconds = 900 },
+		{ Pulls = 3 },
+		{ Seconds = 1800 },
+		{ Pulls = 5 },
+		{ Seconds = 3600, Pulls = 10 }, -- jour 7 : le gros cadeau
+	} :: { BonusReward },
+}
+
+-- Quêtes du jour : 3 par jour (facile, moyenne, difficile), tirées au hasard dans Pool (toujours 3 sortes différentes),
+-- les mêmes toute la journée. Goals = objectif selon la difficulté. Rewards = récompense selon la difficulté.
+export type QuestDef = { Id: string, Text: string, Goals: { number } }
+Config.Quests = {
+	PerDay = 3,
+	Pool = {
+		{ Id = "Feed", Text = "Fais avaler %d objets au trou noir", Goals = { 25, 60, 150 } },
+		{ Id = "Pulls", Text = "Gagne %d tirages", Goals = { 3, 8, 20 } },
+		{ Id = "Hatch", Text = "Fais éclore %d œufs", Goals = { 3, 8, 20 } },
+		{ Id = "Train", Text = "Gagne %d niveaux de Vitesse ou de Force", Goals = { 2, 5, 10 } },
+		{ Id = "Upgrade", Text = "Achète %d améliorations dans la Boutique", Goals = { 1, 3, 6 } },
+		{ Id = "Steal", Text = "Vole %d familiers dans les bases adverses", Goals = { 1, 2, 4 } },
+	} :: { QuestDef },
+	Rewards = {
+		{ Seconds = 600 }, -- facile : 10 min de revenu
+		{ Seconds = 1200, Pulls = 1 },
+		{ Seconds = 2400, Pulls = 3 }, -- difficile
+	} :: { BonusReward },
+	MinMoney = 500,
+}
+
+-- Codes cadeaux : à taper dans la fenêtre Bonus (majuscules / minuscules et espaces ignorés), une fois par joueur.
+-- Until = date de fin (os.time(), UTC) facultative. Ajouter un code ici puis Publier : il marche tout de suite.
+export type GiftCode = { Reward: BonusReward, Until: number? }
+Config.Codes = {
+	LANCEMENT = { Reward = { Seconds = 1800, Pulls = 3 } },
+	TROUNOIR = { Reward = { Pulls = 2 } },
+	MERCI = { Reward = { Seconds = 900 } },
+} :: { [string]: GiftCode }
+
+-- Bonus d'amis : +10 % de revenu par ami Roblox présent sur le même serveur, jusqu'à 5 amis (+50 %).
+Config.Friends = {
+	BonusPerFriend = 0.1,
+	MaxFriends = 5,
+}
+
+-- Rebirth : quand on a atteint le dernier monde, on paie Price(n) pour recommencer en Prairie avec 0 $ et les
+-- améliorations de la Boutique à zéro (armes et pouvoir gardés). On GARDE familiers, œufs, mutations, entraînement,
+-- clés et achats Robux. En échange, à vie : revenu x(1 + IncomeBonus x rebirths) et +ExtraPets familier(s) dans la base
+-- (ceux qui rapportent, Config.Pets.IncomeSlots), jusqu'à MaxExtraPets.
+Config.Rebirth = {
+	RequiredTier = 7, -- monde à avoir atteint (7 = Divin, le dernier)
+	BasePrice = 1e15, -- prix du 1er Rebirth ($1Qa)
+	PriceGrowth = 10, -- chaque Rebirth coûte 10 fois plus que le précédent
+	IncomeBonus = 1, -- +100 % de revenu par Rebirth : x2, x3, x4...
+	ExtraPets = 1, -- +1 familier qui rapporte dans la base par Rebirth
+	MaxExtraPets = 5,
+	KeepShopItems = { WeaponBat = true, WeaponGrapple = true, PowerInvisible = true }, -- pas remis à zéro
+}
+
+function Config.GetRebirthPrice(rebirths: number): number
+	return Config.Rebirth.BasePrice * Config.Rebirth.PriceGrowth ^ rebirths
+end
+
+function Config.GetRebirthMultiplier(rebirths: number): number
+	return 1 + Config.Rebirth.IncomeBonus * rebirths
+end
+
+-- Familiers qui rapportent (et se baladent) dans la base selon le nombre de Rebirths.
+function Config.GetIncomeSlots(rebirths: number): number
+	return Config.Pets.IncomeSlots + math.min(rebirths * Config.Rebirth.ExtraPets, Config.Rebirth.MaxExtraPets)
+end
+
 Config.Colors = {
 	Feeding = Color3.fromRGB(150, 0, 255),
 	Digesting = Color3.fromRGB(255, 40, 40),

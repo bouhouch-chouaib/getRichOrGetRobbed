@@ -46,6 +46,7 @@ local BlackholeTiers = require(script.Parent.BlackholeTiers)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local PowerController = require(script.Parent.PowerController)
+local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
 
 local StealController = {}
@@ -243,6 +244,7 @@ local function finish(carry: Carry, outcome: Outcome)
 			outcome = "Gone" -- le propriétaire ne l'a plus (fusion, équipement...) ou une sauvegarde n'est pas chargée
 		elseif transfer then
 			SessionData.AddPets(carrier, { [carry.petId] = 1 })
+			Quests.Add(carrier, "Steal", 1)
 			BasePetsController.Celebrate(carrier, { carry.petId })
 		else
 			money, points = StealController.SacrificeReward(carrier, carry.petId)

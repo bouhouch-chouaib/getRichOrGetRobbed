@@ -108,6 +108,13 @@ Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remo
 7 versions de plus en plus grandes et épiques (photographiées en jeu) et de plus en plus efficaces. **Familiers évolués complets** :
 Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stats et duel x1,4 / x2, étiquette dorée dans la base.
 
+**16 oct. : rétention** (GDD « Rétention », `server/ProgressionController`, `server/Quests`, `client/BonusMenu`,
+`client/RebirthMenu`) : boutons Bonus (cadeau du jour sur 7 jours, 3 quêtes du jour, codes cadeaux) et Rebirth (monde Divin
++ $1Qa : on perd argent, mondes, Boutique sauf armes ; revenu x(1+n) à vie, +1 familier dans la base), +10 % de revenu par
+ami sur le serveur. Vérifié en jeu (solo) : cadeau du jour, quête réclamée, code (accepté, déjà utilisé, inconnu), Rebirth
+(confirmation, célébration, Prairie, revenu x2, 11 familiers). Tests hors Studio dans `tools/check-eggs.luau`. Pas vu :
+bonus d'amis (il faut 2 vrais comptes amis), passage à minuit, sur téléphone (tuiles sur 2 rangées).
+
 **16 oct. : mutations SECRÈTES** (`Config.Mutations`, `client/RainbowPets`, GDD « Mutations ») : Doré 1/4 000 x2,
 Diamant 1/25 000 x5, Arc-en-ciel 1/150 000 x10, seulement sur les tirages gratuits (jamais Robux : chances à afficher) ;
 pas dans l'Index ni nulle part dans le jeu (demande de Chouaib : la surprise doit être énorme) ; éclosion surprise

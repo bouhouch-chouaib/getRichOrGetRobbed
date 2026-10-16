@@ -22,6 +22,7 @@ local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local EconomyController = require(script.Parent.EconomyController)
 local PullRewards = require(script.Parent.PullRewards)
+local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
 
 local BlackholeController = {}
@@ -130,6 +131,7 @@ local function consume(item: BasePart, caught: boolean?)
 			local value = if type(rawValue) == "number" then rawValue else 1
 			local bonus = BlackholeTiers.OnScored(owner, item, value)
 			SessionData.AddScore(owner, value * SessionData.GetMultiplier(owner) * bonus)
+			Quests.Add(owner, "Feed", 1)
 		elseif reason ~= "jamais lancé" then
 			-- Un objet simplement lâché près du trou n'est pas suspect ; le reste est signalé.
 			warn(string.format("[AntiCheat] %s : objet avalé sans points (%s)", owner.Name, reason))
@@ -249,6 +251,7 @@ local function distributeRewards()
 			-- Chance selon le score + passes et boost serveur (shared/Perks) ; rang, doublons : server/PullRewards.
 			local money = pointsMoney(player, score)
 			PullRewards.Grant(player, pulls, LootEngine.luck(score, Perks.LuckBonus(player)), money, score)
+			Quests.Add(player, "Pulls", pulls)
 			print(string.format("[Blackhole] %s : %.1f points -> %d tirage(s), +%d$", player.Name, score, pulls, money))
 		else
 			Remotes.RewardsGranted:FireClient(player, score, 0, {}, 0)

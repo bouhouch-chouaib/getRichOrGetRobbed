@@ -8,7 +8,8 @@
 --   SpeedLevel/SpeedXP/SpeedXPNeeded/Speed (WalkSpeed), StrengthLevel/StrengthXP/StrengthXPNeeded/ThrowPower,
 --   Pet_<PetId> (quantité possédée), Equipped ("id1,id2"), Multiplier, EquipSlots,
 --   SpeedBonus/StrengthBonus (niveaux donnés par les familiers équipés, shared/PetStats),
---   Pity (tirages depuis le dernier Épique+), TotalPulls (tirages faits depuis le début : le rang, Config.Loot.Ranks)
+--   Pity (tirages depuis le dernier Épique+), TotalPulls (tirages faits depuis le début : le rang, Config.Loot.Ranks),
+--   Rebirths, DailyLast/DailyStreak (cadeau du jour), Quests (JSON des quêtes du jour), QuestsDay (server/ProgressionController)
 
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
@@ -24,6 +25,9 @@ local PetStats = require(ReplicatedStorage.Shared.PetStats)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 export type Stat = "Speed" | "Strength"
+
+-- Quête du jour (server/Quests) : sorte (Config.Quests.Pool), objectif, avancement, récompense réclamée.
+export type Quest = { id: string, goal: number, progress: number, claimed: boolean }
 
 export type PlayerData = {
 	levels: { [string]: number }, -- Stat -> niveau
@@ -43,6 +47,10 @@ export type PlayerData = {
 	world: number, -- monde où le joueur se trouve (déjà visité, <= tier) : l'apparence et la musique
 	receipts: { string }, -- derniers achats Robux accordés (PurchaseId) : jamais deux fois le même (MonetizationController)
 	indexClaimed: { string }, -- familiers dont la récompense d'Index a été réclamée (ils restent « découverts » même volés)
+	rebirths: number, -- Rebirths faits (Config.Rebirth) : revenu x(1 + n), familiers en plus dans la base
+	daily: { last: number, streak: number }, -- cadeau du jour : dernier jour réclamé (jour UTC), jour de la série (1 à 7)
+	quests: { day: number, list: { Quest } }, -- quêtes du jour (refaites chaque jour UTC)
+	codes: { string }, -- codes cadeaux déjà utilisés
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
 }
 
@@ -120,6 +128,10 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		tier = data.tier,
 		world = data.world,
 		indexClaimed = table.clone(data.indexClaimed),
+		rebirths = data.rebirths,
+		daily = table.clone(data.daily),
+		quests = { day = data.quests.day, list = table.clone(data.quests.list) },
+		codes = table.clone(data.codes),
 		session = session,
 	}
 end
@@ -339,6 +351,34 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 			end
 		end
 	end
+	data.rebirths = math.max(0, math.floor(numberOr(saved.rebirths, 0)))
+	if type(saved.daily) == "table" then
+		data.daily = {
+			last = math.floor(numberOr(saved.daily.last, 0)),
+			streak = math.clamp(math.floor(numberOr(saved.daily.streak, 0)), 0, #Config.Daily.Rewards),
+		}
+	end
+	if type(saved.quests) == "table" and type(saved.quests.list) == "table" then
+		local list: { Quest } = {}
+		for _, quest in ipairs(saved.quests.list) do
+			if type(quest) == "table" and type(quest.id) == "string" and type(quest.goal) == "number" then
+				table.insert(list, {
+					id = quest.id,
+					goal = math.max(1, math.floor(quest.goal)),
+					progress = math.max(0, math.floor(numberOr(quest.progress, 0))),
+					claimed = quest.claimed == true,
+				})
+			end
+		end
+		data.quests = { day = math.floor(numberOr(saved.quests.day, 0)), list = list }
+	end
+	if type(saved.codes) == "table" then
+		for _, code in ipairs(saved.codes) do
+			if type(code) == "string" and not table.find(data.codes, code) then
+				table.insert(data.codes, code)
+			end
+		end
+	end
 	if saved.totalPulls == nil then
 		local owned = 0
 		for _, count in pairs(data.pets) do
@@ -439,6 +479,11 @@ local function sync(player: Player)
 	player:SetAttribute("Pity", data.pity)
 	player:SetAttribute("TotalPulls", data.totalPulls)
 	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
+	player:SetAttribute("Rebirths", data.rebirths)
+	player:SetAttribute("DailyLast", data.daily.last)
+	player:SetAttribute("DailyStreak", data.daily.streak)
+	player:SetAttribute("QuestsDay", data.quests.day)
+	player:SetAttribute("Quests", HttpService:JSONEncode(data.quests.list))
 	for id, level in pairs(data.upgrades) do
 		player:SetAttribute("Upgrade_" .. id, level)
 	end
@@ -452,6 +497,10 @@ local function sync(player: Player)
 	local points = getStat(player, "Points")
 	if points then
 		points.Value = math.floor(data.roundScore)
+	end
+	local rebirths = getStat(player, "Rebirth")
+	if rebirths then
+		rebirths.Value = data.rebirths
 	end
 end
 
@@ -542,6 +591,10 @@ local function onPlayerAdded(player: Player)
 		world = 1,
 		receipts = {},
 		indexClaimed = {},
+		rebirths = 0,
+		daily = { last = 0, streak = 0 },
+		quests = { day = 0, list = {} },
+		codes = {},
 		loaded = false,
 	}
 
@@ -553,6 +606,9 @@ local function onPlayerAdded(player: Player)
 	local pointsStat = Instance.new("IntValue")
 	pointsStat.Name = "Points"
 	pointsStat.Parent = leaderstats
+	local rebirthStat = Instance.new("IntValue")
+	rebirthStat.Name = "Rebirth"
+	rebirthStat.Parent = leaderstats
 	leaderstats.Parent = player
 
 	player.CharacterAdded:Connect(function()
@@ -640,6 +696,11 @@ function SessionData.Save(player: Player): boolean
 	return savePlayer(player, false)
 end
 
+-- Recopie les données vers les attributs (après une modification faite par un autre module via SessionData.Get).
+function SessionData.Sync(player: Player)
+	sync(player)
+end
+
 -- Un passe vient d'être détecté ou acheté : places d'équipement, sac, etc. sont recalculés.
 function SessionData.RefreshPerks(player: Player)
 	local data = storage[player]
@@ -686,6 +747,35 @@ function SessionData.AdvanceTier(player: Player): number?
 	data.world = data.tier -- on arrive dans le nouveau monde
 	sync(player)
 	return data.tier
+end
+
+-- Rebirth (Config.Rebirth) : il faut avoir atteint le dernier monde et payer le prix. On repart en Prairie avec 0 $ et
+-- les améliorations de la Boutique à zéro (sauf Config.Rebirth.KeepShopItems) ; familiers, œufs, entraînement, clés
+-- et achats Robux restent. Sans attente. Retourne le nouveau nombre de Rebirths, ou nil si impossible.
+function SessionData.Rebirth(player: Player): number?
+	local data = storage[player]
+	if not data or not data.loaded or data.tier < Config.Rebirth.RequiredTier then
+		return nil
+	end
+	if data.money < Config.GetRebirthPrice(data.rebirths) then
+		return nil
+	end
+	data.rebirths += 1
+	data.money = 0
+	data.tier = 1
+	data.world = 1
+	for _, item in ipairs(Config.Shop) do
+		if not Config.Rebirth.KeepShopItems[item.Id] and (data.upgrades[item.Id] or 0) > 0 then
+			data.upgrades[item.Id] = 0
+		end
+	end
+	sync(player)
+	return data.rebirths
+end
+
+function SessionData.GetRebirths(player: Player): number
+	local data = storage[player]
+	return if data then data.rebirths else 0
 end
 
 -- Retour dans un monde déjà visité (gratuit). Retourne true si le joueur a changé de monde.

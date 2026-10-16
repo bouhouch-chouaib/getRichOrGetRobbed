@@ -23,6 +23,7 @@ local PetWander = require(ReplicatedStorage.Shared.PetWander)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local BasePets = require(script.Parent.BasePetsController)
+local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
 local EggController = {}
 
@@ -101,6 +102,11 @@ function EggController.Init(bases: { Model })
 		-- 1. Éclosions (les données sont déjà à jour en mémoire : l'affichage ne peut ni empêcher ni rejouer une éclosion).
 		local hatched, done = SessionData.HatchEggs(player, os.time())
 		if #done > 0 then
+			local hatchCount = 0
+			for _, egg in ipairs(done) do
+				hatchCount += egg.count
+			end
+			Quests.Add(player, "Hatch", hatchCount)
 			local events: { Event } = {}
 			local spots: { [string]: Vector2 } = {}
 			local ids: { string } = {}

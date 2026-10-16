@@ -250,6 +250,27 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   anneau au sol (Épique), flammes + lumière (Légendaire), étincelles roses (Mythique), auréole + paillettes (Divin),
   auréole dorée + 8 rayons de lumière autour (Sigma). Retirées des aperçus des fenêtres (`MenuKit.petViewport`).
 
+## Rétention : cadeau du jour, quêtes, codes, amis, Rebirth (16 oct.)
+
+`server/ProgressionController` (+ `server/Quests`), fenêtres `client/BonusMenu` (bouton Bonus) et `client/RebirthMenu`
+(bouton Rebirth), réglages `Config.Daily / Quests / Codes / Friends / Rebirth`. Remotes `Bonus` (client -> serveur) et
+`BonusResult`. Sauvegardé : `rebirths`, `daily { last, streak }`, `quests { day, list }`, `codes`.
+- Récompenses en argent = secondes du revenu actuel du joueur (attribut `Income`, plancher `MinMoney`) : elles valent
+  autant au début qu'à la fin. Les tirages donnés sont des tirages gratuits (œufs, mutation secrète possible).
+- **Cadeau du jour** : un par jour UTC (minuit UTC = 1 h / 2 h en France), série de 7 (5 min de revenu, 1 tirage,
+  15 min, 3 tirages, 30 min, 5 tirages, 1 h + 10 tirages), un jour manqué = retour au jour 1. La fenêtre s'ouvre seule à
+  la connexion s'il y en a un à prendre (après le tutoriel).
+- **Quêtes du jour** : 3 (facile / moyenne / difficile) de sortes différentes, tirées avec une graine joueur + jour
+  (mêmes quêtes toute la journée). Sortes : Feed (objets avalés), Pulls (tirages du trou noir), Hatch (œufs éclos),
+  Train (niveaux d'entraînement), Upgrade (achats Boutique), Steal (vols réussis). `Quests.Add(joueur, sorte, n)`.
+- **Codes** : `Config.Codes` (LANCEMENT, TROUNOIR, MERCI pour l'instant), une fois par joueur, `Until` facultatif.
+- **Amis** : +10 % de revenu par ami Roblox sur le serveur (5 max), attribut `FriendsHere`.
+- **Rebirth** : il faut le monde Divin (7) et $1Qa (x10 à chaque Rebirth). On perd argent, mondes et améliorations de
+  la Boutique (armes et invisibilité gardées) ; on garde familiers, œufs, mutations, entraînement, clés, achats Robux.
+  Gain à vie : revenu x(1 + n) et +1 familier qui rapporte dans la base (jusqu'à +5). Colonne « Rebirth » dans la liste
+  des joueurs. Double appui pour confirmer. `SessionData.Rebirth`, sauvegarde immédiate.
+- Revenu = familiers x passes x monde x Rebirth x amis (`EconomyController.GetIncome / BonusMultiplier`).
+
 ## Mutations (16 oct., `Config.Mutations`)
 
 - **SECRET** (demande de Chouaib) : rien dans le jeu n'en parle, ni l'Index (pas d'onglet, pas de récompense, pas de

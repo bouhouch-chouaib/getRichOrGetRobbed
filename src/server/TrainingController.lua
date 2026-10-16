@@ -20,6 +20,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local BaseManager = require(script.Parent.BaseManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
+local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
 local StationLooks = require(script.Parent.StationLooks)
 
@@ -221,7 +222,7 @@ local function update()
 			local root = getRoot(owner)
 			if session and session.station == station then
 				local gain = Config.GetStationRate(level) * TICK
-				SessionData.AddTrainingXP(owner, station.kind.stat, gain)
+				Quests.Add(owner, "Train", SessionData.AddTrainingXP(owner, station.kind.stat, gain))
 				session.gained += gain
 				if now >= session.nextPulse then
 					session.nextPulse = now + PULSE

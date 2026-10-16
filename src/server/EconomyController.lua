@@ -9,6 +9,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
 
 local EconomyController = {}
@@ -20,16 +21,18 @@ end
 
 local petIncome = PetCatalog.GetIncome
 
--- Les Config.Pets.IncomeSlots meilleurs familiers NON équipés du joueur : ceux qui se baladent dans sa base
--- et rapportent de l'argent. Un familier équipé suit le joueur (bonus de points) mais ne rapporte rien.
+-- Les Config.Pets.IncomeSlots meilleurs familiers NON équipés du joueur (+1 par Rebirth, Config.GetIncomeSlots) : ceux
+-- qui se baladent dans sa base et rapportent de l'argent. Un familier équipé suit le joueur (bonus de points) mais ne
+-- rapporte rien.
 function EconomyController.GetTopPets(player: Player): { string }
 	local data = SessionData.Get(player)
 	if not data then
 		return {}
 	end
+	local slots = Config.GetIncomeSlots(data.rebirths)
 	local list = {}
 	for petId in pairs(data.pets) do
-		for _ = 1, math.min(SessionData.GetSpareCount(player, petId), Config.Pets.IncomeSlots) do
+		for _ = 1, math.min(SessionData.GetSpareCount(player, petId), slots) do
 			table.insert(list, petId)
 		end
 	end
@@ -41,7 +44,7 @@ function EconomyController.GetTopPets(player: Player): { string }
 		return a < b
 	end)
 	local top = {}
-	for index = 1, math.min(#list, Config.Pets.IncomeSlots) do
+	for index = 1, math.min(#list, slots) do
 		top[index] = list[index]
 	end
 	return top
@@ -54,10 +57,18 @@ function EconomyController.GetIncome(player: Player): number
 		income += petIncome(petId)
 	end
 	-- Passes 2X Argent et VIP (shared/Perks), puis bonus du monde le plus loin débloqué (Config.Worlds, attribut Tier),
-	-- même s'il est retourné dans un monde précédent.
+	-- même s'il est retourné dans un monde précédent, puis Rebirths (Config.Rebirth) et amis présents (Config.Friends).
 	local tier = player:GetAttribute("Tier")
 	local world = Config.GetWorld(if type(tier) == "number" then tier else 1)
-	return income * Perks.MoneyMultiplier(player) * world.IncomeMultiplier
+	return income * Perks.MoneyMultiplier(player) * world.IncomeMultiplier * EconomyController.BonusMultiplier(player)
+end
+
+-- Rebirths x amis sur le serveur (affiché par le HUD).
+function EconomyController.BonusMultiplier(player: Player): number
+	local friends = player:GetAttribute("FriendsHere")
+	local friendBonus = 1 + math.min(if type(friends) == "number" then friends else 0, Config.Friends.MaxFriends)
+		* Config.Friends.BonusPerFriend
+	return Config.GetRebirthMultiplier(SessionData.GetRebirths(player)) * friendBonus
 end
 
 EconomyController.GetPetIncome = petIncome
@@ -74,6 +85,7 @@ local function onBuy(player: Player, itemId: unknown)
 	local price = Config.GetUpgradePrice(item, level)
 	if price and SessionData.SpendMoney(player, price) then
 		SessionData.SetUpgradeLevel(player, item.Id, level + 1)
+		Quests.Add(player, "Upgrade", 1)
 		print(string.format("[Shop] %s a acheté %s niveau %d", player.Name, item.Name, level + 1))
 	end
 end

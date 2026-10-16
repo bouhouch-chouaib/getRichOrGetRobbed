@@ -252,6 +252,9 @@ services.HttpService = {
 		guid += 1
 		return "guid" .. guid
 	end,
+	JSONEncode = function(_, value)
+		return serde.encode("json", value)
+	end,
 }
 services.Players = {
 	PlayerAdded = signal(),
@@ -406,6 +409,60 @@ assert(records.u_1234.totalPulls == n + 1 and records.u_1234.pets[byRank[4]] == 
 assert(session.GetRewardOwned(player)[byRank[4]] == 1)
 assert(monetization.ProcessReceipt(paid) == decision.PurchaseGranted and session.GetTotalPulls(player) == n + 1)
 
+-- Retention: Rebirth resets money, worlds and the shop (weapons kept) and keeps every pet; daily gift rules, daily
+-- quests (same all day, 3 different kinds), quest progress capped at the goal, code normalisation.
+do
+	local data = session.Get(player)
+	local function petCount(): number
+		local total = 0
+		for _, count in pairs(data.pets) do
+			total += count
+		end
+		return total
+	end
+	local petsBefore = petCount()
+	data.upgrades.Treadmill = 7
+	data.upgrades.WeaponBat = 1
+	data.tier = config.Rebirth.RequiredTier - 1
+	data.money = config.GetRebirthPrice(0) * 2
+	assert(session.Rebirth(player) == nil, "the last world is required")
+	data.tier = config.Rebirth.RequiredTier
+	data.money = config.GetRebirthPrice(0) - 1
+	assert(session.Rebirth(player) == nil, "the price is required")
+	data.money = config.GetRebirthPrice(0)
+	assert(session.Rebirth(player) == 1)
+	assert(data.money == 0 and data.tier == 1 and data.world == 1, "back to the first world with no money")
+	assert(data.upgrades.Treadmill == 0 and data.upgrades.WeaponBat == 1, "shop reset, weapons kept")
+	assert(petCount() == petsBefore, "pets are kept")
+	assert(config.GetRebirthMultiplier(1) == 2 and config.GetRebirthPrice(1) == config.Rebirth.BasePrice * config.Rebirth.PriceGrowth)
+	assert(config.GetIncomeSlots(1) == config.Pets.IncomeSlots + 1)
+	assert(config.GetIncomeSlots(99) == config.Pets.IncomeSlots + config.Rebirth.MaxExtraPets)
+
+	local quests = loadModule("Quests")
+	local first, again = quests.Generate(1234, 500), quests.Generate(1234, 500)
+	assert(#first == config.Quests.PerDay)
+	local kinds = {}
+	for index, quest in ipairs(first) do
+		assert(quest.id == again[index].id and quest.goal == again[index].goal, "the same quests all day")
+		assert(not kinds[quest.id], "three different kinds")
+		kinds[quest.id] = true
+	end
+	data.quests = { day = quests.Today(), list = { { id = "Feed", goal = 2, progress = 0, claimed = false } } }
+	quests.Add(player, "Feed", 5)
+	quests.Add(player, "Pulls", 5)
+	assert(data.quests.list[1].progress == 2, "progress is capped at the goal")
+	data.daily = { last = 100, streak = 3 }
+	data.codes = { "MERCI" }
+
+	local progression = loadModule("ProgressionController")
+	assert(progression.DailyDay(100, 3, 100) == nil, "one gift a day")
+	assert(progression.DailyDay(100, 3, 101) == 4, "the streak goes on")
+	assert(progression.DailyDay(100, 7, 101) == 1, "after day 7, back to day 1")
+	assert(progression.DailyDay(100, 3, 103) == 1, "a missed day restarts the streak")
+	assert(progression.DailyDay(0, 0, 20000) == 1, "first gift ever")
+	assert(progression.NormalizeCode(" mer ci ") == "MERCI")
+end
+
 -- A fresh server loads the persisted eggs and hatches them, without crediting them again on the next tick.
 services.Players.PlayerRemoving:Fire(player)
 cache.SessionData = nil
@@ -414,6 +471,12 @@ local rejoined = loadModule("SessionData")
 rejoined.Init()
 tasks[1].f(table.unpack(tasks[1].args))
 assert(rejoined.IsLoaded(player))
+do
+	local data = rejoined.Get(player)
+	assert(rejoined.GetRebirths(player) == 1 and data.tier == 1, "the Rebirth is saved")
+	assert(data.daily.last == 100 and data.daily.streak == 3 and table.find(data.codes, "MERCI"), "daily gift and codes are saved")
+	assert(#data.quests.list == 1 and data.quests.list[1].progress == 2, "quests are saved")
+end
 local before = rejoined.GetRewardOwned(player)
 rejoined.HatchEggs(player, os.time() + 10000)
 assert(#rejoined.GetEggs(player) == 0 and next((rejoined.HatchEggs(player, os.time() + 10000))) == nil)

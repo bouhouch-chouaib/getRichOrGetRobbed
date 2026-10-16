@@ -1,6 +1,7 @@
 --!strict
 -- HUD : l'écran de jeu, disposé comme la référence (docs/DIRECTION_ARTISTIQUE.md §3) :
---   - au milieu à gauche : gros boutons Boutique (vert), Index (cyan), Mondes avec pastilles rouges ;
+--   - au milieu à gauche : gros boutons Boutique (vert), Index (cyan), Mondes, Bonus (cadeau du jour, quêtes, codes)
+--     et Rebirth, avec pastilles rouges ;
 --   - en bas à gauche : Force, Vitesse et argent en gros chiffres italiques ;
 --   - en haut au centre : une pastille horloge de la manche (lune = on nourrit le trou noir, soleil = il digère)
 --     + tirages gagnés pendant la manche, et dessous une pile (boost, consigne, carte des tirages) ;
@@ -16,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
+local BonusMenu = require(script.Parent.BonusMenu)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
@@ -23,6 +25,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local RebirthMenu = require(script.Parent.RebirthMenu)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local FusionMenu = require(script.Parent.FusionMenu)
 local IndexMenu = require(script.Parent.IndexMenu)
@@ -226,8 +229,10 @@ local menuColumn = Instance.new("Frame")
 menuColumn.Name = "Left"
 menuColumn.BackgroundTransparency = 1
 menuColumn.AnchorPoint = if isTouch then Vector2.new(0, 0) else Vector2.new(0, 0.5)
-menuColumn.Position = if isTouch then UDim2.new(0, 16, 0, STATS_HEIGHT + 20) else UDim2.new(0, 16, 0.5, -30)
-menuColumn.Size = if isTouch then UDim2.fromOffset(310, 92) else UDim2.fromOffset(220, 250)
+-- PC : 5 boutons de 58 (pas de 66) centrés un peu au-dessus du milieu, pour laisser la place aux stats en bas à gauche
+-- même sur un écran bas (630 de haut).
+menuColumn.Position = if isTouch then UDim2.new(0, 16, 0, STATS_HEIGHT + 20) else UDim2.new(0, 16, 0.5, -95)
+menuColumn.Size = if isTouch then UDim2.fromOffset(310, 196) else UDim2.fromOffset(220, 322)
 menuColumn.Parent = gui
 
 -- Ligne de stat d'entraînement : icône + « NV 13 » en italique + barre d'XP (plus petite sur tactile).
@@ -270,11 +275,12 @@ incomeLabel.Position = UDim2.fromOffset(if isTouch then 44 else 52, if isTouch t
 incomeLabel.Size = UDim2.new(1, -52, 0, if isTouch then 20 else 26)
 incomeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- Bouton de menu : PC = grand rectangle icône + nom ; tactile = tuile carrée (icône, nom dessous). Pastille rouge.
+-- Bouton de menu : PC = grand rectangle icône + nom (en colonne) ; tactile = tuile carrée (icône, nom dessous), 3 par
+-- rangée. Pastille rouge.
 local function menuButton(icon: string, name: string, index: number, color: Color3): (TextButton, TextLabel)
 	if isTouch then
 		local tile = UiStyle.button(menuColumn, "", UDim2.fromOffset(92, 92), color, 1)
-		tile.Position = UDim2.fromOffset((index - 1) * 104, 0)
+		tile.Position = UDim2.fromOffset(((index - 1) % 3) * 104, ((index - 1) // 3) * 104)
 		local iconImage = Icons.image(tile, icon, UDim2.fromOffset(56, 56), UDim2.fromOffset(18, 4))
 		iconImage.ZIndex = 2
 		local nameLabel = text(tile, name, 18, WHITE, BODY_FONT)
@@ -284,11 +290,11 @@ local function menuButton(icon: string, name: string, index: number, color: Colo
 		nameLabel.ZIndex = 2
 		return tile, UiStyle.badge(tile)
 	end
-	local button = UiStyle.button(menuColumn, "", UDim2.fromOffset(210, 70), color, 1)
-	button.Position = UDim2.fromOffset(0, (index - 1) * 88)
-	local iconImage = Icons.image(button, icon, UDim2.fromOffset(62, 62), UDim2.fromOffset(2, 4))
+	local button = UiStyle.button(menuColumn, "", UDim2.fromOffset(210, 58), color, 1)
+	button.Position = UDim2.fromOffset(0, (index - 1) * 66)
+	local iconImage = Icons.image(button, icon, UDim2.fromOffset(54, 54), UDim2.fromOffset(4, 2))
 	iconImage.ZIndex = 2
-	local nameLabel = text(button, name, 32, WHITE, BODY_FONT)
+	local nameLabel = text(button, name, 30, WHITE, BODY_FONT)
 	nameLabel.Position = UDim2.fromOffset(60, 0)
 	nameLabel.Size = UDim2.new(1, -66, 1, 0)
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -299,6 +305,8 @@ end
 local shopButton, shopBadge = menuButton("Shop", "Boutique", 1, UiStyle.Colors.Green)
 local indexButton, indexBadge = menuButton("Index", "Index", 2, UiStyle.Colors.Cyan)
 local worldsButton, worldsBadge = menuButton("Planet", "Mondes", 3, Color3.fromRGB(255, 150, 40))
+local bonusButton, bonusBadge = menuButton("Gift", "Bonus", 4, Color3.fromRGB(255, 200, 40))
+local rebirthButton, rebirthBadge = menuButton("Crown", "Rebirth", 5, Color3.fromRGB(170, 90, 255))
 
 ----------------------------------------------------------------------
 -- Fenêtres
@@ -308,10 +316,14 @@ local shop = ShopMenu.create(gui, topStack)
 local index = IndexMenu.create(gui)
 local fusion = FusionMenu.create(gui)
 local worlds = WorldMenu.create(gui)
+local bonus = BonusMenu.create(gui)
+local rebirth = RebirthMenu.create(gui)
 
 shopButton.Activated:Connect(shop.window.toggle)
 indexButton.Activated:Connect(index.window.toggle)
 worldsButton.Activated:Connect(worlds.window.toggle)
+bonusButton.Activated:Connect(bonus.window.toggle)
+rebirthButton.Activated:Connect(rebirth.window.toggle)
 
 ----------------------------------------------------------------------
 -- Carte de résultats des tirages (fin de manche)
@@ -464,6 +476,15 @@ local function updateStats()
 	UiStyle.setBadge(worldsBadge, if worlds.canTravel() then "!" else nil)
 	local claimable = MenuKit.claimableCount()
 	UiStyle.setBadge(indexBadge, if claimable > 0 then tostring(claimable) else nil)
+	if bonus.window.isOpen() then
+		bonus.refresh()
+	end
+	local bonusReady = bonus.claimableCount()
+	UiStyle.setBadge(bonusBadge, if bonusReady > 0 then tostring(bonusReady) else nil)
+	if rebirth.window.isOpen() then
+		rebirth.refresh()
+	end
+	UiStyle.setBadge(rebirthBadge, if rebirth.canRebirth() then "!" else nil)
 end
 
 -- Sauvegarde encore ouverte sur l'ancien serveur (on vient d'en changer) : le serveur attend qu'elle se libère.
@@ -682,6 +703,71 @@ Remotes.TierReached.OnClientEvent:Connect(function(traveller: Player, tier: numb
 		WorldMenu.celebrate(gui, tier, revisit == true)
 	else
 		Toast.show(string.format("%s VOYAGE VERS LE MONDE %s !", TextFormat.upper(traveller.DisplayName), TextFormat.upper(world.Name)), Color3.fromRGB(255, 180, 60))
+	end
+end)
+
+-- Bonus (server/ProgressionController) : cadeau du jour, quêtes, codes, et Rebirths de tout le serveur.
+local function rewardSummary(money: number?, pulls: number?): string
+	local parts = {}
+	if money and money > 0 then
+		table.insert(parts, "+" .. NumberFormat.money(money))
+	end
+	if pulls and pulls > 0 then
+		table.insert(parts, string.format("+%d TIRAGE%s", pulls, if pulls > 1 then "S" else ""))
+	end
+	return table.concat(parts, "  •  ")
+end
+Remotes.BonusResult.OnClientEvent:Connect(function(kind: string, a: any, b: any, c: any, d: any)
+	if kind == "Daily" then
+		Sounds.play("Coins")
+		Toast.show(string.format("CADEAU DU JOUR %d : %s !", a, rewardSummary(b, c)), UiStyle.Colors.Gold)
+	elseif kind == "Quest" then
+		Sounds.play("Coins")
+		Toast.show("QUÊTE TERMINÉE : " .. rewardSummary(b, c) .. " !", MONEY)
+	elseif kind == "Code" then
+		if a == true then
+			Sounds.play("Coins")
+			bonus.codeResult(true, "CODE " .. tostring(b) .. " : " .. rewardSummary(c, d) .. " !")
+			Toast.show("CODE " .. tostring(b) .. " : " .. rewardSummary(c, d) .. " !", MONEY)
+		else
+			Sounds.play("Error")
+			bonus.codeResult(false, tostring(b))
+		end
+	elseif kind == "Rebirth" and typeof(a) == "Instance" and type(b) == "number" then
+		if a == player then
+			MenuKit.closeAll()
+			RebirthMenu.celebrate(gui, b)
+		else
+			Toast.show(string.format("%s A FAIT UN REBIRTH (%d) !", TextFormat.upper((a :: Player).DisplayName), b),
+				Color3.fromRGB(190, 130, 255))
+		end
+	end
+	updateStats()
+end)
+
+-- Un ami Roblox arrive sur le serveur : bonus de revenu (Config.Friends).
+local lastFriends = numberAttribute("FriendsHere")
+player:GetAttributeChangedSignal("FriendsHere"):Connect(function()
+	local friends = numberAttribute("FriendsHere")
+	if friends > lastFriends then
+		local bonusPercent = math.floor(math.min(friends, Config.Friends.MaxFriends) * Config.Friends.BonusPerFriend * 100 + 0.5)
+		Toast.show(string.format("UN AMI EST LÀ : +%d %% DE REVENU !", bonusPercent), MONEY)
+	end
+	lastFriends = friends
+end)
+
+-- Cadeau du jour à réclamer : la fenêtre s'ouvre toute seule une fois par session (après le tutoriel).
+task.spawn(function()
+	local started = os.clock()
+	while player:GetAttribute("DataLoaded") ~= true and os.clock() - started < 15 do
+		task.wait(0.5)
+	end
+	task.wait(4)
+	while player:GetAttribute("TutorialDone") ~= true do
+		task.wait(2)
+	end
+	if bonus.dailyReady() then
+		bonus.openTab(1)
 	end
 end)
 

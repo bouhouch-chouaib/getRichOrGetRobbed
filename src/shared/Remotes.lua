@@ -133,4 +133,9 @@ return {
 	-- Serveur -> client : ("Invite", joueur, fin), ("Waiting", joueur, fin), ("Cancelled", raison), ("Open", autre),
 	-- ("State", monOffre, prêt, confirmé, sonOffre, prêt, confirmé, phase, confirmableÀ), ("Done", reçu, donné, autre).
 	TradeEvent = remote("TradeEvent"),
+	-- Client -> serveur : bonus (server/ProgressionController) : ("Daily"), ("Quest", index), ("Code", texte), ("Rebirth").
+	Bonus = remote("Bonus"),
+	-- Serveur -> client(s) : ("Daily", jour, argent, tirages), ("Quest", index, argent, tirages),
+	-- ("Code", ok, message, argent?, tirages?), et à tous : ("Rebirth", joueur, nombre de Rebirths).
+	BonusResult = remote("BonusResult"),
 }

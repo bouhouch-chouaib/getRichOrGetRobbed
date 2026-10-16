@@ -175,6 +175,8 @@ Le joueur doit comprendre en 30 secondes : flèche/balise + 3 étapes guidées (
 ### P1 — Rétention
 
 #### P1.1 Rebirth
+> **Fait le 16 oct.** (avec P1.5 en partie : cadeau du jour, quêtes du jour, codes cadeaux, bonus d'amis ; voir GDD
+> « Rétention »). Restent : badges, bonus de groupe Roblox.
 Condition : une somme d'argent (+ éventuellement un familier précis). Effet : on perd argent et familiers (hors exceptions [À DÉCIDER]) ; on gagne un multiplicateur permanent de revenu, +1 emplacement de familier, +temps de verrou, et le déblocage d'un nouvel outil dans la boutique.
 
 #### P1.2 Emplacements et étages
