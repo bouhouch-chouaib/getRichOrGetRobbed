@@ -181,6 +181,8 @@ Condition : une somme d'argent (+ éventuellement un familier précis). Effet : 
 Aujourd'hui 10 familiers se baladent dans la base. Passer à des emplacements explicites (socles) qui augmentent avec les rebirths ; un 2e étage (accessible par escalier) débloqué à un rebirth donné, qui rend aussi le vol plus difficile.
 
 #### P1.3 Mutations et traits
+> **Fait le 16 oct. (mutations)** : Doré x2 / Diamant x5 / Arc-en-ciel x10, depuis les tirages du trou noir (voir GDD
+> « Mutations »). Restent : traits cumulables, mutations par la fusion et les événements.
 - Mutation : une seule par familier, change l'apparence (couleur, effet), multiplie le revenu (ex. Or ×1,25, Diamant ×1,5, Lave ×6, Arc-en-ciel ×10 — noms et valeurs à adapter au thème du trou noir, ex. « Cosmique », « Supernova », « Matière noire »).
 - Traits : cumulables, obtenus par événements/météo.
 - Formule : `revenu = base × mutation × trait1 × trait2 × …`.

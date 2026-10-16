@@ -30,7 +30,8 @@ export type Pet = {
 	Description: string,
 	Look: Look,
 	Stage: number?, -- 2 = Évolué, 3 = Ultime (familier sorti de la machine d'évolution) ; nil = stade normal
-	BaseId: string?, -- l'espèce de départ d'un familier évolué
+	Mutation: string?, -- "Gold" | "Diamond" | "Rainbow" (Config.Mutations) ; nil = sans mutation
+	BaseId: string?, -- l'espèce de départ d'un familier évolué ou muté
 }
 
 local rgb = Color3.fromRGB
@@ -176,33 +177,68 @@ for _, entry in ipairs(list) do
 	table.insert(bucket, entry)
 end
 
--- Familiers évolués (machine d'évolution, Config.Evolution) : chaque espèce a 2 formes de plus, « <Id>__E2 » (Évolué)
--- et « <Id>__E3 » (Ultime). Ils sont dans ById (tout le jeu les connaît : base, échanges, vols, duels, sauvegarde)
--- mais PAS dans List / ByRarity : ils ne sortent pas des tirages et n'ont pas de case à eux dans l'Index.
--- Everything = List + formes évoluées (fenêtres qui montrent les familiers possédés : échanges, duels).
+-- Formes d'une espèce : évoluées (machine d'évolution, Config.Evolution : « <Id>__E2 » Évolué, « <Id>__E3 » Ultime) et/ou
+-- mutées (Config.Mutations : « <Id>__MGold », « <Id>__E3__MRainbow »...). Elles sont dans ById (tout le jeu les connaît :
+-- base, échanges, vols, duels, sauvegarde) mais PAS dans List / ByRarity : elles ne sortent pas des tirages telles quelles et
+-- n'ont pas de case à elles dans l'Index (la fiche de l'espèce les montre).
+-- Everything = List + toutes les formes (fenêtres qui montrent les familiers possédés : échanges, duels).
+-- FormsOf[espèce] = les Id de toutes ses formes, elle comprise.
 PetCatalog.Everything = table.clone(list)
-for _, entry in ipairs(list) do
-	for stage = 2, #Config.Evolution.Names do
-		local variant: Pet = {
-			Id = entry.Id .. "__E" .. stage,
-			Name = entry.Name .. " " .. Config.Evolution.Names[stage],
-			Rarity = entry.Rarity,
-			Category = entry.Category,
-			Description = entry.Description,
-			Look = entry.Look,
-			Stage = stage,
-			BaseId = entry.Id,
-		}
-		PetCatalog.ById[variant.Id] = variant
-		table.insert(PetCatalog.Everything, variant)
-	end
+PetCatalog.FormsOf = {} :: { [string]: { string } }
+
+-- Id d'une forme : espèce + stade (1 = normal) + mutation (nil = aucune).
+function PetCatalog.Compose(baseId: string, stage: number, mutation: string?): string
+	return baseId .. (if stage > 1 then "__E" .. stage else "") .. (if mutation then "__M" .. mutation else "")
 end
 
--- Id de la forme d'une espèce à ce stade (1 = l'espèce elle-même).
+for _, entry in ipairs(list) do
+	local forms = { entry.Id }
+	for stage = 1, #Config.Evolution.Names do
+		for slot = 1, #Config.Mutations + 1 do -- 1 = sans mutation, puis chaque mutation
+			local mutation = if slot > 1 then Config.Mutations[slot - 1] else nil
+			if stage == 1 and not mutation then
+				continue -- l'espèce elle-même
+			end
+			local name = entry.Name
+				.. (if stage > 1 then " " .. Config.Evolution.Names[stage] else "")
+				.. (if mutation then " " .. mutation.Name else "")
+			local variant: Pet = {
+				Id = PetCatalog.Compose(entry.Id, stage, mutation and mutation.Id),
+				Name = name,
+				Rarity = entry.Rarity,
+				Category = entry.Category,
+				Description = entry.Description,
+				Look = entry.Look,
+				Stage = if stage > 1 then stage else nil,
+				Mutation = if mutation then mutation.Id else nil,
+				BaseId = entry.Id,
+			}
+			PetCatalog.ById[variant.Id] = variant
+			table.insert(PetCatalog.Everything, variant)
+			table.insert(forms, variant.Id)
+		end
+	end
+	PetCatalog.FormsOf[entry.Id] = forms
+end
+
+-- Id de la forme de ce familier à ce stade (1 = normal), en gardant sa mutation.
 function PetCatalog.Variant(petId: string, stage: number): string
 	local entry = PetCatalog.ById[petId]
 	local baseId = if entry and entry.BaseId then entry.BaseId else petId
-	return if stage <= 1 then baseId else baseId .. "__E" .. stage
+	return PetCatalog.Compose(baseId, stage, entry and entry.Mutation)
+end
+
+-- Le même familier avec cette mutation (nil = sans), en gardant son stade.
+function PetCatalog.WithMutation(petId: string, mutation: string?): string
+	local entry = PetCatalog.ById[petId]
+	local baseId = if entry and entry.BaseId then entry.BaseId else petId
+	return PetCatalog.Compose(baseId, if entry and entry.Stage then entry.Stage else 1, mutation)
+end
+
+-- Mutation d'un familier (nil = aucune).
+function PetCatalog.Mutation(petId: string): string?
+	local entry = PetCatalog.ById[petId]
+	return if entry then entry.Mutation else nil
 end
 
 -- Stade d'un familier (1 = normal).
@@ -212,15 +248,17 @@ function PetCatalog.Stage(petId: string): number
 end
 
 -- Revenu par seconde d'un familier sur un socle : base de sa rareté, +15 % par rang dans sa rareté
--- (ordre du catalogue), pour que chaque familier ait sa propre valeur ; x Config.Evolution.IncomeMultiplier s'il est évolué.
+-- (ordre du catalogue), pour que chaque familier ait sa propre valeur ; x Config.Evolution.IncomeMultiplier s'il est évolué,
+-- x Config.Mutations[].Income s'il est muté.
 local incomes: { [string]: number } = {}
 for rarityId, bucket in pairs(PetCatalog.ByRarity) do
 	local rarity = Config.Rarities[Config.RarityIndex[rarityId]]
 	for rank, entry in ipairs(bucket) do
 		local income = if rarity then math.floor(rarity.Income * (1 + (rank - 1) * 0.15)) else 0
-		incomes[entry.Id] = income
-		for stage = 2, #Config.Evolution.Names do
-			incomes[entry.Id .. "__E" .. stage] = math.floor(income * Config.Evolution.IncomeMultiplier[stage])
+		for _, formId in ipairs(PetCatalog.FormsOf[entry.Id]) do
+			local form = PetCatalog.ById[formId]
+			local mutation = if form.Mutation then Config.Mutations[Config.MutationIndex[form.Mutation]] else nil
+			incomes[formId] = math.floor(income * Config.Evolution.IncomeMultiplier[form.Stage or 1] * (if mutation then mutation.Income else 1))
 		end
 	end
 end

@@ -14,6 +14,21 @@ Config.Eggs = {
 	ViewDistance = 140,
 }
 
+-- Mutations (16 oct.) : un familier qui sort d'un tirage a une petite chance d'être Doré, Diamant ou Arc-en-ciel.
+-- Tirée en secret quand l'œuf est attribué (server/PullRewards), révélée à l'éclosion. Aspect unique (shared/PetModelBuilder,
+-- client/RainbowPets), revenu multiplié (Income), annonce à tout le serveur à partir de Diamant. Se cumule avec l'évolution.
+-- Un doublon muté n'est jamais vendu : c'est un autre familier (« <Id>__MGold »...).
+export type Mutation = { Id: string, Name: string, Chance: number, Income: number, Color: Color3, Announce: boolean }
+Config.Mutations = {
+	{ Id = "Gold", Name = "Doré", Chance = 0.04, Income = 2, Color = Color3.fromRGB(255, 200, 40), Announce = false },
+	{ Id = "Diamond", Name = "Diamant", Chance = 0.01, Income = 5, Color = Color3.fromRGB(140, 230, 255), Announce = true },
+	{ Id = "Rainbow", Name = "Arc-en-ciel", Chance = 0.002, Income = 10, Color = Color3.fromRGB(255, 100, 210), Announce = true },
+} :: { Mutation }
+Config.MutationIndex = {} :: { [string]: number }
+for index, mutation in ipairs(Config.Mutations) do
+	Config.MutationIndex[mutation.Id] = index
+end
+
 -- Aimant à objets (amélioration "Magnet" de la boutique, ou passe Robux "AutoMagnet" = niveau maximum) :
 -- server/ItemInteraction ramasse pour le joueur l'objet le plus proche dans la portée, avec les mêmes règles que [E]
 -- (mains / sac libres, pas de familier porté, pas d'arme en main, vivant).

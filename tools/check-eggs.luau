@@ -472,6 +472,18 @@ for i = 1, 1000 do
 	end
 end
 assert(maxed > 100 and maxed < 260, "most eggs never reach Ultime")
+-- Mutations (Config.Mutations): every species has its mutated forms, income multiplied, kept through evolution.
+for _, entry in ipairs(catalog.List) do
+	assert(#catalog.FormsOf[entry.Id] == #config.Evolution.Names * (#config.Mutations + 1), "all forms of " .. entry.Id)
+end
+local goldId = catalog.WithMutation(byRank[2], "Gold")
+assert(goldId == byRank[2] .. "__MGold" and catalog.ById[goldId].Mutation == "Gold" and catalog.ById[goldId].BaseId == byRank[2])
+assert(catalog.GetIncome(goldId) == math.floor(catalog.GetIncome(byRank[2]) * config.Mutations[1].Income))
+local ultimeRainbow = catalog.Variant(catalog.WithMutation(byRank[2], "Rainbow"), 3)
+assert(ultimeRainbow == byRank[2] .. "__E3__MRainbow", "evolving keeps the mutation")
+assert(catalog.GetIncome(ultimeRainbow) == math.floor(catalog.GetIncome(byRank[2]) * config.Evolution.IncomeMultiplier[3] * config.Mutations[3].Income))
+assert(eggs.Create(goldId, 1, 0, "mut") ~= nil, "a mutated pet can be an egg")
+
 -- Saved evolution survives a reload.
 local saved = eggs.Merge({ { id = "x", petId = byRank[1], count = 1, startedAt = 1, readyAt = 2,
 	evolve = { stage = 2, maxStage = 3, nextAt = 99, done = false } } }, {})

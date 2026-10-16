@@ -603,11 +603,17 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 		return
 	end
 	local rarity = Config.Rarities[rank]
-	-- Un familier évolué (machine d'évolution) éclot avec le spectacle des raretés au-dessus.
+	-- Un familier évolué (machine d'évolution) ou muté (Doré +1, Diamant +2, Arc-en-ciel +3) éclot avec le spectacle des
+	-- raretés au-dessus ; la mutation donne sa couleur au bandeau.
 	local stage = Catalog.Stage(petId)
-	local fx = SPECTACLE[math.min(#SPECTACLE, rank + stage - 1)]
+	local mutationId = Catalog.Mutation(petId)
+	local mutationIndex = if mutationId then Config.MutationIndex[mutationId] or 0 else 0
+	local mutation = if mutationIndex > 0 then Config.Mutations[mutationIndex] else nil
+	local fx = SPECTACLE[math.min(#SPECTACLE, rank + stage - 1 + mutationIndex)]
 	local title = "ÉCLOSION " .. TextFormat.upper(rarity.Name)
-		.. (if stage > 1 then " " .. TextFormat.upper(Config.Evolution.Names[stage]) else "") .. " !"
+		.. (if stage > 1 then " " .. TextFormat.upper(Config.Evolution.Names[stage]) else "")
+		.. (if mutation then " " .. TextFormat.upper(mutation.Name) else "") .. " !"
+	local bannerColor = if mutation then mutation.Color else rarity.Color
 	local mine = ownerId == player.UserId
 	if mine then
 		queueToast(TextFormat.upper(entry.Name), rank, rarity.Color)
@@ -636,8 +642,8 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 	local near = camera ~= nil and (camera.CFrame.Position - cf.Position).Magnitude <= Config.Eggs.ViewDistance
 	if not near then
 		shell:Destroy()
-		if mine and fx.banner then
-			showBanner(title, rarity.Color)
+		if mine and (fx.banner or mutation) then
+			showBanner(title, bannerColor)
 		end
 		return
 	end
@@ -719,8 +725,8 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 	if mine and fx.flash then
 		screenFlash(0.25 + (rank - 6) * 0.15)
 	end
-	if mine and fx.banner then
-		showBanner(title, rarity.Color)
+	if mine and (fx.banner or mutation) then
+		showBanner(title, bannerColor)
 	end
 
 	-- 5. Le familier : il sort du nid (client/BasePets) ou s'affiche un instant puis rejoint la collection.

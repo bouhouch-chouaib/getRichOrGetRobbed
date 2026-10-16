@@ -250,6 +250,21 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   anneau au sol (Épique), flammes + lumière (Légendaire), étincelles roses (Mythique), auréole + paillettes (Divin),
   auréole dorée + 8 rayons de lumière autour (Sigma). Retirées des aperçus des fenêtres (`MenuKit.petViewport`).
 
+## Mutations (16 oct., `Config.Mutations`)
+
+- 3 mutations, une au plus par familier, tirées à chaque tirage du trou noir (`PullRewards.RollMutation`, chance
+  x (1 + Chance x 0,5)) : **Doré** 4 % (revenu x2), **Diamant** 1 % (x5), **Arc-en-ciel** 0,2 % (x10).
+- Identifiant : `<Id>__M<Mutation>`, combiné avec l'évolution : `<Id>__E3__MRainbow` (`PetCatalog.Compose`,
+  `WithMutation`, `Mutation`, `FormsOf[espèce]` = les 12 formes). Revenu = base x évolution x mutation. Une mutation
+  reste quand l'œuf évolue dans la capsule (`PetCatalog.Variant`). Les doublons se comptent forme par forme.
+- Aspect (`PetModelBuilder.applyMutation`) : Doré = or brillant (Foil), Diamant = cristal bleu translucide (Glass),
+  Arc-en-ciel = dégradé du bas vers le haut qui défile (`client/RainbowPets`, tag `RainbowPet`) ; le visage (pièces
+  `EyeSocket`, `Iris`, `Pupil`, `Mouth`...) ne change pas ; étincelles à la couleur de la mutation.
+- Éclosion : spectacle d'une rareté au-dessus par mutation (Doré +1, Diamant +2, Arc-en-ciel +3), bandeau
+  « ÉCLOSION RARE DIAMANT ! » à la couleur de la mutation. Annonce à tout le serveur pour Diamant et Arc-en-ciel.
+- Base : ligne de couleur au-dessus du nom. Index : 2e rangée d'onglets (— / OR / DIAM. / ARC), losange de couleur
+  sur la case, compteur « Mutations », une récompense par forme.
+
 ## Familiers sculptés et échelle des tailles (13 oct.)
 
 - Modèles refaits avec Codex : `PetSculpt`, `PetSculptedModels`, `PetSculptedEffects`, `PetMotion`,

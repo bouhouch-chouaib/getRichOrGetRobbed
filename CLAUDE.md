@@ -108,6 +108,12 @@ Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remo
 7 versions de plus en plus grandes et épiques (photographiées en jeu) et de plus en plus efficaces. **Familiers évolués complets** :
 Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stats et duel x1,4 / x2, étiquette dorée dans la base.
 
+**16 oct. : mutations** (`Config.Mutations`, `client/RainbowPets`, GDD « Mutations ») : Doré 4 % x2, Diamant 1 % x5,
+Arc-en-ciel 0,2 % x10, tirées à chaque tirage du trou noir ; ids `<Id>__MGold` (avec évolution `<Id>__E3__MRainbow`).
+Vérifié en jeu (solo) : aspect des 3 mutations dans la base (y compris un familier blanc), dégradé arc-en-ciel qui défile,
+éclosion d'un œuf Diamant (bandeau « ÉCLOSION RARE DIAMANT ! », familier qui sort du nid), Index (rangée — / OR / DIAM. / ARC,
+revenu x10, losanges). Pas vu : l'annonce à tout le serveur, à 2 joueurs, sur téléphone.
+
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.
 
@@ -115,7 +121,7 @@ Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stat
 `Config.Loot`) : barre « prochain tirage » en direct, capsules ouvertes une par une, top 3 sur la jauge, rang de tirage
 (plus de Communs à 150 tirages, plus d'Inhabituels à 600, si la rareté est complète), doublons au-delà de 5 vendus,
 argent des points selon le revenu. Vérifié en jeu (solo) : barre, capsules, vente des doublons, top 3. Pas encore fait :
-les mutations (familiers Dorés / Diamant / Arc-en-ciel), prochaine grosse étape proposée.
+les mutations (fait le 16 oct.).
 
 **13 oct. : stats des familiers équipés** (`shared/PetStats`, `Config.Pets.EquipBonus`) : niveaux de Vitesse / Force en plus
 selon la rareté et la taille (petit = rapide, gros = fort), en plus du bonus de points ; toujours pas d'argent quand il est équipé.

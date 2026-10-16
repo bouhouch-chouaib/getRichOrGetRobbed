@@ -9,7 +9,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local Config = require(ReplicatedStorage.Shared.Config)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
@@ -70,9 +69,9 @@ function MenuKit.discovered(petId: string, claimed: { [string]: boolean }): bool
 	if MenuKit.number("Pet_" .. petId) > 0 or claimed[petId] == true then
 		return true
 	end
-	-- Une forme évoluée possédée (Config.Evolution) fait aussi découvrir l'espèce.
-	for stage = 2, #Config.Evolution.Names do
-		if MenuKit.number("Pet_" .. petId .. "__E" .. stage) > 0 then
+	-- Une forme évoluée ou mutée possédée fait aussi découvrir l'espèce.
+	for _, formId in ipairs(PetCatalog.FormsOf[petId] or {}) do
+		if MenuKit.number("Pet_" .. formId) > 0 then
 			return true
 		end
 	end

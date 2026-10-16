@@ -79,11 +79,13 @@ local function setLabel(shown: Shown)
 	local countValue = shown.anchor:GetAttribute("Count")
 	local count = if type(countValue) == "number" then countValue else 1
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
-	local stage = entry.Stage or 1 -- familier évolué (capsule d'évolution) : une ligne dorée en plus
+	local stage = entry.Stage or 1 -- familier évolué (capsule d'évolution) ou muté : une ligne en plus au-dessus du nom
+	local mutation = if entry.Mutation then Config.Mutations[Config.MutationIndex[entry.Mutation]] else nil
+	local special = stage > 1 or mutation ~= nil
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "PetLabel"
 	sign.Adornee = root
-	sign.Size = UDim2.fromScale(7, if stage > 1 then 3 else 2.2)
+	sign.Size = UDim2.fromScale(7, if special then 3 else 2.2)
 	sign.StudsOffsetWorldSpace = Vector3.new(0, shown.topOffset + 1.4, 0)
 	sign.AlwaysOnTop = true
 	sign.LightInfluence = 0
@@ -102,9 +104,11 @@ local function setLabel(shown: Shown)
 		outline.Parent = label
 		label.Parent = sign
 	end
-	if stage > 1 then
+	if special then
 		local name = TextFormat.upper(PetCatalog.ById[entry.BaseId or petId].Name)
-		line(string.rep("★", stage) .. " " .. TextFormat.upper(Config.Evolution.Names[stage]), Color3.fromRGB(255, 214, 70), 0, 0.3)
+		local tag = (if stage > 1 then string.rep("★", stage) .. " " .. TextFormat.upper(Config.Evolution.Names[stage]) else "")
+			.. (if mutation then (if stage > 1 then " " else "") .. TextFormat.upper(mutation.Name) else "")
+		line(tag, if mutation then mutation.Color else Color3.fromRGB(255, 214, 70), 0, 0.3)
 		line(name .. (if count > 1 then " x" .. count else ""), rarity.Color, 0.3, 0.4)
 		line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.7, 0.3)
 	else

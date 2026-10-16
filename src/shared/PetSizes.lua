@@ -138,6 +138,7 @@ PetSizes.Heights = {
 -- Taille d'un familier en J (milieu de la tranche de sa rareté s'il n'est pas dans la table). Un familier évolué
 -- (« <Id>__E2 », PetCatalog) est plus grand que son espèce : x Config.Evolution.SizeMultiplier.
 function PetSizes.Of(petId: string, rarityId: string?): number
+	petId = string.gsub(petId, "__M%a+$", "") -- la mutation ne change pas la taille
 	local baseId, stage = string.match(petId, "^(.-)__E(%d)$")
 	local multiplier = 1
 	if baseId and stage then

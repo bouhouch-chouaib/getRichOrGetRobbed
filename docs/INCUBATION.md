@@ -35,6 +35,12 @@ Chaque base a une **capsule d’évolution** dehors, derrière la clôture du fo
 - **Familiers évolués partout** : plus forts (stats données quand ils sont équipés et puissance en duel x1,4 / x2, `PowerMultiplier`) ; dans l’Index, onglets ★ / ★★ / ★★★ sur la fiche (aperçu, revenu, stats, équiper, récompense propre à chaque forme), étoiles sur la case, compteur « Évolutions x/150 », « Réclamer tout » compris ; étiquette dorée « ★★ ÉVOLUÉ » / « ★★★ ULTIME » dans la base ; échanges et duels les proposent. La fusion ne les prend pas.
 - Serveur : `SessionData.StartEvolution / TickEvolution / HatchEvolving`, `EggController` (état publié sur `Base_N.EvolutionCapsule.EvolutionMachine`, `Remotes.Evolution`) ; client : `client/EvolutionMachine`. Un œuf à la fois.
 
+## Mutations
+
+Un œuf peut contenir un familier muté (Doré, Diamant, Arc-en-ciel, `Config.Mutations`) : même durée d'incubation que sa
+rareté, mais éclosion plus spectaculaire (Doré +1 rang de spectacle, Diamant +2, Arc-en-ciel +3) et bandeau à la couleur de la
+mutation. Dans la capsule d'évolution, la mutation est gardée (`PetCatalog.Variant`).
+
 ## Sauvegarde et serveur
 
 `SessionData.eggs` contient des lots avec identifiant unique, familier, quantité, début et échéance UTC. Les anciennes sauvegardes sans ce champ restent compatibles ; le DataStore v2 est conservé. Le retrait des œufs et l’ajout des familiers s’effectuent sans suspension, dans la même opération. Les tables de sauvegarde sont copiées avant `UpdateAsync`, pour empêcher un reçu concurrent d’être enregistré sans sa récompense.

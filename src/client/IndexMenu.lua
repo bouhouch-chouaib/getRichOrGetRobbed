@@ -7,6 +7,8 @@
 -- Récompenses : Config.Index, validées par le serveur (Remotes.ClaimIndex -> SessionData.ClaimIndex).
 -- Formes évoluées (capsule d'évolution, Config.Evolution) : onglets ★ / ★★ / ★★★ sur la fiche du familier (aperçu, revenu,
 -- stats, équiper, récompense de chaque forme), étoiles sur la case quand on en possède une, compteur « Évolutions ».
+-- Mutations (Config.Mutations) : 2e rangée d'onglets (— / Or / Diamant / Arc-en-ciel), losange de couleur sur la case,
+-- compteur « Mutations ».
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -149,13 +151,29 @@ function IndexMenu.create(gui: Instance): Index
 	local detailViewport: ViewportFrame? = nil
 	-- Forme affichée : 1 = normale, 2 = Évolué, 3 = Ultime (PetCatalog.Variant).
 	local selectedStage = 1
+	local selectedMutation: string? = nil -- nil = sans mutation
 	local STAGES = #Config.Evolution.Names
 	local GOLD = Color3.fromRGB(255, 214, 70)
-	local function formOf(petId: string, stage: number): string
-		return PetCatalog.Variant(petId, stage)
+	local function formOf(petId: string, stage: number, mutation: string?): string
+		return PetCatalog.Compose(petId, stage, mutation)
 	end
 	local formButtons: { TextButton } = {}
+	local mutationButtons: { TextButton } = {}
 	local refreshDetail: () -> ()
+	-- 2e rangée : sans mutation, puis chaque mutation.
+	local MUTATION_LABELS = { "—", "OR", "DIAM.", "ARC" }
+	for slot = 1, #Config.Mutations + 1 do
+		local count = #Config.Mutations + 1
+		local width = (226 - 16 - (count - 1) * 4) / count
+		local button = UiStyle.button(detail, MUTATION_LABELS[slot] or "?", UDim2.fromOffset(width, 20), GREY, 13)
+		button.Position = UDim2.fromOffset(8 + (slot - 1) * (width + 4), 28)
+		button.ZIndex = 4
+		button.Activated:Connect(function()
+			selectedMutation = if slot > 1 then Config.Mutations[slot - 1].Id else nil
+			refreshDetail()
+		end)
+		mutationButtons[slot] = button
+	end
 	for stage = 1, STAGES do
 		local width = (226 - 16 - (STAGES - 1) * 4) / STAGES
 		local button = UiStyle.button(detail, string.rep("★", stage), UDim2.fromOffset(width, 22), GREY, 16)
@@ -228,20 +246,20 @@ function IndexMenu.create(gui: Instance): Index
 		return not claimed[petId] and MenuKit.number("Pet_" .. petId) > 0
 	end
 
-	-- Une forme évoluée est « connue » si on l'a (ou si sa récompense a été réclamée) ; la forme normale suit l'espèce.
-	local function formKnown(petId: string, stage: number, claimed: { [string]: boolean }): boolean
-		if stage <= 1 then
+	-- Une forme évoluée / mutée est « connue » si on l'a (ou si sa récompense a été réclamée) ; la forme normale suit l'espèce.
+	local function formKnown(petId: string, stage: number, claimed: { [string]: boolean }, mutation: string?): boolean
+		if stage <= 1 and not mutation then
 			return MenuKit.discovered(petId, claimed)
 		end
-		local form = formOf(petId, stage)
+		local form = formOf(petId, stage, mutation)
 		return MenuKit.number("Pet_" .. form) > 0 or claimed[form] == true
 	end
 
 	-- Récompenses qui attendent pour cette espèce, toutes formes comprises.
 	local function waitingFor(petId: string, claimed: { [string]: boolean }): number
 		local count = 0
-		for stage = 1, STAGES do
-			if canClaim(formOf(petId, stage), claimed) then
+		for _, formId in ipairs(PetCatalog.FormsOf[petId] or { petId }) do
+			if canClaim(formId, claimed) then
 				count += 1
 			end
 		end
@@ -266,12 +284,18 @@ function IndexMenu.create(gui: Instance): Index
 		local claimed = MenuKit.claimed()
 		-- Onglets de forme : couleur si on la possède, gris sinon, contour blanc sur celle affichée.
 		for stage, button in ipairs(formButtons) do
-			local owned = MenuKit.number("Pet_" .. formOf(speciesId, stage)) > 0
+			local owned = MenuKit.number("Pet_" .. formOf(speciesId, stage, selectedMutation)) > 0
 			UiStyle.setButtonColor(button, if stage == selectedStage then GOLD elseif owned then UiStyle.Colors.Cyan else GREY)
 		end
-		local petId = formOf(speciesId, selectedStage)
+		for slot, button in ipairs(mutationButtons) do
+			local mutation = if slot > 1 then Config.Mutations[slot - 1] else nil
+			local owned = MenuKit.number("Pet_" .. formOf(speciesId, selectedStage, mutation and mutation.Id)) > 0
+			local selected = (mutation and mutation.Id) == selectedMutation
+			UiStyle.setButtonColor(button, if selected then GOLD elseif owned then (if mutation then mutation.Color else UiStyle.Colors.Cyan) else GREY)
+		end
+		local petId = formOf(speciesId, selectedStage, selectedMutation)
 		local entry = PetCatalog.ById[petId]
-		local known = formKnown(speciesId, selectedStage, claimed)
+		local known = formKnown(speciesId, selectedStage, claimed, selectedMutation)
 		local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 		detailGradient.Color = ColorSequence.new(UiStyle.lighter(rarity.Color, 0.25), UiStyle.darker(rarity.Color, 0.35))
 		local key = petId .. (if known then "+" else "-")
@@ -281,8 +305,8 @@ function IndexMenu.create(gui: Instance): Index
 				detailViewport:Destroy()
 			end
 			local viewport = MenuKit.petViewport(detail, petId, not known)
-			viewport.Position = UDim2.fromOffset(8, 28)
-			viewport.Size = UDim2.new(1, -16, 0, 84)
+			viewport.Position = UDim2.fromOffset(8, 50)
+			viewport.Size = UDim2.new(1, -16, 0, 62)
 			viewport.ZIndex = 3
 			detailViewport = viewport
 		end
@@ -322,7 +346,7 @@ function IndexMenu.create(gui: Instance): Index
 	end
 
 	equipButton.Activated:Connect(function()
-		local petId = if selectedId then formOf(selectedId, selectedStage) else nil
+		local petId = if selectedId then formOf(selectedId, selectedStage, selectedMutation) else nil
 		if not petId then
 			return
 		end
@@ -350,7 +374,7 @@ function IndexMenu.create(gui: Instance): Index
 	end)
 
 	claimButton.Activated:Connect(function()
-		local petId = if selectedId then formOf(selectedId, selectedStage) else nil
+		local petId = if selectedId then formOf(selectedId, selectedStage, selectedMutation) else nil
 		if petId and canClaim(petId, MenuKit.claimed()) then
 			Remotes.ClaimIndex:FireServer(petId)
 		end
@@ -403,13 +427,17 @@ function IndexMenu.create(gui: Instance): Index
 			local tag = cell.button:FindFirstChild("Equipped")
 			local anyEquipped = false
 			local best = 1
-			for stage = 1, STAGES do
-				local form = formOf(entry.Id, stage)
-				if table.find(equipped, form) then
+			local bestMutation = 0
+			for _, formId in ipairs(PetCatalog.FormsOf[entry.Id] or { entry.Id }) do
+				if table.find(equipped, formId) then
 					anyEquipped = true
 				end
-				if stage > 1 and MenuKit.number("Pet_" .. form) > 0 then
-					best = stage
+				if MenuKit.number("Pet_" .. formId) > 0 then
+					local form = PetCatalog.ById[formId]
+					best = math.max(best, form.Stage or 1)
+					if form.Mutation then
+						bestMutation = math.max(bestMutation, Config.MutationIndex[form.Mutation] or 0)
+					end
 				end
 			end
 			if tag and tag:IsA("TextLabel") then
@@ -417,7 +445,11 @@ function IndexMenu.create(gui: Instance): Index
 			end
 			local stars = cell.button:FindFirstChild("Stars")
 			if stars and stars:IsA("TextLabel") then
-				stars.Text = if best > 1 then string.rep("★", best) else ""
+				-- Étoiles (meilleure évolution) + losange à la couleur de la meilleure mutation possédée.
+				local diamond = if bestMutation > 0
+					then string.format('<font color="#%s">◆</font>', Config.Mutations[bestMutation].Color:ToHex())
+					else ""
+				stars.Text = (if best > 1 then string.rep("★", best) else "") .. diamond
 			end
 			local badge = cell.button:FindFirstChild("Badge")
 			if badge and badge:IsA("TextLabel") then
@@ -432,6 +464,7 @@ function IndexMenu.create(gui: Instance): Index
 	local function select(petId: string)
 		selectedId = petId
 		selectedStage = 1
+		selectedMutation = nil
 		refreshCells()
 		refreshDetail()
 	end
@@ -484,6 +517,7 @@ function IndexMenu.create(gui: Instance): Index
 			tag.Visible = false
 			local stars = UiStyle.text(button, "", 15, GOLD)
 			stars.Name = "Stars"
+			stars.RichText = true
 			stars.AnchorPoint = Vector2.new(0.5, 0)
 			stars.Position = UDim2.new(0.5, 0, 0, 18)
 			stars.Size = UDim2.fromOffset(60, 16)
@@ -522,6 +556,7 @@ function IndexMenu.create(gui: Instance): Index
 		local claimed = MenuKit.claimed()
 		local discoveredTotal = 0
 		local evolvedTotal = 0
+		local mutatedTotal = 0
 		for index, rarity in ipairs(Config.Rarities) do
 			local waiting = 0
 			for _, entry in ipairs(PetCatalog.ByRarity[rarity.Id] or {}) do
@@ -531,6 +566,12 @@ function IndexMenu.create(gui: Instance): Index
 				for stage = 2, STAGES do
 					if formKnown(entry.Id, stage, claimed) then
 						evolvedTotal += 1
+					end
+				end
+				for _, formId in ipairs(PetCatalog.FormsOf[entry.Id] or {}) do
+					local form = PetCatalog.ById[formId]
+					if form.Mutation and (MenuKit.number("Pet_" .. formId) > 0 or claimed[formId]) then
+						mutatedTotal += 1
 					end
 				end
 				waiting += waitingFor(entry.Id, claimed)
@@ -543,11 +584,11 @@ function IndexMenu.create(gui: Instance): Index
 		if collectionLabel then
 			local multiplier = MenuKit.player:GetAttribute("Multiplier")
 			collectionLabel.Text = string.format(
-				"Collection %d/%d\nÉvolutions %d/%d\nÉquipés %d/%d • x%.2f",
+				"Collection %d/%d\nÉvolutions %d • Mutations %d\nÉquipés %d/%d • x%.2f",
 				discoveredTotal,
 				#PetCatalog.List,
 				evolvedTotal,
-				#PetCatalog.List * (STAGES - 1),
+				mutatedTotal,
 				#MenuKit.equipped(),
 				MenuKit.number("EquipSlots"),
 				if type(multiplier) == "number" then multiplier else 1

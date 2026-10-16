@@ -14,6 +14,7 @@
 -- lumière, anneau au sol, auréole...). Les pièces de l'aura portent l'attribut "Aura" (retirées des aperçus 2D).
 
 local AssetService = game:GetService("AssetService")
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -705,6 +706,85 @@ local function applyEvolution(model: Model, entry: PetCatalog.Pet)
 	model:SetAttribute("EvolutionStage", stage)
 end
 
+-- Familier muté (Config.Mutations) : tout le corps change de matière, sauf le visage (yeux, pupilles, reflets).
+--   Doré : or brillant ; Diamant : cristal bleu clair qui reflète ; Arc-en-ciel : dégradé de couleurs du bas vers le haut,
+--   qui défile en continu (tag "RainbowPet", client/RainbowPets). Étincelles à la couleur de la mutation.
+local MUTATION_LOOKS = {
+	Gold = { color = Color3.fromRGB(255, 196, 40), mix = 0.72, material = Enum.Material.Foil, reflectance = 0.15, transparency = 0 },
+	Diamond = { color = Color3.fromRGB(90, 215, 255), mix = 0.9, material = Enum.Material.Glass, reflectance = 0.2, transparency = 0.15 },
+}
+-- Pièces du visage des familiers sculptés (shared/PetSculpt, PetSculptedModels), reconnues à leur nom. Les anciens
+-- modèles (pièces sans nom) : yeux noirs et reflets blancs reconnus à leur couleur.
+local FACE_PARTS = {
+	EyeSocket = true, Iris = true, Pupil = true, Catchlight = true, Brow = true, FrogEye = true, FrogPupil = true,
+	FrogSmile = true, Mouth = true, MouthCavity = true, MouthInterior = true, Tooth = true,
+}
+local function isFacePart(part: BasePart): boolean
+	if FACE_PARTS[part.Name] then
+		return true
+	end
+	if part.Name ~= "Part" then
+		return false
+	end
+	local _, saturation, value = part.Color:ToHSV()
+	return value < 0.18 or (saturation < 0.08 and value > 0.93)
+end
+
+local function applyMutation(model: Model, entry: PetCatalog.Pet)
+	local mutationId = entry.Mutation :: string
+	local mutation = Config.Mutations[Config.MutationIndex[mutationId] or 1]
+	local look = MUTATION_LOOKS[mutationId]
+	local rainbow = mutationId == "Rainbow"
+	local box, size = PetModelBuilder.BodyBounds(model)
+	local pivot = model:GetPivot()
+	local bottom = pivot:PointToObjectSpace(box.Position).Y - size.Y / 2
+	for _, part in ipairs(model:GetDescendants()) do
+		if not part:IsA("BasePart") or part.Transparency >= 1 or part:GetAttribute("Aura") then
+			continue
+		end
+		if isFacePart(part) then
+			continue -- yeux, pupilles, reflets, bouche : le visage reste reconnaissable
+		end
+		if rainbow then
+			local height = (pivot:PointToObjectSpace(part.Position).Y - bottom) / math.max(size.Y, 0.1)
+			local offset = height * 0.85
+			part.Color = Color3.fromHSV(offset % 1, 0.75, 1)
+			part:SetAttribute("RainbowOffset", offset)
+		elseif look then
+			part.Color = part.Color:Lerp(look.color, look.mix)
+			part.Material = look.material
+			part.Reflectance = look.reflectance
+			part.Transparency = math.max(part.Transparency, look.transparency)
+		end
+	end
+	local root = model.PrimaryPart
+	if root then
+		local sparkles = Instance.new("ParticleEmitter")
+		sparkles.Name = "MutationSparkles"
+		sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		sparkles.Color = if rainbow
+			then ColorSequence.new({
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 80)),
+				ColorSequenceKeypoint.new(0.33, Color3.fromRGB(255, 230, 60)),
+				ColorSequenceKeypoint.new(0.66, Color3.fromRGB(80, 220, 255)),
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 90, 255)),
+			})
+			else ColorSequence.new(mutation.Color, Color3.new(1, 1, 1))
+		sparkles.Rate = 5 + (Config.MutationIndex[mutationId] or 1) * 3
+		sparkles.Lifetime = NumberRange.new(0.8, 1.6)
+		sparkles.Speed = NumberRange.new(0.4, 1.4)
+		sparkles.SpreadAngle = Vector2.new(180, 180)
+		sparkles.LightEmission = 0.9
+		sparkles.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.3), NumberSequenceKeypoint.new(1, 0) })
+		sparkles:SetAttribute("Aura", true)
+		sparkles.Parent = root
+	end
+	if rainbow then
+		CollectionService:AddTag(model, "RainbowPet")
+	end
+	model:SetAttribute("Mutation", mutationId)
+end
+
 function PetModelBuilder.Build(petId: string): Model?
 	petId = PetCatalog.CurrentId(petId)
 	local entry = PetCatalog.ById[petId]
@@ -714,7 +794,13 @@ function PetModelBuilder.Build(petId: string): Model?
 	if entry.BaseId then
 		local model = PetModelBuilder.Build(entry.BaseId)
 		if model then
-			applyEvolution(model, entry)
+			if (entry.Stage or 1) > 1 then
+				applyEvolution(model, entry)
+			end
+			if entry.Mutation then
+				applyMutation(model, entry)
+			end
+			model.Name = entry.Id
 		end
 		return model
 	end

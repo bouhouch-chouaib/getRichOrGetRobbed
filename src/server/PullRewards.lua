@@ -2,6 +2,7 @@
 -- PullRewards : accorde des tirages à un joueur, au même endroit pour toutes les sources (fin de manche du trou
 -- noir, roue des duels, tirages achetés en Robux).
 --   - Rang de tirage : la rareté plancher dépend des tirages faits depuis le début (LootEngine.floor).
+--   - Mutations (Config.Mutations) : chaque familier gagné peut être Doré, Diamant ou Arc-en-ciel (tiré en secret).
 --   - Doublons : au-delà de Config.Loot.KeepCopies exemplaires d'un même familier, le suivant est vendu tout de
 --     suite (Config.Loot.SellSeconds secondes de son revenu, x bonus du monde et des passes).
 --   - Le client reçoit Remotes.RewardsGranted(score, tirages, familiers gardés, argent total, détails) ; détails =
@@ -23,6 +24,20 @@ local PullRewards = {}
 
 export type Drop = { Id: string, New: boolean, Sold: number?, Egg: boolean? }
 export type Details = { drops: { Drop }, sold: number, floor: number, rank: number, eggs: boolean }
+
+-- Mutation tirée en secret pour un familier gagné (Config.Mutations, la plus rare d'abord) ; la chance du tirage
+-- (score de la manche, passes, boost serveur) l'augmente un peu. nil = pas de mutation.
+local mutationRng = Random.new()
+function PullRewards.RollMutation(luck: number): string?
+	local boost = 1 + math.max(0, luck) * 0.5
+	for index = #Config.Mutations, 1, -1 do
+		local mutation = Config.Mutations[index]
+		if mutationRng:NextNumber() < mutation.Chance * boost then
+			return mutation.Id
+		end
+	end
+	return nil
+end
 
 -- Prix de vente automatique d'un doublon.
 function PullRewards.SellValue(player: Player, petId: string): number
@@ -46,9 +61,12 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 	local kept: { [string]: number } = {}
 	local drops: { Drop } = {}
 	local sold = 0
-	for _, petId in ipairs(outcome.drops) do
-		local isNew = not discovered[petId]
-		discovered[petId] = true
+	for _, rolledId in ipairs(outcome.drops) do
+		local isNew = not discovered[rolledId]
+		discovered[rolledId] = true
+		-- Mutation secrète, révélée à l'éclosion : un familier muté est un autre familier (jamais vendu comme doublon).
+		local mutation = PullRewards.RollMutation(luck)
+		local petId = if mutation then PetCatalog.WithMutation(rolledId, mutation) else rolledId
 		if (owned[petId] or 0) + (kept[petId] or 0) >= Config.Loot.KeepCopies then
 			local value = PullRewards.SellValue(player, petId)
 			sold += value

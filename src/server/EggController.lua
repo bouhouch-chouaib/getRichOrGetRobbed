@@ -151,8 +151,18 @@ function EggController.Init(bases: { Model })
 			table.sort(ids, function(a, b)
 				return rank(a) > rank(b)
 			end)
-			if rank(ids[1]) >= Config.Loot.AnnounceMinRarity then
-				Remotes.Announcement:FireAllClients(player.DisplayName, ids[1])
+			-- (sauf une mutation rare : Diamant, Arc-en-ciel, annoncée quelle que soit la rareté)
+			local announced = ids[1]
+			for _, petId in ipairs(ids) do
+				local mutation = Catalog.Mutation(petId)
+				if mutation and Config.Mutations[Config.MutationIndex[mutation]].Announce then
+					announced = petId
+					break
+				end
+			end
+			local mutation = Catalog.Mutation(announced)
+			if rank(announced) >= Config.Loot.AnnounceMinRarity or (mutation and Config.Mutations[Config.MutationIndex[mutation]].Announce) then
+				Remotes.Announcement:FireAllClients(player.DisplayName, announced)
 			end
 		end
 
