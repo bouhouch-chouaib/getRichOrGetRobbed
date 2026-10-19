@@ -4,12 +4,15 @@
 -- aléatoire de la rareté au-dessus. Le joueur choisit les familiers dans les cases de la machine (client/HUD) ;
 -- sans choix valide, les doublons sont consommés en priorité.
 -- Le Sigma ne peut pas être obtenu par fusion (Config.Fusion.MaxFromRarity).
+-- Mutations (SECRET, Config.Fusion.Mutation) : le familier obtenu peut hériter de la mutation des familiers mis dans la
+-- machine ; le client ne reçoit que l'espèce (œuf normal), la mutation se découvre à l'éclosion.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local PullRewards = require(script.Parent.PullRewards)
 local SessionData = require(script.Parent.SessionData)
 
 local FusionController = {}
@@ -65,6 +68,46 @@ local function checkChosen(player: Player, rarityId: string, chosen: unknown): {
 	return if total == Config.Fusion.Count then result else nil
 end
 
+-- Mutation secrète du familier obtenu (nil = aucune), à partir des familiers consommés. roll() = tirage gratuit
+-- habituel, random() = nombre entre 0 et 1. Séparé pour les tests.
+function FusionController.ResultMutation(ingredients: { [string]: number }, roll: () -> string?, random: () -> number): string?
+	local best = 0
+	local function offer(mutationId: string?)
+		local index = if mutationId then Config.MutationIndex[mutationId] or 0 else 0
+		if index > best then
+			best = index
+		end
+	end
+	offer(roll())
+	local total, shared = 0, nil :: string?
+	local allSame = true
+	for petId, count in pairs(ingredients) do
+		local mutation = PetCatalog.Mutation(petId)
+		total += count
+		if shared == nil and allSame then
+			shared = mutation
+		end
+		if mutation ~= shared or mutation == nil then
+			allSame = false
+		end
+		if mutation then
+			for _ = 1, count do
+				if random() < Config.Fusion.Mutation.CarryChance then
+					offer(mutation)
+				end
+			end
+		end
+	end
+	if allSame and shared and total >= Config.Fusion.Count then
+		local index = Config.MutationIndex[shared] or 0
+		offer(shared)
+		if Config.Mutations[index + 1] and random() < Config.Fusion.Mutation.UpgradeChance then
+			offer(Config.Mutations[index + 1].Id)
+		end
+	end
+	return if best > 0 then Config.Mutations[best].Id else nil
+end
+
 local function onFuse(player: Player, rarityIndex: unknown, chosen: unknown)
 	if type(rarityIndex) ~= "number" or rarityIndex % 1 ~= 0 then
 		return
@@ -95,8 +138,15 @@ local function onFuse(player: Player, rarityIndex: unknown, chosen: unknown)
 	SessionData.SpendMoney(player, cost)
 
 	local result = nextBucket[rng:NextInteger(1, #nextBucket)]
-	SessionData.AddEggs(player, { [result.Id] = 1 })
-	Remotes.FusionResult:FireClient(player, result.Id, true)
+	local mutation = FusionController.ResultMutation(ingredients, PullRewards.RollMutation, function()
+		return rng:NextNumber()
+	end)
+	local resultId = if mutation then PetCatalog.WithMutation(result.Id, mutation) else result.Id
+	SessionData.AddEggs(player, { [resultId] = 1 })
+	Remotes.FusionResult:FireClient(player, result.Id, true) -- l'espèce seulement : la mutation reste une surprise
+	if mutation then
+		print(string.format("[Fusion] %s : mutation secrète %s", player.Name, resultId))
+	end
 	print(string.format("[Fusion] %s : %d %s -> %s", player.Name, Config.Fusion.Count, Config.Rarities[rarityIndex].Name, result.Name))
 
 end

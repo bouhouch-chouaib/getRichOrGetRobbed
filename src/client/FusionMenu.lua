@@ -255,7 +255,7 @@ function FusionMenu.create(gui: Instance): Fusion
 	local function buildPicker()
 		local lockNow = slotRarity()
 		local keyParts = { tostring(lockNow) }
-		for _, entry in ipairs(PetCatalog.List) do
+		for _, entry in ipairs(PetCatalog.Everything) do
 			local left = freeLeft(entry.Id)
 			if left > 0 then
 				table.insert(keyParts, entry.Id .. "=" .. left)
@@ -273,7 +273,8 @@ function FusionMenu.create(gui: Instance): Fusion
 		end
 		local lock = slotRarity()
 		local shown = 0
-		for order, entry in ipairs(PetCatalog.List) do
+		-- Toutes les formes possédées (évoluées, et les autres que le joueur a déjà), pas seulement les espèces.
+		for order, entry in ipairs(PetCatalog.Everything) do
 			local rarityIndex = Config.RarityIndex[entry.Rarity]
 			local left = freeLeft(entry.Id)
 			if left > 0 and rarityIndex <= Config.Fusion.MaxFromRarity and (lock == nil or lock == rarityIndex) then

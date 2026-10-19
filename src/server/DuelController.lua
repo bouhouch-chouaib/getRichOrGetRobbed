@@ -35,6 +35,7 @@ local EconomyController = require(script.Parent.EconomyController)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local PowerController = require(script.Parent.PowerController)
 local PullRewards = require(script.Parent.PullRewards)
+local BadgeController = require(script.Parent.BadgeController)
 local SessionData = require(script.Parent.SessionData)
 
 local DuelController = {}
@@ -302,6 +303,7 @@ local function finishFight(duel: Duel, winner: Side, loser: Side, forfeit: boole
 	end
 	Remotes.DuelEvent:FireAllClients("End", duel.model, if winner == duel.a then "A" else "B", forfeit)
 	send(winner.player, "Won", loser.player.DisplayName)
+	BadgeController.Award(winner.player, "DuelWin")
 	send(loser.player, "Lost", winner.player.DisplayName)
 	print(string.format("[Duel] %s (%s) bat %s (%s)%s", winner.player.Name, tostring(winner.petId), loser.player.Name,
 		tostring(loser.petId), if forfeit then " par abandon" else ""))

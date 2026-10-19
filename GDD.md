@@ -271,6 +271,20 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   des joueurs. Double appui pour confirmer. `SessionData.Rebirth`, sauvegarde immédiate.
 - Revenu = familiers x passes x monde x Rebirth x amis (`EconomyController.GetIncome / BonusMultiplier`).
 
+## Badges, groupe Roblox, mutations par la fusion (19 oct.)
+
+- **Badges** (`server/BadgeController`, `Config.Badges`) : 13 badges (bienvenue, premier œuf, premier vol, duel gagné,
+  Désert / Cosmos / Divin, premier Rebirth, 25 / 50 / 75 familiers découverts, familier Ultime, familier Sigma).
+  `BadgeController.Award(joueur, clé)` au moment de l'action + une ronde toutes les 5 s sur la progression. Id = 0 =>
+  ignoré : il faut créer chaque badge sur create.roblox.com (images prêtes dans `assets/badges`,
+  `tools/icons/make_badges.py`) et mettre son Id. Aucun badge sur les mutations (secrètes). Rien n'est envoyé dans Studio.
+- **Groupe Roblox** (`Config.Group`) : membre = +10 % de revenu (attribut `InGroup`, vérifié à l'arrivée puis toutes les
+  2 min ; `EconomyController.BonusMultiplier`). Id = 0 => désactivé, rien d'affiché. Ligne d'invitation dans Bonus > Codes.
+- **Mutations par la fusion** (SECRET, `Config.Fusion.Mutation`, `FusionController.ResultMutation`) : tirage secret
+  habituel ; chaque familier muté mis dans la machine a 12 % de passer sa mutation ; 5 familiers de la même mutation =>
+  mutation sûre + 30 % de la suivante. Le client ne reçoit que l'espèce (œuf normal). La machine accepte maintenant
+  toutes les formes possédées (évoluées, mutées) ; le bouton « Auto » ne prend que les espèces normales.
+
 ## Mutations (16 oct., `Config.Mutations`)
 
 - **SECRET** (demande de Chouaib) : rien dans le jeu n'en parle, ni l'Index (pas d'onglet, pas de récompense, pas de

@@ -108,6 +108,12 @@ Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remo
 7 versions de plus en plus grandes et épiques (photographiées en jeu) et de plus en plus efficaces. **Familiers évolués complets** :
 Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stats et duel x1,4 / x2, étiquette dorée dans la base.
 
+**19 oct. : badges, groupe, mutations par la fusion** (GDD « Badges, groupe Roblox... ») : 13 badges (Id à créer sur
+Roblox, images dans `assets/badges`), +10 % de revenu pour les membres du groupe (`Config.Group.Id` à remplir), fusion qui
+transmet les mutations en secret. Vérifié en jeu : fusion de 5 Dorés -> œuf Doré secret ; démarrage sans erreur. Pas vu :
+attribution réelle des badges et bonus de groupe (Id = 0, et Studio n'envoie pas les badges).
+**19 oct. : étages de ChatGPT retirés** (docs/CORRECTIONS_AIMANT.md) ; police Montserrat de ChatGPT gardée (choix de Chouaib).
+
 **16 oct. : refonte de l'interface** (docs/DIRECTION_ARTISTIQUE.md §3.1, d'après 3 vidéos de packs « Studs UI ») :
 25 icônes ForgeGUI, textures (`assets/ui`), fenêtres / boutons / tuiles / pastilles / bandeaux refaits dans `UiStyle`,
 animations et flou dans `MenuKit`, offres Robux à droite (`client/OffersPanel`). Vérifié en jeu (PC) : HUD, Boutique (+

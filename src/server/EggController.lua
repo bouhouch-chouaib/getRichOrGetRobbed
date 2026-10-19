@@ -23,6 +23,7 @@ local PetWander = require(ReplicatedStorage.Shared.PetWander)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local BasePets = require(script.Parent.BasePetsController)
+local BadgeController = require(script.Parent.BadgeController)
 local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
 local EggController = {}
@@ -107,6 +108,7 @@ function EggController.Init(bases: { Model })
 				hatchCount += egg.count
 			end
 			Quests.Add(player, "Hatch", hatchCount)
+			BadgeController.Award(player, "FirstHatch")
 			local events: { Event } = {}
 			local spots: { [string]: Vector2 } = {}
 			local ids: { string } = {}
@@ -270,6 +272,7 @@ function EggController.Init(bases: { Model })
 		elseif action == "Hatch" then
 			local petId = SessionData.HatchEvolving(player)
 			if petId then
+				BadgeController.Award(player, "FirstHatch")
 				-- L'éclosion part de la capsule ; le familier (s'il est affiché) arrive dans la prairie, près d'elle.
 				BasePets.Celebrate(player, { petId }, { [petId] = BaseLayout.EvolutionExit })
 				local cf = machine.CFrame * CFrame.new(0, machine.Size.Y / 2, 0)

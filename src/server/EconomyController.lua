@@ -56,7 +56,8 @@ function EconomyController.BonusMultiplier(player: Player): number
 	local friends = player:GetAttribute("FriendsHere")
 	local friendBonus = 1 + math.min(if type(friends) == "number" then friends else 0, Config.Friends.MaxFriends)
 		* Config.Friends.BonusPerFriend
-	return Config.GetRebirthMultiplier(SessionData.GetRebirths(player)) * friendBonus
+	local groupBonus = if player:GetAttribute("InGroup") == true then 1 + Config.Group.IncomeBonus else 1
+	return Config.GetRebirthMultiplier(SessionData.GetRebirths(player)) * friendBonus * groupBonus
 end
 
 EconomyController.GetPetIncome = petIncome

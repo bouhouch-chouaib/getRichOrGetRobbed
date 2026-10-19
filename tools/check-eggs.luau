@@ -282,6 +282,7 @@ services.Workspace = {
 }
 services.AnalyticsService = {} -- Studio: no live telemetry calls
 services.MarketplaceService = { PromptGamePassPurchaseFinished = signal() }
+services.BadgeService = {}
 game.JobId = "test"
 game.BindToClose = function() end
 cache.Remotes = { TutorialDone = { OnServerEvent = signal() }, RewardsGranted = { FireClient = function() end } }
@@ -442,6 +443,35 @@ session.AddEggs(player, { [byRank[1]] = 2 }) -- 2 pets + 2 eggs, only one more s
 local details = rewards.Grant(player, 2, 0)
 assert(details.eggs and details.drops[1].Egg and details.drops[2].Sold and details.sold > 0)
 assert(session.GetOwnedPets(player)[byRank[1]] == 2 and session.GetRewardOwned(player)[byRank[1]] == 5)
+
+-- Secret fusion mutations (Config.Fusion.Mutation): roll, carry chance per mutated input, all-same guarantee + upgrade.
+do
+	cache.Remotes.Fuse = cache.Remotes.Fuse or { OnServerEvent = signal() }
+	cache.Remotes.FusionResult = cache.Remotes.FusionResult or { FireClient = function() end }
+	local fusion = loadModule("FusionController")
+	local base = byRank[1]
+	local gold, diamond = catalog.WithMutation(base, "Gold"), catalog.WithMutation(base, "Diamond")
+	local never = function()
+		return 0.99
+	end
+	local always = function()
+		return 0
+	end
+	local noRoll = function()
+		return nil
+	end
+	assert(fusion.ResultMutation({ [base] = 5 }, noRoll, always) == nil, "plain inputs give a plain pet")
+	assert(fusion.ResultMutation({ [base] = 5 }, function()
+		return "Rainbow"
+	end, never) == "Rainbow", "the usual free roll still applies")
+	assert(fusion.ResultMutation({ [base] = 4, [gold] = 1 }, noRoll, never) == nil, "carry is a chance, not a rule")
+	assert(fusion.ResultMutation({ [base] = 4, [gold] = 1 }, noRoll, always) == "Gold", "a mutated input can pass it on")
+	assert(fusion.ResultMutation({ [gold] = 5 }, noRoll, never) == "Gold", "five of the same mutation keep it")
+	assert(fusion.ResultMutation({ [gold] = 5 }, noRoll, always) == "Diamond", "five of the same can upgrade")
+	assert(fusion.ResultMutation({ [gold] = 4, [diamond] = 1 }, noRoll, never) == nil, "mixed mutations: no guarantee")
+	assert(fusion.ResultMutation({ [catalog.WithMutation(base, "Rainbow")] = 5 }, noRoll, always) == "Rainbow", "no mutation above Rainbow")
+	print("PASS: secret fusion mutations (roll, carry, guarantee, upgrade)")
+end
 
 -- Secret mutations: free pulls can mutate (never sold as duplicates), the client only learns it at hatching, paid
 -- pulls never mutate.

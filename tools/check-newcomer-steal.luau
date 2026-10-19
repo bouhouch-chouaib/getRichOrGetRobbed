@@ -50,6 +50,7 @@ local pick, throws = signal(), signal()
 local reserved = 0
 local petPosition = r.Vector3.zero
 local modules = {
+	BadgeController = { Award = function() end },
 	Config = {
 		Steal = { OnlyDuringDigesting = false, MaxDistance = 15, MaxCarryTime = 30, RecoverPromptDistance = 8 },
 		Carry = {

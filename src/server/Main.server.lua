@@ -53,6 +53,7 @@ LeaderboardController.Init()
 DuelController.Init()
 TradeController.Init()
 ProgressionController.Init()
+require(script.Parent.BadgeController).Init()
 
 GameLoopManager.Start()
 print("[Main] Serveur prêt.")

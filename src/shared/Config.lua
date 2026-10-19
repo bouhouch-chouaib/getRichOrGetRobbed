@@ -338,6 +338,42 @@ Config.Fusion = {
 	Count = 5,
 	MaxFromRarity = 6,
 	Costs = { 250, 15e3, 750e3, 40e6, 2.5e9, 250e9 }, -- prix en $ selon la rareté fusionnée (index de rareté)
+	-- Mutations par la fusion (SECRET, comme Config.Mutations : rien dans le jeu n'en parle). Le familier obtenu :
+	--   - tire sa mutation secrète comme un tirage gratuit (PullRewards.RollMutation) ;
+	--   - chaque familier muté mis dans la machine a CarryChance de lui passer sa mutation ;
+	--   - si les Count familiers ont TOUS la même mutation, il l'a forcément, et UpgradeChance d'avoir la suivante
+	--     (5 Dorés -> Doré sûr, 30 % Diamant ; 5 Diamants -> Diamant sûr, 30 % Arc-en-ciel).
+	-- On garde la meilleure. Le joueur ne voit qu'un œuf normal : la surprise est à l'éclosion.
+	Mutation = {
+		CarryChance = 0.12,
+		UpgradeChance = 0.3,
+	},
+}
+
+-- Badges Roblox (server/BadgeController). Id = numéro du badge créé sur create.roblox.com (0 = pas encore créé : ignoré).
+-- Images prêtes dans assets/badges (512 x 512). Aucun badge ne parle des mutations (elles restent secrètes).
+export type BadgeDef = { Key: string, Id: number, Name: string, Description: string }
+Config.Badges = {
+	{ Key = "Welcome", Id = 0, Name = "Bienvenue !", Description = "Rejoindre Get Rich Or Get Robbed pour la première fois." },
+	{ Key = "FirstHatch", Id = 0, Name = "Premier œuf", Description = "Faire éclore son premier œuf." },
+	{ Key = "FirstSteal", Id = 0, Name = "Voleur", Description = "Voler un familier dans une base adverse et le ramener chez soi." },
+	{ Key = "DuelWin", Id = 0, Name = "Champion de l'arène", Description = "Gagner un duel de familiers." },
+	{ Key = "WorldDesert", Id = 0, Name = "Voyageur", Description = "Atteindre le monde Désert." },
+	{ Key = "WorldCosmos", Id = 0, Name = "Explorateur cosmique", Description = "Atteindre le monde Cosmos." },
+	{ Key = "WorldDivin", Id = 0, Name = "Divin", Description = "Atteindre le dernier monde : Divin." },
+	{ Key = "FirstRebirth", Id = 0, Name = "Renaissance", Description = "Faire son premier Rebirth." },
+	{ Key = "Index25", Id = 0, Name = "Collectionneur", Description = "Découvrir 25 familiers différents." },
+	{ Key = "Index50", Id = 0, Name = "Grand collectionneur", Description = "Découvrir 50 familiers différents." },
+	{ Key = "Index75", Id = 0, Name = "Index complet", Description = "Découvrir les 75 familiers." },
+	{ Key = "Ultime", Id = 0, Name = "Évolution ultime", Description = "Obtenir un familier Ultime dans la capsule d'évolution." },
+	{ Key = "Sigma", Id = 0, Name = "Légende Sigma", Description = "Obtenir un familier Sigma." },
+} :: { BadgeDef }
+
+-- Groupe Roblox : les membres gagnent IncomeBonus de revenu en plus (server/ProgressionController, attribut "InGroup").
+-- Id = numéro du groupe (0 = pas de groupe : bonus désactivé et rien n'est affiché).
+Config.Group = {
+	Id = 0,
+	IncomeBonus = 0.1, -- +10 %
 }
 
 -- Index (collection) : chaque familier découvert donne une récompense à réclamer une seule fois

@@ -294,6 +294,9 @@ function BonusMenu.create(gui: Instance): Menu
 	local codeMessage = label(codePage, "", 24, WHITE, UDim2.fromOffset(0, 262), UDim2.new(1, 0, 0, 30))
 	label(codePage, "Les codes sont donnés sur la page du jeu et pendant les événements.", 18, GREY,
 		UDim2.fromOffset(0, 310), UDim2.new(1, 0, 0, 24))
+	-- Groupe Roblox (Config.Group) : invitation à le rejoindre, ou confirmation du bonus.
+	local groupLine = label(codePage, "", 20, GOLD, UDim2.fromOffset(0, 344), UDim2.new(1, 0, 0, 26))
+	groupLine.Visible = Config.Group.Id ~= 0
 	local function submit()
 		if box.Text == "" then
 			return
@@ -321,6 +324,11 @@ function BonusMenu.create(gui: Instance): Menu
 
 	local tabs: MenuKit.Tabs
 	local function refresh()
+		local percent = math.floor(Config.Group.IncomeBonus * 100 + 0.5)
+		groupLine.Text = if player:GetAttribute("InGroup") == true
+			then string.format("MEMBRE DU GROUPE : +%d %% DE REVENU !", percent)
+			else string.format("Rejoins notre groupe Roblox : +%d %% de revenu pour toujours !", percent)
+		groupLine.TextColor3 = if player:GetAttribute("InGroup") == true then MONEY else GOLD
 		-- Cadeau du jour
 		local claimDay = dailyDay()
 		local streak = MenuKit.number("DailyStreak")

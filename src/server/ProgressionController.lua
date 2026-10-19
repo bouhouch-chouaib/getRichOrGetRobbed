@@ -161,7 +161,21 @@ local function refreshFriends()
 	end
 end
 
+-- Groupe Roblox (Config.Group) : attribut "InGroup" = membre (bonus de revenu dans EconomyController).
+local function checkGroup(player: Player)
+	if Config.Group.Id == 0 or player:GetAttribute("InGroup") == true then
+		return
+	end
+	local ok, member = pcall(function()
+		return player:IsInGroupAsync(Config.Group.Id)
+	end)
+	if ok and member and player.Parent then
+		player:SetAttribute("InGroup", true)
+	end
+end
+
 local function onPlayerAdded(player: Player)
+	task.spawn(checkGroup, player)
 	friendships[player] = friendships[player] or {}
 	for _, other in ipairs(Players:GetPlayers()) do
 		if other ~= player then
@@ -220,10 +234,18 @@ function ProgressionController.Init()
 		end
 		refreshFriends()
 	end)
-	-- Passage à minuit (UTC) : nouvelles quêtes pour les joueurs déjà là.
+	-- Passage à minuit (UTC) : nouvelles quêtes pour les joueurs déjà là. Et un joueur qui vient de rejoindre le groupe
+	-- (sans quitter le jeu) reçoit son bonus.
 	task.spawn(function()
+		local rounds = 0
 		while true do
 			task.wait(30)
+			rounds += 1
+			if rounds % 4 == 0 then
+				for _, player in ipairs(Players:GetPlayers()) do
+					task.spawn(checkGroup, player)
+				end
+			end
 			for _, player in ipairs(Players:GetPlayers()) do
 				if Quests.Ensure(player) then
 					SessionData.Sync(player)

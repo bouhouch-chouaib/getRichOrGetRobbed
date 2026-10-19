@@ -764,6 +764,13 @@ Remotes.BonusResult.OnClientEvent:Connect(function(kind: string, a: any, b: any,
 end)
 
 -- Un ami Roblox arrive sur le serveur : bonus de revenu (Config.Friends).
+-- Membre du groupe Roblox (Config.Group) : bonus de revenu.
+player:GetAttributeChangedSignal("InGroup"):Connect(function()
+	if player:GetAttribute("InGroup") == true then
+		Toast.show(string.format("MEMBRE DU GROUPE : +%d %% DE REVENU !", math.floor(Config.Group.IncomeBonus * 100 + 0.5)), MONEY)
+	end
+end)
+
 local lastFriends = numberAttribute("FriendsHere")
 player:GetAttributeChangedSignal("FriendsHere"):Connect(function()
 	local friends = numberAttribute("FriendsHere")
