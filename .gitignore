@@ -12,3 +12,6 @@ sourcemap.json
 .env
 # Captures de jeux de référence (ne jamais publier)
 /references/
+
+# Sauvegardes automatiques de Blender
+*.blend1
