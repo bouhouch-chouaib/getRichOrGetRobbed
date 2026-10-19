@@ -4,6 +4,21 @@
 
 local Config = {}
 
+-- Un étage supplémentaire achetable par monde atteint, en plus du rez-de-chaussée.
+Config.BaseFloors = {
+	Height = 32,
+	SlotsPerFloor = 10,
+	Prices = { 250e3, 5e6, 250e6, 15e9, 1e12, 100e12, 10e15 },
+}
+
+-- Premier ramassage d'un nouveau profil : œuf Commun garanti, sans attendre une manche.
+-- Sa prime finance une première station. La protection anti-vol expire même hors ligne.
+Config.Newcomer = {
+	PetId = "ChienSaucisse",
+	BonusMoney = 500,
+	ProtectionSeconds = 300,
+}
+
 -- Incubation parallèle, en secondes réelles (continue hors ligne).
 -- Chaque œuf a son nid dans la couveuse de la base (shared/BaseLayout : 10 nids, les premiers à éclore d'abord).
 -- BuildUp : secondes de montée en tension avant l'éclosion (tremble, s'élève, brille), par rareté (Commun -> Sigma).
@@ -38,7 +53,7 @@ end
 Config.Magnet = {
 	Radius = { 7, 10, 13, 16, 20 }, -- studs, portée par niveau
 	Interval = 0.35, -- secondes entre deux objets attirés
-	IgnoreOwnThrow = 2, -- secondes : un objet qu'on vient de lancer n'est pas repris tout de suite
+	-- Un objet lancé est exclu de l’aimant jusqu’à un ramassage manuel. Aucun retour en plein vol.
 	PassKey = "AutoMagnet",
 }
 
@@ -282,12 +297,13 @@ Config.Monetization = {
 		{ Key = "DoubleMoney", Id = 2025998871, Icon = "Money", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
 		{ Key = "VIP", Id = 2026292822, Icon = "Crown", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
 		-- Id = 0 tant que le passe n'est pas créé sur Roblox (bouton « Bientôt »).
-		{ Key = "AutoMagnet", Id = 0, Icon = "Magnet", Name = "AIMANT MAX", Description = "Aimant à objets au niveau maximum tout de suite, pour toujours : les objets sautent dans tes mains de loin.", Price = 199 },
+		{ Key = "AutoMagnet", Id = 0, Icon = "Magnet", Name = "AIMANT MAX", Description = "Portée maximale permanente. Active ou coupe l’aimant avec son bouton ; les objets les plus rentables passent en premier.", Price = 199 },
 		{ Key = "ExtraBackpack", Id = 2025176879, Icon = "Backpack", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
 		{ Key = "EquipPlus2", Id = 2025296892, Icon = "Paw", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
 		{ Key = "LuckyLuck", Id = 2026568802, Icon = "Clover", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
 	} :: { MonetizationItem },
 	Products = {
+		{ Key = "BaseFloor", Id = 0, Icon = "Rebirth", Name = "ÉTAGE DE BASE", Description = "Un crédit d’étage permanent : +10 places. Un étage par monde atteint ; un crédit en attente reste sauvegardé.", Price = 149 },
 		{ Key = "AstralAura", Id = 3718429232, Icon = "Sparkle", Name = "AURA ASTRALE", Description = "Cristaux lumineux, étoiles cyan et violettes, et une traînée quand tu cours. Activée automatiquement, pour toujours.", Price = 19 },
 
 		{ Key = "ServerLuck", Id = 3717917081, Icon = "Sparkle", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
@@ -382,12 +398,12 @@ Config.Lock = {
 export type WorldDef = { Id: string, Name: string, Price: number, IncomeMultiplier: number }
 Config.Worlds = {
 	{ Id = "Prairie", Name = "Prairie", Price = 0, IncomeMultiplier = 1 },
-	{ Id = "Desert", Name = "Désert", Price = 1e6, IncomeMultiplier = 1.5 },
-	{ Id = "Volcan", Name = "Volcan", Price = 40e6, IncomeMultiplier = 2.25 },
-	{ Id = "Glace", Name = "Glace", Price = 1.5e9, IncomeMultiplier = 3.4 },
-	{ Id = "Abysses", Name = "Abysses", Price = 75e9, IncomeMultiplier = 5 },
-	{ Id = "Cosmos", Name = "Cosmos", Price = 4e12, IncomeMultiplier = 7.5 },
-	{ Id = "Divin", Name = "Divin", Price = 250e12, IncomeMultiplier = 11 },
+	{ Id = "Desert", Name = "Désert", Price = 5e6, IncomeMultiplier = 1.5 },
+	{ Id = "Volcan", Name = "Volcan", Price = 320e6, IncomeMultiplier = 2.25 },
+	{ Id = "Glace", Name = "Glace", Price = 18e9, IncomeMultiplier = 3.4 },
+	{ Id = "Abysses", Name = "Abysses", Price = 1.5e12, IncomeMultiplier = 5 },
+	{ Id = "Cosmos", Name = "Cosmos", Price = 120e12, IncomeMultiplier = 7.5 },
+	{ Id = "Divin", Name = "Divin", Price = 12.5e15, IncomeMultiplier = 11 },
 } :: { WorldDef }
 
 -- Monde (1 à #Config.Worlds) d'un palier quelconque, borné.
@@ -632,7 +648,7 @@ Config.Shop = {
 	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
 	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
 	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
-	{ Id = "Magnet", Icon = "Magnet", Name = "Aimant à objets", Description = "Les objets proches sautent tout seuls dans tes mains et ton sac, sans appuyer sur [E]. Plus de portée à chaque niveau.", MaxLevel = 5, BasePrice = 20e3, PriceGrowth = 9 },
+	{ Id = "Magnet", Icon = "Magnet", Name = "Aimant à objets", Description = "Active ou coupe l’aimant avec son bouton. Priorité aux objets qui rapportent le plus. Plus de portée à chaque niveau.", MaxLevel = 5, BasePrice = 20e3, PriceGrowth = 9 },
 	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2).
 	{ Id = "WeaponBat", Icon = "Bat", Name = "Batte", Description = "ARME : un grand coup de batte qui envoie valser un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },

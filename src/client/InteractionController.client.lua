@@ -6,6 +6,7 @@
 --   -> charge (ralentissement + zoom + arc de prédiction).
 --   Relâchement -> on détruit le weld, on réactive les collisions et on propulse via ApplyImpulse.
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -121,7 +122,7 @@ end
 local throwLabel = Instance.new("TextLabel")
 throwLabel.BackgroundTransparency = 1
 throwLabel.Size = UDim2.fromScale(1, 1)
-throwLabel.Font = Enum.Font.FredokaOne
+throwLabel.FontFace = Typography.Face
 throwLabel.TextSize = 34
 throwLabel.TextColor3 = Color3.new(1, 1, 1)
 throwLabel.Text = "LANCER"

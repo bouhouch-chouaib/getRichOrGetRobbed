@@ -39,6 +39,8 @@ local function remote(name: string): RemoteEvent
 end
 
 return {
+	SetMagnet = remote("SetMagnet"), -- (active: boolean), décision serveur
+	BaseFloor = remote("BaseFloor"), -- client: "Cash" | "Robux" ; serveur: succès/message
 	-- Serveur -> client : (item: BasePart) le serveur a validé le ramassage, le client peut souder l'item.
 	ItemGrabbed = remote("ItemGrabbed"),
 	-- Client -> serveur : (item: BasePart) le client vient de lancer l'item qu'il tenait.
@@ -48,7 +50,7 @@ return {
 	Knockback = remote("Knockback"),
 	-- Serveur -> client : (score: number, pulls: number, results: { [string]: number }, money: number)
 	RewardsGranted = remote("RewardsGranted"),
-	-- Serveur -> clients : (ownerUserId, clé de l'œuf, rareté, CFrame du nid, petId, dansLaBase: boolean).
+	-- Serveur -> clients : (ownerUserId, clé de l'œuf, rareté, CFrame du nid, petId, dansLaBase: boolean, enRéserve: boolean?).
 	-- Un message par œuf éclos (server/EggController). Aucun client ne peut demander une éclosion.
 	EggHatched = remote("EggHatched"),
 	-- Machine d'évolution (server/EggController) :

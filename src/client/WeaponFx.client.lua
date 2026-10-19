@@ -14,6 +14,7 @@
 --       suit pendant qu'elle est ramenée, puis revient dans le canon. Raté : il va jusqu'au point et revient.
 --     - Remotes.Grappled (pour la victime) : ce client ramène son propre personnage devant le tireur.
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -242,7 +243,7 @@ local function comicWord(head: BasePart, word: string, color: Color3?)
 	label.Position = UDim2.fromScale(0.5, 0.5)
 	label.Size = UDim2.fromScale(0.2, 0.2)
 	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.FredokaOne
+	label.FontFace = Typography.Face
 	label.TextScaled = true
 	label.Text = word
 	label.TextColor3 = color or WORD_COLORS[math.random(1, #WORD_COLORS)]

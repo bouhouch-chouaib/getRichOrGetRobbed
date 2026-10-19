@@ -65,7 +65,7 @@ export type Menu = { window: MenuKit.Window, refresh: () -> (), canTravel: () ->
 local function landscape(parent: Instance, look: Worlds.Look)
 	local frame = Instance.new("Frame")
 	frame.Name = "Landscape"
-	frame.Position = UDim2.fromOffset(12, 64)
+	frame.Position = UDim2.fromOffset(12, 70)
 	frame.Size = UDim2.new(1, -24, 0, 104)
 	frame.BackgroundColor3 = look.Ambience.AirColor
 	frame.BorderSizePixel = 0
@@ -114,13 +114,9 @@ function WorldMenu.create(gui: Instance): Menu
 	layout.Padding = UDim.new(0, 12)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = row
-	local padding = Instance.new("UIPadding")
-	padding.PaddingLeft = UDim.new(0, 4)
-	padding.PaddingTop = UDim.new(0, 4)
-	padding.PaddingRight = UDim.new(0, 4)
-	padding.Parent = row
+	UiStyle.scrollPadding(row)
 
-	local cardHeight = window.frame.Size.Y.Offset + window.content.Size.Y.Offset - 18
+	local cardHeight = window.frame.Size.Y.Offset + window.content.Size.Y.Offset - 28
 	local cards: { Card } = {}
 
 	for index, world in ipairs(Config.Worlds) do
@@ -128,11 +124,11 @@ function WorldMenu.create(gui: Instance): Menu
 		local card = UiStyle.brightCard(row, UDim2.fromOffset(CARD_WIDTH, cardHeight), look.Accent)
 		card.LayoutOrder = index
 		local name = UiStyle.text(card, world.Name, 30, WHITE, UiStyle.BODY_FONT)
-		name.Position = UDim2.fromOffset(6, 8)
-		name.Size = UDim2.new(1, -12, 0, 32)
+		name.Position = UDim2.fromOffset(12, 8)
+		name.Size = UDim2.new(1, -24, 0, 30)
 		local number = UiStyle.text(card, "Monde " .. index, 18, WHITE, UiStyle.BODY_FONT)
-		number.Position = UDim2.fromOffset(6, 38)
-		number.Size = UDim2.new(1, -12, 0, 22)
+		number.Position = UDim2.fromOffset(12, 42)
+		number.Size = UDim2.new(1, -24, 0, 20)
 		landscape(card, look)
 		local bonusBox = Instance.new("Frame")
 		bonusBox.BackgroundColor3 = Color3.new(0, 0, 0)
@@ -143,7 +139,8 @@ function WorldMenu.create(gui: Instance): Menu
 		UiStyle.corner(bonusBox, 6)
 		bonusBox.Parent = card
 		local bonus = UiStyle.number(bonusBox, "Revenu x" .. tostring(world.IncomeMultiplier), 26, UiStyle.Colors.Money)
-		bonus.Size = UDim2.fromScale(1, 1)
+		bonus.Position = UDim2.fromOffset(8, 6)
+		bonus.Size = UDim2.new(1, -16, 1, -12)
 		local status = UiStyle.text(card, "", 20, WHITE, UiStyle.BODY_FONT)
 		status.Position = UDim2.new(0, 10, 1, -96)
 		status.Size = UDim2.new(1, -20, 0, 30)

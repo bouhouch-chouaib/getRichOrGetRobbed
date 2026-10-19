@@ -5,6 +5,7 @@
 -- au même endroit pour tout le monde (horloge commune). Bulle [E] locale : « Reprendre » pour son propriétaire,
 -- « Voler » pour les autres -> Remotes.PickLoosePet (le serveur revérifie tout).
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -42,7 +43,7 @@ local function line(sign: BillboardGui, text: string, color: Color3, y: number, 
 	label.BackgroundTransparency = 1
 	label.Position = UDim2.fromScale(0, y)
 	label.Size = UDim2.fromScale(1, height)
-	label.Font = Enum.Font.FredokaOne
+	label.FontFace = Typography.Face
 	label.TextScaled = true
 	label.TextColor3 = color
 	label.Text = text
@@ -145,8 +146,13 @@ RunService:BindToRenderStep("LoosePetsPlacement", Enum.RenderPriority.Last.Value
 		local base = CFrame.lookAt(position, position + look) -- l'avant des modèles est -Z : il regarde où il va
 		walker.model:PivotTo(base * CFrame.new(0, walker.bottom + hop, 0) * CFrame.Angles(0, 0, roll))
 		walker.anchor.CFrame = CFrame.new(walker.model:GetPivot().Position)
-		if walker.prompt.Enabled ~= handsFree then
-			walker.prompt.Enabled = handsFree
+		local ownerId = walker.anchor:GetAttribute("OwnerUserId")
+		local owner = if type(ownerId) == "number" then Players:GetPlayerByUserId(ownerId) else nil
+		local protectedUntil = owner and owner:GetAttribute("NewcomerProtectedUntil")
+		local protected = not walker.mine and type(protectedUntil) == "number" and protectedUntil > now
+		local enabled = handsFree and not protected
+		if walker.prompt.Enabled ~= enabled then
+			walker.prompt.Enabled = enabled
 		end
 	end
 end)

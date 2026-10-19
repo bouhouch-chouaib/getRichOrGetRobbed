@@ -70,7 +70,10 @@ end
 local function isInsideBase(platform: BasePart, position: Vector3): boolean
 	local localPosition = platform.CFrame:PointToObjectSpace(position)
 	local half = platform.Size / 2 + Vector3.new(1.5, 0, 1.5)
-	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -3 and localPosition.Y < 25
+	local base = platform.Parent
+	local floorValue = base and base:GetAttribute("FloorsBuilt")
+	local floors = if type(floorValue) == "number" then floorValue else 0
+	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -3 and localPosition.Y < 25 + floors * Config.BaseFloors.Height
 end
 
 local function update(entry: BaseParts, now: number)

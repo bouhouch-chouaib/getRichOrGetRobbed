@@ -6,6 +6,7 @@
 -- L'OrderedDataStore ne sert qu'à l'affichage : la vraie sauvegarde reste dans SessionData (verrou de session).
 -- Si le DataStore est indisponible (Studio sans accès API), le tableau montre les joueurs du serveur.
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -88,12 +89,12 @@ end
 
 local function styleText(label: TextLabel, color: Color3, alignment: Enum.TextXAlignment)
 	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.LuckiestGuy
+	label.FontFace = Typography.Face
 	label.TextScaled = true
 	label.TextColor3 = color
 	label.TextXAlignment = alignment
 	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 3
+	stroke.Thickness = 2
 	stroke.Color = Color3.new(0, 0, 0)
 	stroke.Parent = label
 end

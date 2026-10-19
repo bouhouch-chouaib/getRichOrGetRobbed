@@ -15,6 +15,7 @@ local PolicyService = game:GetService("PolicyService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Icons = require(ReplicatedStorage.Shared.Icons)
@@ -79,11 +80,7 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 		layout.Padding = UDim.new(0, 12)
 		layout.SortOrder = Enum.SortOrder.LayoutOrder
 		layout.Parent = row
-		local padding = Instance.new("UIPadding")
-		padding.PaddingLeft = UDim.new(0, 4)
-		padding.PaddingTop = UDim.new(0, 4)
-		padding.PaddingRight = UDim.new(0, 4)
-		padding.Parent = row
+		UiStyle.scrollPadding(row)
 		return row
 	end
 
@@ -106,6 +103,7 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 	oddsLabel.TextXAlignment = Enum.TextXAlignment.Left
 	oddsLabel.TextYAlignment = Enum.TextYAlignment.Top
 	oddsLabel.TextWrapped = true
+	oddsLabel.LineHeight = 1.12
 	oddsLabel.ZIndex = 3
 
 	-- Tout ce qui concerne les objets aléatoires payants (tirages Robux et leurs chances) : caché par défaut.
@@ -128,16 +126,16 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 			randomItem(card)
 		end
 		local name = UiStyle.text(card, item.Name, 24, WHITE)
-		name.Position = UDim2.fromOffset(6, 10)
-		name.Size = UDim2.new(1, -12, 0, 30)
+		name.Position = UDim2.fromOffset(12, 8)
+		name.Size = UDim2.new(1, -24, 0, 30)
 		name.TextScaled = true
 		local nameLimit = Instance.new("UITextSizeConstraint")
 		nameLimit.MaxTextSize = 24
 		nameLimit.Parent = name
 		local kind = UiStyle.text(card, if isPass or item.Key == "AstralAura" then "Pour toujours" else "Achat", 18, WHITE, BODY_FONT)
-		kind.Position = UDim2.fromOffset(6, 40)
-		kind.Size = UDim2.new(1, -12, 0, 22)
-		Icons.image(card, item.Icon, UDim2.new(1, -60, 0, 116), UDim2.fromOffset(30, 66))
+		kind.Position = UDim2.fromOffset(12, 44)
+		kind.Size = UDim2.new(1, -24, 0, 22)
+		Icons.image(card, item.Icon, UDim2.new(1, -60, 0, 116), UDim2.fromOffset(30, 72))
 		local descriptionBox = Instance.new("Frame")
 		descriptionBox.BackgroundColor3 = Color3.new(0, 0, 0)
 		descriptionBox.BackgroundTransparency = 0.55
@@ -148,9 +146,9 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 		descriptionBox.Parent = card
 		local description = Instance.new("TextLabel")
 		description.BackgroundTransparency = 1
-		description.Position = UDim2.fromOffset(6, 4)
-		description.Size = UDim2.new(1, -12, 1, -8)
-		description.Font = BODY_FONT
+		description.Position = UDim2.fromOffset(8, 6)
+		description.Size = UDim2.new(1, -16, 1, -12)
+		description.FontFace = BODY_FONT
 		description.Text = item.Description
 		description.TextColor3 = WHITE
 		description.TextScaled = true
@@ -169,7 +167,9 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 			if item.Id == 0 or (isPass and Perks.HasPass(player, item.Key)) or (item.Key == "AstralAura" and (Perks.HasAura(player) or auraPending or player:GetAttribute("DataLoaded") ~= true)) then
 				return
 			end
-			if isPass then
+			if item.Key == "BaseFloor" then
+				Remotes.BaseFloor:FireServer("Robux")
+			elseif isPass then
 				MarketplaceService:PromptGamePassPurchase(player, item.Id)
 			else
 				if item.Key == "AstralAura" then auraPending = true end

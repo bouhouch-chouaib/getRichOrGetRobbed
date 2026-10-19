@@ -1,5 +1,6 @@
 --!strict
 -- Standalone visual review place. No remotes, inventory grants, economy or DataStore.
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -24,7 +25,7 @@ label.BackgroundTransparency = 0.15
 label.BackgroundColor3 = Color3.fromRGB(20, 26, 38)
 label.TextColor3 = Color3.new(1, 1, 1)
 label.TextSize = 22
-label.Font = Enum.Font.GothamBold
+label.FontFace = Typography.Face
 label.TextWrapped = true
 label.Parent = gui
 local bar = Instance.new("Frame")
@@ -82,7 +83,7 @@ local function button(text: string, callback: () -> ())
 	b.Size = UDim2.fromOffset(134, 50)
 	b.Text = text
 	b.TextSize = 17
-	b.Font = Enum.Font.GothamBold
+	b.FontFace = Typography.Face
 	b.BackgroundColor3 = Color3.fromRGB(42, 58, 82)
 	b.TextColor3 = Color3.new(1, 1, 1)
 	b.Parent = bar

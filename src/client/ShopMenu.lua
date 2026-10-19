@@ -122,15 +122,11 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 	layout.Padding = UDim.new(0, 12)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = row
-	local padding = Instance.new("UIPadding")
-	padding.PaddingLeft = UDim.new(0, 4)
-	padding.PaddingTop = UDim.new(0, 4)
-	padding.PaddingRight = UDim.new(0, 4)
-	padding.Parent = row
+	UiStyle.scrollPadding(row)
 
 	local cards: { Card } = {}
 	-- Hauteur de la zone de contenu (taille de la fenêtre moins en-tête et marges), moins la barre de défilement.
-	local cardHeight = window.frame.Size.Y.Offset + window.content.Size.Y.Offset - 18
+	local cardHeight = window.frame.Size.Y.Offset + window.content.Size.Y.Offset - 28
 
 	local function makeCard(item: Config.ShopItem, order: number): Card
 		local color = CARD_COLORS[item.Id] or UiStyle.Colors.Green
@@ -138,18 +134,18 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 		card.LayoutOrder = order
 
 		local name = UiStyle.text(card, item.Name, 26, WHITE, UiStyle.BODY_FONT)
-		name.Position = UDim2.fromOffset(6, 8)
-		name.Size = UDim2.new(1, -12, 0, 30)
+		name.Position = UDim2.fromOffset(12, 8)
+		name.Size = UDim2.new(1, -24, 0, 30)
 		name.TextScaled = true
 		local nameLimit = Instance.new("UITextSizeConstraint")
 		nameLimit.MaxTextSize = 26
 		nameLimit.Parent = name
 
 		local level = UiStyle.text(card, "", 18, WHITE, UiStyle.BODY_FONT)
-		level.Position = UDim2.fromOffset(6, 38)
-		level.Size = UDim2.new(1, -12, 0, 22)
+		level.Position = UDim2.fromOffset(12, 42)
+		level.Size = UDim2.new(1, -24, 0, 22)
 
-		Icons.image(card, item.Icon, UDim2.new(1, -60, 0, 112), UDim2.fromOffset(30, 62))
+		Icons.image(card, item.Icon, UDim2.new(1, -60, 0, 106), UDim2.fromOffset(30, 70))
 
 		local descriptionBox = Instance.new("Frame")
 		descriptionBox.BackgroundColor3 = Color3.new(0, 0, 0)
@@ -161,9 +157,9 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 		descriptionBox.Parent = card
 		local description = Instance.new("TextLabel")
 		description.BackgroundTransparency = 1
-		description.Position = UDim2.fromOffset(6, 4)
-		description.Size = UDim2.new(1, -12, 1, -8)
-		description.Font = UiStyle.BODY_FONT
+		description.Position = UDim2.fromOffset(8, 6)
+		description.Size = UDim2.new(1, -16, 1, -12)
+		description.FontFace = UiStyle.BODY_FONT
 		description.Text = item.Description
 		description.TextColor3 = WHITE
 		description.TextScaled = true
@@ -182,8 +178,8 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 		UiStyle.stroke(chip, 3, Color3.new(0, 0, 0), true)
 		chip.Parent = card
 		local effect = UiStyle.text(chip, "", 20, WHITE, UiStyle.BODY_FONT)
-		effect.Size = UDim2.new(1, -8, 1, 0)
-		effect.Position = UDim2.fromOffset(4, 0)
+		effect.Size = UDim2.new(1, -16, 1, -10)
+		effect.Position = UDim2.fromOffset(8, 5)
 		effect.TextScaled = true
 		local effectLimit = Instance.new("UITextSizeConstraint")
 		effectLimit.MaxTextSize = 20
@@ -283,7 +279,12 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 	table.insert(tabList, { label = "Chances", color = Color3.fromRGB(120, 120, 140), icon = "Dice" })
 	tabs = MenuKit.sideTabs(window, tabList, showCategory)
 	showCategory(1)
-	window.onOpen(robux.refresh)
+	window.onOpen(function()
+		if MenuKit.player:GetAttribute("StarterBonusPaid") == true and MenuKit.player:GetAttribute("Onboarding_Upgraded") ~= true then
+			tabs.select(1) -- les deux premières stations sont achetables avec la prime de départ
+		end
+		robux.refresh()
+	end)
 
 	return {
 		window = window,

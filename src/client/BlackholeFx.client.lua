@@ -11,6 +11,7 @@
 -- Tout est local (aucune donnée envoyée) : le serveur publie l'état en attributs de ReplicatedStorage
 -- (HoleTier, HoleGauge, HoleNeed, HoleCollapse, HoleJackpotUntil) et les moments forts par Remotes.HoleEvent.
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -577,7 +578,7 @@ local function label(parent: Instance, text: string, y: number, height: number, 
 	l.BackgroundTransparency = 1
 	l.Position = UDim2.fromScale(0, y)
 	l.Size = UDim2.fromScale(1, height)
-	l.Font = Enum.Font.FredokaOne
+	l.FontFace = Typography.Face
 	l.TextScaled = true
 	l.TextColor3 = color
 	l.Text = text

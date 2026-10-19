@@ -24,6 +24,7 @@ local EconomyController = require(script.Parent.EconomyController)
 local PullRewards = require(script.Parent.PullRewards)
 local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
+local OnboardingAnalytics = require(script.Parent.OnboardingAnalytics)
 
 local BlackholeController = {}
 
@@ -131,6 +132,7 @@ local function consume(item: BasePart, caught: boolean?)
 			local value = if type(rawValue) == "number" then rawValue else 1
 			local bonus = BlackholeTiers.OnScored(owner, item, value)
 			SessionData.AddScore(owner, value * SessionData.GetMultiplier(owner) * bonus)
+			OnboardingAnalytics.Mark(owner, "Scored")
 			Quests.Add(owner, "Feed", 1)
 		elseif reason ~= "jamais lancé" then
 			-- Un objet simplement lâché près du trou n'est pas suspect ; le reste est signalé.

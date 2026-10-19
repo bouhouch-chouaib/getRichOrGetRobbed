@@ -1,18 +1,21 @@
 --!strict
--- Tutoriel : 3 étapes guidées pour un nouveau joueur (affiché une seule fois : attribut "TutorialDone",
+-- Tutoriel : 4 étapes guidées pour un nouveau joueur (affiché une seule fois : attribut "TutorialDone",
 -- enregistré dans la sauvegarde via Remotes.TutorialDone).
 --   1. Ramasser un objet       -> flèche sur l'objet le plus proche
 --   2. Le lancer dans le trou  -> flèche sur le trou noir (ou sur un objet si on n'en tient plus)
---   3. Voir ses familiers      -> flèche sur sa base, jusqu'aux tirages de la digestion
+--   3. Recevoir un œuf         -> retour vers la base
+--   4. Voir son éclosion       -> flèche sur son œuf, jusqu’au vrai familier
 -- Guidage : panneau en bas de l'écran, gros "⬇" au-dessus de la cible, rayon doré entre le joueur et la cible.
 -- Bouton PASSER pour ceux qui connaissent déjà le jeu.
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
+local BaseLayout = require(ReplicatedStorage.Shared.BaseLayout)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
@@ -25,18 +28,24 @@ local TOUCH = ScreenScale.isTouch()
 type Step = { title: string, hint: string }
 local STEPS: { Step } = {
 	{
-		title = "ÉTAPE 1/3 : RAMASSE UN OBJET",
-		hint = if TOUCH then "Approche-toi d'un objet et touche RAMASSER" else "Approche-toi d'un objet et appuie sur [E]",
+		title = "ÉTAPE 1/4 : RAMASSE UN OBJET",
+		hint = if TOUCH
+			then "Approche-toi d'un objet et touche RAMASSER"
+			else "Approche-toi d'un objet et appuie sur [E]",
 	},
 	{
-		title = "ÉTAPE 2/3 : LANCE-LE DANS LE TROU NOIR !",
+		title = "ÉTAPE 2/4 : LANCE-LE DANS LE TROU NOIR !",
 		hint = if TOUCH
 			then "Sors de ta base, approche-toi du trou, maintiens LANCER pour viser puis relâche"
 			else "Sors de ta base, approche-toi du trou, maintiens CLIC GAUCHE pour viser puis relâche",
 	},
 	{
-		title = "ÉTAPE 3/3 : TES FAMILIERS ARRIVENT !",
-		hint = "Pendant la digestion, le trou noir te donne des familiers : regarde-les tomber dans ta base !",
+		title = "ÉTAPE 3/4 : TON PREMIER ŒUF !",
+		hint = "Reviens dans ta base : tes points te donnent des œufs quand le trou noir commence à digérer.",
+	},
+	{
+		title = "ÉTAPE 4/4 : FAIS ÉCLORE TON ŒUF",
+		hint = "Retrouve ton œuf dans la couveuse au fond de ta base. Il éclot tout seul à la fin du compte à rebours !",
 	},
 }
 
@@ -76,13 +85,14 @@ end
 local panelScale = Instance.new("UIScale")
 panelScale.Parent = panel
 
-local function label(font: Enum.Font, size: number, y: number, height: number): TextLabel
+local function label(font: Font, size: number, y: number, height: number): TextLabel
 	local text = Instance.new("TextLabel")
 	text.BackgroundTransparency = 1
 	text.Position = UDim2.fromOffset(16, y)
 	text.Size = UDim2.new(1, -130, 0, height)
-	text.Font = font
+	text.FontFace = font
 	text.TextSize = size
+	Typography.Fit(text, size, 14)
 	text.TextColor3 = Color3.new(1, 1, 1)
 	text.TextXAlignment = Enum.TextXAlignment.Left
 	text.TextWrapped = true
@@ -92,8 +102,8 @@ local function label(font: Enum.Font, size: number, y: number, height: number): 
 	text.Parent = panel
 	return text
 end
-local titleLabel = label(Enum.Font.FredokaOne, 26, 8, 30)
-local hintLabel = label(Enum.Font.FredokaOne, 16, 40, 32)
+local titleLabel = label(Typography.Face, 26, 8, 30)
+local hintLabel = label(Typography.Face, 16, 40, 32)
 
 local skipButton = Instance.new("TextButton")
 skipButton.Name = "Skip"
@@ -101,8 +111,9 @@ skipButton.AnchorPoint = Vector2.new(1, 0.5)
 skipButton.Position = UDim2.new(1, -12, 0.5, 0)
 skipButton.Size = UDim2.fromOffset(100, 40)
 skipButton.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
-skipButton.Font = Enum.Font.FredokaOne
-skipButton.TextSize = 20
+skipButton.FontFace = Typography.Face
+skipButton.TextSize = 18
+Typography.Fit(skipButton, 18)
 skipButton.TextColor3 = Color3.new(1, 1, 1)
 skipButton.Text = "PASSER"
 skipButton.Parent = panel
@@ -136,7 +147,7 @@ do
 	local arrow = Instance.new("TextLabel")
 	arrow.BackgroundTransparency = 1
 	arrow.Size = UDim2.fromScale(1, 1)
-	arrow.Font = Enum.Font.FredokaOne
+	arrow.FontFace = Typography.Face
 	arrow.TextScaled = true
 	arrow.TextColor3 = GOLD
 	arrow.Text = "⬇"
@@ -262,12 +273,12 @@ local function finish(skipped: boolean)
 		return
 	end
 	stop()
-	Remotes.TutorialDone:FireServer()
+	Remotes.TutorialDone:FireServer(skipped)
 	if skipped then
 		Toast.show("TUTORIEL PASSÉ", Color3.fromRGB(200, 200, 200))
 	else
 		Sounds.play("LevelUp")
-		Toast.show("BRAVO ! VOLE LES FAMILIERS DES BASES OUVERTES ET RAMÈNE-LES CHEZ TOI !", GOLD)
+		Toast.show("TON FAMILIER RAPPORTE DE L’ARGENT ! OUVRE L’INDEX POUR RÉCLAMER SA RÉCOMPENSE.", GOLD)
 	end
 end
 
@@ -275,32 +286,40 @@ skipButton.Activated:Connect(function()
 	finish(true)
 end)
 
--- Étape 1 -> 2 : un objet ramassé.
-Remotes.ItemGrabbed.OnClientEvent:Connect(function()
-	if step == 1 then
-		showStep(2)
+-- Reprendre les vrais jalons du serveur après reconnexion. Recevoir un œuf
+-- ne termine plus le tutoriel : il faut qu'un familier ait réellement éclos.
+local finishing = false
+local function updateProgress()
+	if step == 0 then
+		return
 	end
-end)
-
--- Étape 1/2 -> 3 : des points marqués (objet avalé par le trou noir).
-local lastScore = player:GetAttribute("RoundScore")
-player:GetAttributeChangedSignal("RoundScore"):Connect(function()
-	local score = player:GetAttribute("RoundScore")
-	local previous = if type(lastScore) == "number" then lastScore else 0
-	lastScore = score
-	if type(score) == "number" and score > previous and (step == 1 or step == 2) then
-		showStep(3)
+	local nextStep = 1
+	if player:GetAttribute("Onboarding_Scored") == true then
+		if player:GetAttribute("Onboarding_Hatched") == true then
+			if not finishing then
+				finishing = true
+				task.delay(3, function()
+					finish(false)
+				end) -- laisser voir l'éclosion
+			end
+			return
+		end
+		local eggCount = player:GetAttribute("EggCount")
+		nextStep = if player:GetAttribute("Onboarding_EggReceived") == true
+				or (type(eggCount) == "number" and eggCount > 0)
+			then 4
+			else 3
+	elseif player:GetAttribute("Onboarding_Pickup") == true or isHolding() then
+		nextStep = 2
 	end
-end)
-
--- Étape 3 -> fin : les tirages sont tombés (on laisse le temps de voir l'ouverture / la carte).
-Remotes.RewardsGranted.OnClientEvent:Connect(function(_score: number, pulls: number)
-	if step == 3 and pulls > 0 then
-		task.delay(3, function()
-			finish(false)
-		end)
+	if nextStep ~= step then
+		showStep(nextStep)
 	end
-end)
+end
+for _, key in ipairs({ "Pickup", "Scored", "EggReceived", "Hatched" }) do
+	player:GetAttributeChangedSignal("Onboarding_" .. key):Connect(updateProgress)
+end
+player:GetAttributeChangedSignal("EggCount"):Connect(updateProgress)
 
 -- Terminé ailleurs (autre appareil) : on arrête.
 player:GetAttributeChangedSignal("TutorialDone"):Connect(function()
@@ -308,6 +327,34 @@ player:GetAttributeChangedSignal("TutorialDone"):Connect(function()
 		stop()
 	end
 end)
+
+local function eggGoal(): Vector3?
+	local base = myBase()
+	local folder = base and base:FindFirstChild("Eggs")
+	local eggs: { Instance } = if folder then folder:GetChildren() else {}
+	local earliest: BasePart? = nil
+	local earliestTime = math.huge
+	for _, egg in ipairs(eggs) do
+		local readyAt = egg:GetAttribute("ReadyAt")
+		if egg:IsA("BasePart") and type(readyAt) == "number" and readyAt < earliestTime then
+			earliest, earliestTime = egg, readyAt
+		end
+	end
+	local capsule = base and base:FindFirstChild("EvolutionCapsule")
+	local machine = capsule and capsule:FindFirstChild("EvolutionMachine")
+	if earliest then
+		return earliest.Position + Vector3.new(0, 3, 0)
+	elseif machine and machine:IsA("BasePart") and machine:GetAttribute("Occupied") == true then
+		return machine.Position + Vector3.new(0, 3, 0)
+	else
+		local platform = base and base:FindFirstChild("BasePart")
+		return if platform and platform:IsA("BasePart")
+			then platform.CFrame:PointToWorldSpace(
+				Vector3.new(0, platform.Size.Y / 2 + 3, BaseLayout.IncubatorCenter.Y)
+			)
+			else nil
+	end
+end
 
 -- Position de la flèche et du rayon à chaque image.
 RunService.RenderStepped:Connect(function()
@@ -334,25 +381,50 @@ RunService.RenderStepped:Connect(function()
 		beam.Attachment0 = point
 	end
 
+	local digesting = ReplicatedStorage:GetAttribute("GameState") == "Digesting"
+	local starterPending = player:GetAttribute("StarterEggGiven") == true
+		and player:GetAttribute("StarterBonusPaid") ~= true
 	local goal: Vector3? = nil
-	if step == 1 or (step == 2 and not isHolding()) then
+	if step == 2 and digesting and starterPending then
+		goal = eggGoal() -- pendant la fermeture du trou, découvrir sa première récompense
+	elseif step == 2 and digesting and player:GetAttribute("StarterBonusPaid") == true then
+		goal = nil -- consigne d'achat dans le HUD ; ne pas envoyer le joueur contre le dôme
+	elseif step == 1 or (step == 2 and not isHolding()) then
 		local item = nearestItem(rootPart.Position)
 		goal = if item then item + Vector3.new(0, 2.5, 0) else nil
 	elseif step == 2 then
 		goal = HOLE
 	else
-		local base = myBase()
-		local platform = base and base:FindFirstChild("BasePart")
-		goal = if platform and platform:IsA("BasePart") then platform.Position + Vector3.new(0, 5, 0) else nil
+		goal = eggGoal()
 	end
 
 	-- Étape 2 pendant la digestion : le trou ne mange pas, on prévient.
 	if step == 2 then
-		local digesting = ReplicatedStorage:GetAttribute("GameState") == "Digesting"
-		hintLabel.Text = if digesting
-			then "Le trou noir digère... attends qu'il ait de nouveau faim (chrono en haut) !"
+		titleLabel.Text = if digesting and starterPending then "TON ŒUF DE DÉPART T’ATTEND !" else STEPS[2].title
+		hintLabel.Text = if digesting and starterPending
+			then "Rejoins ta couveuse : ton œuf offert éclot bientôt et finance ta première amélioration !"
+			elseif digesting and player:GetAttribute("StarterBonusPaid") == true and player:GetAttribute(
+				"Onboarding_Upgraded"
+			) ~= true then "Ouvre BOUTIQUE : utilise ta prime pour acheter un tapis de course ou un banc de muscu."
+			elseif digesting then "Entraîne-toi ou prépare ton prochain lancer pendant la digestion (chrono en haut)."
 			elseif isHolding() then STEPS[2].hint
 			else STEPS[1].hint .. ", puis lance-le dans le trou noir !"
+	end
+
+	if step == 4 then
+		local hatchAt = player:GetAttribute("NextHatchAt")
+		local countdown = if type(hatchAt) == "number" and hatchAt < math.huge
+			then math.max(0, math.ceil(hatchAt - Workspace:GetServerTimeNow()))
+			else 0
+		hintLabel.Text = if countdown > 0
+			then string.format(
+				"Ton œuf éclot dans %d s ! Rejoins la couveuse ; tu peux continuer à jouer pendant l’attente.",
+				countdown
+			)
+			elseif
+				hatchAt == math.huge
+			then "Ton œuf est dans la capsule d’évolution. Ouvre-le quand tu veux pour découvrir ton familier !"
+			else STEPS[4].hint
 	end
 
 	if goal then
@@ -367,15 +439,15 @@ end)
 
 -- Démarrage : seulement quand la sauvegarde est connue (sinon un ancien joueur le verrait une seconde).
 task.spawn(function()
-	local started = os.clock()
-	while player:GetAttribute("DataLoaded") ~= true and os.clock() - started < 8 do
+	while player.Parent and player:GetAttribute("DataLoaded") ~= true do
 		task.wait(0.25)
 	end
-	if player:GetAttribute("TutorialDone") == true then
+	if not player.Parent or player:GetAttribute("TutorialDone") == true then
 		return
 	end
 	task.wait(1.5) -- laisse le joueur apparaître et le HUD se mettre en place
 	if player:GetAttribute("TutorialDone") ~= true then
-		showStep(if isHolding() then 2 else 1)
+		showStep(1)
+		updateProgress()
 	end
 end)

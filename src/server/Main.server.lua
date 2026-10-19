@@ -32,6 +32,7 @@ SessionData.Init()
 
 local bases = MapGenerator.generate()
 BaseManager.Init(bases)
+require(script.Parent.BaseFloorController).Init(bases)
 ItemInteraction.Init()
 BlackholeController.Init()
 ItemSpawner.Init()

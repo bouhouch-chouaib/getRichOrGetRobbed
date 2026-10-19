@@ -16,9 +16,9 @@
 
 ## 1. Un seul joueur (PC)
 
-- [ ] Arrivée : base attribuée, nom sur le panneau, 5 objets dans la base, tutoriel en 3 étapes.
+- [ ] Arrivée : base attribuée, nom sur le panneau, 5 objets dans la base, tutoriel en 4 étapes (ramasser, lancer, recevoir un œuf, voir son éclosion).
 - [ ] Ramasser [E], viser (clic gauche maintenu), lancer : l'objet tombe dans le trou → points.
-- [ ] Fin de la nuit : tirages, familiers qui tombent dans la base, carte de résultats.
+- [ ] Fin de la nuit : tirages, œufs dans la couveuse, carte de résultats. Le tutoriel continue jusqu’à la vraie éclosion.
 - [ ] Revenu d'argent qui monte, boutique (tapis, banc, sac, chance, verrou long), fusion.
 - [ ] Sons et musique (nuit / jour) : volume correct, rien de gênant.
 - [ ] **Quitter puis revenir** : argent, familiers, niveaux et équipement sont **conservés**, le tutoriel ne revient pas.

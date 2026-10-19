@@ -18,6 +18,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
+local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local EconomyController = require(script.Parent.EconomyController)
@@ -30,6 +31,7 @@ BasePetsController.PetTriggered = petTriggered.Event
 
 type PetState = {
 	anchor: BasePart,
+	floor: number,
 	style: PetWander.Style,
 	leg: PetWander.Leg,
 	nextLegAt: number, -- heure (serveur) du prochain départ
@@ -65,7 +67,7 @@ local function wantedPets(owner: Player?): ({ string }, { [string]: number })
 	return order, counts
 end
 
-local function addPet(state: BaseState, petId: string, count: number)
+local function addPet(state: BaseState, petId: string, count: number, floor: number)
 	local anchor = Instance.new("Part")
 	anchor.Name = petId
 	anchor.Size = Vector3.one
@@ -75,16 +77,18 @@ local function addPet(state: BaseState, petId: string, count: number)
 	anchor.CanTouch = false
 	anchor.CanQuery = false
 	anchor.CastShadow = false
-	local spot = PetWander.randomSpot(rng, petId)
-	anchor.CFrame = PetWander.groundOf(state.platform) * CFrame.new(spot.X, 0.5, spot.Y)
+	local spot = PetWander.randomSpot(rng, petId, floor)
+	anchor.CFrame = PetWander.groundOf(state.platform) * CFrame.new(spot.X, floor * Config.BaseFloors.Height + 0.5, spot.Y)
 	local leg: PetWander.Leg = { from = spot, to = spot, start = now(), duration = 0 }
 	anchor:SetAttribute("PetId", petId)
+	anchor:SetAttribute("Floor", floor)
 	anchor:SetAttribute("Count", count)
 	anchor:SetAttribute("Seed", rng:NextInteger(0, 1000))
 	anchor:SetAttribute("Walk", PetWander.encode(leg))
 	anchor.Parent = state.folder
 	state.pets[petId] = {
 		anchor = anchor,
+		floor = floor,
 		style = PetWander.STYLES[PetWander.styleFor(petId)],
 		leg = leg,
 		-- Départs décalés pour que les familiers ne bougent pas tous en même temps.
@@ -102,7 +106,10 @@ end
 
 -- Met la base à jour : ajoute / retire des espèces, change les quantités. Les familiers déjà là gardent leur place.
 local function syncBase(state: BaseState)
-	local order, counts = wantedPets(BaseManager.GetOwner(state.base))
+	local owner = BaseManager.GetOwner(state.base)
+	local order, counts = wantedPets(owner)
+	local rebirths = owner and owner:GetAttribute("Rebirths")
+	local groundSlots = Config.GetIncomeSlots(if type(rebirths) == "number" then rebirths else 0)
 	for petId, count in pairs(counts) do
 		counts[petId] = count - (state.reserved[petId] or 0)
 	end
@@ -111,15 +118,23 @@ local function syncBase(state: BaseState)
 			removePet(state, petId)
 		end
 	end
-	for _, petId in ipairs(order) do
+	for index, petId in ipairs(order) do
+		local floor = math.max(0, math.ceil((index - groundSlots) / Config.BaseFloors.SlotsPerFloor))
 		local count = counts[petId]
 		local pet = state.pets[petId]
 		if count <= 0 then
 			continue
 		elseif not pet then
-			addPet(state, petId, count)
-		elseif pet.anchor:GetAttribute("Count") ~= count then
-			pet.anchor:SetAttribute("Count", count)
+			addPet(state, petId, count, floor)
+		else
+			if pet.anchor:GetAttribute("Count") ~= count then pet.anchor:SetAttribute("Count", count) end
+			if pet.floor ~= floor then
+				pet.floor = floor
+				local spot = PetWander.randomSpot(rng, petId, floor)
+				pet.leg = {from=spot,to=spot,start=now(),duration=0}
+				pet.anchor:SetAttribute("Floor", floor)
+				pet.anchor:SetAttribute("Walk", PetWander.encode(pet.leg))
+			end
 		end
 	end
 end
@@ -164,7 +179,7 @@ local function updateWalks()
 		for petId, pet in pairs(state.pets) do
 			if time >= pet.nextLegAt then
 				local from = PetWander.positionAt(pet.leg, time)
-				local to = PetWander.randomSpot(rng, petId)
+				local to = PetWander.randomSpot(rng, petId, pet.floor)
 				local duration = (to - from).Magnitude / pet.style.speed
 				pet.leg = { from = from, to = to, start = time, duration = duration }
 				pet.nextLegAt = time + duration + rng:NextNumber(pet.style.minWait, pet.style.maxWait)
@@ -191,7 +206,7 @@ function BasePetsController.Celebrate(player: Player, petIds: { string }, hatchS
 	for _, petId in ipairs(petIds) do
 		local pet = state.pets[petId]
 		if pet then
-			local spot = (hatchSpots and hatchSpots[petId]) or PetWander.positionAt(pet.leg, time)
+			local spot = (hatchSpots and pet.floor == 0 and hatchSpots[petId]) or PetWander.positionAt(pet.leg, time)
 			pet.leg = { from = spot, to = spot, start = time, duration = 0 }
 			pet.nextLegAt = time + LANDING_PAUSE
 			pet.anchor:SetAttribute("Walk", PetWander.encode(pet.leg))
@@ -215,7 +230,7 @@ function BasePetsController.GetPetPosition(anchor: Instance): Vector3?
 		local pet = if type(petId) == "string" then state.pets[petId] else nil
 		if pet and pet.anchor == anchor then
 			local spot = PetWander.positionAt(pet.leg, now())
-			return (PetWander.groundOf(state.platform) * CFrame.new(spot.X, 0, spot.Y)).Position
+			return (PetWander.groundOf(state.platform) * CFrame.new(spot.X, pet.floor * Config.BaseFloors.Height, spot.Y)).Position
 		end
 	end
 	return nil

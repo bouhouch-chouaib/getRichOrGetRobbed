@@ -151,7 +151,7 @@ function EggController.Init(bases: { Model })
 				if inBase then
 					walked[event.petId] = true
 				end
-				Remotes.EggHatched:FireAllClients(player.UserId, event.key, Catalog.ById[event.petId].Rarity, cf, event.petId, inBase)
+				Remotes.EggHatched:FireAllClients(player.UserId, event.key, Catalog.ById[event.petId].Rarity, cf, event.petId, inBase, not BasePets.IsShown(player, event.petId))
 			end
 			-- Une seule annonce pour le plus rare (pas de rafale au retour d'une absence).
 			table.sort(ids, function(a, b)
@@ -274,7 +274,7 @@ function EggController.Init(bases: { Model })
 				BasePets.Celebrate(player, { petId }, { [petId] = BaseLayout.EvolutionExit })
 				local cf = machine.CFrame * CFrame.new(0, machine.Size.Y / 2, 0)
 				Remotes.EggHatched:FireAllClients(player.UserId, "machine", Catalog.ById[petId].Rarity, cf, petId,
-					BasePets.IsShown(player, petId))
+					BasePets.IsShown(player, petId), not BasePets.IsShown(player, petId))
 				if rank(petId) + Catalog.Stage(petId) - 1 >= Config.Loot.AnnounceMinRarity or Catalog.Mutation(petId) then
 					Remotes.Announcement:FireAllClients(player.DisplayName, petId)
 				end

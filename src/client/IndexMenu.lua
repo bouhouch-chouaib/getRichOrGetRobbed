@@ -56,12 +56,12 @@ function IndexMenu.create(gui: Instance): Index
 			rarityCard:Destroy()
 		end
 		local rarity = Config.Rarities[rarityIndex]
-		local card = UiStyle.brightCard(content, UDim2.fromOffset(150, 330), rarity.Color)
+		local card = UiStyle.brightCard(content, UDim2.fromOffset(150, 340), rarity.Color)
 		card.ZIndex = 2
 		local name = UiStyle.text(card, rarity.Name, 30, WHITE, UiStyle.BODY_FONT)
-		name.Position = UDim2.fromOffset(4, 10)
-		name.Size = UDim2.new(1, -8, 0, 36)
-		name.TextScaled = true
+		name.Position = UDim2.fromOffset(10, 10)
+		name.Size = UDim2.new(1, -20, 0, 36)
+		name.TextWrapped = true
 		-- Emblème de la rareté (shared/Icons : pousse, trèfle, goutte, orbe, flamme, fleur, étoile, couronne).
 		Icons.image(card, rarity.Id, UDim2.new(1, -30, 0, 120), UDim2.fromOffset(15, 56))
 		local bonus = UiStyle.text(card, string.format("Points x%s", tostring(rarity.Multiplier)), 18, WHITE, UiStyle.BODY_FONT)
@@ -71,8 +71,8 @@ function IndexMenu.create(gui: Instance): Index
 		income.Position = UDim2.fromOffset(4, 222)
 		income.Size = UDim2.new(1, -8, 0, 28)
 		local total = UiStyle.text(card, "", 16, WHITE, UiStyle.BODY_FONT)
-		total.Position = UDim2.new(0, 4, 1, -72)
-		total.Size = UDim2.new(1, -8, 0, 64)
+		total.Position = UDim2.new(0, 10, 1, -76)
+		total.Size = UDim2.new(1, -20, 0, 64)
 		total.TextWrapped = true
 		collectionLabel = total
 		rarityCard = card
@@ -81,7 +81,7 @@ function IndexMenu.create(gui: Instance): Index
 	----------------------------------------------------------------------
 	-- Grille + barre de progression (centre)
 	----------------------------------------------------------------------
-	local gridBox = UiStyle.panel(content, UDim2.fromOffset(434, 330))
+	local gridBox = UiStyle.panel(content, UDim2.fromOffset(434, 340))
 	gridBox.Position = UDim2.fromOffset(160, 0)
 	gridBox.ZIndex = 2
 	local grid = Instance.new("ScrollingFrame")
@@ -91,22 +91,20 @@ function IndexMenu.create(gui: Instance): Index
 	grid.Size = UDim2.new(1, -8, 1, -8)
 	grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	grid.CanvasSize = UDim2.new()
+	grid.ScrollingDirection = Enum.ScrollingDirection.Y
 	grid.ScrollBarThickness = 6
 	grid.ScrollBarImageColor3 = WHITE
 	grid.ZIndex = 2
 	grid.Parent = gridBox
 	local gridLayout = Instance.new("UIGridLayout")
-	gridLayout.CellSize = UDim2.fromOffset(98, 112)
-	gridLayout.CellPadding = UDim2.fromOffset(6, 6)
+	gridLayout.CellSize = UDim2.fromOffset(126, 150)
+	gridLayout.CellPadding = UDim2.fromOffset(10, 10)
 	gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	gridLayout.Parent = grid
-	local gridPadding = Instance.new("UIPadding")
-	gridPadding.PaddingTop = UDim.new(0, 4)
-	gridPadding.PaddingLeft = UDim.new(0, 4)
-	gridPadding.Parent = grid
+	UiStyle.scrollPadding(grid)
 
 	local progress = UiStyle.panel(content, UDim2.fromOffset(434, 44))
-	progress.Position = UDim2.fromOffset(160, 338)
+	progress.Position = UDim2.fromOffset(160, 352)
 	progress.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
 	progress.ZIndex = 2
 	local progressFill = Instance.new("Frame")
@@ -122,13 +120,13 @@ function IndexMenu.create(gui: Instance): Index
 	progressText.ZIndex = 3
 
 	-- Bandeau du bas : tout réclamer.
-	local claimAll = UiStyle.button(content, "", UDim2.fromOffset(594, 58), UiStyle.Colors.Cyan, 1)
-	claimAll.Position = UDim2.fromOffset(0, 390)
-	local claimAllIcon = Icons.image(claimAll, "Index", UDim2.fromOffset(62, 62), UDim2.fromOffset(6, -6))
+	local claimAll = UiStyle.button(content, "", UDim2.fromOffset(594, 56), UiStyle.Colors.Cyan, 1)
+	claimAll.Position = UDim2.fromOffset(0, 408)
+	local claimAllIcon = Icons.image(claimAll, "Index", UDim2.fromOffset(44, 44), UDim2.fromOffset(10, 6))
 	claimAllIcon.ZIndex = 2
 	local claimAllText = UiStyle.text(claimAll, "", 34, WHITE)
-	claimAllText.Position = UDim2.fromOffset(60, 0)
-	claimAllText.Size = UDim2.new(1, -70, 1, 0)
+	claimAllText.Position = UDim2.fromOffset(64, 6)
+	claimAllText.Size = UDim2.new(1, -76, 1, -12)
 	claimAllText.ZIndex = 2
 	claimAll.Activated:Connect(function()
 		if MenuKit.claimableCount() > 0 then
@@ -142,7 +140,7 @@ function IndexMenu.create(gui: Instance): Index
 	----------------------------------------------------------------------
 	-- Détail du familier choisi + récompense (droite)
 	----------------------------------------------------------------------
-	local detail = UiStyle.panel(content, UDim2.fromOffset(226, 262))
+	local detail = UiStyle.panel(content, UDim2.fromOffset(226, 300))
 	detail.Position = UDim2.fromOffset(602, 0)
 	detail.ZIndex = 2
 	local relief = detail:FindFirstChildOfClass("UIGradient")
@@ -163,9 +161,9 @@ function IndexMenu.create(gui: Instance): Index
 	local formButtons: { TextButton } = {}
 	local refreshDetail: () -> ()
 	for stage = 1, STAGES do
-		local width = (226 - 16 - (STAGES - 1) * 4) / STAGES
-		local button = UiStyle.button(detail, string.rep("★", stage), UDim2.fromOffset(width, 22), GREY, 16)
-		button.Position = UDim2.fromOffset(8 + (stage - 1) * (width + 4), 4)
+		local width = (226 - 16 - (STAGES - 1) * 8) / STAGES
+		local button = UiStyle.button(detail, string.rep("★", stage), UDim2.fromOffset(width, 28), GREY, 16)
+		button.Position = UDim2.fromOffset(8 + (stage - 1) * (width + 8), 8)
 		button.ZIndex = 4
 		button.Activated:Connect(function()
 			selectedStage = stage
@@ -175,37 +173,37 @@ function IndexMenu.create(gui: Instance): Index
 	end
 	local detailKey: string? = nil -- familier + découvert/non affiché (évite de refaire l'aperçu 3D à chaque seconde)
 	local detailName = UiStyle.text(detail, "", 26, WHITE, UiStyle.BODY_FONT)
-	detailName.Position = UDim2.fromOffset(6, 112)
-	detailName.Size = UDim2.new(1, -12, 0, 28)
-	detailName.TextScaled = true
+	detailName.Position = UDim2.fromOffset(10, 126)
+	detailName.Size = UDim2.new(1, -20, 0, 30)
+	detailName.TextWrapped = true
 	detailName.ZIndex = 3
 	local detailRarity = UiStyle.text(detail, "", 22, WHITE, UiStyle.BODY_FONT)
-	detailRarity.Position = UDim2.fromOffset(6, 140)
-	detailRarity.Size = UDim2.new(1, -12, 0, 22)
+	detailRarity.Position = UDim2.fromOffset(10, 160)
+	detailRarity.Size = UDim2.new(1, -20, 0, 22)
 	detailRarity.ZIndex = 3
 	local detailIncome = UiStyle.number(detail, "", 24, UiStyle.Colors.Money)
-	detailIncome.Position = UDim2.fromOffset(6, 160)
-	detailIncome.Size = UDim2.new(1, -12, 0, 26)
+	detailIncome.Position = UDim2.fromOffset(10, 188)
+	detailIncome.Size = UDim2.new(1, -20, 0, 26)
 	detailIncome.ZIndex = 3
 	-- Stats données quand il est équipé (shared/PetStats) : icône + « +3 » pour la Vitesse et la Force.
 	local function statChip(icon: string, x: number, color: Color3): TextLabel
-		local image = Icons.image(detail, icon, UDim2.fromOffset(28, 28), UDim2.fromOffset(x, 186))
+		local image = Icons.image(detail, icon, UDim2.fromOffset(28, 28), UDim2.fromOffset(x, 220))
 		image.ZIndex = 3
 		local label = UiStyle.number(detail, "", 24, color)
-		label.Position = UDim2.fromOffset(x + 30, 186)
-		label.Size = UDim2.fromOffset(70, 28)
+		label.Position = UDim2.fromOffset(x + 32, 220)
+		label.Size = UDim2.fromOffset(64, 28)
 		label.TextXAlignment = Enum.TextXAlignment.Left
 		label.ZIndex = 3
 		return label
 	end
 	local detailSpeed = statChip("Speed", 14, UiStyle.Colors.Speed)
 	local detailStrength = statChip("Strength", 116, UiStyle.Colors.Strength)
-	local equipButton = UiStyle.button(detail, "", UDim2.new(1, -16, 0, 40), UiStyle.Colors.Cyan, 24)
-	equipButton.Position = UDim2.new(0, 8, 1, -46)
+	local equipButton = UiStyle.button(detail, "", UDim2.new(1, -16, 0, 36), UiStyle.Colors.Cyan, 24)
+	equipButton.Position = UDim2.new(0, 8, 1, -44)
 	equipButton.ZIndex = 3
 
-	local rewardBox = UiStyle.panel(content, UDim2.fromOffset(226, 178))
-	rewardBox.Position = UDim2.fromOffset(602, 270)
+	local rewardBox = UiStyle.panel(content, UDim2.fromOffset(226, 152))
+	rewardBox.Position = UDim2.fromOffset(602, 312)
 	rewardBox.BackgroundColor3 = REWARD_GREEN
 	rewardBox.ZIndex = 2
 	local rewardStroke = rewardBox:FindFirstChildOfClass("UIStroke")
@@ -213,20 +211,20 @@ function IndexMenu.create(gui: Instance): Index
 		rewardStroke.Color = Color3.fromRGB(60, 220, 80)
 	end
 	local rewardTitle = UiStyle.text(rewardBox, "Récompense :", 22, WHITE, UiStyle.BODY_FONT)
-	rewardTitle.Position = UDim2.fromOffset(10, 6)
+	rewardTitle.Position = UDim2.fromOffset(10, 8)
 	rewardTitle.Size = UDim2.new(1, -20, 0, 26)
 	rewardTitle.TextXAlignment = Enum.TextXAlignment.Left
 	rewardTitle.ZIndex = 3
 	local rewardChip = UiStyle.panel(rewardBox, UDim2.new(1, -20, 0, 52))
-	rewardChip.Position = UDim2.fromOffset(10, 38)
+	rewardChip.Position = UDim2.fromOffset(10, 40)
 	rewardChip.ZIndex = 3
 	local rewardIcon = Icons.image(rewardChip, "Money", UDim2.fromOffset(46, 46), UDim2.fromOffset(4, 3))
 	rewardIcon.ZIndex = 4
 	local rewardAmount = UiStyle.number(rewardChip, "", 28, UiStyle.Colors.Money)
-	rewardAmount.Position = UDim2.fromOffset(46, 0)
-	rewardAmount.Size = UDim2.new(1, -52, 1, 0)
+	rewardAmount.Position = UDim2.fromOffset(58, 6)
+	rewardAmount.Size = UDim2.new(1, -68, 1, -12)
 	rewardAmount.ZIndex = 3
-	local claimButton = UiStyle.button(rewardBox, "", UDim2.new(1, -20, 0, 54), UiStyle.Colors.Green, 26)
+	local claimButton = UiStyle.button(rewardBox, "", UDim2.new(1, -20, 0, 40), UiStyle.Colors.Green, 26)
 	claimButton.Position = UDim2.fromOffset(10, 104)
 	claimButton.ZIndex = 3
 
@@ -287,8 +285,8 @@ function IndexMenu.create(gui: Instance): Index
 				detailViewport:Destroy()
 			end
 			local viewport = MenuKit.petViewport(detail, petId, not known)
-			viewport.Position = UDim2.fromOffset(8, 28)
-			viewport.Size = UDim2.new(1, -16, 0, 84)
+			viewport.Position = UDim2.fromOffset(8, 42)
+			viewport.Size = UDim2.new(1, -16, 0, 78)
 			viewport.ZIndex = 3
 			detailViewport = viewport
 		end
@@ -381,8 +379,8 @@ function IndexMenu.create(gui: Instance): Index
 					cell.viewport:Destroy()
 				end
 				local viewport = MenuKit.petViewport(cell.button, entry.Id, not known)
-				viewport.Position = UDim2.fromOffset(4, 20)
-				viewport.Size = UDim2.new(1, -8, 1, -38)
+				viewport.Position = UDim2.fromOffset(6, 42)
+				viewport.Size = UDim2.new(1, -12, 0, 56)
 				viewport.ZIndex = 3
 				cell.viewport = viewport
 			end
@@ -470,21 +468,21 @@ function IndexMenu.create(gui: Instance): Index
 
 			local name = UiStyle.text(button, "???", 16, WHITE, UiStyle.BODY_FONT)
 			name.Name = "PetName"
-			name.Position = UDim2.fromOffset(3, 2)
-			name.Size = UDim2.new(1, -6, 0, 18)
-			name.TextScaled = true
+			name.Position = UDim2.fromOffset(8, 6)
+			name.Size = UDim2.new(1, -16, 0, 32)
+			name.TextWrapped = true
 			name.ZIndex = 4
 			local count = UiStyle.text(button, "", 16, WHITE)
 			count.Name = "Count"
 			count.AnchorPoint = Vector2.new(1, 1)
-			count.Position = UDim2.new(1, -4, 1, -2)
+			count.Position = UDim2.new(1, -8, 1, -6)
 			count.Size = UDim2.fromOffset(40, 18)
 			count.TextXAlignment = Enum.TextXAlignment.Right
 			count.ZIndex = 4
 			local tag = UiStyle.text(button, "ÉQUIPÉ", 13, Color3.fromRGB(140, 255, 100))
 			tag.Name = "Equipped"
 			tag.AnchorPoint = Vector2.new(0, 1)
-			tag.Position = UDim2.new(0, 4, 1, -2)
+			tag.Position = UDim2.new(0, 8, 1, -6)
 			tag.Size = UDim2.fromOffset(56, 16)
 			tag.TextXAlignment = Enum.TextXAlignment.Left
 			tag.ZIndex = 4
@@ -492,10 +490,13 @@ function IndexMenu.create(gui: Instance): Index
 			local stars = UiStyle.text(button, "", 15, GOLD)
 			stars.Name = "Stars"
 			stars.AnchorPoint = Vector2.new(0.5, 0)
-			stars.Position = UDim2.new(0.5, 0, 0, 18)
-			stars.Size = UDim2.fromOffset(60, 16)
+			stars.Position = UDim2.new(0.5, -12, 0, 102)
+			stars.Size = UDim2.fromOffset(60, 14)
 			stars.ZIndex = 5
-			UiStyle.badge(button)
+			local badge = UiStyle.badge(button)
+			badge.AnchorPoint = Vector2.new(1, 0)
+			badge.Position = UDim2.new(1, -7, 0, 100)
+			badge.Size = UDim2.fromOffset(20, 20)
 
 			button.Activated:Connect(function()
 				select(entry.Id)

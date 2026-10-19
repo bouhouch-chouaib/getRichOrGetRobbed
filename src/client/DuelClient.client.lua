@@ -127,7 +127,7 @@ invite.BackgroundColor3 = UiStyle.Colors.WindowBody
 invite.Visible = false
 local inviteText = UiStyle.text(invite, "", 26, UiStyle.Colors.Orange)
 inviteText.Position = UDim2.fromOffset(12, 8)
-inviteText.Size = UDim2.new(1, -24, 0, 60)
+inviteText.Size = UDim2.new(1, -24, 0, 50)
 inviteText.TextWrapped = true
 local inviteTimer = UiStyle.text(invite, "", 18, WHITE)
 inviteTimer.Position = UDim2.fromOffset(12, 64)
@@ -150,7 +150,7 @@ end)
 -- Fenêtre de choix
 ----------------------------------------------------------------------
 
-local window = MenuKit.window(gui, "Duel de familiers", Vector2.new(860, 540), UiStyle.Colors.Orange, "Bat")
+local window = MenuKit.window(gui, "Duel de familiers", Vector2.new(860, 590), UiStyle.Colors.Orange, "Bat")
 local content = window.content
 
 local grid = Instance.new("ScrollingFrame")
@@ -162,9 +162,11 @@ grid.ScrollBarThickness = 8
 grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
 grid.CanvasSize = UDim2.new()
 grid.Parent = content
+grid.ScrollingDirection = Enum.ScrollingDirection.Y
+UiStyle.scrollPadding(grid)
 local layout = Instance.new("UIGridLayout")
-layout.CellSize = UDim2.fromOffset(108, 136)
-layout.CellPadding = UDim2.fromOffset(8, 8)
+layout.CellSize = UDim2.fromOffset(138, 148)
+layout.CellPadding = UDim2.fromOffset(12, 12)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.Parent = grid
 
@@ -296,16 +298,16 @@ local function refreshGrid()
 		UiStyle.stroke(card, 3, rarityColor(petId), true)
 		card.Parent = grid
 		local viewport = MenuKit.petViewport(card, petId, false)
-		viewport.Size = UDim2.fromOffset(96, 84)
-		viewport.Position = UDim2.fromOffset(6, 4)
+		viewport.Size = UDim2.new(1, -16, 0, 80)
+		viewport.Position = UDim2.fromOffset(8, 6)
 		local name = UiStyle.text(card, petName(petId), 13, rarityColor(petId))
-		name.Position = UDim2.fromOffset(2, 88)
-		name.Size = UDim2.new(1, -4, 0, 26)
+		name.Position = UDim2.fromOffset(8, 92)
+		name.Size = UDim2.new(1, -16, 0, 22)
 		name.TextWrapped = true
 		local hp, attack = DuelStats.of(petId)
 		local stats = UiStyle.text(card, string.format("PV %d  ATT %d", hp, attack), 12, WHITE)
-		stats.Position = UDim2.fromOffset(2, 114)
-		stats.Size = UDim2.new(1, -4, 0, 18)
+		stats.Position = UDim2.fromOffset(8, 120)
+		stats.Size = UDim2.new(1, -16, 0, 20)
 		gridCards[petId] = { card = card, viewport = viewport, name = name }
 		card.Activated:Connect(function()
 			if otherPick == nil or DuelStats.compatible(petId, otherPick) then

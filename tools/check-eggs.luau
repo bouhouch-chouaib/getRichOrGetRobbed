@@ -153,16 +153,13 @@ for rank, rarity in ipairs(config.Rarities) do
 	assert(top > 0 and bottom > 0 and m.PrimaryPart.Name == "Root")
 	local _, size = m:GetBoundingBox()
 	assert(size.X < 5 and size.Y < 5 and size.Z < 5, rarity.Id .. " fits the nest")
-	table.insert(
-		models,
-		{
-			id = rarity.Id,
-			name = rarity.Name,
-			rarity = rarity.Id,
-			parts = geometry(m),
-			seconds = eggs.Duration(rarity.Id),
-		}
-	)
+	table.insert(models, {
+		id = rarity.Id,
+		name = rarity.Name,
+		rarity = rarity.Id,
+		parts = geometry(m),
+		seconds = eggs.Duration(rarity.Id),
+	})
 	table.insert(report, { rarity = rarity.Id, seconds = eggs.Duration(rarity.Id), parts = #m:GetChildren() })
 end
 assert(#eggs.Merge(nil, {}) == 0, "old saves migrate without resetting pets")
@@ -283,6 +280,7 @@ services.Workspace = {
 		return os.time()
 	end,
 }
+services.AnalyticsService = {} -- Studio: no live telemetry calls
 services.MarketplaceService = { PromptGamePassPurchaseFinished = signal() }
 game.JobId = "test"
 game.BindToClose = function() end
@@ -318,6 +316,80 @@ loadModule = function(name)
 end
 local session = loadModule("SessionData")
 session.Init()
+
+-- Newcomer journey: real SessionData, DataStore snapshots, no client reward request.
+do
+	local function newcomer(id)
+		local fresh = r.Instance.new("Player")
+		fresh.Name, fresh.DisplayName, fresh.UserId = "Starter" .. id, "Starter", id
+		fresh.Parent = r.Instance.new("Folder")
+		services.Players.PlayerAdded:Fire(fresh)
+		assert(not session.GrantStarterEgg(fresh), "unloaded profiles cannot receive starter gifts")
+		cache.OnboardingAnalytics.Mark(fresh, "Pickup")
+		local load = tasks[#tasks]
+		load.f(table.unpack(load.args))
+		return fresh
+	end
+	local fresh = newcomer(3456)
+	local data = session.Get(fresh)
+	assert(data.starter.eligible and #data.eggs == 1, "early validated pickup receives exactly one starter egg")
+	local starter = data.eggs[1]
+	local deadline = data.starter.protectionUntil
+	assert(starter.petId == config.Newcomer.PetId and starter.count == 1)
+	assert(catalog.ById[starter.petId].Rarity == "Commun", "starter is guaranteed Common")
+	assert(starter.readyAt - starter.startedAt == config.Eggs.Seconds.Commun)
+	assert(session.IsNewcomerProtected(fresh))
+	assert(not session.GrantStarterEgg(fresh) and #data.eggs == 1, "pickup spam duplicated starter egg")
+	table.insert(data.eggs, eggs.Create(byRank[2], 1, 0, "unrelated-free-egg"))
+	session.HatchEggs(fresh, starter.startedAt)
+	assert(data.money == 0 and not data.starter.bonusPaid, "another egg wrongly paid starter bonus")
+	session.HatchEggs(fresh, starter.readyAt - 0.01)
+	assert(data.money == 0)
+	session.HatchEggs(fresh, starter.readyAt)
+	assert(data.money == config.Newcomer.BonusMoney and data.starter.bonusPaid)
+	session.HatchEggs(fresh, starter.readyAt + 1000)
+	assert(data.money == config.Newcomer.BonusMoney, "repeated hatch paid twice")
+	assert(session.Save(fresh))
+	assert(records.u_3456.starter.bonusPaid and records.u_3456.money == config.Newcomer.BonusMoney)
+	services.Players.PlayerRemoving:Fire(fresh)
+	services.Players.PlayerAdded:Fire(fresh)
+	local load = tasks[#tasks]
+	load.f(table.unpack(load.args))
+	data = session.Get(fresh)
+	assert(data.starter.protectionUntil == deadline, "reconnect refreshed protection")
+	assert(not session.GrantStarterEgg(fresh) and #data.eggs == 0)
+	assert(data.money == config.Newcomer.BonusMoney)
+	session.EndNewcomerProtection(fresh)
+	assert(not session.IsNewcomerProtected(fresh) and data.starter.protectionUntil == 0)
+	assert(session.Save(fresh) and records.u_3456.starter.protectionUntil == 0)
+	services.Players.PlayerRemoving:Fire(fresh)
+
+	local evolving = newcomer(3457)
+	local egg = session.GetEggs(evolving)[1]
+	assert(session.StartEvolution(evolving, egg.id .. "#1", os.time()))
+	assert(session.HatchEvolving(evolving), "starter can use the evolution machine")
+	assert(session.Get(evolving).money == config.Newcomer.BonusMoney)
+	assert(not session.HatchEvolving(evolving) and not session.GrantStarterEgg(evolving))
+	services.Players.PlayerRemoving:Fire(evolving)
+	local starterRules = loadModule("StarterJourney")
+	local restored =
+		starterRules.Restore({ eligible = true, eggId = "test", bonusPaid = true, protectionUntil = 100 }, false)
+	assert(
+		starterRules.IsProtected(restored, 99) and not starterRules.IsProtected(restored, 100),
+		"protection expiry boundary"
+	)
+	assert(
+		not starterRules.IsProtected(starterRules.Restore(nil, false), 0),
+		"existing profiles must not receive protection"
+	)
+	local earlyThief = starterRules.Restore(nil, true)
+	starterRules.EndProtection(earlyThief)
+	assert(starterRules.Grant(earlyThief, 100, "after-steal"))
+	assert(not starterRules.IsProtected(earlyThief, 101), "stealing before first pickup must not enable a later shield")
+	assert(starterRules.Restore(table.clone(earlyThief), false).protectionWaived)
+	print("PASS: starter gift, one-time hatch bonus, evolution, snapshot persistence, reconnect and protection expiry")
+end
+
 session.AddEggs(player, { [byRank[1]] = 2 })
 assert(next((session.HatchEggs(player, os.time() + 10000))) == nil, "unloaded profile cannot hatch")
 local early = session.GetEggs(player)[1]
@@ -325,6 +397,10 @@ records.u_1234 = { pets = { [byRank[2]] = 1 }, eggs = { eggs.Create(byRank[3], 1
 tasks[1].f(table.unpack(tasks[1].args)) -- actual loadPlayer, no autosave loop
 assert(session.IsLoaded(player) and #session.GetEggs(player) == 2, "merge pending rewards during async load")
 assert(session.GetOwnedPets(player)[byRank[2]] == 1, "old pets untouched")
+assert(
+	not session.Get(player).starter.eligible and not session.GrantStarterEgg(player),
+	"legacy save must not get newcomer gifts"
+)
 local rewardOwned = session.GetRewardOwned(player)
 assert(rewardOwned[byRank[1]] == 2 and rewardOwned[byRank[3]] == 1)
 assert(
@@ -376,7 +452,10 @@ do
 	local before = session.GetRewardOwned(player)[goldId] or 0
 	local shown = rewards.Grant(player, 2, 0)
 	assert((session.GetRewardOwned(player)[goldId] or 0) == before + 2, "free pulls can mutate, never sold")
-	assert(shown.drops[1].Id == byRank[1] and shown.drops[2].Id == byRank[1], "the client never sees the mutation before hatching")
+	assert(
+		shown.drops[1].Id == byRank[1] and shown.drops[2].Id == byRank[1],
+		"the client never sees the mutation before hatching"
+	)
 	rewards.Grant(player, 2, 0, nil, nil, true)
 	assert((session.GetRewardOwned(player)[goldId] or 0) == before + 2, "paid pulls never mutate")
 	config.Mutations[1].Chance = goldChance
@@ -386,6 +465,12 @@ do
 		if eggs[index].petId == goldId then
 			table.remove(eggs, index)
 		end
+	end
+end
+-- A local-only fake product ID enables receipt tests without altering production config.
+for _, product in ipairs(config.Monetization.Products) do
+	if product.Key == "BaseFloor" then
+		product.Id = 987654321
 	end
 end
 local monetization = loadModule("MonetizationController")
@@ -408,6 +493,57 @@ assert(monetization.ProcessReceipt(paid) == decision.PurchaseGranted)
 assert(records.u_1234.totalPulls == n + 1 and records.u_1234.pets[byRank[4]] == nil)
 assert(session.GetRewardOwned(player)[byRank[4]] == 1)
 assert(monetization.ProcessReceipt(paid) == decision.PurchaseGranted and session.GetTotalPulls(player) == n + 1)
+
+-- Real profile APIs: floors, receipt race, retry, world cap and saved magnet preference.
+do
+	local data = session.Get(player)
+	assert(data.expansion.floors == 0 and data.expansion.credits == 0 and not data.magnetEnabled)
+	assert(not session.SetMagnetEnabled(player, true), "unowned magnet enabled")
+	session.SetUpgradeLevel(player, "Magnet", 1)
+	assert(not data.magnetEnabled, "purchase must not activate magnet")
+	assert(session.SetMagnetEnabled(player, true) and player:GetAttribute("MagnetEnabled"))
+	assert(session.Save(player) and records.u_1234.magnetEnabled)
+	assert(session.SetMagnetEnabled(player, false))
+	data.money = config.BaseFloors.Prices[1] - 1
+	assert(not session.BuyBaseFloor(player) and data.expansion.floors == 0)
+	data.money += 1
+	assert(session.BuyBaseFloor(player) and data.money == 0 and data.expansion.floors == 1)
+	data.money = 1e20
+	assert(not session.BuyBaseFloor(player) and data.money == 1e20, "world floor cap charged twice")
+	local receipt = { PlayerId = 1234, ProductId = 987654321, PurchaseId = "floor-delayed" }
+	assert(monetization.ProcessReceipt(receipt) == decision.PurchaseGranted)
+	assert(data.expansion.floors == 1 and data.expansion.credits == 1, "race lost paid entitlement")
+	assert(records.u_1234.expansion.credits == 1)
+	assert(monetization.ProcessReceipt(receipt) == decision.PurchaseGranted and data.expansion.credits == 1)
+	receipt.PurchaseId = "floor-retry"
+	failSave = true
+	assert(monetization.ProcessReceipt(receipt) == decision.NotProcessedYet)
+	failSave = false
+	assert(monetization.ProcessReceipt(receipt) == decision.PurchaseGranted and data.expansion.credits == 2)
+	data.money = config.Worlds[2].Price - 1
+	assert(not session.AdvanceTier(player) and data.tier == 1)
+	data.money += 1
+	assert(session.AdvanceTier(player) == 2 and data.money == 0)
+	assert(data.expansion.floors == 2 and data.expansion.credits == 1, "tier must consume exactly one credit")
+	assert(player:GetAttribute("BaseCapacity") == 30)
+	assert(session.Save(player))
+	services.Players.PlayerRemoving:Fire(player)
+	services.Players.PlayerAdded:Fire(player)
+	local reload = tasks[#tasks]
+	reload.f(table.unpack(reload.args))
+	data = session.Get(player)
+	assert(data.expansion.floors == 2 and data.expansion.credits == 1 and not data.magnetEnabled)
+	assert(session.SetMagnetEnabled(player, true))
+	assert(session.Save(player) and records.u_1234.magnetEnabled)
+	services.Players.PlayerRemoving:Fire(player)
+	services.Players.PlayerAdded:Fire(player)
+	reload = tasks[#tasks]
+	reload.f(table.unpack(reload.args))
+	assert(session.Get(player).magnetEnabled and player:GetAttribute("MagnetEnabled"))
+	print(
+		"PASS: real profiles, cash floors, world caps, receipt credits/retry/idempotence, reconnect and magnet preference"
+	)
+end
 
 -- Retention: Rebirth resets money, worlds and the shop (weapons kept) and keeps every pet; daily gift rules, daily
 -- quests (same all day, 3 different kinds), quest progress capped at the goal, code normalisation.
@@ -434,7 +570,11 @@ do
 	assert(data.money == 0 and data.tier == 1 and data.world == 1, "back to the first world with no money")
 	assert(data.upgrades.Treadmill == 0 and data.upgrades.WeaponBat == 1, "shop reset, weapons kept")
 	assert(petCount() == petsBefore, "pets are kept")
-	assert(config.GetRebirthMultiplier(1) == 2 and config.GetRebirthPrice(1) == config.Rebirth.BasePrice * config.Rebirth.PriceGrowth)
+	assert(data.expansion.floors == 2 and data.expansion.credits == 1, "Rebirth must keep floors and paid credits")
+	assert(
+		config.GetRebirthMultiplier(1) == 2
+			and config.GetRebirthPrice(1) == config.Rebirth.BasePrice * config.Rebirth.PriceGrowth
+	)
 	assert(config.GetIncomeSlots(1) == config.Pets.IncomeSlots + 1)
 	assert(config.GetIncomeSlots(99) == config.Pets.IncomeSlots + config.Rebirth.MaxExtraPets)
 
@@ -471,10 +611,20 @@ local rejoined = loadModule("SessionData")
 rejoined.Init()
 tasks[1].f(table.unpack(tasks[1].args))
 assert(rejoined.IsLoaded(player))
+assert(rejoined.Get(player).onboarding.visits == 4, "analytics visit counter survives reconnect")
+assert(not rejoined.Get(player).onboarding.newPlayer, "legacy save is not a newly acquired player")
 do
 	local data = rejoined.Get(player)
 	assert(rejoined.GetRebirths(player) == 1 and data.tier == 1, "the Rebirth is saved")
-	assert(data.daily.last == 100 and data.daily.streak == 3 and table.find(data.codes, "MERCI"), "daily gift and codes are saved")
+	assert(
+		data.expansion.floors == 2 and data.expansion.credits == 1,
+		"floors must survive a fresh-server reload after Rebirth"
+	)
+	assert(data.magnetEnabled, "saved toggle preference lost")
+	assert(
+		data.daily.last == 100 and data.daily.streak == 3 and table.find(data.codes, "MERCI"),
+		"daily gift and codes are saved"
+	)
 	assert(#data.quests.list == 1 and data.quests.list[1].progress == 2, "quests are saved")
 end
 local before = rejoined.GetRewardOwned(player)
@@ -544,7 +694,10 @@ assert(next(hatchedNow) == nil, "the machine egg never hatches on its own")
 evolving.evolve.maxStage = 2
 assert(rejoined.TickEvolution(player, now) == nil, "nothing before the first attempt")
 assert(rejoined.TickEvolution(player, evolving.evolve.nextAt) == "Evolved" and evolving.evolve.stage == 2)
-assert(rejoined.TickEvolution(player, evolving.evolve.nextAt) == "Maxed" and evolving.evolve.done, "secret limit reached")
+assert(
+	rejoined.TickEvolution(player, evolving.evolve.nextAt) == "Maxed" and evolving.evolve.done,
+	"secret limit reached"
+)
 assert(rejoined.TickEvolution(player, now + 10 ^ 7) == nil, "no attempt after the limit")
 local evolvedId = assert(rejoined.HatchEvolving(player))
 assert(evolvedId == byRank[3] .. "__E2" and catalog.ById[evolvedId].Stage == 2, "hatches as the Évolué form")
@@ -562,16 +715,34 @@ for _, entry in ipairs(catalog.List) do
 	assert(#catalog.FormsOf[entry.Id] == #config.Evolution.Names * (#config.Mutations + 1), "all forms of " .. entry.Id)
 end
 local goldId = catalog.WithMutation(byRank[2], "Gold")
-assert(goldId == byRank[2] .. "__MGold" and catalog.ById[goldId].Mutation == "Gold" and catalog.ById[goldId].BaseId == byRank[2])
+assert(
+	goldId == byRank[2] .. "__MGold"
+		and catalog.ById[goldId].Mutation == "Gold"
+		and catalog.ById[goldId].BaseId == byRank[2]
+)
 assert(catalog.GetIncome(goldId) == math.floor(catalog.GetIncome(byRank[2]) * config.Mutations[1].Income))
 local ultimeRainbow = catalog.Variant(catalog.WithMutation(byRank[2], "Rainbow"), 3)
 assert(ultimeRainbow == byRank[2] .. "__E3__MRainbow", "evolving keeps the mutation")
-assert(catalog.GetIncome(ultimeRainbow) == math.floor(catalog.GetIncome(byRank[2]) * config.Evolution.IncomeMultiplier[3] * config.Mutations[3].Income))
+assert(
+	catalog.GetIncome(ultimeRainbow)
+		== math.floor(catalog.GetIncome(byRank[2]) * config.Evolution.IncomeMultiplier[3] * config.Mutations[3].Income)
+)
 assert(eggs.Create(goldId, 1, 0, "mut") ~= nil, "a mutated pet can be an egg")
 
 -- Saved evolution survives a reload.
-local saved = eggs.Merge({ { id = "x", petId = byRank[1], count = 1, startedAt = 1, readyAt = 2,
-	evolve = { stage = 2, maxStage = 3, nextAt = 99, done = false } } }, {})
+local saved = eggs.Merge(
+	{
+		{
+			id = "x",
+			petId = byRank[1],
+			count = 1,
+			startedAt = 1,
+			readyAt = 2,
+			evolve = { stage = 2, maxStage = 3, nextAt = 99, done = false },
+		},
+	},
+	{}
+)
 assert(saved[1].evolve and saved[1].evolve.stage == 2 and saved[1].evolve.maxStage == 3)
 table.clear(rejoined.GetEggs(player))
 rejoined.AddEggs(player, { [byRank[1]] = 3, [byRank[8]] = 1 })

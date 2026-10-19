@@ -181,13 +181,15 @@ local function fit(frame: Frame): number
 	local touch = ScreenScale.isTouch()
 	local left = if touch then ScreenScale.TOUCH_LEFT_RESERVED else 0
 	local right = if touch then ScreenScale.TOUCH_RIGHT_RESERVED else 0 -- bouton de saut de Roblox
-	local scale = math.min(1, (screen.X - left - right - 24) / width, (screen.Y - 40) / height)
-	if touch then
-		local start = left + (screen.X - left - right - width * scale) / 2
-		frame.Position = UDim2.new(0, start + frame.Size.X.Offset * scale / 2, 0.52, 0)
-	else
-		frame.Position = UDim2.fromScale(0.5, 0.52)
-	end
+	-- On narrow portrait screens, reserve a proportional strip instead of
+	-- consuming almost all the available width with fixed HUD reservations.
+	local reserveScale = math.min(1, screen.X * 0.35 / math.max(1, left + right))
+	left *= reserveScale
+	right *= reserveScale
+	local scale = math.max(0.05, math.min(1, (screen.X - left - right - 32) / width, (screen.Y - 64) / height))
+	local start = left + (screen.X - left - right - width * scale) / 2
+	-- Center the complete window AND its tabs, not just the body.
+	frame.Position = UDim2.fromOffset(start + frame.Size.X.Offset * scale / 2, screen.Y / 2 + 12)
 	return scale
 end
 
@@ -277,6 +279,21 @@ function MenuKit.window(parent: Instance, title: string, size: Vector2, headerCo
 			table.insert(callbacks, callback)
 		end,
 	}
+	-- Refit an already open menu after resizing or rotating the screen.
+	if parent:IsA("GuiObject") then
+		local resizeConnection = parent:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+			task.defer(function()
+				if opened and frame.Parent then
+					local scale = fit(frame)
+					TweenService:Create(built.scale, TweenInfo.new(0), { Scale = scale }):Play()
+					TweenService:Create(frame, TweenInfo.new(0), { Position = frame.Position }):Play()
+				end
+			end)
+		end)
+		frame.Destroying:Connect(function()
+			resizeConnection:Disconnect()
+		end)
+	end
 	built.closeButton.Activated:Connect(window.close)
 	-- Fenêtre cachée par un autre script (Visible = false) : elle compte comme fermée (sinon le flou resterait).
 	frame:GetPropertyChangedSignal("Visible"):Connect(function()
@@ -314,8 +331,8 @@ export type Tabs = {
 }
 
 -- Colonne d'onglets à droite de la fenêtre (16 oct. : refaits façon packs « Studs UI »). Chaque onglet : couleur en
--- relief, tenons, reflet, grosse icône qui déborde à gauche, nom en gros. L'onglet choisi se colle à la fenêtre avec
--- une flèche qui pointe dessus, grossit, brille (halo + contour blanc) ; les autres sont un peu éteints et décalés, et
+-- relief, tenons, reflet, icône contenue dans sa case, nom en gros. L'onglet choisi se colle à la fenêtre avec
+-- une flèche qui pointe dessus, brille (halo + contour blanc) ; les autres sont un peu éteints et décalés, et
 -- ressortent au survol. onSelect(index) est appelé à chaque changement.
 local TAB_WIDTH = 176
 local TAB_OUT = 14 -- décalage vers la droite des onglets non choisis
@@ -327,7 +344,7 @@ function MenuKit.sideTabs(window: Window, tabs: { Tab }, onSelect: (index: numbe
 	column.Size = UDim2.new(0, TAB_WIDTH + TAB_OUT + 10, 1, -70)
 	column.Parent = window.frame
 
-	local gap = 8
+	local gap = 10
 	local tabHeight = math.clamp(math.floor((window.frame.Size.Y.Offset - 80) / #tabs) - gap, 36, 66)
 	type TabUi = {
 		button: TextButton,
@@ -355,7 +372,7 @@ function MenuKit.sideTabs(window: Window, tabs: { Tab }, onSelect: (index: numbe
 			local x = if active then 0 elseif hot then TAB_OUT / 2 else TAB_OUT
 			local info = TweenInfo.new(if animate then 0.22 else 0, Enum.EasingStyle.Back)
 			TweenService:Create(ui.holder, info, { Position = UDim2.fromOffset(x, (index - 1) * (tabHeight + gap)) }):Play()
-			TweenService:Create(ui.scale, info, { Scale = if active then 1.08 elseif hot then 1.03 else 0.97 }):Play()
+			TweenService:Create(ui.scale, info, { Scale = 1 }):Play()
 			ui.shade.Color = UiStyle.buttonColors(if active then ui.color
 				elseif hot then ui.color:Lerp(Color3.fromRGB(70, 70, 90), 0.2)
 				else ui.color:Lerp(Color3.fromRGB(60, 60, 80), 0.45))
@@ -365,7 +382,7 @@ function MenuKit.sideTabs(window: Window, tabs: { Tab }, onSelect: (index: numbe
 			local icon = ui.icon
 			if icon then
 				icon.ImageTransparency = if active then 0 else 0.2
-				local side = tabHeight * (if active then 1.25 else 1.05)
+				local side = tabHeight * 0.72
 				TweenService:Create(icon, info, { Size = UDim2.fromOffset(side, side) }):Play()
 			end
 			ui.arrow.Visible = active
@@ -439,23 +456,23 @@ function MenuKit.sideTabs(window: Window, tabs: { Tab }, onSelect: (index: numbe
 		lip.Parent = button
 		UiStyle.addSweep(button, 10)
 
-		-- Grosse icône qui déborde à gauche.
+		-- Icône avec une marge dans chaque onglet.
 		local icon: ImageLabel? = nil
 		local textLeft = 12
 		if tab.icon then
-			local image = Icons.image(button, tab.icon, UDim2.fromOffset(tabHeight * 1.05, tabHeight * 1.05))
+			local image = Icons.image(button, tab.icon, UDim2.fromOffset(tabHeight * 0.72, tabHeight * 0.72))
 			image.AnchorPoint = Vector2.new(0.5, 0.5)
-			image.Position = UDim2.new(0, tabHeight * 0.3, 0.5, 0)
+			image.Position = UDim2.new(0, tabHeight * 0.45, 0.5, 0)
 			image.Rotation = -8
 			image.ZIndex = 4
 			UiStyle.sway(image, 4)
 			icon = image
-			textLeft = math.floor(tabHeight * 0.85)
+			textLeft = math.floor(tabHeight * 0.92)
 		end
 		local caption = UiStyle.text(button, tab.label, 26, WHITE, UiStyle.TITLE_FONT)
 		caption.Name = "Caption"
-		caption.Position = UDim2.fromOffset(textLeft, 0)
-		caption.Size = UDim2.new(1, -textLeft - 20, 1, -4) -- place pour la pastille rouge en haut à droite
+		caption.Position = UDim2.fromOffset(textLeft, 6)
+		caption.Size = UDim2.new(1, -textLeft - 40, 1, -12) -- marge avant la pastille rouge à droite
 		caption.TextXAlignment = if tab.icon then Enum.TextXAlignment.Left else Enum.TextXAlignment.Center
 		caption.TextScaled = true
 		caption.TextWrapped = false -- une seule ligne : le texte rétrécit pour tenir
@@ -492,8 +509,9 @@ function MenuKit.sideTabs(window: Window, tabs: { Tab }, onSelect: (index: numbe
 			color = tab.color,
 		}
 		local badge = UiStyle.badge(button)
-		badge.Position = UDim2.new(1, 2, 0, 2)
-		badge.Size = UDim2.fromOffset(28, 28)
+		badge.AnchorPoint = Vector2.new(1, 0.5)
+		badge.Position = UDim2.new(1, -5, 0.5, 0)
+		badge.Size = UDim2.fromOffset(22, 22)
 		badges[index] = badge
 
 		button.MouseEnter:Connect(function()

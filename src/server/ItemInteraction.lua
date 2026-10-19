@@ -9,8 +9,8 @@
 --   3. Au lancer, le client détruit le weld, applique l'impulsion et prévient le serveur (ThrowItem).
 --   4. Lâcher forcé (KO, mort, départ) : le serveur efface "Holder", le client le détecte et lâche.
 -- Sac à dos : un joueur peut porter 1 + niveau "Backpack" objets (le 1er en main, les autres dans le dos).
--- Aimant à objets (Config.Magnet, niveau Perks.MagnetLevel) : le serveur ramasse pour le joueur l'objet le plus proche
--- dans sa portée, par le même chemin que la bulle [E] (mêmes règles). Les objets des autres bases sont ignorés.
+-- Aimant à objets (Config.Magnet, niveau Perks.MagnetLevel) : le serveur ramasse les objets par points décroissants, puis par taille
+-- dans sa portée lorsque le joueur l’active, par le même chemin que la bulle [E] (mêmes règles). Les objets des autres bases sont ignorés.
 -- Anti-triche : à chaque lancer, le serveur note qui, d'où (position de son personnage côté serveur), quand et avec
 -- quelle puissance max ; BlackholeController vérifie ces infos (GetThrowInfo) avant de donner des points.
 
@@ -20,9 +20,11 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Perks = require(ReplicatedStorage.Shared.Perks)
+local MagnetRules = require(ReplicatedStorage.Shared.MagnetRules)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PowerController = require(script.Parent.PowerController)
 local SessionData = require(script.Parent.SessionData)
+local OnboardingAnalytics = require(script.Parent.OnboardingAnalytics)
 
 local ItemInteraction = {}
 
@@ -130,6 +132,8 @@ local function onPromptTriggered(item: BasePart, player: Player)
 		item:SetNetworkOwner(player)
 	end)
 
+	OnboardingAnalytics.Mark(player, "Pickup")
+	SessionData.GrantStarterEgg(player)
 	Remotes.ItemGrabbed:FireClient(player, item)
 	PowerController.Reveal(player) -- ramasser brise l'invisibilité
 end
@@ -145,6 +149,13 @@ function ItemInteraction.Register(item: BasePart)
 end
 
 function ItemInteraction.Init()
+	local toggled: { [Player]: number } = {}
+	Remotes.SetMagnet.OnServerEvent:Connect(function(player: Player, enabled: unknown)
+		if type(enabled) ~= "boolean" or os.clock() - (toggled[player] or -math.huge) < 0.2 then return end
+		toggled[player] = os.clock()
+		SessionData.SetMagnetEnabled(player, enabled)
+	end)
+	Players.PlayerRemoving:Connect(function(player) toggled[player] = nil end)
 	Remotes.ThrowItem.OnServerEvent:Connect(function(player: Player, item: unknown)
 		local items = held[player]
 		local index = if items and typeof(item) == "Instance" then table.find(items, item :: any) else nil
@@ -238,7 +249,7 @@ function ItemInteraction.Init()
 			local now = os.clock()
 			for _, player in ipairs(Players:GetPlayers()) do
 				local level = Perks.MagnetLevel(player)
-				if level <= 0 or now - (lastPull[player] or 0) < MAGNET.Interval then
+				if level <= 0 or player:GetAttribute("MagnetEnabled") ~= true or now - (lastPull[player] or 0) < MAGNET.Interval then
 					continue
 				end
 				if #(held[player] or {}) >= getCapacity(player) or player:GetAttribute("CarryingPet") then
@@ -250,21 +261,9 @@ function ItemInteraction.Init()
 					continue
 				end
 				local radius = MAGNET.Radius[level]
-				local best: BasePart? = nil
-				local bestDistance = radius
-				for _, item in ipairs(candidates(player)) do
-					if item:GetAttribute("Holder") or item:GetAttribute("Consumed") then
-						continue
-					end
-					local throw = throws[item]
-					if throw and throw.thrower == player and now - throw.time < MAGNET.IgnoreOwnThrow then
-						continue
-					end
-					local distance = (item.Position - root.Position).Magnitude
-					if distance < bestDistance then
-						best, bestDistance = item, distance
-					end
-				end
+				local best = MagnetRules.Best(candidates(player), root.Position, radius, function(item)
+					return throws[item] ~= nil -- jamais de boomerang, même sur une trajectoire de plus de 2 secondes
+				end)
 				if best then
 					lastPull[player] = now
 					onPromptTriggered(best, player)

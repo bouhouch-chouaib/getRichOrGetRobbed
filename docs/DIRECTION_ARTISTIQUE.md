@@ -45,8 +45,7 @@ Règle : couleurs **pures et saturées**, peu de pastel, pas de marron terne. Le
 
 ## 3. Interface
 
-- **Police** : grasse, ronde, souvent *italique* pour les chiffres (argent, vitesse, minuteur). Nous avons
-  Luckiest Guy et Fredoka One : garder, ajouter l'italique pour les nombres.
+- **Police** : Montserrat Black, graisse Heavy, droite pour les textes et les chiffres (dernière référence GUI du 16 oct.). Définition commune dans `shared/Typography` ; voir [TYPOGRAPHIE.md](TYPOGRAPHIE.md).
 - **Contour noir épais** sur tout le texte (UIStroke 2 à 3 px) et sur tous les boutons.
 - **Fenêtres** : fond sombre texturé, en-tête coloré (couleur = fonction : vert vente, violet machines/boutiques,
   cyan collection), bouton X rouge en haut à droite, coins peu arrondis (4 à 6 px), pas d'ombres floues.
@@ -75,8 +74,7 @@ Règle : couleurs **pures et saturées**, peu de pastel, pas de marron terne. Le
 - **HUD** : tuiles carrées à tenons 2 par 2 (Boutique, Index, Mondes, Bonus) + une large Rebirth arc-en-ciel animée ;
   icônes qui se balancent. **Offres Robux** à droite (`client/OffersPanel`, PC seulement) : icône sur rayons qui
   tournent, prix en pastille verte, tournent toutes les 9 s, cachées quand une fenêtre est ouverte.
-- **Une seule police partout : FredokaOne** (titres, textes, chiffres ; LuckiestGuy et les chiffres en italique ont été
-  retirés le 16 oct.). Icône Rebirth = boucle rouge et blanche dessinée par `tools/icons/make_rebirth_icon.py`.
+- **Une seule police partout : Montserrat Black** (titres, textes, chiffres, panneaux et interactions ; remplace FredokaOne et LuckiestGuy selon la dernière référence du 16 oct.). Icône Rebirth = boucle rouge et blanche dessinée par `tools/icons/make_rebirth_icon.py`.
 - **Messages** (`client/Toast`) : bandeaux colorés effacés sur les côtés, qui s'empilent (3 max).
 - **Cadeau du jour** : cartes avec pastille d'état (REÇU / AUJOURD'HUI / BLOQUÉ), jour 7 arc-en-ciel, rayons derrière
   le cadeau du jour.

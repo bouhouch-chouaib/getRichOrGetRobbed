@@ -10,6 +10,7 @@
 --     (client/BasePets) ; sinon il apparaît un instant au-dessus du nid (« +1 NOM ») puis rejoint la collection.
 --   - « +N ŒUFS EN ATTENTE » sur le panneau de la couveuse quand les 10 nids sont pleins.
 -- Tout est local (aucune requête au serveur) et limité aux œufs proches de la caméra.
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
@@ -155,7 +156,7 @@ local function add(instance: Instance)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 0.4)
-	label.Font, label.TextScaled = Enum.Font.FredokaOne, true
+	label.FontFace, label.TextScaled = Typography.Face, true
 	label.TextColor3 = rarity.Color
 	label.Text = "ŒUF " .. TextFormat.upper(rarity.Name)
 	outline(label, 2)
@@ -163,7 +164,7 @@ local function add(instance: Instance)
 	local timer = Instance.new("TextLabel")
 	timer.BackgroundTransparency = 1
 	timer.Position, timer.Size = UDim2.fromScale(0, 0.4), UDim2.fromScale(1, 0.36)
-	timer.Font, timer.TextScaled = Enum.Font.FredokaOne, true
+	timer.FontFace, timer.TextScaled = Typography.Face, true
 	timer.TextColor3 = WHITE
 	outline(timer, 2)
 	timer.Parent = gui
@@ -350,7 +351,7 @@ local function watchBase(base: Instance)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 1)
-	label.Font, label.TextScaled = Enum.Font.FredokaOne, true
+	label.FontFace, label.TextScaled = Typography.Face, true
 	label.TextColor3 = Color3.fromRGB(255, 210, 60)
 	outline(label, 3)
 	label.Parent = gui
@@ -416,7 +417,7 @@ banner.AnchorPoint = Vector2.new(0.5, 0.5)
 banner.Position = UDim2.fromScale(0.5, 0.32)
 banner.Size = UDim2.fromOffset(820, 70)
 banner.BackgroundTransparency = 1
-banner.Font, banner.TextScaled = Enum.Font.FredokaOne, true
+banner.FontFace, banner.TextScaled = Typography.Face, true
 banner.Visible = false
 outline(banner, 4)
 banner.Parent = bannerRoot
@@ -550,14 +551,14 @@ local function showcase(petId: string, ground: CFrame, rarityColor: Color3)
 	local name = Instance.new("TextLabel")
 	name.BackgroundTransparency = 1
 	name.Size = UDim2.fromScale(1, 0.6)
-	name.Font, name.TextScaled = Enum.Font.FredokaOne, true
+	name.FontFace, name.TextScaled = Typography.Face, true
 	name.TextColor3, name.Text = rarityColor, "+1 " .. TextFormat.upper(entry.Name)
 	outline(name, 3)
 	name.Parent = gui
 	local hint = Instance.new("TextLabel")
 	hint.BackgroundTransparency = 1
 	hint.Position, hint.Size = UDim2.fromScale(0, 0.6), UDim2.fromScale(1, 0.4)
-	hint.Font, hint.TextScaled = Enum.Font.FredokaOne, true
+	hint.FontFace, hint.TextScaled = Typography.Face, true
 	hint.TextColor3, hint.Text = WHITE, "DANS TA COLLECTION"
 	outline(hint, 2)
 	hint.Parent = gui
@@ -580,9 +581,11 @@ local function showcase(petId: string, ground: CFrame, rarityColor: Color3)
 end
 
 local pendingToast: { string } = {}
+local reserveToast = false
 local toastColor = WHITE
 local toastBest = 0
-local function queueToast(name: string, rank: number, color: Color3)
+local function queueToast(name: string, rank: number, color: Color3, reserve: boolean?)
+	reserveToast = reserveToast or reserve == true
 	table.insert(pendingToast, name)
 	if rank > toastBest then
 		toastBest, toastColor = rank, color
@@ -591,7 +594,9 @@ local function queueToast(name: string, rank: number, color: Color3)
 		task.delay(0.5, function()
 			local names = pendingToast
 			pendingToast, toastBest = {}, 0
-			Toast.show(if #names == 1 then "ÉCLOSION : " .. names[1] .. " !" else string.format("%d FAMILIERS ONT ÉCLOS !", #names), toastColor)
+			local suffix = if reserveToast then " BASE PLEINE : AGRANDIS-LA POUR SORTIR TES FAMILIERS DE L’INDEX." else ""
+			reserveToast = false
+			Toast.show((if #names == 1 then "ÉCLOSION : " .. names[1] .. " !" else string.format("%d FAMILIERS ONT ÉCLOS !", #names)) .. suffix, toastColor)
 		end)
 	end
 end
@@ -624,7 +629,7 @@ local function revealLabel(y: number, height: number, width: number): (TextLabel
 	label.Position = UDim2.fromScale(0.5, y)
 	label.Size = UDim2.fromOffset(width, height)
 	label.BackgroundTransparency = 1
-	label.Font, label.TextScaled = Enum.Font.FredokaOne, true
+	label.FontFace, label.TextScaled = Typography.Face, true
 	label.TextColor3 = WHITE
 	outline(label, 5)
 	local scale = Instance.new("UIScale")
@@ -786,7 +791,7 @@ local function mutationReveal(ground: CFrame, center: Vector3, petId: string, mu
 	end)
 end
 
-Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, rarityId: string, cf: CFrame, petId: string, inBase: boolean)
+Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, rarityId: string, cf: CFrame, petId: string, inBase: boolean, reserve: boolean?)
 	local rank = Config.RarityIndex[rarityId]
 	local entry = Catalog.ById[petId]
 	if not rank or not entry or typeof(cf) ~= "CFrame" then
@@ -804,7 +809,7 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 	local bannerColor = rarity.Color
 	local mine = ownerId == player.UserId
 	if mine and not mutation then
-		queueToast(TextFormat.upper(entry.Name), rank, rarity.Color)
+		queueToast(TextFormat.upper(entry.Name), rank, rarity.Color, reserve)
 	end
 
 	-- L'œuf affiché devient la coquille qui éclate (il ne sera pas détruit par le repère qui disparaît).

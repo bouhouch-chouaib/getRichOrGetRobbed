@@ -3,6 +3,7 @@
 -- côtés, texte blanc épais à contour noir. Il arrive en grossissant, les plus anciens remontent et s'effacent (3 au
 -- plus à l'écran). Utilisable par tous les scripts client : Toast.show("Texte", couleur?)
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
@@ -94,7 +95,7 @@ function Toast.show(message: string, color: Color3?)
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
 	label.Position = UDim2.fromScale(0.5, 0.5)
 	label.Size = UDim2.new(0.74, 0, 0, HEIGHT - 10)
-	label.Font = Enum.Font.FredokaOne
+	label.FontFace = Typography.Face
 	label.Text = message
 	label.TextColor3 = WHITE
 	label.TextScaled = true

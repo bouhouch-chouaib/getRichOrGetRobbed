@@ -4,26 +4,25 @@
 --   - Tapis : animation de course de Roblox jouée en boucle sur son propre personnage (donc vue par tout le monde).
 --   - Banc : développé couché animé ICI pour chaque joueur allongé (bras qui poussent, barre qui suit les mains,
 --     grognement d'effort à chaque poussée). Chaque client anime tout le monde : c'est pareil pour tous.
---   - "+X 👟" / "+X 💪" qui s'envolent au-dessus de la tête à chaque seconde (attributs "TrainingGain" / "TrainingPulse").
+--   - Rafales de "+X 👟" / "+X 💪" autour du corps à chaque gain (attributs "TrainingGain" / "TrainingPulse").
 --   - Pour descendre : sauter, ou bouton ARRÊTER (Remotes.StopTraining).
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Icons = require(ReplicatedStorage.Shared.Icons)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Joints = require(script.Parent.Joints)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
+local TrainingGainFx = require(script.Parent.TrainingGainFx)
 
 local TRAINING = Config.Training
 local DEFAULT_RUN = "rbxassetid://913376220" -- course R15 de Roblox (si le script Animate n'en donne pas)
-local POPUP_DISTANCE = 90
 
 local player = Players.LocalPlayer
 
@@ -50,7 +49,7 @@ stopButton.Position = UDim2.new(0.5, 0, 1, -ScreenScale.BOTTOM_RESERVED)
 stopButton.Size = UDim2.fromOffset(220, 60)
 stopButton.BackgroundColor3 = Color3.new(1, 1, 1)
 stopButton.AutoButtonColor = false
-stopButton.Font = Enum.Font.FredokaOne
+stopButton.FontFace = Typography.Face
 stopButton.Text = "⏹ ARRÊTER"
 stopButton.TextSize = 28
 stopButton.TextColor3 = Color3.new(1, 1, 1)
@@ -130,59 +129,15 @@ player.CharacterAdded:Connect(function()
 end)
 
 ----------------------------------------------------------------------
--- "+X" qui s'envolent au-dessus de la tête (tous les joueurs)
+-- Rafales de gains autour du corps (tous les joueurs proches)
 ----------------------------------------------------------------------
 
-local function formatGain(value: number): string
-	if value >= 10 then
-		return tostring(math.floor(value + 0.5))
-	end
-	return (string.format("%.1f", value):gsub("%.0$", ""))
-end
-
 local function popup(target: Player)
-	local character = target.Character
-	local head = character and character:FindFirstChild("Head")
 	local gain = target:GetAttribute("TrainingGain")
 	local training = target:GetAttribute("Training")
-	if not head or not head:IsA("BasePart") or type(gain) ~= "number" or training == nil then
-		return
+	if type(gain) == "number" and type(training) == "string" then
+		TrainingGainFx.Burst(target, gain, training, gui)
 	end
-	local camera = Workspace.CurrentCamera
-	if camera and (camera.CFrame.Position - head.Position).Magnitude > POPUP_DISTANCE then
-		return
-	end
-	local isSpeed = training == "Treadmill"
-	local billboard = Instance.new("BillboardGui")
-	billboard.Adornee = head
-	billboard.Size = UDim2.fromOffset(160, 50)
-	billboard.StudsOffsetWorldSpace = Vector3.new(math.random(-15, 15) / 10, 2, 0)
-	billboard.AlwaysOnTop = true
-	billboard.LightInfluence = 0
-	local label = Instance.new("TextLabel")
-	label.BackgroundTransparency = 1
-	label.Size = UDim2.fromScale(0.68, 1)
-	label.Font = Enum.Font.FredokaOne
-	label.TextScaled = true
-	label.TextXAlignment = Enum.TextXAlignment.Right
-	label.Text = "+" .. formatGain(gain)
-	label.TextColor3 = if isSpeed then Color3.fromRGB(120, 230, 255) else Color3.fromRGB(255, 170, 60)
-	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 2.5
-	stroke.Parent = label
-	label.Parent = billboard
-	-- Icône de la stat (basket ou haltère) à droite du nombre.
-	local icon = Icons.image(billboard, if isSpeed then "Speed" else "Strength", UDim2.fromScale(0.3, 1), UDim2.fromScale(0.7, 0))
-	billboard.Parent = gui
-
-	local info = TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	TweenService:Create(billboard, info, { StudsOffsetWorldSpace = billboard.StudsOffsetWorldSpace + Vector3.new(0, 3.5, 0) }):Play()
-	TweenService:Create(label, info, { TextTransparency = 1 }):Play()
-	TweenService:Create(stroke, info, { Transparency = 1 }):Play()
-	TweenService:Create(icon, info, { ImageTransparency = 1 }):Play()
-	task.delay(1.2, function()
-		billboard:Destroy()
-	end)
 end
 
 ----------------------------------------------------------------------
@@ -322,12 +277,16 @@ end)
 
 local function watch(target: Player)
 	local function onTraining()
+		TrainingGainFx.Clear(target)
 		if target:GetAttribute("Training") == "Bench" then
 			startLifter(target)
 		else
 			stopLifter(target)
 		end
 	end
+	target.CharacterRemoving:Connect(function()
+		TrainingGainFx.Clear(target)
+	end)
 	target:GetAttributeChangedSignal("Training"):Connect(onTraining)
 	target:GetAttributeChangedSignal("TrainingPulse"):Connect(function()
 		popup(target)
@@ -339,5 +298,8 @@ Players.PlayerAdded:Connect(watch)
 for _, other in ipairs(Players:GetPlayers()) do
 	watch(other)
 end
-Players.PlayerRemoving:Connect(stopLifter)
+Players.PlayerRemoving:Connect(function(target)
+	stopLifter(target)
+	TrainingGainFx.Clear(target)
+end)
 updateLocalTraining()

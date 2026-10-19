@@ -10,6 +10,7 @@
 -- Arrivée d'un nouveau familier (attribut "ArrivedAt" posé par le serveur après un tirage, une fusion ou un vol) :
 -- il tombe du ciel, gerbe d'étincelles à la couleur de sa rareté, étiquette "NOUVEAU", rayon de lumière si Légendaire+.
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -95,7 +96,7 @@ local function setLabel(shown: Shown)
 		label.BackgroundTransparency = 1
 		label.Position = UDim2.fromScale(0, y)
 		label.Size = UDim2.fromScale(1, height)
-		label.Font = Enum.Font.FredokaOne
+		label.FontFace = Typography.Face
 		label.TextScaled = true
 		label.TextColor3 = color
 		label.Text = text
@@ -146,7 +147,7 @@ local function playArrival(shown: Shown, arrivedAt: number)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 1)
-	label.Font = Enum.Font.FredokaOne
+	label.FontFace = Typography.Face
 	label.TextScaled = true
 	label.TextColor3 = color
 	label.Text = if hatched then "ÉCLOSION !" else "NOUVEAU !"
@@ -339,7 +340,8 @@ local function pose(shown: Shown, dt: number, now: number): CFrame
 	end
 
 	local t = now + shown.seed
-	local height = shown.style.hover
+	local floor = shown.anchor:GetAttribute("Floor")
+	local height = shown.style.hover + (if type(floor) == "number" then floor * Config.BaseFloors.Height else 0)
 	-- Arrivée : chute depuis le ciel (accélérée), pour que tout le monde voie le nouveau familier.
 	local arrivedAt = shown.arrivedAt
 	if arrivedAt then
@@ -381,6 +383,12 @@ local function canTake(base: Model): (boolean, string)
 	if own then
 		return handsFree, "Porter"
 	end
+	local ownerName = base:GetAttribute("OwnerName")
+	local owner = if type(ownerName) == "string" then Players:FindFirstChild(ownerName) else nil
+	local protectedUntil = owner and owner:GetAttribute("NewcomerProtectedUntil")
+	if type(protectedUntil) == "number" and protectedUntil > Workspace:GetServerTimeNow() then
+		return false, "Protégé"
+	end
 	if Config.Steal.OnlyDuringDigesting and ReplicatedStorage:GetAttribute("GameState") ~= "Digesting" then
 		return false, "Voler"
 	end
@@ -396,11 +404,15 @@ RunService:BindToRenderStep("BasePetsPlacement", Enum.RenderPriority.Last.Value 
 	local now = Workspace:GetServerTimeNow()
 	for _, display in pairs(displays) do
 		local platform = display.platform
-		local visible = (platform.Position - camera.CFrame.Position).Magnitude < VIEW_DISTANCE
-			or (root ~= nil and root:IsA("BasePart") and (platform.Position - root.Position).Magnitude < NEAR_CHARACTER)
 		local ground = PetWander.groundOf(platform)
 		local stealable, action = canTake(display.base)
 		for _, shown in pairs(display.pets) do
+            -- Mesurer depuis l’étage : sur mobile, le sol serait trop loin dès le 5e niveau.
+            local floorValue = shown.anchor:GetAttribute("Floor")
+            local level = if type(floorValue) == "number" then floorValue else 0
+            local center = (ground * CFrame.new(0, level * Config.BaseFloors.Height, 0)).Position
+            local visible = (center - camera.CFrame.Position).Magnitude < VIEW_DISTANCE
+                or (root ~= nil and root:IsA("BasePart") and (center - root.Position).Magnitude < NEAR_CHARACTER)
 			if visible then
 				shown.model:PivotTo(ground * pose(shown, dt, now))
 				-- Le repère (et sa bulle [E]) suit le familier, chez ce joueur seulement : le serveur ne le déplace jamais.

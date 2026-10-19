@@ -5,6 +5,7 @@
 -- Rendu 100 % local d'après le modèle Workspace.Duels.Duel_N (attributs Center, PlayerA/B, PetA/B, HpA/B, MaxA/B,
 -- Winner, SpinIndex) et les événements Remotes.DuelEvent ("Hit", "End", "Spin").
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -65,7 +66,7 @@ local function textLabel(parent: Instance, text: string, color: Color3, y: numbe
 	label.BackgroundTransparency = 1
 	label.Position = UDim2.fromScale(0, y)
 	label.Size = UDim2.fromScale(1, height)
-	label.Font = Enum.Font.FredokaOne
+	label.FontFace = Typography.Face
 	label.TextScaled = true
 	label.TextColor3 = color
 	label.Text = text

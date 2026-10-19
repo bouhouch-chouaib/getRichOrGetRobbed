@@ -9,6 +9,7 @@
 -- Si le joueur local est la victime ("CarryingFrom" = son UserId) : le voleur est entouré de rouge (visible à
 -- travers les murs) et seule la victime voit la bulle [E] "Reprendre" posée par le serveur sur le voleur.
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -132,7 +133,7 @@ local function rebuildCarried(player: Player)
 		label.BackgroundTransparency = 1
 		label.Position = UDim2.fromScale(0, y)
 		label.Size = UDim2.fromScale(1, height)
-		label.Font = Enum.Font.FredokaOne
+		label.FontFace = Typography.Face
 		label.TextScaled = true
 		label.TextColor3 = color
 		label.Text = text

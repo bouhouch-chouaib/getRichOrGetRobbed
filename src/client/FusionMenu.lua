@@ -189,7 +189,7 @@ function FusionMenu.create(gui: Instance): Fusion
 	fuseButton.Position = UDim2.fromOffset(width / 2 - 165, CHAMBER_TOP + CHAMBER_SIZE.Y + 14)
 	fuseButton.ZIndex = 3
 	local fuseCaption = fuseButton:FindFirstChild("Caption") :: TextLabel
-	fuseCaption.Font = UiStyle.BODY_FONT
+	fuseCaption.FontFace = UiStyle.BODY_FONT
 
 	local autoButton = UiStyle.button(content, "Auto", UDim2.fromOffset(110, 46), UiStyle.Colors.Cyan, 24)
 	autoButton.Position = UDim2.fromOffset(rowLeft, CHAMBER_TOP + CHAMBER_SIZE.Y + 18)
@@ -228,13 +228,17 @@ function FusionMenu.create(gui: Instance): Fusion
 	pickerGrid.ScrollBarImageColor3 = WHITE
 	pickerGrid.ZIndex = 11
 	pickerGrid.Parent = picker
+	pickerGrid.ScrollingDirection = Enum.ScrollingDirection.Y
+	UiStyle.scrollPadding(pickerGrid)
 	local pickerLayout = Instance.new("UIGridLayout")
-	pickerLayout.CellSize = UDim2.fromOffset(100, 116)
-	pickerLayout.CellPadding = UDim2.fromOffset(8, 8)
+	pickerLayout.CellSize = UDim2.fromOffset(116, 138)
+	pickerLayout.CellPadding = UDim2.fromOffset(12, 12)
 	pickerLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	pickerLayout.Parent = pickerGrid
 	local pickerEmpty = UiStyle.text(picker, "Aucun familier libre à fusionner ici.\nLes familiers équipés ne comptent pas.", 22, WHITE, UiStyle.BODY_FONT)
-	pickerEmpty.Size = UDim2.fromScale(1, 1)
+	pickerEmpty.Position = UDim2.fromOffset(16, 56)
+	pickerEmpty.Size = UDim2.new(1, -32, 1, -72)
+	pickerEmpty.TextWrapped = true
 	pickerEmpty.ZIndex = 11
 	pickerEmpty.Visible = false
 
@@ -287,18 +291,18 @@ function FusionMenu.create(gui: Instance): Fusion
 				button.Parent = pickerGrid
 				UiStyle.bounce(button)
 				local viewport = MenuKit.petViewport(button, entry.Id, false)
-				viewport.Position = UDim2.fromOffset(4, 20)
-				viewport.Size = UDim2.new(1, -8, 1, -40)
+				viewport.Position = UDim2.fromOffset(8, 40)
+				viewport.Size = UDim2.new(1, -16, 0, 64)
 				viewport.ZIndex = 12
 				local name = UiStyle.text(button, entry.Name, 15, WHITE, UiStyle.BODY_FONT)
-				name.Position = UDim2.fromOffset(3, 2)
-				name.Size = UDim2.new(1, -6, 0, 18)
-				name.TextScaled = true
+				name.Position = UDim2.fromOffset(8, 6)
+				name.Size = UDim2.new(1, -16, 0, 30)
+				name.TextWrapped = true
 				name.ZIndex = 13
 				local count = UiStyle.text(button, string.format("x%d libre%s", left, if left > 1 then "s" else ""), 14, WHITE)
 				count.AnchorPoint = Vector2.new(0, 1)
-				count.Position = UDim2.new(0, 3, 1, -2)
-				count.Size = UDim2.new(1, -6, 0, 18)
+				count.Position = UDim2.new(0, 8, 1, -8)
+				count.Size = UDim2.new(1, -16, 0, 18)
 				count.ZIndex = 13
 				button.Activated:Connect(function()
 					addToSlot(entry.Id)

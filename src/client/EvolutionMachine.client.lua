@@ -11,6 +11,7 @@
 --     épique, au thème de son monde (client/CapsuleDecor), avec son bonus (Config.Evolution.SpeedPerTier...).
 --   - Effets : l'œuf choisi vole de son nid à la machine ; gerbe et message à chaque évolution ; nuage gris quand
 --     il a atteint sa limite. L'éclosion elle-même est jouée par client/Eggs.
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -85,7 +86,7 @@ screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screen.DisplayOrder = 4
 screen.Parent = player:WaitForChild("PlayerGui")
 local root = ScreenScale.attach(screen)
-local window = MenuKit.window(root, "Capsule d'évolution", Vector2.new(780, 440), PURPLE, "Egg")
+local window = MenuKit.window(root, "Capsule d'évolution", Vector2.new(780, 510), PURPLE, "Egg")
 local explain = UiStyle.text(window.content, "", 17, WHITE, UiStyle.BODY_FONT)
 explain.Size = UDim2.new(1, 0, 0, 70)
 explain.TextWrapped = true
@@ -105,6 +106,7 @@ row.CanvasSize = UDim2.new()
 row.ScrollBarThickness = 8
 row.ZIndex = 3
 row.Parent = window.content
+UiStyle.scrollPadding(row)
 do
 	local layout = Instance.new("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Horizontal
@@ -169,26 +171,26 @@ local function openPicker()
 	for order, anchor in ipairs(anchors) do
 		local rarityId = anchor:GetAttribute("Rarity") :: string
 		local rarity = Config.Rarities[Config.RarityIndex[rarityId] or 1]
-		local card = UiStyle.brightCard(row, UDim2.fromOffset(160, 300), rarity.Color)
+		local card = UiStyle.brightCard(row, UDim2.fromOffset(180, 316), rarity.Color)
 		card.LayoutOrder = order
 		card.ZIndex = 3
 		local viewport = MenuKit.eggViewport(card, rarityId)
-		viewport.Position = UDim2.fromOffset(10, 8)
+		viewport.Position = UDim2.fromOffset(20, 8)
 		viewport.Size = UDim2.fromOffset(140, 140)
 		viewport.ZIndex = 4
 		local name = UiStyle.text(card, "ŒUF " .. TextFormat.upper(rarity.Name), 20, WHITE, UiStyle.BODY_FONT)
-		name.Position = UDim2.fromOffset(4, 152)
-		name.Size = UDim2.new(1, -8, 0, 26)
+		name.Position = UDim2.fromOffset(10, 154)
+		name.Size = UDim2.new(1, -20, 0, 26)
 		name.TextScaled = true
 		name.ZIndex = 4
 		local left = math.max(0, (anchor:GetAttribute("ReadyAt") :: number) - Workspace:GetServerTimeNow())
 		local time = UiStyle.text(card, "éclot dans " .. Eggs.Time(left), 16, WHITE, UiStyle.BODY_FONT)
-		time.Position = UDim2.fromOffset(4, 180)
-		time.Size = UDim2.new(1, -8, 0, 22)
+		time.Position = UDim2.fromOffset(10, 184)
+		time.Size = UDim2.new(1, -20, 0, 22)
 		time.ZIndex = 4
 		local chance = UiStyle.text(card, "1re évolution vers " .. Eggs.Time(Eggs.Duration(rarityId) * EVOLUTION.StageTimeFactor[1]), 14, GOLD, UiStyle.BODY_FONT)
-		chance.Position = UDim2.fromOffset(4, 204)
-		chance.Size = UDim2.new(1, -8, 0, 36)
+		chance.Position = UDim2.fromOffset(10, 212)
+		chance.Size = UDim2.new(1, -20, 0, 36)
 		chance.TextWrapped = true
 		chance.ZIndex = 4
 		local put = UiStyle.button(card, "METTRE", UDim2.new(1, -20, 0, 48), UiStyle.Colors.Green, 26)
@@ -316,7 +318,7 @@ local function addMachine(part: BasePart, capsule: Model)
 		local label = Instance.new("TextLabel")
 		label.BackgroundTransparency = 1
 		label.Position, label.Size = UDim2.fromScale(0, y), UDim2.fromScale(1, height)
-		label.Font, label.TextScaled = Enum.Font.FredokaOne, true
+		label.FontFace, label.TextScaled = Typography.Face, true
 		label.TextColor3 = color
 		label.TextWrapped = true
 		outline(label, 2.5)

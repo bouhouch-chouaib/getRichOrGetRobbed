@@ -7,10 +7,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetRoster = require(ReplicatedStorage.Shared.PetRoster)
+local BaseExpansion = require(ReplicatedStorage.Shared.BaseExpansion)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
+local OnboardingAnalytics = require(script.Parent.OnboardingAnalytics)
 
 local EconomyController = {}
 
@@ -21,7 +24,7 @@ end
 
 local petIncome = PetCatalog.GetIncome
 
--- Les Config.Pets.IncomeSlots meilleurs familiers NON équipés du joueur (+1 par Rebirth, Config.GetIncomeSlots) : ceux
+-- Places de base + Rebirths + étages : une place par espèce non équipée avant les doublons, par revenu. Ce sont ceux
 -- qui se baladent dans sa base et rapportent de l'argent. Un familier équipé suit le joueur (bonus de points) mais ne
 -- rapporte rien.
 function EconomyController.GetTopPets(player: Player): { string }
@@ -29,25 +32,10 @@ function EconomyController.GetTopPets(player: Player): { string }
 	if not data then
 		return {}
 	end
-	local slots = Config.GetIncomeSlots(data.rebirths)
-	local list = {}
-	for petId in pairs(data.pets) do
-		for _ = 1, math.min(SessionData.GetSpareCount(player, petId), slots) do
-			table.insert(list, petId)
-		end
-	end
-	table.sort(list, function(a, b)
-		local incomeA, incomeB = petIncome(a), petIncome(b)
-		if incomeA ~= incomeB then
-			return incomeA > incomeB
-		end
-		return a < b
-	end)
-	local top = {}
-	for index = 1, math.min(#list, slots) do
-		top[index] = list[index]
-	end
-	return top
+	local slots = BaseExpansion.Capacity(data.rebirths, data.expansion.floors)
+	local available: { [string]: number } = {}
+	for petId in pairs(data.pets) do available[petId] = SessionData.GetSpareCount(player, petId) end
+	return PetRoster.Select(available, slots, petIncome)
 end
 
 -- Revenu par seconde : seuls les familiers qui se baladent dans la base rapportent.
@@ -85,6 +73,7 @@ local function onBuy(player: Player, itemId: unknown)
 	local price = Config.GetUpgradePrice(item, level)
 	if price and SessionData.SpendMoney(player, price) then
 		SessionData.SetUpgradeLevel(player, item.Id, level + 1)
+		OnboardingAnalytics.Mark(player, "Upgraded")
 		Quests.Add(player, "Upgrade", 1)
 		print(string.format("[Shop] %s a acheté %s niveau %d", player.Name, item.Name, level + 1))
 	end

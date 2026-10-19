@@ -20,6 +20,7 @@
 --                              SpawnPoints (Folder), ItemSpawns (Folder), Incubator (Folder : couveuse, nids Nest_1..12).
 --                              Plan de la base (entrée, palettes, prairie, couveuse) : shared/BaseLayout.
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -108,12 +109,12 @@ end
 
 -- Texte des panneaux dans le décor : police cartoon + gros contour noir (style Steal a Brainrot).
 local function styleSignText(label: TextLabel, color: Color3)
-	label.Font = Enum.Font.LuckiestGuy
+	label.FontFace = Typography.Face
 	label.TextScaled = true
 	label.TextColor3 = color
 	label.TextStrokeTransparency = 1
 	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 3
+	stroke.Thickness = 2
 	stroke.Color = Color3.new(0, 0, 0)
 	stroke.Parent = label
 end

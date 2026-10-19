@@ -157,7 +157,7 @@ function BonusMenu.create(gui: Instance): Menu
 				})
 			end
 		end
-		label(card, "JOUR " .. day, if big then 28 else 22, WHITE, UDim2.fromOffset(2, 6), UDim2.new(1, -4, 0, 28))
+		label(card, "JOUR " .. day, if big then 28 else 22, WHITE, UDim2.fromOffset(8, 6), UDim2.new(1, -16, 0, 28))
 		local iconSize = if big then 92 else 62
 		local iconHolder = Instance.new("Frame")
 		iconHolder.BackgroundTransparency = 1
@@ -171,8 +171,8 @@ function BonusMenu.create(gui: Instance): Menu
 		icon.ZIndex = 3
 		UiStyle.sway(icon, 6)
 		local rewardLabel = UiStyle.number(card, "", if big then 20 else 16, WHITE)
-		rewardLabel.Position = UDim2.fromOffset(2, 40 + iconSize)
-		rewardLabel.Size = UDim2.new(1, -4, 0, 46)
+		rewardLabel.Position = UDim2.fromOffset(8, 46 + iconSize)
+		rewardLabel.Size = UDim2.new(1, -16, 0, 40)
 		rewardLabel.TextWrapped = true
 		local chip = UiStyle.text(card, "", 15, WHITE, UiStyle.TITLE_FONT)
 		chip.AnchorPoint = Vector2.new(0.5, 1)
@@ -181,6 +181,12 @@ function BonusMenu.create(gui: Instance): Menu
 		chip.BackgroundTransparency = 0
 		chip.BackgroundColor3 = WHITE
 		chip.TextScaled = true
+		local chipPadding = Instance.new("UIPadding")
+		chipPadding.PaddingLeft = UDim.new(0, 6)
+		chipPadding.PaddingRight = UDim.new(0, 6)
+		chipPadding.PaddingTop = UDim.new(0, 4)
+		chipPadding.PaddingBottom = UDim.new(0, 4)
+		chipPadding.Parent = chip
 		UiStyle.corner(chip, 6)
 		UiStyle.stroke(chip, 2.5, BLACK, true)
 		local chipShade = UiStyle.gradient(chip, WHITE, WHITE)
@@ -338,7 +344,7 @@ function BonusMenu.create(gui: Instance): Menu
 				ui.border.Color = if isToday then WHITE else BLACK
 				ui.border.Thickness = if isToday then 5 else 4
 			end
-			ui.scale.Scale = if isToday then 1.06 else 1
+			ui.scale.Scale = 1 -- highlight with color; preserve the spacing between days
 		end
 		local caption = dailyButton:FindFirstChild("Caption") :: TextLabel
 		if claimDay then

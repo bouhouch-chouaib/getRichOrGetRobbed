@@ -17,8 +17,11 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local OnboardingAnalytics = require(script.Parent.OnboardingAnalytics)
 local Config = require(ReplicatedStorage.Shared.Config)
 local EggIncubation = require(ReplicatedStorage.Shared.EggIncubation)
+local StarterJourney = require(ReplicatedStorage.Shared.StarterJourney)
+local BaseExpansion = require(ReplicatedStorage.Shared.BaseExpansion)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local PetStats = require(ReplicatedStorage.Shared.PetStats)
@@ -51,6 +54,10 @@ export type PlayerData = {
 	daily: { last: number, streak: number }, -- cadeau du jour : dernier jour réclamé (jour UTC), jour de la série (1 à 7)
 	quests: { day: number, list: { Quest } }, -- quêtes du jour (refaites chaque jour UTC)
 	codes: { string }, -- codes cadeaux déjà utilisés
+	magnetEnabled: boolean,
+	expansion: BaseExpansion.State,
+	starter: StarterJourney.State,
+	onboarding: OnboardingAnalytics.Progress,
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
 }
 
@@ -111,6 +118,10 @@ end
 -- session = nil : la sauvegarde est libérée (le joueur a quitté ce serveur).
 local function serialize(data: PlayerData, session: SessionLock?): { [string]: any }
 	return {
+		magnetEnabled = data.magnetEnabled,
+		expansion = table.clone(data.expansion),
+		starter = table.clone(data.starter),
+		onboarding = OnboardingAnalytics.Snapshot(data.onboarding),
 		version = 2, -- 2 : ajout du verrou de session
 		levels = table.clone(data.levels),
 		xp = table.clone(data.xp),
@@ -287,6 +298,8 @@ end
 
 -- Applique une sauvegarde lue sur les données du joueur (en validant chaque champ).
 local function applySaved(data: PlayerData, saved: { [string]: any })
+	data.magnetEnabled = saved.magnetEnabled == true
+	data.expansion = BaseExpansion.Restore(saved.expansion)
 	if type(saved.levels) == "table" then
 		data.levels.Speed = numberOr(saved.levels.Speed, 0)
 		data.levels.Strength = numberOr(saved.levels.Strength, 0)
@@ -471,6 +484,13 @@ local function sync(player: Player)
 	player:SetAttribute("SpeedBonus", bonus.Speed)
 	player:SetAttribute("StrengthBonus", bonus.Strength)
 	player:SetAttribute("EquipSlots", data.equipSlots)
+	player:SetAttribute("StarterEggGiven", data.starter.eggId ~= nil)
+	player:SetAttribute("StarterBonusPaid", data.starter.bonusPaid)
+	player:SetAttribute("NewcomerProtectedUntil", data.starter.protectionUntil)
+	player:SetAttribute("MagnetEnabled", data.magnetEnabled)
+	player:SetAttribute("BaseFloors", data.expansion.floors)
+	player:SetAttribute("FloorCredits", data.expansion.credits)
+	player:SetAttribute("BaseCapacity", BaseExpansion.Capacity(data.rebirths, data.expansion.floors))
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("Keys", data.keys)
 	player:SetAttribute("Tier", data.tier)
@@ -549,12 +569,17 @@ local function loadPlayer(player: Player)
 			if type(saved) == "table" then
 				applySaved(data, saved :: { [string]: any })
 			end
+			data.starter = StarterJourney.Restore(if type(saved) == "table" then (saved :: { [string]: any }).starter else nil, saved == nil)
+			data.onboarding = OnboardingAnalytics.Restore(if type(saved) == "table" then (saved :: { [string]: any }).onboarding else nil, saved == nil)
+			BaseExpansion.Redeem(data.expansion, data.tier)
 			refreshPerks(player, data)
 			data.loaded = true
+			OnboardingAnalytics.Loaded(player, data.onboarding)
 			applySpeed(player, statValue(data, "Speed"))
 			sync(player)
 			player:SetAttribute("SaveWaiting", nil)
 			player:SetAttribute("DataLoaded", true)
+			if data.onboarding.reached.Pickup then SessionData.GrantStarterEgg(player) end
 			return
 		end
 		if not data then
@@ -573,6 +598,7 @@ local function loadPlayer(player: Player)
 end
 
 local function onPlayerAdded(player: Player)
+	OnboardingAnalytics.Joined(player)
 	storage[player] = {
 		levels = { Speed = 0, Strength = 0 },
 		xp = { Speed = 0, Strength = 0 },
@@ -595,6 +621,10 @@ local function onPlayerAdded(player: Player)
 		daily = { last = 0, streak = 0 },
 		quests = { day = 0, list = {} },
 		codes = {},
+		magnetEnabled = false,
+		expansion = BaseExpansion.Restore(nil),
+		starter = StarterJourney.Restore(nil, false),
+		onboarding = OnboardingAnalytics.Restore(nil, false),
 		loaded = false,
 	}
 
@@ -626,7 +656,9 @@ local function onPlayerAdded(player: Player)
 end
 
 function SessionData.Init()
-	Remotes.TutorialDone.OnServerEvent:Connect(function(player: Player)
+	Remotes.TutorialDone.OnServerEvent:Connect(function(player: Player, skipped: unknown)
+		if player:GetAttribute("DataLoaded") ~= true then return end
+		OnboardingAnalytics.Dismissed(player, skipped)
 		SessionData.SetTutorialDone(player)
 	end)
 	Players.PlayerAdded:Connect(onPlayerAdded)
@@ -640,6 +672,7 @@ function SessionData.Init()
 				warn("[SessionData] Erreur au départ de " .. player.Name .. " : " .. tostring(err))
 			end
 		end
+		OnboardingAnalytics.Leaving(player)
 		savePlayer(player, true)
 		storage[player] = nil
 	end)
@@ -663,6 +696,7 @@ function SessionData.Init()
 		for _, player in ipairs(Players:GetPlayers()) do
 			pending += 1
 			task.spawn(function()
+				OnboardingAnalytics.Leaving(player)
 				savePlayer(player, true)
 				pending -= 1
 			end)
@@ -744,6 +778,7 @@ function SessionData.AdvanceTier(player: Player): number?
 	end
 	data.money -= price
 	data.tier += 1
+	BaseExpansion.Redeem(data.expansion, data.tier)
 	data.world = data.tier -- on arrive dans le nouveau monde
 	sync(player)
 	return data.tier
@@ -874,9 +909,37 @@ function SessionData.AddEggs(player: Player, rewards: { [string]: number })
 	local time = os.time()
 	for petId, count in pairs(rewards) do
 		local egg = EggIncubation.Create(petId, count, time, HttpService:GenerateGUID(false))
-		if egg then table.insert(data.eggs, egg) end
+		if egg then
+			table.insert(data.eggs, egg)
+			OnboardingAnalytics.Mark(player, "EggReceived")
+		end
 	end
 	sync(player)
+end
+
+-- Appelé uniquement après un ramassage validé (ou sa reprise après chargement).
+function SessionData.GrantStarterEgg(player: Player): boolean
+	local data = storage[player]
+	if not data or not data.loaded or not data.onboarding.reached.Pickup then return false end
+	local egg = StarterJourney.Grant(data.starter, os.time(), HttpService:GenerateGUID(false))
+	if not egg then return false end
+	table.insert(data.eggs, egg)
+	OnboardingAnalytics.Mark(player, "EggReceived")
+	sync(player)
+	return true
+end
+
+function SessionData.IsNewcomerProtected(player: Player): boolean
+	local data = storage[player]
+	return data ~= nil and data.loaded and StarterJourney.IsProtected(data.starter, os.time())
+end
+
+function SessionData.EndNewcomerProtection(player: Player)
+	local data = storage[player]
+	if data and data.loaded and data.starter.eligible and not data.starter.protectionWaived then
+		StarterJourney.EndProtection(data.starter)
+		sync(player)
+	end
 end
 
 function SessionData.GetEggs(player: Player): { EggIncubation.Egg }
@@ -971,7 +1034,9 @@ function SessionData.HatchEvolving(player: Player): string?
 		if evolve then
 			table.remove(data.eggs, index)
 			local petId = PetCatalog.Variant(egg.petId, evolve.stage)
+			data.money += StarterJourney.Hatched(data.starter, egg.id)
 			data.pets[petId] = (data.pets[petId] or 0) + 1
+			OnboardingAnalytics.Mark(player, "Hatched")
 			sync(player)
 			return petId
 		end
@@ -986,7 +1051,9 @@ function SessionData.HatchEggs(player: Player, time: number): ({ [string]: numbe
 	local pending, hatched, done = EggIncubation.Collect(data.eggs, time)
 	if next(hatched) then
 		data.eggs = pending
+		for _, egg in ipairs(done) do data.money += StarterJourney.Hatched(data.starter, egg.id) end
 		for petId, count in pairs(hatched) do data.pets[petId] = (data.pets[petId] or 0) + count end
+		OnboardingAnalytics.Mark(player, "Hatched")
 		sync(player)
 	end
 	return hatched, done
@@ -1196,6 +1263,33 @@ function SessionData.SpendMoney(player: Player, amount: number): boolean
 	data.money -= amount
 	sync(player)
 	return true
+end
+
+function SessionData.SetMagnetEnabled(player: Player, enabled: boolean): boolean
+	local data = storage[player]
+	if not data or not data.loaded or (enabled and Perks.MagnetLevel(player) <= 0) then return false end
+	data.magnetEnabled = enabled
+	sync(player)
+	return true
+end
+
+function SessionData.BuyBaseFloor(player: Player): boolean
+	local data = storage[player]
+	if not data or not data.loaded then return false end
+	local balance = BaseExpansion.Buy(data.expansion, data.tier, data.money)
+	if balance == nil then return false end
+	data.money = balance
+	sync(player)
+	return true
+end
+
+-- Un reçu donne toujours son crédit, même si un achat en argent a rempli la place entre-temps.
+function SessionData.AddFloorCredit(player: Player)
+	local data = storage[player]
+	if not data or not data.loaded then return end
+	data.expansion.credits += 1
+	BaseExpansion.Redeem(data.expansion, data.tier)
+	sync(player)
 end
 
 function SessionData.GetUpgradeLevel(player: Player, id: string): number

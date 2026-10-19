@@ -10,6 +10,7 @@
 --   - sinon : effet accordé, reçu noté, sauvegarde immédiate ; PurchaseGranted seulement si elle a réussi
 --     (sinon Roblox réessaie, et le reçu noté évite de l'accorder une 2e fois sur ce serveur).
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -58,7 +59,7 @@ local function addVipTag(character: Model)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 1)
-	label.Font = Enum.Font.LuckiestGuy
+	label.FontFace = Typography.Face
 	label.TextScaled = true
 	label.TextColor3 = Color3.fromRGB(255, 215, 60)
 	label.Text = "VIP"
@@ -130,7 +131,9 @@ local function grantPulls(player: Player, pulls: number)
 end
 
 local function grantProduct(player: Player, product: Config.MonetizationItem)
-	if product.Key == "AstralAura" then
+	if product.Key == "BaseFloor" then
+		SessionData.AddFloorCredit(player)
+	elseif product.Key == "AstralAura" then
 		SessionData.SetUpgradeLevel(player, Config.PlayerAura.UnlockId, 1)
 	elseif product.Key == "ServerLuck" then
 		grantServerLuck(player)

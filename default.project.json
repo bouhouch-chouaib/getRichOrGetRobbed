@@ -16,6 +16,8 @@
         "Bonus": { "$className": "RemoteEvent" },
         "BonusResult": { "$className": "RemoteEvent" },
         "ThrowItem": { "$className": "RemoteEvent" },
+        "SetMagnet": { "$className": "RemoteEvent" },
+        "BaseFloor": { "$className": "RemoteEvent" },
         "Knockback": { "$className": "RemoteEvent" },
         "RewardsGranted": { "$className": "RemoteEvent" },
         "EggHatched": { "$className": "RemoteEvent" },

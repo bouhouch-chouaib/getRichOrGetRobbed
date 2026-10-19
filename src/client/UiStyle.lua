@@ -5,13 +5,14 @@
 --     contour noir ; en-tête coloré (couleur = fonction) avec éclats de lumière en diagonale, tenons, bande d'ombre,
 --     titre à ombre portée, grosse icône penchée qui déborde en haut à gauche, croix rouge ;
 --   - boutons « 3D » : dégradé, reflet en haut, lèvre sombre en bas, contour noir épais, reflet qui balaie au survol,
---     grossit et penche au survol, s'écrase au clic ;
+--     reste dans sa case au survol, s'écrase au clic ;
 --   - cartes vives : dégradé, rayons de soleil, tenons clairs ;
 --   - pastilles rouges qui pulsent ;
---   - chiffres (argent, vitesse) en italique très gras.
+--   - textes Montserrat Black, contours adaptés à la taille et couleurs selon leur fonction.
 -- Textures dessinées par tools/icons/make_ui_textures.py (assets/ui), en blanc pour être teintées (ImageColor3).
 -- Utilisé par tous les menus (client/MenuKit, HUD, ShopMenu, IndexMenu...).
 
+local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -21,11 +22,10 @@ local Sounds = require(script.Parent.Sounds)
 
 local UiStyle = {}
 
-UiStyle.TITLE_FONT = Enum.Font.FredokaOne
-UiStyle.BODY_FONT = Enum.Font.FredokaOne
--- 16 oct. : une seule police partout (titres, textes, chiffres), la ronde et épaisse des en-têtes de fenêtres, comme
--- dans les packs de référence (Chouaib trouvait l'ancienne, LuckiestGuy + chiffres en italique, moche).
-UiStyle.NUMBER_FONT = Font.fromEnum(Enum.Font.FredokaOne)
+-- Même famille et même graisse que les textes dans le monde.
+UiStyle.TITLE_FONT = Typography.Face
+UiStyle.BODY_FONT = Typography.Face
+UiStyle.NUMBER_FONT = Typography.Face
 
 -- Textures (assets/ui, envoyées sur Roblox le 16 oct. 2026).
 UiStyle.Textures = {
@@ -103,19 +103,25 @@ function UiStyle.buttonColors(color: Color3): ColorSequence
 end
 
 -- Texte cartoon : police épaisse + contour noir arrondi.
-function UiStyle.text(parent: Instance, value: string, size: number, color: Color3?, font: Enum.Font?): TextLabel
+function UiStyle.text(parent: Instance, value: string, size: number, color: Color3?, font: Font?): TextLabel
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.Text = value
 	label.TextSize = size
-	label.Font = font or UiStyle.TITLE_FONT
+	label.FontFace = font or UiStyle.TITLE_FONT
 	label.TextColor3 = color or WHITE
-	UiStyle.stroke(label, math.max(1.6, size / 11))
+	UiStyle.stroke(label, Typography.StrokeSize(size))
 	label.Parent = parent
+	-- L'appelant fixe d'abord la taille, le retour à la ligne et l'AutomaticSize.
+	task.defer(function()
+		if label.Parent and not label.TextScaled then
+			Typography.Fit(label, label.TextSize)
+		end
+	end)
 	return label
 end
 
--- Gros chiffre italique (argent, vitesse...).
+-- Chiffres droits très gras (argent, vitesse...), cohérents avec les titres.
 function UiStyle.number(parent: Instance, value: string, size: number, color: Color3): TextLabel
 	local label = UiStyle.text(parent, value, size, color)
 	label.FontFace = UiStyle.NUMBER_FONT
@@ -194,14 +200,13 @@ function UiStyle.sweep(button: GuiObject)
 	end
 end
 
--- Petit effet au survol (grossit et penche, reflet qui balaie) et au clic (s'écrase), avec le son de clic.
+-- Petit effet au survol (reflet qui balaie, sans déborder sur les voisins) et au clic (s'écrase), avec le son de clic.
 function UiStyle.bounce(button: GuiButton)
 	local scale = Instance.new("UIScale")
 	scale.Parent = button
-	local hoverTilt = if math.random() < 0.5 then -2 else 2
+	-- Keep every button inside its allocated cell, including during hover.
 	button.MouseEnter:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1.07 }):Play()
-		TweenService:Create(button, TweenInfo.new(0.12), { Rotation = hoverTilt }):Play()
+		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Quad), { Scale = 1 }):Play()
 		UiStyle.sweep(button)
 	end)
 	button.MouseLeave:Connect(function()
@@ -215,7 +220,7 @@ function UiStyle.bounce(button: GuiButton)
 		Sounds.play("UiClick")
 	end)
 	button.MouseButton1Up:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.16, Enum.EasingStyle.Back), { Scale = 1.07 }):Play()
+		TweenService:Create(scale, TweenInfo.new(0.16, Enum.EasingStyle.Quad), { Scale = 1 }):Play()
 	end)
 end
 
@@ -304,6 +309,16 @@ function UiStyle.shards(parent: GuiObject, transparency: number?)
 end
 
 -- Carte vive (boutique, index) : couleur pleine en dégradé, rayons de soleil, tenons clairs, gros contour noir.
+-- Space for borders and scrollbars around a scrolling collection.
+function UiStyle.scrollPadding(scroll: ScrollingFrame)
+	local padding = scroll:FindFirstChildOfClass("UIPadding") or Instance.new("UIPadding")
+	padding.PaddingLeft = UDim.new(0, 8)
+	padding.PaddingTop = UDim.new(0, 8)
+	padding.PaddingRight = UDim.new(0, if scroll.ScrollingDirection == Enum.ScrollingDirection.Y then 16 else 8)
+	padding.PaddingBottom = UDim.new(0, if scroll.ScrollingDirection == Enum.ScrollingDirection.X then 18 else 8)
+	padding.Parent = scroll
+end
+
 function UiStyle.brightCard(parent: Instance, size: UDim2, color: Color3): Frame
 	local card = Instance.new("Frame")
 	card.Size = size
@@ -371,7 +386,10 @@ function UiStyle.button(parent: Instance, label: string, size: UDim2, color: Col
 
 	local caption = UiStyle.text(button, label, textSize)
 	caption.Name = "Caption"
-	caption.Size = UDim2.fromScale(1, 1)
+	local insetY = if size.Y.Offset > 0 and size.Y.Offset <= 30 then 3 else 6
+	local insetX = if size.X.Offset > 0 and size.X.Offset <= 44 then 5 else 12
+	caption.Position = UDim2.fromOffset(insetX, insetY)
+	caption.Size = UDim2.new(1, -2 * insetX, 1, -2 * insetY)
 	caption.ZIndex = 2
 
 	UiStyle.bounce(button)
