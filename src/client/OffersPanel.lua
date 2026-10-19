@@ -29,7 +29,7 @@ local FEATURED: { { key: string, color: Color3 } } = {
 	{ key = "VIP", color = Color3.fromRGB(255, 205, 50) },
 	{ key = "ServerLuck", color = Color3.fromRGB(255, 120, 230) },
 	{ key = "EquipPlus2", color = Color3.fromRGB(255, 160, 60) },
-	{ key = "AutoMagnet", color = Color3.fromRGB(255, 90, 90) },
+	{ key = "Vacuum", color = Color3.fromRGB(190, 90, 255) },
 	{ key = "ExtraBackpack", color = Color3.fromRGB(255, 140, 60) },
 }
 

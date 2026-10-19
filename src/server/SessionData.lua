@@ -1331,7 +1331,7 @@ end
 
 function SessionData.SetMagnetEnabled(player: Player, enabled: boolean): boolean
 	local data = storage[player]
-	if not data or not data.loaded or (enabled and Perks.MagnetLevel(player) <= 0) then return false end
+	if not data or not data.loaded or (enabled and Perks.MagnetLevel(player) <= 0 and not Perks.HasVacuum(player)) then return false end
 	data.magnetEnabled = enabled
 	sync(player)
 	return true

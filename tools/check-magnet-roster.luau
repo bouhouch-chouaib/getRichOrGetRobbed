@@ -209,6 +209,9 @@ end
 cache.Perks.ExtraCapacity = function()
 	return 0
 end
+cache.Perks.HasVacuum = function()
+	return false
+end
 cache.PowerController = { Reveal = function() end }
 cache.SessionData.GetUpgradeLevel = function()
 	return 3

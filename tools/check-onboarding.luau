@@ -266,6 +266,11 @@ env.os = {
 env.require = function(name)
 	return assert(modules[name], name)
 end
+modules.MenuKit = {
+	anyOpen = function()
+		return false
+	end,
+}
 modules.Typography = luau.load(fs.readFile(project .. "/src/shared/Typography.lua"), { environment = env })()
 local activated = {}
 r.implementProperty("GuiButton", "Activated", function(instance)

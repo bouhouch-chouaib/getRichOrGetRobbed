@@ -34,7 +34,13 @@ function Perks.MoneyMultiplier(player: Player): number
 end
 
 function Perks.ExtraCapacity(player: Player): number
-	return if Perks.HasPass(player, "ExtraBackpack") then M.ExtraBackpack else 0
+	return (if Perks.HasPass(player, "ExtraBackpack") then M.ExtraBackpack else 0)
+		+ (if Perks.HasVacuum(player) then Config.Vacuum.ExtraCapacity else 0)
+end
+
+-- Aspirateur à objets (passe Robux, Config.Vacuum).
+function Perks.HasVacuum(player: Player): boolean
+	return Perks.HasPass(player, Config.Vacuum.PassKey)
 end
 
 function Perks.ExtraEquipSlots(player: Player): number
@@ -44,9 +50,6 @@ end
 -- Niveau de l'aimant à objets : celui acheté dans la boutique (attribut Upgrade_Magnet), ou le maximum avec le passe.
 function Perks.MagnetLevel(player: Player): number
 	local radius = Config.Magnet.Radius
-	if Perks.HasPass(player, Config.Magnet.PassKey) then
-		return #radius
-	end
 	local level = player:GetAttribute("Upgrade_Magnet")
 	return if type(level) == "number" then math.clamp(level, 0, #radius) else 0
 end

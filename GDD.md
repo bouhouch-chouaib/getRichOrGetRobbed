@@ -132,7 +132,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `ItemQuality` (10 niv.) : objets plus précieux.
   - `Backpack` (4 niv.) : +1 objet porté par niveau (le 1er en main, les autres empilés dans le dos, lancés un par un).
   - `Magnet` (5 niv., 15 oct.) : aimant à objets, les objets proches sautent tout seuls dans les mains / le sac (portée 7, 10,
-    13, 16, 20 studs ; `Config.Magnet`). Aussi en Robux : passe `AutoMagnet` = niveau maximum pour toujours (`Perks.MagnetLevel`).
+    13, 16, 20 studs ; `Config.Magnet`). En argent du jeu seulement (19 oct. : plus de passe Robux pour l'aimant).
     Le serveur (`ItemInteraction`) prend l'objet le plus proche par le même chemin que [E] (mêmes règles : mains libres, pas
     de familier porté, pas d'arme en main), ignore les objets des autres bases et ceux qu'on vient de lancer (2 s).
   - `LongLock` : base fermée 10 s au lieu de 5 s.
@@ -238,6 +238,11 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   d'un tirage acheté (`LootEngine.odds` avec la chance réelle du joueur) + règle de la pitié ; bandeau du boost serveur.
   Les tirages Robux et leurs chances sont **cachés** si `PolicyService` indique `ArePaidRandomItemsRestricted`
   (pays où les objets aléatoires payants sont interdits) ou si la réponse échoue. Le créateur du jeu possède d'office ses passes.
+- **Aspirateur à objets** (19 oct., passe `Vacuum` « ASPIRATEUR », 199 R$, `Config.Vacuum`, `Perks.HasVacuum`) : remplace
+  l'aimant quand il est allumé (même bouton « ASPIRATEUR : ACTIF / ARRÊT », touche G) : aspire TOUS les objets à 32 studs,
+  un toutes les 0,08 s, mêmes règles que [E] (`ItemInteraction`) ; +4 objets portés (`Perks.ExtraCapacity`). Côté client
+  (`client/Magnet`) : tourbillon de particules violettes autour du joueur, et chaque objet aspiré vole jusqu'à lui en
+  tournant (`Remotes.VacuumPull` : copie locale, le vrai objet est déjà dans ses mains).
 - Serveurs : 8 joueurs maximum (une base chacun). `BaseManager` renvoie un 9e joueur avec un message « serveur plein ».
 - `shared/TextFormat.upper` : majuscules avec accents (remplace `:upper()` partout).
 
@@ -387,6 +392,19 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Transfert en une étape serveur : revérification, retrait chez A, retrait chez B (A remboursé si échec), ajouts croisés,
   sauvegarde des deux. Annulé si un familier offert disparaît (vol, fusion), départ, ou 4 min écoulées.
 - Pas d'échange pendant un duel (et pas de duel pendant un échange : attribut `InTrade`).
+
+## Marché entre joueurs (19 oct., `server/MarketController`, `client/MarketMenu`, `Config.Market`)
+
+- Tuile « Marché » du HUD. Onglets : **Acheter** (ventes des autres joueurs du serveur : aperçu, rareté, revenu, vendeur,
+  prix, ACHETER ; « INDISPONIBLE » si le vendeur l'a équipé entre-temps), **Vendre** (choisir un familier libre, prix
+  tapé « 25K / 3M / 1.5B », proposé = 10 min de son revenu), **Mes ventes** (RETIRER).
+- Le vendeur garde son familier jusqu'à l'achat ; 3 ventes au plus par joueur ; un exemplaire ne peut être en vente
+  qu'une fois ; les ventes ne sont pas sauvegardées (elles disparaissent quand le vendeur quitte le serveur).
+- Achat en une étape serveur sans attente : revérification (deux sauvegardes chargées, familier toujours libre, argent),
+  retrait chez le vendeur, argent pris à l'acheteur (vendeur remboursé si échec), ajout chez l'acheteur (le familier tombe
+  dans sa base, `Celebrate`), argent au vendeur moins `Config.Market.Tax` (0 pour l'instant), sauvegarde des deux, message
+  « VENDU À ... » au vendeur. Remotes : `Market` (List / Cancel / Buy / Refresh, réponse ok + message), `MarketUpdate` (liste).
+- Test hors Studio : `lune run tools/check-market.luau .` (PASS).
 
 ## Duels de familiers (13 oct., `server/DuelController`, `client/DuelClient`, `client/DuelFx`, `shared/DuelStats`, `Config.Duel`)
 

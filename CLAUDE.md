@@ -92,10 +92,16 @@ les œufs dans leurs nids, la montée en tension, l'éclosion Divine (colonne de
 la base de haut. Test hors Studio : `lune run tools/check-eggs.luau . <sortie>` (PASS). Pas vu : éclosions à 2 joueurs,
 le « +1 NOM » d'un familier hors des 10 affichés, sur téléphone.
 
-**15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, passe Robux `AutoMagnet`) :
+**15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, en argent du jeu seulement) :
 les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`, mêmes règles que [E]). Vérifié en jeu (solo) :
-achat de 3 niveaux, objet attiré depuis 9 studs. **À faire par Chouaib** : créer le passe « AIMANT MAX » sur Roblox et mettre son Id
-dans `Config.Monetization.GamePasses` (Id = 0 => « Bientôt »). Icône d'aimant dessinée (`assets/icons/Magnet.png`) mais pas encore
+achat de 3 niveaux, objet attiré depuis 9 studs.
+**19 oct. : aspirateur à objets** (passe Robux `Vacuum` « ASPIRATEUR » 199 R$, `Config.Vacuum`, remplace l'ancien passe AIMANT MAX) :
+aspire tout à 32 studs, très vite, +4 objets portés, tourbillon violet et objets qui volent vers le joueur. Vérifié en jeu (solo,
+passe simulé par l'attribut `Pass_Vacuum`) : bouton, tourbillon, 5 objets aspirés depuis 18 studs. **À faire par Chouaib** : créer
+le passe « ASPIRATEUR » (199 R$) sur Roblox et mettre son Id dans `Config.Monetization.GamePasses` (Id = 0 => « Bientôt »).
+**19 oct. : marché entre joueurs** (`server/MarketController`, `client/MarketMenu`, tuile « Marché », GDD « Marché ») : vendre un
+familier contre de l'argent du jeu, acheter ceux des autres. Vérifié en jeu (solo) : les 3 onglets, mise en vente, refus (prix 0,
+doublon, 4e vente) ; achat vérifié hors Studio (`tools/check-market.luau`). **À tester à 2 joueurs** : un vrai achat. Icône d'aimant dessinée (`assets/icons/Magnet.png`) mais pas encore
 envoyée sur Roblox : la Boutique utilise l'icône « Orb » en attendant.
 
 **15 oct. : capsule d'évolution** (`Config.Evolution`, `client/EvolutionMachine`, `docs/INCUBATION.md`) : cylindre de stase

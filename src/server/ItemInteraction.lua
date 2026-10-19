@@ -245,11 +245,14 @@ function ItemInteraction.Init()
 	end
 	task.spawn(function()
 		while true do
-			task.wait(0.15)
+			task.wait(Config.Vacuum.Interval) -- l'aimant attend MAGNET.Interval par joueur, l'aspirateur moins
 			local now = os.clock()
 			for _, player in ipairs(Players:GetPlayers()) do
+				-- Aspirateur (passe Robux) : plus loin, plus vite ; sinon l'aimant de la Boutique.
+				local vacuum = Perks.HasVacuum(player)
 				local level = Perks.MagnetLevel(player)
-				if level <= 0 or player:GetAttribute("MagnetEnabled") ~= true or now - (lastPull[player] or 0) < MAGNET.Interval then
+				local interval = if vacuum then Config.Vacuum.Interval else MAGNET.Interval
+				if (level <= 0 and not vacuum) or player:GetAttribute("MagnetEnabled") ~= true or now - (lastPull[player] or 0) < interval then
 					continue
 				end
 				if #(held[player] or {}) >= getCapacity(player) or player:GetAttribute("CarryingPet") then
@@ -260,13 +263,17 @@ function ItemInteraction.Init()
 				if not root or not root:IsA("BasePart") then
 					continue
 				end
-				local radius = MAGNET.Radius[level]
+				local radius = if vacuum then math.max(Config.Vacuum.Radius, MAGNET.Radius[level] or 0) else MAGNET.Radius[level]
 				local best = MagnetRules.Best(candidates(player), root.Position, radius, function(item)
 					return throws[item] ~= nil -- jamais de boomerang, même sur une trajectoire de plus de 2 secondes
 				end)
 				if best then
 					lastPull[player] = now
+					local from = best.Position
 					onPromptTriggered(best, player)
+					if vacuum and best:GetAttribute("Holder") == player.Name then
+						Remotes.VacuumPull:FireClient(player, best, from)
+					end
 				end
 			end
 		end

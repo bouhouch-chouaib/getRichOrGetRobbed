@@ -1,7 +1,7 @@
 --!strict
 -- HUD : l'écran de jeu, disposé comme la référence (docs/DIRECTION_ARTISTIQUE.md §3) :
---   - au milieu à gauche : gros boutons Boutique (vert), Index (cyan), Mondes, Bonus (cadeau du jour, quêtes, codes)
---     et Rebirth, avec pastilles rouges ;
+--   - au milieu à gauche : gros boutons Boutique (vert), Index (cyan), Mondes, Bonus (cadeau du jour, quêtes, codes),
+--     Marché (acheter / vendre des familiers) et Rebirth, avec pastilles rouges ;
 --   - en bas à gauche : Force, Vitesse et argent en gros chiffres italiques ;
 --   - en haut au centre : une pastille horloge de la manche (lune = on nourrit le trou noir, soleil = il digère)
 --     + tirages gagnés pendant la manche, et dessous une pile (boost, consigne, carte des tirages) ;
@@ -25,6 +25,7 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
+local MarketMenu = require(script.Parent.MarketMenu)
 local RebirthMenu = require(script.Parent.RebirthMenu)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local FusionMenu = require(script.Parent.FusionMenu)
@@ -230,10 +231,10 @@ local menuColumn = Instance.new("Frame")
 menuColumn.Name = "Left"
 menuColumn.BackgroundTransparency = 1
 menuColumn.AnchorPoint = if isTouch then Vector2.new(0, 0) else Vector2.new(0, 0.5)
--- PC : tuiles carrées 2 par 2 + une large (Rebirth) en dessous, un peu au-dessus du milieu, pour laisser la place aux
--- stats en bas à gauche même sur un écran bas (630 de haut). Tactile : 3 tuiles par rangée.
+-- PC : 6 tuiles carrées 2 par 2 (3 rangées), un peu au-dessus du milieu, pour laisser la place aux stats en bas à
+-- gauche même sur un écran bas (630 de haut). Tactile : 3 tuiles par rangée.
 menuColumn.Position = if isTouch then UDim2.new(0, 16, 0, STATS_HEIGHT + 20) else UDim2.new(0, 16, 0.5, -105)
-menuColumn.Size = if isTouch then UDim2.fromOffset(310, 196) else UDim2.fromOffset(222, 304)
+menuColumn.Size = if isTouch then UDim2.fromOffset(310, 196) else UDim2.fromOffset(202, 308)
 menuColumn.Parent = gui
 
 -- Ligne de stat d'entraînement : icône + « NV 13 » en italique + barre d'XP (plus petite sur tactile).
@@ -277,18 +278,15 @@ incomeLabel.Size = UDim2.new(1, -52, 0, if isTouch then 20 else 26)
 incomeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Bouton de menu (16 oct., façon packs « Studs UI ») : tuile colorée à tenons, grosse icône qui se balance, nom en bas.
--- PC : 4 tuiles carrées 2 par 2, la 5e large en dessous ; tactile : 3 tuiles par rangée. Pastille rouge.
+-- PC : tuiles carrées 2 par 2 ; tactile : 3 tuiles par rangée. Pastille rouge.
 local function menuButton(icon: string, name: string, index: number, color: Color3): (TextButton, TextLabel)
 	local tile: TextButton
 	if isTouch then
 		tile = UiStyle.tile(menuColumn, icon, name, UDim2.fromOffset(92, 92), color, 18)
 		tile.Position = UDim2.fromOffset(((index - 1) % 3) * 104, ((index - 1) // 3) * 104)
-	elseif index <= 4 then
-		tile = UiStyle.tile(menuColumn, icon, name, UDim2.fromOffset(104, 104), color, 22)
-		tile.Position = UDim2.fromOffset(((index - 1) % 2) * 116, ((index - 1) // 2) * 116)
 	else
-		tile = UiStyle.tile(menuColumn, icon, name, UDim2.fromOffset(220, 68), color, 34)
-		tile.Position = UDim2.fromOffset(0, 2 * 116)
+		tile = UiStyle.tile(menuColumn, icon, name, UDim2.fromOffset(96, 96), color, 20)
+		tile.Position = UDim2.fromOffset(((index - 1) % 2) * 106, ((index - 1) // 2) * 106)
 	end
 	return tile, UiStyle.badge(tile)
 end
@@ -297,7 +295,8 @@ local shopButton, shopBadge = menuButton("Shop", "Boutique", 1, UiStyle.Colors.G
 local indexButton, indexBadge = menuButton("Index", "Index", 2, UiStyle.Colors.Cyan)
 local worldsButton, worldsBadge = menuButton("Planet", "Mondes", 3, Color3.fromRGB(95, 110, 255))
 local bonusButton, bonusBadge = menuButton("Gift", "Bonus", 4, Color3.fromRGB(255, 196, 40))
-local rebirthButton, rebirthBadge = menuButton("Rebirth", "Rebirth", 5, Color3.fromRGB(170, 90, 255))
+local marketButton = menuButton("Money", "Marché", 5, Color3.fromRGB(60, 200, 120))
+local rebirthButton, rebirthBadge = menuButton("Rebirth", "Rebirth", 6, Color3.fromRGB(170, 90, 255))
 -- Rebirth : dégradé arc-en-ciel qui défile (comme la grande tuile « roue » des packs de référence).
 do
 	local rainbow = rebirthButton:FindFirstChildOfClass("UIGradient")
@@ -336,12 +335,14 @@ if offers then
 	end)
 end
 local rebirth = RebirthMenu.create(gui)
+local market = MarketMenu.create(gui)
 
 shopButton.Activated:Connect(shop.window.toggle)
 indexButton.Activated:Connect(index.window.toggle)
 worldsButton.Activated:Connect(worlds.window.toggle)
 bonusButton.Activated:Connect(bonus.window.toggle)
 rebirthButton.Activated:Connect(rebirth.window.toggle)
+marketButton.Activated:Connect(market.window.toggle)
 
 ----------------------------------------------------------------------
 -- Carte de résultats des tirages (fin de manche)

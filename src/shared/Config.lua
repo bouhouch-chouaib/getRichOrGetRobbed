@@ -40,14 +40,34 @@ for index, mutation in ipairs(Config.Mutations) do
 	Config.MutationIndex[mutation.Id] = index
 end
 
--- Aimant à objets (amélioration "Magnet" de la boutique, ou passe Robux "AutoMagnet" = niveau maximum) :
+-- Aimant à objets (amélioration "Magnet" de la boutique, en argent du jeu ; le passe Robux est l'aspirateur, Config.Vacuum) :
 -- server/ItemInteraction ramasse pour le joueur l'objet le plus proche dans la portée, avec les mêmes règles que [E]
 -- (mains / sac libres, pas de familier porté, pas d'arme en main, vivant).
 Config.Magnet = {
-	Radius = { 7, 10, 13, 16, 20 }, -- studs, portée par niveau
+	Radius = { 7, 10, 13, 16, 20 }, -- studs, portée par niveau (amélioration de la Boutique, en argent du jeu seulement)
 	Interval = 0.35, -- secondes entre deux objets attirés
 	-- Un objet lancé est exclu de l’aimant jusqu’à un ramassage manuel. Aucun retour en plein vol.
-	PassKey = "AutoMagnet",
+}
+
+-- Aspirateur à objets (passe Robux "Vacuum", 19 oct.) : remplace l'aimant quand il est allumé (même bouton / touche G) :
+-- aspire TOUS les objets autour (Radius) très vite (Interval), les objets volent vers le joueur (client/Magnet), et son
+-- réservoir permet de porter ExtraCapacity objets de plus.
+Config.Vacuum = {
+	PassKey = "Vacuum",
+	Radius = 32,
+	Interval = 0.08,
+	ExtraCapacity = 4,
+}
+
+-- Marché entre joueurs du même serveur (server/MarketController, fenêtre client/MarketMenu) : on met un familier en vente
+-- pour un prix en argent du jeu, les autres l'achètent. Tax = part de l'argent qui disparaît à chaque vente (0 = aucune).
+Config.Market = {
+	MaxListings = 3, -- ventes en même temps par joueur
+	MinPrice = 1,
+	MaxPrice = 1e30,
+	Tax = 0,
+	SuggestedSeconds = 600, -- prix proposé = 10 min du revenu du familier (au moins MinSuggested)
+	MinSuggested = 100,
 }
 
 -- Machine d'évolution (couveuse au fond de la base, shared/BaseLayout) : le joueur y met un de ses œufs. Il n'éclot
@@ -292,7 +312,7 @@ Config.Monetization = {
 		{ Key = "DoubleMoney", Id = 2025998871, Icon = "Money", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
 		{ Key = "VIP", Id = 2026292822, Icon = "Crown", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
 		-- Id = 0 tant que le passe n'est pas créé sur Roblox (bouton « Bientôt »).
-		{ Key = "AutoMagnet", Id = 0, Icon = "Magnet", Name = "AIMANT MAX", Description = "Portée maximale permanente. Active ou coupe l’aimant avec son bouton ; les objets les plus rentables passent en premier.", Price = 199 },
+		{ Key = "Vacuum", Id = 0, Icon = "Vortex", Name = "ASPIRATEUR", Description = "Aspire TOUS les objets autour de toi, très vite, et porte 4 objets de plus. Active-le ou coupe-le avec son bouton (touche G).", Price = 199 },
 		{ Key = "ExtraBackpack", Id = 2025176879, Icon = "Backpack", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
 		{ Key = "EquipPlus2", Id = 2025296892, Icon = "Paw", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
 		{ Key = "LuckyLuck", Id = 2026568802, Icon = "Clover", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },

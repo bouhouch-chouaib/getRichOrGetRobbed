@@ -139,6 +139,13 @@ return {
 	-- Client -> serveur : (petId, dansLaBase: boolean) mettre un familier dans la base ou le retirer (Index).
 	-- Serveur -> client : (ok: boolean, raison: string?, petId) ; raison "Full" = toutes les places sont déjà choisies.
 	BasePick = remote("BasePick"),
+	-- Marché (server/MarketController) : client -> serveur ("List", petId, prix), ("Cancel", id), ("Buy", id), ("Refresh") ;
+	-- serveur -> client : (ok: boolean, message: string).
+	Market = remote("Market"),
+	-- Serveur -> clients : (ventes : { { id, seller (UserId), sellerName, petId, price, available } }).
+	MarketUpdate = remote("MarketUpdate"),
+	-- Serveur -> joueur : (objet, position de départ) l'aspirateur vient d'attraper cet objet (effet de vol, client/Magnet).
+	VacuumPull = remote("VacuumPull"),
 	-- Serveur -> client(s) : ("Daily", jour, argent, tirages), ("Quest", index, argent, tirages),
 	-- ("Code", ok, message, argent?, tirages?), et à tous : ("Rebirth", joueur, nombre de Rebirths).
 	BonusResult = remote("BonusResult"),

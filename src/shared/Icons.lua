@@ -81,7 +81,7 @@ local ALIASES: { [string]: string } = {
 	Quests = "Trophy",
 	Codes = "Key",
 	Pulls = "Vortex",
-	AutoMagnet = "Magnet",
+	Vacuum = "Vortex",
 	Robux = "Gem",
 	Leaderboard = "Trophy",
 }
