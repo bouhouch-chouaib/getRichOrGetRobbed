@@ -478,9 +478,10 @@ end
 local function createTreadmill(cframe: CFrame, outward: number, base: Model)
 	local model = Instance.new("Model")
 	model.Name = "Treadmill"
-	local belt = makePart("Zone", Vector3.new(10, 0.6, 20), cframe * CFrame.new(0, 0.3, 0), Color3.fromRGB(45, 45, 50), model)
+	local s = Config.Training.TreadmillScale -- tout le tapis est réduit (server/StationLooks fait pareil pour le décor)
+	local belt = makePart("Zone", Vector3.new(10 * s, 0.6 * s, 20 * s), cframe * CFrame.new(0, 0.3 * s, 0), Color3.fromRGB(45, 45, 50), model)
 	createStationSign(model, belt, "TAPIS DE COURSE")
-	createUpgradeSign(cframe * CFrame.new(outward * 9.5, 0, -12), "Treadmill", model)
+	createUpgradeSign(cframe * CFrame.new(outward * (5 * s + 4.5), 0, -(10 * s + 2)), "Treadmill", model)
 	hideStation(model)
 	model.Parent = base
 end

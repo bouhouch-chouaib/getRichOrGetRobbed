@@ -213,6 +213,11 @@ Config.Training = {
 	XPGrowth = 1.12,
 	StationRateGrowth = 1.17, -- niveau 25 : x43 (l'ancien niveau 8 donnait x40)
 	LevelsPerTier = 5,
+	-- Tapis de course (19 oct.) : taille par rapport aux premières mesures (trop grand à côté de l'avatar) ; tout le tapis
+	-- (zone, décor, modèles de ReplicatedStorage.ArtModels) est réduit d'autant. Flèches sur la bande qui défilent vers
+	-- l'arrière (client/TreadmillBelt) : Length = studs entre deux flèches, vitesses en studs / s (à vide / quelqu'un court).
+	TreadmillScale = 0.6,
+	BeltArrows = { Image = "rbxassetid://131546186740141", Length = 2.4, IdleSpeed = 1.5, RunSpeed = 7, Transparency = 0.15 },
 	StationTiers = {
 		{ Name = "Bois", Main = Color3.fromRGB(216, 128, 42), Dark = Color3.fromRGB(120, 76, 40), Accent = Color3.fromRGB(90, 230, 80), Belt = Color3.fromRGB(55, 55, 62) },
 		{ Name = "Acier", Main = Color3.fromRGB(228, 232, 240), Dark = Color3.fromRGB(110, 118, 138), Accent = Color3.fromRGB(40, 150, 255), Belt = Color3.fromRGB(40, 44, 56) },

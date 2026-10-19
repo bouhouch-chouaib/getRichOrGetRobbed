@@ -6,11 +6,14 @@
 -- La station garde ses pièces « utiles » créées par MapGenerator (Zone, Bar, Plate, Seat... marquées "Tint") :
 -- on ne fait que les recolorer. Tout le décor est reconstruit dans le dossier "Look" à chaque changement de niveau.
 
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Modèles faits à la main (Blender -> Importer 3D de Studio, 19 oct.) : ReplicatedStorage.ArtModels.<Station>_<Niveau>
 -- (ex. Treadmill_Bois). Leur pivot est le sol, au centre, -Z vers la console. Les MeshParts nommées "Main" / "Dark" prennent
 -- les couleurs du modèle de niveau (Config.Training.StationTiers) ; les autres gardent la leur. Sans modèle, la station
--- est construite en blocs comme avant. L'écran, les voyants, l'étoile et les décors des niveaux restent ajoutés par le code.
+-- est construite en blocs comme avant. L'écran, les voyants et l'étoile restent ajoutés par le code (attribut "StarY" du
+-- modèle : hauteur de l'étoile) ; les décors en blocs des niveaux (portique, cristaux, halo) ne le sont plus : le modèle a
+-- les siens. Pièces en verre / néon : réglées une fois dans le modèle (Material, Transparency), gardées telles quelles.
 
 local Config = require(ReplicatedStorage.Shared.Config)
 
@@ -129,11 +132,11 @@ local function glowEffects(anchor: BasePart, tier: Tier)
 	sparkles.Parent = anchor
 end
 
-local function authoredStation(name: string, origin: CFrame, tier: Tier, parent: Instance): boolean
+local function authoredStation(name: string, origin: CFrame, tier: Tier, parent: Instance): Model?
 	local folder = ReplicatedStorage:FindFirstChild("ArtModels")
 	local source = folder and folder:FindFirstChild(name)
 	if not source or not source:IsA("Model") then
-		return false
+		return nil
 	end
 	local clone = source:Clone()
 	clone:PivotTo(origin)
@@ -148,16 +151,17 @@ local function authoredStation(name: string, origin: CFrame, tier: Tier, parent:
 		end
 	end
 	clone.Parent = parent
-	return true
+	return clone
 end
 
 ----------------------------------------------------------------------
 -- Tapis de course (repère : sol, -Z vers la console)
 ----------------------------------------------------------------------
 
-local function treadmill(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Folder)
+local function treadmill(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Model)
 	groundCircle(origin, 27, tier.Accent, look)
-	if not authoredStation("Treadmill_" .. tier.Name, origin, tier, look) then
+	local authored = authoredStation("Treadmill_" .. tier.Name, origin, tier, look)
+	if not authored then
 		block("Deck", Vector3.new(11.2, 0.5, 21), origin * CFrame.new(0, 0.25, 0), tier.Dark, look)
 		for _, side in ipairs({ -1, 1 }) do
 			block("SideRail", Vector3.new(1.4, 1.4, 21.4), origin * CFrame.new(side * 5.7, 0.7, 0), tier.Main, look)
@@ -185,22 +189,23 @@ local function treadmill(origin: CFrame, tier: Tier, rank: number, tierIndex: nu
 			end
 		end
 	end
-	if tierIndex >= 3 then
+	if tierIndex >= 3 and not authored then
 		arch(origin * CFrame.new(0, 0, 9.6), 11.4, 9, tier, look)
 	end
-	if tierIndex == 4 then
+	if tierIndex == 4 and not authored then
 		for _, corner in ipairs({ Vector2.new(-7.2, -10), Vector2.new(7.2, -10), Vector2.new(-7.2, 10.5), Vector2.new(7.2, 10.5) }) do
 			crystal(origin * CFrame.new(corner.X, 0, corner.Y), 4.5, tier.Accent, look)
 		end
 	end
-	if tierIndex == 5 then
+	if tierIndex == 5 and not authored then
 		halo(origin * CFrame.new(0, 10.5, 9.6), 5.2, tier.Accent, look)
 		for _, side in ipairs({ -1, 1 }) do
 			neon(block("TrimLine", Vector3.new(0.3, 0.3, 21.4), origin * CFrame.new(side * 6.45, 1.5, 0), tier.Trim or tier.Accent, look))
 		end
 	end
 	if rank == Config.Training.LevelsPerTier then
-		star(origin * CFrame.new(0, 8.2, -9.6), look)
+		local starY = if authored then authored:GetAttribute("StarY") else nil
+		star(origin * CFrame.new(0, if type(starY) == "number" then starY else 8.2, -9.6), look)
 	end
 end
 
@@ -215,7 +220,7 @@ local function dumbbell(origin: CFrame, tier: Tier, parent: Instance)
 	end
 end
 
-local function bench(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Folder)
+local function bench(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Model)
 	groundCircle(origin, 22, tier.Accent, look)
 	for _, side in ipairs({ -1, 1 }) do
 		block("RackFoot", Vector3.new(1.6, 0.6, 3.4), origin * CFrame.new(side * 2.2, 0.3, -3.2), tier.Dark, look)
@@ -269,6 +274,29 @@ local function recolor(model: Model, tier: Tier, tierIndex: number)
 	end
 end
 
+-- Flèches sur la bande du tapis (Config.Training.BeltArrows), une par rangée sur toute la largeur, couleur du niveau.
+-- client/TreadmillBelt les fait défiler (étiquette "TreadmillBelt").
+local function beltArrows(zone: BasePart, tier: Tier?)
+	local old = zone:FindFirstChild("BeltArrows")
+	if not tier then
+		if old then
+			old:Destroy()
+		end
+		return
+	end
+	local settings = Config.Training.BeltArrows
+	local arrows = if old and old:IsA("Texture") then old else Instance.new("Texture")
+	arrows.Name = "BeltArrows"
+	arrows.Face = Enum.NormalId.Top
+	arrows.Texture = settings.Image
+	arrows.StudsPerTileU = zone.Size.X
+	arrows.StudsPerTileV = settings.Length
+	arrows.Color3 = tier.Accent
+	arrows.Transparency = settings.Transparency
+	arrows.Parent = zone
+	CollectionService:AddTag(arrows, "TreadmillBelt")
+end
+
 -- Repère au sol de la station, retrouvé à partir de sa Zone (posée sur le sol).
 local function originOf(zone: BasePart): CFrame
 	return zone.CFrame * CFrame.new(0, -zone.Size.Y / 2, 0)
@@ -291,16 +319,23 @@ function StationLooks.Apply(model: Model, kind: string, level: number)
 		end
 	end
 	if level <= 0 then
+		if kind == "Treadmill" then
+			beltArrows(zone, nil)
+		end
 		return
 	end
 
 	local tier, rank = Config.GetStationTier(level)
 	local tierIndex = table.find(Config.Training.StationTiers, tier) or 1
-	local look = Instance.new("Folder")
+	local look = Instance.new("Model")
 	look.Name = "Look"
 	local origin = originOf(zone)
 	if kind == "Treadmill" then
+		-- Construit à la taille d'origine puis réduit autour du sol (Config.Training.TreadmillScale).
 		treadmill(origin, tier, rank, tierIndex, look)
+		look.WorldPivot = origin
+		look:ScaleTo(Config.Training.TreadmillScale)
+		beltArrows(zone, tier)
 	else
 		bench(origin, tier, rank, tierIndex, look)
 	end

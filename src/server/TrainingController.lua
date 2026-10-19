@@ -85,7 +85,7 @@ local function trainingPose(station: Station, root: BasePart, humanoid: Humanoid
 	if station.kind.model == "Treadmill" then
 		-- Debout au milieu du tapis, face à la console.
 		local height = zone.Size.Y + humanoid.HipHeight + root.Size.Y / 2
-		return base * CFrame.new(0, height, 2)
+		return base * CFrame.new(0, height, 2 * Config.Training.TreadmillScale)
 	end
 	-- Allongé sur le dos sur le banc, la tête sous la barre (vers -Z), le visage vers le ciel.
 	local position = (base * CFrame.new(0, 3.05, -0.8)).Position

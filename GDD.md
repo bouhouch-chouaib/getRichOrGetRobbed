@@ -402,9 +402,15 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Familier : `ArtModels.<Id>` (MeshParts nommées comme les pièces générées : Body, Head, Leg, Ear, Tail...). `shared/PetSculptedModels`
   l'utilise à la place de la silhouette générée ; taille (`PetSizes`), animation (`PetMotion` : Leg et Ear bougent), auras et
   mutations restent celles du jeu. Attribut `FacingYaw` (degrés) si le modèle ne regarde pas vers -Z (180 pour un .fbx de Blender).
-- Station : `ArtModels.Treadmill_<Niveau>` (ex. `Treadmill_Bois`), pivot = sol au centre, -Z vers la console. Les MeshParts
-  « Main » / « Dark » prennent les couleurs du modèle de niveau. `server/StationLooks` garde le cercle, l'écran, les voyants,
-  l'étoile et les décors des niveaux supérieurs. Sans modèle : stations en blocs comme avant.
+- Tapis de course réduit (`Config.Training.TreadmillScale` = 0,6 : avant, trop grand à côté de l'avatar) : la Zone
+  (`MapGenerator`), la place du coureur (`TrainingController`) et tout le décor (`StationLooks`, construit à la taille
+  d'origine puis `ScaleTo` autour du sol) suivent. Flèches sur la bande (Texture « BeltArrows » sur la Zone, image
+  `assets/textures/belt_arrow.png`, couleur du niveau) qui défilent vers l'arrière (`client/TreadmillBelt`), vite quand
+  quelqu'un court.
+- Station : `ArtModels.Treadmill_<Niveau>` (Bois, Acier, Or, Cristal, Cosmique), à la taille d'origine (le code réduit),
+  pivot = sol au centre, -Z vers la console. Les MeshParts « Main » / « Dark » prennent les couleurs du modèle de niveau, les
+  autres gardent les leurs (néon, verre réglés dans le modèle). `server/StationLooks` garde le cercle, l'écran, les voyants
+  et l'étoile (hauteur : attribut `StarY` du modèle) ; plus de portique / cristaux / halo en blocs quand le modèle existe.
 
 ## Marché entre joueurs (19 oct., `server/MarketController`, `client/MarketMenu`, `Config.Market`)
 
