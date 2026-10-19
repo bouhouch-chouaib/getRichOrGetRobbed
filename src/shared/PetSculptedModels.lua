@@ -5,6 +5,7 @@ local Catalog = require(script.Parent.PetCatalog)
 local FX = require(script.Parent.PetSculptedEffects)
 local Motion = require(script.Parent.PetMotion)
 local PetSizes = require(script.Parent.PetSizes)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Models = {}
 local V, CF, A = Vector3.new, CFrame.new, CFrame.Angles
 local rgb = Color3.fromRGB
@@ -1079,6 +1080,34 @@ local function object(m: Model, e: Pet, c: Palette, kind: string)
 	end
 end
 
+-- Modèle fait à la main (Blender -> Importer 3D de Studio, 19 oct.) : ReplicatedStorage.ArtModels.<Id>, un Model de
+-- MeshParts nommées comme les pièces des modèles générés (Body, Head, Leg, Ear, Tail...), qui regarde vers -Z (sinon
+-- attribut "FacingYaw" en degrés). Il remplace la silhouette générée ; la taille, l'animation (Leg / Ear / Tail bougent)
+-- et les auras restent celles du jeu.
+local function authored(m: Model, id: string): boolean
+	local folder = ReplicatedStorage:FindFirstChild("ArtModels")
+	local source = folder and folder:FindFirstChild(id)
+	if not source or not source:IsA("Model") then
+		return false
+	end
+	local yaw = source:GetAttribute("FacingYaw")
+	local turn = A(0, math.rad(if type(yaw) == "number" then yaw else 0), 0) * source:GetPivot():Inverse()
+	for _, d in ipairs(source:GetDescendants()) do
+		if d:IsA("BasePart") then
+			local q = d:Clone()
+			for _, child in ipairs(q:GetChildren()) do
+				if not child:IsA("SurfaceAppearance") then
+					child:Destroy()
+				end
+			end
+			q.CFrame = turn * d.CFrame
+			q.Anchored, q.CanCollide, q.CanTouch, q.CanQuery, q.Massless = true, false, false, false, true
+			q.Parent = m
+		end
+	end
+	return true
+end
+
 function Models.Build(e: Pet): Model
 	local kind = families[e.Id]
 	assert(kind, "Missing sculpted pet: " .. e.Id)
@@ -1088,7 +1117,9 @@ function Models.Build(e: Pet): Model
 	root.Transparency = 1
 	m.PrimaryPart = root
 	local c = S.palette(e.Look.Body, e.Look.Detail)
-	if kind == "Beast" then
+	if authored(m, e.Id) then
+		-- modèle fait à la main (ArtModels)
+	elseif kind == "Beast" then
 		beast(m, e, c)
 	elseif kind == "Bird" then
 		bird(m, e, c)

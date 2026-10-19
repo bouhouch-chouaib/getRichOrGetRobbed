@@ -7,6 +7,10 @@
 -- on ne fait que les recolorer. Tout le décor est reconstruit dans le dossier "Look" à chaque changement de niveau.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- Modèles faits à la main (Blender -> Importer 3D de Studio, 19 oct.) : ReplicatedStorage.ArtModels.<Station>_<Niveau>
+-- (ex. Treadmill_Bois). Leur pivot est le sol, au centre, -Z vers la console. Les MeshParts nommées "Main" / "Dark" prennent
+-- les couleurs du modèle de niveau (Config.Training.StationTiers) ; les autres gardent la leur. Sans modèle, la station
+-- est construite en blocs comme avant. L'écran, les voyants, l'étoile et les décors des niveaux restent ajoutés par le code.
 
 local Config = require(ReplicatedStorage.Shared.Config)
 
@@ -125,25 +129,49 @@ local function glowEffects(anchor: BasePart, tier: Tier)
 	sparkles.Parent = anchor
 end
 
+local function authoredStation(name: string, origin: CFrame, tier: Tier, parent: Instance): boolean
+	local folder = ReplicatedStorage:FindFirstChild("ArtModels")
+	local source = folder and folder:FindFirstChild(name)
+	if not source or not source:IsA("Model") then
+		return false
+	end
+	local clone = source:Clone()
+	clone:PivotTo(origin)
+	for _, part in ipairs(clone:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Anchored, part.CanCollide, part.CanTouch, part.CanQuery = true, false, false, false
+			if part.Name == "Main" then
+				part.Color = tier.Main
+			elseif part.Name == "Dark" then
+				part.Color = tier.Dark
+			end
+		end
+	end
+	clone.Parent = parent
+	return true
+end
+
 ----------------------------------------------------------------------
 -- Tapis de course (repère : sol, -Z vers la console)
 ----------------------------------------------------------------------
 
 local function treadmill(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Folder)
 	groundCircle(origin, 27, tier.Accent, look)
-	block("Deck", Vector3.new(11.2, 0.5, 21), origin * CFrame.new(0, 0.25, 0), tier.Dark, look)
-	for _, side in ipairs({ -1, 1 }) do
-		block("SideRail", Vector3.new(1.4, 1.4, 21.4), origin * CFrame.new(side * 5.7, 0.7, 0), tier.Main, look)
-		block("Upright", Vector3.new(1, 4.2, 1), origin * CFrame.new(side * 5.7, 3.5, -9.6), tier.Main, look)
-		block("Handrail", Vector3.new(0.7, 0.7, 8), origin * CFrame.new(side * 5.7, 5, -5.6), tier.Main, look)
-		block("RailFoot", Vector3.new(1.6, 0.6, 2.2), origin * CFrame.new(side * 5.7, 0.3, 9.6), tier.Dark, look)
-		if tierIndex >= 2 then
-			-- Bande de couleur sur les rails (Acier et au-delà).
-			block("RailStripe", Vector3.new(0.3, 0.5, 21.4), origin * CFrame.new(side * 6.45, 0.9, 0), tier.Trim or tier.Accent, look)
+	if not authoredStation("Treadmill_" .. tier.Name, origin, tier, look) then
+		block("Deck", Vector3.new(11.2, 0.5, 21), origin * CFrame.new(0, 0.25, 0), tier.Dark, look)
+		for _, side in ipairs({ -1, 1 }) do
+			block("SideRail", Vector3.new(1.4, 1.4, 21.4), origin * CFrame.new(side * 5.7, 0.7, 0), tier.Main, look)
+			block("Upright", Vector3.new(1, 4.2, 1), origin * CFrame.new(side * 5.7, 3.5, -9.6), tier.Main, look)
+			block("Handrail", Vector3.new(0.7, 0.7, 8), origin * CFrame.new(side * 5.7, 5, -5.6), tier.Main, look)
+			block("RailFoot", Vector3.new(1.6, 0.6, 2.2), origin * CFrame.new(side * 5.7, 0.3, 9.6), tier.Dark, look)
+			if tierIndex >= 2 then
+				-- Bande de couleur sur les rails (Acier et au-delà).
+				block("RailStripe", Vector3.new(0.3, 0.5, 21.4), origin * CFrame.new(side * 6.45, 0.9, 0), tier.Trim or tier.Accent, look)
+			end
 		end
+		block("Console", Vector3.new(12.6, 1.8, 2.2), origin * CFrame.new(0, 6.3, -9.6), tier.Main, look)
+		block("ConsoleBase", Vector3.new(12.8, 0.5, 2.4), origin * CFrame.new(0, 5.2, -9.6), tier.Dark, look)
 	end
-	block("Console", Vector3.new(12.6, 1.8, 2.2), origin * CFrame.new(0, 6.3, -9.6), tier.Main, look)
-	block("ConsoleBase", Vector3.new(12.8, 0.5, 2.4), origin * CFrame.new(0, 5.2, -9.6), tier.Dark, look)
 	neon(block("Screen", Vector3.new(5, 0.9, 0.2), origin * CFrame.new(0, 6.05, -8.45), tier.Accent, look))
 	lamps(origin * CFrame.new(0, 6.95, -8.4), 1.3, rank, tier, look)
 	lamps(origin * CFrame.new(0, 6.95, -10.8), 1.3, rank, tier, look) -- visibles aussi du côté du trou noir

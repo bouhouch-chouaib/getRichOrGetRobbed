@@ -393,6 +393,19 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   sauvegarde des deux. Annulé si un familier offert disparaît (vol, fusion), départ, ou 4 min écoulées.
 - Pas d'échange pendant un duel (et pas de duel pendant un échange : attribut `InTrade`).
 
+## Modèles faits à la main (19 oct., Blender -> `ReplicatedStorage.ArtModels`)
+
+- Chaîne : modèle dans Blender (connecteur Blender MCP ; 1 unité Blender = 1 stud ; devant = +Y Blender = -Z Roblox) ->
+  export .fbx dans `assets/models/` -> Studio, Fichier > Importer 3D -> le Model est rangé dans `ReplicatedStorage.ArtModels`
+  (dans le fichier du jeu : ce dossier n'est pas géré par Rojo). Les couleurs sont perdues à l'import : elles sont remises
+  à la main, par nom de pièce.
+- Familier : `ArtModels.<Id>` (MeshParts nommées comme les pièces générées : Body, Head, Leg, Ear, Tail...). `shared/PetSculptedModels`
+  l'utilise à la place de la silhouette générée ; taille (`PetSizes`), animation (`PetMotion` : Leg et Ear bougent), auras et
+  mutations restent celles du jeu. Attribut `FacingYaw` (degrés) si le modèle ne regarde pas vers -Z (180 pour un .fbx de Blender).
+- Station : `ArtModels.Treadmill_<Niveau>` (ex. `Treadmill_Bois`), pivot = sol au centre, -Z vers la console. Les MeshParts
+  « Main » / « Dark » prennent les couleurs du modèle de niveau. `server/StationLooks` garde le cercle, l'écran, les voyants,
+  l'étoile et les décors des niveaux supérieurs. Sans modèle : stations en blocs comme avant.
+
 ## Marché entre joueurs (19 oct., `server/MarketController`, `client/MarketMenu`, `Config.Market`)
 
 - Tuile « Marché » du HUD. Onglets : **Acheter** (ventes des autres joueurs du serveur : aperçu, rareté, revenu, vendeur,

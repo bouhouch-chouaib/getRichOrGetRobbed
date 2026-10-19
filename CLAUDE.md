@@ -104,6 +104,13 @@ familier contre de l'argent du jeu, acheter ceux des autres. Vérifié en jeu (s
 doublon, 4e vente) ; achat vérifié hors Studio (`tools/check-market.luau`). **À tester à 2 joueurs** : un vrai achat. Icône d'aimant dessinée (`assets/icons/Magnet.png`) mais pas encore
 envoyée sur Roblox : la Boutique utilise l'icône « Orb » en attendant.
 
+**19 oct. : modèles 3D faits dans Blender** (connecteur Blender MCP, voir GDD « Modèles faits à la main ») : Claude modélise
+dans Blender, exporte en .fbx (`assets/models/`, source `assets/models/source_modeles.blend`), Chouaib importe dans Studio
+(Fichier > Importer 3D : les formes sont envoyées sur son compte), Claude range le modèle dans `ReplicatedStorage.ArtModels`
+(**dans le fichier du jeu, pas dans git** : sauvegarder / publier), le recolore et l'oriente. Faits : `Treadmill_Bois` (tapis
+niveaux 1-5, pièces Main / Dark recolorées par niveau, Metal) et `ChienSaucisse` (familier, pièces Leg / Ear animées par
+`PetMotion`). Vérifié en jeu (solo) : tapis en place avec écran et voyants, chien dans la base, qui marche tête en avant, pattes qui bougent.
+
 **15 oct. : capsule d'évolution** (`Config.Evolution`, `client/EvolutionMachine`, `docs/INCUBATION.md`) : cylindre de stase
 dehors derrière chaque base ; on y met un œuf (il n'éclot plus tout seul), il tente d'évoluer au fil du temps (Normal → Évolué x3
 → Ultime x8), plafond secret tiré au hasard (« IL N'ÉVOLUERA PLUS »), on l'ouvre quand on veut. Formes évoluées = `<Id>__E2/__E3`
