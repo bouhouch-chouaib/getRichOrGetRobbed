@@ -402,8 +402,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Familier : `ArtModels.<Id>` (MeshParts nommées comme les pièces générées : Body, Head, Leg, Ear, Tail...). `shared/PetSculptedModels`
   l'utilise à la place de la silhouette générée ; taille (`PetSizes`), animation (`PetMotion` : Leg et Ear bougent), auras et
   mutations restent celles du jeu. Attribut `FacingYaw` (degrés) si le modèle ne regarde pas vers -Z (180 pour un .fbx de Blender).
-- Style Steal an Egg (19 oct., Tigre du Bengal) : blocs biseautés en facettes, grosses têtes, pointes, yeux et détails
-  néon, et des tenons sur toutes les surfaces : texture `assets/textures/stud_overlay.png` (rbxassetid://114609125680646,
+- Style Steal an Egg (19 oct., Tigre du Bengal) : UNE forme sculptée (métaboules converties en maillage, découpées en
+  facettes, couleurs peintes par zones : rayures, ventre, museau), grosse tête, pointes, yeux et détails néon, et des tenons sur toutes les surfaces : texture `assets/textures/stud_overlay.png` (rbxassetid://114609125680646,
   transparente sauf le tenon) en TextureID des MeshParts, UV calculées dans Blender (1 unité d'UV = 1 tenon de 0,2 unité),
   donc la couleur de la pièce (et des mutations) reste visible dessous.
 - Tapis de course réduit (`Config.Training.TreadmillScale` = 0,6 : avant, trop grand à côté de l'avatar) : la Zone
