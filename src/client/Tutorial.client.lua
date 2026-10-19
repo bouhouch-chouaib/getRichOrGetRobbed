@@ -17,6 +17,7 @@ local Workspace = game:GetService("Workspace")
 
 local BaseLayout = require(ReplicatedStorage.Shared.BaseLayout)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local MenuKit = require(script.Parent.MenuKit)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
@@ -364,6 +365,8 @@ RunService.RenderStepped:Connect(function()
 		end
 		return
 	end
+	-- Une fenêtre ouverte (Index, Boutique...) : le panneau s'efface pour ne pas la cacher.
+	panel.Visible = not MenuKit.anyOpen()
 	local rootPart = getRoot()
 	if not rootPart then
 		marker.Enabled = false

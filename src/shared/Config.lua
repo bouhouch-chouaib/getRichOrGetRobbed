@@ -268,7 +268,9 @@ Config.Pets = {
 		SpeedShareBig = 0.2, -- le plus gros : 20 % en Vitesse (80 % en Force)
 		MaxLevels = 30, -- plafond par stat, tous familiers équipés confondus
 	},
-	IncomeSlots = 10, -- seuls les N meilleurs familiers de la base rapportent de l'argent
+	-- Places de la base (+1 par Rebirth) : les familiers placés par le joueur, puis les meilleurs (shared/PetRoster).
+	-- Seuls ceux-là sont dans la base et rapportent ; les autres sont « en réserve » (Index, fusion, échanges).
+	IncomeSlots = 15,
 	-- Taille de chaque familier : voir shared/PetSizes (échelle en « tailles de joueur », de 0,5 à 2,9).
 }
 
@@ -393,7 +395,9 @@ Config.StudioTestPets = {} :: { string }
 -- Sauvegardes (DataStore). Changer Version remet TOUTES les progressions et le tableau des plus riches à zéro.
 -- Dans Studio, tout va dans des magasins séparés (suffixe "_studio") : les tests ne touchent jamais les vrais joueurs.
 Config.Save = {
-	Version = 2, -- v1 = sauvegardes de développement, abandonnées le 10 oct. 2026 (nettoyage avant sortie)
+	-- v1 = développement (abandonnées le 10 oct. 2026) ; v2 = tests jusqu'au 19 oct. 2026 ; v3 : tout le monde repart à zéro
+	-- le 19 oct. 2026 (demande de Chouaib). Les anciennes sauvegardes restent dans PlayerData_v2 (rien n'est effacé).
+	Version = 3,
 }
 
 -- Tableau des plus riches, planté dans l'arène (tous serveurs confondus, OrderedDataStore).

@@ -526,7 +526,8 @@ end
 
 -- Le familier apparaît au-dessus du nid quand il n'est pas affiché dans la base : « +1 NOM », puis il rejoint la
 -- collection (il s'envole et rapetisse).
-local function showcase(petId: string, ground: CFrame, rarityColor: Color3)
+-- reserve = il ne va pas dans la base (toutes les places sont prises) : « EN RÉSERVE », sinon « DANS TA BASE ».
+local function showcase(petId: string, ground: CFrame, rarityColor: Color3, reserve: boolean?)
 	local model = PetModelBuilder.Build(petId)
 	local entry = Catalog.ById[petId]
 	if not model or not entry then
@@ -541,9 +542,10 @@ local function showcase(petId: string, ground: CFrame, rarityColor: Color3)
 	local full = model:GetScale() * math.min(1, 5 / math.max(size.Y, 0.1))
 	model:ScaleTo(full * 0.2)
 	model.Parent = visuals
+	-- Étiquette en pixels, posée HORS du modèle : dedans, elle grandissait avec lui (ScaleTo x5) et couvrait l'écran.
 	local gui = Instance.new("BillboardGui")
-	gui.Size, gui.StudsOffsetWorldSpace = UDim2.fromScale(10, 2.4), V(0, 4, 0)
-	gui.LightInfluence, gui.MaxDistance = 0, 120
+	gui.Size, gui.StudsOffsetWorldSpace = UDim2.fromOffset(240, 56), V(0, 4, 0)
+	gui.LightInfluence, gui.MaxDistance, gui.AlwaysOnTop = 0, 120, true
 	local adornee = model.PrimaryPart
 	if adornee then
 		gui.Adornee = adornee
@@ -559,10 +561,11 @@ local function showcase(petId: string, ground: CFrame, rarityColor: Color3)
 	hint.BackgroundTransparency = 1
 	hint.Position, hint.Size = UDim2.fromScale(0, 0.6), UDim2.fromScale(1, 0.4)
 	hint.FontFace, hint.TextScaled = Typography.Face, true
-	hint.TextColor3, hint.Text = WHITE, "DANS TA COLLECTION"
+	hint.TextColor3 = if reserve then Color3.fromRGB(255, 180, 80) else WHITE
+	hint.Text = if reserve then "EN RÉSERVE (INDEX)" else "DANS TA BASE"
 	outline(hint, 2)
 	hint.Parent = gui
-	gui.Parent = model
+	gui.Parent = visuals
 	local start = os.clock()
 	local connection: RBXScriptConnection
 	connection = RunService.Heartbeat:Connect(function()
@@ -570,6 +573,7 @@ local function showcase(petId: string, ground: CFrame, rarityColor: Color3)
 		if t >= 3.2 or not model.Parent then
 			connection:Disconnect()
 			model:Destroy()
+			gui:Destroy()
 			return
 		end
 		local grow = math.clamp(t / 0.35, 0, 1)
@@ -594,7 +598,7 @@ local function queueToast(name: string, rank: number, color: Color3, reserve: bo
 		task.delay(0.5, function()
 			local names = pendingToast
 			pendingToast, toastBest = {}, 0
-			local suffix = if reserveToast then " BASE PLEINE : LES AUTRES RESTENT DANS TON INDEX." else ""
+			local suffix = if reserveToast then " BASE PLEINE : LES NOUVEAUX SONT EN RÉSERVE (INDEX > DANS LA BASE)." else ""
 			reserveToast = false
 			Toast.show((if #names == 1 then "ÉCLOSION : " .. names[1] .. " !" else string.format("%d FAMILIERS ONT ÉCLOS !", #names)) .. suffix, toastColor)
 		end)
@@ -884,7 +888,7 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 	end
 	if not big then
 		if not inBase then
-			showcase(petId, cf, rarity.Color)
+			showcase(petId, cf, rarity.Color, reserve)
 		end
 		return
 	end
@@ -930,6 +934,6 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 
 	-- 5. Le familier : il sort du nid (client/BasePets) ou s'affiche un instant puis rejoint la collection.
 	if not inBase then
-		showcase(petId, cf, rarity.Color)
+		showcase(petId, cf, rarity.Color, reserve)
 	end
 end)

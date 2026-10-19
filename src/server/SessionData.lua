@@ -53,6 +53,8 @@ export type PlayerData = {
 	daily: { last: number, streak: number }, -- cadeau du jour : dernier jour réclamé (jour UTC), jour de la série (1 à 7)
 	quests: { day: number, list: { Quest } }, -- quêtes du jour (refaites chaque jour UTC)
 	codes: { string }, -- codes cadeaux déjà utilisés
+	-- Familiers que le joueur a mis lui-même dans la base (dans l'ordre) ou retirés (shared/PetRoster).
+	basePicks: { placed: { string }, removed: { string } },
 	magnetEnabled: boolean,
 	starter: StarterJourney.State,
 	onboarding: OnboardingAnalytics.Progress,
@@ -140,6 +142,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		daily = table.clone(data.daily),
 		quests = { day = data.quests.day, list = table.clone(data.quests.list) },
 		codes = table.clone(data.codes),
+		basePicks = { placed = table.clone(data.basePicks.placed), removed = table.clone(data.basePicks.removed) },
 		session = session,
 	}
 end
@@ -388,6 +391,19 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 			end
 		end
 	end
+	if type(saved.basePicks) == "table" then
+		for _, field in ipairs({ "placed", "removed" }) do
+			local list = saved.basePicks[field]
+			if type(list) == "table" then
+				for _, savedId in ipairs(list) do
+					local petId = if type(savedId) == "string" then PetCatalog.CurrentId(savedId) else nil
+					if petId and PetCatalog.ById[petId] and not table.find(data.basePicks[field], petId) then
+						table.insert(data.basePicks[field], petId)
+					end
+				end
+			end
+		end
+	end
 	if saved.totalPulls == nil then
 		local owned = 0
 		for _, count in pairs(data.pets) do
@@ -614,6 +630,7 @@ local function onPlayerAdded(player: Player)
 		daily = { last = 0, streak = 0 },
 		quests = { day = 0, list = {} },
 		codes = {},
+		basePicks = { placed = {}, removed = {} },
 		magnetEnabled = false,
 		starter = StarterJourney.Restore(nil, false),
 		onboarding = OnboardingAnalytics.Restore(nil, false),
@@ -720,6 +737,62 @@ end
 -- Sauvegarde tout de suite (sans attendre la sauvegarde auto). Bloque jusqu'à la fin de l'écriture.
 function SessionData.Save(player: Player): boolean
 	return savePlayer(player, false)
+end
+
+-- Choix du joueur pour sa base (shared/PetRoster) : placed = liste dans l'ordre, removed = ensemble.
+function SessionData.GetBasePicks(player: Player): ({ string }, { [string]: boolean })
+	local data = storage[player]
+	local removed: { [string]: boolean } = {}
+	if not data then
+		return {}, removed
+	end
+	for _, petId in ipairs(data.basePicks.removed) do
+		removed[petId] = true
+	end
+	return data.basePicks.placed, removed
+end
+
+-- Met un familier possédé dans la base (wanted = true) ou l'en retire. slots = places de la base. Sans attente.
+-- Retourne (ok, raison) ; raison "Full" : toutes les places sont déjà des familiers choisis par le joueur.
+function SessionData.SetInBase(player: Player, petId: string, wanted: boolean, slots: number): (boolean, string?)
+	local data = storage[player]
+	if not data or not data.loaded or not PetCatalog.ById[petId] then
+		return false, nil
+	end
+	local picks = data.basePicks
+	-- Les familiers qu'il n'a plus (volés, fusionnés...) sont oubliés.
+	for _, field in ipairs({ "placed", "removed" }) do
+		local list = picks[field]
+		for index = #list, 1, -1 do
+			if (data.pets[list[index]] or 0) <= 0 then
+				table.remove(list, index)
+			end
+		end
+	end
+	local placedAt = table.find(picks.placed, petId)
+	local removedAt = table.find(picks.removed, petId)
+	if wanted then
+		if (data.pets[petId] or 0) <= 0 then
+			return false, nil
+		end
+		if not placedAt then
+			if #picks.placed >= slots then
+				return false, "Full"
+			end
+			table.insert(picks.placed, petId)
+		end
+		if removedAt then
+			table.remove(picks.removed, removedAt)
+		end
+	else
+		if placedAt then
+			table.remove(picks.placed, placedAt)
+		end
+		if not removedAt then
+			table.insert(picks.removed, petId)
+		end
+	end
+	return true, nil
 end
 
 -- Recopie les données vers les attributs (après une modification faite par un autre module via SessionData.Get).

@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local PetStats = require(ReplicatedStorage.Shared.PetStats)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Icons = require(ReplicatedStorage.Shared.Icons)
@@ -198,9 +199,23 @@ function IndexMenu.create(gui: Instance): Index
 	end
 	local detailSpeed = statChip("Speed", 14, UiStyle.Colors.Speed)
 	local detailStrength = statChip("Strength", 116, UiStyle.Colors.Strength)
-	local equipButton = UiStyle.button(detail, "", UDim2.new(1, -16, 0, 36), UiStyle.Colors.Cyan, 24)
+	local equipButton = UiStyle.button(detail, "", UDim2.new(0.5, -11, 0, 36), UiStyle.Colors.Cyan, 18)
 	equipButton.Position = UDim2.new(0, 8, 1, -44)
 	equipButton.ZIndex = 3
+	-- Base (shared/PetRoster) : le mettre dans la base ou l'en retirer ; l'étiquette dit où il est.
+	local baseButton = UiStyle.button(detail, "", UDim2.new(0.5, -11, 0, 36), UiStyle.Colors.Green, 18)
+	baseButton.AnchorPoint = Vector2.new(1, 0)
+	baseButton.Position = UDim2.new(1, -8, 1, -44)
+	baseButton.ZIndex = 3
+	local whereChip = UiStyle.text(detail, "", 14, WHITE, UiStyle.BODY_FONT)
+	whereChip.AnchorPoint = Vector2.new(0.5, 0)
+	whereChip.Position = UDim2.new(0.5, 0, 0, 106)
+	whereChip.Size = UDim2.fromOffset(150, 20)
+	whereChip.BackgroundTransparency = 0
+	whereChip.BackgroundColor3 = GREY
+	whereChip.ZIndex = 5
+	UiStyle.corner(whereChip, 6)
+	UiStyle.stroke(whereChip, 2, Color3.new(0, 0, 0), true)
 
 	local rewardBox = UiStyle.panel(content, UDim2.fromOffset(226, 152))
 	rewardBox.Position = UDim2.fromOffset(602, 312)
@@ -310,6 +325,29 @@ function IndexMenu.create(gui: Instance): Index
 			caption.Text = string.format("Équiper (x%d)", owned)
 			UiStyle.setButtonColor(equipButton, UiStyle.Colors.Cyan)
 		end
+		local baseCaption = baseButton:FindFirstChild("Caption") :: TextLabel
+		local inBase = MenuKit.inBase()[petId] == true
+		local onlyEquipped = owned > 0 and equippedCount(petId) >= owned
+		whereChip.Visible = owned > 0
+		if owned <= 0 then
+			baseButton.Visible = false
+		elseif onlyEquipped then
+			baseButton.Visible = false
+			whereChip.Text = "ÉQUIPÉ (TE SUIT)"
+			whereChip.BackgroundColor3 = UiStyle.Colors.Cyan
+		elseif inBase then
+			baseButton.Visible = true
+			baseCaption.Text = "Retirer"
+			UiStyle.setButtonColor(baseButton, UiStyle.Colors.Orange)
+			whereChip.Text = "DANS TA BASE"
+			whereChip.BackgroundColor3 = UiStyle.Colors.Green
+		else
+			baseButton.Visible = true
+			baseCaption.Text = "Dans la base"
+			UiStyle.setButtonColor(baseButton, UiStyle.Colors.Green)
+			whereChip.Text = "EN RÉSERVE"
+			whereChip.BackgroundColor3 = UiStyle.Colors.Orange
+		end
 
 		rewardAmount.Text = if known then NumberFormat.money(Config.GetIndexReward(petId)) else "???"
 		local claimCaption = claimButton:FindFirstChild("Caption") :: TextLabel
@@ -350,6 +388,27 @@ function IndexMenu.create(gui: Instance): Index
 		else
 			Toast.show("PLUS DE PLACE ! DÉSÉQUIPE UN FAMILIER", UiStyle.Colors.Red)
 			Sounds.play("Error")
+		end
+	end)
+
+	baseButton.Activated:Connect(function()
+		local petId = if selectedId then formOf(selectedId, selectedStage, selectedMutation) else nil
+		if not petId or MenuKit.number("Pet_" .. petId) <= 0 then
+			return
+		end
+		Remotes.BasePick:FireServer(petId, not (MenuKit.inBase()[petId] == true))
+	end)
+	Remotes.BasePick.OnClientEvent:Connect(function(ok: boolean, reason: string?, petId: string)
+		local entry = PetCatalog.ById[petId]
+		local name = if entry then TextFormat.upper(entry.Name) else "LE FAMILIER"
+		if ok then
+			Sounds.play("UiClick")
+			Toast.show(if MenuKit.inBase()[petId] == true
+				then name .. " RETOURNE EN RÉSERVE"
+				else name .. " ARRIVE DANS TA BASE !", UiStyle.Colors.Gold)
+		elseif reason == "Full" then
+			Sounds.play("Error")
+			Toast.show("BASE PLEINE : RETIRE D'ABORD UN FAMILIER QUE TU AS PLACÉ", UiStyle.Colors.Red)
 		end
 	end)
 
@@ -416,8 +475,24 @@ function IndexMenu.create(gui: Instance): Index
 					best = math.max(best, form.Stage or 1)
 				end
 			end
+			-- Où sont les familiers de cette espèce : ÉQUIPÉ (te suit), BASE (rapporte) ou RÉSERVE (ne rapporte pas).
+			local anyInBase, anyOwned = false, false
+			local inBaseNow = MenuKit.inBase()
+			for _, formId in ipairs(PetCatalog.FormsOf[entry.Id] or { entry.Id }) do
+				if MenuKit.number("Pet_" .. formId) > 0 then
+					anyOwned = true
+					if inBaseNow[formId] then
+						anyInBase = true
+					end
+				end
+			end
 			if tag and tag:IsA("TextLabel") then
-				tag.Visible = anyEquipped
+				tag.Visible = anyOwned
+				tag.Text = if anyInBase then "BASE" elseif anyEquipped then "ÉQUIPÉ" else "RÉSERVE"
+				tag.TextColor3 = if anyInBase
+					then Color3.fromRGB(140, 255, 100)
+					elseif anyEquipped then Color3.fromRGB(120, 220, 255)
+					else Color3.fromRGB(255, 180, 80)
 			end
 			local stars = cell.button:FindFirstChild("Stars")
 			if stars and stars:IsA("TextLabel") then
@@ -482,9 +557,10 @@ function IndexMenu.create(gui: Instance): Index
 			local tag = UiStyle.text(button, "ÉQUIPÉ", 13, Color3.fromRGB(140, 255, 100))
 			tag.Name = "Equipped"
 			tag.AnchorPoint = Vector2.new(0, 1)
-			tag.Position = UDim2.new(0, 8, 1, -6)
-			tag.Size = UDim2.fromOffset(56, 16)
+			tag.Position = UDim2.new(0, 6, 1, -6)
+			tag.Size = UDim2.new(1, -48, 0, 15)
 			tag.TextXAlignment = Enum.TextXAlignment.Left
+			tag.TextScaled = true
 			tag.ZIndex = 4
 			tag.Visible = false
 			local stars = UiStyle.text(button, "", 15, GOLD)

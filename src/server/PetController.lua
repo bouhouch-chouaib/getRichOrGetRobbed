@@ -24,6 +24,23 @@ function PetController.Init()
 		end
 	end)
 
+	-- Index : mettre un familier dans la base ou l'en retirer (shared/PetRoster). La base suit en moins d'une seconde.
+	local lastPick: { [Player]: number } = {}
+	Remotes.BasePick.OnServerEvent:Connect(function(player: Player, petId: unknown, wanted: unknown)
+		local now = os.clock()
+		if type(petId) ~= "string" or type(wanted) ~= "boolean" or now - (lastPick[player] or 0) < 0.25 then
+			return
+		end
+		lastPick[player] = now
+		local data = SessionData.Get(player)
+		local slots = Config.GetIncomeSlots(if data then data.rebirths else 0)
+		local ok, reason = SessionData.SetInBase(player, petId, wanted, slots)
+		Remotes.BasePick:FireClient(player, ok, reason, petId)
+	end)
+	Players.PlayerRemoving:Connect(function(player: Player)
+		lastPick[player] = nil
+	end)
+
 	-- Index : récompense d'un familier découvert (ou de tous ceux qui attendent si petId = nil).
 	local lastClaim: { [Player]: number } = {}
 	Remotes.ClaimIndex.OnServerEvent:Connect(function(player: Player, petId: unknown)

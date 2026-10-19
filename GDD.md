@@ -271,6 +271,22 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   des joueurs. Double appui pour confirmer. `SessionData.Rebirth`, sauvegarde immédiate.
 - Revenu = familiers x passes x monde x Rebirth x amis (`EconomyController.GetIncome / BonusMultiplier`).
 
+## Places de la base et réserve (19 oct.)
+
+- La base a **15 places** (+1 par Rebirth, jusqu'à +5 ; `Config.Pets.IncomeSlots`, `Config.GetIncomeSlots`). Seuls ces
+  familiers s'y promènent et rapportent. Les autres sont **en réserve** : possédés (Index, fusion, échanges, sacrifice),
+  ils ne rapportent pas. Avant, la base n'en montrait que 10 sans rien expliquer : « des familiers que j'ai mais qui ne
+  sont pas dans ma base ».
+- Choix du joueur (`shared/PetRoster`, sauvegarde `basePicks { placed, removed }`, `SessionData.SetInBase`,
+  `Remotes.BasePick`) : Index > « Dans la base » / « Retirer ». Ordre de remplissage : ceux qu'il a placés, puis une place
+  par espèce/forme par revenu, puis les doublons ; ceux qu'il a retirés ne reviennent jamais tout seuls. Base pleine de
+  choix => « BASE PLEINE : RETIRE D'ABORD UN FAMILIER QUE TU AS PLACÉ ».
+- Affichage : attribut `InBase` (formes dans la base, `EconomyController`), étiquette BASE / ÉQUIPÉ / RÉSERVE sur chaque
+  case de l'Index, « DANS TA BASE » / « EN RÉSERVE » / « ÉQUIPÉ » dans le détail ; à l'éclosion, « +1 NOM » avec
+  « DANS TA BASE » ou « EN RÉSERVE (INDEX) ».
+- **19 oct. : remise à zéro de toutes les sauvegardes** (`Config.Save.Version` = 3 : `PlayerData_v3`, tableau des plus riches
+  `RichestBoard_v3`). Les sauvegardes v2 restent intactes dans leur DataStore.
+
 ## Badges, groupe Roblox, mutations par la fusion (19 oct.)
 
 - **Badges** (`server/BadgeController`, `Config.Badges`) : 13 badges (bienvenue, premier œuf, premier vol, duel gagné,

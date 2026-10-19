@@ -136,6 +136,9 @@ return {
 	TradeEvent = remote("TradeEvent"),
 	-- Client -> serveur : bonus (server/ProgressionController) : ("Daily"), ("Quest", index), ("Code", texte), ("Rebirth").
 	Bonus = remote("Bonus"),
+	-- Client -> serveur : (petId, dansLaBase: boolean) mettre un familier dans la base ou le retirer (Index).
+	-- Serveur -> client : (ok: boolean, raison: string?, petId) ; raison "Full" = toutes les places sont déjà choisies.
+	BasePick = remote("BasePick"),
 	-- Serveur -> client(s) : ("Daily", jour, argent, tirages), ("Quest", index, argent, tirages),
 	-- ("Code", ok, message, argent?, tirages?), et à tous : ("Rebirth", joueur, nombre de Rebirths).
 	BonusResult = remote("BonusResult"),

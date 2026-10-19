@@ -81,6 +81,18 @@ function MenuKit.discovered(petId: string, claimed: { [string]: boolean }): bool
 	return false
 end
 
+-- Formes dans la base du joueur (attribut "InBase" écrit par server/EconomyController) : petId -> true.
+function MenuKit.inBase(): { [string]: boolean }
+	local set: { [string]: boolean } = {}
+	local raw = player:GetAttribute("InBase")
+	if type(raw) == "string" then
+		for petId in string.gmatch(raw, "[^,]+") do
+			set[petId] = true
+		end
+	end
+	return set
+end
+
 -- Rareté plancher des tirages du joueur (rang de tirage, shared/LootEngine.floor), comme le serveur la calcule.
 function MenuKit.pullFloor(): number
 	local claimed = MenuKit.claimed()

@@ -533,6 +533,30 @@ do
 	data.money += 1
 	assert(session.AdvanceTier(player) == 2 and data.money == 0)
 	assert(player:GetAttribute("BaseCapacity") == config.GetIncomeSlots(0))
+	-- Base choices are validated, capped at the base size and saved.
+	local someId = next(data.pets)
+	assert(someId, "test profile owns a pet")
+	assert(not session.SetInBase(player, "NotAPet", true, 15))
+	assert(session.SetInBase(player, someId, false, 15))
+	local placedNow, removedNow = session.GetBasePicks(player)
+	assert(removedNow[someId] and not table.find(placedNow, someId))
+	assert(session.SetInBase(player, someId, true, 15))
+	placedNow, removedNow = session.GetBasePicks(player)
+	assert(table.find(placedNow, someId) and not removedNow[someId])
+	local ok, reason = session.SetInBase(player, someId, true, 1)
+	assert(ok, "placing an already placed pet is fine")
+	data.basePicks.placed = { someId }
+	local otherId
+	for id in pairs(data.pets) do
+		if id ~= someId then
+			otherId = id
+		end
+	end
+	if otherId then
+		ok, reason = session.SetInBase(player, otherId, true, 1)
+		assert(not ok and reason == "Full", "a full base refuses a new choice")
+	end
+	assert(session.Save(player) and records.u_1234.basePicks.placed[1] == someId, "choices are saved")
 	assert(session.Save(player))
 	services.Players.PlayerRemoving:Fire(player)
 	services.Players.PlayerAdded:Fire(player)

@@ -1,10 +1,38 @@
 --!strict
--- Réserver d'abord une place par espèce évite que dix doublons masquent toutes les nouveautés.
+-- PetRoster : quels familiers vont dans la base (et rapportent), Config.GetIncomeSlots places.
+--   1. ceux que le joueur a PLACÉS lui-même (bouton « Mettre dans la base » de l'Index), dans l'ordre de ses choix ;
+--   2. puis une place par espèce/forme, par revenu décroissant (dix doublons ne masquent pas une nouveauté) ;
+--   3. puis les doublons.
+-- Ceux que le joueur a RETIRÉS (« Retirer de la base ») ne sont jamais ajoutés automatiquement. Les autres restent
+-- « en réserve » : possédés (Index, fusion, échanges, sacrifice) mais pas dans la base, ils ne rapportent pas.
 local PetRoster = {}
-function PetRoster.Select(owned: { [string]: number }, slots: number, income: (string) -> number): { string }
+
+function PetRoster.Select(
+	owned: { [string]: number },
+	slots: number,
+	income: (string) -> number,
+	placed: { string }?,
+	removed: { [string]: boolean }?
+): { string }
+	local result: { string } = {}
+	local used: { [string]: number } = {}
+	local function take(id: string): boolean
+		if #result >= slots then
+			return false
+		end
+		if (used[id] or 0) >= (owned[id] or 0) then
+			return false
+		end
+		used[id] = (used[id] or 0) + 1
+		table.insert(result, id)
+		return true
+	end
+	for _, id in ipairs(placed or {}) do
+		take(id)
+	end
 	local species = {}
 	for id, count in pairs(owned) do
-		if count > 0 then
+		if count > 0 and not (removed and removed[id]) then
 			table.insert(species, id)
 		end
 	end
@@ -12,21 +40,16 @@ function PetRoster.Select(owned: { [string]: number }, slots: number, income: (s
 		local av, bv = income(a), income(b)
 		return if av == bv then a < b else av > bv
 	end)
-	local result = {}
 	for _, id in ipairs(species) do
-		if #result >= slots then
-			break
+		if (used[id] or 0) == 0 then
+			take(id)
 		end
-		table.insert(result, id)
 	end
 	for _, id in ipairs(species) do
-		for _ = 2, owned[id] do
-			if #result >= slots then
-				return result
-			end
-			table.insert(result, id)
+		while #result < slots and take(id) do
 		end
 	end
 	return result
 end
+
 return PetRoster

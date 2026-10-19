@@ -122,6 +122,13 @@ for _, id in selected do
 	counts[id] = (counts[id] or 0) + 1
 end
 assert(counts[high] == 9 and counts[low] == 1)
+-- Player choices: placed pets come first (even if poor), removed ones are never auto-added.
+local mid = catalog.ByRarity.Rare[1].Id
+local picked = roster.Select({ [high] = 2, [low] = 1, [mid] = 1 }, 2, catalog.GetIncome, { low }, { [high] = true })
+assert(#picked == 2 and picked[1] == low and picked[2] == mid, "placed first, removed skipped")
+local onlyOwned = roster.Select({ [low] = 1 }, 5, catalog.GetIncome, { high, low, low }, {})
+assert(#onlyOwned == 1 and onlyOwned[1] == low, "placed pets the player no longer owns are ignored")
+print("PASS: base choices (placed first, removed never auto-added, unowned picks ignored)")
 local world = r.Instance.new("Folder")
 local base = r.Instance.new("Model")
 base.Name, base.Parent = "Base_1", world
@@ -137,6 +144,9 @@ cache.SessionData = {
 	end,
 	GetSpareCount = function(_, id)
 		return data.pets[id] or 0
+	end,
+	GetBasePicks = function()
+		return {}, {}
 	end,
 }
 cache.BaseManager = {

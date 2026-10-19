@@ -35,7 +35,8 @@ function EconomyController.GetTopPets(player: Player): { string }
 	local slots = Config.GetIncomeSlots(data.rebirths)
 	local available: { [string]: number } = {}
 	for petId in pairs(data.pets) do available[petId] = SessionData.GetSpareCount(player, petId) end
-	return PetRoster.Select(available, slots, petIncome)
+	local placed, removed = SessionData.GetBasePicks(player)
+	return PetRoster.Select(available, slots, petIncome, placed, removed)
 end
 
 -- Revenu par seconde : seuls les familiers qui se baladent dans la base rapportent.
@@ -89,6 +90,20 @@ function EconomyController.Init()
 			for _, player in ipairs(Players:GetPlayers()) do
 				local income = EconomyController.GetIncome(player)
 				player:SetAttribute("Income", income)
+				-- Formes dans la base (l'Index affiche « DANS TA BASE » / « EN RÉSERVE »).
+				local inBase: { [string]: boolean } = {}
+				local list: { string } = {}
+				for _, petId in ipairs(EconomyController.GetTopPets(player)) do
+					if not inBase[petId] then
+						inBase[petId] = true
+						table.insert(list, petId)
+					end
+				end
+				table.sort(list)
+				local text = table.concat(list, ",")
+				if player:GetAttribute("InBase") ~= text then
+					player:SetAttribute("InBase", text)
+				end
 				if income > 0 then
 					SessionData.AddMoney(player, income)
 				end

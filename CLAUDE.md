@@ -108,6 +108,12 @@ Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remo
 7 versions de plus en plus grandes et épiques (photographiées en jeu) et de plus en plus efficaces. **Familiers évolués complets** :
 Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stats et duel x1,4 / x2, étiquette dorée dans la base.
 
+**19 oct. : remise à zéro + places de la base** (GDD « Places de la base et réserve ») : sauvegardes v3 (tout le monde
+repart de zéro), 15 places, le joueur choisit qui va dans la base (Index), étiquettes BASE / RÉSERVE ; corrigés : étiquette
+« +1 NOM » géante à l'éclosion (elle grandissait avec le familier), panneau du tutoriel par-dessus les fenêtres, messages
+qui se superposaient au tutoriel. Vérifié en jeu (solo) : 20 familiers -> 15 dans la base, choix d'un familier en réserve,
+éclosion Légendaire dans la base + Commun en réserve, sauvegarde Studio vide.
+
 **19 oct. : badges, groupe, mutations par la fusion** (GDD « Badges, groupe Roblox... ») : 13 badges (Id à créer sur
 Roblox, images dans `assets/badges`), +10 % de revenu pour les membres du groupe (`Config.Group.Id` à remplir), fusion qui
 transmet les mutations en secret. Vérifié en jeu : fusion de 5 Dorés -> œuf Doré secret ; démarrage sans erreur. Pas vu :

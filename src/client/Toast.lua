@@ -26,8 +26,8 @@ local HEIGHT = 50
 local GAP = 6
 local MAX_SHOWN = 3
 local LIFETIME = 2.6
--- Au-dessus des capsules de tirage et des boutons d'action du bas.
-local BASE_Y = 0.6
+-- Au milieu de l'écran : au-dessus du panneau du tutoriel et des capsules de tirage, sous le bandeau d'éclosion.
+local BASE_Y = 0.44
 
 type Banner = { frame: Frame, scale: UIScale, slot: number, alive: boolean }
 local banners: { Banner } = {}
