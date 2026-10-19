@@ -97,8 +97,8 @@ les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`
 achat de 3 niveaux, objet attiré depuis 9 studs.
 **19 oct. : aspirateur à objets** (passe Robux `Vacuum` « ASPIRATEUR » 199 R$, `Config.Vacuum`, remplace l'ancien passe AIMANT MAX) :
 aspire tout à 32 studs, très vite, +4 objets portés, tourbillon violet et objets qui volent vers le joueur. Vérifié en jeu (solo,
-passe simulé par l'attribut `Pass_Vacuum`) : bouton, tourbillon, 5 objets aspirés depuis 18 studs. **À faire par Chouaib** : créer
-le passe « ASPIRATEUR » (199 R$) sur Roblox et mettre son Id dans `Config.Monetization.GamePasses` (Id = 0 => « Bientôt »).
+passe simulé par l'attribut `Pass_Vacuum`) : bouton, tourbillon, 5 objets aspirés depuis 18 studs. Passe « ASPIRATEUR » créé
+sur Roblox le 19 oct. (Id 2038180912, dans `Config.Monetization.GamePasses`).
 **19 oct. : marché entre joueurs** (`server/MarketController`, `client/MarketMenu`, tuile « Marché », GDD « Marché ») : vendre un
 familier contre de l'argent du jeu, acheter ceux des autres. Vérifié en jeu (solo) : les 3 onglets, mise en vente, refus (prix 0,
 doublon, 4e vente) ; achat vérifié hors Studio (`tools/check-market.luau`). **À tester à 2 joueurs** : un vrai achat. Icône d'aimant dessinée (`assets/icons/Magnet.png`) mais pas encore

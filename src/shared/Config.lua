@@ -312,7 +312,7 @@ Config.Monetization = {
 		{ Key = "DoubleMoney", Id = 2025998871, Icon = "Money", Name = "2X ARGENT", Description = "Revenu et gains d'argent x2, pour toujours.", Price = 399 },
 		{ Key = "VIP", Id = 2026292822, Icon = "Crown", Name = "VIP", Description = "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.", Price = 299 },
 		-- Id = 0 tant que le passe n'est pas créé sur Roblox (bouton « Bientôt »).
-		{ Key = "Vacuum", Id = 0, Icon = "Vortex", Name = "ASPIRATEUR", Description = "Aspire TOUS les objets autour de toi, très vite, et porte 4 objets de plus. Active-le ou coupe-le avec son bouton (touche G).", Price = 199 },
+		{ Key = "Vacuum", Id = 2038180912, Icon = "Vortex", Name = "ASPIRATEUR", Description = "Aspire TOUS les objets autour de toi, très vite, et porte 4 objets de plus. Active-le ou coupe-le avec son bouton (touche G).", Price = 199 },
 		{ Key = "ExtraBackpack", Id = 2025176879, Icon = "Backpack", Name = "SAC À DOS +1", Description = "Porte 1 objet de plus.", Price = 149 },
 		{ Key = "EquipPlus2", Id = 2025296892, Icon = "Paw", Name = "ÉQUIPEMENT +2", Description = "Équipe 2 familiers de plus.", Price = 799 },
 		{ Key = "LuckyLuck", Id = 2026568802, Icon = "Clover", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
