@@ -8,7 +8,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetRoster = require(ReplicatedStorage.Shared.PetRoster)
-local BaseExpansion = require(ReplicatedStorage.Shared.BaseExpansion)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Quests = require(script.Parent.Quests)
@@ -24,7 +23,8 @@ end
 
 local petIncome = PetCatalog.GetIncome
 
--- Places de base + Rebirths + étages : une place par espèce non équipée avant les doublons, par revenu. Ce sont ceux
+-- Places de base + Rebirths (Config.GetIncomeSlots) : une place par espèce non équipée avant les doublons, par revenu.
+-- Ce sont ceux
 -- qui se baladent dans sa base et rapportent de l'argent. Un familier équipé suit le joueur (bonus de points) mais ne
 -- rapporte rien.
 function EconomyController.GetTopPets(player: Player): { string }
@@ -32,7 +32,7 @@ function EconomyController.GetTopPets(player: Player): { string }
 	if not data then
 		return {}
 	end
-	local slots = BaseExpansion.Capacity(data.rebirths, data.expansion.floors)
+	local slots = Config.GetIncomeSlots(data.rebirths)
 	local available: { [string]: number } = {}
 	for petId in pairs(data.pets) do available[petId] = SessionData.GetSpareCount(player, petId) end
 	return PetRoster.Select(available, slots, petIncome)

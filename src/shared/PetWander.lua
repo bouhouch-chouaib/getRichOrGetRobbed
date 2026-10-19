@@ -60,15 +60,15 @@ end
 
 -- Un point au hasard dans la prairie. Avec petId, les grands familiers (shared/PetSizes) restent plus près du
 -- centre pour ne pas déborder sur la clôture, les palettes ou la couveuse.
-function PetWander.randomSpot(rng: Random, petId: string?, floor: number?): Vector2
+function PetWander.randomSpot(rng: Random, petId: string?): Vector2
 	local margin = 0
 	if petId then
 		local entry = PetCatalog.ById[petId]
 		margin = math.max(0, PetSizes.Radius(petId, entry and entry.Rarity) - 4)
 	end
-	local halfX = math.max(2, (if floor and floor > 0 then 25 else 28) - margin)
+	local halfX = math.max(2, ZONE_HALF.X - margin)
 	local halfZ = math.max(2, ZONE_HALF.Y - margin)
-	return (if floor and floor > 0 then Vector2.new(-4, ZONE_CENTER.Y) else Vector2.new(-3, ZONE_CENTER.Y)) + Vector2.new(rng:NextNumber(-halfX, halfX), rng:NextNumber(-halfZ, halfZ))
+	return ZONE_CENTER + Vector2.new(rng:NextNumber(-halfX, halfX), rng:NextNumber(-halfZ, halfZ))
 end
 
 -- Un trajet : de `from` à `to`, départ à `start` (horloge serveur), pendant `duration` secondes.

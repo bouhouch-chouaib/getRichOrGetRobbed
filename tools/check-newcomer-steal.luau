@@ -186,13 +186,6 @@ steal.Init()
 petTriggered:Fire(anchor, thief)
 assert(reserved == 0 and thief:GetAttribute("CarryingPet") == nil, "direct steal bypassed owner protection")
 assert(protected[thief], "rejected steal removed attacker's protection")
-petPosition = r.Vector3.new(0, 32, 0)
-petTriggered:Fire(anchor, owner)
-assert(
-	reserved == 0 and owner:GetAttribute("CarryingPet") == nil,
-	"ground player carried a pet through the upper floor"
-)
-petPosition = r.Vector3.zero
 petTriggered:Fire(anchor, owner)
 assert(reserved == 1 and owner:GetAttribute("CarryingOwn"), "protection blocked carrying own pet")
 assert(protected[owner], "carrying own pet removed protection")
@@ -202,13 +195,6 @@ pick:Fire(thief, loose)
 assert(thief:GetAttribute("CarryingPet") == nil and loose.Parent, "loose-pet remote bypassed protection")
 assert(protected[thief])
 protected[owner] = false
-thief.Character.HumanoidRootPart.Position = r.Vector3.new(0, 32, 0)
-pick:Fire(thief, loose)
-assert(
-	thief:GetAttribute("CarryingPet") == nil and loose.Parent,
-	"upper-floor player grabbed a loose pet through the floor"
-)
-thief.Character.HumanoidRootPart.Position = r.Vector3.zero
 pick:Fire(thief, loose)
 assert(thief:GetAttribute("CarryingPet") == "Common" and not protected[thief], "valid theft must end thief protection")
 assert(reserved == 1 and not loose.Parent, "loose pickup duplicated the reservation")

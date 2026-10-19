@@ -102,8 +102,7 @@ function RebirthMenu.create(gui: Instance): Menu
 		local worldName = TextFormat.upper(Config.GetWorld(Config.Rebirth.RequiredTier).Name)
 		title.Text = string.format("REBIRTH %d", count + 1)
 		incomeLine.Text = string.format("x%d  →  x%d", Config.GetRebirthMultiplier(count), Config.GetRebirthMultiplier(count + 1))
-		local bonus = MenuKit.number("BaseFloors") * Config.BaseFloors.SlotsPerFloor
-		local slots, nextSlots = Config.GetIncomeSlots(count) + bonus, Config.GetIncomeSlots(count + 1) + bonus
+		local slots, nextSlots = Config.GetIncomeSlots(count), Config.GetIncomeSlots(count + 1)
 		petsLine.Text = if nextSlots > slots then string.format("%d  →  %d", slots, nextSlots) else string.format("%d (MAX)", slots)
 		worldLine.Text = (if tierOk then "OK  " else "") .. "Atteindre le monde " .. worldName
 		worldLine.TextColor3 = if tierOk then MONEY else WHITE

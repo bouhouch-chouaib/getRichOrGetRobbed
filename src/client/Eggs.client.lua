@@ -594,7 +594,7 @@ local function queueToast(name: string, rank: number, color: Color3, reserve: bo
 		task.delay(0.5, function()
 			local names = pendingToast
 			pendingToast, toastBest = {}, 0
-			local suffix = if reserveToast then " BASE PLEINE : AGRANDIS-LA POUR SORTIR TES FAMILIERS DE L’INDEX." else ""
+			local suffix = if reserveToast then " BASE PLEINE : LES AUTRES RESTENT DANS TON INDEX." else ""
 			reserveToast = false
 			Toast.show((if #names == 1 then "ÉCLOSION : " .. names[1] .. " !" else string.format("%d FAMILIERS ONT ÉCLOS !", #names)) .. suffix, toastColor)
 		end)

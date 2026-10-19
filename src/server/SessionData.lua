@@ -21,7 +21,6 @@ local OnboardingAnalytics = require(script.Parent.OnboardingAnalytics)
 local Config = require(ReplicatedStorage.Shared.Config)
 local EggIncubation = require(ReplicatedStorage.Shared.EggIncubation)
 local StarterJourney = require(ReplicatedStorage.Shared.StarterJourney)
-local BaseExpansion = require(ReplicatedStorage.Shared.BaseExpansion)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local PetStats = require(ReplicatedStorage.Shared.PetStats)
@@ -55,7 +54,6 @@ export type PlayerData = {
 	quests: { day: number, list: { Quest } }, -- quêtes du jour (refaites chaque jour UTC)
 	codes: { string }, -- codes cadeaux déjà utilisés
 	magnetEnabled: boolean,
-	expansion: BaseExpansion.State,
 	starter: StarterJourney.State,
 	onboarding: OnboardingAnalytics.Progress,
 	loaded: boolean, -- true quand la sauvegarde a été lue avec succès (sinon on ne sauvegarde pas)
@@ -119,7 +117,6 @@ end
 local function serialize(data: PlayerData, session: SessionLock?): { [string]: any }
 	return {
 		magnetEnabled = data.magnetEnabled,
-		expansion = table.clone(data.expansion),
 		starter = table.clone(data.starter),
 		onboarding = OnboardingAnalytics.Snapshot(data.onboarding),
 		version = 2, -- 2 : ajout du verrou de session
@@ -299,7 +296,6 @@ end
 -- Applique une sauvegarde lue sur les données du joueur (en validant chaque champ).
 local function applySaved(data: PlayerData, saved: { [string]: any })
 	data.magnetEnabled = saved.magnetEnabled == true
-	data.expansion = BaseExpansion.Restore(saved.expansion)
 	if type(saved.levels) == "table" then
 		data.levels.Speed = numberOr(saved.levels.Speed, 0)
 		data.levels.Strength = numberOr(saved.levels.Strength, 0)
@@ -488,9 +484,7 @@ local function sync(player: Player)
 	player:SetAttribute("StarterBonusPaid", data.starter.bonusPaid)
 	player:SetAttribute("NewcomerProtectedUntil", data.starter.protectionUntil)
 	player:SetAttribute("MagnetEnabled", data.magnetEnabled)
-	player:SetAttribute("BaseFloors", data.expansion.floors)
-	player:SetAttribute("FloorCredits", data.expansion.credits)
-	player:SetAttribute("BaseCapacity", BaseExpansion.Capacity(data.rebirths, data.expansion.floors))
+	player:SetAttribute("BaseCapacity", Config.GetIncomeSlots(data.rebirths))
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("Keys", data.keys)
 	player:SetAttribute("Tier", data.tier)
@@ -571,7 +565,6 @@ local function loadPlayer(player: Player)
 			end
 			data.starter = StarterJourney.Restore(if type(saved) == "table" then (saved :: { [string]: any }).starter else nil, saved == nil)
 			data.onboarding = OnboardingAnalytics.Restore(if type(saved) == "table" then (saved :: { [string]: any }).onboarding else nil, saved == nil)
-			BaseExpansion.Redeem(data.expansion, data.tier)
 			refreshPerks(player, data)
 			data.loaded = true
 			OnboardingAnalytics.Loaded(player, data.onboarding)
@@ -622,7 +615,6 @@ local function onPlayerAdded(player: Player)
 		quests = { day = 0, list = {} },
 		codes = {},
 		magnetEnabled = false,
-		expansion = BaseExpansion.Restore(nil),
 		starter = StarterJourney.Restore(nil, false),
 		onboarding = OnboardingAnalytics.Restore(nil, false),
 		loaded = false,
@@ -778,7 +770,6 @@ function SessionData.AdvanceTier(player: Player): number?
 	end
 	data.money -= price
 	data.tier += 1
-	BaseExpansion.Redeem(data.expansion, data.tier)
 	data.world = data.tier -- on arrive dans le nouveau monde
 	sync(player)
 	return data.tier
@@ -1271,25 +1262,6 @@ function SessionData.SetMagnetEnabled(player: Player, enabled: boolean): boolean
 	data.magnetEnabled = enabled
 	sync(player)
 	return true
-end
-
-function SessionData.BuyBaseFloor(player: Player): boolean
-	local data = storage[player]
-	if not data or not data.loaded then return false end
-	local balance = BaseExpansion.Buy(data.expansion, data.tier, data.money)
-	if balance == nil then return false end
-	data.money = balance
-	sync(player)
-	return true
-end
-
--- Un reçu donne toujours son crédit, même si un achat en argent a rempli la place entre-temps.
-function SessionData.AddFloorCredit(player: Player)
-	local data = storage[player]
-	if not data or not data.loaded then return end
-	data.expansion.credits += 1
-	BaseExpansion.Redeem(data.expansion, data.tier)
-	sync(player)
 end
 
 function SessionData.GetUpgradeLevel(player: Player, id: string): number

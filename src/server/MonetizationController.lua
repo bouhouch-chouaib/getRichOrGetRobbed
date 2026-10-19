@@ -131,9 +131,7 @@ local function grantPulls(player: Player, pulls: number)
 end
 
 local function grantProduct(player: Player, product: Config.MonetizationItem)
-	if product.Key == "BaseFloor" then
-		SessionData.AddFloorCredit(player)
-	elseif product.Key == "AstralAura" then
+	if product.Key == "AstralAura" then
 		SessionData.SetUpgradeLevel(player, Config.PlayerAura.UnlockId, 1)
 	elseif product.Key == "ServerLuck" then
 		grantServerLuck(player)

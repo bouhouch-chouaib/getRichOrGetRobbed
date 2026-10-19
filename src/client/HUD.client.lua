@@ -34,7 +34,6 @@ local OffersPanel = require(script.Parent.OffersPanel)
 local WorldMenu = require(script.Parent.WorldMenu)
 local ScreenScale = require(script.Parent.ScreenScale)
 local ShopMenu = require(script.Parent.ShopMenu)
-local BaseFloorMenu = require(script.Parent.BaseFloorMenu)
 local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
 local UiStyle = require(script.Parent.UiStyle)
@@ -322,7 +321,6 @@ end
 ----------------------------------------------------------------------
 
 local shop = ShopMenu.create(gui, topStack)
-local baseFloors = BaseFloorMenu.create(gui)
 local index = IndexMenu.create(gui)
 local fusion = FusionMenu.create(gui)
 local worlds = WorldMenu.create(gui)
@@ -801,7 +799,6 @@ end)
 -- qui se ferme toute seule quand le joueur s'éloigne.
 local promptWindows: { [string]: MenuKit.Window } = {
 	Shop = shop.window,
-	BaseFloors = baseFloors.window,
 	Fusion = fusion.window,
 }
 local openedFrom: BasePart? = nil

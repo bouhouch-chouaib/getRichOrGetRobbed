@@ -340,8 +340,7 @@ local function pose(shown: Shown, dt: number, now: number): CFrame
 	end
 
 	local t = now + shown.seed
-	local floor = shown.anchor:GetAttribute("Floor")
-	local height = shown.style.hover + (if type(floor) == "number" then floor * Config.BaseFloors.Height else 0)
+	local height = shown.style.hover
 	-- Arrivée : chute depuis le ciel (accélérée), pour que tout le monde voie le nouveau familier.
 	local arrivedAt = shown.arrivedAt
 	if arrivedAt then
@@ -407,12 +406,8 @@ RunService:BindToRenderStep("BasePetsPlacement", Enum.RenderPriority.Last.Value 
 		local ground = PetWander.groundOf(platform)
 		local stealable, action = canTake(display.base)
 		for _, shown in pairs(display.pets) do
-            -- Mesurer depuis l’étage : sur mobile, le sol serait trop loin dès le 5e niveau.
-            local floorValue = shown.anchor:GetAttribute("Floor")
-            local level = if type(floorValue) == "number" then floorValue else 0
-            local center = (ground * CFrame.new(0, level * Config.BaseFloors.Height, 0)).Position
-            local visible = (center - camera.CFrame.Position).Magnitude < VIEW_DISTANCE
-                or (root ~= nil and root:IsA("BasePart") and (center - root.Position).Magnitude < NEAR_CHARACTER)
+		local visible = (platform.Position - camera.CFrame.Position).Magnitude < VIEW_DISTANCE
+			or (root ~= nil and root:IsA("BasePart") and (platform.Position - root.Position).Magnitude < NEAR_CHARACTER)
 			if visible then
 				shown.model:PivotTo(ground * pose(shown, dt, now))
 				-- Le repère (et sa bulle [E]) suit le familier, chez ce joueur seulement : le serveur ne le déplace jamais.

@@ -15,7 +15,6 @@ local PolicyService = game:GetService("PolicyService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Icons = require(ReplicatedStorage.Shared.Icons)
@@ -167,9 +166,7 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 			if item.Id == 0 or (isPass and Perks.HasPass(player, item.Key)) or (item.Key == "AstralAura" and (Perks.HasAura(player) or auraPending or player:GetAttribute("DataLoaded") ~= true)) then
 				return
 			end
-			if item.Key == "BaseFloor" then
-				Remotes.BaseFloor:FireServer("Robux")
-			elseif isPass then
+			if isPass then
 				MarketplaceService:PromptGamePassPurchase(player, item.Id)
 			else
 				if item.Key == "AstralAura" then auraPending = true end

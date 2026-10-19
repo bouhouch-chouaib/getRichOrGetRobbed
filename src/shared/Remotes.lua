@@ -40,7 +40,6 @@ end
 
 return {
 	SetMagnet = remote("SetMagnet"), -- (active: boolean), décision serveur
-	BaseFloor = remote("BaseFloor"), -- client: "Cash" | "Robux" ; serveur: succès/message
 	-- Serveur -> client : (item: BasePart) le serveur a validé le ramassage, le client peut souder l'item.
 	ItemGrabbed = remote("ItemGrabbed"),
 	-- Client -> serveur : (item: BasePart) le client vient de lancer l'item qu'il tenait.

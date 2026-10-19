@@ -4,13 +4,6 @@
 
 local Config = {}
 
--- Un étage supplémentaire achetable par monde atteint, en plus du rez-de-chaussée.
-Config.BaseFloors = {
-	Height = 32,
-	SlotsPerFloor = 10,
-	Prices = { 250e3, 5e6, 250e6, 15e9, 1e12, 100e12, 10e15 },
-}
-
 -- Premier ramassage d'un nouveau profil : œuf Commun garanti, sans attendre une manche.
 -- Sa prime finance une première station. La protection anti-vol expire même hors ligne.
 Config.Newcomer = {
@@ -303,7 +296,6 @@ Config.Monetization = {
 		{ Key = "LuckyLuck", Id = 2026568802, Icon = "Clover", Name = "CHANCE CHANCEUSE", Description = "Meilleure chance à tous tes tirages.", Price = 399 },
 	} :: { MonetizationItem },
 	Products = {
-		{ Key = "BaseFloor", Id = 0, Icon = "Rebirth", Name = "ÉTAGE DE BASE", Description = "Un crédit d’étage permanent : +10 places. Un étage par monde atteint ; un crédit en attente reste sauvegardé.", Price = 149 },
 		{ Key = "AstralAura", Id = 3718429232, Icon = "Sparkle", Name = "AURA ASTRALE", Description = "Cristaux lumineux, étoiles cyan et violettes, et une traînée quand tu cours. Activée automatiquement, pour toujours.", Price = 19 },
 
 		{ Key = "ServerLuck", Id = 3717917081, Icon = "Sparkle", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
@@ -398,12 +390,12 @@ Config.Lock = {
 export type WorldDef = { Id: string, Name: string, Price: number, IncomeMultiplier: number }
 Config.Worlds = {
 	{ Id = "Prairie", Name = "Prairie", Price = 0, IncomeMultiplier = 1 },
-	{ Id = "Desert", Name = "Désert", Price = 5e6, IncomeMultiplier = 1.5 },
-	{ Id = "Volcan", Name = "Volcan", Price = 320e6, IncomeMultiplier = 2.25 },
-	{ Id = "Glace", Name = "Glace", Price = 18e9, IncomeMultiplier = 3.4 },
-	{ Id = "Abysses", Name = "Abysses", Price = 1.5e12, IncomeMultiplier = 5 },
-	{ Id = "Cosmos", Name = "Cosmos", Price = 120e12, IncomeMultiplier = 7.5 },
-	{ Id = "Divin", Name = "Divin", Price = 12.5e15, IncomeMultiplier = 11 },
+	{ Id = "Desert", Name = "Désert", Price = 1e6, IncomeMultiplier = 1.5 },
+	{ Id = "Volcan", Name = "Volcan", Price = 40e6, IncomeMultiplier = 2.25 },
+	{ Id = "Glace", Name = "Glace", Price = 1.5e9, IncomeMultiplier = 3.4 },
+	{ Id = "Abysses", Name = "Abysses", Price = 75e9, IncomeMultiplier = 5 },
+	{ Id = "Cosmos", Name = "Cosmos", Price = 4e12, IncomeMultiplier = 7.5 },
+	{ Id = "Divin", Name = "Divin", Price = 250e12, IncomeMultiplier = 11 },
 } :: { WorldDef }
 
 -- Monde (1 à #Config.Worlds) d'un palier quelconque, borné.

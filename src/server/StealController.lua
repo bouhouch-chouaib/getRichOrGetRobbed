@@ -131,9 +131,7 @@ local function isInsideBase(base: Model, position: Vector3): boolean
 	end
 	local localPosition = platform.CFrame:PointToObjectSpace(position)
 	local half = platform.Size / 2 + Vector3.new(1.5, 0, 1.5)
-	local floorValue = base:GetAttribute("FloorsBuilt")
-	local floors = if type(floorValue) == "number" then floorValue else 0
-	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -3 and localPosition.Y < 25 + floors * Config.BaseFloors.Height
+	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -3 and localPosition.Y < 25
 end
 
 -- Vitesse du porteur (x vitesse normale) selon sa force et le poids du familier (Config.Carry).
@@ -414,7 +412,7 @@ local function tryStart(anchor: BasePart, player: Player)
 	end
 	local offset = root.Position - petPosition
 	local entry = PetCatalog.ById[petId]
-	if offset.Magnitude > STEAL.MaxDistance + PetSizes.Radius(petId, entry and entry.Rarity) then
+	if Vector2.new(offset.X, offset.Z).Magnitude > STEAL.MaxDistance + PetSizes.Radius(petId, entry and entry.Rarity) then
 		return
 	end
 	BasePetsController.Reserve(base, petId, 1)
@@ -440,7 +438,7 @@ local function tryPickLoose(player: Player, anchor: unknown)
 	end
 	local offset = root.Position - loosePosition(loose)
 	local entry = PetCatalog.ById[loose.petId]
-	if offset.Magnitude > STEAL.MaxDistance + PetSizes.Radius(loose.petId, entry and entry.Rarity) then
+	if Vector2.new(offset.X, offset.Z).Magnitude > STEAL.MaxDistance + PetSizes.Radius(loose.petId, entry and entry.Rarity) then
 		return
 	end
 	-- Il passe du sol aux mains du joueur : la réservation dans sa base reste la même.

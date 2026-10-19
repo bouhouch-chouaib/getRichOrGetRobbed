@@ -1,4 +1,4 @@
--- Runs actual roster, magnet rules, floor geometry and server base pet placement offline.
+-- Runs actual roster, magnet rules and server base pet placement offline.
 local fs, luau, r = require("@lune/fs"), require("@lune/luau"), require("@lune/roblox")
 local project = require("@lune/process").args[1]
 local function signal()
@@ -84,7 +84,7 @@ services.Workspace = {
 	end,
 }
 local config, catalog = load("Config"), load("PetCatalog")
-local expansion, roster, magnet = load("BaseExpansion"), load("PetRoster"), load("MagnetRules")
+local roster, magnet = load("PetRoster"), load("MagnetRules")
 
 local function item(value, size, distance)
 	local part = r.Instance.new("Part")
@@ -111,22 +111,6 @@ assert(magnet.Best({ small, near }, r.Vector3.zero, 10, function()
 end) == near)
 print("PASS: magnet prefers points, volume and distance; rejects thrown/held/consumed/out-of-range items")
 
-local state = expansion.Restore(nil)
-assert(expansion.Buy(state, 1, config.BaseFloors.Prices[1] - 1) == nil and state.floors == 0)
-assert(expansion.Buy(state, 1, config.BaseFloors.Prices[1]) == 0 and state.floors == 1)
-assert(expansion.Buy(state, 1, 1e20) == nil)
-state.credits = 2
-assert(expansion.Redeem(state, 1) == 0 and state.credits == 2)
-assert(expansion.Redeem(state, 2) == 1 and state.credits == 1 and state.floors == 2)
-local restored = expansion.Restore(table.clone(state))
-assert(restored.floors == 2 and restored.credits == 1)
-assert(expansion.Redeem(restored, 3) == 1 and restored.floors == 3)
-assert(expansion.Capacity(0, 3) == 40 and expansion.Capacity(1, 3) == 41)
-for i = 2, #config.Worlds do
-	assert(config.Worlds[i].Price > config.Worlds[i - 1].Price)
-end
-assert(config.Worlds[7].Price == 12.5e15)
-print("PASS: floor money/caps/credits/reconnect rules and rising world prices")
 
 -- Ten valuable duplicates used to consume every slot and hide a new species.
 local high = catalog.ByRarity.Sigma[1].Id
@@ -146,7 +130,7 @@ platform.Name, platform.CFrame, platform.Size, platform.Parent =
 	"BasePart", r.CFrame.new(0, 0.5, 0), config.Arena.BaseSize, base
 local player = r.Instance.new("Player")
 player.Parent = world
-local data = { pets = { [high] = 10, [low] = 1 }, rebirths = 0, expansion = { floors = 0, credits = 0 } }
+local data = { pets = { [high] = 10, [low] = 1 }, rebirths = 0 }
 cache.SessionData = {
 	Get = function()
 		return data
@@ -175,46 +159,12 @@ local evolved = catalog.Variant(low, 2)
 data.pets[evolved] = 1
 bases.Celebrate(player, { evolved }, { [evolved] = r.Vector2.new(0, 14) })
 assert(bases.IsShown(player, evolved), "actual controller hid new evolved hatch")
-data.expansion.floors = 1
 for _, entry in ipairs(catalog.List) do
-	if #economy.GetTopPets(player) >= 20 then
-		break
-	end
 	data.pets[entry.Id] = 1
 end
-bases.Celebrate(player, { low })
-local upper = 0
-for _, anchor in base.Pets:GetChildren() do
-	local floor = anchor:GetAttribute("Floor")
-	if floor > 0 then
-		upper += 1
-		assert(bases.GetPetPosition(anchor).Y >= config.BaseFloors.Height, "server pet position ignores floor height")
-	end
-end
-assert(upper > 0, "floor expansion did not place any pets upstairs")
-print("PASS: actual base controller displays normal/evolved species and positions upper-floor pets")
+assert(#economy.GetTopPets(player) == config.GetIncomeSlots(0), "active places must stop at the base capacity")
+print("PASS: actual base controller displays normal/evolved species and fills exactly the base places")
 
-local geometry = load("BaseFloorGeometry")
-for level = 1, 7 do
-	local floor = geometry.Build(base, r.CFrame.new(0, 1, 0), level, r.Color3.fromRGB(60, 180, 255))
-	local steps, parts = 0, 0
-	for _, part in floor:GetChildren() do
-		if part:IsA("BasePart") then
-			parts += 1
-			assert(part.Anchored)
-			if part.Name == "Step" then
-				steps += 1
-				assert(
-					part.Size.Y <= 1.5 and part.CFrame.Position.X - part.Size.X / 2 > 30,
-					"stairs obstruct deck or have oversized risers"
-				)
-			end
-		end
-	end
-	assert(steps == 24 and parts < 80)
-	assert(math.abs(floor.Deck.CFrame.Position.Y + floor.Deck.Size.Y / 2 - (1 + level * 32)) < 0.001)
-end
-print("PASS: all seven floor models, deck heights, anchored parts and 24-step stairs")
 
 -- Actual interaction controller: toggle, repeated attraction and long-flight regression.
 local instanceSignals = {}
@@ -308,80 +258,3 @@ assert(grabbed[4] == fourth, "manual pickup stopped working with magnet off")
 first:FindFirstChildOfClass("ProximityPrompt").Triggered:Fire(player)
 assert(grabbed[5] == first and interactions.GetThrowInfo(first) == nil, "manual pickup must restore a thrown item")
 print("PASS: actual magnet starts off, toggles, prioritizes rocks and never reclaims its thrown item after 20 seconds")
-
--- Actual expansion controller: terminal, cap before payment, prompt route and base reassignment.
-local currentOwner = player
-cache.BaseManager.GetOwner = function()
-	return currentOwner
-end
-cache.SessionData.Get = function()
-	return data
-end
-data.loaded, data.money, data.tier = true, 1e12, 1
-data.expansion = { floors = 0, credits = 0 }
-cache.SessionData.BuyBaseFloor = function()
-	local balance = expansion.Buy(data.expansion, data.tier, data.money)
-	if balance == nil then
-		return false
-	end
-	data.money = balance
-	return true
-end
-cache.SessionData.Save = function()
-	return true
-end
-local prompts, replies = 0, {}
-services.MarketplaceService = {
-	PromptProductPurchase = function(_, p, id)
-		assert(p == player and id == 123456789)
-		prompts += 1
-	end,
-}
-cache.Remotes.BaseFloor = {
-	OnServerEvent = signal(),
-	FireClient = function(_, _, ok, message)
-		table.insert(replies, { ok = ok, message = message })
-	end,
-}
-local floorProduct
-for _, product in config.Monetization.Products do
-	if product.Key == "BaseFloor" then
-		floorProduct = product
-	end
-end
-assert(floorProduct)
-local originalId = floorProduct.Id
-floorProduct.Id = 123456789 -- test-only ID
-local controller = load("BaseFloorController")
-controller.Init({ base })
-local floorLoop = coroutine.create(tasks[#tasks])
-assert(coroutine.resume(floorLoop))
-assert(base.FloorTerminal.ProximityPrompt:GetAttribute("OpensWindow") == "BaseFloors")
-local function buy(action)
-	clock += 1
-	cache.Remotes.BaseFloor.OnServerEvent:Fire(player, action)
-end
-local balance = data.money
-buy("invalid")
-assert(data.money == balance and #replies == 0)
-buy("Cash")
-assert(data.expansion.floors == 1 and data.money == balance - config.BaseFloors.Prices[1])
-assert(#base.UpperFloors:GetChildren() == 1 and base:GetAttribute("FloorsBuilt") == 1)
-balance = data.money
-buy("Cash")
-buy("Robux")
-assert(data.money == balance and prompts == 0 and not replies[#replies].ok, "floor cap permitted payment")
-data.tier = 2
-buy("Robux")
-assert(prompts == 1 and data.expansion.floors == 1, "purchase prompt granted before receipt")
-floorProduct.Id = 0
-buy("Robux")
-assert(prompts == 1 and not replies[#replies].ok, "unconfigured product attempted a real prompt")
-currentOwner = nil
-assert(coroutine.resume(floorLoop))
-assert(#base.UpperFloors:GetChildren() == 0 and base:GetAttribute("FloorsBuilt") == 0)
-currentOwner = player
-assert(coroutine.resume(floorLoop))
-assert(#base.UpperFloors:GetChildren() == 1, "reassigned base failed to restore floors")
-floorProduct.Id = originalId
-print("PASS: actual floor terminal, cash build, tier cap, Robux route, missing-ID guard and base reassignment")

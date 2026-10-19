@@ -467,12 +467,6 @@ do
 		end
 	end
 end
--- A local-only fake product ID enables receipt tests without altering production config.
-for _, product in ipairs(config.Monetization.Products) do
-	if product.Key == "BaseFloor" then
-		product.Id = 987654321
-	end
-end
 local monetization = loadModule("MonetizationController")
 local decision = r.Enum.ProductPurchaseDecision
 local info = { PlayerId = 1234, ProductId = 3718429232, PurchaseId = "aura-1" }
@@ -494,45 +488,28 @@ assert(records.u_1234.totalPulls == n + 1 and records.u_1234.pets[byRank[4]] == 
 assert(session.GetRewardOwned(player)[byRank[4]] == 1)
 assert(monetization.ProcessReceipt(paid) == decision.PurchaseGranted and session.GetTotalPulls(player) == n + 1)
 
--- Real profile APIs: floors, receipt race, retry, world cap and saved magnet preference.
+-- Real profile APIs: world purchase, base capacity and saved magnet preference.
 do
 	local data = session.Get(player)
-	assert(data.expansion.floors == 0 and data.expansion.credits == 0 and not data.magnetEnabled)
+	assert(not data.magnetEnabled)
 	assert(not session.SetMagnetEnabled(player, true), "unowned magnet enabled")
 	session.SetUpgradeLevel(player, "Magnet", 1)
 	assert(not data.magnetEnabled, "purchase must not activate magnet")
 	assert(session.SetMagnetEnabled(player, true) and player:GetAttribute("MagnetEnabled"))
 	assert(session.Save(player) and records.u_1234.magnetEnabled)
 	assert(session.SetMagnetEnabled(player, false))
-	data.money = config.BaseFloors.Prices[1] - 1
-	assert(not session.BuyBaseFloor(player) and data.expansion.floors == 0)
-	data.money += 1
-	assert(session.BuyBaseFloor(player) and data.money == 0 and data.expansion.floors == 1)
-	data.money = 1e20
-	assert(not session.BuyBaseFloor(player) and data.money == 1e20, "world floor cap charged twice")
-	local receipt = { PlayerId = 1234, ProductId = 987654321, PurchaseId = "floor-delayed" }
-	assert(monetization.ProcessReceipt(receipt) == decision.PurchaseGranted)
-	assert(data.expansion.floors == 1 and data.expansion.credits == 1, "race lost paid entitlement")
-	assert(records.u_1234.expansion.credits == 1)
-	assert(monetization.ProcessReceipt(receipt) == decision.PurchaseGranted and data.expansion.credits == 1)
-	receipt.PurchaseId = "floor-retry"
-	failSave = true
-	assert(monetization.ProcessReceipt(receipt) == decision.NotProcessedYet)
-	failSave = false
-	assert(monetization.ProcessReceipt(receipt) == decision.PurchaseGranted and data.expansion.credits == 2)
 	data.money = config.Worlds[2].Price - 1
 	assert(not session.AdvanceTier(player) and data.tier == 1)
 	data.money += 1
 	assert(session.AdvanceTier(player) == 2 and data.money == 0)
-	assert(data.expansion.floors == 2 and data.expansion.credits == 1, "tier must consume exactly one credit")
-	assert(player:GetAttribute("BaseCapacity") == 30)
+	assert(player:GetAttribute("BaseCapacity") == config.GetIncomeSlots(0))
 	assert(session.Save(player))
 	services.Players.PlayerRemoving:Fire(player)
 	services.Players.PlayerAdded:Fire(player)
 	local reload = tasks[#tasks]
 	reload.f(table.unpack(reload.args))
 	data = session.Get(player)
-	assert(data.expansion.floors == 2 and data.expansion.credits == 1 and not data.magnetEnabled)
+	assert(not data.magnetEnabled)
 	assert(session.SetMagnetEnabled(player, true))
 	assert(session.Save(player) and records.u_1234.magnetEnabled)
 	services.Players.PlayerRemoving:Fire(player)
@@ -541,7 +518,7 @@ do
 	reload.f(table.unpack(reload.args))
 	assert(session.Get(player).magnetEnabled and player:GetAttribute("MagnetEnabled"))
 	print(
-		"PASS: real profiles, cash floors, world caps, receipt credits/retry/idempotence, reconnect and magnet preference"
+		"PASS: real profiles, world purchase, base capacity, reconnect and magnet preference"
 	)
 end
 
@@ -570,7 +547,6 @@ do
 	assert(data.money == 0 and data.tier == 1 and data.world == 1, "back to the first world with no money")
 	assert(data.upgrades.Treadmill == 0 and data.upgrades.WeaponBat == 1, "shop reset, weapons kept")
 	assert(petCount() == petsBefore, "pets are kept")
-	assert(data.expansion.floors == 2 and data.expansion.credits == 1, "Rebirth must keep floors and paid credits")
 	assert(
 		config.GetRebirthMultiplier(1) == 2
 			and config.GetRebirthPrice(1) == config.Rebirth.BasePrice * config.Rebirth.PriceGrowth
@@ -616,10 +592,6 @@ assert(not rejoined.Get(player).onboarding.newPlayer, "legacy save is not a newl
 do
 	local data = rejoined.Get(player)
 	assert(rejoined.GetRebirths(player) == 1 and data.tier == 1, "the Rebirth is saved")
-	assert(
-		data.expansion.floors == 2 and data.expansion.credits == 1,
-		"floors must survive a fresh-server reload after Rebirth"
-	)
 	assert(data.magnetEnabled, "saved toggle preference lost")
 	assert(
 		data.daily.last == 100 and data.daily.streak == 3 and table.find(data.codes, "MERCI"),
