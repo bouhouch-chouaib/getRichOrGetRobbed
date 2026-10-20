@@ -426,7 +426,7 @@ RunService.RenderStepped:Connect(function()
 			)
 			elseif
 				hatchAt == math.huge
-			then "Ton œuf est dans la capsule d’évolution. Ouvre-le quand tu veux pour découvrir ton familier !"
+			then "Ton œuf est dans la capsule d’évolution : il finit son incubation, puis tu pourras l’ouvrir pour découvrir ton familier !"
 			else STEPS[4].hint
 	end
 

@@ -368,9 +368,10 @@ do
 	local evolving = newcomer(3457)
 	local egg = session.GetEggs(evolving)[1]
 	assert(session.StartEvolution(evolving, egg.id .. "#1", os.time()))
-	assert(session.HatchEvolving(evolving), "starter can use the evolution machine")
+	assert(not session.HatchEvolving(evolving, egg.readyAt - 1), "the capsule never skips the normal incubation")
+	assert(session.HatchEvolving(evolving, egg.readyAt), "starter can use the evolution machine")
 	assert(session.Get(evolving).money == config.Newcomer.BonusMoney)
-	assert(not session.HatchEvolving(evolving) and not session.GrantStarterEgg(evolving))
+	assert(not session.HatchEvolving(evolving, egg.readyAt) and not session.GrantStarterEgg(evolving))
 	services.Players.PlayerRemoving:Fire(evolving)
 	local starterRules = loadModule("StarterJourney")
 	local restored =
@@ -717,15 +718,16 @@ assert(lot.count == 1 and evolving.count == 1 and evolving.evolve.stage == 1, "o
 assert(#eggs.Units({ evolving }) == 0, "the machine egg has no nest")
 local _, hatchedNow = eggs.Collect({ evolving }, now + 10 ^ 7)
 assert(next(hatchedNow) == nil, "the machine egg never hatches on its own")
-evolving.evolve.maxStage = 2
-assert(rejoined.TickEvolution(player, now) == nil, "nothing before the first attempt")
-assert(rejoined.TickEvolution(player, evolving.evolve.nextAt) == "Evolved" and evolving.evolve.stage == 2)
+assert(evolving.evolve.nextAt > evolving.readyAt, "first attempt only after the normal incubation")
+assert(not rejoined.HatchEvolving(player, now), "cannot open before the normal incubation ends")
+assert(rejoined.TickEvolution(player, now, 0) == nil, "nothing before the first attempt")
+assert(rejoined.TickEvolution(player, evolving.evolve.nextAt, 0) == "Evolved" and evolving.evolve.stage == 2)
 assert(
-	rejoined.TickEvolution(player, evolving.evolve.nextAt) == "Maxed" and evolving.evolve.done,
-	"secret limit reached"
+	rejoined.TickEvolution(player, evolving.evolve.nextAt, 0.999) == "Maxed" and evolving.evolve.done,
+	"a failed attempt ends the evolution"
 )
-assert(rejoined.TickEvolution(player, now + 10 ^ 7) == nil, "no attempt after the limit")
-local evolvedId = assert(rejoined.HatchEvolving(player))
+assert(rejoined.TickEvolution(player, now + 10 ^ 7, 0) == nil, "no attempt after a failure")
+local evolvedId = assert(rejoined.HatchEvolving(player, now + 10 ^ 7))
 assert(evolvedId == byRank[3] .. "__E2" and catalog.ById[evolvedId].Stage == 2, "hatches as the Évolué form")
 assert(catalog.GetIncome(evolvedId) == catalog.GetIncome(byRank[3]) * config.Evolution.IncomeMultiplier[2])
 assert(rejoined.GetEvolving(player) == nil and rejoined.Get(player).pets[evolvedId] == 1)
@@ -736,6 +738,9 @@ for i = 1, 1000 do
 	end
 end
 assert(maxed > 100 and maxed < 260, "most eggs never reach Ultime")
+local first, second = eggs.StageChance(1, 1), eggs.StageChance(2, 1)
+assert(math.abs(first - 0.6) < 1e-6 and math.abs(first * second - 0.18) < 1e-6, "visible chances match the old odds")
+assert(eggs.StageChance(1, 7) > first and eggs.StageChance(3, 1) == 0, "better capsules, nothing above Ultime")
 -- Mutations (Config.Mutations): every species has its mutated forms, income multiplied, kept through evolution.
 for _, entry in ipairs(catalog.List) do
 	assert(#catalog.FormsOf[entry.Id] == #config.Evolution.Names * (#config.Mutations + 1), "all forms of " .. entry.Id)

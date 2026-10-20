@@ -1035,7 +1035,8 @@ function SessionData.GetEvolving(player: Player): EggIncubation.Egg?
 end
 
 -- Met dans la machine l'œuf de la clé donnée (« lot#n », shared/EggIncubation.UnitKey). Refusé si la machine est pleine,
--- si l'œuf n'existe plus ou s'il est déjà à l'heure d'éclore. Sans attente.
+-- si l'œuf n'existe plus ou s'il est déjà à l'heure d'éclore. Sans attente. L'œuf y finit son incubation normale, puis
+-- tente d'évoluer (première tentative : EggIncubation.FirstAttemptAt).
 function SessionData.StartEvolution(player: Player, key: string, time: number): boolean
 	local data = storage[player]
 	if not data or not data.loaded or SessionData.GetEvolving(player) then
@@ -1048,12 +1049,11 @@ function SessionData.StartEvolution(player: Player, key: string, time: number): 
 	end
 	for position, egg in ipairs(data.eggs) do
 		if egg.id == lotId and not egg.evolve and unit >= 1 and unit <= egg.count and egg.readyAt > time then
-			local rarity = PetCatalog.ById[egg.petId].Rarity
 			local evolve: EggIncubation.Evolve = {
 				stage = 1,
+				maxStage = #Config.Evolution.Names, -- plus de plafond secret : chaque tentative est tirée au sort
 				-- La capsule suit le niveau du joueur (monde le plus loin) : meilleures chances, plus rapide.
-				maxStage = EggIncubation.RollMaxStage(evolutionRng:NextNumber(), data.tier),
-				nextAt = time + EggIncubation.EvolveDelay(rarity, 1, evolutionRng:NextNumber(), data.tier),
+				nextAt = EggIncubation.FirstAttemptAt(egg, time, evolutionRng:NextNumber(), data.tier),
 				done = false,
 			}
 			if egg.count == 1 then
@@ -1078,11 +1078,12 @@ function SessionData.StartEvolution(player: Player, key: string, time: number): 
 end
 
 -- Tentative d'évolution si c'est l'heure : "Evolved" ou "Maxed" (voir EggIncubation.TryEvolve), sinon nil.
-function SessionData.TickEvolution(player: Player, time: number): string?
+-- roll : tirage imposé (tests) ; sinon au hasard.
+function SessionData.TickEvolution(player: Player, time: number, roll: number?): string?
 	local egg = SessionData.GetEvolving(player)
 	if not egg then return nil end
 	local data = storage[player]
-	local result = EggIncubation.TryEvolve(egg, time, evolutionRng:NextNumber(), if data then data.tier else 1)
+	local result = EggIncubation.TryEvolve(egg, time, roll or evolutionRng:NextNumber(), if data then data.tier else 1)
 	if result then
 		sync(player)
 	end
@@ -1090,12 +1091,16 @@ function SessionData.TickEvolution(player: Player, time: number): string?
 end
 
 -- Ouvre l'œuf de la machine : le familier, à son stade, rejoint le joueur (sans attente). Renvoie son Id.
-function SessionData.HatchEvolving(player: Player): string?
+-- Refusé tant que son incubation normale n'est pas finie (sinon la capsule ferait éclore un œuf de 20 min tout de suite).
+function SessionData.HatchEvolving(player: Player, time: number): string?
 	local data = storage[player]
 	if not data or not data.loaded then return nil end
 	for index, egg in ipairs(data.eggs) do
 		local evolve = egg.evolve
 		if evolve then
+			if not EggIncubation.CanOpen(egg, time) then
+				return nil
+			end
 			table.remove(data.eggs, index)
 			local petId = PetCatalog.Variant(egg.petId, evolve.stage)
 			data.money += StarterJourney.Hatched(data.starter, egg.id)

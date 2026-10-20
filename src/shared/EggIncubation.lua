@@ -5,8 +5,10 @@ local Catalog = require(script.Parent.PetCatalog)
 local Eggs = {}
 
 -- evolve : l'œuf est dans la machine d'évolution (Config.Evolution) — il n'éclot plus tout seul.
---   stage = stade actuel (1 à 3), maxStage = plafond secret tiré au hasard, nextAt = prochaine tentative (UTC),
---   done = il n'évoluera plus (limite atteinte).
+--   stage = stade actuel (1 à 3), nextAt = prochaine tentative (UTC), done = il n'évoluera plus (tentative ratée ou
+--   stade Ultime). 20 oct. : il finit d'abord son incubation normale (readyAt : on ne peut pas l'ouvrir avant), puis
+--   chaque tentative est un tirage au sort visible (Eggs.StageChance). maxStage n'est plus utilisé (gardé pour les
+--   anciennes sauvegardes).
 export type Evolve = { stage: number, maxStage: number, nextAt: number, done: boolean }
 export type Egg = { id: string, petId: string, count: number, startedAt: number, readyAt: number, evolve: Evolve? }
 export type Batch = { count: number, startedAt: number, readyAt: number }
@@ -142,19 +144,46 @@ function Eggs.RollMaxStage(roll: number, tier: number?): number
 	return #weights
 end
 
--- Une tentative d'évolution si c'est l'heure : "Evolved" (stade +1), "Maxed" (il n'évoluera plus) ou nil.
+-- Chance (0 à 1) que la tentative depuis le stade `stage` réussisse, pour une capsule de ce niveau. Mêmes chances
+-- au total qu'avant (MaxStageWeights) : Évolué 60 %, puis Ultime 30 % de ceux-là (18 % au total) en Prairie.
+function Eggs.StageChance(stage: number, tier: number?): number
+	local weights = Eggs.MaxStageWeights(tier)
+	local above, from = 0, 0
+	for index, weight in ipairs(weights) do
+		if index > stage then
+			above += weight
+		end
+		if index >= stage then
+			from += weight
+		end
+	end
+	return if from > 0 then above / from else 0
+end
+
+-- Première tentative d'un œuf qui entre dans la capsule : après la fin de son incubation normale.
+function Eggs.FirstAttemptAt(egg: Egg, time: number, roll: number, tier: number?): number
+	return math.max(time, egg.readyAt) + Eggs.EvolveDelay(Catalog.ById[egg.petId].Rarity, 1, roll, tier)
+end
+
+-- L'œuf de la capsule peut-il être ouvert ? Seulement une fois son incubation normale terminée.
+function Eggs.CanOpen(egg: Egg, time: number): boolean
+	return time >= egg.readyAt
+end
+
+-- Une tentative d'évolution si c'est l'heure : "Evolved" (stade +1), "Maxed" (ratée : il n'évoluera plus) ou nil.
+-- roll (0 à 1) décide de la réussite (Eggs.StageChance).
 function Eggs.TryEvolve(egg: Egg, time: number, roll: number, tier: number?): string?
 	local evolve = egg.evolve
 	if not evolve or evolve.done or time < evolve.nextAt then
 		return nil
 	end
 	local stages = #Config.Evolution.Names
-	if evolve.stage < evolve.maxStage and evolve.stage < stages then
+	if evolve.stage < stages and roll < Eggs.StageChance(evolve.stage, tier) then
 		evolve.stage += 1
 		if evolve.stage >= stages then
 			evolve.done = true -- Ultime : rien au-dessus
 		else
-			evolve.nextAt = time + Eggs.EvolveDelay(Catalog.ById[egg.petId].Rarity, evolve.stage, roll, tier)
+			evolve.nextAt = time + Eggs.EvolveDelay(Catalog.ById[egg.petId].Rarity, evolve.stage, (roll * 7.31) % 1, tier)
 		end
 		return "Evolved"
 	end

@@ -74,6 +74,8 @@ function EggController.Init(bases: { Model })
 		machine:SetAttribute("Occupied", evolve ~= nil)
 		machine:SetAttribute("Rarity", if egg then Catalog.ById[egg.petId].Rarity else nil)
 		machine:SetAttribute("Stage", if evolve then evolve.stage else nil)
+		-- Fin de l'incubation normale : avant, on ne peut pas ouvrir l'œuf (client/EvolutionMachine affiche le compte).
+		machine:SetAttribute("ReadyAt", if evolve and egg then egg.readyAt else nil)
 		machine:SetAttribute("NextAt", if evolve and not evolve.done then evolve.nextAt else nil)
 		machine:SetAttribute("Done", if evolve then evolve.done else nil)
 	end
@@ -270,7 +272,7 @@ function EggController.Init(bases: { Model })
 				publishMachine(base, player)
 			end
 		elseif action == "Hatch" then
-			local petId = SessionData.HatchEvolving(player)
+			local petId = SessionData.HatchEvolving(player, os.time())
 			if petId then
 				BadgeController.Award(player, "FirstHatch")
 				-- L'éclosion part de la capsule ; le familier (s'il est affiché) arrive dans la prairie, près d'elle.
