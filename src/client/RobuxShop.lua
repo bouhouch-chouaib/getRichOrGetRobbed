@@ -248,7 +248,8 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 			end
 		end
 		-- Chances exactes pour CE joueur : chance des tirages achetés + bonus, et sa rareté plancher (rang de tirage).
-		local odds = LootEngine.odds(M.PullLuck + Perks.LuckBonus(player), MenuKit.pullFloor())
+		local tier = player:GetAttribute("Tier")
+		local odds = LootEngine.odds(M.PullLuck + Perks.LuckBonus(player), MenuKit.pullFloor(), if type(tier) == "number" then tier else 1)
 		local lines = {}
 		for index, rarity in ipairs(Config.Rarities) do
 			table.insert(lines, string.format('<font color="#%s">%s</font> : %s', rarity.Color:ToHex(), TextFormat.upper(rarity.Name), formatPercent(odds[index])))

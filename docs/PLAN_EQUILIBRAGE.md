@@ -61,6 +61,42 @@ c'est un mur (Rebirth 4 : 14 h de plus, sans rien de nouveau à gagner). Les cau
 3. **Les écarts de revenu entre raretés** (x12 à x100) et des tirages qui ne dépendent pas du monde.
 4. **Le Rebirth** : prix x10 à chaque fois alors que le revenu plafonne → facile au début, puis mur.
 
+## 1 ter. Nouvelles valeurs (étapes 2 à 7, 20 oct.) : résultat du simulateur
+
+200 parties de 26 h. Temps visés (choix de Chouaib : 1er Rebirth vers 8-10 h) entre parenthèses.
+
+| Étape | chanceux | moyen | malchanceux |
+| --- | --- | --- | --- |
+| Désert (10 min) | 5 min | 9 min | 12 min |
+| Volcan (30 min) | 18 min | 23 min | 30 min |
+| Glace (1 h) | 40 min | 49 min | 1,1 h |
+| Abysses (2 h) | 1,4 h | 1,8 h | 2,2 h |
+| Cosmos (3,5 h) | 3,1 h | 3,7 h | 4,5 h |
+| Divin (6 h) | 6,5 h | 7,1 h | 7,9 h |
+| **Rebirth 1 (~9 h)** | 8,6 h | **9,2 h** | 10,0 h |
+| Rebirth 2 (+6 h) | 13,4 h | 14,1 h | 14,8 h |
+| Rebirth 3 (+5 h) | 19,0 h | 19,6 h | 20,4 h |
+
+Revenu moyen : 4,6K/s après 10 min, 255K/s après 30 min, 3M/s après 1 h, 30M/s après 2 h, 151M/s après 5 h, 302M/s
+après 10 h, 610M/s après 20 h (il continue de monter grâce aux Rebirths). Une manche : 6 tirages au début, 24 au plus.
+Argent avant le 1er Rebirth : 77 % revenu des familiers, 15 % points du trou, 8 % doublons vendus.
+
+Ce qui a changé dans `Config.lua` :
+- **Chance** : `Items.QualityBoost` 0,5 → 0,2 ; prix x7,7 par niveau (avant x18).
+- **Tirages** : `Loot.PullCostGrowth` 8 % → 22 % (moins de tirages par manche) ; `Loot.LuckPerPoint` 0,01 → 0,005.
+- **Argent des points** : `Economy.IncomeSecondsPerPoint` 0,1 → 0,02.
+- **Raretés** : revenus 2 / 14 / 100 / 700 / 5K / 35K / 250K / 1,75M (environ x7 d'une rareté à l'autre) ; poids des
+  raretés hautes divisés (Mythique 9, Divin 2,5, Sigma 0,5).
+- **Mondes** : nouveau `RarityBoost` (meilleurs tirages : x1,08 à x1,8 par rang de rareté) ; revenu x1,6 / 2,5 / 4 /
+  6,5 / 10 / 16 ; prix 200K / 14M / 450M / 14B / 300B / 1,4T. Code : `LootEngine` (paramètre tier), `PullRewards`
+  (monde le plus loin atteint), `RobuxShop` (chances affichées exactes).
+- **Rebirth** (option a) : 2,5T, puis x2,1 à chaque fois (avant 1Qa puis x10).
+- **Fusion** : prix ramenés aux nouveaux revenus (250 / 8K / 190K / 3,5M / 60M / 1,5B).
+- **Boutique** : tapis et banc x2,44 par niveau (niveau 25 vers 17 h), Chance x7,7, sac à dos x150.
+
+Limite connue : la base prend un familier par espèce d'abord. Une fois les 5 Sigma et les 9 Divins obtenus, le revenu
+ne monte plus que par les mondes, les Rebirths, la capsule d'évolution et les mutations (non simulées).
+
 ## 2. L'idée directrice
 
 Une seule courbe de progression, avec un **temps de jeu visé pour chaque étape**. Tous les prix en découlent :

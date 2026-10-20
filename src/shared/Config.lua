@@ -133,7 +133,7 @@ Config.Items = {
 	WildMinRadius = 70, -- hors du dôme
 	WildMaxRadius = 160, -- avant les bases (bord intérieur à 173) et les kiosques
 	MaxLooseItems = 80, -- au-delà, les plus vieux objets abandonnés sont nettoyés
-	QualityBoost = 0.5, -- par niveau de "Chance" : poids des objets précieux ×(1 + 0.5 × niveau)^rang
+	QualityBoost = 0.2, -- par niveau de "Chance" : poids des objets précieux ×(1 + 0.2 × niveau)^rang (0,5 avant le 20 oct. : trop fort)
 }
 
 export type ItemTier = {
@@ -249,8 +249,8 @@ end
 -- Le coût d'un tirage augmente à chaque tirage de la même manche (évite l'emballement).
 Config.Loot = {
 	PullCost = 2, -- coût du 1er tirage (minimum 1 tirage si score > 0)
-	PullCostGrowth = 0.08, -- +8 % de coût à chaque tirage suivant
-	LuckPerPoint = 0.01, -- chaque point augmente un peu le poids des raretés hautes
+	PullCostGrowth = 0.22, -- +22 % de coût à chaque tirage suivant de la manche (8 % avant le 20 oct. : trop de tirages)
+	LuckPerPoint = 0.005, -- chaque point augmente un peu le poids des raretés hautes
 	MaxLuck = 1, -- au maximum, poids des raretés hautes ×2
 	PityPulls = 60, -- au plus tard au 60e tirage sans Épique+, un Épique+ est garanti
 	PityMinRarity = 4, -- index de rareté garanti par la pitié (4 = Épique)
@@ -364,7 +364,7 @@ Config.PlayerAura = {
 Config.Fusion = {
 	Count = 5,
 	MaxFromRarity = 6,
-	Costs = { 250, 15e3, 750e3, 40e6, 2.5e9, 250e9 }, -- prix en $ selon la rareté fusionnée (index de rareté)
+	Costs = { 250, 8e3, 190e3, 3.5e6, 60e6, 1.5e9 }, -- prix en $ selon la rareté fusionnée (index de rareté)
 	-- Mutations par la fusion (SECRET, comme Config.Mutations : rien dans le jeu n'en parle). Le familier obtenu :
 	--   - tire sa mutation secrète comme un tirage gratuit (PullRewards.RollMutation) ;
 	--   - chaque familier muté mis dans la machine a CarryChance de lui passer sa mutation ;
@@ -438,7 +438,7 @@ Config.Economy = {
 	-- Chaque point marqué rapporte aussi de l'argent à la digestion : MoneyPerPoint, ou IncomeSecondsPerPoint
 	-- secondes du revenu du joueur si c'est plus (l'argent du trou suit la progression).
 	MoneyPerPoint = 15,
-	IncomeSecondsPerPoint = 0.1,
+	IncomeSecondsPerPoint = 0.02,
 }
 
 -- Verrouillage de base (bouton au sol, comme Steal a Brainrot).
@@ -452,15 +452,17 @@ Config.Lock = {
 -- Tout change pour lui (client/WorldSkin) : l'arène entière s'affiche dans SON monde, sa base dans son monde aux yeux de
 -- tous, la musique (Config.Sounds.Playlists[palier]). Chaque monde multiplie son revenu (IncomeMultiplier).
 -- Les couleurs et décors de chaque monde sont dans shared/Worlds (pur visuel).
-export type WorldDef = { Id: string, Name: string, Price: number, IncomeMultiplier: number }
+-- RarityBoost (20 oct., docs/PLAN_EQUILIBRAGE.md) : les tirages sont meilleurs dans les mondes plus loin (le plus loin
+-- atteint) : le poids de chaque rareté est multiplié par RarityBoost ^ (rang - 1) (Commun x1, Inhabituel x boost...).
+export type WorldDef = { Id: string, Name: string, Price: number, IncomeMultiplier: number, RarityBoost: number? }
 Config.Worlds = {
-	{ Id = "Prairie", Name = "Prairie", Price = 0, IncomeMultiplier = 1 },
-	{ Id = "Desert", Name = "Désert", Price = 1e6, IncomeMultiplier = 1.5 },
-	{ Id = "Volcan", Name = "Volcan", Price = 40e6, IncomeMultiplier = 2.25 },
-	{ Id = "Glace", Name = "Glace", Price = 1.5e9, IncomeMultiplier = 3.4 },
-	{ Id = "Abysses", Name = "Abysses", Price = 75e9, IncomeMultiplier = 5 },
-	{ Id = "Cosmos", Name = "Cosmos", Price = 4e12, IncomeMultiplier = 7.5 },
-	{ Id = "Divin", Name = "Divin", Price = 250e12, IncomeMultiplier = 11 },
+	{ Id = "Prairie", Name = "Prairie", Price = 0, IncomeMultiplier = 1, RarityBoost = 1 },
+	{ Id = "Desert", Name = "Désert", Price = 200e3, IncomeMultiplier = 1.6, RarityBoost = 1.08 },
+	{ Id = "Volcan", Name = "Volcan", Price = 14e6, IncomeMultiplier = 2.5, RarityBoost = 1.17 },
+	{ Id = "Glace", Name = "Glace", Price = 450e6, IncomeMultiplier = 4, RarityBoost = 1.27 },
+	{ Id = "Abysses", Name = "Abysses", Price = 14e9, IncomeMultiplier = 6.5, RarityBoost = 1.38 },
+	{ Id = "Cosmos", Name = "Cosmos", Price = 300e9, IncomeMultiplier = 10, RarityBoost = 1.5 },
+	{ Id = "Divin", Name = "Divin", Price = 1.4e12, IncomeMultiplier = 16, RarityBoost = 1.8 },
 } :: { WorldDef }
 
 -- Monde (1 à #Config.Worlds) d'un palier quelconque, borné.
@@ -701,10 +703,10 @@ export type ShopItem = {
 
 -- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Icon = "Treadmill", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 5 modèles (bois, acier, or, cristal, cosmique) : chaque niveau entraîne plus vite.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
-	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 4.04 },
-	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+50 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 18 },
-	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 400 },
+	{ Id = "Treadmill", Icon = "Treadmill", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 5 modèles (bois, acier, or, cristal, cosmique) : chaque niveau entraîne plus vite.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 2.44 },
+	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 2.44 },
+	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+20 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 7.7 },
+	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 150 },
 	{ Id = "Magnet", Icon = "Magnet", Name = "Aimant à objets", Description = "Active ou coupe l’aimant avec son bouton. Priorité aux objets qui rapportent le plus. Plus de portée à chaque niveau.", MaxLevel = 5, BasePrice = 20e3, PriceGrowth = 9 },
 	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2).
@@ -793,22 +795,24 @@ end
 export type Rarity = {
 	Id: string, -- clé sans accent (attributs)
 	Name: string, -- nom affiché
-	Weight: number, -- poids de tirage (total = 1000)
+	Weight: number, -- poids de tirage (les chances sont normalisées ; voir aussi Config.Worlds[].RarityBoost)
 	Color: Color3,
 	Multiplier: number, -- bonus de points quand le familier est équipé
 	Income: number, -- $/s de base quand le familier est sur un socle (chaque familier a un bonus de 0 à +45 %, cf. PetCatalog.GetIncome)
 }
 
 -- Ordre = du plus commun au plus rare.
+-- 20 oct. (docs/PLAN_EQUILIBRAGE.md) : revenus lissés (environ x7 d'une rareté à l'autre au lieu de x12 à x100) et
+-- raretés hautes bien plus rares au départ ; ce sont les mondes (RarityBoost) qui les rendent accessibles.
 Config.Rarities = {
 	{ Id = "Commun", Name = "Commun", Weight = 500, Color = Color3.fromRGB(200, 200, 200), Multiplier = 1.1, Income = 2 },
-	{ Id = "Inhabituel", Name = "Inhabituel", Weight = 250, Color = Color3.fromRGB(100, 220, 90), Multiplier = 1.2, Income = 25 },
-	{ Id = "Rare", Name = "Rare", Weight = 120, Color = Color3.fromRGB(70, 160, 255), Multiplier = 1.35, Income = 400 },
-	{ Id = "Epique", Name = "Épique", Weight = 70, Color = Color3.fromRGB(180, 80, 255), Multiplier = 1.6, Income = 8e3 },
-	{ Id = "Legendaire", Name = "Légendaire", Weight = 40, Color = Color3.fromRGB(255, 170, 30), Multiplier = 2, Income = 200e3 },
-	{ Id = "Mythique", Name = "Mythique", Weight = 15, Color = Color3.fromRGB(255, 70, 120), Multiplier = 3, Income = 6e6 },
-	{ Id = "Divin", Name = "Divin", Weight = 4, Color = Color3.fromRGB(120, 255, 245), Multiplier = 5, Income = 250e6 },
-	{ Id = "Sigma", Name = "Sigma", Weight = 1, Color = Color3.fromRGB(255, 230, 60), Multiplier = 10, Income = 25e9 },
+	{ Id = "Inhabituel", Name = "Inhabituel", Weight = 260, Color = Color3.fromRGB(100, 220, 90), Multiplier = 1.2, Income = 14 },
+	{ Id = "Rare", Name = "Rare", Weight = 140, Color = Color3.fromRGB(70, 160, 255), Multiplier = 1.35, Income = 100 },
+	{ Id = "Epique", Name = "Épique", Weight = 60, Color = Color3.fromRGB(180, 80, 255), Multiplier = 1.6, Income = 700 },
+	{ Id = "Legendaire", Name = "Légendaire", Weight = 28, Color = Color3.fromRGB(255, 170, 30), Multiplier = 2, Income = 5e3 },
+	{ Id = "Mythique", Name = "Mythique", Weight = 9, Color = Color3.fromRGB(255, 70, 120), Multiplier = 3, Income = 35e3 },
+	{ Id = "Divin", Name = "Divin", Weight = 2.5, Color = Color3.fromRGB(120, 255, 245), Multiplier = 5, Income = 250e3 },
+	{ Id = "Sigma", Name = "Sigma", Weight = 0.5, Color = Color3.fromRGB(255, 230, 60), Multiplier = 10, Income = 1.75e6 },
 } :: { Rarity }
 
 -- Accès rapide : Config.RarityIndex["Epique"] = 4
@@ -947,8 +951,8 @@ Config.Friends = {
 -- (ceux qui rapportent, Config.Pets.IncomeSlots), jusqu'à MaxExtraPets.
 Config.Rebirth = {
 	RequiredTier = 7, -- monde à avoir atteint (7 = Divin, le dernier)
-	BasePrice = 1e15, -- prix du 1er Rebirth ($1Qa)
-	PriceGrowth = 10, -- chaque Rebirth coûte 10 fois plus que le précédent
+	BasePrice = 2.5e12, -- prix du 1er Rebirth ($2.5T) : vers 9 h de jeu (tools/sim-economy.luau)
+	PriceGrowth = 2.1, -- chaque Rebirth coûte 2,1 fois le précédent : ~5 h de plus à chaque fois
 	IncomeBonus = 1, -- +100 % de revenu par Rebirth : x2, x3, x4...
 	ExtraPets = 1, -- +1 familier qui rapporte dans la base par Rebirth
 	MaxExtraPets = 5,

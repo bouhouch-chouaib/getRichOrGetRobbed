@@ -10,13 +10,15 @@
 -- Hypothèses (à affiner avec les vraies parties) : un joueur seul, toujours présent ; il lance HOLE.Items objets par
 -- manche (plus avec le sac, l'aimant et l'entraînement) ; il achète le monde suivant dès qu'il peut, sinon la moins
 -- chère des améliorations si elle coûte moins de 30 % de son argent ; il fusionne ses familiers en réserve ; il équipe
--- son meilleur familier en réserve. Pas de passes Robux, d'amis, de vols, de capsule d'évolution ni de cadeaux du jour.
+-- son meilleur familier en réserve. Il économise pour le monde suivant (une amélioration seulement si elle coûte
+-- moins de 15 % de ce monde). Pas de passes Robux, d'amis, de vols, de capsule d'évolution ni de cadeaux du jour.
 local fs, luau, r = require("@lune/fs"), require("@lune/luau"), require("@lune/roblox")
 local process = require("@lune/process")
 local project = process.args[1] or "."
 local RUNS = tonumber(process.args[2]) or 200
 local HOURS = tonumber(process.args[3]) or 40
-local FUSION = process.args[4] ~= "nofusion" -- « nofusion » : le joueur n'utilise jamais la fusion
+local FUSION = process.args[4] ~= "nofusion"
+local DEBUG = process.args[5] == "debug" -- affiche la base du joueur à chaque point de contrôle -- « nofusion » : le joueur n'utilise jamais la fusion
 
 local cache = {}
 local parent = setmetatable({}, { __index = function(_, key) return key end })
@@ -199,7 +201,9 @@ local function simulate(): ({ [string]: number }, { [number]: number })
 						cheapest, price = id, cost
 					end
 				end
-				if cheapest and price <= 0.3 * s.money then
+				-- Il économise pour son objectif (monde suivant ou Rebirth) : une amélioration seulement si elle est petite à côté.
+				local goal = if nextWorld then nextWorld.Price else Config.GetRebirthPrice(s.rebirths)
+				if cheapest and price <= 0.3 * s.money and price <= 0.15 * goal then
 					s.money -= price
 					s.up[cheapest] = (s.up[cheapest] or 0) + 1
 					local level = s.up[cheapest]
@@ -239,6 +243,19 @@ local function simulate(): ({ [string]: number }, { [number]: number })
 			incomeAt[checkpoints[nextCheck]] = perSecond
 			checkpoint = checkpoints[nextCheck]
 			nextCheck += 1
+		end
+		if checkpoint and DEBUG then
+			local counts = {}
+			for _, petId in ipairs(base) do
+				local rarity = Catalog.ById[petId].Rarity
+				counts[rarity] = (counts[rarity] or 0) + 1
+			end
+			local parts = {}
+			for rarity, count in pairs(counts) do
+				table.insert(parts, rarity .. " x" .. count)
+			end
+			print(string.format("[debug] %.1f h monde %d argent %s revenu %s/s base : %s", s.t / 3600, s.tier, tostring(math.floor(s.money)),
+				tostring(math.floor(perSecond)), table.concat(parts, ", ")))
 		end
 
 		-- Fusion des familiers en réserve (Config.Fusion) si elle coûte moins de la moitié de l'argent.
@@ -282,7 +299,7 @@ local function simulate(): ({ [string]: number }, { [number]: number })
 			owned[egg.id] = (owned[egg.id] or 0) + 1
 		end
 		local floorIndex = Loot.floor(s.totalPulls, s.discovered)
-		local outcome = Loot.rollPulls(pulls, s.pity, Loot.luck(score, 0), owned, floorIndex)
+		local outcome = Loot.rollPulls(pulls, s.pity, Loot.luck(score, 0), owned, floorIndex, s.tier)
 		s.pity = outcome.pity
 		s.totalPulls += outcome.pulls
 		local world = Config.GetWorld(s.tier)

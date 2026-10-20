@@ -111,6 +111,11 @@ dans Blender, exporte en .fbx (`assets/models/`, source `assets/models/source_mo
 niveaux 1-5, pièces Main / Dark recolorées par niveau, Metal) et `ChienSaucisse` (familier, pièces Leg / Ear animées par
 `PetMotion`). Vérifié en jeu (solo) : tapis en place avec écran et voyants, chien dans la base, qui marche tête en avant, pattes qui bougent.
 
+**20 oct. : équilibrage de la progression** (docs/PLAN_EQUILIBRAGE.md, simulateur `lune run tools/sim-economy.luau . 200 26`) :
+1er Rebirth vers 9 h de jeu (avant 1,7 h), un nouveau monde toutes les 1 à 2 h, Rebirths suivants ~5 h ; revenus des raretés lissés,
+tirages meilleurs dans les mondes plus loin (`Config.Worlds[].RarityBoost`), Chance / tirages / argent des points calmés, prix des
+mondes, Rebirth, fusion et Boutique recalculés. Analyse + 9 tests OK ; pas encore joué dans Studio.
+
 **20 oct. : capsule corrigée** (retour d'un ami testeur) : on ne peut plus ouvrir un œuf avant la fin de son incubation
 normale ; ensuite tentatives d'évolution tirées au sort, chance affichée, suspense « TENTATIVE EN COURS... » (docs/INCUBATION.md).
 Analyse + `check-eggs` OK ; pas encore vu dans Studio (Studio fermé).

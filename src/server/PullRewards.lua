@@ -57,7 +57,8 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 	local owned = SessionData.GetRewardOwned(player) -- pending eggs count toward the duplicate limit
 	local floorIndex = LootEngine.floor(SessionData.GetTotalPulls(player), discovered)
 	local rankIndex = LootEngine.rank(SessionData.GetTotalPulls(player))
-	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), luck, owned, floorIndex)
+	-- Monde le plus loin atteint : meilleures raretés (Config.Worlds[].RarityBoost).
+	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), luck, owned, floorIndex, SessionData.GetTier(player))
 
 	local kept: { [string]: number } = {}
 	local shownKept: { [string]: number } = {} -- ce que voit le client : l'espèce seulement (mutation secrète)
