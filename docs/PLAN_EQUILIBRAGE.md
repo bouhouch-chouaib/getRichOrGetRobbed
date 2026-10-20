@@ -43,7 +43,7 @@ Une seule courbe de progression, avec un **temps de jeu visé pour chaque étape
    joueur moyen manche après manche : points, tirages (chances, pitié, rang), revenu, achats. Il sort le temps pour
    chaque monde, chaque amélioration et chaque Rebirth, pour 3 profils : malchanceux, moyen, chanceux. On mesure
    d'abord les valeurs actuelles, pour confirmer le diagnostic avec des chiffres.
-2. **Fixer les temps visés** (décision de Chouaib), par exemple : Désert 10 min, Volcan 30 min, Glace 1 h, Abysses 2 h,
+2. **Fixer les temps visés** (décision de Chouaib, 20 oct. : **1er Rebirth vers 8-10 h de jeu**), par exemple : Désert 10 min, Volcan 30 min, Glace 1 h, Abysses 2 h,
    Cosmos 4 h, Divin 7 h, 1er Rebirth vers 8-10 h, puis chaque Rebirth un peu plus rapide.
 3. **Lisser les raretés** : écarts de revenu plus réguliers, d'environ x6 à x8 entre deux raretés au lieu de x12 à x100.
    Un familier rare reste un gros cadeau, sans faire sauter trois mondes d'un coup.
