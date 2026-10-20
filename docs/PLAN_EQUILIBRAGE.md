@@ -31,6 +31,36 @@ Au début, elles semblent hors de prix ; avec un Légendaire, tout devient gratu
 dans les mondes n'aide pas à obtenir de meilleurs familiers. Or c'est le moteur des jeux de référence : la zone
 suivante donne de meilleurs œufs.
 
+## 1 bis. Mesures du simulateur (étape 1, 20 oct.) : valeurs actuelles
+
+`lune run tools/sim-economy.luau . 200 24` (200 parties de 24 h, un joueur seul ; détails des hypothèses en tête du fichier).
+
+| Étape | chanceux | moyen | malchanceux |
+| --- | --- | --- | --- |
+| Désert | 4 min | 5 min | 9 min |
+| Volcan | 7 min | 10 min | 14 min |
+| Glace | 14 min | 18 min | 23 min |
+| Abysses | 26 min | 33 min | 38 min |
+| Cosmos | 42 min | 52 min | 1,1 h |
+| Divin | 58 min | 1,3 h | 2,1 h |
+| **Rebirth 1** | 1,3 h | **1,7 h** (visé : 8-10 h) | 2,4 h |
+| Rebirth 2 | 2,0 h | 2,6 h | 3,5 h |
+| Rebirth 3 | 3,8 h | 4,5 h | 5,7 h |
+| Rebirth 4 | 17,5 h | 18,3 h | 19,5 h |
+
+Revenu moyen : 0,9M/s après 10 min, 227M/s après 30 min, 15B/s après 1 h, 1,6T/s après 2 h, puis **bloqué vers 7T/s**
+de 5 h à 20 h (on a déjà tous les meilleurs familiers). Une manche donne déjà 90 points et 19 tirages après 10 min,
+puis 63 tirages. D'où vient l'argent avant le 1er Rebirth : points du trou 55 %, revenu des familiers 44 %, le reste
+moins de 1 %. La fusion ne change presque rien au rythme.
+
+**Ce que ça confirme :** tout va beaucoup trop vite jusqu'au Rebirth 3 (4,5 h au lieu de 8-10 h pour le 1er), puis
+c'est un mur (Rebirth 4 : 14 h de plus, sans rien de nouveau à gagner). Les causes, par ordre d'importance :
+1. **La Chance (amélioration ItemQuality)** est trop bon marché et trop forte : chaque niveau multiplie les objets
+   rares, la valeur moyenne d'un objet explose, donc les points, donc les tirages (19 tirages par manche à 10 min).
+2. **L'argent des points** (0,1 s de revenu par point) dépasse le revenu des familiers dès qu'on a beaucoup de points.
+3. **Les écarts de revenu entre raretés** (x12 à x100) et des tirages qui ne dépendent pas du monde.
+4. **Le Rebirth** : prix x10 à chaque fois alors que le revenu plafonne → facile au début, puis mur.
+
 ## 2. L'idée directrice
 
 Une seule courbe de progression, avec un **temps de jeu visé pour chaque étape**. Tous les prix en découlent :
