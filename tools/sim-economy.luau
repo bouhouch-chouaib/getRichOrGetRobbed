@@ -80,7 +80,7 @@ end
 
 -- Familier au hasard de cette rareté (les nouveaux d'abord, comme LootEngine).
 local function pickPet(rarityIndex, owned)
-	local bucket = Catalog.ByRarity[Config.Rarities[rarityIndex].Id]
+	local bucket = Catalog.BaseByRarity[Config.Rarities[rarityIndex].Id]
 	local total = 0
 	for _, entry in ipairs(bucket) do
 		total += if (owned[entry.Id] or 0) > 0 then 1 else Config.Loot.NewPetWeight
@@ -299,7 +299,8 @@ local function simulate(): ({ [string]: number }, { [number]: number })
 			owned[egg.id] = (owned[egg.id] or 0) + 1
 		end
 		local floorIndex = Loot.floor(s.totalPulls, s.discovered)
-		local outcome = Loot.rollPulls(pulls, s.pity, Loot.luck(score, 0), owned, floorIndex, s.tier)
+		-- Il joue dans son monde le plus loin : les exclusifs de ce monde peuvent sortir.
+		local outcome = Loot.rollPulls(pulls, s.pity, Loot.luck(score, 0), owned, floorIndex, s.tier, Config.GetWorld(s.tier).Id)
 		s.pity = outcome.pity
 		s.totalPulls += outcome.pulls
 		local world = Config.GetWorld(s.tier)

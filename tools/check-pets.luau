@@ -291,7 +291,7 @@ for _, e in catalog.List do
 	table.insert(meshes, { id = e.Id, name = e.Name, rarity = e.Rarity, parts = geo, size = vec(size) })
 	m:Destroy()
 end
-assert(#report == 75, "Catalogue count")
+assert(#report == #catalog.List and #catalog.List == 105, "Catalogue count (75 de base + 30 exclusifs des mondes)")
 assert(builder.Build("UnknownPet") == nil, "Unknown id")
 for old, new in catalog.Renamed do
 	local m = assert(builder.Build(old))
@@ -302,7 +302,7 @@ fs.writeFile(output .. "/pet-geometry.json", serde.encode("json", meshes))
 fs.writeFile(output .. "/pet-check-report.json", serde.encode("json", report, true))
 fs.writeFile(output .. "/pet-motion-report.json", serde.encode("json", motionReport, true))
 fs.writeFile(output .. "/pet-motion-preview.json", serde.encode("json", previews))
-print("PASS: 75 animated rigs; 120 frames/pet, rigid groups, no drift, pause/rest, carrying + rotation + rescale.")
+print("PASS: " .. #report .. " animated rigs; 120 frames/pet, rigid groups, no drift, pause/rest, carrying + rotation + rescale.")
 print(
 	string.format(
 		"PASS: %d pets + renamed IDs; deterministic, centered, scaled, noncolliding. Max %d parts, %.1f particles/s.",

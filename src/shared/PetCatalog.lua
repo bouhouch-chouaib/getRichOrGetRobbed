@@ -1,5 +1,8 @@
 --!strict
--- PetCatalog : les 75 familiers du jeu (5 catégories x 15).
+-- PetCatalog : les 75 familiers de base (5 catégories x 15) + les familiers EXCLUSIFS des mondes (21 oct. : 5 par monde
+-- du Désert au Divin, champ World = Id de Config.Worlds). Un exclusif ne sort des tirages que si le joueur se trouve
+-- dans son monde (LootEngine, monde actuel) ; il est dans List / ByRarity (Index, revenu) mais PAS dans BaseByRarity
+-- (tirages ordinaires, rang de tirage, fusion, effondrement du trou noir). ByWorld[monde] = ses exclusifs.
 -- Id      : clé unique sans espace ni accent (utilisée dans les attributs et pour le modèle 3D).
 -- Rarity  : Id d'une rareté de Config.Rarities.
 -- Look    : description simplifiée pour le modèle de remplacement (PetModelBuilder).
@@ -32,6 +35,7 @@ export type Pet = {
 	Stage: number?, -- 2 = Évolué, 3 = Ultime (familier sorti de la machine d'évolution) ; nil = stade normal
 	Mutation: string?, -- "Gold" | "Diamond" | "Rainbow" (Config.Mutations) ; nil = sans mutation
 	BaseId: string?, -- l'espèce de départ d'un familier évolué ou muté
+	World: string?, -- familier exclusif de ce monde (Id de Config.Worlds) ; nil = familier de base
 }
 
 local rgb = Color3.fromRGB
@@ -45,6 +49,11 @@ local function pet(id: string, name: string, rarity: string, category: string, d
 end
 
 local A, M, P, H, B = "Animaux", "Fantastiques", "Plantes", "Hybrides", "Absurdes"
+
+-- Familier exclusif d'un monde (catégorie = le monde).
+local function worldPet(id: string, name: string, rarity: string, world: string, description: string, look: Look): Pet
+	return { Id = id, Name = name, Rarity = rarity, Category = "Monde", Description = description, Look = look, World = world }
+end
 
 local list: { Pet } = {
 	-- 🐾 Animaux
@@ -131,6 +140,44 @@ local list: { Pet } = {
 	pet("MachineQuantique", "Machine à Laver Quantique", "Divin", B, "Essore une galaxie à 3000 tours par seconde.", { Shape = "Object", Body = WHITE, Detail = rgb(90, 60, 200), Neon = true, Effect = "Bubbles", EffectColor = rgb(180, 140, 255) }),
 	pet("DragonAurore", "Dragon Aurore", "Divin", B, "Dragon fait d'aurores boréales qui changent de couleur.", { Shape = "Dragon", Body = rgb(60, 220, 160), Detail = rgb(150, 80, 255), Float = true, Effect = "Sparkles", EffectColor = rgb(120, 255, 200) }),
 	pet("BaleineGalaxie", "La Baleine Galaxie", "Sigma", B, "Baleine immense qui porte une galaxie entière dans son ventre.", { Shape = "Fish", Body = rgb(30, 40, 110), Detail = rgb(255, 120, 230), Float = true, Effect = "Aura", EffectColor = GOLD }),
+
+	-- 🌍 Exclusifs des mondes (21 oct.) : ne sortent des tirages que dans leur monde.
+	-- Désert
+	worldPet("FennecLunettes", "Fennec à Lunettes", "Inhabituel", "Desert", "Petit fennec aux grandes oreilles, lunettes de soleil vissées sur le nez.", { Shape = "Quadruped", Body = rgb(235, 195, 135), Detail = rgb(40, 40, 50) }),
+	worldPet("CactusCowboy", "Cactus Cowboy", "Rare", "Desert", "Cactus au chapeau de cowboy, toujours prêt pour un duel au soleil.", { Shape = "Plant", Body = rgb(90, 175, 70), Detail = rgb(170, 110, 60), Extra = "Hat", Effect = "Sparkles", EffectColor = rgb(255, 220, 120) }),
+	worldPet("ScorpionSablier", "Scorpion Sablier", "Epique", "Desert", "Sa queue est un sablier : quand le sable est tombé, il pique.", { Shape = "Dragon", Body = rgb(205, 145, 60), Detail = rgb(255, 215, 90), Effect = "Sparkles", EffectColor = rgb(255, 210, 120) }),
+	worldPet("LezardMomie", "Lézard Momie", "Legendaire", "Desert", "Lézard enroulé dans des bandelettes depuis 3000 ans, et toujours aussi pressé.", { Shape = "Dragon", Body = rgb(235, 225, 200), Detail = rgb(110, 200, 120), Effect = "Smoke" }),
+	worldPet("SphinxGrognon", "Sphinx Grognon", "Mythique", "Desert", "Il pose des devinettes, mais ne donne jamais la réponse.", { Shape = "Quadruped", Body = rgb(225, 180, 90), Detail = rgb(40, 90, 200), Extra = "Crown", Effect = "Aura", EffectColor = rgb(255, 205, 50) }),
+	-- Volcan
+	worldPet("SalamandreBraise", "Salamandre Braise", "Rare", "Volcan", "Salamandre brûlante qui fait griller tout ce qu'elle touche.", { Shape = "Dragon", Body = rgb(230, 70, 30), Detail = rgb(255, 190, 40), Effect = "Fire" }),
+	worldPet("TaupeMagma", "Taupe Magma", "Epique", "Volcan", "Creuse des tunnels dans la lave avec ses griffes incandescentes.", { Shape = "Blob", Body = rgb(90, 60, 55), Detail = rgb(255, 120, 30), Effect = "Fire" }),
+	worldPet("GolemCendre", "Golem de Cendre", "Legendaire", "Volcan", "Bloc de roche volcanique qui fume en permanence.", { Shape = "Humanoid", Body = rgb(70, 60, 60), Detail = rgb(255, 90, 20), Effect = "Smoke" }),
+	worldPet("DragonBarbecue", "Dragon Barbecue", "Mythique", "Volcan", "Dragon cuisinier : sa grille est toujours chaude.", { Shape = "Dragon", Body = rgb(180, 40, 30), Detail = rgb(255, 170, 40), Effect = "Fire" }),
+	worldPet("TitanLave", "Titan de Lave", "Divin", "Volcan", "Géant de magma dont chaque pas fait trembler le volcan.", { Shape = "Humanoid", Body = rgb(50, 30, 30), Detail = rgb(255, 100, 0), Neon = true, Effect = "Fire", EffectColor = rgb(255, 120, 20) }),
+	-- Glace
+	worldPet("PingouinPatineur", "Pingouin Patineur", "Rare", "Glace", "Champion de patinage artistique, triple axel sur la banquise.", { Shape = "Bird", Body = rgb(30, 40, 60), Detail = rgb(150, 220, 255), Effect = "Snow" }),
+	worldPet("MorseMoustachu", "Morse Moustachu", "Epique", "Glace", "Sa moustache givrée fait sa fierté. Ses défenses aussi.", { Shape = "Quadruped", Body = rgb(150, 110, 90), Detail = rgb(250, 250, 240), Effect = "Snow" }),
+	worldPet("YetiCalin", "Yéti Câlin", "Legendaire", "Glace", "Énorme, poilu, et il ne veut que des câlins.", { Shape = "Humanoid", Body = rgb(240, 250, 255), Detail = rgb(120, 190, 255), Effect = "Snow" }),
+	worldPet("MammouthGlacon", "Mammouth Glaçon", "Mythique", "Glace", "Mammouth resté coincé dans un glaçon pendant 10 000 ans.", { Shape = "Quadruped", Body = rgb(130, 90, 70), Detail = rgb(170, 230, 255), Effect = "Snow", EffectColor = rgb(200, 240, 255) }),
+	worldPet("NarvalAurore", "Narval Aurore", "Divin", "Glace", "Narval dont la corne projette des aurores boréales.", { Shape = "Fish", Body = rgb(200, 230, 255), Detail = rgb(120, 255, 200), Float = true, Effect = "Sparkles", EffectColor = rgb(120, 255, 200) }),
+	-- Abysses
+	worldPet("LanterneDisco", "Poisson-Lanterne Disco", "Epique", "Abysses", "Sa lanterne est une boule à facettes : la fête au fond de l'océan.", { Shape = "Fish", Body = rgb(40, 30, 80), Detail = rgb(255, 80, 220), Float = true, Neon = true, Effect = "Pulse", EffectColor = rgb(255, 80, 220) }),
+	worldPet("MeduseLampion", "Méduse Lampion", "Legendaire", "Abysses", "Méduse lumineuse qui flotte comme une lanterne de papier.", { Shape = "Blob", Body = rgb(255, 150, 220), Detail = rgb(255, 240, 120), Float = true, Effect = "Pulse", EffectColor = rgb(255, 200, 240) }),
+	worldPet("PieuvrePirate", "Pieuvre Pirate", "Mythique", "Abysses", "Huit bras, huit sabres, et un trésor caché quelque part.", { Shape = "Blob", Body = rgb(200, 60, 90), Detail = rgb(40, 40, 50), Effect = "Bubbles" }),
+	worldPet("CalmarColosse", "Calmar Colosse", "Divin", "Abysses", "Calmar géant qui a déjà avalé trois sous-marins.", { Shape = "Blob", Body = rgb(120, 30, 60), Detail = rgb(255, 200, 120), Float = true, Effect = "Bubbles", EffectColor = rgb(180, 230, 255) }),
+	worldPet("RoiCorail", "Le Roi Corail", "Sigma", "Abysses", "Crabe royal couronné de corail, maître des abysses.", { Shape = "Humanoid", Body = rgb(255, 110, 90), Detail = rgb(255, 215, 60), Extra = "Crown", Effect = "Aura", EffectColor = rgb(255, 205, 50) }),
+	-- Cosmos
+	worldPet("AstroHamster", "Astro-Hamster", "Epique", "Cosmos", "Premier hamster à avoir couru dans une roue en apesanteur.", { Shape = "Blob", Body = rgb(230, 170, 100), Detail = rgb(220, 230, 255), Effect = "Sparkles", EffectColor = rgb(200, 220, 255) }),
+	worldPet("ChatComete", "Chat Comète", "Legendaire", "Cosmos", "Chat bleu nuit qui file d'une planète à l'autre, queue en traînée d'étoiles.", { Shape = "Quadruped", Body = rgb(40, 50, 110), Detail = rgb(120, 220, 255), Effect = "Sparkles", EffectColor = rgb(150, 230, 255) }),
+	worldPet("AlienGelatine", "Alien Gélatine", "Mythique", "Cosmos", "Extraterrestre gluant et fluo qui imite tout ce qu'il voit.", { Shape = "Blob", Body = rgb(120, 255, 140), Detail = rgb(255, 255, 255), Neon = true, Effect = "Pulse", EffectColor = rgb(120, 255, 140) }),
+	worldPet("LionNebuleuse", "Lion Nébuleuse", "Divin", "Cosmos", "Sa crinière est une nébuleuse où naissent des étoiles.", { Shape = "Quadruped", Body = rgb(90, 40, 150), Detail = rgb(255, 120, 230), Effect = "Aura", EffectColor = rgb(255, 120, 230) }),
+	worldPet("TrouNoirPoche", "Trou Noir de Poche", "Sigma", "Cosmos", "Un petit trou noir apprivoisé. Ne le nourris pas après minuit.", { Shape = "Object", Body = rgb(20, 10, 30), Detail = rgb(170, 90, 255), Float = true, Neon = true, Effect = "Pulse", EffectColor = rgb(170, 90, 255) }),
+	-- Divin
+	worldPet("CherubinHamster", "Chérubin Hamster", "Legendaire", "Divin", "Hamster aux petites ailes dorées qui joue de la harpe.", { Shape = "Blob", Body = rgb(255, 240, 220), Detail = rgb(255, 215, 80), Float = true, Extra = "Wings", Effect = "Sparkles", EffectColor = rgb(255, 230, 120) }),
+	worldPet("LicorneCeleste", "Licorne Céleste", "Mythique", "Divin", "Licorne blanche qui galope sur les nuages.", { Shape = "Quadruped", Body = rgb(250, 245, 255), Detail = rgb(255, 200, 90), Extra = "Horn", Effect = "Sparkles", EffectColor = rgb(255, 230, 150) }),
+	worldPet("GriffonDore", "Griffon Doré", "Divin", "Divin", "Gardien du paradis aux plumes d'or pur.", { Shape = "Bird", Body = rgb(255, 205, 60), Detail = rgb(255, 250, 230), Extra = "Wings", Effect = "Aura", EffectColor = rgb(255, 220, 100) }),
+	worldPet("TitanAureole", "Titan Auréole", "Sigma", "Divin", "Colosse de lumière, une auréole au-dessus de la tête.", { Shape = "Humanoid", Body = rgb(255, 250, 235), Detail = rgb(255, 205, 50), Neon = true, Effect = "Aura", EffectColor = rgb(255, 220, 90) }),
+	worldPet("GardienTrouNoir", "Gardien du Trou Noir", "Sigma", "Divin", "Le dragon qui veille sur le trou noir depuis le début des temps.", { Shape = "Dragon", Body = rgb(30, 20, 50), Detail = rgb(255, 200, 60), Float = true, Effect = "Aura", EffectColor = rgb(255, 200, 60) }),
 }
 
 local Config = require(script.Parent.Config)
@@ -164,17 +211,39 @@ PetCatalog.Renamed = {
 function PetCatalog.CurrentId(petId: string): string
 	return PetCatalog.Renamed[petId] or petId
 end
-PetCatalog.ByRarity = {} :: { [string]: { Pet } }
+PetCatalog.ByRarity = {} :: { [string]: { Pet } } -- tous (Index, revenu)
+PetCatalog.BaseByRarity = {} :: { [string]: { Pet } } -- sans les exclusifs des mondes (tirages ordinaires, fusion)
+PetCatalog.ByWorld = {} :: { [string]: { Pet } } -- exclusifs de chaque monde
 
+local function add(map: { [string]: { Pet } }, key: string, entry: Pet)
+	local bucket = map[key]
+	if not bucket then
+		bucket = {}
+		map[key] = bucket
+	end
+	table.insert(bucket, entry)
+end
 for _, entry in ipairs(list) do
 	assert(PetCatalog.ById[entry.Id] == nil, "Id de familier en double : " .. entry.Id)
 	PetCatalog.ById[entry.Id] = entry
-	local bucket = PetCatalog.ByRarity[entry.Rarity]
-	if not bucket then
-		bucket = {}
-		PetCatalog.ByRarity[entry.Rarity] = bucket
+	add(PetCatalog.ByRarity, entry.Rarity, entry)
+	if entry.World then
+		add(PetCatalog.ByWorld, entry.World, entry)
+	else
+		add(PetCatalog.BaseByRarity, entry.Rarity, entry)
 	end
-	table.insert(bucket, entry)
+end
+
+-- Familiers qui peuvent sortir d'un tirage de cette rareté dans ce monde (Id de Config.Worlds, nil = aucun monde) :
+-- ceux de base + les exclusifs du monde.
+function PetCatalog.Pool(rarityId: string, worldId: string?): { Pet }
+	local pool = table.clone(PetCatalog.BaseByRarity[rarityId] or {})
+	for _, entry in ipairs(if worldId then PetCatalog.ByWorld[worldId] or {} else {}) do
+		if entry.Rarity == rarityId then
+			table.insert(pool, entry)
+		end
+	end
+	return pool
 end
 
 -- Formes d'une espèce : évoluées (machine d'évolution, Config.Evolution : « <Id>__E2 » Évolué, « <Id>__E3 » Ultime) et/ou
@@ -212,6 +281,7 @@ for _, entry in ipairs(list) do
 				Stage = if stage > 1 then stage else nil,
 				Mutation = if mutation then mutation.Id else nil,
 				BaseId = entry.Id,
+				World = entry.World,
 			}
 			PetCatalog.ById[variant.Id] = variant
 			table.insert(PetCatalog.Everything, variant)

@@ -290,7 +290,7 @@ function BlackholeTiers.AfterRewards()
 	local winners: { string } = {}
 	for index, rarity in ipairs(HOLE.Collapse.Rewards) do
 		local entry = ranking[index]
-		local pool = PetCatalog.ByRarity[rarity]
+		local pool = PetCatalog.BaseByRarity[rarity]
 		if entry and pool and #pool > 0 then
 			local pet = pool[rng:NextInteger(1, #pool)]
 			SessionData.AddEggs(entry.player, { [pet.Id] = 1 })

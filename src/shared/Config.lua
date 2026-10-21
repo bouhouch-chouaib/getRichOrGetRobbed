@@ -466,6 +466,12 @@ Config.Worlds = {
 } :: { WorldDef }
 
 -- Monde (1 à #Config.Worlds) d'un palier quelconque, borné.
+-- Index d'un monde à partir de son Id (Config.WorldIndex["Desert"] = 2).
+Config.WorldIndex = {} :: { [string]: number }
+for index, world in ipairs(Config.Worlds) do
+	Config.WorldIndex[world.Id] = index
+end
+
 function Config.GetWorld(tier: number): WorldDef
 	return Config.Worlds[math.clamp(math.floor(tier), 1, #Config.Worlds)]
 end
@@ -951,8 +957,8 @@ Config.Friends = {
 -- (ceux qui rapportent, Config.Pets.IncomeSlots), jusqu'à MaxExtraPets.
 Config.Rebirth = {
 	RequiredTier = 7, -- monde à avoir atteint (7 = Divin, le dernier)
-	BasePrice = 2.5e12, -- prix du 1er Rebirth ($2.5T) : vers 9 h de jeu (tools/sim-economy.luau)
-	PriceGrowth = 2.1, -- chaque Rebirth coûte 2,1 fois le précédent : ~5 h de plus à chaque fois
+	BasePrice = 4e12, -- prix du 1er Rebirth ($4T) : vers 9 h de jeu (tools/sim-economy.luau)
+	PriceGrowth = 2.7, -- chaque Rebirth coûte 2,7 fois le précédent : ~5 h de plus à chaque fois
 	IncomeBonus = 1, -- +100 % de revenu par Rebirth : x2, x3, x4...
 	ExtraPets = 1, -- +1 familier qui rapporte dans la base par Rebirth
 	MaxExtraPets = 5,

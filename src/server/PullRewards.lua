@@ -58,7 +58,9 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 	local floorIndex = LootEngine.floor(SessionData.GetTotalPulls(player), discovered)
 	local rankIndex = LootEngine.rank(SessionData.GetTotalPulls(player))
 	-- Monde le plus loin atteint : meilleures raretés (Config.Worlds[].RarityBoost).
-	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), luck, owned, floorIndex, SessionData.GetTier(player))
+	-- Exclusifs du monde où se trouve le joueur (PetCatalog.ByWorld).
+	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), luck, owned, floorIndex, SessionData.GetTier(player),
+		Config.GetWorld(SessionData.GetWorld(player)).Id)
 
 	local kept: { [string]: number } = {}
 	local shownKept: { [string]: number } = {} -- ce que voit le client : l'espèce seulement (mutation secrète)

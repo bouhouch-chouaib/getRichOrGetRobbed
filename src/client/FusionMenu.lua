@@ -450,7 +450,8 @@ function FusionMenu.create(gui: Instance): Fusion
 			-- Rareté la plus basse qui a assez de familiers libres.
 			for index = 1, Config.Fusion.MaxFromRarity do
 				local total = 0
-				for _, entry in ipairs(PetCatalog.ByRarity[Config.Rarities[index].Id] or {}) do
+				-- Familiers de base seulement : le remplissage automatique ne prend jamais un exclusif de monde.
+				for _, entry in ipairs(PetCatalog.BaseByRarity[Config.Rarities[index].Id] or {}) do
 					total += MenuKit.spare(entry.Id)
 				end
 				if total >= COUNT then
@@ -464,7 +465,7 @@ function FusionMenu.create(gui: Instance): Fusion
 			Sounds.play("Error")
 			return
 		end
-		local bucket = PetCatalog.ByRarity[Config.Rarities[lock].Id] or {}
+		local bucket = PetCatalog.BaseByRarity[Config.Rarities[lock].Id] or {}
 		while filledCount() < COUNT do
 			local best: string? = nil
 			local bestLeft = 0

@@ -21,7 +21,7 @@ local rng = Random.new()
 
 -- Choisit quels familiers consommer : à chaque fois celui qui a le plus d'exemplaires libres (doublons d'abord).
 local function pickIngredients(player: Player, rarityId: string): { [string]: number }?
-	local bucket = PetCatalog.ByRarity[rarityId]
+	local bucket = PetCatalog.BaseByRarity[rarityId]
 	if not bucket then
 		return nil
 	end
@@ -126,7 +126,7 @@ local function onFuse(player: Player, rarityIndex: unknown, chosen: unknown)
 	if not ingredients then
 		return
 	end
-	local nextBucket = PetCatalog.ByRarity[Config.Rarities[rarityIndex + 1].Id]
+	local nextBucket = PetCatalog.BaseByRarity[Config.Rarities[rarityIndex + 1].Id]
 	if not nextBucket or #nextBucket == 0 then
 		return
 	end

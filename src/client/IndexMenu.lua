@@ -306,7 +306,10 @@ function IndexMenu.create(gui: Instance): Index
 			detailViewport = viewport
 		end
 		detailName.Text = if known then entry.Name else "???"
-		detailRarity.Text = rarity.Name
+		-- Exclusif d'un monde : il ne sort des tirages que dans ce monde.
+		detailRarity.Text = if entry.World
+			then rarity.Name .. "  •  EXCLUSIF " .. TextFormat.upper(Config.Worlds[Config.WorldIndex[entry.World] or 1].Name)
+			else rarity.Name
 		detailRarity.TextColor3 = UiStyle.lighter(rarity.Color, 0.4)
 		detailIncome.Text = if known then NumberFormat.perSecond(PetCatalog.GetIncome(petId)) else "???"
 		local stats = PetStats.Of(petId)
@@ -547,6 +550,16 @@ function IndexMenu.create(gui: Instance): Index
 			name.Size = UDim2.new(1, -16, 0, 32)
 			name.TextWrapped = true
 			name.ZIndex = 4
+			if entry.World then
+				-- Pastille du monde : ce familier ne sort des tirages que là-bas.
+				local world = UiStyle.text(button, TextFormat.upper(Config.Worlds[Config.WorldIndex[entry.World] or 1].Name), 12,
+					Color3.fromRGB(255, 225, 120), UiStyle.BODY_FONT)
+				world.Name = "World"
+				world.Position = UDim2.fromOffset(6, 36)
+				world.Size = UDim2.new(1, -12, 0, 14)
+				world.TextScaled = true
+				world.ZIndex = 4
+			end
 			local count = UiStyle.text(button, "", 16, WHITE)
 			count.Name = "Count"
 			count.AnchorPoint = Vector2.new(1, 1)

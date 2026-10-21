@@ -66,7 +66,7 @@ function LootEngine.floor(totalPulls: number, discovered: { [string]: boolean })
 	local target = Config.Loot.Ranks[LootEngine.rank(totalPulls)].Floor
 	local floorIndex = 1
 	while floorIndex < target do
-		for _, entry in ipairs(PetCatalog.ByRarity[Config.Rarities[floorIndex].Id] or {}) do
+		for _, entry in ipairs(PetCatalog.BaseByRarity[Config.Rarities[floorIndex].Id] or {}) do
 			if not discovered[entry.Id] then
 				return floorIndex
 			end
@@ -138,11 +138,12 @@ end
 
 export type Owned = { [string]: number } -- petId -> quantité possédée (sauvegarde du joueur)
 
--- owned : familiers déjà possédés (y compris ceux tirés juste avant dans la même série).
-local function pickPet(rarityIndex: number, owned: Owned): string
+-- owned : familiers déjà possédés (y compris ceux tirés juste avant dans la même série). worldId : monde où se trouve le
+-- joueur (ses exclusifs peuvent sortir, PetCatalog.Pool).
+local function pickPet(rarityIndex: number, owned: Owned, worldId: string?): string
 	-- Si une rareté n'a aucun familier, on descend jusqu'à en trouver un.
 	for index = rarityIndex, 1, -1 do
-		local bucket = PetCatalog.ByRarity[Config.Rarities[index].Id]
+		local bucket = PetCatalog.Pool(Config.Rarities[index].Id, worldId)
 		if bucket and #bucket > 0 then
 			local total = 0
 			for _, entry in ipairs(bucket) do
@@ -177,8 +178,8 @@ end
 
 -- Effectue `pulls` tirages avec cette chance (tirages achetés, ou ceux d'une manche).
 -- owned : familiers du joueur (non modifié : une copie suit les tirages de la série). floorIndex : rareté plancher.
--- tier : monde le plus loin atteint (bonus de rareté).
-function LootEngine.rollPulls(pulls: number, pity: number, luck: number, owned: Owned?, floorIndex: number?, tier: number?): Outcome
+-- tier : monde le plus loin atteint (bonus de rareté). worldId : monde où se trouve le joueur (ses exclusifs).
+function LootEngine.rollPulls(pulls: number, pity: number, luck: number, owned: Owned?, floorIndex: number?, tier: number?, worldId: string?): Outcome
 	local outcome: Outcome = { results = {}, pulls = 0, pity = pity, drops = {} }
 	local have: Owned = table.clone(owned or {})
 	for _ = 1, pulls do
@@ -188,7 +189,7 @@ function LootEngine.rollPulls(pulls: number, pity: number, luck: number, owned: 
 		if rarityIndex >= Config.Loot.PityMinRarity then
 			outcome.pity = 0
 		end
-		local petId = pickPet(rarityIndex, have)
+		local petId = pickPet(rarityIndex, have, worldId)
 		have[petId] = (have[petId] or 0) + 1
 		outcome.results[petId] = (outcome.results[petId] or 0) + 1
 		table.insert(outcome.drops, petId)

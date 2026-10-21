@@ -826,6 +826,12 @@ function SessionData.AddReceipt(player: Player, purchaseId: string)
 end
 
 -- Monde atteint (Config.Worlds).
+-- Monde où se trouve le joueur (il peut retourner dans un monde déjà débloqué) : ses familiers exclusifs peuvent sortir.
+function SessionData.GetWorld(player: Player): number
+	local data = storage[player]
+	return if data then data.world else 1
+end
+
 function SessionData.GetTier(player: Player): number
 	local data = storage[player]
 	return if data then data.tier else 1

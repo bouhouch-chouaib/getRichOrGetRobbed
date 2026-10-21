@@ -133,6 +133,38 @@ PetSizes.Heights = {
 	CanardTractopelle = 2.5,
 	FougereFibonacci = 2.7,
 	BaleineGalaxie = 2.9, -- le plus grand familier du jeu
+
+	-- Exclusifs des mondes (21 oct.), chacun dans la tranche de sa rareté
+	FennecLunettes = 0.72, -- Inhabituel (Désert)
+	CactusCowboy = 0.88, -- Rare (Désert)
+	ScorpionSablier = 1.0, -- Epique (Désert)
+	LezardMomie = 1.25, -- Legendaire (Désert)
+	SphinxGrognon = 1.55, -- Mythique (Désert)
+	SalamandreBraise = 0.86, -- Rare (Volcan)
+	TaupeMagma = 1.0, -- Epique (Volcan)
+	GolemCendre = 1.3, -- Legendaire (Volcan)
+	DragonBarbecue = 1.6, -- Mythique (Volcan)
+	TitanLave = 2.05, -- Divin (Volcan)
+	PingouinPatineur = 0.82, -- Rare (Glace)
+	MorseMoustachu = 1.05, -- Epique (Glace)
+	YetiCalin = 1.35, -- Legendaire (Glace)
+	MammouthGlacon = 1.65, -- Mythique (Glace)
+	NarvalAurore = 1.9, -- Divin (Glace)
+	LanterneDisco = 1.0, -- Epique (Abysses)
+	MeduseLampion = 1.2, -- Legendaire (Abysses)
+	PieuvrePirate = 1.5, -- Mythique (Abysses)
+	CalmarColosse = 2.1, -- Divin (Abysses)
+	RoiCorail = 2.4, -- Sigma (Abysses)
+	AstroHamster = 0.98, -- Epique (Cosmos)
+	ChatComete = 1.2, -- Legendaire (Cosmos)
+	AlienGelatine = 1.45, -- Mythique (Cosmos)
+	LionNebuleuse = 2.0, -- Divin (Cosmos)
+	TrouNoirPoche = 2.35, -- Sigma (Cosmos)
+	CherubinHamster = 1.3, -- Legendaire (Divin)
+	LicorneCeleste = 1.68, -- Mythique (Divin)
+	GriffonDore = 2.1, -- Divin (Divin)
+	TitanAureole = 2.6, -- Sigma (Divin)
+	GardienTrouNoir = 2.85, -- Sigma (Divin)
 } :: { [string]: number }
 
 -- Taille d'un familier en J (milieu de la tranche de sa rareté s'il n'est pas dans la table). Un familier évolué
