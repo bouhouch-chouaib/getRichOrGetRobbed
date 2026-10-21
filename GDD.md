@@ -416,6 +416,21 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   autres gardent les leurs (néon, verre réglés dans le modèle). `server/StationLooks` garde le cercle, l'écran, les voyants
   et l'étoile (hauteur : attribut `StarY` du modèle) ; plus de portique / cristaux / halo en blocs quand le modèle existe.
 
+## Familiers exclusifs des mondes (21 oct.)
+
+- 30 familiers en plus des 75 de base : **5 par monde** du Désert au Divin (`PetCatalog`, champ `World` ; liste dans
+  `PetCatalog.ByWorld`). Raretés de plus en plus hautes d'un monde à l'autre (Désert : Inhabituel à Mythique ; Divin :
+  Légendaire à 2 Sigma).
+- Ils ne sortent des tirages (trou noir, duels, tirages Robux) **que si le joueur se trouve dans leur monde** (monde actuel,
+  `SessionData.GetWorld`, `LootEngine` paramètre worldId, `PetCatalog.Pool`) : de quoi revenir dans les mondes déjà débloqués.
+  Les chances de chaque rareté ne changent pas ; dans sa rareté, un exclusif a le même poids qu'un familier de base
+  (x5 s'il n'est pas encore découvert).
+- Ils sont dans l'Index (pastille du monde sur la case, « EXCLUSIF DÉSERT » sur la fiche) et rapportent un peu plus que
+  les familiers de base de leur rareté (placés en fin de catalogue). Ils ne comptent pas dans le rang de tirage ; la
+  fusion, son remplissage automatique et l'effondrement du trou noir n'utilisent que les familiers de base.
+- Modèles : silhouettes sculptées existantes (`PetSculptedModels.Families`) aux couleurs et effets de leur monde, tailles
+  dans `PetSizes`. À remplacer par des modèles Blender plus tard. Test : `lune run tools/check-world-pets.luau .`.
+
 ## Marché entre joueurs (19 oct., `server/MarketController`, `client/MarketMenu`, `Config.Market`)
 
 - Tuile « Marché » du HUD. Onglets : **Acheter** (ventes des autres joueurs du serveur : aperçu, rareté, revenu, vendeur,

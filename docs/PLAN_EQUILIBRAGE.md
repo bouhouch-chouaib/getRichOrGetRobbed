@@ -94,6 +94,9 @@ Ce qui a changé dans `Config.lua` :
 - **Fusion** : prix ramenés aux nouveaux revenus (250 / 8K / 190K / 3,5M / 60M / 1,5B).
 - **Boutique** : tapis et banc x2,44 par niveau (niveau 25 vers 17 h), Chance x7,7, sac à dos x150.
 
+**21 oct. : 30 familiers exclusifs des mondes** : plus d'espèces, donc un revenu plus haut en fin de partie ; Rebirth
+réajusté à 4T puis x2,7 (simulation : Divin 6,2 h, Rebirth 1 8,7 h, Rebirth 2 13,1 h, Rebirth 3 18,9 h).
+
 Limite connue : la base prend un familier par espèce d'abord. Une fois les 5 Sigma et les 9 Divins obtenus, le revenu
 ne monte plus que par les mondes, les Rebirths, la capsule d'évolution et les mutations (non simulées).
 
