@@ -111,6 +111,12 @@ dans Blender, exporte en .fbx (`assets/models/`, source `assets/models/source_mo
 niveaux 1-5, pièces Main / Dark recolorées par niveau, Metal) et `ChienSaucisse` (familier, pièces Leg / Ear animées par
 `PetMotion`). Vérifié en jeu (solo) : tapis en place avec écran et voyants, chien dans la base, qui marche tête en avant, pattes qui bougent.
 
+**22 oct. : modèles Blender en jeu** (`ReplicatedStorage.ArtModels`, dans le fichier du jeu) : les 5 tapis (Bois, Acier, Or,
+Cristal, Cosmique : couleurs, Foil / Marble / Fabric / Glass / Neon, attribut `StarY`), Renard Furtif et Tigre du Bengal
+(tenons par SurfaceAppearance en AlphaMode Overlay : un TextureID cachait la couleur, le tigre était noir). Doublons d'import
+rangés dans `ServerStorage.ArtImportsDoublons`. Vérifié en jeu (solo) : les 4 nouveaux tapis aux niveaux 8, 13, 18 et 25
+(étoile), renard et tigre dans la base.
+
 **21 oct. : 30 familiers exclusifs des mondes** (5 par monde, GDD « Familiers exclusifs des mondes ») : ne sortent que dans
 leur monde (monde actuel du joueur), pastille du monde dans l'Index ; Rebirth réajusté (4T puis x2,7) pour garder ~9 h.
 Analyse + 10 tests OK (dont `check-world-pets`) ; pas encore vu dans Studio.
