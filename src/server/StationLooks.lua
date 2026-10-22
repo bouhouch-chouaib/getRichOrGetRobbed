@@ -9,7 +9,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Modèles faits à la main (Blender -> Importer 3D de Studio, 19 oct.) : ReplicatedStorage.ArtModels.<Station>_<Niveau>
--- (ex. Treadmill_Bois). Leur pivot est le sol, au centre, -Z vers la console. Les MeshParts nommées "Main" / "Dark" prennent
+-- (ex. Treadmill_Bois, Bench_Or). Leur pivot est le sol, au centre, -Z vers la console. Les MeshParts nommées "Main" / "Dark" prennent
 -- les couleurs du modèle de niveau (Config.Training.StationTiers) ; les autres gardent la leur. Sans modèle, la station
 -- est construite en blocs comme avant. L'écran, les voyants et l'étoile restent ajoutés par le code (attribut "StarY" du
 -- modèle : hauteur de l'étoile) ; les décors en blocs des niveaux (portique, cristaux, halo) ne le sont plus : le modèle a
@@ -220,38 +220,46 @@ local function dumbbell(origin: CFrame, tier: Tier, parent: Instance)
 	end
 end
 
-local function bench(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Model)
+-- Modèle fait à la main (ReplicatedStorage.ArtModels.Bench_<Niveau>, 22 oct.) : il remplace le banc en blocs (banc,
+-- pieds, montants, panneau, haltères, porte-disques, décors). Le jeu garde la barre et les disques (animés pendant le
+-- développé couché), le cercle, les voyants et l'étoile. Renvoie le modèle s'il existe.
+local function bench(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Model): Model?
 	groundCircle(origin, 22, tier.Accent, look)
-	for _, side in ipairs({ -1, 1 }) do
-		block("RackFoot", Vector3.new(1.6, 0.6, 3.4), origin * CFrame.new(side * 2.2, 0.3, -3.2), tier.Dark, look)
-		block("Hook", Vector3.new(1, 0.4, 1), origin * CFrame.new(side * 2.2, 4.6, -3.6), tier.Dark, look)
-	end
-	-- Petit tableau de voyants au pied du banc.
-	block("Panel", Vector3.new(7.2, 1.6, 0.8), origin * CFrame.new(0, 0.8, 7.2), tier.Main, look)
-	lamps(origin * CFrame.new(0, 1.85, 7.2), 1.3, rank, tier, look)
-	-- Haltères posées au sol et porte-disques.
-	dumbbell(origin * CFrame.new(-5, 0, 4.5), tier, look)
-	dumbbell(origin * CFrame.new(-5, 0, 6.2), tier, look)
-	block("PlateTree", Vector3.new(0.8, 4, 0.8), origin * CFrame.new(5, 2, 4.5), tier.Dark, look)
-	block("PlateTreeFoot", Vector3.new(2.4, 0.4, 2.4), origin * CFrame.new(5, 0.2, 4.5), tier.Dark, look)
-	for index, y in ipairs({ 1.4, 2.6 }) do
-		local plate = block("SparePlate", Vector3.new(0.5, 2.2 - index * 0.3, 2.2 - index * 0.3), origin * CFrame.new(5.5, y, 4.5), tier.Main, look)
-		plate.Shape = Enum.PartType.Cylinder
-	end
-	if tierIndex >= 3 then
-		arch(origin * CFrame.new(0, 0, -6.2), 10, 8, tier, look)
-	end
-	if tierIndex == 4 then
-		for _, corner in ipairs({ Vector2.new(-6.5, -6.5), Vector2.new(6.5, -6.5), Vector2.new(-6.5, 6.5), Vector2.new(6.5, 6.5) }) do
-			crystal(origin * CFrame.new(corner.X, 0, corner.Y), 4, tier.Accent, look)
+	local authored = authoredStation("Bench_" .. tier.Name, origin, tier, look)
+	if not authored then
+		for _, side in ipairs({ -1, 1 }) do
+			block("RackFoot", Vector3.new(1.6, 0.6, 3.4), origin * CFrame.new(side * 2.2, 0.3, -3.2), tier.Dark, look)
+			block("Hook", Vector3.new(1, 0.4, 1), origin * CFrame.new(side * 2.2, 4.6, -3.6), tier.Dark, look)
+		end
+		-- Petit tableau de voyants au pied du banc.
+		block("Panel", Vector3.new(7.2, 1.6, 0.8), origin * CFrame.new(0, 0.8, 7.2), tier.Main, look)
+		-- Haltères posées au sol et porte-disques.
+		dumbbell(origin * CFrame.new(-5, 0, 4.5), tier, look)
+		dumbbell(origin * CFrame.new(-5, 0, 6.2), tier, look)
+		block("PlateTree", Vector3.new(0.8, 4, 0.8), origin * CFrame.new(5, 2, 4.5), tier.Dark, look)
+		block("PlateTreeFoot", Vector3.new(2.4, 0.4, 2.4), origin * CFrame.new(5, 0.2, 4.5), tier.Dark, look)
+		for index, y in ipairs({ 1.4, 2.6 }) do
+			local plate = block("SparePlate", Vector3.new(0.5, 2.2 - index * 0.3, 2.2 - index * 0.3), origin * CFrame.new(5.5, y, 4.5), tier.Main, look)
+			plate.Shape = Enum.PartType.Cylinder
+		end
+		if tierIndex >= 3 then
+			arch(origin * CFrame.new(0, 0, -6.2), 10, 8, tier, look)
+		end
+		if tierIndex == 4 then
+			for _, corner in ipairs({ Vector2.new(-6.5, -6.5), Vector2.new(6.5, -6.5), Vector2.new(-6.5, 6.5), Vector2.new(6.5, 6.5) }) do
+				crystal(origin * CFrame.new(corner.X, 0, corner.Y), 4, tier.Accent, look)
+			end
+		end
+		if tierIndex == 5 then
+			halo(origin * CFrame.new(0, 9.4, -6.2), 4.6, tier.Accent, look)
 		end
 	end
-	if tierIndex == 5 then
-		halo(origin * CFrame.new(0, 9.4, -6.2), 4.6, tier.Accent, look)
-	end
+	lamps(origin * CFrame.new(0, 1.85, 7.2), 1.3, rank, tier, look)
 	if rank == Config.Training.LevelsPerTier then
-		star(origin * CFrame.new(0, 3.2, 7.2), look)
+		local starY = if authored then authored:GetAttribute("StarY") else nil
+		star(origin * CFrame.new(0, if type(starY) == "number" then starY else 3.2, 7.2), look)
 	end
+	return authored
 end
 
 ----------------------------------------------------------------------
@@ -336,8 +344,15 @@ function StationLooks.Apply(model: Model, kind: string, level: number)
 		look.WorldPivot = origin
 		look:ScaleTo(Config.Training.TreadmillScale)
 		beltArrows(zone, tier)
-	else
-		bench(origin, tier, rank, tierIndex, look)
+	elseif bench(origin, tier, rank, tierIndex, look) then
+		-- Le modèle a son propre banc et ses montants : ceux en blocs de MapGenerator sont cachés (la barre et les
+		-- disques restent, ils bougent pendant le développé couché).
+		for _, part in ipairs(model:GetChildren()) do
+			if part:IsA("BasePart") and (part.Name == "Seat" or part.Name == "Leg" or part.Name == "Upright") then
+				part.Transparency = 1
+				part.CastShadow = false
+			end
+		end
 	end
 	recolor(model, tier, tierIndex)
 	if tier.Glow then
