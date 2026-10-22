@@ -114,7 +114,9 @@ niveaux 1-5, pièces Main / Dark recolorées par niveau, Metal) et `ChienSauciss
 **22 oct. : modèles Blender en jeu** (`ReplicatedStorage.ArtModels`, dans le fichier du jeu) : les 5 tapis (Bois, Acier, Or,
 Cristal, Cosmique : couleurs, Foil / Marble / Fabric / Glass / Neon, attribut `StarY`), Renard Furtif et Tigre du Bengal
 (tenons par SurfaceAppearance en AlphaMode Overlay : un TextureID cachait la couleur, le tigre était noir). Doublons d'import
-rangés dans `ServerStorage.ArtImportsDoublons`. Vérifié en jeu (solo) : les 4 nouveaux tapis aux niveaux 8, 13, 18 et 25
+rangés dans `ServerStorage.ArtImportsDoublons`. Puis les 5 bancs (`Bench_<Niveau>`, source `assets/models/source_bancs.blend`) : le jeu cache
+le banc en blocs (Seat / Leg / Upright) et garde barre, disques, voyants, étoile ; vérifiés en jeu aux niveaux 3, 8, 13, 18, 25
++ développé couché (la Force monte). Vérifié en jeu (solo) : les 4 nouveaux tapis aux niveaux 8, 13, 18 et 25
 (étoile), renard et tigre dans la base.
 
 **21 oct. : 30 familiers exclusifs des mondes** (5 par monde, GDD « Familiers exclusifs des mondes ») : ne sortent que dans
