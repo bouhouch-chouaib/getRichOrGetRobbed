@@ -18,3 +18,5 @@ sourcemap.json
 
 # Aperçu Studio local du pipeline 3D (se refait avec blender_tools/export_studio_mesh.py)
 /dataset_and_pipeline/studio_import/
+# Textures extraites par l'importateur 3D de Studio à côté des .fbx
+*.fbm/
