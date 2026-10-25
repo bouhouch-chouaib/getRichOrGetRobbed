@@ -1,0 +1,165 @@
+{
+  "assets": {
+    "PiedestalStylise": {
+      "asset": "PiedestalStylise",
+      "triangles": 4960,
+      "vertices": 2508,
+      "size_studs": [
+        5.543,
+        5.543,
+        2.36
+      ],
+      "pivot": "sol, au centre",
+      "resolution": 1024,
+      "uv_overlap_pct": 0.0,
+      "source_materials": [
+        "M_PedestalStylise_Cristal",
+        "M_PedestalStylise_Or",
+        "M_PedestalStylise_Pierre",
+        "M_PedestalStylise_Plateau"
+      ],
+      "presets": [
+        "create_etched_metal_or_gold",
+        "create_stylized_crystal_or_gem",
+        "create_stylized_edge_wear_material"
+      ],
+      "bake": {
+        "backend": "CUDA",
+        "samples": 32,
+        "ao_samples": 64,
+        "cage": 0.0831,
+        "max_ray": 0.2079,
+        "ao_distance": 0.4435,
+        "ao_strength": 0.55,
+        "from_high": true
+      },
+      "maps": {
+        "Color": "PiedestalStylise_Color.png",
+        "Roughness": "PiedestalStylise_Roughness.png",
+        "Metalness": "PiedestalStylise_Metalness.png",
+        "Normal": "PiedestalStylise_Normal.png",
+        "AO": "PiedestalStylise_AO.png",
+        "Emissive": "PiedestalStylise_Emissive.png"
+      },
+      "exports": [
+        "PiedestalStylise.fbx",
+        "PiedestalStylise.glb"
+      ],
+      "roblox": {
+        "MeshPart": "PiedestalStylise (Fichier > Importer 3D, ou le .fbx)",
+        "SurfaceAppearance": {
+          "ColorMap": "PiedestalStylise_Color.png",
+          "NormalMap": "PiedestalStylise_Normal.png",
+          "RoughnessMap": "PiedestalStylise_Roughness.png",
+          "MetalnessMap": "PiedestalStylise_Metalness.png",
+          "EmissiveMaskContent": "PiedestalStylise_Emissive.png",
+          "EmissiveTint": "#FFFFFF",
+          "EmissiveStrength": 0.6,
+          "coverage_pct": 2.76,
+          "AlphaMode": "Overlay"
+        },
+        "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+      },
+      "within_budget": true,
+      "seconds": 16.7
+    },
+    "OeufMythique": {
+      "asset": "OeufMythique",
+      "triangles": 6440,
+      "vertices": 3254,
+      "size_studs": [
+        3.262,
+        3.024,
+        4.332
+      ],
+      "pivot": "sol, au centre",
+      "resolution": 1024,
+      "uv_overlap_pct": 0.0,
+      "source_materials": [
+        "M_OeufMythique_Eclats",
+        "M_OeufMythique_Gemme",
+        "M_OeufMythique_Or"
+      ],
+      "presets": [
+        "create_etched_metal_or_gold",
+        "create_stylized_crystal_or_gem"
+      ],
+      "bake": {
+        "backend": "CUDA",
+        "samples": 32,
+        "ao_samples": 64,
+        "cage": 0.065,
+        "max_ray": 0.1625,
+        "ao_distance": 0.3466,
+        "ao_strength": 0.55,
+        "from_high": true
+      },
+      "maps": {
+        "Color": "OeufMythique_Color.png",
+        "Roughness": "OeufMythique_Roughness.png",
+        "Metalness": "OeufMythique_Metalness.png",
+        "Normal": "OeufMythique_Normal.png",
+        "AO": "OeufMythique_AO.png",
+        "Emissive": "OeufMythique_Emissive.png"
+      },
+      "exports": [
+        "OeufMythique.fbx",
+        "OeufMythique.glb"
+      ],
+      "roblox": {
+        "MeshPart": "OeufMythique (Fichier > Importer 3D, ou le .fbx)",
+        "SurfaceAppearance": {
+          "ColorMap": "OeufMythique_Color.png",
+          "NormalMap": "OeufMythique_Normal.png",
+          "RoughnessMap": "OeufMythique_Roughness.png",
+          "MetalnessMap": "OeufMythique_Metalness.png",
+          "EmissiveMaskContent": "OeufMythique_Emissive.png",
+          "EmissiveTint": "#FFFFFF",
+          "EmissiveStrength": 0.9,
+          "coverage_pct": 9.56,
+          "AlphaMode": "Overlay"
+        },
+        "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+      },
+      "within_budget": true,
+      "seconds": 17.7
+    }
+  },
+  "qa": {
+    "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\preview.png",
+    "rows": [
+      {
+        "label": "Piédestal procédural",
+        "triangles": 38544,
+        "flags": []
+      },
+      {
+        "label": "Piédestal cuit",
+        "triangles": 4960,
+        "flags": []
+      },
+      {
+        "label": "Œuf Mythique procédural",
+        "triangles": 181836,
+        "flags": []
+      },
+      {
+        "label": "Œuf Mythique cuit",
+        "triangles": 6440,
+        "flags": []
+      }
+    ]
+  },
+  "swatch_bake": {
+    "triangles": 11904,
+    "uv_overlap_pct": 0.0,
+    "maps": {
+      "Color": "TestPeauOrganique_Color.png",
+      "Roughness": "TestPeauOrganique_Roughness.png",
+      "Metalness": "TestPeauOrganique_Metalness.png",
+      "Normal": "TestPeauOrganique_Normal.png",
+      "AO": "TestPeauOrganique_AO.png"
+    }
+  },
+  "seconds": 142.3
+}

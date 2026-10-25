@@ -1,0 +1,185 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\preview.png",
+  "layout": {
+    "rows": [
+      "Piédestal procédural",
+      "Piédestal cuit",
+      "Œuf Mythique procédural",
+      "Œuf Mythique cuit"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Piédestal procédural",
+      "kind": "procedural",
+      "triangles": 38544,
+      "views": {
+        "face": {
+          "coverage": 0.17,
+          "lum_mean": 0.532,
+          "lum_std": 0.165,
+          "detail": 0.0488,
+          "saturation": 0.28,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.223,
+          "lum_mean": 0.552,
+          "lum_std": 0.138,
+          "detail": 0.0504,
+          "saturation": 0.341,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.166,
+          "lum_mean": 0.559,
+          "lum_std": 0.142,
+          "detail": 0.0518,
+          "saturation": 0.324,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.723,
+          "lum_mean": 0.62,
+          "lum_std": 0.146,
+          "detail": 0.0367,
+          "saturation": 0.319,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Piédestal cuit",
+      "kind": "baked",
+      "triangles": 4960,
+      "views": {
+        "face": {
+          "coverage": 0.17,
+          "lum_mean": 0.517,
+          "lum_std": 0.16,
+          "detail": 0.0469,
+          "saturation": 0.284,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.224,
+          "lum_mean": 0.54,
+          "lum_std": 0.137,
+          "detail": 0.0492,
+          "saturation": 0.344,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.166,
+          "lum_mean": 0.542,
+          "lum_std": 0.139,
+          "detail": 0.0488,
+          "saturation": 0.328,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.724,
+          "lum_mean": 0.606,
+          "lum_std": 0.157,
+          "detail": 0.0292,
+          "saturation": 0.317,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Œuf Mythique procédural",
+      "kind": "procedural",
+      "triangles": 181836,
+      "views": {
+        "face": {
+          "coverage": 0.214,
+          "lum_mean": 0.473,
+          "lum_std": 0.216,
+          "detail": 0.0655,
+          "saturation": 0.556,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.23,
+          "lum_mean": 0.477,
+          "lum_std": 0.204,
+          "detail": 0.0567,
+          "saturation": 0.55,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.211,
+          "lum_mean": 0.453,
+          "lum_std": 0.198,
+          "detail": 0.0621,
+          "saturation": 0.586,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.6,
+          "lum_mean": 0.568,
+          "lum_std": 0.199,
+          "detail": 0.0232,
+          "saturation": 0.507,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Œuf Mythique cuit",
+      "kind": "baked",
+      "triangles": 6440,
+      "views": {
+        "face": {
+          "coverage": 0.214,
+          "lum_mean": 0.429,
+          "lum_std": 0.222,
+          "detail": 0.0594,
+          "saturation": 0.609,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.23,
+          "lum_mean": 0.432,
+          "lum_std": 0.213,
+          "detail": 0.0534,
+          "saturation": 0.6,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.211,
+          "lum_mean": 0.413,
+          "lum_std": 0.205,
+          "detail": 0.0587,
+          "saturation": 0.631,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.6,
+          "lum_mean": 0.522,
+          "lum_std": 0.211,
+          "detail": 0.0189,
+          "saturation": 0.562,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 48,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 60.4
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

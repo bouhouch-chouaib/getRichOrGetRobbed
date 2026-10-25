@@ -5,6 +5,32 @@ Contexte de passation pour toute nouvelle session Claude. Lire aussi `GDD.md` (d
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
 **Pour tout travail visuel, lire `docs/DIRECTION_ARTISTIQUE.md`** (style Steal an Egg relevé sur captures :
 tenons partout, palette, interface, zones). Captures de référence dans `references/` (local, exclu de git).
+**Pour fabriquer un modèle 3D (familier, œuf, décor), lire `dataset_and_pipeline/PIPELINE.md`** : pipeline Blender
+par code (phase 1, 25 oct.), matériaux PBR procéduraux, cuisson en textures pour SurfaceAppearance, contrôle visuel.
+
+## Pipeline 3D procédural (phase 1, 25 oct. 2026) — comment l'appeler
+
+Dossier `dataset_and_pipeline/` (détails, règles et limites : `PIPELINE.md`). Blender 5.0 en arrière-plan, sans MCP :
+`"/c/Program Files/Blender Foundation/Blender 5.0/blender.exe" -b --factory-startup --python <script>` depuis
+`C:\Users\bouho\dev\getRichOrGetRobbed`. Dans un script (ou par `execute_blender_code` du MCP Blender) :
+
+```python
+import sys; sys.path.insert(0, r"C:\Users\bouho\dev\getRichOrGetRobbed\dataset_and_pipeline\blender_tools")
+import shader_node_library as S, procedural_geometry_recipes as G, auto_pbr_baker as B, visual_qa_renderer as Q
+gold = S.create_etched_metal_or_gold(name="M_Or", tint="#FFC830", hammered=0.5)   # 1. matériaux (4 familles)
+part = G.lathe("Coupe", [(0, 0), (1, 0), (1.1, 0.6), (0, 0.6)], segments=32)       # 2. formes (pas de primitives)
+G.assign_material(part, gold); G.add_bevel_finish(part, width=0.05, segments=3)     # 3. finition (Bevel + Weighted Normal)
+high, low = ..., ...      # voxel_fuse / add_organic_displace pour le high, make_low pour le low (< 8 000 triangles)
+report = B.bake_asset(low, "NomAsset", high=high)   # 4. UV + cuisson Cycles -> baked_assets/ (PNG, FBX, GLB, manifeste)
+Q.render_qa_grid([{"label": "cuit", "objects": [low], "kind": "baked"}])  # 5. planche qa_renders/preview.png
+```
+
+Après chaque `render_qa_grid` : **ouvrir `qa_renders/preview.png` avec l'outil de lecture d'image** et corriger tant que
+ça fait « primitives » ou « plat ». Fiches des 20 familiers (stats calculées depuis Config, specs 3D) :
+`dataset_and_pipeline/game_design_matrix.json`. Exemples complets : `build_stylized_pedestal()`,
+`build_mythic_gem_egg()`, `blender_tools/run_poc.py`. Règles clés : un seul Principled « BAKE_BSDF » par matériau,
+lueur = couleur de la surface (seule l'intensité varie), tenons par la Normal map (pas de TextureID), pas de Néon.
+Vérifié dans Blender ; **import Roblox pas encore testé**.
 
 ## L'utilisateur et la façon de travailler
 
