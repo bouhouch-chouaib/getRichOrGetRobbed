@@ -179,6 +179,11 @@ les œufs dans leurs nids, la montée en tension, l'éclosion Divine (colonne de
 la base de haut. Test hors Studio : `lune run tools/check-eggs.luau . <sortie>` (PASS). Pas vu : éclosions à 2 joueurs,
 le « +1 NOM » d'un familier hors des 10 affichés, sur téléphone.
 
+**25 oct. : œufs de la couveuse en briques** (`Lot08_Oeufs.fbx`, `pets/_egg.py` + `pets/Oeuf<Rareté>.py`, branchement
+`dataset_and_pipeline/studio_tools/wire_brick_eggs.lua` -> `ArtModels.Eggs.<Rareté>`, `shared/EggModelBuilder`) : un œuf par
+rareté, sans néon, sans lumière ni étincelles dans la couveuse (`client/Eggs`, attribut `Handmade`). Faits et cuits ;
+**pas encore importés ni vus en jeu**.
+
 **15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, en argent du jeu seulement) :
 les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`, mêmes règles que [E]). Vérifié en jeu (solo) :
 achat de 3 niveaux, objet attiré depuis 9 studs.

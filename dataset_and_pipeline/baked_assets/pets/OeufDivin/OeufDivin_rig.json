@@ -1,0 +1,128 @@
+{
+  "pet": "OeufDivin",
+  "model_height_blender": 2.04,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Bottom": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 224,
+      "center": [
+        0.0,
+        0.0,
+        0.21
+      ],
+      "size": [
+        1.15485,
+        1.15485,
+        0.42
+      ],
+      "pivot": null
+    },
+    "Lower": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 192,
+      "center": [
+        0.0,
+        0.0,
+        0.5775
+      ],
+      "size": [
+        1.33039,
+        1.33039,
+        0.315
+      ],
+      "pivot": null
+    },
+    "Middle": {
+      "kind": "Wing",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 480,
+      "center": [
+        0.0,
+        0.0,
+        0.97336
+      ],
+      "size": [
+        2.37073,
+        1.35,
+        0.54671
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.52
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.08
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.98
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Upper": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 144,
+      "center": [
+        0.0,
+        0.0,
+        1.17
+      ],
+      "size": [
+        1.0717,
+        1.0717,
+        0.3
+      ],
+      "pivot": null
+    },
+    "Top": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 336,
+      "center": [
+        0.0,
+        0.0,
+        1.68
+      ],
+      "size": [
+        0.85921,
+        0.85921,
+        0.72
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.029412
+}

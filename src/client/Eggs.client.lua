@@ -182,13 +182,15 @@ local function add(instance: Instance)
 
 	local light: PointLight? = nil
 	local sparkles: ParticleEmitter? = nil
-	if root and rank >= 3 then
+	-- Œuf en briques (25 oct., shared/EggModelBuilder) : sa matière suffit, ni lumière, ni étincelles, ni éclats en néon.
+	local plain = model:GetAttribute("Handmade") == true
+	if root and rank >= 3 and not plain then
 		local glow = Instance.new("PointLight")
 		glow.Color, glow.Brightness, glow.Range, glow.Shadows = rarity.Color, 0.6, 6, false
 		glow.Parent = root
 		light = glow
 	end
-	if root and rank >= 4 then
+	if root and rank >= 4 and not plain then
 		local emitter = Instance.new("ParticleEmitter")
 		emitter.Texture = SPARK
 		emitter.Color = ColorSequence.new(rarity.Color, WHITE)
@@ -200,7 +202,7 @@ local function add(instance: Instance)
 	end
 	-- Divin et Sigma : éclats qui tournent autour de l'œuf.
 	local orbit: { BasePart } = {}
-	if rank >= 7 then
+	if rank >= 7 and not plain then
 		for index = 1, 6 do
 			local piece = glowPart(V(0.45, 0.45, 0.45), instance.CFrame, if index % 2 == 0 then WHITE else rarity.Color, 0.1)
 			piece.Name = "Orbit"

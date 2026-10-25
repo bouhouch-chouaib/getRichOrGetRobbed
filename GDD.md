@@ -652,6 +652,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 - Familiers visibles physiquement dans la base, vol d'un objet dans les mains d'un autre joueur.
 - (fait le 15 oct.) Œufs + couveuse + capsule d'évolution (3 stades, hasard) : voir `docs/INCUBATION.md`.
+- (25 oct.) **Œufs en briques**, un par rareté, sans néon (Blender, `Lot08_Oeufs`) : Commun crème tacheté, Inhabituel
+  vert avec une pousse, Rare bleu à étoile, Épique violet chrome et cristal, Légendaire ambre à flammes d'or, Mythique
+  nacre et or, Divin blanc à ailes et cristaux, Sigma or massif couronné. `ArtModels.Eggs.<Rareté>` (fichier du jeu),
+  pris par `shared/EggModelBuilder` (l'œuf généré reste en secours) ; dans la couveuse, plus de lumière, d'étincelles
+  ni d'éclats en néon autour d'un œuf en briques (`client/Eggs`, attribut `Handmade`). L'éclatement à l'éclosion
+  garde ses 5 morceaux.
 
 ## Bases (15 oct.)
 

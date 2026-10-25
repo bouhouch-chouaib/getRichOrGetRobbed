@@ -1,9 +1,34 @@
 --!strict
 -- Eight original studded eggs. Stepped shells, rectangular ornaments and wedge tips.
 -- Origin is the ground; ShellHalf lets the client separate the two halves at hatching.
+-- 25 oct. : œufs en briques faits dans Blender (un par rareté, sans néon) : ReplicatedStorage.ArtModels.Eggs.<Rareté>,
+-- rangés par le branchement Studio (studio_tools/wire_brick_eggs.lua). L'œuf généré ne sert plus qu'en secours.
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(script.Parent.Config)
 local S = require(script.Parent.PetSculpt)
 local EggModel = {}
+
+-- Copie de l'œuf en briques dans un modèle neuf : son échelle repart de 1 (les clients font ScaleTo(échelle voulue)).
+-- Attribut "Handmade" : client/Eggs ne lui ajoute ni lumière, ni étincelles, ni éclats en néon.
+local function handmade(rarityId: string): Model?
+	local art = ReplicatedStorage:FindFirstChild("ArtModels")
+	local eggs = art and art:FindFirstChild("Eggs")
+	local source = eggs and eggs:FindFirstChild(rarityId)
+	if not source or not source:IsA("Model") or not source.PrimaryPart then
+		return nil
+	end
+	local m = Instance.new("Model")
+	m.Name = "Egg_" .. rarityId
+	for _, child in ipairs(source:GetChildren()) do
+		local copy = child:Clone()
+		copy.Parent = m
+		if child == source.PrimaryPart then
+			m.PrimaryPart = copy :: BasePart
+		end
+	end
+	m:SetAttribute("Handmade", true)
+	return m
+end
 local V, CF, A = Vector3.new, CFrame.new, CFrame.Angles
 local rgb = Color3.fromRGB
 local GOLD, WHITE = rgb(255, 190, 35), rgb(255, 248, 222)
@@ -19,6 +44,10 @@ local colors = {
 }
 
 function EggModel.Build(rarityId: string): Model
+	local brick = handmade(rarityId)
+	if brick then
+		return brick
+	end
 	local rank = Config.RarityIndex[rarityId] or 1
 	local accent = Config.Rarities[rank].Color
 	local shell = colors[rank]

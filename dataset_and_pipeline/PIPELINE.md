@@ -221,8 +221,15 @@ couche droite, sinon ses coins passent devant le visage, et un peu plus haute (d
 épaisseur ont des faces confondues qui cuisent en NOIR : étoiles en deux carrés, octogones) ; une pièce qui tourne (`Orbit`, `Drum`) ne suit pas une tige
 animée (garder la tige fixe) ; `Drum` tourne autour de l'axe avant-arrière du pivot (roue de hamster : `rot=(0, 0, 90)`).
 
+**Œufs de la couveuse en briques (25 oct., `Lot08_Oeufs`)** : `pets/_egg.py` (coquille en 8 étages de briques
+octogonales, morceaux Bottom / Lower sous la couture d'éclosion, Middle / Upper / Top au-dessus) et un fichier par
+rareté (`pets/Oeuf<Rareté>.py`, cuits par `run_pet_rig.py` comme un familier), sans lueur, rareté par la matière.
+Branchement Studio : `studio_tools/wire_brick_eggs.lua` (barre MCP, mode Édition) -> `ArtModels.Eggs.<Rareté>`, que
+`shared/EggModelBuilder` prend à la place de l'œuf généré. Piège : une flamme ou un détail en or miroir sort sombre
+(il reflète le fond) : or plus mat (`rough=0.5`) pour les petits détails.
+
 ## Pistes pour la suite
 
 - Cuisson par pièce pour garder Leg / Ear animables.
-- Les 5 coquilles d'œufs de `egg_shells` (la Mythique est faite).
+- (fait le 25 oct. : les 8 œufs de la couveuse en briques, `Lot08_Oeufs`.)
 - Comparer une capture Studio de l'asset importé avec `hero.png` (outil MCP Roblox `screen_capture`).

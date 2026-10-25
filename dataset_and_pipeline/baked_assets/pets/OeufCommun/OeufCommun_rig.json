@@ -1,0 +1,103 @@
+{
+  "pet": "OeufCommun",
+  "model_height_blender": 1.8,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Bottom": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 240,
+      "center": [
+        0.0,
+        0.0,
+        0.21
+      ],
+      "size": [
+        1.10866,
+        1.10866,
+        0.42
+      ],
+      "pivot": null
+    },
+    "Lower": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 240,
+      "center": [
+        0.0,
+        0.0,
+        0.5775
+      ],
+      "size": [
+        1.33039,
+        1.33039,
+        0.315
+      ],
+      "pivot": null
+    },
+    "Middle": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 144,
+      "center": [
+        0.0,
+        0.0,
+        0.86
+      ],
+      "size": [
+        1.238,
+        1.238,
+        0.32
+      ],
+      "pivot": null
+    },
+    "Upper": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 144,
+      "center": [
+        0.0,
+        0.0,
+        1.17
+      ],
+      "size": [
+        1.1237,
+        1.1237,
+        0.3
+      ],
+      "pivot": null
+    },
+    "Top": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 336,
+      "center": [
+        0.0,
+        0.0,
+        1.56
+      ],
+      "size": [
+        0.81301,
+        0.81301,
+        0.48
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.033333
+}
