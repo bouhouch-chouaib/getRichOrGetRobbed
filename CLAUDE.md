@@ -38,11 +38,17 @@ voxels « Minecraft »). **Pas d'aura sur le Cerbère** : modélisée, en partic
 refusées par Chouaib (« très mal fait ») ; ne pas en reproposer sans qu'il le demande. Aperçu dans Studio sans import par un
 `.mesh` dans le dossier content (`export_studio_mesh.py`). Méthode, pièges et photos : `PIPELINE.md` « Essai 1.5 ».
 **Mis en jeu le 25 oct. : Cerbère Infernal**, Sigma exclusif du Volcan (106e familier, GDD « Familiers exclusifs des mondes »),
-modèle `ArtModels.CerbereInfernal` (MeshPart « Body » importée par Chouaib, maillage rbxassetid://102688666618509,
-`FacingYaw` 0), aucune aura (`PetSculptedEffects.NO_AURA`). Donné à Chouaib dans sa sauvegarde Studio et placé dans sa base
-(script temporaire qui appelle `SessionData.AddPets` / `SetInBase`). **En cours** (demande de Chouaib) : refaire la peau
-(« pas folle ») et animer les 3 têtes et la marche, donc découper le modèle en pièces. Tests Lune : 4 échecs déjà présents
-avant (magnet-roster, newcomer-steal, onboarding, typography).
+aucune aura (`PetSculptedEffects.NO_AURA`). Donné à Chouaib dans sa sauvegarde Studio et placé dans sa base (script
+temporaire qui appelle `SessionData.AddPets` / `SetInBase`). **Animé** (2e version, demande de Chouaib : peau « pas folle »,
+têtes et marche à animer) : `run_cerberus_rig.py` -> 12 pièces (Body, Head0-2, Jaw0-2, LegFL/FR/BL/BR, Tail) et 3 textures
+(Tetes / Corps / Pattes) au lieu d'une texture en ~1 000 îlots qui devenait de la bouillie dans Roblox ; Chouaib importe
+`CerbereInfernal_Rig.fbx`, puis `studio_tools/wire_cerberus_rig.lua` (barre MCP) pose les attributs de mouvement et la lueur
+et range le modèle dans `ArtModels.CerbereInfernal` (**fichier du jeu : sauvegarder dans Studio**). `shared/PetMotion` :
+genres « Head » (regarde autour, aboie, hoche au pas) et « Jaw » (suit sa tête via `MotionHingeRaw`, halète, s'ouvre en grand),
+profil « Cerberus » (souffle, foulée). Vérifié en jeu (solo) : têtes indépendantes, mâchoire ouverte à 21° pendant un
+aboiement, trot en diagonale, peau nette de jour et de nuit (`qa_renders/cerberus_anime_*.jpg`). Pas vu : sur téléphone, porté
+/ volé / équipé (il suit le joueur). Tests Lune : 4 échecs déjà présents avant (magnet-roster, newcomer-steal, onboarding,
+typography).
 
 ## L'utilisateur et la façon de travailler
 

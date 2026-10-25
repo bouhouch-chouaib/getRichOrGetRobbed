@@ -16,7 +16,9 @@ Preuve de concept : un piédestal de base et un œuf Mythique (`qa_renders/hero.
 | `blender_tools/visual_qa_renderer.py` | Studio 3 points, 4 vues, planche `preview.png` + rapport chiffré. |
 | `blender_tools/run_poc.py` | Exemple complet (piédestal + œuf + planche des matériaux). |
 | `blender_tools/block_creatures.py` | Créatures en blocs biseautés (essai 1.5) : `block`, `stepped_plate`, `staircase_spike`, `tooth`, `claw`, `spike_band`, `blocky_wolf_head`, `build_blocky_cerberus`. |
-| `blender_tools/run_cerberus_blocks.py` | Fabrique, cuit et contrôle le Cerbère (`source/cerberus_blocs.blend`, planche + héros). |
+| `blender_tools/run_cerberus_blocks.py` | Cerbère en un seul maillage (image de présentation : planche + héros). |
+| `blender_tools/run_cerberus_rig.py` | **Le Cerbère du jeu** : 12 pièces animées, 3 textures, `.fbx` + `rig.json` (`source/cerberus_rig.blend`). |
+| `studio_tools/wire_cerberus_rig.lua` | Après l'import du `.fbx` : branche les pièces sur `PetMotion` et range le modèle dans `ArtModels`. |
 | `blender_tools/export_studio_mesh.py` | `.mesh` natif Roblox pour voir un asset dans Studio sans import (aperçu local). |
 | `baked_assets/` | Sorties prêtes pour Roblox (`<Asset>_Color/Roughness/Metalness/Normal/Emissive/AO.png`, `.fbx`, `.glb`, `_manifest.json`). |
 | `qa_renders/` | `preview.png` (contrôle), `materials.png` (les 4 matériaux), `hero.png`, rapports JSON. |
@@ -118,7 +120,7 @@ for m in (S, G, B, Q): importlib.reload(m)
 - Pas vérifié : import dans Roblox Studio, rendu des cartes dans Roblox (éclairage différent), envoi des PNG par le MCP
   Roblox, export GLB relu par un autre outil.
 
-## Essai 1.5 : Cerbère Secret en blocs + aura (25 oct.)
+## Essai 1.5 : Cerbère Secret en blocs (25 oct.)
 
 **Style (validé par Chouaib après 3 essais refusés)** : ni jouet vinyle lisse (trop cartoon), ni voxels à tenons
 (« Minecraft »). Des blocs et rectangles biseautés de tailles variées, inclinés et superposés comme des plaques
@@ -149,8 +151,38 @@ Creator Store : `insert_asset` dans `ServerStorage`, lire les scripts d'abord (l
 Téléporter le personnage (serveur), mettre la caméra en `Scriptable` (client, qui suit le familier par RenderStepped),
 masquer les ScreenGui, puis `screen_capture` SANS position de caméra. Studio en arrière-plan tourne à ~15 images/s.
 
-**Import Studio du `.fbx`** (25 oct.) : l'importateur arrive ~34 fois trop grand (unités) et regarde déjà vers -Z
-(`FacingYaw` 0, contrairement au `.mesh` exporté à la main) ; il envoie le maillage et les textures sur le compte.
+**Import Studio du `.fbx`** (25 oct.) : sans réglage, Studio lit 1 unité Blender = 100 studs (d'où `global_scale` dans
+`run_cerberus_rig.py`, ~13 studs à l'import) ; l'import regarde déjà vers -Z (`FacingYaw` 0, contrairement au `.mesh`
+exporté à la main) et la correspondance des axes est Blender (x, y, z) -> Studio (-x, z, y). L'importateur envoie
+maillages et textures (couleur, relief, rugosité, métal) sur le compte, mais **pas la lueur** : envoyer les
+`_Emissive.png` avec `upload_image` et les poser en `EmissiveMaskContent`.
+
+## Cerbère animé (2e version, 25 oct.)
+
+Retour de Chouaib sur la 1re version en jeu : peau « pas folle », rien ne bougeait. Causes : UNE texture de 1024 px pour
+tout le Cerbère, découpée en ~1 000 îlots minuscules (flou, couleurs qui bavent entre îlots au loin, lueur perdue à
+l'import) et UN seul maillage. Recette (à suivre pour tout familier animé) :
+
+```bash
+"/c/Program Files/Blender Foundation/Blender 5.0/blender.exe" -b --factory-startup --python dataset_and_pipeline/blender_tools/run_cerberus_rig.py
+```
+
+1. **Découpe** (`build_blocky_cerberus(rig=True)`) : chaque bloc dit à quelle pièce il appartient (Body, Head0-2,
+   Jaw0-2, LegFL/FR/BL/BR, Tail) ; pivots en Matrix (base du crâne, charnière de la mâchoire, épaule, hanche, base de la
+   queue), orientés comme la pièce (une tête de côté tourne autour de SON axe). Gueules entrouvertes au repos (14°).
+2. **Une texture par zone** : pièces regroupées en 3 atlas de 1024 (Tetes, Corps, Pattes), cuits ensemble (attribut de
+   face `rig_id`) puis recoupés ; marges UV 0,006 et 16 px d'extension.
+3. **Export** : `CerbereInfernal_Rig.fbx` (12 objets nommés comme les MeshParts du jeu) + `CerbereInfernal_rig.json`
+   (pivots, genres de mouvement, phases). Planche : `qa_renders/cerberus_rig_board.png` (repos, pose animée, têtes).
+4. **Studio** : Chouaib importe le `.fbx`, puis `studio_tools/wire_cerberus_rig.lua` (barre MCP) pose sur chaque pièce
+   `MotionGroup` / `MotionKind` / `MotionPhase` / `MotionPivotRaw` (+ `MotionHingeRaw` pour une mâchoire, avec le pivot de
+   sa tête), la lueur, et range le modèle dans `ReplicatedStorage.ArtModels.CerbereInfernal` (sauvegarder le jeu).
+5. **Jeu** (`shared/PetMotion`) : « Head » regarde autour (têtes de côté vers l'extérieur), aboie (relève la tête,
+   gueule grande ouverte), hoche au pas ; « Jaw » suit sa tête puis s'ouvre autour de sa charnière ; pattes « Leg »
+   en diagonale, queue « Tail », profil « Cerberus » (souffle lourd, le corps monte à chaque foulée).
+
+Vérifié en jeu (solo, 25 oct.) : 12 pièces, têtes indépendantes, mâchoire à 21° pendant un aboiement, trot,
+peau nette de jour et de nuit (`qa_renders/cerberus_anime_face.jpg`, `_nuit.jpg`, `_marche.jpg`).
 
 ## Pistes pour la suite
 

@@ -4,8 +4,9 @@
         --python dataset_and_pipeline/blender_tools/run_cerberus_blocks.py -- --res 1024 --qa-res 520 --qa-samples 64
 
 Sorties : baked_assets/CerbereInfernal* (PNG, FBX, GLB, manifeste), qa_renders/cerberus_qa_board.png (+ _report.json),
-qa_renders/cerberus_hero.png (sur le piédestal de la phase 1), source/cerberus_blocs.blend. Pas de tenons sur le
-familier ; l'aura n'est pas un modèle mais un effet Roblox (voir vfx_tools/ et PIPELINE.md).
+qa_renders/cerberus_hero.png (sur le piédestal de la phase 1), source/cerberus_blocs.blend. Pas de tenons ni d'aura.
+1re version, en UN seul maillage (image de présentation) : le Cerbère du jeu est fait par run_cerberus_rig.py
+(12 pièces animées, 3 textures).
 """
 
 from __future__ import annotations
