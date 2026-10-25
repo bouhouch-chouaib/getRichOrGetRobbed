@@ -1,8 +1,11 @@
 --!strict
 -- BaseManager : attribue une base libre à chaque joueur et le fait apparaître dessus.
 -- Écrit l'attribut "BaseIndex" sur le Player et "OwnerName" sur la base.
+-- Jeu entre amis (Config.Friends) : d'abord une base libre voisine de celle d'un ami présent (server/Friends).
 
 local Players = game:GetService("Players")
+
+local Friends = require(script.Parent.Friends)
 
 local BaseManager = {}
 
@@ -65,9 +68,38 @@ local function onCharacterAdded(player: Player, character: Model)
 	end
 end
 
-local function onPlayerAdded(player: Player)
+-- La base d'un joueur qui arrive : une base libre voisine de celle d'un ami, sinon la première libre.
+local function pickBase(player: Player): Model?
+	for _, friend in ipairs(Friends.Of(player)) do
+		local friendBase = BaseManager.GetBase(friend)
+		local index = friendBase and friendBase:GetAttribute("BaseIndex")
+		if type(index) == "number" then
+			for _, offset in ipairs({ 1, -1 }) do
+				local wanted = (index - 1 + offset) % #bases + 1
+				for _, base in ipairs(bases) do
+					if base:GetAttribute("BaseIndex") == wanted and not owners[base] then
+						return base
+					end
+				end
+			end
+		end
+	end
 	for _, base in ipairs(bases) do
 		if not owners[base] then
+			return base
+		end
+	end
+	return nil
+end
+
+local function onPlayerAdded(player: Player)
+	Friends.Check(player) -- attend au plus Config.Friends.CheckTimeout secondes
+	if not player.Parent then
+		return
+	end
+	local chosen = pickBase(player)
+	for _, base in ipairs(bases) do
+		if base == chosen then
 			owners[base] = player
 			base:SetAttribute("OwnerName", player.Name)
 			player:SetAttribute("BaseIndex", base:GetAttribute("BaseIndex"))
@@ -115,7 +147,7 @@ function BaseManager.Init(generatedBases: { Model })
 	Players.PlayerAdded:Connect(onPlayerAdded)
 	Players.PlayerRemoving:Connect(onPlayerRemoving)
 	for _, player in ipairs(Players:GetPlayers()) do
-		onPlayerAdded(player)
+		task.spawn(onPlayerAdded, player)
 	end
 end
 

@@ -31,6 +31,7 @@ local WeaponController = require(script.Parent.WeaponController)
 SessionData.Init()
 
 local bases = MapGenerator.generate()
+require(script.Parent.Friends).Init()
 BaseManager.Init(bases)
 ItemInteraction.Init()
 BlackholeController.Init()

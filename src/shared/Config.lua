@@ -1040,6 +1040,14 @@ Config.Codes = {
 Config.Friends = {
 	BonusPerFriend = 0.1,
 	MaxFriends = 5,
+	-- Jeu entre amis (25 oct., ECONOMY_REPORT.md règles 17 à 19, server/Friends, server/StealController) :
+	--   - un joueur qui arrive reçoit, si elle est libre, une base voisine de celle d'un ami (server/BaseManager) ;
+	--   - refuge : un familier volé peut être rapporté dans la base d'un ami présent (il va quand même au voleur) ;
+	--   - escorte : un ami à moins de EscortRadius studs du porteur, et le familier compte comme une rareté plus légère
+	--     (Config.Carry.SpeedByRarity, +14 % de vitesse) ; 15 studs = la portée de la batte (8 + 3) avec un peu de marge ;
+	--   - « Reprendre » pour un ami : les amis de la victime voient la bulle et peuvent rendre le familier à son propriétaire.
+	EscortRadius = 15,
+	CheckTimeout = 3, -- secondes au plus pour vérifier les amitiés d'un joueur qui arrive (avant de choisir sa base)
 }
 
 -- Rebirth : quand on a atteint le dernier monde, on paie Price(n) pour recommencer en Prairie avec 0 $ et les

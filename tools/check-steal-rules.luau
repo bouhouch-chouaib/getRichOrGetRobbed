@@ -81,6 +81,14 @@ table.insert(log, { at = 1300, thief = 9 })
 assert(not CrownRules.CanReward(log, 10, 1400), "au plus 3 défenses récompensées par heure")
 assert(CrownRules.CanReward(log, 10, 1000 + 3600), "une heure après la première")
 
+-- Escorte (Config.Friends) : une rareté plus légère = ~14 % plus vite (0,876 par rareté dans Config.Carry.SpeedByRarity).
+local speeds = Config.Carry.SpeedByRarity
+for index = 2, #speeds do
+	local gain = speeds[index - 1] / speeds[index]
+	assert(gain > 1.1 and gain < 1.2, "escorte : +" .. math.floor((gain - 1) * 100) .. " % entre les raretés " .. index - 1 .. " et " .. index)
+end
+assert(Config.Friends.EscortRadius >= Config.Weapons.Bat.Range + Config.Weapons.RangeMargin, "l'escorte est à portée de batte")
+
 -- Pile « prochain objectif » (shared/NextGoals, règle 12) : le plus proche dans le temps, puis le plus avancé des autres.
 local NextGoals = load("NextGoals")
 local state = {
@@ -104,4 +112,4 @@ state.cappedName, state.cappedUnlock = "Le Capybara Zen", rarity("Mythique")
 local last = NextGoals.List(state)
 assert(last[#last].id == "capped" and last[#last].label == "LE CAPYBARA ZEN BRIDÉ : OBTIENS UN MYTHIQUE", "familier bridé")
 
-print("PASS: plafond de revenu, rareté à obtenir, vol utile, durée du verrou à cycle, couronne, prochain objectif")
+print("PASS: plafond de revenu, rareté à obtenir, vol utile, durée du verrou à cycle, couronne, escorte, prochain objectif")

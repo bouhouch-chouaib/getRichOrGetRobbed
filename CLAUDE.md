@@ -183,7 +183,8 @@ et **vol utile** (bulle [E] seulement sur ce qui ferait monter son revenu). Vér
 **Rebirth** : +1 chambre de capsule d'évolution par Rebirth (6 au plus, `Config.GetCapsuleSlots`, plusieurs œufs évoluent en même temps), doublons de sa meilleure rareté vers une chambre libre, prix 4T x (n+1) x 1,62^n.
 **Couronne du plus riche** (`Config.Crown`, `server/CrownController`, `shared/CrownRules`, `client/Crown`) : plus gros revenu du serveur, prime pour qui le vole, récompense limitée pour chaque voleur arrêté.
 **Pile « prochain objectif »** (`shared/NextGoals`, `client/NextGoals`) : deux objectifs entamés avec barre sous l'horloge, résumé d'absence au retour (attribut `AwaySummary`).
-Restent proposés : jeu entre amis. Pour l'analyse Luau : luau-lsp 1.70.1 (page des versions) dans un dossier temporaire, projet copié sans accents.
+**Jeu entre amis** (`server/Friends`, attribut `FriendIds`) : base voisine d'un ami, refuge chez un ami, escorte (+14 % de vitesse), « Reprendre » pour un ami ; à vérifier avec 2 vrais comptes amis dans le jeu publié.
+Restent au choix de Chouaib : gros butin signalé à tous (règle 10), ruée des voleurs (règle 14). Pour l'analyse Luau : luau-lsp 1.70.1 (page des versions) dans un dossier temporaire, projet copié sans accents.
 
 **15 oct. : œufs (Codex) puis corrections Claude** (`server/EggController`, `client/Eggs`, `shared/EggIncubation`,
 `docs/INCUBATION.md`) : toutes les récompenses arrivent en œufs qui incubent (15 s à 30 min). Claude : un nid par œuf

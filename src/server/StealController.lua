@@ -50,6 +50,7 @@ local BasePetsController = require(script.Parent.BasePetsController)
 local BlackholeTiers = require(script.Parent.BlackholeTiers)
 local CrownController = require(script.Parent.CrownController)
 local EconomyController = require(script.Parent.EconomyController)
+local Friends = require(script.Parent.Friends)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local PowerController = require(script.Parent.PowerController)
@@ -177,10 +178,14 @@ local function recordLoss(owner: Player, loss: number)
 end
 
 -- Vitesse du porteur (x sa vitesse normale) : selon la rareté du familier, et jamais plus vite que le propriétaire
--- (Config.Carry.SpeedByRarity x min(1, vitesse du propriétaire / vitesse du porteur)).
-function StealController.CarrySpeed(player: Player, petId: string, owner: Player?): number
+-- (Config.Carry.SpeedByRarity x min(1, vitesse du propriétaire / vitesse du porteur)). escorted : un ami du porteur est
+-- tout près (Config.Friends.EscortRadius) : le familier compte comme une rareté plus légère.
+function StealController.CarrySpeed(player: Player, petId: string, owner: Player?, escorted: boolean?): number
 	local entry = PetCatalog.ById[petId]
 	local rarity = if entry then Config.RarityIndex[entry.Rarity] or 1 else 1
+	if escorted then
+		rarity = math.max(1, rarity - 1)
+	end
 	local speed = math.clamp(CARRY.SpeedByRarity[rarity] or CARRY.MaxSpeed, CARRY.MinSpeed, CARRY.MaxSpeed)
 	if owner and owner ~= player then
 		local mine, theirs = player:GetAttribute("Speed"), owner:GetAttribute("Speed")
@@ -336,6 +341,7 @@ local function finish(carry: Carry, outcome: Outcome)
 		carrier:SetAttribute("CarryingFrom", nil)
 		carrier:SetAttribute("CarryingOwn", nil)
 		carrier:SetAttribute("SpeedMultiplier", nil)
+		carrier:SetAttribute("Escorted", nil)
 		SessionData.RefreshSpeed(carrier)
 		Remotes.StealResult:FireClient(carrier, outcome, carry.petId, money, points)
 	end
@@ -364,7 +370,9 @@ end
 
 -- La victime valide la bulle "Reprendre" posée sur le voleur : vérifiée ici (bon joueur, vivant, assez près).
 local function tryRecover(carry: Carry, player: Player)
-	if carries[carry.carrier] ~= carry or player ~= carry.owner or not isAlive(player) then
+	-- La victime, ou un ami de la victime (Config.Friends : « Reprendre » pour un ami), jamais le voleur.
+	local allowed = player == carry.owner or (player ~= carry.carrier and Friends.Are(player, carry.owner))
+	if carries[carry.carrier] ~= carry or not allowed or not isAlive(player) then
 		return
 	end
 	local victimRoot = getRoot(player)
@@ -435,6 +443,12 @@ local function beginCarry(carrier: Player, owner: Player, ownerBase: Model, petI
 		prompt.Parent = root
 		carry.prompt = prompt
 		Remotes.StealNotice:FireClient(owner, "Started", carrier.DisplayName, owner.DisplayName, petId)
+		-- Les amis de la victime sont prévenus : ils peuvent la défendre (Config.Friends).
+		for _, friend in ipairs(Friends.Of(owner)) do
+			if friend ~= carrier then
+				Remotes.StealNotice:FireClient(friend, "FriendStarted", carrier.DisplayName, owner.DisplayName, petId)
+			end
+		end
 	end
 	print(string.format("[Steal] %s porte %s (à %s, vitesse x%.2f)", carrier.Name, petId, owner.Name, speed))
 end
@@ -530,6 +544,25 @@ local function tryThrow(player: Player)
 	finish(carry, "Sacrificed")
 end
 
+-- Escorte (Config.Friends) : un ami du porteur tout près, et le familier compte comme une rareté plus légère.
+local function updateEscort(carry: Carry, root: BasePart)
+	local escorted = false
+	for _, friend in ipairs(Friends.Of(carry.carrier)) do
+		local friendRoot = getRoot(friend)
+		if friend ~= carry.owner and friendRoot and isAlive(friend)
+			and (friendRoot.Position - root.Position).Magnitude <= Config.Friends.EscortRadius then
+			escorted = true
+			break
+		end
+	end
+	local speed = StealController.CarrySpeed(carry.carrier, carry.petId, carry.owner, escorted)
+	if carry.carrier:GetAttribute("SpeedMultiplier") ~= speed then
+		carry.carrier:SetAttribute("SpeedMultiplier", speed)
+		carry.carrier:SetAttribute("Escorted", if escorted then true else nil)
+		SessionData.RefreshSpeed(carry.carrier)
+	end
+end
+
 -- Vérifié plusieurs fois par seconde : arrivée dans une base, temps écoulé, familiers qui rentrent à pied.
 local function update()
 	local time = now()
@@ -545,10 +578,23 @@ local function update()
 		elseif root then
 			local carrierBase = BaseManager.GetBase(carrier)
 			local inside = carrierBase ~= nil and isInsideBase(carrierBase, root.Position)
+			if not inside and not carry.own then
+				-- Refuge (Config.Friends) : la base d'un ami présent compte comme la sienne.
+				for _, friend in ipairs(Friends.Of(carrier)) do
+					local friendBase = if friend ~= carry.owner then BaseManager.GetBase(friend) else nil
+					if friendBase and isInsideBase(friendBase, root.Position) then
+						inside = true
+						break
+					end
+				end
+			end
 			if not inside then
 				carry.wasOutside = true
 			elseif carry.wasOutside then
 				finish(carry, if carry.own then "Home" else "Success")
+			end
+			if carries[carrier] == carry and not carry.own then
+				updateEscort(carry, root)
 			end
 		end
 	end

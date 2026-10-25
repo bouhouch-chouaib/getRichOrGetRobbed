@@ -151,7 +151,11 @@ local function rebuildCarried(player: Player)
 	sign.Parent = model
 
 	-- C'est mon familier : le voleur est entouré de rouge, même derrière un mur, pour que je puisse le rattraper.
-	local mine = player:GetAttribute("CarryingFrom") == localPlayer.UserId
+	-- Ou celui d'un ami (Config.Friends : « Reprendre » pour un ami ; attribut "FriendIds" écrit par server/Friends).
+	local from = player:GetAttribute("CarryingFrom")
+	local friendIds = localPlayer:GetAttribute("FriendIds")
+	local mine = from == localPlayer.UserId or (type(from) == "number" and type(friendIds) == "string"
+		and table.find(string.split(friendIds, ","), tostring(from)) ~= nil)
 	if mine and player.Character then
 		local highlight = Instance.new("Highlight")
 		highlight.Name = "ThiefHighlight"

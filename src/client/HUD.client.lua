@@ -583,6 +583,10 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 		local entry = PetCatalog.ById[petId]
 		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]
 		Toast.show(string.format("%s A VOLÉ %s À %s !", thief, pet, TextFormat.upper(victimName)), if rarity then rarity.Color else WHITE)
+	elseif kind == "FriendStarted" then
+		-- Vol chez un ami (Config.Friends) : tu peux le reprendre pour lui.
+		Toast.show(string.format("VOL CHEZ TON AMI %s : RATTRAPE %s ET %s !", TextFormat.upper(victimName), thief, RECOVER_KEY),
+			Color3.fromRGB(255, 90, 90))
 	elseif kind == "Crowned" then
 		-- Couronne du plus riche (Config.Crown, server/CrownController).
 		if thiefName == player.DisplayName then

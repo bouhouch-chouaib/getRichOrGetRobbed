@@ -2,8 +2,8 @@
 
 **État au 25 oct. 2026 : étapes 1 à 5 faites. Dans le jeu : premier lot (règles 3, 5, 6, 11, 13 et la batte, voir
 5.3), deuxième lot (verrou à cycle, bouclier, plafond, vol utile, voir 5.5), Rebirth (règles 15 et 16, voir 5.6) et
-couronne du plus riche (règle 9, voir 5.7) et pile « prochain objectif » (règle 12, voir 5.8).** Restent à faire : jeu
-entre amis (17 à 19), et au choix 10 et 14. Rien n'a encore été
+couronne du plus riche (règle 9, voir 5.7), pile « prochain objectif » (règle 12, voir 5.8) et jeu entre amis
+(règles 17 à 19, voir 5.9).** Restent au choix de Chouaib : gros butin signalé à tous (10), ruée des voleurs (14). Rien n'a encore été
 vérifié dans Studio. **Rien n'a encore été changé dans le jeu** :
 les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
@@ -854,3 +854,24 @@ Vérifié : analyse Luau sans erreur, `rojo build` réussi, les 10 tests Lune pa
 les objectifs : 75 % du Désert en 50 s, la pitié, le choix des deux objectifs, le Rebirth au dernier monde, le familier
 bridé, accents compris). **Pas vérifié (Studio)** : la place de la pile à l'écran (PC et téléphone, aperçu
 `DebugPhone`), les deux lignes qui changent au fil de la partie, le résumé d'absence en revenant après une éclosion.
+
+## 5.9 Appliqué dans le jeu le 25 oct. (jeu entre amis : règles 17 à 19)
+
+| Règle | Où | Ce qui change |
+| --- | --- | --- |
+| Liste des amis | nouveau `server/Friends` (attribut `FriendIds`), `server/Main.server` | les amitiés Roblox entre joueurs présents, vérifiées une fois à l'arrivée (3 s au plus, en parallèle) |
+| 17. Base voisine | `server/BaseManager` (`pickBase`) | un joueur qui arrive reçoit, si elle est libre, la base à côté de celle d'un ami ; sinon la première libre comme avant |
+| 17. Refuge | `server/StealController` (`update`) | un familier volé peut être rapporté dans la base d'un ami présent : le vol réussit, le familier va au voleur |
+| 18. Escorte | `Config.Friends.EscortRadius` (15), `StealController.CarrySpeed`, `updateEscort` | un ami à moins de 15 studs du porteur : le familier compte comme une rareté plus légère (+14 % de vitesse), recalculé 10 fois par seconde (attributs `SpeedMultiplier`, `Escorted`) |
+| 19. Reprendre pour un ami | `StealController.tryRecover`, `client/PetFollow`, `client/HUD` | les amis de la victime voient le voleur entouré de rouge et la bulle « Reprendre », et peuvent rendre le familier à son propriétaire ; ils sont prévenus : « VOL CHEZ TON AMI X : RATTRAPE Y… » |
+
+Rappel du simulateur (5.2) : ces règles ne changent presque rien à l'équilibre (ce qui rend un duo fort, c'est le nombre
+de vols tentés). Elles sont là pour le plaisir de jouer ensemble et pour inviter ses amis (le bonus de +10 % de revenu par
+ami présent reste). L'œuf offert quand un ami arrive par invitation (étape 4) n'est pas fait : le champ Roblox qui dit
+qui a invité reste à vérifier dans la documentation.
+
+Vérifié : analyse Luau sans erreur, `rojo build` réussi, les 10 tests Lune passent (`check-steal-rules` vérifie que
+chaque rareté est ~14 % plus rapide que la suivante et que l'escorte est à portée de batte). **Pas vérifié** : ces règles
+ont besoin de **deux vrais comptes Roblox amis** dans le jeu publié (les joueurs de test de Studio ne sont pas amis entre
+eux, comme pour le bonus d'amis déjà en place) : base voisine, vol rapporté chez l'ami, vitesse escortée, bulle
+« Reprendre » et alerte chez l'ami.

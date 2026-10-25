@@ -121,6 +121,14 @@ local modules = {
 		end,
 	},
 	BlackholeTiers = {},
+	Friends = { -- personne n'est ami dans ce test (Config.Friends)
+		Are = function()
+			return false
+		end,
+		Of = function()
+			return {}
+		end,
+	},
 	CrownController = { -- pas de roi dans ce test (Config.Crown)
 		IsCrowned = function()
 			return false
