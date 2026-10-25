@@ -51,17 +51,26 @@ Civilisation : MurRuine (2 700), ArcheAncienne (3 348, runes), TotemEnergie (3 4
 EscalierPierre (1 512), Caisse (2 356), Tonneau (4 676), Pancarte (1 022), Palissade (3 084), PontBois (4 212).
 Rochers et obsidienne cuits depuis une version détaillée (facettes ébréchées), le reste cuit sur lui-même.
 
-## Passer dans Roblox (à faire avec Chouaib, rien n'est vérifié dans Studio)
+## Dans Studio (fait le 25 oct., style validé par Chouaib)
 
-1. Importer les `.fbx` de `baked_assets/map/` (Fichier > Importer 3D), ranger chaque MeshPart dans
-   `ReplicatedStorage.ArtModels.Map.<Asset>`. Lueur : envoyer les `_Emissive.png` (outil MCP `upload_image`) et les
-   poser en `EmissiveMaskContent` (l'importateur ne le fait pas, voir PIPELINE.md).
-2. Lancer `studio_tools/apply_map_look.lua` en Édition (`MODE = "all"`). Il pose les décors dans `Workspace.MapDecor`
-   (un Model Atomic par zone et par huitième de carte ; SLIM pour la périphérie), sans les décors des bases.
-   À vérifier au premier essai : le sens du demi-tour des `.fbx` (`FBX_YAW_OFFSET`).
-3. Garder le look en jeu : reporter les valeurs du préréglage dans `server/MapGenerator.applyLighting` et
-   `server/DayNightController` (ils écrasent l'éclairage au Play) ; habiller les bases dans `MapGenerator`
-   (remplacer les clôtures par les palissades, l'arche à l'entrée) plutôt que par-dessus.
+1. Export : `blender_tools/export_map_lot.py` -> `baked_assets/map/Decors_Carte.fbx` (21 décors, vraie taille en studs,
+   global_scale 0,01). Chouaib l'importe (Fichier > Importer 3D, réglages par défaut) : 21 MeshParts avec leur
+   SurfaceAppearance (couleur, relief, rugosité, métal) dans `Workspace.Decors_Carte`.
+2. Lueur : les 6 `_Emissive.png` envoyés avec `upload_image` (Id dans `baked_assets/map/map_roblox.json`).
+3. `studio_tools/apply_map_look.lua` (88 Ko : trop gros pour la barre MCP, passer par un `.rbxm` : projet Rojo
+   `{ "MapLook": { "$path": "apply_map_look.lua" } }` -> `claude_maplook.rbxm` copié dans le dossier `content` de Studio,
+   puis `require(game:GetObjects("rbxasset://claude_maplook.rbxm")[1].MapLook)`). Résultat : 21 décors rangés dans
+   `ReplicatedStorage.ArtModels.Map` (lueurs posées, import supprimé), éclairage « jour », 642 décors dans
+   `Workspace.MapDecor` (les 296 des bases ignorés). **Le tout est dans le fichier du jeu : Ctrl+S puis Publier.**
+4. Sens vérifié par mesure : la face en marches d'une falaise importée est son -Z ; les 122 falaises et arches posées
+   regardent le trou noir (`FBX_YAW_OFFSET = 180` juste).
+5. Textures : 2 couleurs de l'import restaient grises (FalaiseGradins, RocherCalcaire_A) alors que l'image est bonne :
+   renvoyées à la main (`color_override` de `map_roblox.json`, reprises par le script), en attente de la modération
+   Roblox au moment de l'écriture.
+
+Reste à faire : garder le look en jeu en reportant les valeurs du préréglage dans `server/MapGenerator.applyLighting` et
+`server/DayNightController` (ils écrasent l'éclairage au Play) ; habiller les bases dans `MapGenerator` (palissades à
+la place des clôtures, arche à l'entrée) plutôt que par-dessus ; regarder la performance sur téléphone.
 
 ## Règles de jeu respectées par le placement
 
@@ -75,8 +84,10 @@ Eggs, WorldSkin supposent la carte entière présente).
 
 - Vérifié dans Blender : les 21 décors cuits sous 6 000 triangles, UV sans chevauchement (Caisse 3,9 %), cuit fidèle
   aux formes (`map_assets_board.png`), scène complète rendue de jour et de nuit, placement exporté (938 décors).
-- Pas vérifié : import des décors dans Studio, rendu sous l'éclairage Roblox, performance (surtout téléphone),
-  `apply_map_look.lua` jamais lancé, collisions et parcours des joueurs autour des arches.
+- Vérifié dans Studio (Édition + Play solo) : import, script lancé, décors à leur place autour de la vraie carte
+  (anneau d'arches, arbres et ruines entre les bases, falaises derrière le mur), sens des falaises et arches.
+- Pas vérifié : la couleur des 2 textures renvoyées (modération), performance (surtout téléphone), collisions et
+  parcours des joueurs autour des arches, le nouvel éclairage en jeu (le jeu remet l'ancien au Play).
 - Limites vues sur les rendus : les falaises répètent le même module (varier : 2e module, rochers à leur pied) ;
   le mur d'enceinte reste une grande bande unie (piste : le remplacer par une falaise) ; la prairie sauvage est
   volontairement dégagée (jeu) ; la vue aérienne reste un peu brumeuse.

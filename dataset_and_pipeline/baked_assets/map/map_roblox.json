@@ -1,0 +1,34 @@
+{
+  "note": "Masques de lueur envoyes sur le compte de Chouaib le 25 oct. 2026 (outil MCP upload_image)",
+  "emissive": {
+    "ArcheAncienne": {
+      "EmissiveMaskContent": "rbxassetid://98668858061127",
+      "EmissiveStrength": 2.6
+    },
+    "ChampignonGeant": {
+      "EmissiveMaskContent": "rbxassetid://129251097436567",
+      "EmissiveStrength": 2.8
+    },
+    "DalleRunique": {
+      "EmissiveMaskContent": "rbxassetid://88992029353653",
+      "EmissiveStrength": 2.6
+    },
+    "RocherObsidienne_A": {
+      "EmissiveMaskContent": "rbxassetid://134859917191838",
+      "EmissiveStrength": 2.38
+    },
+    "RocherObsidienne_B": {
+      "EmissiveMaskContent": "rbxassetid://92866191097210",
+      "EmissiveStrength": 2.38
+    },
+    "TotemEnergie": {
+      "EmissiveMaskContent": "rbxassetid://125786714678592",
+      "EmissiveStrength": 2.6
+    }
+  },
+  "color_override": {
+    "FalaiseGradins": "rbxassetid://116601833750884",
+    "RocherCalcaire_A": "rbxassetid://110368253253253"
+  },
+  "note_color_override": "25 oct. : couleurs renvoyees a la main, celles de l'import restaient grises (moderation)"
+}

@@ -35,6 +35,7 @@ def main() -> None:
     layout = json.loads((MAP / "map_layout.json").read_text(encoding="utf-8"))
     bible = json.loads((ROOT / "map_art_bible.json").read_text(encoding="utf-8"))
     day = bible["atmosphere"]["presets"]["jour_digestion"]
+    roblox = json.loads((MAP / "map_roblox.json").read_text(encoding="utf-8"))["emissive"]
     sizes = {}
     for asset in sorted({it["asset"] for it in layout["items"]}):
         man = json.loads((MAP / f"{asset}_manifest.json").read_text(encoding="utf-8"))
@@ -46,8 +47,10 @@ def main() -> None:
     w("--!nocheck")
     w("-- Aperçu de la nouvelle carte (phase 1.6) dans Studio, mode Édition, barre MCP execute_luau ou barre de commande.")
     w("-- GÉNÉRÉ par dataset_and_pipeline/tools/make_map_look_script.py (ne pas modifier à la main).")
-    w("-- Avant : importer les décors baked_assets/map/<Asset>.fbx (Fichier > Importer 3D) et ranger chaque MeshPart dans")
-    w("-- ReplicatedStorage.ArtModels.Map.<Asset> (nom de l'asset). Ce script :")
+    w("-- Avant : importer baked_assets/map/Decors_Carte.fbx (Fichier > Importer 3D, réglages par défaut) : 21 MeshParts")
+    w("-- nommées comme les décors arrivent dans le Workspace. Ce script :")
+    w("--   0. range ces MeshParts dans ReplicatedStorage.ArtModels.Map.<Asset> (+ lueur : EmissiveMaskContent) et")
+    w("--      supprime l'import (sauvegarder le jeu ensuite : ArtModels n'est que dans le fichier du jeu) ;")
     w("--   1. applique l'éclairage « jour » de map_art_bible.json (Lighting + Atmosphere, Bloom, ColorCorrection,")
     w("--      DepthOfField, SunRays). Attention : au Play, server/MapGenerator.applyLighting et DayNightController")
     w("--      remettent leurs propres valeurs ; pour garder ce look en jeu il faudra reporter ces valeurs dans le code ;")
@@ -73,6 +76,17 @@ def main() -> None:
         props = {k: v for k, v in day[key].items() if k != "note"}
         body = ", ".join(f"{k} = {lua_value(v)}" for k, v in props.items())
         w(f"local {key.upper()} = {{ class = \"{inst}\", props = {{ {body} }} }}")
+    w("")
+    w("-- Masques de lueur envoyés sur le compte (baked_assets/map/map_roblox.json).")
+    w("-- Couleurs renvoyées à la main (celles de l'import restaient grises).")
+    w("local COLOR_OVERRIDE = {")
+    for asset, uri in sorted(json.loads((MAP / "map_roblox.json").read_text(encoding="utf-8")).get("color_override", {}).items()):
+        w(f'	{asset} = "{uri}",')
+    w("}")
+    w("local EMISSIVE = {")
+    for asset, e in sorted(roblox.items()):
+        w(f'	{asset} = {{ id = "{e["EmissiveMaskContent"]}", strength = {e["EmissiveStrength"]} }},')
+    w("}")
     w("")
     w("-- Taille de chaque décor dans Roblox (studs, axes X, Y haut, Z) avant mise à l'échelle.")
     w("local SIZE = {")
@@ -111,6 +125,64 @@ local function applyLighting()
 		effect.Parent = Lighting
 	end
 	return "éclairage « jour » appliqué"
+end
+
+local function collectImported()
+	local art = ReplicatedStorage:FindFirstChild("ArtModels")
+	if not art then
+		art = Instance.new("Folder")
+		art.Name = "ArtModels"
+		art.Parent = ReplicatedStorage
+	end
+	local library = art:FindFirstChild("Map")
+	if not library then
+		library = Instance.new("Folder")
+		library.Name = "Map"
+		library.Parent = art
+	end
+	local moved, containers = 0, {}
+	for _, inst in ipairs(Workspace:GetDescendants()) do
+		if inst:IsA("MeshPart") and SIZE[inst.Name] and not inst:FindFirstAncestor("MapDecor")
+			and not inst:FindFirstAncestor("Map") then
+			local top = inst
+			while top.Parent ~= Workspace do
+				top = top.Parent
+			end
+			if top ~= inst then
+				containers[top] = true
+			end
+			local old = library:FindFirstChild(inst.Name)
+			if old then
+				old:Destroy()
+			end
+			inst.Anchored = true
+			local sa = inst:FindFirstChildOfClass("SurfaceAppearance")
+			local glow = EMISSIVE[inst.Name]
+			if sa and COLOR_OVERRIDE[inst.Name] then
+				sa.ColorMapContent = Content.fromUri(COLOR_OVERRIDE[inst.Name])
+			end
+			if sa and glow then
+				sa.EmissiveMaskContent = Content.fromUri(glow.id)
+				sa.EmissiveStrength = glow.strength
+				sa.EmissiveTint = Color3.new(1, 1, 1)
+			end
+			inst.Parent = library
+			moved += 1
+		end
+	end
+	for container in pairs(containers) do
+		if #container:GetDescendants() == 0 or not container:FindFirstChildWhichIsA("BasePart", true) then
+			container:Destroy()
+		end
+	end
+	local count, total = 0, 0
+	for name in pairs(SIZE) do
+		total += 1
+		if library:FindFirstChild(name) then
+			count += 1
+		end
+	end
+	return string.format("%d décors importés rangés (%d / %d dans ArtModels.Map)", moved, count, total)
 end
 
 local function sectorOf(x: number, z: number): number
@@ -190,6 +262,9 @@ if MODE == "remove" then
 	end
 	table.insert(report, "Workspace.MapDecor retiré")
 else
+	if MODE == "all" or MODE == "decor" then
+		table.insert(report, collectImported())
+	end
 	if MODE == "all" or MODE == "lighting" then
 		table.insert(report, applyLighting())
 	end

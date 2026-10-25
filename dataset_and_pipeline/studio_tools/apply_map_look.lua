@@ -1,8 +1,10 @@
 --!nocheck
 -- Aperçu de la nouvelle carte (phase 1.6) dans Studio, mode Édition, barre MCP execute_luau ou barre de commande.
 -- GÉNÉRÉ par dataset_and_pipeline/tools/make_map_look_script.py (ne pas modifier à la main).
--- Avant : importer les décors baked_assets/map/<Asset>.fbx (Fichier > Importer 3D) et ranger chaque MeshPart dans
--- ReplicatedStorage.ArtModels.Map.<Asset> (nom de l'asset). Ce script :
+-- Avant : importer baked_assets/map/Decors_Carte.fbx (Fichier > Importer 3D, réglages par défaut) : 21 MeshParts
+-- nommées comme les décors arrivent dans le Workspace. Ce script :
+--   0. range ces MeshParts dans ReplicatedStorage.ArtModels.Map.<Asset> (+ lueur : EmissiveMaskContent) et
+--      supprime l'import (sauvegarder le jeu ensuite : ArtModels n'est que dans le fichier du jeu) ;
 --   1. applique l'éclairage « jour » de map_art_bible.json (Lighting + Atmosphere, Bloom, ColorCorrection,
 --      DepthOfField, SunRays). Attention : au Play, server/MapGenerator.applyLighting et DayNightController
 --      remettent leurs propres valeurs ; pour garder ce look en jeu il faudra reporter ces valeurs dans le code ;
@@ -33,6 +35,21 @@ local BLOOM = { class = "BloomEffect", props = { Intensity = 0.45, Size = 22.0, 
 local COLORCORRECTION = { class = "ColorCorrectionEffect", props = { Saturation = 0.18, Contrast = 0.08, Brightness = 0.0, TintColor = Color3.fromHex("FFFAF0") } }
 local DEPTHOFFIELD = { class = "DepthOfFieldEffect", props = { Enabled = true, FarIntensity = 0.12, FocusDistance = 120.0, InFocusRadius = 160.0, NearIntensity = 0.0 } }
 local SUNRAYS = { class = "SunRaysEffect", props = { Intensity = 0.04, Spread = 0.6 } }
+
+-- Masques de lueur envoyés sur le compte (baked_assets/map/map_roblox.json).
+-- Couleurs renvoyées à la main (celles de l'import restaient grises).
+local COLOR_OVERRIDE = {
+	FalaiseGradins = "rbxassetid://116601833750884",
+	RocherCalcaire_A = "rbxassetid://110368253253253",
+}
+local EMISSIVE = {
+	ArcheAncienne = { id = "rbxassetid://98668858061127", strength = 2.6 },
+	ChampignonGeant = { id = "rbxassetid://129251097436567", strength = 2.8 },
+	DalleRunique = { id = "rbxassetid://88992029353653", strength = 2.6 },
+	RocherObsidienne_A = { id = "rbxassetid://134859917191838", strength = 2.38 },
+	RocherObsidienne_B = { id = "rbxassetid://92866191097210", strength = 2.38 },
+	TotemEnergie = { id = "rbxassetid://125786714678592", strength = 2.6 },
+}
 
 -- Taille de chaque décor dans Roblox (studs, axes X, Y haut, Z) avant mise à l'échelle.
 local SIZE = {
@@ -1026,6 +1043,64 @@ local function applyLighting()
 	return "éclairage « jour » appliqué"
 end
 
+local function collectImported()
+	local art = ReplicatedStorage:FindFirstChild("ArtModels")
+	if not art then
+		art = Instance.new("Folder")
+		art.Name = "ArtModels"
+		art.Parent = ReplicatedStorage
+	end
+	local library = art:FindFirstChild("Map")
+	if not library then
+		library = Instance.new("Folder")
+		library.Name = "Map"
+		library.Parent = art
+	end
+	local moved, containers = 0, {}
+	for _, inst in ipairs(Workspace:GetDescendants()) do
+		if inst:IsA("MeshPart") and SIZE[inst.Name] and not inst:FindFirstAncestor("MapDecor")
+			and not inst:FindFirstAncestor("Map") then
+			local top = inst
+			while top.Parent ~= Workspace do
+				top = top.Parent
+			end
+			if top ~= inst then
+				containers[top] = true
+			end
+			local old = library:FindFirstChild(inst.Name)
+			if old then
+				old:Destroy()
+			end
+			inst.Anchored = true
+			local sa = inst:FindFirstChildOfClass("SurfaceAppearance")
+			local glow = EMISSIVE[inst.Name]
+			if sa and COLOR_OVERRIDE[inst.Name] then
+				sa.ColorMapContent = Content.fromUri(COLOR_OVERRIDE[inst.Name])
+			end
+			if sa and glow then
+				sa.EmissiveMaskContent = Content.fromUri(glow.id)
+				sa.EmissiveStrength = glow.strength
+				sa.EmissiveTint = Color3.new(1, 1, 1)
+			end
+			inst.Parent = library
+			moved += 1
+		end
+	end
+	for container in pairs(containers) do
+		if #container:GetDescendants() == 0 or not container:FindFirstChildWhichIsA("BasePart", true) then
+			container:Destroy()
+		end
+	end
+	local count, total = 0, 0
+	for name in pairs(SIZE) do
+		total += 1
+		if library:FindFirstChild(name) then
+			count += 1
+		end
+	end
+	return string.format("%d décors importés rangés (%d / %d dans ArtModels.Map)", moved, count, total)
+end
+
 local function sectorOf(x: number, z: number): number
 	return math.floor(((math.deg(math.atan2(z, x)) + 360) % 360) / 45) + 1
 end
@@ -1103,6 +1178,9 @@ if MODE == "remove" then
 	end
 	table.insert(report, "Workspace.MapDecor retiré")
 else
+	if MODE == "all" or MODE == "decor" then
+		table.insert(report, collectImported())
+	end
 	if MODE == "all" or MODE == "lighting" then
 		table.insert(report, applyLighting())
 	end
