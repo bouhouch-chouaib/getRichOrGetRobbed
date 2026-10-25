@@ -1,0 +1,58 @@
+{
+  "asset": "Glace_Bonhomme",
+  "triangles": 2086,
+  "vertices": 1073,
+  "size_studs": [
+    5.289,
+    2.81,
+    7.146
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 40.4,
+  "source_materials": [
+    "M_Carotte",
+    "M_CharbonNoir",
+    "M_EcorceFroide",
+    "M_LaineRouge",
+    "M_Neige"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0286,
+    "max_ray": 0.0715,
+    "ao_distance": 0.8575,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Glace_Bonhomme_Color.png",
+    "Roughness": "Glace_Bonhomme_Roughness.png",
+    "Metalness": "Glace_Bonhomme_Metalness.png",
+    "Normal": "Glace_Bonhomme_Normal.png",
+    "AO": "Glace_Bonhomme_AO.png"
+  },
+  "exports": [
+    "Glace_Bonhomme.fbx",
+    "Glace_Bonhomme.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Glace_Bonhomme (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Glace_Bonhomme_Color.png",
+      "NormalMap": "Glace_Bonhomme_Normal.png",
+      "RoughnessMap": "Glace_Bonhomme_Roughness.png",
+      "MetalnessMap": "Glace_Bonhomme_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 12.0
+}

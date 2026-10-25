@@ -1,0 +1,189 @@
+{
+  "Glace_Glacier": {
+    "triangles": 5832,
+    "within_6000": true,
+    "size_studs": [
+      36.078,
+      15.03,
+      29.623
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 6.5
+  },
+  "Glace_Sapin": {
+    "triangles": 2370,
+    "within_6000": true,
+    "size_studs": [
+      8.79,
+      8.79,
+      14.145
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 18.6
+  },
+  "Glace_SapinPetit": {
+    "triangles": 2262,
+    "within_6000": true,
+    "size_studs": [
+      5.284,
+      5.284,
+      8.487
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 7.8
+  },
+  "Glace_Rocher": {
+    "triangles": 798,
+    "within_6000": true,
+    "size_studs": [
+      9.317,
+      6.716,
+      6.122
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 26.4
+  },
+  "Glace_Cristaux": {
+    "triangles": 2446,
+    "within_6000": true,
+    "size_studs": [
+      5.156,
+      4.227,
+      3.994
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 8.0
+  },
+  "Glace_Congere": {
+    "triangles": 894,
+    "within_6000": true,
+    "size_studs": [
+      7.551,
+      3.43,
+      1.699
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 10.4
+  },
+  "Glace_Touffe": {
+    "triangles": 440,
+    "within_6000": true,
+    "size_studs": [
+      2.11,
+      2.079,
+      2.741
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 9.0
+  },
+  "Glace_Pic": {
+    "triangles": 1190,
+    "within_6000": true,
+    "size_studs": [
+      6.981,
+      5.842,
+      12.762
+    ],
+    "uv_overlap_pct": 0.01,
+    "seconds": 32.7
+  },
+  "Glace_BlocMammouth": {
+    "triangles": 2606,
+    "within_6000": true,
+    "size_studs": [
+      9.478,
+      13.477,
+      8.602
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 20.0
+  },
+  "Glace_PorteGlace": {
+    "triangles": 3906,
+    "within_6000": true,
+    "size_studs": [
+      26.051,
+      4.4,
+      26.9
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 13.1
+  },
+  "Glace_Lanterne": {
+    "triangles": 1404,
+    "within_6000": true,
+    "size_studs": [
+      5.508,
+      3.633,
+      12.05
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 7.2
+  },
+  "Glace_Dalle": {
+    "triangles": 2262,
+    "within_6000": true,
+    "size_studs": [
+      8.084,
+      5.984,
+      1.37
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 9.7
+  },
+  "Glace_Barriere": {
+    "triangles": 2016,
+    "within_6000": true,
+    "size_studs": [
+      12.276,
+      2.163,
+      5.5
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 16.0
+  },
+  "Glace_Escalier": {
+    "triangles": 1620,
+    "within_6000": true,
+    "size_studs": [
+      19.2,
+      5.805,
+      2.3
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 15.9
+  },
+  "Glace_Igloo": {
+    "triangles": 1870,
+    "within_6000": true,
+    "size_studs": [
+      12.137,
+      14.227,
+      4.85
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 26.0
+  },
+  "Glace_Traineau": {
+    "triangles": 2376,
+    "within_6000": true,
+    "size_studs": [
+      5.244,
+      2.65,
+      2.8
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 10.0
+  },
+  "Glace_Bonhomme": {
+    "triangles": 2086,
+    "within_6000": true,
+    "size_studs": [
+      5.289,
+      2.81,
+      7.146
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 12.0
+  }
+}

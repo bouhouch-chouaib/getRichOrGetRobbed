@@ -1,0 +1,58 @@
+{
+  "asset": "Glace_Glacier",
+  "triangles": 5832,
+  "vertices": 3024,
+  "size_studs": [
+    36.078,
+    15.03,
+    29.623
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 2.2,
+  "source_materials": [
+    "M_GlaceA",
+    "M_GlaceB",
+    "M_GlaceC",
+    "M_Neige",
+    "M_NeigeTassee"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.1443,
+    "max_ray": 0.3608,
+    "ao_distance": 2.5,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Glace_Glacier_Color.png",
+    "Roughness": "Glace_Glacier_Roughness.png",
+    "Metalness": "Glace_Glacier_Metalness.png",
+    "Normal": "Glace_Glacier_Normal.png",
+    "AO": "Glace_Glacier_AO.png"
+  },
+  "exports": [
+    "Glace_Glacier.fbx",
+    "Glace_Glacier.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Glace_Glacier (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Glace_Glacier_Color.png",
+      "NormalMap": "Glace_Glacier_Normal.png",
+      "RoughnessMap": "Glace_Glacier_Roughness.png",
+      "MetalnessMap": "Glace_Glacier_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 6.5
+}

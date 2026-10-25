@@ -1,0 +1,59 @@
+{
+  "asset": "Glace_BlocMammouth",
+  "triangles": 2606,
+  "vertices": 1345,
+  "size_studs": [
+    9.478,
+    13.477,
+    8.602
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 44.7,
+  "source_materials": [
+    "M_CharbonNoir",
+    "M_FourrureMammouth",
+    "M_GlaceA",
+    "M_GlaceC",
+    "M_Ivoire",
+    "M_Neige"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0539,
+    "max_ray": 0.1348,
+    "ao_distance": 1.6172,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Glace_BlocMammouth_Color.png",
+    "Roughness": "Glace_BlocMammouth_Roughness.png",
+    "Metalness": "Glace_BlocMammouth_Metalness.png",
+    "Normal": "Glace_BlocMammouth_Normal.png",
+    "AO": "Glace_BlocMammouth_AO.png"
+  },
+  "exports": [
+    "Glace_BlocMammouth.fbx",
+    "Glace_BlocMammouth.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Glace_BlocMammouth (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Glace_BlocMammouth_Color.png",
+      "NormalMap": "Glace_BlocMammouth_Normal.png",
+      "RoughnessMap": "Glace_BlocMammouth_Roughness.png",
+      "MetalnessMap": "Glace_BlocMammouth_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 20.0
+}

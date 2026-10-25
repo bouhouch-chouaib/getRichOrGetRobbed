@@ -1,0 +1,57 @@
+{
+  "asset": "Glace_Pic",
+  "triangles": 1190,
+  "vertices": 605,
+  "size_studs": [
+    6.981,
+    5.842,
+    12.762
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.01,
+  "uv_coverage_pct": 38.5,
+  "source_materials": [
+    "M_GlaceA",
+    "M_GlaceB",
+    "M_GlaceC",
+    "M_Neige"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.051,
+    "max_ray": 0.1276,
+    "ao_distance": 1.5314,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Glace_Pic_Color.png",
+    "Roughness": "Glace_Pic_Roughness.png",
+    "Metalness": "Glace_Pic_Metalness.png",
+    "Normal": "Glace_Pic_Normal.png",
+    "AO": "Glace_Pic_AO.png"
+  },
+  "exports": [
+    "Glace_Pic.fbx",
+    "Glace_Pic.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Glace_Pic (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Glace_Pic_Color.png",
+      "NormalMap": "Glace_Pic_Normal.png",
+      "RoughnessMap": "Glace_Pic_Roughness.png",
+      "MetalnessMap": "Glace_Pic_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 32.7
+}

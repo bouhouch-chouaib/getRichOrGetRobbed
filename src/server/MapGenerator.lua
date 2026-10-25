@@ -390,6 +390,7 @@ local DRESSINGS: { [string]: { Fence: string, Gate: string, Stairs: string } } =
 	Prairie = { Fence = "Palissade", Gate = "ArcheAncienne", Stairs = "EscalierPierre" },
 	Desert = { Fence = "Desert_Muret", Gate = "Desert_PorteTemple", Stairs = "Desert_Escalier" },
 	Volcan = { Fence = "Volcan_Rempart", Gate = "Volcan_PorteForge", Stairs = "Volcan_Escalier" },
+	Glace = { Fence = "Glace_Barriere", Gate = "Glace_PorteGlace", Stairs = "Glace_Escalier" },
 }
 
 local function createDressing(origin: CFrame, top: number, base: Model, worldId: string, library: Instance)

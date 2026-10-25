@@ -78,7 +78,8 @@ Worlds (Prairie), vérifié en Play de jour et de nuit ; bases habillées en Pra
 `MapGenerator.createPrairieDressing` + bascule par monde dans `WorldSkin`). **Chouaib (25 oct.) : on refera ce même
 travail de design (charte, décors, éclairage, bases) pour chaque monde ; Prairie et Désert en jeu (Désert : 19 décors sans
 lueur, `MapDecor.Desert`, bases `DesertLook`, vérifié en Play le 25 oct.) ; Volcan en jeu (17 décors sans lueur,
-`MapDecor.Volcan`, bases `VolcanLook`, 37 PointLight, vérifié en Play le 25 oct.) ; prochain monde : Glace ; eau / lave en pièces Roblox via les scripts ; importer un
+`MapDecor.Volcan`, bases `VolcanLook`, 37 PointLight, vérifié en Play le 25 oct.) ; Glace proposée (17 décors,
+rendus `map_hero_glace.png`, rien dans Studio) ; eau / lave en pièces Roblox via les scripts ; importer un
 .fbx seulement Studio en mode Édition** : lire
 `dataset_and_pipeline/MAP.md`. Charte `map_art_bible.json`, 21 décors en blocs biseautés cuits (`environment_recipes.py`,
 `run_map_assets.py`, `baked_assets/map/`), scène aux vraies dimensions + rendus `qa_renders/map_hero.png` et

@@ -1128,6 +1128,7 @@ local LAVA_LIGHT = Color3.fromRGB(255, 110, 40)
 local SURFACE_LOOK = {
 	water = { name = "Eau", color = Color3.fromRGB(47, 168, 255), material = Enum.Material.Glass, transparency = 0.35 },
 	lava = { name = "Lave", color = Color3.fromRGB(255, 122, 26), material = Enum.Material.Neon, transparency = 0 },
+	ice = { name = "Glace", color = Color3.fromRGB(190, 230, 255), material = Enum.Material.Ice, transparency = 0.1 },
 }
 
 local function addLight(part: BasePart, spec)

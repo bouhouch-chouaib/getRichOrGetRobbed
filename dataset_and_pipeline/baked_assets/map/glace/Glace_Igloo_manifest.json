@@ -1,0 +1,57 @@
+{
+  "asset": "Glace_Igloo",
+  "triangles": 1870,
+  "vertices": 951,
+  "size_studs": [
+    12.137,
+    14.227,
+    4.85
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 57.9,
+  "source_materials": [
+    "M_Neige",
+    "M_NeigeTassee",
+    "M_OmbreBleue",
+    "M_VerreChaud"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0569,
+    "max_ray": 0.1423,
+    "ao_distance": 1.7073,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Glace_Igloo_Color.png",
+    "Roughness": "Glace_Igloo_Roughness.png",
+    "Metalness": "Glace_Igloo_Metalness.png",
+    "Normal": "Glace_Igloo_Normal.png",
+    "AO": "Glace_Igloo_AO.png"
+  },
+  "exports": [
+    "Glace_Igloo.fbx",
+    "Glace_Igloo.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Glace_Igloo (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Glace_Igloo_Color.png",
+      "NormalMap": "Glace_Igloo_Normal.png",
+      "RoughnessMap": "Glace_Igloo_Roughness.png",
+      "MetalnessMap": "Glace_Igloo_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 26.0
+}

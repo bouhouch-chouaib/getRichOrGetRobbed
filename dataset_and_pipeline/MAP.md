@@ -187,3 +187,25 @@ aussi remontés de ~1,6 stud (hauteur réelle de la falaise au lieu de 28,2). Re
 Play : ruisseau sous le pont de la Prairie (`map_roblox_prairie_ruisseau.jpg`), oasis du Désert
 (`map_roblox_desert_oasis.jpg`). Au changement de monde, les textures du nouveau monde mettent quelques secondes à
 s'afficher (gris le temps du chargement).
+
+---
+
+# Monde 4 : Glace (25 oct. 2026) — proposition à valider
+
+« Le Village Givré du Yéti » (charte `map_art_bible_glace.json`, d'après Pingouin Patineur, Morse Moustachu, Yéti Câlin,
+Mammouth Glaçon, Narval Aurore). 17 décors dans `blender_tools/environment_glace.py`, rendus `qa_renders/map_hero_glace.png`,
+`map_aesthetic_board_glace.png`, `map_assets_board_glace.png` (les 5 familiers du monde, déjà refaits, posent dans la base).
+
+- **Aucune lueur** : vitres des lanternes et fenêtre de l'igloo en couleur chaude ; PointLight posées par le script
+  (lanternes du sanctuaire, igloos), éteintes pour les autres mondes. Rien à envoyer.
+- Décors (< 6 000 triangles) : Glacier (strates de glace, terrasses de neige), Sapin et SapinPetit (étages enneigés),
+  Rocher (chapeau de neige), Cristaux, Congere, Touffe (herbe givrée), Pic (aiguilles de glace), BlocMammouth (mammouth
+  pris dans la glace), PorteGlace (stalactites, flocon), Lanterne, Dalle (flocon), Barriere (rondins enneigés),
+  Escalier, Igloo, Traineau (cadeaux), Bonhomme. Pancarte reprise de la Prairie.
+- Scène : `run_map_scene.py -- --world Glace` -> `baked_assets/map/glace/map_layout.json` (891 décors + lac gelé : surface
+  « ice », matériau Ice de Roblox) ; pics de glace géants au loin, un module de glacier sur trois remplacé par des pics ;
+  neige : soleil moins fort, exposition -0,2, saturation et contraste remontés (sinon tout est bleu pâle).
+  `export_map_lot.py -- --world Glace` -> `Decors_Glace.fbx` (26,5 Mo).
+- Branchement prévu (après validation, import Studio en mode Édition) : `apply_map_look_glace.lua`, `MapDecor.Glace`,
+  bases `GlaceLook` (déjà dans `MapGenerator.DRESSINGS`). À proposer : saturation de l'air de la Glace 0,05 -> 0,12
+  (`shared/Worlds`), la neige paraît terne sinon.

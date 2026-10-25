@@ -1,0 +1,58 @@
+{
+  "asset": "Glace_PorteGlace",
+  "triangles": 3906,
+  "vertices": 2019,
+  "size_studs": [
+    26.051,
+    4.4,
+    26.9
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 19.0,
+  "source_materials": [
+    "M_GlaceA",
+    "M_GlaceB",
+    "M_GlaceC",
+    "M_Neige",
+    "M_NeigeTassee"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.1076,
+    "max_ray": 0.269,
+    "ao_distance": 2.5,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Glace_PorteGlace_Color.png",
+    "Roughness": "Glace_PorteGlace_Roughness.png",
+    "Metalness": "Glace_PorteGlace_Metalness.png",
+    "Normal": "Glace_PorteGlace_Normal.png",
+    "AO": "Glace_PorteGlace_AO.png"
+  },
+  "exports": [
+    "Glace_PorteGlace.fbx",
+    "Glace_PorteGlace.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Glace_PorteGlace (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Glace_PorteGlace_Color.png",
+      "NormalMap": "Glace_PorteGlace_Normal.png",
+      "RoughnessMap": "Glace_PorteGlace_Roughness.png",
+      "MetalnessMap": "Glace_PorteGlace_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 13.1
+}

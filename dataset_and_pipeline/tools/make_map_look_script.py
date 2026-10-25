@@ -21,6 +21,7 @@ MAP = ROOT / "baked_assets" / "map"
 LIGHTS = {
     "Volcan": {"Volcan_PilierBrasier": (0.45, 22, 1.6), "Volcan_Cheminee": (0.3, 18, 1.4),
                "Volcan_Chaudron": (0.35, 12, 1.0)},
+    "Glace": {"Glace_Lanterne": (0.25, 20, 1.4), "Glace_Igloo": (-0.1, 14, 1.0)},
 }
 
 
@@ -209,6 +210,7 @@ local LAVA_LIGHT = Color3.fromRGB(255, 110, 40)
 local SURFACE_LOOK = {
 	water = { name = "Eau", color = Color3.fromRGB(47, 168, 255), material = Enum.Material.Glass, transparency = 0.35 },
 	lava = { name = "Lave", color = Color3.fromRGB(255, 122, 26), material = Enum.Material.Neon, transparency = 0 },
+	ice = { name = "Glace", color = Color3.fromRGB(190, 230, 255), material = Enum.Material.Ice, transparency = 0.1 },
 }
 
 local function addLight(part: BasePart, spec)

@@ -1,0 +1,18 @@
+{
+  "layout": "2 colonnes, de gauche à droite et de haut en bas",
+  "views": [
+    "aerien",
+    "entree_base",
+    "entree_arene",
+    "colline",
+    "nuit",
+    "depuis_trou"
+  ],
+  "world": "Glace",
+  "render": {
+    "engine": "CYCLES",
+    "samples": 32,
+    "post": "Atmosphere + Bloom + ColorCorrection du preset (map_art_bible*.json)"
+  },
+  "seconds": 113.0
+}

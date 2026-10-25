@@ -94,6 +94,18 @@ VOLCAN_LOOKS = {
              "exposure": 0.8},
 }
 
+GLACE_LOOKS = {
+    # soleil moins fort et exposition plus basse : la neige garde son détail (map_art_bible_glace.json)
+    "jour": {"sun": 3.6, "sun_color": (1.0, 0.97, 0.93), "sun_elev": 35, "sun_az": 210, "sky_top": "#5AA8F0",
+             "sky_horizon": "#E8F4FF", "sky_strength": 0.9, "fog": "#E0EEFF", "fog_density": 0.0007,
+             "fog_start": 130, "fog_max": 0.4, "bloom": (1.6, 0.4, 22), "saturation": 0.24, "contrast": 0.16,
+             "exposure": -0.2},
+    "nuit": {"sun": 1.3, "sun_color": (0.62, 0.74, 1.0), "sun_elev": 36, "sun_az": 120, "sky_top": "#08142E",
+             "sky_horizon": "#1E5A6E", "sky_strength": 1.4, "fog": "#2A3A6A", "fog_density": 0.001,
+             "fog_start": 100, "fog_max": 0.55, "bloom": (1.3, 0.6, 26), "saturation": 0.2, "contrast": 0.1,
+             "exposure": 0.7},
+}
+
 # Rôle -> décor, couleurs du sol et lumière de chaque monde. Le code de placement ne connaît que les rôles.
 WORLD_CFG = {
     "Prairie": {
@@ -163,6 +175,29 @@ WORLD_CFG = {
                    "base_sol": ("#4E4448", "#3E3438"), "paille": ("#6A5040", "#5A4434"), "dalle": ("#5A5256", "#4A4246"),
                    "mur": ("#3C3238", "#2E262A"), "mur_haut": ("#FF641E", "#F0501E"), "loin": "#2A2226"},
         "glow": {"chemin": 2.2, "mur_haut": 2.2},
+    },
+    "Glace": {
+        "lib": [("Glace", None), ("Prairie", ["Pancarte"])], "suffix": "_glace", "looks": GLACE_LOOKS,
+        "clouds": 14, "water": "ice",
+        "slab": "Glace_Dalle", "gate": "Glace_PorteGlace", "flank": "Glace_Lanterne",
+        "between": ("Glace_Pic", "Glace_Cristaux"), "between_z": -0.2,
+        "tuft": "Glace_Touffe", "path_small": ("Glace_Congere", 0.5, 0.8), "sign": "Pancarte",
+        "fence": "Glace_Barriere", "stairs": "Glace_Escalier", "base_gate": "Glace_PorteGlace",
+        "prop_a": "Glace_Traineau", "prop_b": "Glace_Bonhomme", "hill": "Glace_Glacier",
+        "hill_trees": ("Glace_SapinPetit", ("Glace_Sapin", "Glace_Sapin")),
+        "gap_trees": ("Glace_Sapin", "Glace_SapinPetit", "Glace_Sapin", "Glace_Igloo"),
+        "rocks": ("Glace_Rocher", "Glace_Congere", "Glace_Rocher"), "ruin": "Glace_Igloo",
+        "landmark": ("Glace_BlocMammouth", "Glace_Igloo", "Glace_Bonhomme", "Glace_Pic"),
+        "bank_rock": "Glace_Rocher", "bridge": None,
+        "cliff": "Glace_Glacier", "cliff_trees": ("Glace_SapinPetit", ("Glace_Sapin", "Glace_Sapin")),
+        "far": ("Glace_Pic", "Glace_Pic"), "far_spire": "Glace_Pic",
+        "far_scale": ((9.0, 13.0), (9.0, 13.0), (12.0, 16.0)),  # pics de glace géants (170-220 studs) au loin
+        "cliff_alt": ("Glace_Pic", (3.4, 3.4, 4.6)),
+        "pets": (("YetiCalin", -14, -2, 9.0), ("PingouinPatineur", 10, 6, 5.0), ("MorseMoustachu", -2, 12, 7.5),
+                 ("MammouthGlacon", 18, -12, 9.5), ("LoupPolaire", -24, 8, 6.5)),
+        "colors": {"sol": ("#F0F8FF", "#D6EAFA", "#E6F2FC", "#CCE2F4"), "chemin": ("#96D2F5", "#7CBEEB"),
+                   "base_sol": ("#E8F4FC", "#D0E6F6"), "paille": ("#C8B08A", "#B89C74"), "dalle": ("#D8E8F4", "#C8DCEC"),
+                   "mur": ("#AAD7F5", "#92C4EC"), "mur_haut": ("#FFFFFF", "#F0F8FF"), "loin": "#E8F2FA"},
     },
 }
 W: dict = WORLD_CFG["Prairie"]
@@ -587,6 +622,22 @@ def add_stream(M, k: int):
         put(W["bank_rock"], x - t * math.sin(a), y + t * math.cos(a), -0.6, j * 47.0, 0.45, "colline")
 
 
+def add_frozen_lake(M, k: int, rnd):
+    """Lac gelé de la Glace entre la base 1 et la base 8 (où patine le Pingouin) : glace lisse, congères, sapins,
+    rochers enneigés autour."""
+    phi = -(k + 0.5) * 45.0
+    cx, cy = polar(272, phi)
+    lake = disc("LacGele", 15.0, 0.08, M["glace_lac"], segs=48)  # rond : un cylindre Roblox ne peut pas être ovale
+    G.transform(lake, Matrix.Translation((cx, cy, 0)))
+    surface("ice", "disc", cx, cy, 30.0, 30.0)
+    for j in range(8):
+        a = j * 2 * math.pi / 8 + rnd.uniform(-0.2, 0.2)
+        x, y = cx + math.cos(a) * 18.5, cy + math.sin(a) * 18.5
+        asset = ("Glace_Sapin", "Glace_Congere", "Glace_Rocher", "Glace_SapinPetit")[j % 4]
+        put(asset, x, y, -0.2, rnd.uniform(0, 360), rnd.uniform(0.7, 1.1), "colline",
+            collide=asset in ("Glace_Sapin", "Glace_Rocher"))
+
+
 def add_lava_pool(M, k: int, rnd):
     """Mare de lave du Volcan entre la base 1 et la base 8 : cheminées fumantes, cristaux de feu, rochers de basalte."""
     phi = -(k + 0.5) * 45.0
@@ -967,6 +1018,7 @@ def main() -> None:
         "ecran": flat_mat("M_Ecran", "#22263A", 0.3, emission=0.2),
         "nuage": flat_mat("M_Nuage", W.get("cloud", "#FFFFFF"), 0.95, emission=0.25),
         "lave": flat_mat("M_LaveScene", "#FF7A1A", 0.3, emission=2.4),
+        "glace_lac": flat_mat("M_GlaceLac", "#BEE6FF", 0.05, emission=0.1),
         "avatar_haut": flat_mat("M_AvatarHaut", "#1E7BFF", 0.6),
         "avatar_bas": flat_mat("M_AvatarBas", "#2B2F45", 0.6),
         "avatar_peau": flat_mat("M_AvatarPeau", "#F5CD30", 0.5),
@@ -983,6 +1035,8 @@ def main() -> None:
         add_stream(M, 7)
     elif W["water"] == "oasis":
         add_oasis(M, 7, rnd)
+    elif W["water"] == "ice":
+        add_frozen_lake(M, 7, rnd)
     else:
         add_lava_pool(M, 7, rnd)
     build_periphery(rnd)

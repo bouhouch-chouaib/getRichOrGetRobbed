@@ -1,0 +1,60 @@
+{
+  "title": "Bible artistique de la carte - monde Glace (4e palier)",
+  "date": "2026-10-25",
+  "status": "proposition, a valider par Chouaib sur qa_renders/map_hero_glace.png et map_aesthetic_board_glace.png",
+  "method": "Meme methode que la Prairie, le Desert et le Volcan : carte ronde inchangee, decors en blocs biseautes cuits, relief autour de l'arene, eclairage dans le code, eau / glace en pieces Roblox. Chaque monde a sa charte.",
+  "story": "Le Village Givre du Yeti : au pied des glaciers, le Yeti Calin a construit un village d'igloos et de lanternes. Le Pingouin Patineur s'entraine sur le lac gele, le Morse Moustachu fait la sieste sur la banquise, le Mammouth Glacon est reste coince dans un bloc de glace a l'entree du village, et le Narval Aurore fait danser les aurores la nuit.",
+
+  "sources": {
+    "local_reference": "src/shared/Worlds.lua (Glace : sol blanc-bleu, chemins bleu givre, mur bleu pale au sommet blanc, neige), src/shared/PetCatalog.lua (familiers de la Glace)",
+    "web": [
+      {"what": "Village enneige stylise low poly : batiments, congeres de 3 tailles, chemin, sapins, reverbere, fumee de cheminee", "url": "https://www.fab.com/listings/2bb26fed-e28d-4cba-ab8c-205cd4dd019f"},
+      {"what": "Montagne d'hiver Roblox : soleil trop fort a baisser, Atmosphere plutot que brouillard, DOF avec parcimonie", "url": "https://devforum.roblox.com/t/winter-mountain-showcase/915115"},
+      {"what": "Exposition un peu plus basse pour que la neige reste blanche avec du detail (eviter le blanc brule)", "url": "https://playbook.boostly.co.uk/?p=70250"},
+      {"what": "La neige doit rester blanche mais garder une trace de detail", "url": "https://www.photrio.com/forum/threads/exposing-for-snow.34134/post-492070"}
+    ]
+  },
+
+  "palette": {
+    "rule": "Base froide : neige blanc-bleu et glace bleu ciel / bleu profond (creux bleus, jamais gris). Deux accents chauds et rares : la lumiere des lanternes et des igloos (jaune-orange) et le rouge des echarpes et des traineaux. Le vert sombre des sapins donne le contraste de valeur. Tout reste sature (pas de blanc terne) : la neige a des creux bleus.",
+    "gradient_center_to_edge": [
+      {"zone": "coeur du trou noir", "hex": "#2E1B5C", "note": "inchange : vortex violet"},
+      {"zone": "dalles du sanctuaire", "hex": "#E8F2FA", "accent": "#5AB4F0", "note": "neige tassee, flocon de glace incruste"},
+      {"zone": "arene", "hex": "#F0F8FF", "alt": "#D6EAFA", "note": "damier de neige du jeu (Worlds.Glace.GrassA/B)"},
+      {"zone": "chemins", "hex": "#96D2F5", "alt": "#7CBEEB", "note": "glace bleu givre (Worlds.Glace.PathA/B)"},
+      {"zone": "mur d'enceinte", "hex": "#AAD7F5", "top": "#FFFFFF", "note": "inchange"},
+      {"zone": "glaciers exterieurs", "hex": "#A8DCF8", "deep": "#3E7AC0", "note": "blocs de glace en strates, terrasses de neige, sapins"}
+    ],
+    "materials": {
+      "glace": {"tones": ["#A8DCF8", "#7EC4F0", "#C8EAFF"], "cavity": "#3E7AC0", "roughness": 0.25},
+      "neige": {"base": "#F6FAFF", "cavity": "#A8C4E0"},
+      "roche_froide": {"base": "#7A8494", "cavity": "#3A4250"},
+      "sapin": {"tones": ["#2E7A5A", "#3A8E66"], "snow": "#F6FAFF"},
+      "bois_givre": {"base": "#9A6A48", "edge": "#E0E8F0"},
+      "accents": {"lanterne": "#FFC878", "echarpe": "#E8141A", "carotte": "#FF8A2A"}
+    }
+  },
+
+  "atmosphere": {
+    "tone": "Jour lumineux et net (soleil moins fort qu'en Prairie, neige qui garde son detail), nuit bleu marine avec une lueur verte d'aurore a l'horizon ; les lanternes et les igloos sont les reperes chauds.",
+    "Worlds.Glace.Ambience": {"AirColor": "#DCF0FF", "AirDecay": "#96BEE6", "AirDensity": 0.32, "Tint": "#E1F0FF", "Saturation": 0.05, "note": "deja dans le jeu ; la saturation de 0,05 rend la neige terne : proposer 0,12 au branchement"},
+    "no_glow": "Aucun masque de lueur. Lanternes et igloos : PointLight jaune-orange posees par le script (rien a envoyer), eteintes pour les autres mondes."
+  },
+
+  "zones": {
+    "arene_centrale": {"story": "Le cercle de glace : anneau de dalles de neige tassee a flocons, 8 portes de glace (piliers de glace, arche chapeautee de neige, stalactites) sur les chemins, lanternes de part et d'autre, pics de glace entre les chemins."},
+    "chemins": {"story": "Pistes de glace bleue (couleur du jeu) bordees d'herbe givree et de petites congeres."},
+    "bases": {"story": "Barrieres de rondins enneiges a stalactites, porte de glace, escalier de neige, traineaux charges et bonshommes de neige."},
+    "entre_les_bases": {"story": "Glaciers en gradins adosses au mur, forets de sapins enneiges, igloos, rochers givres, lac gele entre deux bases, mammouth pris dans un bloc de glace."},
+    "peripherie": {"story": "Deux couronnes de glaciers (55-75 puis 85-110 studs) couronnes de sapins ; au loin, pics de glace geants."}
+  },
+
+  "assets": {
+    "budget_triangles": 6000,
+    "prefix": "Glace_",
+    "list": ["Glace_Glacier", "Glace_Sapin", "Glace_SapinPetit", "Glace_Rocher", "Glace_Cristaux", "Glace_Congere", "Glace_Touffe", "Glace_Pic", "Glace_BlocMammouth", "Glace_PorteGlace", "Glace_Lanterne", "Glace_Dalle", "Glace_Barriere", "Glace_Escalier", "Glace_Igloo", "Glace_Traineau", "Glace_Bonhomme"]
+  },
+
+  "gameplay_constraints": "Identiques aux autres mondes : chemins et cercle du trou degages, rien de solide dans l'anneau des objets sauvages (r 70-160), gros decors entre les bases, kiosques degages. Le lac gele est une piece Roblox sans collision (on marche dessus au ras du sol).",
+  "roblox_integration": "Apres validation : import de Decors_Glace.fbx (Studio en mode Edition), MapDecor.Glace, habillage GlaceLook dans MapGenerator.DRESSINGS ; surface de glace (materiau Ice) pour le lac ; PointLight sur lanternes et igloos."
+}
