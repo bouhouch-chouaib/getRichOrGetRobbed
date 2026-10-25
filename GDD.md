@@ -416,6 +416,25 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   autres gardent les leurs (néon, verre réglés dans le modèle). `server/StationLooks` garde le cercle, l'écran, les voyants
   et l'étoile (hauteur : attribut `StarY` du modèle) ; plus de portique / cristaux / halo en blocs quand le modèle existe.
 
+## Familiers en briques LEGO et démarches propres (25 oct., `shared/PetGaits`)
+
+- Les familiers sont refaits un par un dans Blender par code, en briques LEGO sans tenons, très détaillés et animés par
+  pièces (recette : `dataset_and_pipeline/PIPELINE.md`, « Tous les familiers en briques LEGO, par lots »). Faits : les 15
+  Animaux (`Lot01_Animaux`), les 15 Fantastiques (`Lot02_Fantastiques`) et le Cerbère Infernal ; ils sont dans
+  `ReplicatedStorage.ArtModels.<Id>` (fichier du jeu). Restent : Plantes, Hybrides, Absurdes, familiers des Mondes.
+- **Chaque familier refait a sa propre démarche** (demande de Chouaib) : une fiche dans `shared/PetGaits`, lue par
+  - `PetWander.styleOf` : vitesse, pauses, longueur des trajets (`roam`, pour les casaniers), accélération (`Smooth`,
+    `Dash` sprint, `Pounce` approche lente puis bond, `Pulse` par poussées) ; le serveur et les clients calculent la même
+    position ;
+  - `client/BasePets` (`gaitPose`) : pas (secousse, roulis, lacet, tangage à chaque pas, calés sur la distance parcourue),
+    bonds, bond final du chasseur, ondulation en S, vol avec virages inclinés, envol et atterrissage (`perch`), dérive,
+    roue (Ouroboros : roule en tours entiers, s'arrête la tête en haut) ;
+  - `PetMotion` : cadence des pattes calée sur les pas, tête (`Bob` pigeon, `Peck`, `Swivel` hibou, `Howl` loup, `Roar`
+    avec la gueule, `Sniff`, `Sway` basilic, `Nod` capybara, `Proud`), queue (`Wag`, `Flick`, `Swish`, `Fan`, `Stiff`,
+    `Flow`), ailes (`Glide`, `Buzz`, `Fold`, `Slow`, `Flit`, `Flutter`), corps (`Heavy`, `Wobble`, `Pulse`, `Squish`),
+    flammes (`flicker`), pattes tendues pendant les bonds (vitesse verticale).
+- Les familiers sans fiche gardent l'ancien style de leur silhouette. **Tout nouveau familier refait reçoit sa fiche.**
+
 ## Familiers exclusifs des mondes (21 oct.)
 
 - 30 familiers en plus des 75 de base : **5 par monde** du Désert au Divin (`PetCatalog`, champ `World` ; liste dans

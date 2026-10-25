@@ -48,7 +48,17 @@ genres « Head » (regarde autour, aboie, hoche au pas) et « Jaw » (suit sa t�
 profil « Cerberus » (souffle, foulée). Vérifié en jeu (solo) : têtes indépendantes, mâchoire ouverte à 21° pendant un
 aboiement, trot en diagonale, peau nette de jour et de nuit (`qa_renders/cerberus_anime_*.jpg`). Pas vu : sur téléphone, porté
 / volé / équipé (il suit le joueur). Tests Lune : 4 échecs déjà présents avant (magnet-roster, newcomer-steal, onboarding,
-typography).
+typography) ; tous les 8 passent depuis le 25 oct. au soir.
+**25 oct. : tous les familiers refaits en briques LEGO, par lots** (Chouaib : « faire ce travail pour tous les familiers »,
+style validé : briques sans tenons, cubes d'abord, très détaillé, couleurs saturées, **aucune aura**). Un fichier
+`blender_tools/pets/<Id>.py` par familier, recette dans `PIPELINE.md` (« Tous les familiers en briques LEGO, par lots »).
+Faits et branchés dans `ArtModels` : les 15 Animaux (`Lot01_Animaux.fbx`) et les 15 Fantastiques (`Lot02_Fantastiques.fbx`),
+lueurs envoyées (`<Id>_roblox.json`). Restent : Plantes, Hybrides, Absurdes, Mondes. **Chaque familier refait a sa propre
+démarche** (`shared/PetGaits`, GDD « Familiers en briques LEGO et démarches propres ») : trajets, déplacement du corps entier
+et gestes ; tout nouveau familier refait reçoit sa fiche. Vérifié en jeu (solo, mesures sur 10 à 20 s) : bonds (Kitsune,
+grenouille, slime), bond final (chat, renard, panthère), hibou qui se pose et s'envole, Ouroboros qui roule en tours
+entiers, vols inclinés, capybara qui fait la sieste. Pas vu : sur téléphone, à 2 joueurs, porté / équipé. Chouaib a
+reçu les 30 familiers dans sa sauvegarde Studio (pour tester). **ArtModels n'est que dans le fichier du jeu : Ctrl+S.**
 
 ## L'utilisateur et la façon de travailler
 

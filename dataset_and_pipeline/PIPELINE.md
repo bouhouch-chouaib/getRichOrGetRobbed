@@ -204,6 +204,11 @@ saturées pour enfants, **jamais d'aura**.
    `upload_image`, noter les Id dans `baked_assets/pets/<Id>/<Id>_roblox.json` (`{"emissive": {"Corps": "rbxassetid://…"}}`).
 6. **Brancher** : `python dataset_and_pipeline/tools/make_wire_script.py <Id>...` génère le Luau à lancer dans Studio
    (Edit) : attributs de mouvement, lueur, rangement dans `ReplicatedStorage.ArtModels.<Id>` (puis sauvegarder le jeu).
+   Le script d'un lot fait ~30 Ko et le HTTP du jeu est coupé : le mettre dans un `.rbxm` (`rojo build` d'un projet
+   `{ "Wire01": { "$path": "wire_lot01.lua" } }`) copié dans le dossier `content` de Studio, puis dans `execute_luau` :
+   `local f = game:GetObjects("rbxasset://claude_wire.rbxm")[1]; f.Parent = game.ServerStorage; print(require(f.Wire01))`.
+7. **Démarche** : ajouter la fiche du familier dans `src/shared/PetGaits.lua` (vitesse, pauses, façon d'avancer, tête,
+   queue, ailes, corps) ; sinon il garde l'ancien style de sa silhouette.
 
 Lots : `Lot01_Animaux` (15, exporté), `Lot02_Fantastiques` (15). Restent : Plantes, Hybrides, Absurdes, Mondes.
 
