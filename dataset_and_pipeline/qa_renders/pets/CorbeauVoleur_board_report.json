@@ -17,38 +17,38 @@
     {
       "label": "CorbeauVoleur cuit, 7 pièces (repos)",
       "kind": "baked",
-      "triangles": 1072,
+      "triangles": 1740,
       "views": {
         "face": {
-          "coverage": 0.129,
-          "lum_mean": 0.249,
-          "lum_std": 0.114,
-          "detail": 0.035,
-          "saturation": 0.102,
+          "coverage": 0.11,
+          "lum_mean": 0.254,
+          "lum_std": 0.121,
+          "detail": 0.0442,
+          "saturation": 0.207,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.151,
-          "lum_mean": 0.305,
-          "lum_std": 0.128,
-          "detail": 0.0509,
-          "saturation": 0.1,
+          "coverage": 0.135,
+          "lum_mean": 0.309,
+          "lum_std": 0.152,
+          "detail": 0.0661,
+          "saturation": 0.179,
           "flags": []
         },
         "profil": {
-          "coverage": 0.135,
-          "lum_mean": 0.285,
-          "lum_std": 0.093,
-          "detail": 0.0279,
-          "saturation": 0.123,
+          "coverage": 0.126,
+          "lum_mean": 0.281,
+          "lum_std": 0.095,
+          "detail": 0.0298,
+          "saturation": 0.195,
           "flags": []
         },
         "detail": {
-          "coverage": 0.533,
-          "lum_mean": 0.342,
-          "lum_std": 0.189,
-          "detail": 0.0314,
-          "saturation": 0.083,
+          "coverage": 0.451,
+          "lum_mean": 0.346,
+          "lum_std": 0.193,
+          "detail": 0.0404,
+          "saturation": 0.185,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 1072,
+      "triangles": 1740,
       "views": {
         "face": {
-          "coverage": 0.108,
-          "lum_mean": 0.265,
-          "lum_std": 0.119,
-          "detail": 0.0343,
-          "saturation": 0.09,
+          "coverage": 0.093,
+          "lum_mean": 0.273,
+          "lum_std": 0.125,
+          "detail": 0.0423,
+          "saturation": 0.187,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.12,
-          "lum_mean": 0.296,
-          "lum_std": 0.13,
-          "detail": 0.0518,
-          "saturation": 0.101,
+          "coverage": 0.102,
+          "lum_mean": 0.303,
+          "lum_std": 0.144,
+          "detail": 0.0642,
+          "saturation": 0.193,
           "flags": []
         },
         "profil": {
-          "coverage": 0.111,
-          "lum_mean": 0.291,
-          "lum_std": 0.093,
-          "detail": 0.0358,
-          "saturation": 0.125,
+          "coverage": 0.105,
+          "lum_mean": 0.299,
+          "lum_std": 0.115,
+          "detail": 0.0418,
+          "saturation": 0.197,
           "flags": []
         },
         "detail": {
-          "coverage": 0.48,
-          "lum_mean": 0.325,
-          "lum_std": 0.134,
-          "detail": 0.0296,
-          "saturation": 0.064,
+          "coverage": 0.402,
+          "lum_mean": 0.326,
+          "lum_std": 0.148,
+          "detail": 0.0402,
+          "saturation": 0.172,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 20.2
+    "seconds": 20.3
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

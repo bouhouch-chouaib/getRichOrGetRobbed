@@ -17,38 +17,38 @@
     {
       "label": "HibouGrincheux cuit, 7 pièces (repos)",
       "kind": "baked",
-      "triangles": 844,
+      "triangles": 1612,
       "views": {
         "face": {
-          "coverage": 0.247,
-          "lum_mean": 0.422,
-          "lum_std": 0.199,
-          "detail": 0.0317,
-          "saturation": 0.327,
+          "coverage": 0.249,
+          "lum_mean": 0.446,
+          "lum_std": 0.222,
+          "detail": 0.0417,
+          "saturation": 0.353,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.263,
-          "lum_mean": 0.434,
-          "lum_std": 0.186,
-          "detail": 0.0428,
-          "saturation": 0.27,
+          "coverage": 0.261,
+          "lum_mean": 0.441,
+          "lum_std": 0.188,
+          "detail": 0.0544,
+          "saturation": 0.325,
           "flags": []
         },
         "profil": {
-          "coverage": 0.22,
-          "lum_mean": 0.352,
-          "lum_std": 0.149,
-          "detail": 0.0196,
-          "saturation": 0.235,
+          "coverage": 0.206,
+          "lum_mean": 0.382,
+          "lum_std": 0.135,
+          "detail": 0.0259,
+          "saturation": 0.33,
           "flags": []
         },
         "detail": {
-          "coverage": 0.686,
-          "lum_mean": 0.498,
-          "lum_std": 0.174,
-          "detail": 0.0204,
-          "saturation": 0.279,
+          "coverage": 0.694,
+          "lum_mean": 0.49,
+          "lum_std": 0.193,
+          "detail": 0.0283,
+          "saturation": 0.349,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 844,
+      "triangles": 1612,
       "views": {
         "face": {
-          "coverage": 0.176,
-          "lum_mean": 0.406,
-          "lum_std": 0.199,
-          "detail": 0.0343,
-          "saturation": 0.288,
+          "coverage": 0.181,
+          "lum_mean": 0.425,
+          "lum_std": 0.202,
+          "detail": 0.0461,
+          "saturation": 0.33,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.183,
-          "lum_mean": 0.413,
-          "lum_std": 0.176,
-          "detail": 0.0442,
-          "saturation": 0.268,
+          "coverage": 0.18,
+          "lum_mean": 0.421,
+          "lum_std": 0.194,
+          "detail": 0.0563,
+          "saturation": 0.324,
           "flags": []
         },
         "profil": {
           "coverage": 0.164,
-          "lum_mean": 0.387,
-          "lum_std": 0.159,
-          "detail": 0.0327,
-          "saturation": 0.25,
+          "lum_mean": 0.406,
+          "lum_std": 0.155,
+          "detail": 0.0392,
+          "saturation": 0.332,
           "flags": []
         },
         "detail": {
-          "coverage": 0.534,
+          "coverage": 0.528,
           "lum_mean": 0.46,
-          "lum_std": 0.131,
-          "detail": 0.0213,
-          "saturation": 0.283,
+          "lum_std": 0.152,
+          "detail": 0.03,
+          "saturation": 0.367,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 20.3
+    "seconds": 20.1
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

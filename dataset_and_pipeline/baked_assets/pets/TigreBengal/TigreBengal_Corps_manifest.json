@@ -1,25 +1,31 @@
 {
   "asset": "TigreBengal_Corps",
-  "triangles": 1354,
-  "vertices": 772,
+  "triangles": 2752,
+  "vertices": 1646,
   "size_studs": [
-    0.905,
-    2.26,
-    1.49
+    1.195,
+    2.412,
+    1.54
   ],
   "pivot": "sol, au centre",
   "resolution": 1024,
   "uv_overlap_pct": 0.0,
-  "uv_coverage_pct": 54.4,
+  "uv_coverage_pct": 32.9,
   "source_materials": [
     "M_TigreBengal_high_blanc",
-    "M_TigreBengal_high_bouche",
-    "M_TigreBengal_high_iris_#F2A11E",
+    "M_TigreBengal_high_blanc_oeil",
+    "M_TigreBengal_high_bouche#2A1418",
+    "M_TigreBengal_high_griffes",
+    "M_TigreBengal_high_iris#FFB21A",
+    "M_TigreBengal_high_moustache#FFFFFF",
+    "M_TigreBengal_high_narine#A83246",
+    "M_TigreBengal_high_noir",
     "M_TigreBengal_high_or",
     "M_TigreBengal_high_orange",
+    "M_TigreBengal_high_orange_fonce",
     "M_TigreBengal_high_pupille",
     "M_TigreBengal_high_reflet",
-    "M_TigreBengal_high_truffe"
+    "M_TigreBengal_high_truffe#FF7A8C"
   ],
   "presets": [
     "create_stylized_edge_wear_material"
@@ -28,8 +34,8 @@
     "backend": "CUDA",
     "samples": 32,
     "ao_samples": 64,
-    "cage": 0.0339,
-    "max_ray": 0.0847,
+    "cage": 0.0362,
+    "max_ray": 0.0904,
     "ao_distance": 0.06,
     "ao_strength": 0.35,
     "from_high": true
@@ -52,12 +58,12 @@
       "MetalnessMap": "TigreBengal_Corps_Metalness.png",
       "EmissiveMaskContent": "TigreBengal_Corps_Emissive.png",
       "EmissiveTint": "#FFFFFF",
-      "EmissiveStrength": 0.8,
-      "coverage_pct": 18.63,
+      "EmissiveStrength": 0.9,
+      "coverage_pct": 18.09,
       "AlphaMode": "Overlay"
     },
     "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
   },
   "within_budget": true,
-  "seconds": 24.4
+  "seconds": 19.1
 }

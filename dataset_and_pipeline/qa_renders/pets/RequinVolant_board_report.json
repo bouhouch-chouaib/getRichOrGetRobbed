@@ -17,38 +17,38 @@
     {
       "label": "RequinVolant cuit, 4 pièces (repos)",
       "kind": "baked",
-      "triangles": 604,
+      "triangles": 924,
       "views": {
         "face": {
-          "coverage": 0.082,
-          "lum_mean": 0.468,
-          "lum_std": 0.259,
-          "detail": 0.0435,
-          "saturation": 0.107,
+          "coverage": 0.08,
+          "lum_mean": 0.437,
+          "lum_std": 0.25,
+          "detail": 0.0541,
+          "saturation": 0.287,
           "flags": []
         },
         "trois_quarts": {
           "coverage": 0.148,
-          "lum_mean": 0.502,
-          "lum_std": 0.222,
-          "detail": 0.048,
-          "saturation": 0.161,
+          "lum_mean": 0.466,
+          "lum_std": 0.22,
+          "detail": 0.0521,
+          "saturation": 0.348,
           "flags": []
         },
         "profil": {
-          "coverage": 0.157,
-          "lum_mean": 0.488,
-          "lum_std": 0.188,
-          "detail": 0.0315,
-          "saturation": 0.198,
+          "coverage": 0.153,
+          "lum_mean": 0.453,
+          "lum_std": 0.189,
+          "detail": 0.0356,
+          "saturation": 0.398,
           "flags": []
         },
         "detail": {
-          "coverage": 0.374,
-          "lum_mean": 0.544,
-          "lum_std": 0.21,
-          "detail": 0.0215,
-          "saturation": 0.144,
+          "coverage": 0.372,
+          "lum_mean": 0.51,
+          "lum_std": 0.207,
+          "detail": 0.0223,
+          "saturation": 0.364,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 604,
+      "triangles": 924,
       "views": {
         "face": {
-          "coverage": 0.084,
-          "lum_mean": 0.471,
-          "lum_std": 0.253,
-          "detail": 0.0434,
-          "saturation": 0.111,
+          "coverage": 0.082,
+          "lum_mean": 0.439,
+          "lum_std": 0.243,
+          "detail": 0.0518,
+          "saturation": 0.293,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.136,
-          "lum_mean": 0.485,
-          "lum_std": 0.216,
-          "detail": 0.0479,
-          "saturation": 0.165,
+          "coverage": 0.135,
+          "lum_mean": 0.449,
+          "lum_std": 0.214,
+          "detail": 0.052,
+          "saturation": 0.358,
           "flags": []
         },
         "profil": {
-          "coverage": 0.146,
-          "lum_mean": 0.488,
+          "coverage": 0.145,
+          "lum_mean": 0.454,
           "lum_std": 0.199,
-          "detail": 0.0326,
-          "saturation": 0.191,
+          "detail": 0.037,
+          "saturation": 0.385,
           "flags": []
         },
         "detail": {
-          "coverage": 0.412,
-          "lum_mean": 0.509,
-          "lum_std": 0.233,
-          "detail": 0.0191,
-          "saturation": 0.138,
+          "coverage": 0.406,
+          "lum_mean": 0.48,
+          "lum_std": 0.22,
+          "detail": 0.0202,
+          "saturation": 0.355,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 20.2
+    "seconds": 21.9
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

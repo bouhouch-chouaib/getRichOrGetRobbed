@@ -1,6 +1,6 @@
 {
   "pet": "PigeonVilles",
-  "model_height_blender": 1.57,
+  "model_height_blender": 1.5604,
   "front": "-Y Blender = -Z Roblox",
   "parts": {
     "Body": {
@@ -9,15 +9,15 @@
       "follows": null,
       "atlas": "Corps",
       "emissive_strength": null,
-      "triangles": 396,
+      "triangles": 464,
       "center": [
         0.0,
-        0.13009,
+        0.12045,
         0.72
       ],
       "size": [
         0.7,
-        1.13542,
+        1.11616,
         0.84
       ],
       "pivot": null
@@ -28,15 +28,15 @@
       "follows": null,
       "atlas": "Corps",
       "emissive_strength": null,
-      "triangles": 676,
+      "triangles": 360,
       "center": [
         0.0,
-        -0.23,
-        1.355
+        -0.26,
+        1.345
       ],
       "size": [
-        0.552,
-        0.62,
+        0.58,
+        0.68,
         0.43
       ],
       "pivot": [
@@ -72,16 +72,16 @@
       "follows": null,
       "atlas": "Corps",
       "emissive_strength": null,
-      "triangles": 112,
+      "triangles": 232,
       "center": [
-        0.41125,
-        0.17486,
-        0.68
+        0.4075,
+        0.19849,
+        0.6705
       ],
       "size": [
-        0.1225,
-        0.84971,
-        0.38
+        0.115,
+        0.98703,
+        0.363
       ],
       "pivot": [
         [
@@ -94,13 +94,13 @@
           0.0,
           1.0,
           0.0,
-          -0.2
+          -0.1888
         ],
         [
           0.0,
           0.0,
           1.0,
-          0.86
+          0.828
         ],
         [
           0.0,
@@ -116,16 +116,16 @@
       "follows": null,
       "atlas": "Corps",
       "emissive_strength": null,
-      "triangles": 112,
+      "triangles": 232,
       "center": [
-        -0.41125,
-        0.17486,
-        0.68
+        -0.4075,
+        0.19849,
+        0.6705
       ],
       "size": [
-        0.1225,
-        0.84971,
-        0.38
+        0.115,
+        0.98703,
+        0.363
       ],
       "pivot": [
         [
@@ -138,13 +138,13 @@
           0.0,
           1.0,
           0.0,
-          -0.2
+          -0.1888
         ],
         [
           0.0,
           0.0,
           1.0,
-          0.86
+          0.828
         ],
         [
           0.0,
@@ -160,16 +160,16 @@
       "follows": null,
       "atlas": "Corps",
       "emissive_strength": null,
-      "triangles": 132,
+      "triangles": 60,
       "center": [
-        -0.0,
-        0.74,
-        0.76
+        0.0,
+        0.769,
+        0.716
       ],
       "size": [
-        0.41966,
-        0.40736,
-        0.23607
+        0.42672,
+        0.41778,
+        0.24155
       ],
       "pivot": [
         [
@@ -182,13 +182,13 @@
           0.0,
           1.0,
           0.0,
-          0.62
+          0.58
         ],
         [
           0.0,
           0.0,
           1.0,
-          0.7
+          0.72
         ],
         [
           0.0,
@@ -204,16 +204,16 @@
       "follows": null,
       "atlas": "Corps",
       "emissive_strength": null,
-      "triangles": 92,
+      "triangles": 140,
       "center": [
         0.16,
-        0.01001,
-        0.15
+        0.006,
+        0.1433
       ],
       "size": [
-        0.23453,
-        0.31998,
-        0.3
+        0.17737,
+        0.244,
+        0.2874
       ],
       "pivot": [
         [
@@ -232,7 +232,7 @@
           0.0,
           0.0,
           1.0,
-          0.3
+          0.28
         ],
         [
           0.0,
@@ -248,16 +248,16 @@
       "follows": null,
       "atlas": "Corps",
       "emissive_strength": null,
-      "triangles": 92,
+      "triangles": 140,
       "center": [
         -0.16,
-        0.01001,
-        0.15
+        0.006,
+        0.1433
       ],
       "size": [
-        0.23453,
-        0.31998,
-        0.3
+        0.17737,
+        0.244,
+        0.2874
       ],
       "pivot": [
         [
@@ -276,7 +276,7 @@
           0.0,
           0.0,
           1.0,
-          0.3
+          0.28
         ],
         [
           0.0,
@@ -287,5 +287,5 @@
       ]
     }
   },
-  "fbx_global_scale": 0.038217
+  "fbx_global_scale": 0.038452
 }

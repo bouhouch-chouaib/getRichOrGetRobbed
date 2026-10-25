@@ -1,74 +1,62 @@
 """Pigeon des villes (Commun, Animaux) : « Pigeon gris au regard vide. »
 
-Construit en briques LEGO (sans tenons), cubes d'abord, d'après lego_refs/PigeonVilles.png : corps en briques
-empilées arrondi par des pentes (poitrail devant, croupion derrière), collier carré irisé vert puis violet, tête en
-brique gris foncé, yeux ronds sur les côtés (tuiles rondes : regard vide), bec en pente saumon, ailes en briques
-plaquées sur les flancs avec deux barres claires, queue en plaques relevées, pattes et pieds orange en briques.
-Parties animées : tête (regarde, hoche au pas), ailes, queue, pattes.
+En briques LEGO, très détaillé, d'après lego_refs/PigeonVilles.png : corps bleu-gris en briques empilées (poitrail
+bombé, croupion), cou irisé vert émeraude et violet vif en deux colliers + plaques, tête gris ardoise, bec saumon avec
+la morille blanche (cire) des pigeons, gros yeux ronds orange au regard vide sur les côtés, ailes en trois rangs de
+plumes avec deux barres noires, queue en éventail à bout foncé, pattes rouge corail à griffes.
+Parties animées : tête (hoche au pas), ailes, queue, pattes.
 """
 
+import _parts as P
 from pet_kit import PetKit
 
 
 def build(name: str) -> dict:
     kit = PetKit(name)
-    grey = kit.mat("gris", "#8F9399")
-    dark = kit.mat("tete", "#5B5F66")
-    wing = kit.mat("aile", "#7E838A")
-    feather = kit.mat("plume", "#55595F")
-    white = kit.mat("blanc", "#EEEDE8")
-    green = kit.mat("cou_vert", "#2E7D5E", rough=0.18, accent="#4B6FA8")
-    purple = kit.mat("cou_violet", "#5E4384", rough=0.18, accent="#2E7D5E")
-    eye_ring = kit.mat("tour_oeil", "#C3C7CC")
-    pupil = kit.mat("pupille", "#0E0E10", rough=0.12)
-    orange = kit.mat("bec_pattes", "#DE7856")
+    grey = kit.mat("gris", "#8E9CB8")
+    light = kit.mat("gris_clair", "#B3BFD6")
+    head = kit.mat("tete", "#5C6684")
+    wing = kit.mat("aile", "#7E8CAA")
+    dark = kit.mat("plume", "#465070")
+    green = kit.mat("cou_vert", "#14C88C", rough=0.15)
+    purple = kit.mat("cou_violet", "#A24ED6", rough=0.15)
+    beak = kit.mat("bec", "#FF8A6A")
+    cere = kit.mat("cire", "#F4F0EA")
+    legs = kit.mat("pattes", "#FF5A4A")
+    ring = kit.mat("tour_oeil", "#E8EDF5")
+    claw = kit.mat("griffes", "#3A3238")
 
-    # --- corps : trois étages de briques, pentes au poitrail et au croupion ---
-    kit.add(kit.brick((0.58, 0.62, 0.2), center=(0, 0.06, 0.4)), grey, bevel=0.03)
-    kit.add(kit.slope((0.58, 0.16, 0.2), center=(0, -0.33, 0.4), facing="-Y", top=0.35, rot=(180, 0, 0)), grey,
+    # --- corps : étages de briques, poitrail bombé, croupion ---
+    kit.add(kit.brick((0.56, 0.6, 0.2), center=(0, 0.06, 0.4)), grey, bevel=0.03)
+    kit.add(kit.slope((0.56, 0.16, 0.2), center=(0, -0.32, 0.4), facing="-Y", top=0.35, rot=(180, 0, 0)), grey,
             bevel=0.02)
-    kit.add(kit.brick((0.7, 0.86, 0.3), center=(0, 0.06, 0.65)), grey, bevel=0.035)
+    kit.add(kit.brick((0.7, 0.84, 0.3), center=(0, 0.06, 0.65)), grey, bevel=0.035)
+    kit.add(kit.brick((0.5, 0.06, 0.34), center=(0, -0.37, 0.64)), light, bevel=0.02)
     kit.add(kit.brick((0.6, 0.5, 0.16), center=(0, -0.02, 0.88)), grey, bevel=0.025)
     kit.add(kit.slope((0.6, 0.18, 0.16), center=(0, -0.36, 0.88), facing="-Y", top=0.3), grey, bevel=0.02)
     kit.add(kit.slope((0.6, 0.3, 0.16), center=(0, 0.38, 0.88), facing="+Y", top=0.2), grey, bevel=0.02)
-    kit.add(kit.slope((0.5, 0.22, 0.2), center=(0, 0.6, 0.62), facing="+Y", top=0.3), grey, bevel=0.02)
+    kit.add(kit.slope((0.5, 0.22, 0.22), center=(0, 0.58, 0.62), facing="+Y", top=0.3), grey, bevel=0.02)
 
-    # --- collier carré irisé et tête en brique ---
-    kit.add(kit.brick((0.44, 0.42, 0.09), center=(0, -0.14, 1.005)), green, bevel=0.018)
-    kit.add(kit.brick((0.4, 0.38, 0.09), center=(0, -0.14, 1.095)), purple, bevel=0.018)
-    kit.add(kit.brick((0.44, 0.46, 0.36), center=(0, -0.15, 1.32)), dark, "Head", bevel=0.04)
-    kit.add(kit.brick((0.38, 0.4, 0.07), center=(0, -0.15, 1.535)), dark, "Head", bevel=0.02)
-    kit.add(kit.slope((0.16, 0.18, 0.1), center=(0, -0.45, 1.28), facing="-Y", top=0.3), orange, "Head", bevel=0.012)
-    for s in (-1, 1):  # yeux ronds (tuiles rondes LEGO) sur les côtés : le regard vide
-        kit.add(kit.disc(0.13, 0.03, center=(s * 0.232, -0.18, 1.35), normal=(s, 0, 0)), eye_ring, "Head", bevel=0.006)
-        kit.add(kit.disc(0.1, 0.03, center=(s * 0.248, -0.18, 1.35), normal=(s, 0, 0)), white, "Head", bevel=0.006)
-        kit.add(kit.disc(0.062, 0.02, center=(s * 0.266, -0.19, 1.35), normal=(s, 0, 0)), pupil, "Head", bevel=0.0)
+    # --- cou irisé : deux colliers + plaques irisées sur la poitrine ---
+    kit.add(kit.brick((0.46, 0.44, 0.1), center=(0, -0.14, 1.0)), green, bevel=0.018)
+    kit.add(kit.brick((0.42, 0.4, 0.09), center=(0, -0.14, 1.095)), purple, bevel=0.018)
+    for s in (-1, 1):
+        kit.add(kit.slope((0.16, 0.06, 0.16), center=(s * 0.14, -0.36, 0.92), facing="-Y", top=0.3), green, bevel=0.01)
 
-    # --- ailes : briques plaquées sur les flancs, pointe en pente vers l'arrière, deux barres claires ---
-    for s, part in ((1, "WingL"), (-1, "WingR")):
-        x = s * 0.4
-        kit.add(kit.brick((0.1, 0.62, 0.38), center=(x, 0.06, 0.68)), wing, part, bevel=0.025)
-        kit.add(kit.slope((0.1, 0.24, 0.3), center=(x, 0.49, 0.64), facing="+Y", top=0.25), wing, part, bevel=0.02)
-        for dz, mat in ((0.06, white), (-0.06, feather)):
-            kit.add(kit.box((0.025, 0.4, 0.055), center=(x + s * 0.06, 0.1, 0.64 + dz), rot=(-14, 0, 0)), mat, part,
-                    bevel=0.008)
-        kit.part(part, "Wing", pivot=(x - s * 0.03, -0.2, 0.86), phase=float(s))
+    # --- tête ardoise, bec saumon avec cire blanche, gros yeux orange sur les côtés ---
+    kit.add(kit.brick((0.44, 0.46, 0.36), center=(0, -0.15, 1.31)), head, "Head", bevel=0.04)
+    kit.add(kit.brick((0.38, 0.4, 0.07), center=(0, -0.15, 1.525)), head, "Head", bevel=0.02)
+    kit.add(kit.slope((0.38, 0.08, 0.07), center=(0, -0.38, 1.525), facing="-Y", top=0.3), head, "Head", bevel=0.01)
+    kit.add(kit.brick((0.14, 0.12, 0.08), center=(0, -0.42, 1.3)), beak, "Head", bevel=0.012)
+    kit.add(kit.slope((0.12, 0.14, 0.07), center=(0, -0.53, 1.29), facing="-Y", top=0.3), beak, "Head", bevel=0.01)
+    kit.add(kit.brick((0.1, 0.08, 0.05), center=(0, -0.41, 1.36)), cere, "Head", bevel=0.01)
+    P.side_eyes(kit, "Head", x=0.225, y=-0.2, z=1.36, size=0.15, iris="#FF7A1A", pupil="round", ring=ring)
 
-    # --- queue en plaques relevées, en éventail ---
-    for yaw in (-14, 0, 14):
-        kit.add(kit.brick((0.17, 0.42, 0.06), center=(yaw * 0.006, 0.74, 0.76), rot=(-28, 0, yaw)), feather, "Tail",
-                bevel=0.015)
-
-    # --- pattes et pieds en briques orange ---
-    for s, part in ((1, "LegL"), (-1, "LegR")):
-        x = s * 0.16
-        kit.add(kit.brick((0.11, 0.11, 0.24), center=(x, 0.04, 0.18)), orange, part, bevel=0.015)
-        for dx, yaw in ((-0.065, 16), (0.0, 0), (0.065, -16)):
-            kit.add(kit.brick((0.06, 0.17, 0.055), center=(x + dx, -0.06, 0.028), rot=(0, 0, yaw)), orange, part,
-                    bevel=0.01)
-        kit.add(kit.brick((0.055, 0.1, 0.05), center=(x, 0.12, 0.025)), orange, part, bevel=0.01)
-        kit.part(part, "Leg", pivot=(x, 0.04, 0.3), phase=0.0 if s > 0 else 3.14159)
-
+    # --- ailes en trois rangs à barres noires, queue en éventail, pattes corail ---
+    P.bird_wings(kit, x=0.4, y=0.08, z=0.66, length=0.64, height=0.4, cov=wing, sec=grey, prim=dark, bar=dark,
+                 thick=0.1)
+    P.tail_fan(kit, "Tail", (0, 0.58, 0.72), n=5, length=0.42, width=0.12, mats=[dark, wing, dark], spread=12,
+               pitch=-26)
+    P.bird_feet(kit, x=0.16, y=0.04, h=0.28, w=0.08, color=legs, claw=claw)
     kit.part("Head", "Head", pivot=(0, -0.14, 1.14))
-    kit.part("Tail", "Tail", pivot=(0, 0.62, 0.7))
     return kit.result()

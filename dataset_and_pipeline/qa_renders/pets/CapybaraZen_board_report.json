@@ -17,38 +17,38 @@
     {
       "label": "CapybaraZen cuit, 6 pièces (repos)",
       "kind": "baked",
-      "triangles": 844,
+      "triangles": 1988,
       "views": {
         "face": {
-          "coverage": 0.121,
-          "lum_mean": 0.338,
-          "lum_std": 0.152,
-          "detail": 0.0262,
-          "saturation": 0.338,
+          "coverage": 0.114,
+          "lum_mean": 0.351,
+          "lum_std": 0.17,
+          "detail": 0.0458,
+          "saturation": 0.407,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.183,
-          "lum_mean": 0.404,
-          "lum_std": 0.171,
-          "detail": 0.0378,
-          "saturation": 0.301,
+          "coverage": 0.174,
+          "lum_mean": 0.413,
+          "lum_std": 0.173,
+          "detail": 0.0539,
+          "saturation": 0.397,
           "flags": []
         },
         "profil": {
-          "coverage": 0.188,
-          "lum_mean": 0.412,
-          "lum_std": 0.144,
-          "detail": 0.0214,
-          "saturation": 0.302,
+          "coverage": 0.184,
+          "lum_mean": 0.428,
+          "lum_std": 0.159,
+          "detail": 0.0314,
+          "saturation": 0.413,
           "flags": []
         },
         "detail": {
-          "coverage": 0.507,
-          "lum_mean": 0.519,
-          "lum_std": 0.223,
-          "detail": 0.0174,
-          "saturation": 0.346,
+          "coverage": 0.518,
+          "lum_mean": 0.458,
+          "lum_std": 0.204,
+          "detail": 0.031,
+          "saturation": 0.449,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 844,
+      "triangles": 1988,
       "views": {
         "face": {
-          "coverage": 0.105,
-          "lum_mean": 0.363,
-          "lum_std": 0.173,
-          "detail": 0.0289,
-          "saturation": 0.332,
+          "coverage": 0.091,
+          "lum_mean": 0.379,
+          "lum_std": 0.179,
+          "detail": 0.0543,
+          "saturation": 0.406,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.14,
-          "lum_mean": 0.397,
-          "lum_std": 0.181,
-          "detail": 0.0396,
-          "saturation": 0.305,
+          "coverage": 0.118,
+          "lum_mean": 0.406,
+          "lum_std": 0.183,
+          "detail": 0.0606,
+          "saturation": 0.393,
           "flags": []
         },
         "profil": {
-          "coverage": 0.156,
-          "lum_mean": 0.424,
-          "lum_std": 0.143,
-          "detail": 0.0266,
-          "saturation": 0.313,
+          "coverage": 0.134,
+          "lum_mean": 0.444,
+          "lum_std": 0.159,
+          "detail": 0.0411,
+          "saturation": 0.419,
           "flags": []
         },
         "detail": {
-          "coverage": 0.502,
-          "lum_mean": 0.516,
-          "lum_std": 0.237,
-          "detail": 0.0194,
-          "saturation": 0.324,
+          "coverage": 0.472,
+          "lum_mean": 0.472,
+          "lum_std": 0.21,
+          "detail": 0.0357,
+          "saturation": 0.427,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 20.5
+    "seconds": 22.1
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

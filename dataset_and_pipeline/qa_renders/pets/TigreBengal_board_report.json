@@ -17,38 +17,38 @@
     {
       "label": "TigreBengal cuit, 7 pièces (repos)",
       "kind": "baked",
-      "triangles": 1354,
+      "triangles": 2752,
       "views": {
         "face": {
-          "coverage": 0.114,
-          "lum_mean": 0.554,
-          "lum_std": 0.196,
-          "detail": 0.0425,
-          "saturation": 0.394,
+          "coverage": 0.111,
+          "lum_mean": 0.552,
+          "lum_std": 0.193,
+          "detail": 0.0656,
+          "saturation": 0.411,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.157,
-          "lum_mean": 0.613,
-          "lum_std": 0.194,
-          "detail": 0.0537,
-          "saturation": 0.427,
+          "coverage": 0.152,
+          "lum_mean": 0.604,
+          "lum_std": 0.202,
+          "detail": 0.0786,
+          "saturation": 0.433,
           "flags": []
         },
         "profil": {
-          "coverage": 0.132,
-          "lum_mean": 0.607,
-          "lum_std": 0.196,
-          "detail": 0.0432,
-          "saturation": 0.47,
+          "coverage": 0.131,
+          "lum_mean": 0.601,
+          "lum_std": 0.199,
+          "detail": 0.054,
+          "saturation": 0.475,
           "flags": []
         },
         "detail": {
-          "coverage": 0.463,
-          "lum_mean": 0.692,
-          "lum_std": 0.177,
-          "detail": 0.0278,
-          "saturation": 0.489,
+          "coverage": 0.479,
+          "lum_mean": 0.672,
+          "lum_std": 0.194,
+          "detail": 0.0382,
+          "saturation": 0.494,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 1354,
+      "triangles": 2752,
       "views": {
         "face": {
-          "coverage": 0.092,
-          "lum_mean": 0.574,
-          "lum_std": 0.206,
-          "detail": 0.0417,
-          "saturation": 0.363,
+          "coverage": 0.088,
+          "lum_mean": 0.549,
+          "lum_std": 0.217,
+          "detail": 0.0689,
+          "saturation": 0.386,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.123,
-          "lum_mean": 0.59,
-          "lum_std": 0.214,
-          "detail": 0.0547,
-          "saturation": 0.433,
+          "coverage": 0.115,
+          "lum_mean": 0.574,
+          "lum_std": 0.228,
+          "detail": 0.0792,
+          "saturation": 0.426,
           "flags": []
         },
         "profil": {
-          "coverage": 0.118,
-          "lum_mean": 0.611,
-          "lum_std": 0.203,
-          "detail": 0.0501,
-          "saturation": 0.463,
+          "coverage": 0.113,
+          "lum_mean": 0.595,
+          "lum_std": 0.214,
+          "detail": 0.0634,
+          "saturation": 0.461,
           "flags": []
         },
         "detail": {
-          "coverage": 0.462,
-          "lum_mean": 0.684,
-          "lum_std": 0.219,
-          "detail": 0.0309,
-          "saturation": 0.451,
+          "coverage": 0.437,
+          "lum_mean": 0.658,
+          "lum_std": 0.223,
+          "detail": 0.0454,
+          "saturation": 0.467,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 24.1
+    "seconds": 25.8
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

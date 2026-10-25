@@ -17,38 +17,38 @@
     {
       "label": "ChienSaucisse cuit, 7 pièces (repos)",
       "kind": "baked",
-      "triangles": 900,
+      "triangles": 1924,
       "views": {
         "face": {
-          "coverage": 0.065,
-          "lum_mean": 0.304,
-          "lum_std": 0.141,
-          "detail": 0.0376,
-          "saturation": 0.284,
+          "coverage": 0.064,
+          "lum_mean": 0.335,
+          "lum_std": 0.169,
+          "detail": 0.0548,
+          "saturation": 0.391,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.129,
-          "lum_mean": 0.383,
-          "lum_std": 0.164,
-          "detail": 0.0504,
-          "saturation": 0.265,
+          "coverage": 0.119,
+          "lum_mean": 0.4,
+          "lum_std": 0.179,
+          "detail": 0.0568,
+          "saturation": 0.357,
           "flags": []
         },
         "profil": {
-          "coverage": 0.132,
-          "lum_mean": 0.376,
-          "lum_std": 0.126,
-          "detail": 0.0282,
-          "saturation": 0.29,
+          "coverage": 0.12,
+          "lum_mean": 0.416,
+          "lum_std": 0.14,
+          "detail": 0.0345,
+          "saturation": 0.394,
           "flags": []
         },
         "detail": {
-          "coverage": 0.471,
-          "lum_mean": 0.422,
-          "lum_std": 0.241,
-          "detail": 0.0222,
-          "saturation": 0.266,
+          "coverage": 0.452,
+          "lum_mean": 0.443,
+          "lum_std": 0.24,
+          "detail": 0.0257,
+          "saturation": 0.355,
           "flags": []
         }
       }
@@ -56,40 +56,40 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 900,
+      "triangles": 1924,
       "views": {
         "face": {
-          "coverage": 0.046,
-          "lum_mean": 0.37,
-          "lum_std": 0.104,
-          "detail": 0.0404,
-          "saturation": 0.322,
+          "coverage": 0.059,
+          "lum_mean": 0.371,
+          "lum_std": 0.186,
+          "detail": 0.0505,
+          "saturation": 0.387,
           "flags": [
             "objet trop petit dans le cadre"
           ]
         },
         "trois_quarts": {
-          "coverage": 0.079,
-          "lum_mean": 0.425,
-          "lum_std": 0.116,
-          "detail": 0.0611,
-          "saturation": 0.297,
+          "coverage": 0.095,
+          "lum_mean": 0.399,
+          "lum_std": 0.192,
+          "detail": 0.0584,
+          "saturation": 0.359,
           "flags": []
         },
         "profil": {
-          "coverage": 0.085,
-          "lum_mean": 0.402,
-          "lum_std": 0.081,
-          "detail": 0.0344,
-          "saturation": 0.331,
+          "coverage": 0.102,
+          "lum_mean": 0.415,
+          "lum_std": 0.149,
+          "detail": 0.0401,
+          "saturation": 0.404,
           "flags": []
         },
         "detail": {
-          "coverage": 0.409,
-          "lum_mean": 0.51,
-          "lum_std": 0.209,
-          "detail": 0.0245,
-          "saturation": 0.288,
+          "coverage": 0.455,
+          "lum_mean": 0.465,
+          "lum_std": 0.251,
+          "detail": 0.0261,
+          "saturation": 0.343,
           "flags": []
         }
       }
@@ -101,7 +101,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 16.0
+    "seconds": 18.9
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

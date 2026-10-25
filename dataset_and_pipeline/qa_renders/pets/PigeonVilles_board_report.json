@@ -17,38 +17,38 @@
     {
       "label": "PigeonVilles cuit, 7 pièces (repos)",
       "kind": "baked",
-      "triangles": 1612,
+      "triangles": 1628,
       "views": {
         "face": {
-          "coverage": 0.173,
-          "lum_mean": 0.402,
-          "lum_std": 0.166,
-          "detail": 0.0302,
-          "saturation": 0.125,
+          "coverage": 0.156,
+          "lum_mean": 0.465,
+          "lum_std": 0.186,
+          "detail": 0.0321,
+          "saturation": 0.249,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.193,
-          "lum_mean": 0.436,
-          "lum_std": 0.181,
-          "detail": 0.0475,
-          "saturation": 0.131,
+          "coverage": 0.178,
+          "lum_mean": 0.478,
+          "lum_std": 0.193,
+          "detail": 0.0493,
+          "saturation": 0.243,
           "flags": []
         },
         "profil": {
-          "coverage": 0.163,
-          "lum_mean": 0.426,
-          "lum_std": 0.152,
-          "detail": 0.0358,
-          "saturation": 0.153,
+          "coverage": 0.155,
+          "lum_mean": 0.445,
+          "lum_std": 0.145,
+          "detail": 0.0389,
+          "saturation": 0.274,
           "flags": []
         },
         "detail": {
-          "coverage": 0.583,
-          "lum_mean": 0.481,
-          "lum_std": 0.18,
-          "detail": 0.0286,
-          "saturation": 0.113,
+          "coverage": 0.566,
+          "lum_mean": 0.522,
+          "lum_std": 0.166,
+          "detail": 0.0304,
+          "saturation": 0.252,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 1612,
+      "triangles": 1628,
       "views": {
         "face": {
-          "coverage": 0.132,
-          "lum_mean": 0.414,
-          "lum_std": 0.17,
-          "detail": 0.0353,
-          "saturation": 0.123,
+          "coverage": 0.119,
+          "lum_mean": 0.481,
+          "lum_std": 0.179,
+          "detail": 0.0364,
+          "saturation": 0.245,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.15,
-          "lum_mean": 0.433,
+          "coverage": 0.136,
+          "lum_mean": 0.478,
           "lum_std": 0.187,
-          "detail": 0.0521,
-          "saturation": 0.13,
+          "detail": 0.0526,
+          "saturation": 0.242,
           "flags": []
         },
         "profil": {
-          "coverage": 0.128,
-          "lum_mean": 0.433,
-          "lum_std": 0.163,
-          "detail": 0.0446,
-          "saturation": 0.155,
+          "coverage": 0.124,
+          "lum_mean": 0.451,
+          "lum_std": 0.146,
+          "detail": 0.0442,
+          "saturation": 0.276,
           "flags": []
         },
         "detail": {
-          "coverage": 0.512,
-          "lum_mean": 0.484,
-          "lum_std": 0.165,
-          "detail": 0.032,
-          "saturation": 0.09,
+          "coverage": 0.493,
+          "lum_mean": 0.525,
+          "lum_std": 0.149,
+          "detail": 0.0311,
+          "saturation": 0.239,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 20.2
+    "seconds": 17.7
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

@@ -17,38 +17,38 @@
     {
       "label": "PanthereNeon cuit, 7 pièces (repos)",
       "kind": "baked",
-      "triangles": 964,
+      "triangles": 2014,
       "views": {
         "face": {
-          "coverage": 0.08,
-          "lum_mean": 0.27,
-          "lum_std": 0.151,
-          "detail": 0.0413,
-          "saturation": 0.114,
+          "coverage": 0.076,
+          "lum_mean": 0.279,
+          "lum_std": 0.157,
+          "detail": 0.0599,
+          "saturation": 0.202,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.131,
-          "lum_mean": 0.345,
-          "lum_std": 0.168,
-          "detail": 0.0729,
-          "saturation": 0.163,
+          "coverage": 0.119,
+          "lum_mean": 0.346,
+          "lum_std": 0.172,
+          "detail": 0.0828,
+          "saturation": 0.215,
           "flags": []
         },
         "profil": {
-          "coverage": 0.109,
-          "lum_mean": 0.337,
-          "lum_std": 0.156,
-          "detail": 0.0483,
-          "saturation": 0.164,
+          "coverage": 0.099,
+          "lum_mean": 0.339,
+          "lum_std": 0.153,
+          "detail": 0.0578,
+          "saturation": 0.206,
           "flags": []
         },
         "detail": {
-          "coverage": 0.382,
-          "lum_mean": 0.398,
-          "lum_std": 0.209,
-          "detail": 0.0346,
-          "saturation": 0.148,
+          "coverage": 0.358,
+          "lum_mean": 0.388,
+          "lum_std": 0.202,
+          "detail": 0.0432,
+          "saturation": 0.226,
           "flags": []
         }
       }
@@ -56,38 +56,40 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 964,
+      "triangles": 2014,
       "views": {
         "face": {
-          "coverage": 0.07,
-          "lum_mean": 0.293,
-          "lum_std": 0.167,
-          "detail": 0.0479,
-          "saturation": 0.128,
-          "flags": []
+          "coverage": 0.048,
+          "lum_mean": 0.317,
+          "lum_std": 0.163,
+          "detail": 0.0721,
+          "saturation": 0.209,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
         },
         "trois_quarts": {
-          "coverage": 0.104,
-          "lum_mean": 0.333,
-          "lum_std": 0.184,
-          "detail": 0.0745,
-          "saturation": 0.163,
+          "coverage": 0.07,
+          "lum_mean": 0.355,
+          "lum_std": 0.173,
+          "detail": 0.1027,
+          "saturation": 0.234,
           "flags": []
         },
         "profil": {
-          "coverage": 0.102,
-          "lum_mean": 0.325,
-          "lum_std": 0.158,
-          "detail": 0.0495,
-          "saturation": 0.168,
+          "coverage": 0.074,
+          "lum_mean": 0.336,
+          "lum_std": 0.15,
+          "detail": 0.068,
+          "saturation": 0.225,
           "flags": []
         },
         "detail": {
-          "coverage": 0.379,
-          "lum_mean": 0.407,
-          "lum_std": 0.218,
-          "detail": 0.0396,
-          "saturation": 0.132,
+          "coverage": 0.251,
+          "lum_mean": 0.37,
+          "lum_std": 0.159,
+          "detail": 0.053,
+          "saturation": 0.197,
           "flags": []
         }
       }
@@ -99,7 +101,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 25.1
+    "seconds": 23.0
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

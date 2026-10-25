@@ -1,25 +1,31 @@
 {
   "asset": "PigeonVilles_Corps",
-  "triangles": 1612,
-  "vertices": 884,
+  "triangles": 1628,
+  "vertices": 952,
   "size_studs": [
-    0.945,
-    1.484,
-    1.57
+    0.93,
+    1.578,
+    1.56
   ],
   "pivot": "sol, au centre",
   "resolution": 1024,
   "uv_overlap_pct": 0.0,
-  "uv_coverage_pct": 57.7,
+  "uv_coverage_pct": 49.8,
   "source_materials": [
     "M_PigeonVilles_high_aile",
-    "M_PigeonVilles_high_bec_pattes",
-    "M_PigeonVilles_high_blanc",
+    "M_PigeonVilles_high_bec",
+    "M_PigeonVilles_high_blanc_oeil",
+    "M_PigeonVilles_high_cire",
     "M_PigeonVilles_high_cou_vert",
     "M_PigeonVilles_high_cou_violet",
+    "M_PigeonVilles_high_griffes",
     "M_PigeonVilles_high_gris",
+    "M_PigeonVilles_high_gris_clair",
+    "M_PigeonVilles_high_iris#FF7A1A",
+    "M_PigeonVilles_high_pattes",
     "M_PigeonVilles_high_plume",
     "M_PigeonVilles_high_pupille",
+    "M_PigeonVilles_high_reflet",
     "M_PigeonVilles_high_tete",
     "M_PigeonVilles_high_tour_oeil"
   ],
@@ -30,8 +36,8 @@
     "backend": "CUDA",
     "samples": 32,
     "ao_samples": 64,
-    "cage": 0.0235,
-    "max_ray": 0.0589,
+    "cage": 0.0237,
+    "max_ray": 0.0592,
     "ao_distance": 0.06,
     "ao_strength": 0.35,
     "from_high": true
@@ -56,5 +62,5 @@
     "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
   },
   "within_budget": true,
-  "seconds": 21.2
+  "seconds": 19.5
 }

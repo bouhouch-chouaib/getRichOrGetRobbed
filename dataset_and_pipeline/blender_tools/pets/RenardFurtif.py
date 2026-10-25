@@ -1,8 +1,10 @@
 """Renard Furtif (Rare, Animaux) : « Renard orange au bandana rouge. »
 
-En briques LEGO : corps orange, poitrail et museau blancs, museau pointu en pente, truffe noire, yeux ambre rusés,
-grandes oreilles en coins à pointe noire, pattes à chaussettes noires, bandana rouge noué au cou (triangle qui pend),
-grosse queue touffue qui finit en pointe blanche. Parties animées : tête, 4 pattes, queue.
+En briques LEGO, très détaillé (25 oct., 2e niveau) : renard roux vif à la silhouette réelle (poitrail bombé, reins,
+croupe, cou incliné), gorge et poitrail crème, museau long et fin à truffe noire et sourire en coin, joues à touffes
+blanches, yeux ambre en fente sous une paupière rusée et un sourcil, grandes oreilles à intérieur crème et pointe
+noire, moustaches, pattes articulées à chaussettes noires et griffes, bandana rouge vif à pois blancs noué derrière
+le cou, énorme queue touffue à bout blanc. Parties animées : tête, 4 pattes, queue.
 """
 
 import _parts as P
@@ -11,46 +13,56 @@ from pet_kit import PetKit
 
 def build(name: str) -> dict:
     kit = PetKit(name)
-    orange = kit.mat("orange", "#F07828")
-    white = kit.mat("blanc", "#F6F1E8")
-    black = kit.mat("noir", "#2A211E")
-    red = kit.mat("bandana", "#D62F2A")
+    orange = kit.mat("roux", "#FF6A13")
+    rust = kit.mat("roux_fonce", "#E04E06")
+    cream = kit.mat("creme", "#FFF4E2")
+    black = kit.mat("noir", "#24180F")
+    red = kit.mat("bandana", "#F0182A")
     dots = kit.mat("pois", "#FFFFFF")
+    claw = kit.mat("griffes", "#F3E3CC")
 
-    # --- corps ---
-    kit.add(kit.brick((0.44, 0.88, 0.26), center=(0, 0.04, 0.55)), orange, bevel=0.03)
-    kit.add(kit.brick((0.4, 0.7, 0.08), center=(0, 0.0, 0.72)), orange, bevel=0.02)
-    kit.add(kit.slope((0.4, 0.2, 0.08), center=(0, 0.45, 0.72), facing="+Y", top=0.3), orange, bevel=0.015)
-    kit.add(kit.brick((0.32, 0.07, 0.28), center=(0, -0.42, 0.52)), white, bevel=0.02)
+    # --- torse sculpté + dos plus foncé + cou incliné ---
+    P.quad_torso(kit, L=0.96, W=0.42, H=0.3, z=0.6, y0=0.05, main=orange, belly=cream, chest=cream, back=rust)
+    kit.add(kit.brick((0.3, 0.28, 0.34), center=(0, -0.42, 0.82), rot=(24, 0, 0)), orange, bevel=0.03)
+    kit.add(kit.brick((0.2, 0.05, 0.3), center=(0, -0.55, 0.78), rot=(24, 0, 0)), cream, bevel=0.015)
 
-    # --- tête : museau pointu, oreilles à pointe noire ---
-    kit.add(kit.brick((0.5, 0.4, 0.34), center=(0, -0.52, 0.94)), orange, "Head", bevel=0.03)
-    kit.add(kit.brick((0.3, 0.26, 0.12), center=(0, -0.82, 0.83)), white, "Head", bevel=0.02)
-    kit.add(kit.slope((0.3, 0.26, 0.12), center=(0, -0.82, 0.95), facing="-Y", top=0.25), orange, "Head",
-            bevel=0.015)
-    kit.add(kit.brick((0.09, 0.06, 0.07), center=(0, -0.97, 0.88)), black, "Head", bevel=0.01)
+    # --- tête : crâne, front, joues à touffes, museau fin, truffe, sourire, yeux rusés, oreilles, moustaches ---
+    kit.add(kit.brick((0.46, 0.36, 0.3), center=(0, -0.56, 1.02)), orange, "Head", bevel=0.035)
+    kit.add(kit.brick((0.38, 0.3, 0.06), center=(0, -0.55, 1.2)), orange, "Head", bevel=0.015)
+    kit.add(kit.slope((0.38, 0.1, 0.06), center=(0, -0.74, 1.2), facing="-Y", top=0.3), orange, "Head", bevel=0.01)
     for s in (-1, 1):
-        kit.add(kit.slope((0.12, 0.26, 0.16), center=(s * 0.29, -0.58, 0.84), facing="+X" if s > 0 else "-X",
-                          top=0.2), white, "Head", bevel=0.012)
-        kit.add(kit.wedge((0.2, 0.08, 0.3), center=(s * 0.17, -0.46, 1.25), rot=(-6, s * 6, 0), tip=0.12), orange,
-                "Head", bevel=0.012)
-        kit.add(kit.wedge((0.08, 0.085, 0.1), center=(s * (0.17 + 0.026), -0.46, 1.37), rot=(-6, s * 6, 0), tip=0.1),
-                black, "Head", bevel=0.006)
-        kit.add(kit.wedge((0.1, 0.02, 0.17), center=(s * 0.17, -0.505, 1.23), rot=(-6, s * 6, 0), tip=0.12), white,
-                "Head", bevel=0.005)
-    P.eyes(kit, "Head", 0.13, -0.72, 1.02, size=0.11, iris="#F2B230", pupil_w=0.35, pupil_h=0.8, tall=0.75)
+        kit.add(kit.slope((0.14, 0.26, 0.2), center=(s * 0.28, -0.6, 0.93), facing=P.side(s), top=0.2), cream, "Head",
+                bevel=0.015)
+        P.tuft_piece(kit, "Head", (s * 0.32, -0.62, 0.88), (s, -0.3, -0.45), 0.08, 0.06, cream)
+        P.tuft_piece(kit, "Head", (s * 0.3, -0.66, 0.95), (s, -0.4, -0.2), 0.06, 0.05, cream)
+    kit.add(kit.brick((0.26, 0.26, 0.12), center=(0, -0.86, 0.93)), cream, "Head", bevel=0.02)
+    kit.add(kit.slope((0.26, 0.26, 0.1), center=(0, -0.86, 1.04), facing="-Y", top=0.25), orange, "Head", bevel=0.012)
+    kit.add(kit.brick((0.18, 0.12, 0.06), center=(0, -0.8, 0.85)), cream, "Head", bevel=0.01)
+    P.nose(kit, "Head", y=-0.99, z=0.99, w=0.09, color="#1A1210")
+    P.mouth(kit, "Head", y=-0.99, z=0.9, w=0.16, smile=0.5)
+    P.eyes(kit, "Head", x=0.12, y=-0.74, z=1.06, size=0.11, iris="#FFB61E", pupil="slit", lid=orange, lid_drop=0.1,
+           brow=rust, brow_angle=12, tall=0.8)
+    P.whiskers(kit, "Head", x=0.1, y=-0.93, z=0.95, color="#3A2A22", n=2, length=0.12)
+    for s in (-1, 1):
+        P.ear(kit, "Head", s, (s * 0.15, -0.5, 1.17), w=0.21, h=0.32, color=orange, inner=cream, tilt=(-6, 8), tip=black)
 
-    # --- bandana rouge à pois : bande au cou + triangle qui pend devant ---
-    kit.add(kit.brick((0.48, 0.12, 0.08), center=(0, -0.36, 0.74)), red, bevel=0.015)
-    kit.add(kit.slope((0.3, 0.06, 0.2), center=(0, -0.45, 0.62), facing="-Y", top=0.3, rot=(180, 0, 0)), red,
+    # --- bandana rouge à pois, noué derrière ---
+    kit.add(kit.brick((0.4, 0.32, 0.07), center=(0, -0.42, 0.68), rot=(24, 0, 0)), red, bevel=0.015)
+    kit.add(kit.slope((0.28, 0.06, 0.22), center=(0, -0.6, 0.57), facing="-Y", top=0.25, rot=(180, 0, 0)), red,
             bevel=0.01)
-    for dx, dz in ((-0.07, 0.66), (0.06, 0.62), (0.0, 0.57)):
-        kit.add(kit.brick((0.03, 0.01, 0.03), center=(dx, -0.47, dz)), dots, bevel=0.0)
+    kit.add(kit.brick((0.1, 0.08, 0.08), center=(0, -0.26, 0.8)), red, bevel=0.012)
+    for dx in (-0.06, 0.06):
+        P.tuft_piece(kit, "Body", (dx, -0.22, 0.8), (dx * 4, 1.0, -0.5), 0.12, 0.07, red)
+    for dx, dz in ((-0.07, 0.6), (0.06, 0.57), (0.0, 0.51), (-0.13, 0.68), (0.12, 0.68)):
+        kit.add(kit.brick((0.03, 0.01, 0.03), center=(dx, -0.625 if dz < 0.65 else -0.585, dz)), dots, bevel=0.0)
 
-    # --- pattes à chaussettes noires, grosse queue touffue à pointe blanche ---
-    P.legs4(kit, orange, black, x=0.15, yf=-0.28, yb=0.34, h=0.33, w=0.13, paw_h=0.1, thigh=(0.17, 0.28, 0.2))
-    P.chain(kit, "Tail", [(0, 0.5, 0.62), (0, 0.72, 0.66), (0, 0.9, 0.78), (0, 1.0, 0.96), (0, 1.02, 1.1)], 0.2,
-            [orange, orange, orange, white], taper=-0.008)
-    kit.part("Tail", "Tail", pivot=(0, 0.48, 0.62))
-    kit.part("Head", "Head", pivot=(0, -0.4, 0.78))
+    # --- pattes articulées à chaussettes noires et griffes ---
+    P.quad_legs(kit, orange, yf=-0.3, yb=0.38, top_f=0.62, top_b=0.66, length_f=0.6, length_b=0.64, w=0.12,
+                paw=black, toe=black, claw=claw, x=0.15, toes=3, lower=black)
+
+    # --- énorme queue touffue à bout blanc ---
+    P.bushy_tail(kit, "Tail", [(0, 0.52, 0.68), (0, 0.72, 0.7), (0, 0.92, 0.78), (0, 1.07, 0.94), (0, 1.13, 1.12),
+                               (0, 1.12, 1.28)], 0.22, orange, tip=cream)
+    kit.part("Tail", "Tail", pivot=(0, 0.5, 0.68))
+    kit.part("Head", "Head", pivot=(0, -0.42, 0.86))
     return kit.result()

@@ -17,38 +17,38 @@
     {
       "label": "TRexPoche cuit, 8 pièces (repos)",
       "kind": "baked",
-      "triangles": 1132,
+      "triangles": 1644,
       "views": {
         "face": {
-          "coverage": 0.087,
-          "lum_mean": 0.58,
-          "lum_std": 0.191,
-          "detail": 0.0554,
-          "saturation": 0.478,
+          "coverage": 0.083,
+          "lum_mean": 0.518,
+          "lum_std": 0.184,
+          "detail": 0.0623,
+          "saturation": 0.513,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.125,
-          "lum_mean": 0.639,
-          "lum_std": 0.182,
-          "detail": 0.0434,
-          "saturation": 0.491,
+          "coverage": 0.119,
+          "lum_mean": 0.577,
+          "lum_std": 0.177,
+          "detail": 0.0563,
+          "saturation": 0.493,
           "flags": []
         },
         "profil": {
-          "coverage": 0.13,
-          "lum_mean": 0.663,
-          "lum_std": 0.164,
-          "detail": 0.0341,
-          "saturation": 0.508,
+          "coverage": 0.125,
+          "lum_mean": 0.609,
+          "lum_std": 0.169,
+          "detail": 0.0389,
+          "saturation": 0.498,
           "flags": []
         },
         "detail": {
-          "coverage": 0.404,
-          "lum_mean": 0.705,
-          "lum_std": 0.168,
-          "detail": 0.0215,
-          "saturation": 0.539,
+          "coverage": 0.386,
+          "lum_mean": 0.637,
+          "lum_std": 0.162,
+          "detail": 0.0261,
+          "saturation": 0.531,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 1132,
+      "triangles": 1644,
       "views": {
         "face": {
-          "coverage": 0.079,
-          "lum_mean": 0.571,
-          "lum_std": 0.24,
-          "detail": 0.0563,
-          "saturation": 0.449,
+          "coverage": 0.075,
+          "lum_mean": 0.529,
+          "lum_std": 0.218,
+          "detail": 0.0684,
+          "saturation": 0.48,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.095,
-          "lum_mean": 0.601,
-          "lum_std": 0.216,
-          "detail": 0.0514,
-          "saturation": 0.489,
+          "coverage": 0.09,
+          "lum_mean": 0.545,
+          "lum_std": 0.193,
+          "detail": 0.0634,
+          "saturation": 0.495,
           "flags": []
         },
         "profil": {
-          "coverage": 0.111,
-          "lum_mean": 0.667,
-          "lum_std": 0.185,
-          "detail": 0.0403,
-          "saturation": 0.518,
+          "coverage": 0.106,
+          "lum_mean": 0.615,
+          "lum_std": 0.178,
+          "detail": 0.048,
+          "saturation": 0.513,
           "flags": []
         },
         "detail": {
-          "coverage": 0.393,
-          "lum_mean": 0.659,
-          "lum_std": 0.245,
-          "detail": 0.0232,
-          "saturation": 0.502,
+          "coverage": 0.379,
+          "lum_mean": 0.59,
+          "lum_std": 0.229,
+          "detail": 0.0277,
+          "saturation": 0.498,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 23.1
+    "seconds": 26.1
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

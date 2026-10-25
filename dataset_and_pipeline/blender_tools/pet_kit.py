@@ -136,7 +136,11 @@ class PetKit:
         """Disque (œil, bouton, roue) : cylindre court dont la face regarde vers `normal`."""
         obj = G.lathe(self._id(label), [(0.0, -thickness / 2), (radius, -thickness / 2), (radius, thickness / 2),
                                         (0.0, thickness / 2)], segments=sides, closed=True)
-        return G.transform(obj, G.frame_matrix(center, normal))
+        # frame_matrix part d'un « roulis » vers -Y : pour un disque qui regarde vers ±Y il serait parallèle à la
+        # normale et écraserait le disque (pupilles invisibles, 25 oct.) -> on prend alors +Z
+        n = Vector(normal).normalized()
+        roll = (0, 0, 1) if abs(n.y) > 0.9 else (0, -1, 0)
+        return G.transform(obj, G.frame_matrix(center, n, roll_hint=roll))
 
     def cylinder(self, radius, height, center=(0, 0, 0), rot=(0, 0, 0), sides=20, top=None, label="Cylindre"):
         """Cylindre vertical (cou, patte, tige), top = rayon du haut (cône si différent)."""

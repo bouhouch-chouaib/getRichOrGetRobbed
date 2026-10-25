@@ -17,38 +17,38 @@
     {
       "label": "HamsterJoufflu cuit, 5 pièces (repos)",
       "kind": "baked",
-      "triangles": 616,
+      "triangles": 1220,
       "views": {
         "face": {
-          "coverage": 0.252,
-          "lum_mean": 0.565,
-          "lum_std": 0.236,
-          "detail": 0.0315,
-          "saturation": 0.324,
+          "coverage": 0.24,
+          "lum_mean": 0.513,
+          "lum_std": 0.231,
+          "detail": 0.0528,
+          "saturation": 0.332,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.282,
-          "lum_mean": 0.546,
-          "lum_std": 0.222,
-          "detail": 0.0419,
-          "saturation": 0.345,
+          "coverage": 0.264,
+          "lum_mean": 0.517,
+          "lum_std": 0.216,
+          "detail": 0.0576,
+          "saturation": 0.383,
           "flags": []
         },
         "profil": {
-          "coverage": 0.245,
-          "lum_mean": 0.502,
-          "lum_std": 0.175,
-          "detail": 0.0205,
-          "saturation": 0.437,
+          "coverage": 0.229,
+          "lum_mean": 0.512,
+          "lum_std": 0.18,
+          "detail": 0.0261,
+          "saturation": 0.505,
           "flags": []
         },
         "detail": {
-          "coverage": 0.732,
-          "lum_mean": 0.565,
-          "lum_std": 0.206,
-          "detail": 0.0214,
-          "saturation": 0.444,
+          "coverage": 0.72,
+          "lum_mean": 0.548,
+          "lum_std": 0.209,
+          "detail": 0.0291,
+          "saturation": 0.482,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 616,
+      "triangles": 1220,
       "views": {
         "face": {
-          "coverage": 0.237,
-          "lum_mean": 0.567,
-          "lum_std": 0.235,
-          "detail": 0.0331,
-          "saturation": 0.324,
+          "coverage": 0.233,
+          "lum_mean": 0.516,
+          "lum_std": 0.228,
+          "detail": 0.0536,
+          "saturation": 0.333,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.266,
-          "lum_mean": 0.55,
-          "lum_std": 0.22,
-          "detail": 0.0422,
-          "saturation": 0.346,
+          "coverage": 0.256,
+          "lum_mean": 0.523,
+          "lum_std": 0.212,
+          "detail": 0.0592,
+          "saturation": 0.387,
           "flags": []
         },
         "profil": {
-          "coverage": 0.234,
-          "lum_mean": 0.504,
-          "lum_std": 0.174,
-          "detail": 0.0214,
-          "saturation": 0.439,
+          "coverage": 0.223,
+          "lum_mean": 0.513,
+          "lum_std": 0.177,
+          "detail": 0.0264,
+          "saturation": 0.51,
           "flags": []
         },
         "detail": {
-          "coverage": 0.704,
-          "lum_mean": 0.568,
-          "lum_std": 0.202,
-          "detail": 0.0222,
-          "saturation": 0.441,
+          "coverage": 0.7,
+          "lum_mean": 0.547,
+          "lum_std": 0.207,
+          "detail": 0.0294,
+          "saturation": 0.485,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 17.9
+    "seconds": 19.7
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

@@ -17,38 +17,38 @@
     {
       "label": "ChatRuelle cuit, 7 pièces (repos)",
       "kind": "baked",
-      "triangles": 1502,
+      "triangles": 2272,
       "views": {
         "face": {
-          "coverage": 0.13,
-          "lum_mean": 0.481,
-          "lum_std": 0.168,
-          "detail": 0.047,
-          "saturation": 0.119,
+          "coverage": 0.106,
+          "lum_mean": 0.521,
+          "lum_std": 0.169,
+          "detail": 0.0677,
+          "saturation": 0.172,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.168,
-          "lum_mean": 0.48,
-          "lum_std": 0.159,
-          "detail": 0.0519,
-          "saturation": 0.112,
+          "coverage": 0.138,
+          "lum_mean": 0.525,
+          "lum_std": 0.17,
+          "detail": 0.0706,
+          "saturation": 0.185,
           "flags": []
         },
         "profil": {
-          "coverage": 0.15,
-          "lum_mean": 0.462,
-          "lum_std": 0.138,
-          "detail": 0.0356,
-          "saturation": 0.11,
+          "coverage": 0.122,
+          "lum_mean": 0.53,
+          "lum_std": 0.143,
+          "detail": 0.0426,
+          "saturation": 0.202,
           "flags": []
         },
         "detail": {
-          "coverage": 0.473,
-          "lum_mean": 0.502,
-          "lum_std": 0.151,
-          "detail": 0.0288,
-          "saturation": 0.08,
+          "coverage": 0.425,
+          "lum_mean": 0.553,
+          "lum_std": 0.149,
+          "detail": 0.0339,
+          "saturation": 0.171,
           "flags": []
         }
       }
@@ -56,38 +56,38 @@
     {
       "label": "Pose animée",
       "kind": "baked",
-      "triangles": 1502,
+      "triangles": 2272,
       "views": {
         "face": {
-          "coverage": 0.102,
-          "lum_mean": 0.474,
-          "lum_std": 0.164,
-          "detail": 0.0458,
-          "saturation": 0.109,
+          "coverage": 0.084,
+          "lum_mean": 0.51,
+          "lum_std": 0.176,
+          "detail": 0.0649,
+          "saturation": 0.164,
           "flags": []
         },
         "trois_quarts": {
-          "coverage": 0.126,
-          "lum_mean": 0.468,
-          "lum_std": 0.168,
-          "detail": 0.0548,
-          "saturation": 0.111,
+          "coverage": 0.102,
+          "lum_mean": 0.505,
+          "lum_std": 0.185,
+          "detail": 0.073,
+          "saturation": 0.18,
           "flags": []
         },
         "profil": {
-          "coverage": 0.129,
-          "lum_mean": 0.477,
-          "lum_std": 0.146,
-          "detail": 0.0436,
-          "saturation": 0.108,
+          "coverage": 0.105,
+          "lum_mean": 0.537,
+          "lum_std": 0.163,
+          "detail": 0.0552,
+          "saturation": 0.193,
           "flags": []
         },
         "detail": {
-          "coverage": 0.414,
-          "lum_mean": 0.515,
-          "lum_std": 0.169,
-          "detail": 0.0337,
-          "saturation": 0.065,
+          "coverage": 0.359,
+          "lum_mean": 0.563,
+          "lum_std": 0.168,
+          "detail": 0.0405,
+          "saturation": 0.155,
           "flags": []
         }
       }
@@ -99,7 +99,7 @@
     "samples": 40,
     "resolution": 420,
     "view_transform": "Standard",
-    "seconds": 17.2
+    "seconds": 16.6
   },
   "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
 }

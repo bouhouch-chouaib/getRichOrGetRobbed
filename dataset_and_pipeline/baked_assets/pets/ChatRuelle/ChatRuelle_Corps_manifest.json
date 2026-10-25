@@ -1,26 +1,30 @@
 {
   "asset": "ChatRuelle_Corps",
-  "triangles": 1502,
-  "vertices": 858,
+  "triangles": 2272,
+  "vertices": 1352,
   "size_studs": [
-    0.865,
-    1.823,
-    1.598
+    0.997,
+    1.858,
+    1.6
   ],
   "pivot": "sol, au centre",
   "resolution": 1024,
   "uv_overlap_pct": 0.0,
-  "uv_coverage_pct": 52.6,
+  "uv_coverage_pct": 40.0,
   "source_materials": [
+    "M_ChatRuelle_high_blanc_oeil",
+    "M_ChatRuelle_high_bouche#2A1418",
     "M_ChatRuelle_high_creme",
     "M_ChatRuelle_high_gris",
-    "M_ChatRuelle_high_oeil",
+    "M_ChatRuelle_high_iris#B8F02A",
+    "M_ChatRuelle_high_moustache#FFFFFF",
+    "M_ChatRuelle_high_narine#B4466A",
     "M_ChatRuelle_high_pansement",
     "M_ChatRuelle_high_pupille",
     "M_ChatRuelle_high_rayure",
     "M_ChatRuelle_high_reflet",
     "M_ChatRuelle_high_rose",
-    "M_ChatRuelle_high_trous"
+    "M_ChatRuelle_high_truffe#FF8FB1"
   ],
   "presets": [
     "create_stylized_edge_wear_material"
@@ -29,8 +33,8 @@
     "backend": "CUDA",
     "samples": 32,
     "ao_samples": 64,
-    "cage": 0.0274,
-    "max_ray": 0.0684,
+    "cage": 0.0279,
+    "max_ray": 0.0697,
     "ao_distance": 0.06,
     "ao_strength": 0.35,
     "from_high": true
@@ -55,5 +59,5 @@
     "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
   },
   "within_budget": true,
-  "seconds": 18.8
+  "seconds": 17.9
 }

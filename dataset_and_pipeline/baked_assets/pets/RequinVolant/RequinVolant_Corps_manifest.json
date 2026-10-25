@@ -1,23 +1,26 @@
 {
   "asset": "RequinVolant_Corps",
-  "triangles": 604,
-  "vertices": 360,
+  "triangles": 924,
+  "vertices": 568,
   "size_studs": [
-    1.067,
-    2.17,
-    0.968
+    1.139,
+    2.313,
+    1.022
   ],
   "pivot": "sol, au centre",
   "resolution": 1024,
   "uv_overlap_pct": 0.0,
-  "uv_coverage_pct": 70.1,
+  "uv_coverage_pct": 61.1,
   "source_materials": [
+    "M_RequinVolant_high_bleu",
+    "M_RequinVolant_high_cicatrice",
     "M_RequinVolant_high_dents",
     "M_RequinVolant_high_dos",
-    "M_RequinVolant_high_gris_bleu",
+    "M_RequinVolant_high_gencive",
     "M_RequinVolant_high_gueule",
     "M_RequinVolant_high_oeil",
     "M_RequinVolant_high_ouies",
+    "M_RequinVolant_high_reflet",
     "M_RequinVolant_high_ventre"
   ],
   "presets": [
@@ -27,8 +30,8 @@
     "backend": "CUDA",
     "samples": 32,
     "ao_samples": 64,
-    "cage": 0.0325,
-    "max_ray": 0.0814,
+    "cage": 0.0347,
+    "max_ray": 0.0867,
     "ao_distance": 0.06,
     "ao_strength": 0.35,
     "from_high": true
@@ -53,5 +56,5 @@
     "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
   },
   "within_budget": true,
-  "seconds": 25.0
+  "seconds": 26.8
 }
