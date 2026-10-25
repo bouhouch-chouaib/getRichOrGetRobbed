@@ -58,13 +58,38 @@ local art = game.ReplicatedStorage:FindFirstChild("ArtModels") or Instance.new("
 art.Name = "ArtModels"
 art.Parent = game.ReplicatedStorage
 local report = {}
+-- Pièces importées d'un familier : « <Id>__<Pièce> » n'importe où dans le Workspace (import groupé d'un lot,
+-- export_lot.py), sinon les pièces du modèle Workspace.<Id>_Rig (import d'un seul familier).
+local function sourceParts(petId: string): { [string]: MeshPart }
+	local found = {}
+	for _, d in workspace:GetDescendants() do
+		if d:IsA("MeshPart") then
+			local owner, piece = string.match(d.Name, "^(.-)__(.+)$")
+			if owner == petId then
+				found[piece] = d
+			end
+		end
+	end
+	if next(found) == nil then
+		local single = workspace:FindFirstChild(petId .. "_Rig")
+		if single then
+			for _, d in single:GetDescendants() do
+				if d:IsA("MeshPart") then
+					found[d.Name] = d
+				end
+			end
+		end
+	end
+	return found
+end
+
 for petId, data in PETS do
-	local src = workspace:FindFirstChild(petId .. "_Rig")
-	if not src then
-		table.insert(report, petId .. " : import introuvable (Workspace." .. petId .. "_Rig)")
+	local found = sourceParts(petId)
+	local body = found.Body
+	if not body then
+		table.insert(report, petId .. " : import introuvable (pièces " .. petId .. "__... ou Workspace." .. petId .. "_Rig)")
 		continue
 	end
-	local body = src:FindFirstChild("Body", true)
 	local bc, bs = data.bodyCenter, data.bodySize
 	local centerB = Vector3.new(bc[1], bc[2], bc[3])
 	local k = body.Size.Y / bs[3]
@@ -78,14 +103,21 @@ for petId, data in PETS do
 		end
 		return CFrame.fromMatrix(p, mapV(-col(1)), mapV(col(3)), mapV(col(2)))
 	end
-	local cf, size = src:GetBoundingBox()
+	-- boîte de toutes les pièces : le modèle est posé au sol, centré sur l'origine
+	local probe = Instance.new("Model")
+	for _, part in found do
+		part:Clone().Parent = probe
+	end
+	local cf, size = probe:GetBoundingBox()
+	probe:Destroy()
 	local shift = CFrame.new(-Vector3.new(cf.Position.X, cf.Position.Y - size.Y / 2, cf.Position.Z))
 	local model = Instance.new("Model")
 	model.Name = petId
 	local count, moving = 0, 0
-	for _, part in src:GetDescendants() do
-		if part:IsA("MeshPart") then
+	for pieceName, part in found do
+		do
 			local q = part:Clone()
+			q.Name = pieceName
 			for _, c in q:GetChildren() do
 				if not c:IsA("SurfaceAppearance") then
 					c:Destroy()
@@ -129,7 +161,16 @@ for petId, data in PETS do
 		old:Destroy()
 	end
 	model.Parent = art
-	src:Destroy()
+	-- nettoyage de l'import : les pièces, puis les conteneurs restés vides (<Id>_Rig, le modèle du lot)
+	for _, part in found do
+		local parent = part.Parent
+		part:Destroy()
+		while parent and parent ~= workspace and #parent:GetChildren() == 0 do
+			local up = parent.Parent
+			parent:Destroy()
+			parent = up
+		end
+	end
 	local _, msize = model:GetBoundingBox()
 	table.insert(report, string.format("%s : %d pièces dont %d animées, %s", petId, count, moving, tostring(msize)))
 end
