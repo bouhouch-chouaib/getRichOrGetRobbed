@@ -274,7 +274,14 @@ dans `blender_tools/environment_cosmos.py`, rendus `qa_renders/map_hero_cosmos.p
   (exposition +0,45) pour qu'il se distingue de la nuit indigo. `export_map_lot.py -- --world Cosmos` ->
   `Decors_Cosmos.fbx` (30,3 Mo).
 - Le script Studio sait maintenant poser une lumière sur n'importe quelle surface (`light` dans `SURFACE_LOOK`).
-- Pas encore dans Studio : attend la validation du style par Chouaib puis l'import de `Decors_Cosmos.fbx` (mode
-  Édition) ; ensuite `apply_map_look_cosmos.lua` et les bases `CosmosLook` (déjà déclarées dans `MapGenerator`).
-- Différence attendue avec les rendus : en jeu le ciel ne change pas selon le monde (bleu le jour) ; dans l'espace ça se
-  verra plus qu'ailleurs. Piste : un Sky par monde dans `client/WorldSkin`.
+- **Branché dans Studio (26 oct., style validé par Chouaib)** : import de `Decors_Cosmos.fbx` (Édition),
+  `apply_map_look_cosmos.lua` -> 17 décors dans `ArtModels.Map` (108 pour les 6 mondes), 595 posés dans `MapDecor.Cosmos`
+  + cratère de poussière d'étoiles (Neon violet + PointLight), 42 PointLight (16 pylônes cyan, 26 cristaux roses) ;
+  8 / 8 portes et 90 / 90 falaises tournées vers le trou ; bases `CosmosLook` (8 bases, 29 pièces chacune). La ligne
+  `Cosmos` de `MapGenerator` est ajoutée dans la source de Studio et dans le dossier OneDrive (Rojo ne la reprend pas seul).
+- Vérifié en Play (solo, monde changé côté client) : au Cosmos, seuls les décors du Cosmos visibles (596 pièces, les 5
+  autres mondes cachés), 43 lumières allumées (aucune des autres mondes), CosmosLook visible et les 5 autres habillages
+  cachés ; retour en Prairie : tout s'éteint et se cache. Photos `qa_renders/map_roblox_cosmos_jour.jpg`,
+  `map_roblox_cosmos_nuit.jpg`, `map_roblox_cosmos_cratere.jpg`.
+- Différence avec les rendus : en jeu le ciel ne change pas selon le monde (bleu à nuages le jour) ; dans l'espace ça se
+  voit plus qu'ailleurs. Piste : un Sky par monde dans `client/WorldSkin`.
