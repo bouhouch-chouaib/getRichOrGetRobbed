@@ -1,24 +1,22 @@
-"""Génère dataset_and_pipeline/studio_tools/apply_map_look.lua à partir du placement exporté par run_map_scene.py.
+"""Génère le script Studio qui pose les décors d'un monde, à partir du placement exporté par run_map_scene.py.
 
-    python dataset_and_pipeline/tools/make_map_look_script.py
+    python dataset_and_pipeline/tools/make_map_look_script.py [--world Desert]
 
-Entrées : baked_assets/map/map_layout.json (positions Roblox), baked_assets/map/<Asset>_manifest.json (tailles),
-map_art_bible.json (préréglage d'éclairage « jour_digestion »). Le script Luau embarque tout (le HTTP du jeu est coupé).
+Prairie -> studio_tools/apply_map_look.lua ; autre monde -> studio_tools/apply_map_look_<monde>.lua.
+Entrées : baked_assets/map[/<monde>]/map_layout.json (positions Roblox), les manifestes <Asset>_manifest.json (tailles ;
+cherchés dans le dossier du monde puis dans celui de la Prairie, pour les décors partagés comme Caisse), et
+map_roblox.json s'il existe (lueurs et couleurs renvoyées à la main). Le script Luau embarque tout (HTTP du jeu coupé).
+L'éclairage n'est plus dans ces scripts : il est dans le code du jeu (MapGenerator, DayNightController, Worlds).
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MAP = ROOT / "baked_assets" / "map"
-OUT = ROOT / "studio_tools" / "apply_map_look.lua"
-
-
-def c3(hexcol: str) -> str:
-    h = hexcol.lstrip("#")
-    return f'Color3.fromHex("{h}")'
 
 
 def lua_value(v) -> str:
@@ -26,66 +24,57 @@ def lua_value(v) -> str:
         return "true" if v else "false"
     if isinstance(v, (int, float)):
         return repr(round(float(v), 4))
-    if isinstance(v, str) and v.startswith("#"):
-        return c3(v)
     return json.dumps(v, ensure_ascii=False)
 
 
 def main() -> None:
-    layout = json.loads((MAP / "map_layout.json").read_text(encoding="utf-8"))
-    bible = json.loads((ROOT / "map_art_bible.json").read_text(encoding="utf-8"))
-    day = bible["atmosphere"]["presets"]["jour_digestion"]
-    roblox = json.loads((MAP / "map_roblox.json").read_text(encoding="utf-8"))["emissive"]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--world", default="Prairie")
+    world = parser.parse_args().world
+    prairie = world == "Prairie"
+    folder = MAP if prairie else MAP / world.lower()
+    out = ROOT / "studio_tools" / ("apply_map_look.lua" if prairie else f"apply_map_look_{world.lower()}.lua")
+    fbx = "baked_assets/map/Decors_Carte.fbx" if prairie else f"baked_assets/map/{world.lower()}/Decors_{world}.fbx"
+
+    layout = json.loads((folder / "map_layout.json").read_text(encoding="utf-8"))
+    extra_path = folder / "map_roblox.json"
+    extra = json.loads(extra_path.read_text(encoding="utf-8")) if extra_path.exists() else {}
     sizes = {}
-    for asset in sorted({it["asset"] for it in layout["items"]}):
-        man = json.loads((MAP / f"{asset}_manifest.json").read_text(encoding="utf-8"))
-        x, y, z = man["size_studs"]  # Blender (x, y, z) -> Roblox (x, z, y)
+    # tous les décors du monde (même ceux que la carte ne pose pas, comme le brasero) : le script doit les ranger
+    own = {p.name[: -len("_manifest.json")] for p in folder.glob("*_manifest.json")}
+    for asset in sorted({it["asset"] for it in layout["items"]} | own):
+        man_path = next(p for p in (folder / f"{asset}_manifest.json", MAP / f"{asset}_manifest.json") if p.exists())
+        x, y, z = json.loads(man_path.read_text(encoding="utf-8"))["size_studs"]  # Blender (x, y, z) -> Roblox (x, z, y)
         sizes[asset] = (x, z, y)
 
     lines = []
     w = lines.append
     w("--!nocheck")
-    w("-- Aperçu de la nouvelle carte (phase 1.6) dans Studio, mode Édition, barre MCP execute_luau ou barre de commande.")
+    w(f"-- Décors « niveau studio » du monde {world} dans Studio (mode Édition, barre MCP execute_luau ou rbxm + require).")
     w("-- GÉNÉRÉ par dataset_and_pipeline/tools/make_map_look_script.py (ne pas modifier à la main).")
-    w("-- Avant : importer baked_assets/map/Decors_Carte.fbx (Fichier > Importer 3D, réglages par défaut) : 21 MeshParts")
+    w(f"-- Avant : importer {fbx} (Fichier > Importer 3D, réglages par défaut) : les MeshParts")
     w("-- nommées comme les décors arrivent dans le Workspace. Ce script :")
-    w("--   0. range ces MeshParts dans ReplicatedStorage.ArtModels.Map.<Asset> (+ lueur : EmissiveMaskContent) et")
+    w("--   1. range ces MeshParts dans ReplicatedStorage.ArtModels.Map.<Asset> (+ lueur / couleur de map_roblox.json) et")
     w("--      supprime l'import (sauvegarder le jeu ensuite : ArtModels n'est que dans le fichier du jeu) ;")
-    w("--   1. applique l'éclairage « jour » de map_art_bible.json (Lighting + Atmosphere, Bloom, ColorCorrection,")
-    w("--      DepthOfField, SunRays). Attention : au Play, server/MapGenerator.applyLighting et DayNightController")
-    w("--      remettent leurs propres valeurs ; pour garder ce look en jeu il faudra reporter ces valeurs dans le code ;")
-    w("--   2. pose les décors dans Workspace.MapDecor (un Model par zone et par huitième de carte, pour le streaming),")
-    w("--      sans toucher à Workspace.Map. Par défaut SANS les décors des bases (zone « base ») : les bases sont")
-    w("--      construites par MapGenerator au lancement (clôtures, palettes), il faut d'abord adapter ce code ;")
-    w("--   3. MODE = \"remove\" retire Workspace.MapDecor.")
-    w("-- Non vérifié dans Studio (25 oct.) : import des .fbx des décors, sens du demi-tour (FBX_YAW_OFFSET).")
+    w(f"--   2. pose les décors de l'arène dans Workspace.MapDecor.{world} (un Model par zone et par huitième de carte,")
+    w("--      pour le streaming), sans toucher à Workspace.Map ni aux autres mondes ; les pièces de l'ancien rangement")
+    w("--      (directement sous MapDecor) passent dans MapDecor.Prairie. Sans les décors des bases (zone « base ») :")
+    w("--      ce sont les dossiers <Monde>Look de server/MapGenerator. client/WorldSkin montre le monde du joueur ;")
+    w(f"--   3. MODE = \"remove\" retire Workspace.MapDecor.{world}.")
     w("")
-    w('local MODE = "all" -- "all" | "lighting" | "decor" | "remove"')
+    w(f'local WORLD = "{world}"')
+    w('local MODE = "all" -- "all" | "collect" | "decor" | "remove"')
     w("local INCLUDE_BASES = false")
     w(f"local FBX_YAW_OFFSET = {layout['fbx_import']['mesh_yaw_offset_deg']}")
     w("")
-    w("local LIGHTING = {")
-    for k, v in day["Lighting"].items():
-        if k == "Technology":
-            w(f"\tTechnology = Enum.Technology.{v},")
-        else:
-            w(f"\t{k} = {lua_value(v)},")
-    w("}")
-    for inst, key in (("Atmosphere", "Atmosphere"), ("BloomEffect", "Bloom"), ("ColorCorrectionEffect", "ColorCorrection"),
-                      ("DepthOfFieldEffect", "DepthOfField"), ("SunRaysEffect", "SunRays")):
-        props = {k: v for k, v in day[key].items() if k != "note"}
-        body = ", ".join(f"{k} = {lua_value(v)}" for k, v in props.items())
-        w(f"local {key.upper()} = {{ class = \"{inst}\", props = {{ {body} }} }}")
-    w("")
-    w("-- Masques de lueur envoyés sur le compte (baked_assets/map/map_roblox.json).")
-    w("-- Couleurs renvoyées à la main (celles de l'import restaient grises).")
+    w("-- Couleurs renvoyées à la main (celles de l'import restaient grises) et masques de lueur (map_roblox.json).")
     w("local COLOR_OVERRIDE = {")
-    for asset, uri in sorted(json.loads((MAP / "map_roblox.json").read_text(encoding="utf-8")).get("color_override", {}).items()):
-        w(f'	{asset} = "{uri}",')
+    for asset, uri in sorted(extra.get("color_override", {}).items()):
+        w(f'\t{asset} = "{uri}",')
     w("}")
     w("local EMISSIVE = {")
-    for asset, e in sorted(roblox.items()):
-        w(f'	{asset} = {{ id = "{e["EmissiveMaskContent"]}", strength = {e["EmissiveStrength"]} }},')
+    for asset, e in sorted(extra.get("emissive", {}).items()):
+        w(f'\t{asset} = {{ id = "{e["EmissiveMaskContent"]}", strength = {e["EmissiveStrength"]} }},')
     w("}")
     w("")
     w("-- Taille de chaque décor dans Roblox (studs, axes X, Y haut, Z) avant mise à l'échelle.")
@@ -102,30 +91,12 @@ def main() -> None:
         w(f'\t{{ "{it["asset"]}", {x}, {y}, {z}, {it["yaw_deg"]}, {sx}, {sy}, {sz}, {lua_value(it["collide"])}, "{it["zone"]}" }},')
     w("}")
     w("")
-    w('''local Lighting = game:GetService("Lighting")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    w('''local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local NO_SHADOW = { chemin = true, prairie = true, lointain = true }
 local SLIM = { peripherie = true, lointain = true }
-
-local function applyLighting()
-	for key, value in pairs(LIGHTING) do
-		pcall(function()
-			(Lighting :: any)[key] = value
-		end)
-	end
-	for _, spec in ipairs({ ATMOSPHERE, BLOOM, COLORCORRECTION, DEPTHOFFIELD, SUNRAYS }) do
-		local effect = Lighting:FindFirstChildOfClass(spec.class) or Instance.new(spec.class)
-		for key, value in pairs(spec.props) do
-			pcall(function()
-				(effect :: any)[key] = value
-			end)
-		end
-		effect.Parent = Lighting
-	end
-	return "éclairage « jour » appliqué"
-end
+local WORLD_IDS = { Prairie = true, Desert = true, Volcan = true, Glace = true, Abysses = true, Cosmos = true, Divin = true }
 
 local function collectImported()
 	local art = ReplicatedStorage:FindFirstChild("ArtModels")
@@ -182,7 +153,32 @@ local function collectImported()
 			count += 1
 		end
 	end
-	return string.format("%d décors importés rangés (%d / %d dans ArtModels.Map)", moved, count, total)
+	return string.format("%d décors importés rangés (%d / %d de ce monde dans ArtModels.Map)", moved, count, total)
+end
+
+-- Workspace.MapDecor, avec un dossier par monde (l'ancien rangement à plat passe dans MapDecor.Prairie).
+local function decorRoot(): Folder
+	local root = Workspace:FindFirstChild("MapDecor")
+	if not root then
+		root = Instance.new("Folder")
+		root.Name = "MapDecor"
+		root.Parent = Workspace
+	end
+	local legacy = {}
+	for _, child in ipairs(root:GetChildren()) do
+		if not WORLD_IDS[child.Name] then
+			table.insert(legacy, child)
+		end
+	end
+	if #legacy > 0 then
+		local prairie = root:FindFirstChild("Prairie") or Instance.new("Folder")
+		prairie.Name = "Prairie"
+		prairie.Parent = root
+		for _, child in ipairs(legacy) do
+			child.Parent = prairie
+		end
+	end
+	return root
 end
 
 local function sectorOf(x: number, z: number): number
@@ -195,12 +191,13 @@ local function placeDecor()
 	if not library then
 		return "ReplicatedStorage.ArtModels.Map introuvable : importer les décors d'abord"
 	end
-	local old = Workspace:FindFirstChild("MapDecor")
+	local root = decorRoot()
+	local old = root:FindFirstChild(WORLD)
 	if old then
 		old:Destroy()
 	end
-	local root = Instance.new("Folder")
-	root.Name = "MapDecor"
+	local holder = Instance.new("Folder")
+	holder.Name = WORLD
 	local groups = {}
 	local placed, skipped, missing = 0, 0, {}
 	for _, item in ipairs(ITEMS) do
@@ -239,34 +236,32 @@ local function placeDecor()
 					group.LevelOfDetail = Enum.ModelLevelOfDetail.SLIM
 				end)
 			end
-			group.Parent = root
+			group.Parent = holder
 			groups[key] = group
 		end
 		copy.Parent = group
 		placed += 1
 	end
-	root.Parent = Workspace
+	holder.Parent = root
 	local names = {}
 	for asset in pairs(missing) do
 		table.insert(names, asset)
 	end
-	return string.format("%d décors posés, %d de base ignorés, manquants : %s ; StreamingEnabled = %s",
-		placed, skipped, #names > 0 and table.concat(names, ", ") or "aucun", tostring(Workspace.StreamingEnabled))
+	return string.format("%d décors posés dans MapDecor.%s, %d de base ignorés, manquants : %s", placed, WORLD, skipped,
+		#names > 0 and table.concat(names, ", ") or "aucun")
 end
 
 local report = {}
 if MODE == "remove" then
-	local old = Workspace:FindFirstChild("MapDecor")
+	local root = Workspace:FindFirstChild("MapDecor")
+	local old = root and root:FindFirstChild(WORLD)
 	if old then
 		old:Destroy()
 	end
-	table.insert(report, "Workspace.MapDecor retiré")
+	table.insert(report, "Workspace.MapDecor." .. WORLD .. " retiré")
 else
-	if MODE == "all" or MODE == "decor" then
+	if MODE == "all" or MODE == "collect" then
 		table.insert(report, collectImported())
-	end
-	if MODE == "all" or MODE == "lighting" then
-		table.insert(report, applyLighting())
 	end
 	if MODE == "all" or MODE == "decor" then
 		table.insert(report, placeDecor())
@@ -274,8 +269,8 @@ else
 end
 print("[MapLook] " .. table.concat(report, " | "))
 return table.concat(report, " | ")''')
-    OUT.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
-    print(f"{OUT} : {len(layout['items'])} décors, {len(sizes)} assets, {OUT.stat().st_size // 1024} Ko")
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    print(f"{out} : {len(layout['items'])} décors, {len(sizes)} assets, {out.stat().st_size // 1024} Ko")
 
 
 main()

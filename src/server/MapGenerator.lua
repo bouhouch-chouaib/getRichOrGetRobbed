@@ -18,7 +18,8 @@
 --   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Pallets,
 --                              SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
 --                              SpawnPoints (Folder), ItemSpawns (Folder), Incubator (Folder : couveuse, nids Nest_1..12),
---                              PrairieLook (Folder : palissades, arche, escalier ; client/WorldSkin ne les montre qu'en Prairie).
+--                              <Monde>Look (Folders PrairieLook, DesertLook... : clôture, porte, escalier du monde ;
+--                              client/WorldSkin montre celui du monde du propriétaire, sinon l'ancienne clôture).
 --                              Plan de la base (entrée, palettes, prairie, couveuse) : shared/BaseLayout.
 
 local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
@@ -378,21 +379,26 @@ local function createFence(origin: CFrame, top: number, base: Model)
 	createFenceLine(origin, top, Vector2.new(gap, -h), Vector2.new(h, -h), folder)
 end
 
--- Habillage « Prairie » de la base (carte niveau studio, dataset_and_pipeline/MAP.md) : palissades sur muret de pierre,
--- arche ancienne à l'entrée, escalier de pierre devant. Modèles faits dans Blender, rangés dans
--- ReplicatedStorage.ArtModels.Map (fichier du jeu). Purement visuel : l'ancienne clôture garde les collisions et
--- client/WorldSkin montre l'un ou l'autre selon le monde du propriétaire (les autres mondes auront leur habillage).
--- Repère des modèles importés : leur face avant (rail, marches, côté runes) regarde -Z.
-local PRAIRIE_SECTION = 12 -- longueur d'une palissade (studs)
+-- Habillage « niveau studio » des bases, un par monde (dataset_and_pipeline/MAP.md) : sections de clôture (palissades
+-- sur muret en Prairie, muret d'adobe crénelé au Désert), porte à l'entrée, escalier devant. Modèles faits dans Blender,
+-- rangés dans ReplicatedStorage.ArtModels.Map (fichier du jeu) ; un monde dont les modèles manquent n'a pas de dossier.
+-- Purement visuel : l'ancienne clôture garde les collisions et client/WorldSkin montre l'habillage du monde du
+-- propriétaire (ou l'ancienne clôture si ce monde n'a pas encore le sien).
+-- Repère des modèles importés : leur face avant (rail, poutres, marches, côté runes) regarde -Z.
+local DRESSING_SECTION = 12 -- longueur d'une section de clôture (studs)
+local DRESSINGS: { [string]: { Fence: string, Gate: string, Stairs: string } } = {
+	Prairie = { Fence = "Palissade", Gate = "ArcheAncienne", Stairs = "EscalierPierre" },
+	Desert = { Fence = "Desert_Muret", Gate = "Desert_PorteTemple", Stairs = "Desert_Escalier" },
+}
 
-local function createPrairieDressing(origin: CFrame, top: number, base: Model)
-	local art = ReplicatedStorage:FindFirstChild("ArtModels")
-	local library = art and art:FindFirstChild("Map")
-	if not library then
+local function createDressing(origin: CFrame, top: number, base: Model, worldId: string, library: Instance)
+	local spec = DRESSINGS[worldId]
+	local fence = library:FindFirstChild(spec.Fence)
+	if not (fence and fence:IsA("BasePart")) then
 		return
 	end
 	local folder = Instance.new("Folder")
-	folder.Name = "PrairieLook"
+	folder.Name = worldId .. "Look"
 
 	local function place(name: string, cframe: CFrame, scale: Vector3)
 		local source = library:FindFirstChild(name)
@@ -411,29 +417,40 @@ local function createPrairieDressing(origin: CFrame, top: number, base: Model)
 
 	local h = ARENA.BaseSize.X / 2 - 0.5
 	local gap = FENCE_GAP / 2
-	-- Arrière et côtés : 7 palissades de 12 studs, rail tourné vers l'extérieur.
-	local count = math.round(ARENA.BaseSize.X / PRAIRIE_SECTION)
+	-- Arrière et côtés : 7 sections de 12 studs, face avant tournée vers l'extérieur.
+	local count = math.round(ARENA.BaseSize.X / DRESSING_SECTION)
 	for i = 0, count - 1 do
-		local along = (i + 0.5) * PRAIRIE_SECTION - ARENA.BaseSize.X / 2
-		place("Palissade", CFrame.new(along, 0, h) * CFrame.Angles(0, math.pi, 0), Vector3.one)
-		place("Palissade", CFrame.new(-h, 0, along) * CFrame.Angles(0, math.pi / 2, 0), Vector3.one)
-		place("Palissade", CFrame.new(h, 0, along) * CFrame.Angles(0, -math.pi / 2, 0), Vector3.one)
+		local along = (i + 0.5) * DRESSING_SECTION - ARENA.BaseSize.X / 2
+		place(spec.Fence, CFrame.new(along, 0, h) * CFrame.Angles(0, math.pi, 0), Vector3.one)
+		place(spec.Fence, CFrame.new(-h, 0, along) * CFrame.Angles(0, math.pi / 2, 0), Vector3.one)
+		place(spec.Fence, CFrame.new(h, 0, along) * CFrame.Angles(0, -math.pi / 2, 0), Vector3.one)
 	end
-	-- Avant : de chaque côté de l'entrée, 3 palissades étirées pour finir pile au bord de l'ouverture.
+	-- Avant : de chaque côté de l'entrée, 3 sections étirées pour finir pile au bord de l'ouverture.
 	local span = (ARENA.BaseSize.X / 2 - gap) / 3
 	for side = -1, 1, 2 do
 		for i = 0, 2 do
-			place("Palissade", CFrame.new(side * (gap + (i + 0.5) * span), 0, -h), Vector3.new(span / PRAIRIE_SECTION, 1, 1))
+			place(spec.Fence, CFrame.new(side * (gap + (i + 0.5) * span), 0, -h), Vector3.new(span / DRESSING_SECTION, 1, 1))
 		end
 	end
-	-- Arche à cheval sur l'entrée (ouverture ~15 studs pour une porte de 14) et escalier qui monte sur la plateforme.
-	place("ArcheAncienne", CFrame.new(0, 0, -h), Vector3.new(0.82, 0.9, 0.82))
-	local stairs = library:FindFirstChild("EscalierPierre")
+	-- Porte à cheval sur l'entrée (ouverture ~15 studs pour une porte de 14) et escalier qui monte sur la plateforme.
+	place(spec.Gate, CFrame.new(0, 0, -h), Vector3.new(0.82, 0.9, 0.82))
+	local stairs = library:FindFirstChild(spec.Stairs)
 	if stairs and stairs:IsA("BasePart") then
 		local depth = stairs.Size.Z
-		place("EscalierPierre", CFrame.new(0, 0, -h - 0.5 - depth / 2), Vector3.new(1, top / 1.8, 1))
+		place(spec.Stairs, CFrame.new(0, 0, -h - 0.5 - depth / 2), Vector3.new(1, top / 1.8, 1))
 	end
 	folder.Parent = base
+end
+
+local function createDressings(origin: CFrame, top: number, base: Model)
+	local art = ReplicatedStorage:FindFirstChild("ArtModels")
+	local library = art and art:FindFirstChild("Map")
+	if not library then
+		return
+	end
+	for worldId in pairs(DRESSINGS) do
+		createDressing(origin, top, base, worldId, library)
+	end
 end
 
 -- Arbre en cubes : tronc carré, feuillage de blocs empilés en trois verts.
@@ -994,7 +1011,7 @@ local function createBase(index: number, map: Folder): Model
 	local top = size.Y -- hauteur du dessus de la plateforme
 
 	createFence(origin, top, base)
-	createPrairieDressing(origin, top, base)
+	createDressings(origin, top, base)
 	local incubatorSign = createIncubator(origin, top, base)
 
 	local spawn = Instance.new("SpawnLocation")

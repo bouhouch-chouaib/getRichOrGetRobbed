@@ -5,10 +5,11 @@
 --     glace ou cosmique (les stations d'entraînement gardent leur propre modèle, server/StationLooks).
 --   - Les arbres sont remplacés par le décor du monde (cactus, roches de lave, cristaux, coraux, astéroïdes, colonnes).
 --   - L'air, la teinte de l'image, les nuages et des particules d'ambiance changent avec le monde.
---   - Habillage « niveau studio » de la Prairie (dataset_and_pipeline/MAP.md) : décors de l'arène (Workspace.MapDecor)
---     montrés seulement si le joueur local est en Prairie (sinon cachés et traversables pour lui) ; palissades, arche
---     et escalier d'une base (dossier PrairieLook) montrés à la place de la clôture si son propriétaire est en Prairie.
---     Les autres mondes gardent l'ancien décor en attendant le leur.
+--   - Habillage « niveau studio », un par monde (dataset_and_pipeline/MAP.md) : décors de l'arène rangés par monde dans
+--     Workspace.MapDecor.<Monde> (pièces directement sous MapDecor = Prairie, ancien rangement), montrés seulement pour
+--     un joueur de ce monde (sinon cachés et traversables pour lui) ; ils remplacent alors les arbres / l'ancien décor
+--     du monde. Habillage d'une base (dossiers <Monde>Look : clôture, porte, escalier) montré à la place de l'ancienne
+--     clôture si son propriétaire est dans ce monde. Un monde sans habillage garde l'ancien décor.
 -- Tout est local (rien ne part au serveur) : les pièces portent l'attribut "Skin" (rôle) posé par server/MapGenerator.
 
 local Players = game:GetService("Players")
@@ -31,10 +32,12 @@ local spots: { { position: Vector3, scale: number } } = {}
 local decorFolder: Folder? = nil
 local decorKind: string? = nil
 local spinning: { { part: Part, origin: CFrame, speed: number } } = {}
--- Habillage Prairie : pièces d'une base (habillage ou ancienne clôture) et décors de l'arène.
-type BaseVisual = { part: BasePart, baseIndex: number, prairie: boolean }
+-- Habillages par monde : pièces d'une base (look = monde de l'habillage, nil = ancienne clôture) et décors de l'arène.
+type BaseVisual = { part: BasePart, baseIndex: number, look: string? }
 local baseVisuals: { BaseVisual } = {}
-local arenaDecor: { { part: BasePart, collide: boolean } } = {}
+local baseLooks: { [number]: { [string]: boolean } } = {}
+local arenaDecor: { { part: BasePart, collide: boolean, world: string } } = {}
+local arenaWorlds: { [string]: boolean } = {}
 
 -- Monde où se trouve le joueur (attribut "World" : il peut être retourné dans un monde déjà visité), sinon son palier.
 local function tierOf(target: Player?): number
@@ -84,26 +87,44 @@ local function collect(map: Instance)
 	table.clear(treeParts)
 	table.clear(spots)
 	table.clear(baseVisuals)
+	table.clear(baseLooks)
 	table.clear(arenaDecor)
+	table.clear(arenaWorlds)
+	local function addParts(folder: Instance, index: number, look: string?)
+		for _, part in ipairs(folder:GetDescendants()) do
+			if part:IsA("BasePart") then
+				table.insert(baseVisuals, { part = part, baseIndex = index, look = look })
+			end
+		end
+	end
 	for _, base in ipairs(map:GetChildren()) do
 		local index = tonumber(base.Name:match("^Base_(%d+)$"))
-		local dressing = base:FindFirstChild("PrairieLook")
 		local fence = base:FindFirstChild("Fence")
-		if index and dressing and fence then
-			for _, folder in ipairs({ dressing, fence }) do
-				for _, part in ipairs(folder:GetDescendants()) do
-					if part:IsA("BasePart") then
-						table.insert(baseVisuals, { part = part, baseIndex = index, prairie = folder == dressing })
-					end
+		if index and fence then
+			local looks = {}
+			for _, child in ipairs(base:GetChildren()) do
+				local worldId = child.Name:match("^(%w+)Look$")
+				if worldId and Config.WorldIndex[worldId] then
+					looks[worldId] = true
+					addParts(child, index, worldId)
 				end
+			end
+			if next(looks) then
+				baseLooks[index] = looks
+				addParts(fence, index, nil)
 			end
 		end
 	end
 	local decor = Workspace:FindFirstChild("MapDecor")
 	if decor then
-		for _, part in ipairs(decor:GetDescendants()) do
-			if part:IsA("BasePart") then
-				table.insert(arenaDecor, { part = part, collide = part.CanCollide })
+		for _, child in ipairs(decor:GetChildren()) do
+			local worldId = if Config.WorldIndex[child.Name] then child.Name else "Prairie"
+			local parts = if child:IsA("BasePart") then { child } else child:GetDescendants()
+			for _, part in ipairs(parts) do
+				if part:IsA("BasePart") then
+					table.insert(arenaDecor, { part = part, collide = part.CanCollide, world = worldId })
+					arenaWorlds[worldId] = true
+				end
 			end
 		end
 	end
@@ -242,19 +263,20 @@ local function setTreesVisible(visible: boolean)
 	end
 end
 
-local function buildDecor(kind: string)
-	if kind == decorKind then
+-- replaced = le monde a ses décors « niveau studio » (MapDecor) : pas d'arbres en cubes ni d'ancien décor.
+local function buildDecor(kind: string, replaced: boolean)
+	local key = if replaced then kind .. "*" else kind
+	if key == decorKind then
 		return
 	end
-	decorKind = kind
+	decorKind = key
 	if decorFolder then
 		decorFolder:Destroy()
 		decorFolder = nil
 	end
 	table.clear(spinning)
-	local builder = DECORS[kind]
-	-- En Prairie, les décors de l'arène (MapDecor) remplacent les arbres en cubes.
-	setTreesVisible(builder == nil and not (kind == "Trees" and #arenaDecor > 0))
+	local builder = if replaced then nil else DECORS[kind]
+	setTreesVisible(builder == nil and not replaced)
 	if not builder then
 		return
 	end
@@ -377,16 +399,19 @@ local function refresh()
 			end
 		end
 	end
-	buildDecor(myLook.Decor)
-	local inPrairie = myLook == Worlds.Looks.Prairie
+	local myWorld = Config.GetWorld(myTier).Id
+	buildDecor(myLook.Decor, arenaWorlds[myWorld] == true)
 	for _, item in ipairs(arenaDecor) do
 		-- Côté client, CanCollide ne change que les collisions du personnage local : les autres mondes passent au travers.
-		item.part.LocalTransparencyModifier = if inPrairie then 0 else 1
-		item.part.CanCollide = item.collide and inPrairie
+		local mine = item.world == myWorld
+		item.part.LocalTransparencyModifier = if mine then 0 else 1
+		item.part.CanCollide = item.collide and mine
 	end
 	for _, item in ipairs(baseVisuals) do
-		local ownerPrairie = lookOf(tierOf(baseOwners[item.baseIndex] or player)) == Worlds.Looks.Prairie
-		item.part.LocalTransparencyModifier = if item.prairie == ownerPrairie then 0 else 1
+		local ownerWorld = Config.GetWorld(tierOf(baseOwners[item.baseIndex] or player)).Id
+		local dressed = baseLooks[item.baseIndex][ownerWorld] == true
+		local visible = if item.look then item.look == ownerWorld else not dressed
+		item.part.LocalTransparencyModifier = if visible then 0 else 1
 	end
 	if myTier ~= ambienceTier then
 		ambienceTier = myTier

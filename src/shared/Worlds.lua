@@ -49,7 +49,8 @@ Worlds.Looks = {
 			WoodRail = rgb(190, 110, 60), WoodPost = rgb(120, 76, 50), WoodCap = rgb(150, 96, 62),
 			Trunk = rgb(70, 160, 70), LeavesA = rgb(80, 180, 80), LeavesB = rgb(60, 150, 60), LeavesC = rgb(110, 200, 90),
 		},
-		Ambience = { AirColor = rgb(255, 225, 180), AirDecay = rgb(230, 160, 100), AirDensity = 0.3, Tint = rgb(255, 240, 215), Saturation = 0.2, CloudColor = rgb(255, 240, 220), CloudCover = 0.25, Particles = "Sand" },
+		-- air et teinte de dataset_and_pipeline/map_art_bible_desert.json (25 oct.)
+		Ambience = { AirColor = rgb(255, 224, 176), AirDecay = rgb(232, 154, 90), AirDensity = 0.32, Tint = rgb(255, 240, 220), Saturation = 0.2, CloudColor = rgb(255, 240, 220), CloudCover = 0.2, Particles = "Sand" },
 		Decor = "Cactus",
 	},
 	Volcan = {

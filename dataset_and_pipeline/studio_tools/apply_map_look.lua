@@ -1,43 +1,22 @@
 --!nocheck
--- Aperçu de la nouvelle carte (phase 1.6) dans Studio, mode Édition, barre MCP execute_luau ou barre de commande.
+-- Décors « niveau studio » du monde Prairie dans Studio (mode Édition, barre MCP execute_luau ou rbxm + require).
 -- GÉNÉRÉ par dataset_and_pipeline/tools/make_map_look_script.py (ne pas modifier à la main).
--- Avant : importer baked_assets/map/Decors_Carte.fbx (Fichier > Importer 3D, réglages par défaut) : 21 MeshParts
+-- Avant : importer baked_assets/map/Decors_Carte.fbx (Fichier > Importer 3D, réglages par défaut) : les MeshParts
 -- nommées comme les décors arrivent dans le Workspace. Ce script :
---   0. range ces MeshParts dans ReplicatedStorage.ArtModels.Map.<Asset> (+ lueur : EmissiveMaskContent) et
+--   1. range ces MeshParts dans ReplicatedStorage.ArtModels.Map.<Asset> (+ lueur / couleur de map_roblox.json) et
 --      supprime l'import (sauvegarder le jeu ensuite : ArtModels n'est que dans le fichier du jeu) ;
---   1. applique l'éclairage « jour » de map_art_bible.json (Lighting + Atmosphere, Bloom, ColorCorrection,
---      DepthOfField, SunRays). Attention : au Play, server/MapGenerator.applyLighting et DayNightController
---      remettent leurs propres valeurs ; pour garder ce look en jeu il faudra reporter ces valeurs dans le code ;
---   2. pose les décors dans Workspace.MapDecor (un Model par zone et par huitième de carte, pour le streaming),
---      sans toucher à Workspace.Map. Par défaut SANS les décors des bases (zone « base ») : les bases sont
---      construites par MapGenerator au lancement (clôtures, palettes), il faut d'abord adapter ce code ;
---   3. MODE = "remove" retire Workspace.MapDecor.
--- Non vérifié dans Studio (25 oct.) : import des .fbx des décors, sens du demi-tour (FBX_YAW_OFFSET).
+--   2. pose les décors de l'arène dans Workspace.MapDecor.Prairie (un Model par zone et par huitième de carte,
+--      pour le streaming), sans toucher à Workspace.Map ni aux autres mondes ; les pièces de l'ancien rangement
+--      (directement sous MapDecor) passent dans MapDecor.Prairie. Sans les décors des bases (zone « base ») :
+--      ce sont les dossiers <Monde>Look de server/MapGenerator. client/WorldSkin montre le monde du joueur ;
+--   3. MODE = "remove" retire Workspace.MapDecor.Prairie.
 
-local MODE = "all" -- "all" | "lighting" | "decor" | "remove"
+local WORLD = "Prairie"
+local MODE = "all" -- "all" | "collect" | "decor" | "remove"
 local INCLUDE_BASES = false
 local FBX_YAW_OFFSET = 180
 
-local LIGHTING = {
-	Technology = Enum.Technology.Future,
-	ClockTime = 14.5,
-	GeographicLatitude = 35.0,
-	Brightness = 2.6,
-	EnvironmentDiffuseScale = 0.6,
-	EnvironmentSpecularScale = 0.7,
-	Ambient = Color3.fromHex("787878"),
-	OutdoorAmbient = Color3.fromHex("8E8E96"),
-	ExposureCompensation = 0.05,
-	ShadowSoftness = 0.25,
-}
-local ATMOSPHERE = { class = "Atmosphere", props = { Density = 0.3, Offset = 0.25, Color = Color3.fromHex("CFE2FF"), Decay = Color3.fromHex("7A96D0"), Glare = 0.35, Haze = 0.6 } }
-local BLOOM = { class = "BloomEffect", props = { Intensity = 0.45, Size = 22.0, Threshold = 1.6 } }
-local COLORCORRECTION = { class = "ColorCorrectionEffect", props = { Saturation = 0.18, Contrast = 0.08, Brightness = 0.0, TintColor = Color3.fromHex("FFFAF0") } }
-local DEPTHOFFIELD = { class = "DepthOfFieldEffect", props = { Enabled = true, FarIntensity = 0.12, FocusDistance = 120.0, InFocusRadius = 160.0, NearIntensity = 0.0 } }
-local SUNRAYS = { class = "SunRaysEffect", props = { Intensity = 0.04, Spread = 0.6 } }
-
--- Masques de lueur envoyés sur le compte (baked_assets/map/map_roblox.json).
--- Couleurs renvoyées à la main (celles de l'import restaient grises).
+-- Couleurs renvoyées à la main (celles de l'import restaient grises) et masques de lueur (map_roblox.json).
 local COLOR_OVERRIDE = {
 	FalaiseGradins = "rbxassetid://116601833750884",
 	RocherCalcaire_A = "rbxassetid://110368253253253",
@@ -1018,30 +997,12 @@ local ITEMS = {
 	{ "RocherObsidienne_A", 543.839, -4, 525.179, 291.55, 6.85, 6.85, 6.85, false, "lointain" },
 }
 
-local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local NO_SHADOW = { chemin = true, prairie = true, lointain = true }
 local SLIM = { peripherie = true, lointain = true }
-
-local function applyLighting()
-	for key, value in pairs(LIGHTING) do
-		pcall(function()
-			(Lighting :: any)[key] = value
-		end)
-	end
-	for _, spec in ipairs({ ATMOSPHERE, BLOOM, COLORCORRECTION, DEPTHOFFIELD, SUNRAYS }) do
-		local effect = Lighting:FindFirstChildOfClass(spec.class) or Instance.new(spec.class)
-		for key, value in pairs(spec.props) do
-			pcall(function()
-				(effect :: any)[key] = value
-			end)
-		end
-		effect.Parent = Lighting
-	end
-	return "éclairage « jour » appliqué"
-end
+local WORLD_IDS = { Prairie = true, Desert = true, Volcan = true, Glace = true, Abysses = true, Cosmos = true, Divin = true }
 
 local function collectImported()
 	local art = ReplicatedStorage:FindFirstChild("ArtModels")
@@ -1098,7 +1059,32 @@ local function collectImported()
 			count += 1
 		end
 	end
-	return string.format("%d décors importés rangés (%d / %d dans ArtModels.Map)", moved, count, total)
+	return string.format("%d décors importés rangés (%d / %d de ce monde dans ArtModels.Map)", moved, count, total)
+end
+
+-- Workspace.MapDecor, avec un dossier par monde (l'ancien rangement à plat passe dans MapDecor.Prairie).
+local function decorRoot(): Folder
+	local root = Workspace:FindFirstChild("MapDecor")
+	if not root then
+		root = Instance.new("Folder")
+		root.Name = "MapDecor"
+		root.Parent = Workspace
+	end
+	local legacy = {}
+	for _, child in ipairs(root:GetChildren()) do
+		if not WORLD_IDS[child.Name] then
+			table.insert(legacy, child)
+		end
+	end
+	if #legacy > 0 then
+		local prairie = root:FindFirstChild("Prairie") or Instance.new("Folder")
+		prairie.Name = "Prairie"
+		prairie.Parent = root
+		for _, child in ipairs(legacy) do
+			child.Parent = prairie
+		end
+	end
+	return root
 end
 
 local function sectorOf(x: number, z: number): number
@@ -1111,12 +1097,13 @@ local function placeDecor()
 	if not library then
 		return "ReplicatedStorage.ArtModels.Map introuvable : importer les décors d'abord"
 	end
-	local old = Workspace:FindFirstChild("MapDecor")
+	local root = decorRoot()
+	local old = root:FindFirstChild(WORLD)
 	if old then
 		old:Destroy()
 	end
-	local root = Instance.new("Folder")
-	root.Name = "MapDecor"
+	local holder = Instance.new("Folder")
+	holder.Name = WORLD
 	local groups = {}
 	local placed, skipped, missing = 0, 0, {}
 	for _, item in ipairs(ITEMS) do
@@ -1155,34 +1142,32 @@ local function placeDecor()
 					group.LevelOfDetail = Enum.ModelLevelOfDetail.SLIM
 				end)
 			end
-			group.Parent = root
+			group.Parent = holder
 			groups[key] = group
 		end
 		copy.Parent = group
 		placed += 1
 	end
-	root.Parent = Workspace
+	holder.Parent = root
 	local names = {}
 	for asset in pairs(missing) do
 		table.insert(names, asset)
 	end
-	return string.format("%d décors posés, %d de base ignorés, manquants : %s ; StreamingEnabled = %s",
-		placed, skipped, #names > 0 and table.concat(names, ", ") or "aucun", tostring(Workspace.StreamingEnabled))
+	return string.format("%d décors posés dans MapDecor.%s, %d de base ignorés, manquants : %s", placed, WORLD, skipped,
+		#names > 0 and table.concat(names, ", ") or "aucun")
 end
 
 local report = {}
 if MODE == "remove" then
-	local old = Workspace:FindFirstChild("MapDecor")
+	local root = Workspace:FindFirstChild("MapDecor")
+	local old = root and root:FindFirstChild(WORLD)
 	if old then
 		old:Destroy()
 	end
-	table.insert(report, "Workspace.MapDecor retiré")
+	table.insert(report, "Workspace.MapDecor." .. WORLD .. " retiré")
 else
-	if MODE == "all" or MODE == "decor" then
+	if MODE == "all" or MODE == "collect" then
 		table.insert(report, collectImported())
-	end
-	if MODE == "all" or MODE == "lighting" then
-		table.insert(report, applyLighting())
 	end
 	if MODE == "all" or MODE == "decor" then
 		table.insert(report, placeDecor())
