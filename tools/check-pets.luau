@@ -108,6 +108,7 @@ local config = loadModule("Config")
 local builder = loadModule("PetModelBuilder")
 local sizes = loadModule("PetSizes")
 local motion = loadModule("PetMotion")
+local signature = loadModule("PetSignatureAuras")
 local motionReport, previews = {}, {}
 local previewIds = {
 	ChienSaucisse = true,
@@ -181,7 +182,8 @@ for _, e in catalog.List do
 		end
 	end
 	assert(count <= 220, e.Id .. ": geometry budget " .. count)
-	assert(emitters <= 3 and rate <= 28, e.Id .. ": FX budget")
+	-- Aura signature (Cerbère Infernal) : 3 émetteurs aussi, mais plus denses que les auras de rareté.
+	assert(emitters <= 3 and rate <= (if signature.Has(e.Id) then signature.MaxRate else 28), e.Id .. ": FX budget")
 	if e.Rarity == "Commun" then
 		assert(emitters == 0, e.Id .. ": common FX")
 	end
@@ -291,7 +293,7 @@ for _, e in catalog.List do
 	table.insert(meshes, { id = e.Id, name = e.Name, rarity = e.Rarity, parts = geo, size = vec(size) })
 	m:Destroy()
 end
-assert(#report == #catalog.List and #catalog.List == 105, "Catalogue count (75 de base + 30 exclusifs des mondes)")
+assert(#report == #catalog.List and #catalog.List == 106, "Catalogue count (75 de base + 31 exclusifs des mondes)")
 assert(builder.Build("UnknownPet") == nil, "Unknown id")
 for old, new in catalog.Renamed do
 	local m = assert(builder.Build(old))

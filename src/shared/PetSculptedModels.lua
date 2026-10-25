@@ -102,6 +102,7 @@ local families: { [string]: string } = {
 	GolemCendre = "Golem",
 	DragonBarbecue = "Dragon",
 	TitanLave = "Golem",
+	CerbereInfernal = "Beast", -- forme de secours : le vrai modèle est ArtModels.CerbereInfernal (Blender)
 	PingouinPatineur = "Bird",
 	MorseMoustachu = "Beast",
 	YetiCalin = "Golem",
@@ -170,7 +171,8 @@ local function beast(m: Model, e: Pet, c: Palette)
 	local horse = id == "LicorneBois" or id == "PegaseNuageux" or id == "PegaseMoto"
 	local stout = id == "CapybaraZen" or id == "CochonTirelire" or id == "TortueBurger"
 	local long = id == "ChienSaucisse" or id == "BananeChien"
-	local fierce = id == "CerbereChiot"
+	local cerberus = id == "CerbereChiot" or id == "CerbereInfernal"
+	local fierce = cerberus
 		or id == "LoupPolaire"
 		or id == "TigreBengal"
 		or id == "LionEnceinte"
@@ -213,7 +215,7 @@ local function beast(m: Model, e: Pet, c: Palette)
 	local function headAt(f: CFrame, w: number)
 		mass(m, "Head", V(w, 1.18, 1.3), f, c.body)
 		muzzle(m, f, w, c, fierce)
-		S.eyes(m, f, w, 1.4, fierce, if id == "CerbereChiot" then c.detail else nil)
+		S.eyes(m, f, w, 1.4, fierce, if cerberus then c.detail else nil)
 		for _, s in ipairs({ -1, 1 }) do
 			S.ear(
 				m,
@@ -225,7 +227,7 @@ local function beast(m: Model, e: Pet, c: Palette)
 		end
 	end
 	headAt(head, if stout then 1.55 else 1.3)
-	if id == "CerbereChiot" then
+	if cerberus then
 		for _, s in ipairs({ -1, 1 }) do
 			headAt(head * CF(s * 1.05, -0.18, 0.24) * A(0, -s * 0.18, 0), 1.05)
 			for i = 0, 2 do

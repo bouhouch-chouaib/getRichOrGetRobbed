@@ -4,6 +4,7 @@ local CollectionService = game:GetService("CollectionService")
 local S = require(script.Parent.PetSculpt)
 local Catalog = require(script.Parent.PetCatalog)
 local Config = require(script.Parent.Config)
+local Signature = require(script.Parent.PetSignatureAuras)
 local FX = {}
 local V, CF, A = Vector3.new, CFrame.new, CFrame.Angles
 local SPARK = "rbxasset://textures/particles/sparkles_main.dds"
@@ -57,6 +58,11 @@ end
 function FX.Add(m: Model, e: Catalog.Pet, box: CFrame, size: Vector3)
 	local root = m.PrimaryPart
 	if not root then
+		return
+	end
+	-- Aura signature (shared/PetSignatureAuras) : elle remplace les auras de rareté ci-dessous.
+	if Signature.Add(m, e.BaseId or e.Id, box, size) then
+		CollectionService:AddTag(m, "SculptedPetVisual")
 		return
 	end
 	local rank = Config.RarityIndex[e.Rarity] or 1

@@ -18,7 +18,7 @@ Preuve de concept : un piédestal de base et un œuf Mythique (`qa_renders/hero.
 | `blender_tools/block_creatures.py` | Créatures en blocs biseautés (essai 1.5) : `block`, `stepped_plate`, `staircase_spike`, `tooth`, `claw`, `spike_band`, `blocky_wolf_head`, `build_blocky_cerberus`. |
 | `blender_tools/run_cerberus_blocks.py` | Fabrique, cuit et contrôle le Cerbère (`source/cerberus_blocs.blend`, planche + héros). |
 | `blender_tools/export_studio_mesh.py` | `.mesh` natif Roblox pour voir un asset dans Studio sans import (aperçu local). |
-| `vfx_tools/CerbereAura.lua` | Aura du Cerbère (flammes noires et rouges + éclairs) faite avec des effets du Creator Store. |
+| `src/shared/PetSignatureAuras.lua` | Aura du Cerbère (flammes noires et rouges + éclairs) faite avec des effets du Creator Store. |
 | `baked_assets/` | Sorties prêtes pour Roblox (`<Asset>_Color/Roughness/Metalness/Normal/Emissive/AO.png`, `.fbx`, `.glb`, `_manifest.json`). |
 | `qa_renders/` | `preview.png` (contrôle), `materials.png` (les 4 matériaux), `hero.png`, rapports JSON. |
 | `source/poc_phase1.blend` | La scène de la preuve de concept (high, low cuits, matériaux). |
@@ -146,7 +146,7 @@ par la barre MCP. Les cartes PNG passent par l'outil MCP `upload_image` (envoyé
    des effets gratuits sont un piège connu, on jette le modèle.
 2. Ne garder que les **images** (Texture des ParticleEmitter), recréer les émetteurs par code, régler taille / couleur.
    Le Cerbère : `rbxassetid://935947741` (flammes noires) + `rbxassetid://9135310747` (éclair, planche 4x4), voir
-   `vfx_tools/CerbereAura.lua`. Flammes avec ZOffset négatif : elles passent derrière le corps et dessinent la
+   `src/shared/PetSignatureAuras.lua`. Flammes avec ZOffset négatif : elles passent derrière le corps et dessinent la
    silhouette (effet haki d'anime) sans cacher la tête. Orientation `FacingCameraWorldUp` (sinon couchées au sol).
 3. Contrôle en Play : les particules ne s'affichent que près de la caméra du joueur. Téléporter le personnage (serveur),
    mettre la caméra en `Scriptable` devant le familier, masquer les ScreenGui (client), puis `screen_capture`. Studio en

@@ -32,7 +32,8 @@ for worldIndex, world in ipairs(Config.Worlds) do
 	if worldIndex == 1 then
 		assert(#pets == 0, "la Prairie n'a pas d'exclusifs")
 	else
-		assert(#pets == 5, world.Id .. " : 5 exclusifs")
+		local expected = if world.Id == "Volcan" then 6 else 5 -- + le Cerbère Infernal (25 oct.)
+		assert(#pets == expected, world.Id .. " : " .. expected .. " exclusifs")
 	end
 	for _, entry in ipairs(pets) do
 		count += 1
@@ -47,7 +48,7 @@ for worldIndex, world in ipairs(Config.Worlds) do
 		assert(Catalog.ById[Catalog.Compose(entry.Id, 3, "Gold")].World == world.Id, "les formes gardent leur monde")
 	end
 end
-assert(count == 30 and #Catalog.List == 105)
+assert(count == 31 and #Catalog.List == 106)
 
 -- 20 000 tirages dans chaque monde : les exclusifs d'un AUTRE monde ne sortent jamais, ceux du monde oui.
 for worldIndex, world in ipairs(Config.Worlds) do
@@ -66,4 +67,4 @@ end
 for _, petId in ipairs(Loot.rollPulls(5000, 0, 1, {}, 1).drops) do
 	assert(Catalog.ById[petId].World == nil, "aucun exclusif sans monde")
 end
-print("PASS: 30 world-exclusive pets (5 per world), only pulled in their world, out of rank floor and fusion pools")
+print("PASS: 31 world-exclusive pets (5 per world, 6 in Volcan), only pulled in their world, out of rank floor and fusion pools")

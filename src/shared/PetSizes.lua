@@ -145,6 +145,7 @@ PetSizes.Heights = {
 	GolemCendre = 1.3, -- Legendaire (Volcan)
 	DragonBarbecue = 1.6, -- Mythique (Volcan)
 	TitanLave = 2.05, -- Divin (Volcan)
+	CerbereInfernal = 2.6, -- Sigma (Volcan) : 13 studs, comme le Cerbère réglé dans Studio (aura comprise)
 	PingouinPatineur = 0.82, -- Rare (Glace)
 	MorseMoustachu = 1.05, -- Epique (Glace)
 	YetiCalin = 1.35, -- Legendaire (Glace)

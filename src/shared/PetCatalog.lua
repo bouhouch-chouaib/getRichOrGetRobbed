@@ -1,6 +1,6 @@
 --!strict
 -- PetCatalog : les 75 familiers de base (5 catégories x 15) + les familiers EXCLUSIFS des mondes (21 oct. : 5 par monde
--- du Désert au Divin, champ World = Id de Config.Worlds). Un exclusif ne sort des tirages que si le joueur se trouve
+-- du Désert au Divin, + le Cerbère Infernal au Volcan le 25 oct. ; champ World = Id de Config.Worlds). Un exclusif ne sort des tirages que si le joueur se trouve
 -- dans son monde (LootEngine, monde actuel) ; il est dans List / ByRarity (Index, revenu) mais PAS dans BaseByRarity
 -- (tirages ordinaires, rang de tirage, fusion, effondrement du trou noir). ByWorld[monde] = ses exclusifs.
 -- Id      : clé unique sans espace ni accent (utilisée dans les attributs et pour le modèle 3D).
@@ -154,6 +154,8 @@ local list: { Pet } = {
 	worldPet("GolemCendre", "Golem de Cendre", "Legendaire", "Volcan", "Bloc de roche volcanique qui fume en permanence.", { Shape = "Humanoid", Body = rgb(70, 60, 60), Detail = rgb(255, 90, 20), Effect = "Smoke" }),
 	worldPet("DragonBarbecue", "Dragon Barbecue", "Mythique", "Volcan", "Dragon cuisinier : sa grille est toujours chaude.", { Shape = "Dragon", Body = rgb(180, 40, 30), Detail = rgb(255, 170, 40), Effect = "Fire" }),
 	worldPet("TitanLave", "Titan de Lave", "Divin", "Volcan", "Géant de magma dont chaque pas fait trembler le volcan.", { Shape = "Humanoid", Body = rgb(50, 30, 30), Detail = rgb(255, 100, 0), Neon = true, Effect = "Fire", EffectColor = rgb(255, 120, 20) }),
+	-- 25 oct. : 6e exclusif du Volcan, modèle Blender (ArtModels.CerbereInfernal) + aura signature (PetSignatureAuras)
+	worldPet("CerbereInfernal", "Cerbère Infernal", "Sigma", "Volcan", "Gardien des enfers à trois têtes, fissuré de lave, enveloppé de flammes noires.", { Shape = "Quadruped", Body = rgb(47, 42, 41), Detail = rgb(255, 120, 20), Extra = "ThreeHeads" }),
 	-- Glace
 	worldPet("PingouinPatineur", "Pingouin Patineur", "Rare", "Glace", "Champion de patinage artistique, triple axel sur la banquise.", { Shape = "Bird", Body = rgb(30, 40, 60), Detail = rgb(150, 220, 255), Effect = "Snow" }),
 	worldPet("MorseMoustachu", "Morse Moustachu", "Epique", "Glace", "Sa moustache givrée fait sa fierté. Ses défenses aussi.", { Shape = "Quadruped", Body = rgb(150, 110, 90), Detail = rgb(250, 250, 240), Effect = "Snow" }),
