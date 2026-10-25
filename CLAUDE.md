@@ -181,8 +181,10 @@ le « +1 NOM » d'un familier hors des 10 affichés, sur téléphone.
 
 **25 oct. : œufs de la couveuse en briques** (`Lot08_Oeufs.fbx`, `pets/_egg.py` + `pets/Oeuf<Rareté>.py`, branchement
 `dataset_and_pipeline/studio_tools/wire_brick_eggs.lua` -> `ArtModels.Eggs.<Rareté>`, `shared/EggModelBuilder`) : un œuf par
-rareté, sans néon, sans lumière ni étincelles dans la couveuse (`client/Eggs`, attribut `Handmade`). Faits et cuits ;
-**pas encore importés ni vus en jeu**.
+rareté, sans néon, sans lumière ni étincelles dans la couveuse (`client/Eggs`, attribut `Handmade`). Branchés dans
+`ArtModels.Eggs` (fichier du jeu : Ctrl+S) et vérifiés en Play (solo) : les 8 œufs dans leurs nids (taille selon la
+rareté, 0 néon / lumière / particule), éclosion d'un Commun (5 morceaux qui s'écartent puis s'effacent), sans erreur.
+Œufs et familiers de test retirés de la sauvegarde. Pas vu : capsule d'évolution, fenêtres, téléphone.
 
 **15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, en argent du jeu seulement) :
 les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`, mêmes règles que [E]). Vérifié en jeu (solo) :
