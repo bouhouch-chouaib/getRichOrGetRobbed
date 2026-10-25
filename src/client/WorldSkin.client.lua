@@ -5,6 +5,8 @@
 --     glace ou cosmique (les stations d'entraînement gardent leur propre modèle, server/StationLooks).
 --   - Les arbres sont remplacés par le décor du monde (cactus, roches de lave, cristaux, coraux, astéroïdes, colonnes).
 --   - L'air, la teinte de l'image, les nuages et des particules d'ambiance changent avec le monde.
+--   - Le ciel aussi (Worlds.Looks.*.Sky) : brume et halo de l'air, nuages, étoiles, soleil et lune ; l'espace reste de
+--     nuit. Il suit le passage jour / nuit publié par server/DayNightController (attribut Lighting.DayAmount).
 --   - Habillage « niveau studio », un par monde (dataset_and_pipeline/MAP.md) : décors de l'arène rangés par monde dans
 --     Workspace.MapDecor.<Monde> (pièces directement sous MapDecor = Prairie, ancien rangement), montrés seulement pour
 --     un joueur de ce monde (sinon cachés et traversables pour lui) ; ils remplacent alors les arbres / l'ancien décor
@@ -377,6 +379,259 @@ RunService.Heartbeat:Connect(function()
 end)
 
 ----------------------------------------------------------------------
+-- Ciel du monde
+----------------------------------------------------------------------
+-- server/DayNightController règle la lumière de la phase pour tous (Worlds.DayNight) et ses changements sont
+-- répliqués ; ici on recalcule chaque image les valeurs que le ciel du monde local remplace (mélange nuit -> jour selon
+-- Lighting.DayAmount) et on les réécrit si le serveur les a changées. En quittant un monde, une valeur qu'il remplaçait
+-- et que le nouveau ne remplace pas reprend une fois celle de la phase (le serveur la tient ensuite).
+
+local DAY = Worlds.DayNight.Digesting
+local NIGHT = Worlds.DayNight.Feeding
+local NO_SKY: Worlds.Sky = { Day = {}, Night = {}, Stars = 3000 }
+
+type NumberProp = {
+	of: (Worlds.SkyPhase) -> number?,
+	base: (Worlds.DayNight) -> number,
+	get: () -> number?,
+	set: (number) -> (),
+	clock: boolean?,
+}
+type ColorProp = {
+	of: (Worlds.SkyPhase) -> Color3?,
+	base: (Worlds.DayNight) -> Color3,
+	get: () -> Color3,
+	set: (Color3) -> (),
+}
+
+local function air(): Atmosphere?
+	return Lighting:FindFirstChildOfClass("Atmosphere")
+end
+
+local function skyClouds(): Clouds?
+	return Workspace.Terrain:FindFirstChildOfClass("Clouds")
+end
+
+local NUMBER_PROPS: { NumberProp } = {
+	{
+		of = function(p)
+			return p.ClockTime
+		end,
+		base = function(p)
+			return p.ClockTime
+		end,
+		get = function()
+			return Lighting.ClockTime
+		end,
+		set = function(v)
+			Lighting.ClockTime = v
+		end,
+		clock = true,
+	},
+	{
+		of = function(p)
+			return p.Brightness
+		end,
+		base = function(p)
+			return p.Brightness
+		end,
+		get = function()
+			return Lighting.Brightness
+		end,
+		set = function(v)
+			Lighting.Brightness = v
+		end,
+	},
+	{
+		of = function(p)
+			return p.Exposure
+		end,
+		base = function(p)
+			return p.Exposure
+		end,
+		get = function()
+			return Lighting.ExposureCompensation
+		end,
+		set = function(v)
+			Lighting.ExposureCompensation = v
+		end,
+	},
+	{
+		of = function(p)
+			return p.Haze
+		end,
+		base = function(p)
+			return p.Haze
+		end,
+		get = function()
+			local a = air()
+			return if a then a.Haze else nil
+		end,
+		set = function(v)
+			local a = air()
+			if a then
+				a.Haze = v
+			end
+		end,
+	},
+	{
+		of = function(p)
+			return p.Glare
+		end,
+		base = function(p)
+			return p.Glare
+		end,
+		get = function()
+			local a = air()
+			return if a then a.Glare else nil
+		end,
+		set = function(v)
+			local a = air()
+			if a then
+				a.Glare = v
+			end
+		end,
+	},
+	{
+		of = function(p)
+			return p.CloudCover
+		end,
+		base = function(p)
+			return p.CloudCover
+		end,
+		get = function()
+			local c = skyClouds()
+			return if c then c.Cover else nil
+		end,
+		set = function(v)
+			local c = skyClouds()
+			if c then
+				c.Cover = v
+			end
+		end,
+	},
+}
+
+local COLOR_PROPS: { ColorProp } = {
+	{
+		of = function(p)
+			return p.Ambient
+		end,
+		base = function(p)
+			return p.Ambient
+		end,
+		get = function()
+			return Lighting.Ambient
+		end,
+		set = function(v)
+			Lighting.Ambient = v
+		end,
+	},
+	{
+		of = function(p)
+			return p.OutdoorAmbient
+		end,
+		base = function(p)
+			return p.OutdoorAmbient
+		end,
+		get = function()
+			return Lighting.OutdoorAmbient
+		end,
+		set = function(v)
+			Lighting.OutdoorAmbient = v
+		end,
+	},
+}
+
+local currentSky: Worlds.Sky? = nil
+
+local function dayAmount(): number
+	local amount = Lighting:GetAttribute("DayAmount")
+	return if type(amount) == "number" then math.clamp(amount, 0, 1) else 0
+end
+
+local function mixNumber(night: number, day: number, amount: number, clock: boolean?): number
+	if clock then
+		-- l'heure prend le chemin le plus court (sinon 21 h -> 20 h ferait le tour du cadran, soleil compris)
+		local delta = ((day - night + 12) % 24) - 12
+		return (night + delta * amount) % 24
+	end
+	return night + (day - night) * amount
+end
+
+local function numberTarget(prop: NumberProp, sky: Worlds.Sky, amount: number): number
+	local night = prop.of(sky.Night) or prop.base(NIGHT)
+	local day = prop.of(sky.Day) or prop.base(DAY)
+	return mixNumber(night, day, amount, prop.clock)
+end
+
+local function colorTarget(prop: ColorProp, sky: Worlds.Sky, amount: number): Color3
+	local night = prop.of(sky.Night) or prop.base(NIGHT)
+	local day = prop.of(sky.Day) or prop.base(DAY)
+	return night:Lerp(day, amount)
+end
+
+local function ownsNumber(prop: NumberProp, sky: Worlds.Sky): boolean
+	return prop.of(sky.Day) ~= nil or prop.of(sky.Night) ~= nil
+end
+
+local function ownsColor(prop: ColorProp, sky: Worlds.Sky): boolean
+	return prop.of(sky.Day) ~= nil or prop.of(sky.Night) ~= nil
+end
+
+local function applySky(look: Worlds.Look)
+	local sky = look.Sky or NO_SKY
+	local previous = currentSky
+	currentSky = sky
+	if previous then
+		local amount = dayAmount()
+		for _, prop in ipairs(NUMBER_PROPS) do
+			if ownsNumber(prop, previous) and not ownsNumber(prop, sky) then
+				prop.set(numberTarget(prop, NO_SKY, amount))
+			end
+		end
+		for _, prop in ipairs(COLOR_PROPS) do
+			if ownsColor(prop, previous) and not ownsColor(prop, sky) then
+				prop.set(colorTarget(prop, NO_SKY, amount))
+			end
+		end
+	end
+	local robloxSky = Lighting:FindFirstChildOfClass("Sky")
+	if robloxSky then
+		robloxSky.StarCount = sky.Stars
+		robloxSky.SunAngularSize = sky.SunSize or 21
+		robloxSky.MoonAngularSize = sky.MoonSize or 11
+		robloxSky.CelestialBodiesShown = sky.Celestial ~= false
+	end
+end
+
+RunService.RenderStepped:Connect(function()
+	local sky = currentSky
+	if not sky then
+		return
+	end
+	local amount = dayAmount()
+	for _, prop in ipairs(NUMBER_PROPS) do
+		if ownsNumber(prop, sky) then
+			local target = numberTarget(prop, sky, amount)
+			local current = prop.get()
+			if current and math.abs(current - target) > 1e-3 then
+				prop.set(target)
+			end
+		end
+	end
+	for _, prop in ipairs(COLOR_PROPS) do
+		if ownsColor(prop, sky) then
+			local target = colorTarget(prop, sky, amount)
+			local current = prop.get()
+			if math.abs(current.R - target.R) + math.abs(current.G - target.G) + math.abs(current.B - target.B) > 1e-3 then
+				prop.set(target)
+			end
+		end
+	end
+end)
+
+----------------------------------------------------------------------
 -- Application
 ----------------------------------------------------------------------
 
@@ -424,6 +679,7 @@ local function refresh()
 	if myTier ~= ambienceTier then
 		ambienceTier = myTier
 		applyAmbience(myLook)
+		applySky(myLook)
 	end
 end
 

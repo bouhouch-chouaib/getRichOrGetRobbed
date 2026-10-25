@@ -2,59 +2,26 @@
 -- DayNightController : nuit pendant le Feeding, jour pendant la Digestion.
 -- L'heure avance toujours vers l'avant (coucher puis lever du soleil) sur TRANSITION secondes.
 -- Les propriétés de Lighting modifiées par le serveur sont répliquées à tous les clients.
--- Valeurs : préréglages « jour » / « nuit » de dataset_and_pipeline/map_art_bible.json (25 oct.). En plus de la lumière,
--- on fait varier le bloom, le contraste, Glare et Haze de l'air ; la couleur de l'air et la saturation restent à
--- client/WorldSkin (elles dépendent du monde du joueur).
+-- Valeurs : préréglages « jour » / « nuit » de shared/Worlds (Worlds.DayNight). En plus de la lumière, on fait varier le
+-- bloom, le contraste, Glare et Haze de l'air ; la couleur de l'air et la saturation restent à client/WorldSkin (elles
+-- dépendent du monde du joueur), qui remplace aussi une partie de la lumière par le ciel du monde (Worlds.Looks.*.Sky)
+-- en suivant l'attribut Lighting.DayAmount (0 nuit -> 1 jour) publié ici.
 
 local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
+local Worlds = require(ReplicatedStorage.Shared.Worlds)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 
 local DayNightController = {}
 
 local TRANSITION = 4
 
-type Preset = {
-	ClockTime: number,
-	Brightness: number,
-	Ambient: Color3,
-	OutdoorAmbient: Color3,
-	Exposure: number,
-	CloudCover: number, -- nuages du Terrain : moins la nuit, sinon ils sortent gris foncé
-	Bloom: { Intensity: number, Size: number, Threshold: number }, -- la nuit, runes et champignons ressortent
-	Contrast: number,
-	Glare: number, -- halo de l'air autour du soleil
-	Haze: number, -- brume de l'horizon
-}
+type Preset = Worlds.DayNight
 
-local PRESETS: { [string]: Preset } = {
-	Feeding = { -- nuit : ciel bleu nuit étoilé (début de nuit, jamais noir), arène bien lisible
-		ClockTime = 19.4,
-		Brightness = 2.2,
-		Ambient = Color3.fromRGB(150, 155, 190),
-		OutdoorAmbient = Color3.fromRGB(165, 170, 210),
-		Exposure = 0.4,
-		CloudCover = 0.12,
-		Bloom = { Intensity = 0.6, Size = 26, Threshold = 1.3 },
-		Contrast = 0.1,
-		Glare = 0.1,
-		Haze = 0.9,
-	},
-	Digesting = { -- jour : fantastique saturé, soleil un peu plus bas pour des ombres qui modèlent les décors
-		ClockTime = 14.5,
-		Brightness = 2.6,
-		Ambient = Color3.fromRGB(120, 120, 120),
-		OutdoorAmbient = Color3.fromRGB(142, 142, 150),
-		Exposure = 0.05,
-		CloudCover = 0.55,
-		Bloom = { Intensity = 0.45, Size = 22, Threshold = 1.6 },
-		Contrast = 0.08,
-		Glare = 0.35,
-		Haze = 0.6,
-	},
-}
+local PRESETS: { [string]: Preset } = Worlds.DayNight
 
 local transitionId = 0
 
@@ -84,6 +51,8 @@ local function apply(preset: Preset)
 	local startContrast = if grading then grading.Contrast else preset.Contrast
 	local startGlare = if air then air.Glare else preset.Glare
 	local startHaze = if air then air.Haze else preset.Haze
+	local currentAmount = Lighting:GetAttribute("DayAmount")
+	local startAmount = if type(currentAmount) == "number" then currentAmount else preset.DayAmount
 	local elapsed = 0
 
 	local connection: RBXScriptConnection
@@ -95,6 +64,7 @@ local function apply(preset: Preset)
 		elapsed = math.min(elapsed + dt, TRANSITION)
 		local alpha = elapsed / TRANSITION
 		Lighting.ClockTime = (startTime + delta * alpha) % 24
+		Lighting:SetAttribute("DayAmount", startAmount + (preset.DayAmount - startAmount) * alpha)
 		Lighting.Brightness = startBrightness + (preset.Brightness - startBrightness) * alpha
 		Lighting.Ambient = startAmbient:Lerp(preset.Ambient, alpha)
 		Lighting.OutdoorAmbient = startOutdoor:Lerp(preset.OutdoorAmbient, alpha)
@@ -123,6 +93,7 @@ end
 function DayNightController.Init()
 	-- Démarrage directement de nuit (la partie commence en Feeding).
 	local night = PRESETS.Feeding
+	Lighting:SetAttribute("DayAmount", night.DayAmount)
 	Lighting.ClockTime = night.ClockTime
 	Lighting.Brightness = night.Brightness
 	Lighting.Ambient = night.Ambient

@@ -285,3 +285,26 @@ dans `blender_tools/environment_cosmos.py`, rendus `qa_renders/map_hero_cosmos.p
   `map_roblox_cosmos_nuit.jpg`, `map_roblox_cosmos_cratere.jpg`.
 - Différence avec les rendus : en jeu le ciel ne change pas selon le monde (bleu à nuages le jour) ; dans l'espace ça se
   voit plus qu'ailleurs. Piste : un Sky par monde dans `client/WorldSkin`.
+
+---
+
+# Un ciel par monde (26 oct. 2026)
+
+Jusqu'ici le ciel restait le même partout (bleu à nuages le jour), ce qui se voyait surtout dans l'espace. Désormais
+chaque monde a son ciel (`shared/Worlds`, champ `Sky` de chaque monde), appliqué côté client par `client/WorldSkin`.
+
+- **Sans image** (aucun envoi sur le compte) : la couleur du ciel vient de l'air (`Atmosphere` Color / Decay, déjà par
+  monde) rendue visible par la brume (`Haze`) ; plus les nuages du Terrain, le nombre d'étoiles, la taille du soleil et
+  de la lune du `Sky` de Roblox.
+- Les préréglages jour / nuit sont passés de `server/DayNightController` à `Worlds.DayNight` (une seule source pour le
+  serveur et le client). Le serveur publie l'attribut `Lighting.DayAmount` (0 nuit -> 1 jour, suivi pendant le passage
+  de 4 s) ; chaque image, le client mélange les valeurs nuit / jour du ciel de son monde et les réécrit si le serveur
+  les a changées. En quittant un monde, une valeur qu'il remplaçait reprend une fois celle de la phase.
+- Prairie : ciel des préréglages (inchangé). Désert : ciel chaud voilé, gros soleil, nuits très étoilées. Volcan : fumée
+  orangée et nuages sombres, presque pas d'étoiles. Glace : ciel pâle, nuages de neige, nuits polaires étoilées.
+  Abysses : couleur de l'eau, ni nuages, ni étoiles, ni soleil ; eau sombre la nuit. Cosmos : toujours de nuit (heure
+  20,1 le jour, 21,6 la nuit) pour garder les étoiles et une lune géante, scène éclairée le jour par la lumière
+  ambiante et l'exposition. Divin : ciel lumineux à l'horizon doré, nuages légers.
+- Vérifié en Play (solo, monde changé côté client), jour et nuit : planche `qa_renders/ciels_par_monde.jpg`. Réglés
+  après les premières photos : la nuit des Abysses (brume 3,4 : eau cyan qui délavait les récifs -> 1,4), le Divin
+  (trop de nuages : ciel gris -> 0,4 et brume 2), le Désert (encore bleu -> brume 2,3).
