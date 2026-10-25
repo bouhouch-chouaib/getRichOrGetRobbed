@@ -20,3 +20,7 @@ sourcemap.json
 /dataset_and_pipeline/studio_import/
 # Textures extraites par l'importateur 3D de Studio à côté des .fbx
 *.fbm/
+
+# Décors de la carte : copies régénérables (run_map_assets.py / run_map_scene.py)
+/dataset_and_pipeline/baked_assets/map/*.glb
+/dataset_and_pipeline/source/map_scene.blend

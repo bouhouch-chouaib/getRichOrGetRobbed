@@ -61,6 +61,12 @@ et gestes ; tout nouveau familier refait reçoit sa fiche. Vérifié en jeu (sol
 grenouille, slime), bond final (chat, renard, panthère), hibou qui se pose et s'envole, Ouroboros qui roule en tours
 entiers, vols inclinés, capybara qui fait la sieste. Pas vu : sur téléphone, à 2 joueurs, porté / équipé. Chouaib a
 reçu les 30 familiers dans sa sauvegarde Studio (pour tester). **ArtModels n'est que dans le fichier du jeu : Ctrl+S.**
+**25 oct. : carte « niveau studio » (phase 1.6), PROPOSITION à valider par Chouaib, rien dans le jeu** : lire
+`dataset_and_pipeline/MAP.md`. Charte `map_art_bible.json`, 21 décors en blocs biseautés cuits (`environment_recipes.py`,
+`run_map_assets.py`, `baked_assets/map/`), scène aux vraies dimensions + rendus `qa_renders/map_hero.png` et
+`map_aesthetic_board.png` (`run_map_scene.py`), placement Roblox `map_layout.json` et script Studio
+`studio_tools/apply_map_look.lua` (éclairage + décors, jamais lancé). La carte reste plate pour le jeu ; le relief
+(collines, falaises derrière le mur) est autour.
 
 ## L'utilisateur et la façon de travailler
 

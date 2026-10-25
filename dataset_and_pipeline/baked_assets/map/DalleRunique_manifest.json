@@ -1,0 +1,60 @@
+{
+  "asset": "DalleRunique",
+  "triangles": 1296,
+  "vertices": 672,
+  "size_studs": [
+    8.063,
+    5.957,
+    1.415
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 62.7,
+  "source_materials": [
+    "M_CalcaireTaille",
+    "M_Rune"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0323,
+    "max_ray": 0.0806,
+    "ao_distance": 0.9675,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "DalleRunique_Color.png",
+    "Roughness": "DalleRunique_Roughness.png",
+    "Metalness": "DalleRunique_Metalness.png",
+    "Normal": "DalleRunique_Normal.png",
+    "AO": "DalleRunique_AO.png",
+    "Emissive": "DalleRunique_Emissive.png"
+  },
+  "exports": [
+    "DalleRunique.fbx",
+    "DalleRunique.glb"
+  ],
+  "roblox": {
+    "MeshPart": "DalleRunique (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "DalleRunique_Color.png",
+      "NormalMap": "DalleRunique_Normal.png",
+      "RoughnessMap": "DalleRunique_Roughness.png",
+      "MetalnessMap": "DalleRunique_Metalness.png",
+      "EmissiveMaskContent": "DalleRunique_Emissive.png",
+      "EmissiveTint": "#FFFFFF",
+      "EmissiveStrength": 2.6,
+      "coverage_pct": 15.74,
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 25.0
+}

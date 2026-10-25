@@ -1,0 +1,57 @@
+{
+  "asset": "ArbreMajestueux_B",
+  "triangles": 4204,
+  "vertices": 2180,
+  "size_studs": [
+    14.478,
+    13.398,
+    19.47
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 15.5,
+  "source_materials": [
+    "M_Ecorce",
+    "M_FeuilleA",
+    "M_FeuilleB",
+    "M_FeuilleC"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0779,
+    "max_ray": 0.1947,
+    "ao_distance": 2.3364,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "ArbreMajestueux_B_Color.png",
+    "Roughness": "ArbreMajestueux_B_Roughness.png",
+    "Metalness": "ArbreMajestueux_B_Metalness.png",
+    "Normal": "ArbreMajestueux_B_Normal.png",
+    "AO": "ArbreMajestueux_B_AO.png"
+  },
+  "exports": [
+    "ArbreMajestueux_B.fbx",
+    "ArbreMajestueux_B.glb"
+  ],
+  "roblox": {
+    "MeshPart": "ArbreMajestueux_B (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "ArbreMajestueux_B_Color.png",
+      "NormalMap": "ArbreMajestueux_B_Normal.png",
+      "RoughnessMap": "ArbreMajestueux_B_Roughness.png",
+      "MetalnessMap": "ArbreMajestueux_B_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 27.1
+}

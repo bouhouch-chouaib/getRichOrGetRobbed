@@ -1,0 +1,62 @@
+{
+  "asset": "ChampignonGeant",
+  "triangles": 4932,
+  "vertices": 2516,
+  "size_studs": [
+    11.521,
+    11.146,
+    10.899
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 25.3,
+  "source_materials": [
+    "M_ChampiChapeau",
+    "M_ChampiLueur",
+    "M_ChampiPied",
+    "M_PointsBlancs"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0461,
+    "max_ray": 0.1152,
+    "ao_distance": 1.3825,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "ChampignonGeant_Color.png",
+    "Roughness": "ChampignonGeant_Roughness.png",
+    "Metalness": "ChampignonGeant_Metalness.png",
+    "Normal": "ChampignonGeant_Normal.png",
+    "AO": "ChampignonGeant_AO.png",
+    "Emissive": "ChampignonGeant_Emissive.png"
+  },
+  "exports": [
+    "ChampignonGeant.fbx",
+    "ChampignonGeant.glb"
+  ],
+  "roblox": {
+    "MeshPart": "ChampignonGeant (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "ChampignonGeant_Color.png",
+      "NormalMap": "ChampignonGeant_Normal.png",
+      "RoughnessMap": "ChampignonGeant_Roughness.png",
+      "MetalnessMap": "ChampignonGeant_Metalness.png",
+      "EmissiveMaskContent": "ChampignonGeant_Emissive.png",
+      "EmissiveTint": "#FFFFFF",
+      "EmissiveStrength": 2.8,
+      "coverage_pct": 13.74,
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 22.8
+}

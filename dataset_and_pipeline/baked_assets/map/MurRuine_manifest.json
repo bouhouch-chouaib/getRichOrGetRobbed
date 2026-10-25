@@ -1,0 +1,54 @@
+{
+  "asset": "MurRuine",
+  "triangles": 2700,
+  "vertices": 1400,
+  "size_studs": [
+    19.659,
+    8.167,
+    7.78
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 23.8,
+  "source_materials": [
+    "M_PierreRuine"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0786,
+    "max_ray": 0.1966,
+    "ao_distance": 2.3591,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "MurRuine_Color.png",
+    "Roughness": "MurRuine_Roughness.png",
+    "Metalness": "MurRuine_Metalness.png",
+    "Normal": "MurRuine_Normal.png",
+    "AO": "MurRuine_AO.png"
+  },
+  "exports": [
+    "MurRuine.fbx",
+    "MurRuine.glb"
+  ],
+  "roblox": {
+    "MeshPart": "MurRuine (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "MurRuine_Color.png",
+      "NormalMap": "MurRuine_Normal.png",
+      "RoughnessMap": "MurRuine_Roughness.png",
+      "MetalnessMap": "MurRuine_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 18.1
+}

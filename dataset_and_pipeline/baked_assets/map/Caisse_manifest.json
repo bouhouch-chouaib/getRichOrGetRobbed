@@ -1,0 +1,57 @@
+{
+  "asset": "Caisse",
+  "triangles": 2356,
+  "vertices": 1152,
+  "size_studs": [
+    4.15,
+    4.25,
+    4.1
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 3.88,
+  "uv_coverage_pct": 33.7,
+  "source_materials": [
+    "M_BoisPlanche",
+    "M_BoisSombre",
+    "M_Fer"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.017,
+    "max_ray": 0.0425,
+    "ao_distance": 0.51,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Caisse_Color.png",
+    "Roughness": "Caisse_Roughness.png",
+    "Metalness": "Caisse_Metalness.png",
+    "Normal": "Caisse_Normal.png",
+    "AO": "Caisse_AO.png"
+  },
+  "exports": [
+    "Caisse.fbx",
+    "Caisse.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Caisse (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Caisse_Color.png",
+      "NormalMap": "Caisse_Normal.png",
+      "RoughnessMap": "Caisse_Roughness.png",
+      "MetalnessMap": "Caisse_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 14.6
+}

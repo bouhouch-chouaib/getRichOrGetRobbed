@@ -1,0 +1,147 @@
+{
+  "title": "Bible artistique de la carte - Get Rich Or Get Robbed (phase 1.6)",
+  "date": "2026-10-25",
+  "status": "proposition, a valider par Chouaib sur les rendus qa_renders/map_hero.png et map_aesthetic_board.png",
+  "principle": "Monde jouet cinematographique : des blocs biseautes empiles (meme langage que les familiers en briques) et des tenons Roblox sur les faces tournees vers le haut (docs/DIRECTION_ARTISTIQUE.md). On garde la carte ronde, le trou noir au centre et les 8 bases en anneau (plan valide le 13 oct.) : la nouvelle map habille ce plan, elle ne le change pas.",
+  "why_not_organic": "La carte du jeu, les tapis, les bancs et les 30 familiers refaits sont deja en briques. Des arbres et rochers lisses facon Fortnite casseraient cette unite ; on prend donc la forme 'Stylized Fantasy' (silhouettes exagerees, arbres tordus, ruines, champignons) mais construite en blocs biseautes, comme un set de briques haut de gamme.",
+
+  "sources": {
+    "local_reference": "docs/DIRECTION_ARTISTIQUE.md (captures de Steal an Egg relevees le 12 oct. : palette, tenons, zones) ; references/ (local, exclu de git)",
+    "web": [
+      {"what": "Streaming : modes Atomic / Persistent, eviter les gros modeles conteneurs", "url": "https://create.roblox.com/docs/workspace/streaming/techniques"},
+      {"what": "ModelStreamingMode", "url": "https://create.roblox.com/docs/reference/engine/enums/ModelStreamingMode"},
+      {"what": "ModelLevelOfDetail : SLIM conseille pour les modeles statiques, StreamingMesh sans textures", "url": "https://create.roblox.com/docs/reference/engine/enums/ModelLevelOfDetail"},
+      {"what": "Future = meilleure qualite mais plus de GPU, tester sur les appareils faibles", "url": "https://www.creation.dev/fr/tools/lighting-plugins"},
+      {"what": "Bloom = lueur, ColorCorrection = equilibre des couleurs (fil DevForum)", "url": "https://devforum.roblox.com/t/bloom-vs-color-correction/494805"},
+      {"what": "Forets moins monotones : variations, groupes, lisiere", "url": "https://www.gamedeveloper.com/art/art-tips-for-building-forests"},
+      {"what": "Lisibilite : degrades verticaux, herbe regroupee plutot que repartie partout", "url": "https://polycount.com/discussion/comment/2657302"}
+    ],
+    "limits": "Aucune source fiable ne decrit l'eclairage exact de Pet Simulator 99, Adopt Me ou Blox Fruits : les valeurs ci-dessous sont nos choix, a regler dans Studio."
+  },
+
+  "palette": {
+    "rule": "Couleurs pures et saturees, peu de pastel, pas de marron terne. Contraste chaud / froid : sols et bois chauds (jaune-vert, orange) contre ombres et pierres froides (bleu-lilas). Plus on approche du trou noir, plus la palette refroidit vers le violet ; plus on approche des bases, plus elle se rechauffe.",
+    "gradient_center_to_edge": [
+      {"zone": "coeur du trou noir", "hex": "#2E1B5C", "note": "violet profond, seule zone sombre de la carte"},
+      {"zone": "dalles runiques autour du trou", "hex": "#7A63C9", "accent": "#B9A6FF", "note": "pierre lilas, runes cyan #5CF2FF (lueur = couleur de la rune)"},
+      {"zone": "arene / prairie sauvage", "hex": "#98E634", "alt": "#51CC29", "note": "damier vert pomme (inchange)"},
+      {"zone": "chemins", "hex": "#F6D680", "alt": "#E8C268", "note": "sable dore, bordures de pierre claire"},
+      {"zone": "abords des bases", "hex": "#B5E04A", "note": "herbe plus jaune = plus chaude, appel vers la base"},
+      {"zone": "muret d'enceinte", "hex": "#CA9156", "alt": "#B97D49", "note": "beige orange (inchange)"},
+      {"zone": "falaises exterieures", "hex": "#E2C59B", "shadow": "#8E7FB8", "note": "calcaire chaud, ombres lilas"}
+    ],
+    "materials": {
+      "calcaire": {"base": "#E8D2A8", "edge": "#FFF2D6", "cavity": "#7E6E9E", "accent": "#F2B97C"},
+      "obsidienne": {"base": "#2B2340", "edge": "#7C6BC4", "cavity": "#120E1E", "veins": "#B46CFF"},
+      "pierre_ruine": {"base": "#B8B3C8", "edge": "#EDEBF5", "cavity": "#5A5577", "accent": "#9AD07A", "note": "mousse verte en accent"},
+      "bois_clair": {"base": "#E08A3C", "edge": "#FFC27A", "cavity": "#6A3A1E"},
+      "bois_sombre": {"base": "#8A5A3A", "edge": "#C08A60", "cavity": "#3A2216"},
+      "ecorce": {"base": "#9A6440", "edge": "#D7A274", "cavity": "#4A2A1C"},
+      "feuillage": {"tones": ["#5ED13A", "#89E83E", "#3FB046"], "tips": "#C9F25A", "note": "3 tons par arbre, pointes eclaircies"},
+      "feuillage_magique": {"tones": ["#FF8FC8", "#FFB3DA"], "note": "1 arbre sur 6 : cerisier rose, point focal"},
+      "champignon": {"cap": "#FF4FA0", "spots": "#FFF4FB", "glow": "#7CF8FF", "note": "lueur cyan sur les lamelles et les champignons bleus"},
+      "fer": {"tint": "#9AA3B5"},
+      "or": {"tint": "#FFC830"}
+    }
+  },
+
+  "atmosphere": {
+    "tone": "Fantastique sature de plein jour (Digestion) et nuit bleu nuit lumineuse (Feeding). Pas de crepuscule permanent : la reference est tres claire. Le moment 'dore' n'existe que pendant les 4 s de transition (coucher / lever).",
+    "presets": {
+      "jour_digestion": {
+        "Lighting": {"Technology": "Future", "ClockTime": 14.5, "GeographicLatitude": 35, "Brightness": 2.6, "EnvironmentDiffuseScale": 0.6, "EnvironmentSpecularScale": 0.7, "Ambient": "#787878", "OutdoorAmbient": "#8E8E96", "ExposureCompensation": 0.05, "ShadowSoftness": 0.25},
+        "Atmosphere": {"Density": 0.3, "Offset": 0.25, "Color": "#CFE2FF", "Decay": "#7A96D0", "Glare": 0.35, "Haze": 0.6},
+        "Bloom": {"Intensity": 0.45, "Size": 22, "Threshold": 1.6},
+        "ColorCorrection": {"Saturation": 0.18, "Contrast": 0.08, "Brightness": 0.0, "TintColor": "#FFFAF0"},
+        "DepthOfField": {"Enabled": true, "FarIntensity": 0.12, "FocusDistance": 120, "InFocusRadius": 160, "NearIntensity": 0, "note": "seulement le tres lointain (falaises) : jamais flou sur l'arene"},
+        "SunRays": {"Intensity": 0.04, "Spread": 0.6}
+      },
+      "nuit_feeding": {
+        "Lighting": {"ClockTime": 19.4, "Brightness": 2.2, "Ambient": "#969BBE", "OutdoorAmbient": "#A5AAD2", "ExposureCompensation": 0.4},
+        "Atmosphere": {"Density": 0.34, "Offset": 0.2, "Color": "#6C78C8", "Decay": "#2C3470", "Glare": 0.1, "Haze": 0.9},
+        "Bloom": {"Intensity": 0.6, "Size": 26, "Threshold": 1.3},
+        "ColorCorrection": {"Saturation": 0.22, "Contrast": 0.1, "TintColor": "#EEF0FF"},
+        "note": "les champignons, runes et totems deviennent les reperes lumineux ; les PointLight sont rares (8 au plus, un par totem)"
+      },
+      "transition": {"note": "4 s : ClockTime passe par 18 h / 6 h, le soleil rase et dore les falaises (deja fait par DayNightController)."}
+    },
+    "ground_fog": "Pas de brouillard en volume (absent de Roblox) : Atmosphere Haze + une couronne de nuages bas en cartes semi-transparentes derriere les falaises, hors de portee du joueur.",
+    "magic_halos": "Lueur par EmissiveMask (SurfaceAppearance) sur runes, champignons, cristaux des totems : la lueur prend la couleur de la surface. Jamais de Neon pour un volume (regle du pipeline)."
+  },
+
+  "zones": {
+    "layout_reminder": {"FloorRadius": 315, "HoleRadius": 40, "DomeRadius": 55, "BaseRingRadius": 215, "BaseSize": [84, 1, 84], "BaseCount": 8, "WildItemsRing": [70, 160], "WallHeight": 36, "source": "src/shared/Config.lua (Config.Arena, Config.Items)"},
+    "arene_centrale": {
+      "story": "Un ancien sanctuaire englouti par le trou noir : un anneau de dalles runiques fissurees, 8 arches brisees qui marquent les 8 chemins, des totems d'energie qui 'nourrissent' le vortex.",
+      "elements": ["anneau de 24 dalles runiques a r 45 (au ras du sol, sans relief bloquant)", "8 arches anciennes a cheval sur les chemins, r 66, ouverture 18 x 22 studs (les lancers passent dessous ou au-dessus)", "16 totems d'energie, un de chaque cote de chaque arche (r 64) ; une PointLight sur un totem sur deux", "8 formations d'obsidienne entre les chemins, r 57 : avant l'anneau des objets sauvages (r 70), donc aucun objet ne peut apparaitre dedans"],
+      "verticality": "L'arene reste plate pour les lancers et les objets ; le relief vient des formations rocheuses (6 a 18 studs) et des arches, posees hors des chemins."
+    },
+    "chemins": {
+      "story": "Des routes pavees de sable dore qui partent de chaque base et 'invitent' vers le trou : bordures de pierre, racines qui debordent, touffes d'herbe en grappes sur les bas-cotes.",
+      "rules": ["16 studs de large, plats, sans collision decorative", "touffes d'herbe et petits champignons en bas-cotes (sans collision)", "un ruisseau descend du mur jusqu'a une mare entre la base 1 et la base 8, franchi par un pont de bois", "pancartes au depart des chemins (nom du monde du proprietaire)"]
+    },
+    "bases": {
+      "story": "Des bastions : un muret de pierre biseaute a hauteur de hanche + des palis de bois tailles en pointe, des tonneaux et caisses le long des murs, une arche d'entree en bois cercle de fer.",
+      "rules": ["on ne change ni la plateforme, ni la porte, ni le bouton de verrouillage, ni la couveuse (gameplay)", "le decor s'ajoute AUTOUR (escalier de 2 marches a l'entree, murets, palis, tonneaux)", "toujours lisible de loin : couleur du monde du proprietaire sur les fanions et les toits (WorldSkin)"]
+    },
+    "entre_les_bases": {
+      "story": "Collines en terrasses et bosquets : c'est la que se trouvent la verticalite et la 'foret' (arbres majestueux, champignons geants, rochers calcaires).",
+      "rules": ["les kiosques (boutique, fusion) restent degages sur 20 studs", "la nature se densifie en allant vers le mur (lisiere)"]
+    },
+    "peripherie": {
+      "story": "Derriere le mur d'enceinte : des falaises de calcaire en gradins, couronnees d'arbres, puis de lointaines aiguilles rocheuses dans la brume. Elles ferment l'horizon et donnent l'echelle.",
+      "rules": ["hors de portee du joueur (pas de collision, CastShadow seulement pour les plus proches)", "3 plans de profondeur : falaises proches r 330, collines r 420, aiguilles r 600+"]
+    }
+  },
+
+  "assets": {
+    "budget_triangles": 6000,
+    "style": "blocs biseautes (Bevel + Weighted Normal), deplacement leger sur la pierre, tenons sur les faces superieures de la pierre taillee et du bois, aucune primitive posee telle quelle",
+    "nature": [
+      {"id": "RocherCalcaire", "use": "rochers moyens entre les chemins", "variants": 3},
+      {"id": "RocherObsidienne", "use": "formations sombres pres du trou, veines violettes lumineuses", "variants": 2},
+      {"id": "FalaiseGradins", "use": "falaise modulaire derriere le mur, gradins de strates + herbe"},
+      {"id": "ArbreMajestueux", "use": "tronc tordu en sections biseautees, racines, canopee en blocs", "variants": 2},
+      {"id": "ArbreCerisier", "use": "point focal rose"},
+      {"id": "ChampignonGeant", "use": "lamelles et points lumineux"},
+      {"id": "TouffeHerbe", "use": "grappes au bord des chemins"}
+    ],
+    "civilisation": [
+      {"id": "MurRuine", "use": "maconnerie brisee, briques manquantes, gravats"},
+      {"id": "ArcheAncienne", "use": "voussoirs + clef de voute runique"},
+      {"id": "TotemEnergie", "use": "blocs graves empiles + cristal"},
+      {"id": "DalleRunique", "use": "dalles de l'anneau du trou"},
+      {"id": "EscalierPierre", "use": "entree des bases"},
+      {"id": "Caisse", "use": "mobilier"},
+      {"id": "Tonneau", "use": "mobilier, cercles de fer"},
+      {"id": "Pancarte", "use": "depart des chemins"},
+      {"id": "Palissade", "use": "palis biseautes sur muret de pierre"},
+      {"id": "PontBois", "use": "passage sur ruisseau"}
+    ]
+  },
+
+  "gameplay_constraints": [
+    "Chemins (16 studs) et cercle du trou noir : aucun decor qui bloque, les lancers doivent passer.",
+    "Anneau des objets sauvages (r 70 -> 160) : decor bas et sans collision seulement (herbe, champignons), sinon un objet peut apparaitre dans un rocher.",
+    "Gros rochers avec collision : uniquement entre les bases (r > 165), hors chemins et hors kiosques.",
+    "Tout decor : CanQuery = false et CanTouch = false (ne gene ni les raycasts du jeu ni la detection) ; CanCollide = true seulement pour les gros volumes, CollisionFidelity = Box.",
+    "Ne pas toucher aux pieces nommees du jeu (Base_N, Gate, LockButton, Incubator, Kiosks, BlackholeZone) : le decor vit dans Workspace.MapDecor."
+  ],
+
+  "performance": {
+    "streaming": "Ne pas activer StreamingEnabled d'un coup : plusieurs scripts clients supposent que toute la carte est la (BasePets, Eggs, WorldSkin). Si on l'active plus tard : un Model par grappe de decor (pas un gros conteneur), ModelStreamingMode = Atomic, LevelOfDetail = SLIM pour les falaises et bosquets statiques ; Persistent seulement pour ce que les scripts lisent.",
+    "meshes": "Un MeshId par asset, reutilise par copie (memoire partagee) ; RenderFidelity = Automatic ; textures 1024 pour les gros, 512 pour le mobilier.",
+    "shadows": "CastShadow = false sur l'herbe, les champignons, les petits objets et toute la peripherie lointaine.",
+    "lights": "8 PointLight au plus (totems), Shadows = false ; le reste de la lueur passe par EmissiveMask.",
+    "budget": "~350 instances de decor, ~1,2 M triangles affiches au pire (vue aerienne) ; mobile : verifier en Studio (Emulation) avant publication."
+  },
+
+  "roblox_integration": {
+    "files": {
+      "assets": "dataset_and_pipeline/baked_assets/map/<Asset>.fbx + textures + manifest",
+      "layout": "dataset_and_pipeline/baked_assets/map/map_layout.json (positions en coordonnees Roblox, exportees de la scene Blender)",
+      "studio_script": "dataset_and_pipeline/studio_tools/apply_map_look.lua (eclairage + pose du decor a partir d'ArtModels.Map, reversible)"
+    },
+    "not_verified": "Import des .fbx dans Studio, rendu des cartes sous l'eclairage Roblox, perf mobile : rien de ceci n'a ete vu dans Studio."
+  }
+}

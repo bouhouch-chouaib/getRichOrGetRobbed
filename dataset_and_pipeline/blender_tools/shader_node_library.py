@@ -423,6 +423,9 @@ def create_stylized_edge_wear_material(
     magma_width: float = 0.06,
     magma_glow: float = 3.0,
     magma_attribute: str = "magma",
+    wood: float = 0.0,
+    wood_axis: str = "Z",
+    wood_scale: float = 1.4,
     **_ignored,
 ):
     """Matériau « peint à la main » façon jeu stylisé.
@@ -437,6 +440,8 @@ def create_stylized_edge_wear_material(
     - `magma` = couleur de fissures incandescentes (Voronoi DISTANCE_TO_EDGE : liseré `magma`, cœur `magma_core`, halo
       chaud), creusées dans le relief et émissives, SEULEMENT là où l'attribut `magma_attribute` (0-1, peint par la
       recette : poitrail, front...) vaut 1. Lueur = couleur de la fissure, intensité = masque x `magma_glow`.
+    - `wood` > 0 : veinures de bois (Wave en bandes déformées) le long de `wood_axis` (X, Y ou Z de l'objet), plus
+      sombres et creusées ; `wood_scale` = nombre de veines par stud (planches, écorce, tonneaux).
     """
     mat, kit, bsdf = _new_material(name, "create_stylized_edge_wear_material")
     base_c = color(base)
@@ -450,6 +455,22 @@ def create_stylized_edge_wear_material(
     if accent:
         patches = kit.noise(kit.vmath("ADD", obj, (13.7, 5.1, 2.9)), brush_scale * 0.7, detail=2.0, roughness=0.5)
         col = kit.mix(kit.map_range(kit.out(patches, "Fac"), 0.48, 0.68, 0.0, 0.55), col, color(accent))
+
+    wood_h = None
+    if wood > 0:
+        wave = kit.new("ShaderNodeTexWave", label="wood grain")
+        wave.wave_type = "BANDS"
+        # les veines courent le long de l'axe : les bandes se répètent dans les deux autres directions
+        wave.bands_direction = {"X": "Z", "Y": "X", "Z": "X"}.get(wood_axis, "X")
+        stretch = {"X": (0.15, 1.0, 1.0), "Y": (1.0, 0.15, 1.0), "Z": (1.0, 1.0, 0.15)}.get(wood_axis, (1, 1, 0.15))
+        kit.set(wave, "Vector", kit.vmath("MULTIPLY", obj, stretch))
+        kit.set(wave, "Scale", wood_scale)
+        kit.set(wave, "Distortion", 7.0)
+        kit.set(wave, "Detail", 3.0)
+        kit.set(wave, "Detail Scale", 1.6)
+        streak = kit.map_range(kit.out(wave, "Fac"), 0.62, 0.95, 0.0, 1.0)
+        col = kit.mix(kit.math("MULTIPLY", streak, 0.55 * wood), col, shade(base_c, -0.38))
+        wood_h = kit.math("MULTIPLY", streak, -wood)
 
     grain = kit.noise(obj, grain_scale, detail=6.0, roughness=0.62)
     grain_fac = kit.out(grain, "Fac")
@@ -500,7 +521,8 @@ def create_stylized_edge_wear_material(
     rough = kit.math("SUBTRACT", rough, kit.math("MULTIPLY", edge_paint, 0.18))
     rough = kit.math("ADD", rough, kit.math("MULTIPLY", cav, 0.15), clamp=True)
 
-    height = _sum_heights(kit, [(grain_fac, 0.25), (kit.out(brush, "Fac"), 0.35), (crack_h, 0.6), (magma_h, 0.8)])
+    height = _sum_heights(kit, [(grain_fac, 0.25), (kit.out(brush, "Fac"), 0.35), (crack_h, 0.6), (magma_h, 0.8),
+                                 (wood_h, 0.5)])
     normal = kit.bump(height, strength=bump_strength, distance=0.02)
     if stud_h is not None:
         # relief propre aux tenons (vrais petits cylindres, ~0,1 stud de haut), enchaîné sur le relief de surface

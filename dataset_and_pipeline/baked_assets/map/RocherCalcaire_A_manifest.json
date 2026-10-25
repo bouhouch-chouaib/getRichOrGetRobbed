@@ -1,0 +1,54 @@
+{
+  "asset": "RocherCalcaire_A",
+  "triangles": 952,
+  "vertices": 482,
+  "size_studs": [
+    9.313,
+    8.137,
+    5.443
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 53.5,
+  "source_materials": [
+    "M_Calcaire"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.1397,
+    "max_ray": 0.3493,
+    "ao_distance": 1.1176,
+    "ao_strength": 0.55,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "RocherCalcaire_A_Color.png",
+    "Roughness": "RocherCalcaire_A_Roughness.png",
+    "Metalness": "RocherCalcaire_A_Metalness.png",
+    "Normal": "RocherCalcaire_A_Normal.png",
+    "AO": "RocherCalcaire_A_AO.png"
+  },
+  "exports": [
+    "RocherCalcaire_A.fbx",
+    "RocherCalcaire_A.glb"
+  ],
+  "roblox": {
+    "MeshPart": "RocherCalcaire_A (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "RocherCalcaire_A_Color.png",
+      "NormalMap": "RocherCalcaire_A_Normal.png",
+      "RoughnessMap": "RocherCalcaire_A_Roughness.png",
+      "MetalnessMap": "RocherCalcaire_A_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 46.4
+}

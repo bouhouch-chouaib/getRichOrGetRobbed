@@ -1,0 +1,58 @@
+{
+  "asset": "Pancarte",
+  "triangles": 1022,
+  "vertices": 529,
+  "size_studs": [
+    9.772,
+    2.783,
+    7.5
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 52.3,
+  "source_materials": [
+    "M_BoisPlanche",
+    "M_BoisSombre",
+    "M_CalcaireTaille",
+    "M_OrDecor"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0391,
+    "max_ray": 0.0977,
+    "ao_distance": 1.1727,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Pancarte_Color.png",
+    "Roughness": "Pancarte_Roughness.png",
+    "Metalness": "Pancarte_Metalness.png",
+    "Normal": "Pancarte_Normal.png",
+    "AO": "Pancarte_AO.png"
+  },
+  "exports": [
+    "Pancarte.fbx",
+    "Pancarte.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Pancarte (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Pancarte_Color.png",
+      "NormalMap": "Pancarte_Normal.png",
+      "RoughnessMap": "Pancarte_Roughness.png",
+      "MetalnessMap": "Pancarte_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 9.7
+}

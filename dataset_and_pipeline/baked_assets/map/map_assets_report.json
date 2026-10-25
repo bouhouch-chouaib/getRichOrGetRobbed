@@ -1,0 +1,233 @@
+{
+  "RocherCalcaire_A": {
+    "triangles": 952,
+    "within_6000": true,
+    "size_studs": [
+      9.313,
+      8.137,
+      5.443
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 46.4
+  },
+  "RocherCalcaire_B": {
+    "triangles": 570,
+    "within_6000": true,
+    "size_studs": [
+      5.507,
+      7.018,
+      6.631
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 35.1
+  },
+  "RocherCalcaire_C": {
+    "triangles": 590,
+    "within_6000": true,
+    "size_studs": [
+      15.523,
+      7.854,
+      4.514
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 59.7
+  },
+  "RocherObsidienne_A": {
+    "triangles": 2446,
+    "within_6000": true,
+    "size_studs": [
+      8.004,
+      8.58,
+      10.87
+    ],
+    "uv_overlap_pct": 0.03,
+    "seconds": 55.8
+  },
+  "RocherObsidienne_B": {
+    "triangles": 2350,
+    "within_6000": true,
+    "size_studs": [
+      8.82,
+      7.363,
+      8.273
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 59.7
+  },
+  "FalaiseGradins": {
+    "triangles": 5616,
+    "within_6000": true,
+    "size_studs": [
+      36.018,
+      15.251,
+      29.873
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 15.1
+  },
+  "ArbreMajestueux_A": {
+    "triangles": 4208,
+    "within_6000": true,
+    "size_studs": [
+      14.732,
+      13.566,
+      21.473
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 21.2
+  },
+  "ArbreMajestueux_B": {
+    "triangles": 4204,
+    "within_6000": true,
+    "size_studs": [
+      14.478,
+      13.398,
+      19.47
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 27.1
+  },
+  "ArbreCerisier": {
+    "triangles": 4208,
+    "within_6000": true,
+    "size_studs": [
+      12.061,
+      11.528,
+      17.845
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 31.9
+  },
+  "ChampignonGeant": {
+    "triangles": 4932,
+    "within_6000": true,
+    "size_studs": [
+      11.521,
+      11.146,
+      10.899
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 22.8
+  },
+  "TouffeHerbe": {
+    "triangles": 440,
+    "within_6000": true,
+    "size_studs": [
+      2.666,
+      2.625,
+      2.98
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 15.9
+  },
+  "MurRuine": {
+    "triangles": 2700,
+    "within_6000": true,
+    "size_studs": [
+      19.659,
+      8.167,
+      7.78
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 18.1
+  },
+  "ArcheAncienne": {
+    "triangles": 3348,
+    "within_6000": true,
+    "size_studs": [
+      25.6,
+      4.4,
+      26.9
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 12.2
+  },
+  "TotemEnergie": {
+    "triangles": 3494,
+    "within_6000": true,
+    "size_studs": [
+      6.468,
+      6.468,
+      17.58
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 37.5
+  },
+  "DalleRunique": {
+    "triangles": 1296,
+    "within_6000": true,
+    "size_studs": [
+      8.063,
+      5.957,
+      1.415
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 25.0
+  },
+  "EscalierPierre": {
+    "triangles": 1512,
+    "within_6000": true,
+    "size_studs": [
+      19.2,
+      5.836,
+      2.3
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 33.2
+  },
+  "Caisse": {
+    "triangles": 2356,
+    "within_6000": true,
+    "size_studs": [
+      4.15,
+      4.25,
+      4.1
+    ],
+    "uv_overlap_pct": 3.88,
+    "seconds": 14.6
+  },
+  "Tonneau": {
+    "triangles": 4676,
+    "within_6000": true,
+    "size_studs": [
+      4.12,
+      4.02,
+      4.6
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 14.7
+  },
+  "Pancarte": {
+    "triangles": 1022,
+    "within_6000": true,
+    "size_studs": [
+      9.772,
+      2.783,
+      7.5
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 9.7
+  },
+  "Palissade": {
+    "triangles": 3084,
+    "within_6000": true,
+    "size_studs": [
+      12.0,
+      2.034,
+      7.526
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 13.2
+  },
+  "PontBois": {
+    "triangles": 4212,
+    "within_6000": true,
+    "size_studs": [
+      19.968,
+      9.155,
+      5.342
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 10.7
+  }
+}

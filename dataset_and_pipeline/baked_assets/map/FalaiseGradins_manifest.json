@@ -1,0 +1,56 @@
+{
+  "asset": "FalaiseGradins",
+  "triangles": 5616,
+  "vertices": 2912,
+  "size_studs": [
+    36.018,
+    15.251,
+    29.873
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 12.1,
+  "source_materials": [
+    "M_Calcaire",
+    "M_FeuilleA",
+    "M_FeuilleB"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.1441,
+    "max_ray": 0.3602,
+    "ao_distance": 2.5,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "FalaiseGradins_Color.png",
+    "Roughness": "FalaiseGradins_Roughness.png",
+    "Metalness": "FalaiseGradins_Metalness.png",
+    "Normal": "FalaiseGradins_Normal.png",
+    "AO": "FalaiseGradins_AO.png"
+  },
+  "exports": [
+    "FalaiseGradins.fbx",
+    "FalaiseGradins.glb"
+  ],
+  "roblox": {
+    "MeshPart": "FalaiseGradins (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "FalaiseGradins_Color.png",
+      "NormalMap": "FalaiseGradins_Normal.png",
+      "RoughnessMap": "FalaiseGradins_Roughness.png",
+      "MetalnessMap": "FalaiseGradins_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 15.1
+}
