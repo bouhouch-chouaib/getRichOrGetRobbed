@@ -421,7 +421,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Les familiers sont refaits un par un dans Blender par code, en briques LEGO sans tenons, très détaillés et animés par
   pièces (recette : `dataset_and_pipeline/PIPELINE.md`, « Tous les familiers en briques LEGO, par lots »). Faits : les 15
   Animaux (`Lot01_Animaux`), les 15 Fantastiques (`Lot02_Fantastiques`) et le Cerbère Infernal ; ils sont dans
-  `ReplicatedStorage.ArtModels.<Id>` (fichier du jeu). Restent : Plantes, Hybrides, Absurdes, familiers des Mondes.
+  `ReplicatedStorage.ArtModels.<Id>` (fichier du jeu). Les 15 Plantes sont faites (`Lot03_Plantes`, à importer).
+  Restent : Hybrides, Absurdes, familiers des Mondes.
+- Plus de cercle lumineux au sol sous les familiers Épique+ ni d'anneau sous les évolués (Chouaib, 25 oct.).
 - **Chaque familier refait a sa propre démarche** (demande de Chouaib) : une fiche dans `shared/PetGaits`, lue par
   - `PetWander.styleOf` : vitesse, pauses, longueur des trajets (`roam`, pour les casaniers), accélération (`Smooth`,
     `Dash` sprint, `Pounce` approche lente puis bond, `Pulse` par poussées) ; le serveur et les clients calculent la même
@@ -431,7 +433,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
     roue (Ouroboros : roule en tours entiers, s'arrête la tête en haut) ;
   - `PetMotion` : cadence des pattes calée sur les pas, tête (`Bob` pigeon, `Peck`, `Swivel` hibou, `Howl` loup, `Roar`
     avec la gueule, `Sniff`, `Sway` basilic, `Nod` capybara, `Proud`), queue (`Wag`, `Flick`, `Swish`, `Fan`, `Stiff`,
-    `Flow`), ailes (`Glide`, `Buzz`, `Fold`, `Slow`, `Flit`, `Flutter`), corps (`Heavy`, `Wobble`, `Pulse`, `Squish`),
+    `Flow`), ailes (`Glide`, `Buzz`, `Fold`, `Slow`, `Flit`, `Flutter`), corps (`Heavy`, `Wobble`, `Pulse`, `Squish`,
+    `Shiver`), anneaux et galaxies qui tournent (genre de pièce `Orbit`, phase = vitesse),
     flammes (`flicker`), pattes tendues pendant les bonds (vitesse verticale).
 - Les familiers sans fiche gardent l'ancien style de leur silhouette. **Tout nouveau familier refait reçoit sa fiche.**
 

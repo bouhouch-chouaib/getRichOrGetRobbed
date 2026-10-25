@@ -1,0 +1,115 @@
+{
+  "pet": "GraineEtoile",
+  "model_height_blender": 1.0771,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.6,
+      "triangles": 700,
+      "center": [
+        0.0,
+        -0.034,
+        0.70221
+      ],
+      "size": [
+        0.5,
+        0.488,
+        0.92442
+      ],
+      "pivot": null
+    },
+    "Ring0": {
+      "kind": "Orbit",
+      "phase": 0.9,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.6,
+      "triangles": 300,
+      "center": [
+        0.01383,
+        -0.02275,
+        0.6263
+      ],
+      "size": [
+        0.97841,
+        0.55023,
+        0.93069
+      ],
+      "pivot": [
+        [
+          0.951057,
+          -0.11576,
+          0.286516,
+          0.0
+        ],
+        [
+          0.309017,
+          0.356272,
+          -0.881804,
+          0.0
+        ],
+        [
+          0.0,
+          0.927184,
+          0.374607,
+          0.62
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Ring1": {
+      "kind": "Orbit",
+      "phase": -0.6,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.6,
+      "triangles": 360,
+      "center": [
+        0.01759,
+        0.02137,
+        0.62559
+      ],
+      "size": [
+        1.11558,
+        0.8269,
+        1.07646
+      ],
+      "pivot": [
+        [
+          0.899667,
+          0.050884,
+          0.433602,
+          0.0
+        ],
+        [
+          -0.400557,
+          0.491245,
+          0.773454,
+          0.0
+        ],
+        [
+          -0.173648,
+          -0.869534,
+          0.462339,
+          0.62
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.055708
+}

@@ -1,0 +1,66 @@
+{
+  "asset": "PousseHaricot_Corps",
+  "triangles": 1292,
+  "vertices": 772,
+  "size_studs": [
+    0.934,
+    0.84,
+    1.247
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 61.1,
+  "source_materials": [
+    "M_PousseHaricot_high_blanc_oeil",
+    "M_PousseHaricot_high_bouche#2A1418",
+    "M_PousseHaricot_high_caillou",
+    "M_PousseHaricot_high_feuille",
+    "M_PousseHaricot_high_haricot",
+    "M_PousseHaricot_high_herbe",
+    "M_PousseHaricot_high_iris#2A7A1E",
+    "M_PousseHaricot_high_joues",
+    "M_PousseHaricot_high_motte",
+    "M_PousseHaricot_high_nervure",
+    "M_PousseHaricot_high_peau_haricot",
+    "M_PousseHaricot_high_pupille",
+    "M_PousseHaricot_high_reflet",
+    "M_PousseHaricot_high_terre",
+    "M_PousseHaricot_high_terre_fonce",
+    "M_PousseHaricot_high_tige"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0187,
+    "max_ray": 0.0468,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "PousseHaricot_Corps_Color.png",
+    "Roughness": "PousseHaricot_Corps_Roughness.png",
+    "Metalness": "PousseHaricot_Corps_Metalness.png",
+    "Normal": "PousseHaricot_Corps_Normal.png",
+    "AO": "PousseHaricot_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "PousseHaricot_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "PousseHaricot_Corps_Color.png",
+      "NormalMap": "PousseHaricot_Corps_Normal.png",
+      "RoughnessMap": "PousseHaricot_Corps_Roughness.png",
+      "MetalnessMap": "PousseHaricot_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 24.6
+}

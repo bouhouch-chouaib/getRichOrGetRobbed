@@ -1,0 +1,71 @@
+{
+  "pet": "CitrouilleSculptee",
+  "model_height_blender": 0.8171,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.8,
+      "triangles": 816,
+      "center": [
+        0.0,
+        -0.023,
+        0.40853
+      ],
+      "size": [
+        0.78557,
+        0.786,
+        0.81707
+      ],
+      "pivot": null
+    },
+    "Vine": {
+      "kind": "Leaf",
+      "phase": 0.4,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.8,
+      "triangles": 132,
+      "center": [
+        0.13237,
+        0.0838,
+        0.71242
+      ],
+      "size": [
+        0.27614,
+        0.4376,
+        0.2064
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.02
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.02
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.63
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.073433
+}

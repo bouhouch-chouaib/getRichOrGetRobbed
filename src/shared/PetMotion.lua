@@ -432,6 +432,9 @@ local function jointPose(
 		return A(wave * 0.025, 0, math.sin(t * 1.45) * 0.055)
 	elseif kind == "SolarWing" then
 		return A(0, j.phase * math.sin(t * 0.9) * 0.13, j.phase * wave * 0.025)
+	elseif kind == "Orbit" then
+		-- anneau, galaxie : tourne autour de l'axe de son pivot, phase = vitesse (rad / s, négative = autre sens)
+		return A(0, t * j.phase, 0)
 	elseif kind == "Drum" then
 		return A(0, 0, t * 1.6)
 	elseif kind == "Rotor" then
@@ -480,6 +483,9 @@ function Motion.Pose(
 		body = CF(0, (math.sin(t * 1.6) + 1) * 0.05, 0) * A(math.sin(t * 1.6) * 0.03, 0, 0)
 	elseif style == "Squish" then
 		body = CF(0, math.abs(math.sin(t * 3)) * 0.04, 0) * A(math.sin(t * 2.7) * 0.05, 0, math.sin(t * 3.3) * 0.05)
+	elseif style == "Shiver" then
+		-- grelotte de peur
+		body = CF(math.sin(t * 41) * 0.012, 0, 0) * A(math.sin(t * 37) * 0.025, 0, math.sin(t * 43) * 0.035)
 	end
 	if style and style ~= "Heavy" then
 		-- démarche propre : son corps à lui, pas celui de sa famille

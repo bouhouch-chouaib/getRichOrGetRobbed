@@ -1,0 +1,71 @@
+{
+  "pet": "PousseHaricot",
+  "model_height_blender": 1.2472,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 496,
+      "center": [
+        0.01677,
+        0.0,
+        0.17
+      ],
+      "size": [
+        0.93353,
+        0.84,
+        0.34
+      ],
+      "pivot": null
+    },
+    "Head": {
+      "kind": "Head",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 796,
+      "center": [
+        0.06,
+        -0.09292,
+        0.7659
+      ],
+      "size": [
+        0.68377,
+        0.50015,
+        0.96268
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.02
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.048106
+}

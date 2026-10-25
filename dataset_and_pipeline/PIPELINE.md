@@ -210,7 +210,8 @@ saturées pour enfants, **jamais d'aura**.
 7. **Démarche** : ajouter la fiche du familier dans `src/shared/PetGaits.lua` (vitesse, pauses, façon d'avancer, tête,
    queue, ailes, corps) ; sinon il garde l'ancien style de sa silhouette.
 
-Lots : `Lot01_Animaux` (15, exporté), `Lot02_Fantastiques` (15). Restent : Plantes, Hybrides, Absurdes, Mondes.
+Lots : `Lot01_Animaux` (15), `Lot02_Fantastiques` (15), `Lot03_Plantes` (15 ; aides `leaf`, `pot`, `petals`).
+Restent : Hybrides, Absurdes, Mondes.
 
 ## Pistes pour la suite
 

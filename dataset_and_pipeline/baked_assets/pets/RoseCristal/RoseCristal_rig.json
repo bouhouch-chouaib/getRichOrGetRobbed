@@ -1,0 +1,159 @@
+{
+  "pet": "RoseCristal",
+  "model_height_blender": 1.2077,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 0.8,
+      "triangles": 252,
+      "center": [
+        -0.01417,
+        0.01064,
+        0.40481
+      ],
+      "size": [
+        0.59939,
+        0.45808,
+        0.82779
+      ],
+      "pivot": null
+    },
+    "LeafL": {
+      "kind": "Leaf",
+      "phase": 0.8,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 0.8,
+      "triangles": 84,
+      "center": [
+        0.1519,
+        -0.01608,
+        0.49528
+      ],
+      "size": [
+        0.27407,
+        0.16403,
+        0.10177
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.03
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.48
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LeafR": {
+      "kind": "Leaf",
+      "phase": 2.2,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 0.8,
+      "triangles": 84,
+      "center": [
+        -0.1519,
+        -0.01608,
+        0.65528
+      ],
+      "size": [
+        0.27407,
+        0.16403,
+        0.10177
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.03
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.64
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Head": {
+      "kind": "Head",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 0.8,
+      "triangles": 692,
+      "center": [
+        0.0,
+        -0.0455,
+        0.96764
+      ],
+      "size": [
+        0.56283,
+        0.47356,
+        0.46189
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.02
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.049682
+}

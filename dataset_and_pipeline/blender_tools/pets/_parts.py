@@ -419,3 +419,61 @@ def tentacle(kit, part, base, direction, length, width, mat, cups=None, phase=0.
             kit.add(c, cups, part, bevel=0.0)
         p = q
     kit.part(part, "Tentacle", pivot=tuple(Vector(base)), phase=phase)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Plantes (25 oct.)
+# ---------------------------------------------------------------------------------------------------------------------
+
+def leaf(kit, part, base, direction, length, width, mat, vein=None, normal=(0, 0, 1), droop=0.0, thick=0.04,
+         segments=3):
+    """Feuille en plaques LEGO : plaques qui s'élargissent puis s'affinent le long de `direction`, pointe en coin,
+    nervure claire au milieu. normal = côté du dessus de la feuille ; droop = retombe vers le bas au bout."""
+    d0 = Vector(direction).normalized()
+    up = Vector(normal).normalized()
+    p = Vector(base)
+    step = length / (segments + 1)
+    profile = [0.55 + 0.45 * math.sin(math.pi * (k + 0.5) / (segments + 0.6)) for k in range(segments)]
+    for k in range(segments):
+        dk = (d0 - up * droop * (k + 1) / segments).normalized()
+        q = p + dk * step
+        plate = kit.brick((width * profile[k], thick, step * 1.15), label="Feuille")
+        G.transform(plate, G.frame_matrix((p + q) / 2, q - p, roll_hint=tuple(-up)))
+        kit.add(plate, mat, part, bevel=min(0.012, thick * 0.3))
+        if vein:
+            line = kit.box((width * 0.1, thick * 0.5, step * 1.1), label="Nervure")
+            G.transform(line, G.frame_matrix((p + q) / 2 + up * thick * 0.6, q - p, roll_hint=tuple(-up)))
+            kit.add(line, vein, part, bevel=0.0)
+        p = q
+    dk = (d0 - up * droop * 1.2).normalized()
+    tip = kit.wedge((width * 0.5, thick, step * 1.1), tip=0.08, label="Pointe")
+    G.transform(tip, G.frame_matrix(p + dk * step * 0.5, dk, roll_hint=tuple(-up)))
+    kit.add(tip, mat, part, bevel=0.0)
+
+
+def pot(kit, part, z0, w, h, mat, rim=None, band=None, soil=None, x=0.0, y=0.0):
+    """Pot de fleurs en briques : pied plus étroit, corps, bande, rebord plus large, terre dessus. Renvoie le haut."""
+    kit.add(kit.brick((w * 0.78, w * 0.78, h * 0.18), center=(x, y, z0 + h * 0.09)), mat, part, bevel=0.02)
+    kit.add(kit.brick((w * 0.9, w * 0.9, h * 0.62), center=(x, y, z0 + h * 0.49)), mat, part, bevel=0.03)
+    if band:
+        kit.add(kit.brick((w * 0.93, w * 0.93, h * 0.1), center=(x, y, z0 + h * 0.5)), band, part, bevel=0.012)
+    kit.add(kit.brick((w * 1.04, w * 1.04, h * 0.22), center=(x, y, z0 + h * 0.89)), rim or mat, part, bevel=0.025)
+    if soil:
+        kit.add(kit.brick((w * 0.86, w * 0.86, 0.04), center=(x, y, z0 + h * 0.99)), soil, part, bevel=0.01)
+    return z0 + h
+
+
+def petals(kit, part, center, n, length, width, mats, facing=(0, -1, 0), tilt=0.0, start=0.0, thick=0.04):
+    """Couronne de pétales autour de `center`, dans le plan perpendiculaire à `facing` (la fleur regarde vers
+    `facing`) ; tilt > 0 relève les pétales vers l'avant (coupe), mats alternés."""
+    f = Vector(facing).normalized()
+    a_axis = Vector((0, 0, 1)) if abs(f.z) < 0.9 else Vector((1, 0, 0))
+    u = a_axis.cross(f).normalized()
+    v = f.cross(u).normalized()
+    c = Vector(center)
+    for k in range(n):
+        a = start + 2 * math.pi * k / n
+        radial = u * math.cos(a) + v * math.sin(a)
+        d = (radial + f * tilt).normalized()
+        leaf(kit, part, tuple(c + radial * length * 0.08), tuple(d), length, width, mats[k % len(mats)],
+             normal=tuple(f), thick=thick, segments=2)

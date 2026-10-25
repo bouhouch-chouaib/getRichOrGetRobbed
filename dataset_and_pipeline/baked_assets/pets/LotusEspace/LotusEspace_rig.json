@@ -1,0 +1,115 @@
+{
+  "pet": "LotusEspace",
+  "model_height_blender": 0.6693,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.0,
+      "triangles": 540,
+      "center": [
+        0.0,
+        -0.005,
+        0.205
+      ],
+      "size": [
+        0.96,
+        1.09,
+        0.41
+      ],
+      "pivot": null
+    },
+    "Petals": {
+      "kind": "Blossom",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.0,
+      "triangles": 504,
+      "center": [
+        0.0,
+        0.0,
+        0.3196
+      ],
+      "size": [
+        0.83477,
+        0.83477,
+        0.36437
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.16
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Galaxy": {
+      "kind": "Orbit",
+      "phase": 0.8,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.0,
+      "triangles": 212,
+      "center": [
+        0.02375,
+        -0.01475,
+        0.6
+      ],
+      "size": [
+        0.6125,
+        0.33549,
+        0.13856
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.089648
+}

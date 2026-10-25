@@ -1,0 +1,71 @@
+{
+  "pet": "ChampignonVeneneux",
+  "model_height_blender": 1.219,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 712,
+      "center": [
+        -0.0194,
+        -0.01888,
+        0.32175
+      ],
+      "size": [
+        0.66119,
+        0.54225,
+        0.6565
+      ],
+      "pivot": null
+    },
+    "Cap": {
+      "kind": "Canopy",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 376,
+      "center": [
+        0.0,
+        0.0,
+        0.94625
+      ],
+      "size": [
+        0.9,
+        0.88,
+        0.5325
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.7
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.049221
+}

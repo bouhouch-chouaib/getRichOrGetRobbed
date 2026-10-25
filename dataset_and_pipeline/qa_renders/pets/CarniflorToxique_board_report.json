@@ -1,0 +1,105 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\CarniflorToxique_board.png",
+  "layout": {
+    "rows": [
+      "CarniflorToxique cuit, 7 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "CarniflorToxique cuit, 7 pièces (repos)",
+      "kind": "baked",
+      "triangles": 1376,
+      "views": {
+        "face": {
+          "coverage": 0.153,
+          "lum_mean": 0.495,
+          "lum_std": 0.249,
+          "detail": 0.0607,
+          "saturation": 0.455,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.177,
+          "lum_mean": 0.518,
+          "lum_std": 0.228,
+          "detail": 0.0731,
+          "saturation": 0.464,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.148,
+          "lum_mean": 0.487,
+          "lum_std": 0.226,
+          "detail": 0.055,
+          "saturation": 0.445,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.607,
+          "lum_mean": 0.58,
+          "lum_std": 0.218,
+          "detail": 0.0447,
+          "saturation": 0.531,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 1376,
+      "views": {
+        "face": {
+          "coverage": 0.148,
+          "lum_mean": 0.549,
+          "lum_std": 0.261,
+          "detail": 0.067,
+          "saturation": 0.48,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.152,
+          "lum_mean": 0.542,
+          "lum_std": 0.242,
+          "detail": 0.0774,
+          "saturation": 0.484,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.147,
+          "lum_mean": 0.524,
+          "lum_std": 0.251,
+          "detail": 0.0639,
+          "saturation": 0.454,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.511,
+          "lum_mean": 0.563,
+          "lum_std": 0.209,
+          "detail": 0.0444,
+          "saturation": 0.542,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 37.2
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

@@ -1,0 +1,121 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\FougereFibonacci_board.png",
+  "layout": {
+    "rows": [
+      "FougereFibonacci cuit, 6 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "FougereFibonacci cuit, 6 pièces (repos)",
+      "kind": "baked",
+      "triangles": 3992,
+      "views": {
+        "face": {
+          "coverage": 0.085,
+          "lum_mean": 0.91,
+          "lum_std": 0.171,
+          "detail": 0.0431,
+          "saturation": 0.055,
+          "flags": [
+            "surexposé"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.101,
+          "lum_mean": 0.928,
+          "lum_std": 0.153,
+          "detail": 0.0441,
+          "saturation": 0.052,
+          "flags": [
+            "surexposé"
+          ]
+        },
+        "profil": {
+          "coverage": 0.096,
+          "lum_mean": 0.955,
+          "lum_std": 0.11,
+          "detail": 0.0324,
+          "saturation": 0.044,
+          "flags": [
+            "surexposé"
+          ]
+        },
+        "detail": {
+          "coverage": 0.366,
+          "lum_mean": 0.954,
+          "lum_std": 0.126,
+          "detail": 0.0206,
+          "saturation": 0.035,
+          "flags": [
+            "surexposé"
+          ]
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 3992,
+      "views": {
+        "face": {
+          "coverage": 0.071,
+          "lum_mean": 0.906,
+          "lum_std": 0.175,
+          "detail": 0.045,
+          "saturation": 0.058,
+          "flags": [
+            "surexposé"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.088,
+          "lum_mean": 0.928,
+          "lum_std": 0.154,
+          "detail": 0.0464,
+          "saturation": 0.054,
+          "flags": [
+            "surexposé"
+          ]
+        },
+        "profil": {
+          "coverage": 0.096,
+          "lum_mean": 0.953,
+          "lum_std": 0.108,
+          "detail": 0.0333,
+          "saturation": 0.047,
+          "flags": [
+            "surexposé"
+          ]
+        },
+        "detail": {
+          "coverage": 0.348,
+          "lum_mean": 0.949,
+          "lum_std": 0.139,
+          "detail": 0.0201,
+          "saturation": 0.038,
+          "flags": [
+            "surexposé"
+          ]
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 39.8
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

@@ -1,0 +1,71 @@
+{
+  "pet": "ArbreMondeMiniature",
+  "model_height_blender": 1.4907,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.2,
+      "triangles": 932,
+      "center": [
+        -0.01364,
+        -0.01039,
+        0.46718
+      ],
+      "size": [
+        1.01313,
+        1.01137,
+        0.95579
+      ],
+      "pivot": null
+    },
+    "Canopy": {
+      "kind": "Canopy",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.2,
+      "triangles": 572,
+      "center": [
+        0.0,
+        0.01,
+        1.12
+      ],
+      "size": [
+        1.42,
+        1.14,
+        0.72
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.040249
+}

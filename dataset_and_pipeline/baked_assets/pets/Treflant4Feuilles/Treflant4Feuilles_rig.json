@@ -1,0 +1,203 @@
+{
+  "pet": "Treflant4Feuilles",
+  "model_height_blender": 0.9051,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Leaf0": {
+      "kind": "Leaf",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 244,
+      "center": [
+        0.2086,
+        -0.018,
+        0.8286
+      ],
+      "size": [
+        0.4879,
+        0.136,
+        0.4879
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.62
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Leaf1": {
+      "kind": "Leaf",
+      "phase": 1.6,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 244,
+      "center": [
+        -0.2086,
+        -0.018,
+        0.8286
+      ],
+      "size": [
+        0.4879,
+        0.136,
+        0.4879
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.62
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Leaf2": {
+      "kind": "Leaf",
+      "phase": 3.2,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 244,
+      "center": [
+        -0.2086,
+        -0.018,
+        0.4114
+      ],
+      "size": [
+        0.4879,
+        0.136,
+        0.4879
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.62
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Leaf3": {
+      "kind": "Leaf",
+      "phase": 4.8,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 244,
+      "center": [
+        0.2086,
+        -0.018,
+        0.4114
+      ],
+      "size": [
+        0.4879,
+        0.136,
+        0.4879
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.62
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 380,
+      "center": [
+        0.0,
+        0.03445,
+        0.62
+      ],
+      "size": [
+        0.3,
+        0.4149,
+        0.3
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.066291
+}

@@ -1,0 +1,68 @@
+{
+  "asset": "CactusRonchon_Corps",
+  "triangles": 1316,
+  "vertices": 812,
+  "size_studs": [
+    0.897,
+    0.582,
+    1.211
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 53.7,
+  "source_materials": [
+    "M_CactusRonchon_high_bande",
+    "M_CactusRonchon_high_blanc_oeil",
+    "M_CactusRonchon_high_bouche#2A1418",
+    "M_CactusRonchon_high_cactus",
+    "M_CactusRonchon_high_caillou",
+    "M_CactusRonchon_high_coeur",
+    "M_CactusRonchon_high_cotes",
+    "M_CactusRonchon_high_epines",
+    "M_CactusRonchon_high_fleur",
+    "M_CactusRonchon_high_fleur_claire",
+    "M_CactusRonchon_high_frise",
+    "M_CactusRonchon_high_iris#1A1A1A",
+    "M_CactusRonchon_high_pupille",
+    "M_CactusRonchon_high_rebord",
+    "M_CactusRonchon_high_reflet",
+    "M_CactusRonchon_high_sourcils",
+    "M_CactusRonchon_high_terre_cuite",
+    "M_CactusRonchon_high_terreau"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0182,
+    "max_ray": 0.0454,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "CactusRonchon_Corps_Color.png",
+    "Roughness": "CactusRonchon_Corps_Roughness.png",
+    "Metalness": "CactusRonchon_Corps_Metalness.png",
+    "Normal": "CactusRonchon_Corps_Normal.png",
+    "AO": "CactusRonchon_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "CactusRonchon_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "CactusRonchon_Corps_Color.png",
+      "NormalMap": "CactusRonchon_Corps_Normal.png",
+      "RoughnessMap": "CactusRonchon_Corps_Roughness.png",
+      "MetalnessMap": "CactusRonchon_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 22.5
+}

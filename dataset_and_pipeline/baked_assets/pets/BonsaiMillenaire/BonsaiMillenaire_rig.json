@@ -1,0 +1,115 @@
+{
+  "pet": "BonsaiMillenaire",
+  "model_height_blender": 1.205,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.6,
+      "triangles": 908,
+      "center": [
+        0.0,
+        0.0,
+        0.48438
+      ],
+      "size": [
+        0.9,
+        0.62,
+        0.96876
+      ],
+      "pivot": null
+    },
+    "Canopy": {
+      "kind": "Canopy",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.6,
+      "triangles": 660,
+      "center": [
+        -0.008,
+        0.018,
+        0.9975
+      ],
+      "size": [
+        1.264,
+        0.356,
+        0.415
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.9
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Spirit": {
+      "kind": "Companion",
+      "phase": 1.2,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 2.6,
+      "triangles": 104,
+      "center": [
+        0.30674,
+        -0.22475,
+        0.495
+      ],
+      "size": [
+        0.17348,
+        0.18451,
+        0.29
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.3
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.22
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.56
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.049793
+}

@@ -53,7 +53,9 @@ typography) ; tous les 8 passent depuis le 25 oct. au soir.
 style validé : briques sans tenons, cubes d'abord, très détaillé, couleurs saturées, **aucune aura**). Un fichier
 `blender_tools/pets/<Id>.py` par familier, recette dans `PIPELINE.md` (« Tous les familiers en briques LEGO, par lots »).
 Faits et branchés dans `ArtModels` : les 15 Animaux (`Lot01_Animaux.fbx`) et les 15 Fantastiques (`Lot02_Fantastiques.fbx`),
-lueurs envoyées (`<Id>_roblox.json`). Restent : Plantes, Hybrides, Absurdes, Mondes. **Chaque familier refait a sa propre
+lueurs envoyées (`<Id>_roblox.json`). Les 15 Plantes sont faites (`Lot03_Plantes.fbx`, lueurs envoyées, démarches
+écrites) : à importer puis brancher. Restent : Hybrides, Absurdes, Mondes. Le cercle lumineux au sol des familiers
+Épique+ (« RuneArc ») et l'anneau des évolués sont retirés (« bizarre et moche », 25 oct.). **Chaque familier refait a sa propre
 démarche** (`shared/PetGaits`, GDD « Familiers en briques LEGO et démarches propres ») : trajets, déplacement du corps entier
 et gestes ; tout nouveau familier refait reçoit sa fiche. Vérifié en jeu (solo, mesures sur 10 à 20 s) : bonds (Kitsune,
 grenouille, slime), bond final (chat, renard, panthère), hibou qui se pose et s'envole, Ouroboros qui roule en tours

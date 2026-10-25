@@ -39,7 +39,7 @@ export type Gait = {
 	stride: number, -- cadence des pattes
 	swing: number, -- amplitude des pattes
 	airSwing: number?, -- amplitude des pattes en vol (0,15 par défaut)
-	body: string, -- "Breath" | "Heavy" | "Wobble" | "Pulse" | "Squish"
+	body: string, -- "Breath" | "Heavy" | "Wobble" | "Pulse" | "Squish" | "Shiver"
 	head: string, -- "Look" | "Bob" | "Peck" | "Swivel" | "Howl" | "Roar" | "Sniff" | "Sway" | "Nod" | "Proud"
 	tail: string, -- "Sway" | "Wag" | "Flick" | "Swish" | "Fan" | "Stiff" | "Flow"
 	wing: string, -- "Flap" | "Glide" | "Buzz" | "Fold" | "Slow" | "Flit" | "Flutter"
@@ -169,6 +169,51 @@ PetGaits.ById = {
 	-- ouroboros : roule comme une roue d'or, tourne lentement sur lui-même à l'arrêt
 	OuroborosInfini = gait({ speed = 3, minWait = 2, maxWait = 5, ease = "Smooth", hover = 1, float = 0.4,
 		floatRate = 1.2, wheel = true, spin = 0.35 }),
+
+	-- Plantes ---------------------------------------------------------------------------------------------------
+	-- pousse de haricot : petits sauts avec son tas de terre, la pousse se balance et regarde partout
+	PousseHaricot = gait({ speed = 3, minWait = 1.5, maxWait = 5, ease = "Linear", roam = 8, hop = 0.5, hopLength = 1.2 }),
+	-- cactus ronchon : se dandine de mauvaise grâce dans son pot, souvent immobile
+	CactusRonchon = gait({ speed = 2.5, minWait = 3, maxWait = 8, ease = "Linear", roam = 8, step = 0.8, bob = 0.05,
+		roll = 0.16, turn = 3, stride = 1.2 }),
+	-- navet peureux : s'enfuit en courant sur ses petites racines, grelotte à l'arrêt
+	NavetPeureux = gait({ speed = 7, minWait = 0.5, maxWait = 3, ease = "Dash", roam = 14, step = 0.45, bob = 0.1,
+		roll = 0.05, turn = 12, stride = 2.8, swing = 1.4, body = "Shiver" }),
+	-- tournesol : se dandine joyeusement dans son pot, la fleur bien droite vers le soleil
+	TournesolJoyeux = gait({ speed = 3, minWait = 2, maxWait = 5, ease = "Smooth", roam = 10, step = 1, bob = 0.1,
+		roll = 0.1, head = "Proud" }),
+	-- amanite : rebondit comme un ressort
+	ChampignonVeneneux = gait({ speed = 3.5, minWait = 1, maxWait = 4, ease = "Linear", roam = 10, hop = 0.8,
+		hopLength = 1.4, body = "Squish" }),
+	-- citrouille : lourds petits bonds qui tremblotent
+	CitrouilleSculptee = gait({ speed = 3, minWait = 1.5, maxWait = 4.5, ease = "Linear", roam = 10, hop = 0.5,
+		hopLength = 1.6, body = "Squish" }),
+	-- bonsaï : glisse à peine, très lentement ; son esprit flotte autour
+	BonsaiMillenaire = gait({ speed = 1.2, minWait = 6, maxWait = 12, ease = "Smooth", roam = 6, step = 1.5, bob = 0.02,
+		roll = 0.03, turn = 1.5 }),
+	-- rose de cristal : glisse gracieusement et tourne lentement sur elle-même
+	RoseCristal = gait({ speed = 2.5, minWait = 2, maxWait = 6, ease = "Smooth", roam = 10, step = 1.2, roll = 0.06,
+		spin = 0.25, turn = 2, head = "Proud" }),
+	-- mandragore : court en hurlant, bras en l'air
+	MandragoreHurlante = gait({ speed = 7.5, minWait = 0.5, maxWait = 2.5, ease = "Dash", step = 0.6, bob = 0.14,
+		roll = 0.08, turn = 10, stride = 2.4, swing = 1.4, head = "Roar" }),
+	-- tréflant : roule comme une roue en semant ses pièces
+	Treflant4Feuilles = gait({ speed = 4, minWait = 1, maxWait = 4, ease = "Smooth", wheel = true, spin = 0.3 }),
+	-- lotus de l'espace : flotte et tourne lentement, sa galaxie tourne au-dessus
+	LotusEspace = gait({ speed = 2.5, minWait = 1, maxWait = 4, ease = "Smooth", hover = 2.5, float = 0.5,
+		floatRate = 0.9, spin = 0.25, bank = 0.2, turn = 2 }),
+	-- arbre-monde : avance très lentement par poussées de racines, lourd
+	ArbreMondeMiniature = gait({ speed = 1.2, minWait = 8, maxWait = 15, ease = "Pulse", roam = 6, step = 2.4,
+		bob = 0.04, roll = 0.04, turn = 1.5, body = "Heavy" }),
+	-- carniflore : s'approche et se jette sur sa proie, la mâchoire claque
+	CarniflorToxique = gait({ speed = 4, minWait = 1.5, maxWait = 5, ease = "Pounce", roam = 10, pounce = 0.6, step = 1,
+		roll = 0.08, turn = 6, head = "Roar" }),
+	-- graine d'étoile : flotte, dérive et tourne, ses anneaux tournent en sens inverse
+	GraineEtoile = gait({ speed = 3.5, minWait = 1, maxWait = 4, ease = "Smooth", hover = 2, float = 0.6, floatRate = 1.4,
+		drift = 0.3, spin = 0.5 }),
+	-- fougère de Fibonacci : flotte lentement, ses frondes ondulent
+	FougereFibonacci = gait({ speed = 2, minWait = 2, maxWait = 6, ease = "Smooth", hover = 2.5, float = 0.5,
+		floatRate = 0.7, spin = 0.15, bank = 0.15, turn = 2, flicker = 0.6 }),
 } :: { [string]: Gait }
 
 -- Fiche du familier (formes évoluées et mutations comprises : « <Id>__E2 », « <Id>__MGold »...), ou nil.

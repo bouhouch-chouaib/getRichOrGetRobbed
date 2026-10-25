@@ -1,0 +1,62 @@
+{
+  "asset": "MandragoreHurlante_Corps",
+  "triangles": 1236,
+  "vertices": 784,
+  "size_studs": [
+    0.843,
+    0.425,
+    1.375
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 43.8,
+  "source_materials": [
+    "M_MandragoreHurlante_high_arceau",
+    "M_MandragoreHurlante_high_cache_oreilles",
+    "M_MandragoreHurlante_high_cache_oreilles_fonce",
+    "M_MandragoreHurlante_high_dent",
+    "M_MandragoreHurlante_high_feuille",
+    "M_MandragoreHurlante_high_feuille_claire",
+    "M_MandragoreHurlante_high_gorge",
+    "M_MandragoreHurlante_high_langue",
+    "M_MandragoreHurlante_high_nervure",
+    "M_MandragoreHurlante_high_racine",
+    "M_MandragoreHurlante_high_racine_claire",
+    "M_MandragoreHurlante_high_rides"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0206,
+    "max_ray": 0.0515,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "MandragoreHurlante_Corps_Color.png",
+    "Roughness": "MandragoreHurlante_Corps_Roughness.png",
+    "Metalness": "MandragoreHurlante_Corps_Metalness.png",
+    "Normal": "MandragoreHurlante_Corps_Normal.png",
+    "AO": "MandragoreHurlante_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "MandragoreHurlante_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "MandragoreHurlante_Corps_Color.png",
+      "NormalMap": "MandragoreHurlante_Corps_Normal.png",
+      "RoughnessMap": "MandragoreHurlante_Corps_Roughness.png",
+      "MetalnessMap": "MandragoreHurlante_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 29.0
+}
