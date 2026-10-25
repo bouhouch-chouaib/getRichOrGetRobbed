@@ -110,6 +110,7 @@ for m in (S, G, B, Q): importlib.reload(m)
 - Vérifié (Blender 5.0, en arrière-plan) : toute la chaîne sans erreur ; piédestal 4 960 triangles, œuf 6 440 ; UV sans
   chevauchement (0 %) ; cartes Color / Roughness / Metalness / Normal / Emissive / AO + FBX + GLB ; rendu cuit fidèle
   au procédural (planche `preview.png`) ; les 4 familles de matériaux (`materials.png`) ; cuisson sans high.
+- **Rendu validé par Chouaib le 25 oct.** (`qa_renders/hero.png`) : c'est le niveau de qualité minimum pour la phase 2.
 - Pas vérifié : import dans Roblox Studio, rendu des cartes dans Roblox (éclairage différent), envoi des PNG par le MCP
   Roblox, export GLB relu par un autre outil.
 

@@ -30,7 +30,8 @@ Après chaque `render_qa_grid` : **ouvrir `qa_renders/preview.png` avec l'outil 
 `dataset_and_pipeline/game_design_matrix.json`. Exemples complets : `build_stylized_pedestal()`,
 `build_mythic_gem_egg()`, `blender_tools/run_poc.py`. Règles clés : un seul Principled « BAKE_BSDF » par matériau,
 lueur = couleur de la surface (seule l'intensité varie), tenons par la Normal map (pas de TextureID), pas de Néon.
-Vérifié dans Blender ; **import Roblox pas encore testé**.
+Vérifié dans Blender, rendu validé par Chouaib (`qa_renders/hero.png` = niveau minimum attendu) ; **import Roblox pas
+encore testé**.
 
 ## L'utilisateur et la façon de travailler
 
