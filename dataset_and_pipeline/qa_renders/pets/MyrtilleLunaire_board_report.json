@@ -1,0 +1,105 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\MyrtilleLunaire_board.png",
+  "layout": {
+    "rows": [
+      "MyrtilleLunaire cuit, 2 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "MyrtilleLunaire cuit, 2 pièces (repos)",
+      "kind": "baked",
+      "triangles": 1416,
+      "views": {
+        "face": {
+          "coverage": 0.212,
+          "lum_mean": 0.268,
+          "lum_std": 0.176,
+          "detail": 0.0402,
+          "saturation": 0.393,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.227,
+          "lum_mean": 0.29,
+          "lum_std": 0.182,
+          "detail": 0.0579,
+          "saturation": 0.391,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.205,
+          "lum_mean": 0.274,
+          "lum_std": 0.14,
+          "detail": 0.0334,
+          "saturation": 0.463,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.57,
+          "lum_mean": 0.321,
+          "lum_std": 0.212,
+          "detail": 0.034,
+          "saturation": 0.413,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 1416,
+      "views": {
+        "face": {
+          "coverage": 0.212,
+          "lum_mean": 0.268,
+          "lum_std": 0.176,
+          "detail": 0.0402,
+          "saturation": 0.393,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.227,
+          "lum_mean": 0.29,
+          "lum_std": 0.182,
+          "detail": 0.0579,
+          "saturation": 0.391,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.205,
+          "lum_mean": 0.274,
+          "lum_std": 0.14,
+          "detail": 0.0334,
+          "saturation": 0.463,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.57,
+          "lum_mean": 0.321,
+          "lum_std": 0.212,
+          "detail": 0.034,
+          "saturation": 0.413,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 25.3
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

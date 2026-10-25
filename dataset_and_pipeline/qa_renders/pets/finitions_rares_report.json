@@ -1,0 +1,191 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\finitions_rares.png",
+  "layout": {
+    "rows": [
+      "Commun : plastique",
+      "Rare : émail",
+      "Épique : chrome + émail",
+      "Légendaire : or martelé",
+      "Mythique : nacre + or",
+      "Divin : or blanc + cristal",
+      "Sigma : or massif + cristal"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Commun : plastique",
+      "kind": "procedural",
+      "triangles": 3032,
+      "views": {
+        "face": {
+          "coverage": 0.231,
+          "lum_mean": 0.514,
+          "lum_std": 0.161,
+          "detail": 0.0299,
+          "saturation": 0.562,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.231,
+          "lum_mean": 0.531,
+          "lum_std": 0.152,
+          "detail": 0.0371,
+          "saturation": 0.547,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Rare : émail",
+      "kind": "procedural",
+      "triangles": 3032,
+      "views": {
+        "face": {
+          "coverage": 0.231,
+          "lum_mean": 0.496,
+          "lum_std": 0.189,
+          "detail": 0.0346,
+          "saturation": 0.505,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.23,
+          "lum_mean": 0.535,
+          "lum_std": 0.203,
+          "detail": 0.042,
+          "saturation": 0.476,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Épique : chrome + émail",
+      "kind": "procedural",
+      "triangles": 3032,
+      "views": {
+        "face": {
+          "coverage": 0.231,
+          "lum_mean": 0.394,
+          "lum_std": 0.14,
+          "detail": 0.0422,
+          "saturation": 0.473,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.231,
+          "lum_mean": 0.43,
+          "lum_std": 0.183,
+          "detail": 0.068,
+          "saturation": 0.459,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Légendaire : or martelé",
+      "kind": "procedural",
+      "triangles": 3032,
+      "views": {
+        "face": {
+          "coverage": 0.24,
+          "lum_mean": 0.306,
+          "lum_std": 0.157,
+          "detail": 0.0442,
+          "saturation": 0.221,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.233,
+          "lum_mean": 0.356,
+          "lum_std": 0.191,
+          "detail": 0.0692,
+          "saturation": 0.256,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Mythique : nacre + or",
+      "kind": "procedural",
+      "triangles": 3032,
+      "views": {
+        "face": {
+          "coverage": 0.23,
+          "lum_mean": 0.657,
+          "lum_std": 0.188,
+          "detail": 0.0416,
+          "saturation": 0.166,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.23,
+          "lum_mean": 0.688,
+          "lum_std": 0.19,
+          "detail": 0.0601,
+          "saturation": 0.179,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Divin : or blanc + cristal",
+      "kind": "procedural",
+      "triangles": 3032,
+      "views": {
+        "face": {
+          "coverage": 0.23,
+          "lum_mean": 0.571,
+          "lum_std": 0.205,
+          "detail": 0.0567,
+          "saturation": 0.213,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.23,
+          "lum_mean": 0.629,
+          "lum_std": 0.225,
+          "detail": 0.083,
+          "saturation": 0.227,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Sigma : or massif + cristal",
+      "kind": "procedural",
+      "triangles": 3032,
+      "views": {
+        "face": {
+          "coverage": 0.231,
+          "lum_mean": 0.509,
+          "lum_std": 0.171,
+          "detail": 0.055,
+          "saturation": 0.577,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.231,
+          "lum_mean": 0.569,
+          "lum_std": 0.202,
+          "detail": 0.0813,
+          "saturation": 0.554,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 48,
+    "resolution": 300,
+    "view_transform": "Standard",
+    "seconds": 20.8
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

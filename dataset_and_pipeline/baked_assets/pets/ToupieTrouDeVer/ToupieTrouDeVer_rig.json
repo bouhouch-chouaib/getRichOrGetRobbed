@@ -1,0 +1,115 @@
+{
+  "pet": "ToupieTrouDeVer",
+  "model_height_blender": 1.0078,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 464,
+      "center": [
+        0.0,
+        0.0,
+        0.4625
+      ],
+      "size": [
+        0.8,
+        0.8,
+        0.925
+      ],
+      "pivot": null
+    },
+    "Hole": {
+      "kind": "Orbit",
+      "phase": -2.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 132,
+      "center": [
+        0.00349,
+        0.0,
+        0.7425
+      ],
+      "size": [
+        0.44697,
+        0.44,
+        0.055
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.74
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Debris": {
+      "kind": "Orbit",
+      "phase": 1.4,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 60,
+      "center": [
+        0.02909,
+        -0.00418,
+        0.63195
+      ],
+      "size": [
+        1.21958,
+        1.2688,
+        0.75167
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.059537
+}

@@ -55,7 +55,12 @@ style validé : briques sans tenons, cubes d'abord, très détaillé, couleurs s
 Faits et branchés dans `ArtModels` : les 15 Animaux (`Lot01_Animaux.fbx`) et les 15 Fantastiques (`Lot02_Fantastiques.fbx`),
 lueurs envoyées (`<Id>_roblox.json`). Les 15 Plantes sont faites (`Lot03_Plantes.fbx`, lueurs envoyées, démarches
 écrites), branchées et vérifiées en jeu. Les 15 Hybrides sont branchés et vérifiés en jeu (`Lot04_Hybrides.fbx` ; le masque de
-lueur du Requin-Torpille a été retiré par la modération Roblox, il n'a pas de lueur). Restent : Absurdes, Mondes.
+lueur du Requin-Torpille a été retiré par la modération Roblox, il n'a pas de lueur). Les 15 Absurdes sont faits
+(`Lot05_Absurdes.fbx`, démarches écrites) : à importer puis brancher. Reste : les 30 familiers des Mondes.
+**Rareté sans néon** (Chouaib, 25 oct. : « néon sur néon, à la fin on ne voit plus rien ») : à partir des Absurdes, la
+rareté se voit à la matière, sans aucune lueur : plastique (Commun) → émail (Rare) → chrome + cristal (Épique) → or martelé
+(Légendaire) → nacre + or (Mythique) → or blanc + cristal (Divin) → or massif (Sigma) ; `PetKit.gold / chrome / gem / pearl /
+enamel`, planche `qa_renders/pets/finitions_rares.png`. Jamais de visage directement sur du métal miroir.
 ⚠️ Plus aucun envoi d'image sur le compte de Chouaib sans son accord (avertissement de modération du 25 oct., faux positif).
 ⚠️ Deux sessions travaillent dans le même dossier : avant un Play de test, vérifier que `Shared.PetGaits` contient bien
 les derniers familiers (une synchro par .rbxm d'une autre session a déjà remis une ancienne version). Le cercle lumineux au sol des familiers

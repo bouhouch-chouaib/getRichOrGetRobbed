@@ -1,0 +1,71 @@
+{
+  "pet": "MyrtilleLunaire",
+  "model_height_blender": 1.01,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1380,
+      "center": [
+        0.0,
+        -0.01447,
+        0.39802
+      ],
+      "size": [
+        0.88813,
+        0.91706,
+        0.79604
+      ],
+      "pivot": null
+    },
+    "Flag": {
+      "kind": "Leaf",
+      "phase": 0.4,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 36,
+      "center": [
+        0.04625,
+        0.02,
+        0.86
+      ],
+      "size": [
+        0.1475,
+        0.015,
+        0.3
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.02
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.02
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.72
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.059406
+}

@@ -260,6 +260,53 @@ PetGaits.ById = {
 	-- canard-tractopelle : roule sur ses chenilles sans à-coups, tourne lentement comme un engin, creuse avec son bras
 	CanardTractopelle = gait({ speed = 2.5, minWait = 2, maxWait = 5, ease = "Smooth", step = 3, bob = 0.02, rock = 0.02,
 		turn = 1.5, head = "Proud" }),
+
+	-- Absurdes ----------------------------------------------------------------------------------------------------
+	-- astro-boulon : marche de robot un peu bancale, ça grince
+	AstroBoulon = gait({ speed = 3.2, minWait = 1, maxWait = 4, ease = "Linear", roam = 12, step = 0.7, bob = 0.08,
+		roll = 0.1, stride = 1.6, swing = 0.9 }),
+	-- autruche-fusée : sprints propulsés, penchée en avant, la tête qui va et vient
+	AutrucheFusee = gait({ speed = 10, minWait = 0.5, maxWait = 2.5, ease = "Dash", step = 1.6, bob = 0.18, lean = -0.12,
+		turn = 8, stride = 1.4, swing = 1.5, head = "Bob", wing = "Flutter", flicker = 3 }),
+	-- myrtille lunaire : grands bonds lents comme sur la Lune
+	MyrtilleLunaire = gait({ speed = 2.5, minWait = 2, maxWait = 5, ease = "Linear", hop = 1.2, hopLength = 3,
+		body = "Squish" }),
+	-- concierge cosmique : traîne les pieds en balayant, fatigué
+	ConciergeCosmique = gait({ speed = 2, minWait = 3, maxWait = 7, ease = "Smooth", roam = 6, step = 0.6, bob = 0.04,
+		roll = 0.06, stride = 1.2, swing = 1.3, head = "Nod" }),
+	-- mouton météore : trottine tranquillement, la laine en feu
+	MoutonMeteore = gait({ speed = 3.5, minWait = 1.5, maxWait = 4, ease = "Linear", step = 1.2, bob = 0.1, roll = 0.05,
+		stride = 1, swing = 1, tail = "Wag", flicker = 2 }),
+	-- télécommande perdue : flotte, dérive et tourne sur elle-même, cherche d'où elle vient
+	TelecommandePerdue = gait({ speed = 2.5, minWait = 1, maxWait = 4, ease = "Smooth", hover = 2, float = 0.5,
+		floatRate = 1.1, drift = 0.4, spin = 0.4 }),
+	-- satellite ronchon : gravite lentement en grésillant
+	SatelliteRonchon = gait({ speed = 2.5, minWait = 1, maxWait = 4, ease = "Smooth", hover = 3, float = 0.4,
+		floatRate = 0.7, spin = 0.3, bank = 0.3, turn = 2, body = "Wobble" }),
+	-- pingouin comète : glisse sur le ventre à toute vitesse en zigzag
+	PingouinComete = gait({ speed = 9, minWait = 1, maxWait = 3, ease = "Dash", sway = 0.3, swayLength = 6, bank = 0.4,
+		turn = 3, wing = "Flutter" }),
+	-- burrito nébuleuse : petits sauts mous
+	BurritoNebuleuse = gait({ speed = 2.5, minWait = 2, maxWait = 5, ease = "Linear", roam = 10, hop = 0.3,
+		hopLength = 0.8, body = "Squish" }),
+	-- trio d'astéroïdes : dérivent lentement ensemble, les petits tournent autour du gros
+	TrioAsteroides = gait({ speed = 2, minWait = 2, maxWait = 5, ease = "Smooth", hover = 2.5, float = 0.6,
+		floatRate = 0.8, turn = 1.5 }),
+	-- jumeaux éclipse : flottent en tournant lentement, chacun veut être devant
+	JumeauxEclipse = gait({ speed = 2.5, minWait = 1, maxWait = 4, ease = "Smooth", hover = 3, float = 0.5,
+		floatRate = 0.6, spin = 0.3 }),
+	-- toupie trou-de-ver : tourne à toute vitesse en titubant
+	ToupieTrouDeVer = gait({ speed = 4, minWait = 0.5, maxWait = 3, ease = "Smooth", hover = 1.5, float = 0.3, spin = 4,
+		drift = 0.3, body = "Wobble" }),
+	-- machine à laver quantique : sautille en essorage, tremble de partout
+	MachineQuantique = gait({ speed = 2.5, minWait = 1, maxWait = 4, ease = "Linear", roam = 10, hop = 0.35,
+		hopLength = 0.7, body = "Shiver" }),
+	-- dragon aurore : vol gracieux et lent, grands battements
+	DragonAurore = gait({ speed = 5, minWait = 1, maxWait = 3, ease = "Smooth", hover = 4, float = 0.8, floatRate = 0.7,
+		bank = 0.5, turn = 2.5, airSwing = 0.3, head = "Proud", wing = "Slow", tail = "Flow" }),
+	-- baleine galaxie : nage majestueuse dans le ciel, en grandes ondulations
+	BaleineGalaxie = gait({ speed = 3, minWait = 2, maxWait = 5, ease = "Smooth", hover = 4, float = 1, floatRate = 0.4,
+		sway = 0.6, swayLength = 10, bank = 0.25, turn = 1.2 }),
 } :: { [string]: Gait }
 
 -- Fiche du familier (formes évoluées et mutations comprises : « <Id>__E2 », « <Id>__MGold »...), ou nil.

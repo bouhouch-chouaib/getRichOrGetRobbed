@@ -1,0 +1,115 @@
+{
+  "pet": "MachineQuantique",
+  "model_height_blender": 1.1098,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 856,
+      "center": [
+        0.08029,
+        -0.0411,
+        0.49009
+      ],
+      "size": [
+        1.02059,
+        0.88381,
+        0.99983
+      ],
+      "pivot": null
+    },
+    "Galaxy": {
+      "kind": "Drum",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 204,
+      "center": [
+        0.0,
+        -0.445,
+        0.44258
+      ],
+      "size": [
+        0.40676,
+        0.03,
+        0.39391
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.445
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.44
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Bubbles": {
+      "kind": "Leaf",
+      "phase": 0.9,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 264,
+      "center": [
+        0.0275,
+        -0.0575,
+        0.6025
+      ],
+      "size": [
+        0.895,
+        0.765,
+        0.995
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.054062
+}

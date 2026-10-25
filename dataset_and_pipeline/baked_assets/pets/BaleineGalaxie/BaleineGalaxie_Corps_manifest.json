@@ -1,0 +1,67 @@
+{
+  "asset": "BaleineGalaxie_Corps",
+  "triangles": 1688,
+  "vertices": 1000,
+  "size_studs": [
+    1.469,
+    2.044,
+    1.12
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 56.8,
+  "source_materials": [
+    "M_BaleineGalaxie_high_blanc_oeil",
+    "M_BaleineGalaxie_high_bleu_nuit",
+    "M_BaleineGalaxie_high_bleu_profond",
+    "M_BaleineGalaxie_high_bras_rose",
+    "M_BaleineGalaxie_high_bras_violet",
+    "M_BaleineGalaxie_high_coeur",
+    "M_BaleineGalaxie_high_etoiles",
+    "M_BaleineGalaxie_high_fenetre",
+    "M_BaleineGalaxie_high_iris#3A5AE6",
+    "M_BaleineGalaxie_high_jet",
+    "M_BaleineGalaxie_high_or_massif",
+    "M_BaleineGalaxie_high_pupille",
+    "M_BaleineGalaxie_high_reflet",
+    "M_BaleineGalaxie_high_sillon_fonce",
+    "M_BaleineGalaxie_high_sillons"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0307,
+    "max_ray": 0.0767,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "BaleineGalaxie_Corps_Color.png",
+    "Roughness": "BaleineGalaxie_Corps_Roughness.png",
+    "Metalness": "BaleineGalaxie_Corps_Metalness.png",
+    "Normal": "BaleineGalaxie_Corps_Normal.png",
+    "AO": "BaleineGalaxie_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "BaleineGalaxie_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "BaleineGalaxie_Corps_Color.png",
+      "NormalMap": "BaleineGalaxie_Corps_Normal.png",
+      "RoughnessMap": "BaleineGalaxie_Corps_Roughness.png",
+      "MetalnessMap": "BaleineGalaxie_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 28.4
+}

@@ -1,0 +1,64 @@
+{
+  "asset": "DragonAurore_Corps",
+  "triangles": 2224,
+  "vertices": 1340,
+  "size_studs": [
+    1.959,
+    2.451,
+    1.497
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 35.3,
+  "source_materials": [
+    "M_DragonAurore_high_aurore_rose",
+    "M_DragonAurore_high_aurore_turquoise",
+    "M_DragonAurore_high_aurore_verte",
+    "M_DragonAurore_high_aurore_violette",
+    "M_DragonAurore_high_blanc_oeil",
+    "M_DragonAurore_high_bouche#2A1418",
+    "M_DragonAurore_high_iris#FFC21E",
+    "M_DragonAurore_high_narines",
+    "M_DragonAurore_high_or_blanc",
+    "M_DragonAurore_high_pupille",
+    "M_DragonAurore_high_reflet",
+    "M_DragonAurore_high_ventre"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0368,
+    "max_ray": 0.0919,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "DragonAurore_Corps_Color.png",
+    "Roughness": "DragonAurore_Corps_Roughness.png",
+    "Metalness": "DragonAurore_Corps_Metalness.png",
+    "Normal": "DragonAurore_Corps_Normal.png",
+    "AO": "DragonAurore_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "DragonAurore_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "DragonAurore_Corps_Color.png",
+      "NormalMap": "DragonAurore_Corps_Normal.png",
+      "RoughnessMap": "DragonAurore_Corps_Roughness.png",
+      "MetalnessMap": "DragonAurore_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 18.4
+}

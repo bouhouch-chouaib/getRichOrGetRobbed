@@ -213,7 +213,8 @@ saturées pour enfants, **jamais d'aura**.
    queue, ailes, corps) ; sinon il garde l'ancien style de sa silhouette.
 
 Lots : `Lot01_Animaux` (15), `Lot02_Fantastiques` (15), `Lot03_Plantes` (15 ; aides `leaf`, `pot`, `petals`),
-`Lot04_Hybrides` (15 ; aides `gear`, `speaker`, `treads`). Restent : Absurdes, Mondes.
+`Lot04_Hybrides` (15 ; aides `gear`, `speaker`, `treads`), `Lot05_Absurdes` (15, **sans aucune lueur** : finitions
+`gold`, `chrome`, `gem`, `pearl`, `enamel` du kit). Reste : Mondes.
 
 ## Pistes pour la suite
 

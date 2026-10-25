@@ -1,0 +1,159 @@
+{
+  "pet": "TelecommandePerdue",
+  "model_height_blender": 1.05,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 620,
+      "center": [
+        0.0,
+        -0.0415,
+        0.62
+      ],
+      "size": [
+        0.42,
+        0.283,
+        1.0
+      ],
+      "pivot": null
+    },
+    "Ir": {
+      "kind": "Toast",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 44,
+      "center": [
+        0.0,
+        -0.0,
+        1.14
+      ],
+      "size": [
+        0.14,
+        0.14,
+        0.06
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.12
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "ArmL": {
+      "kind": "Arm",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 68,
+      "center": [
+        0.26913,
+        -0.05041,
+        0.57071
+      ],
+      "size": [
+        0.16174,
+        0.13917,
+        0.30141
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.21
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.7
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "ArmR": {
+      "kind": "Arm",
+      "phase": 3.1416,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 68,
+      "center": [
+        -0.26913,
+        -0.05041,
+        0.57071
+      ],
+      "size": [
+        0.16174,
+        0.13917,
+        0.30141
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.21
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.7
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.057143
+}

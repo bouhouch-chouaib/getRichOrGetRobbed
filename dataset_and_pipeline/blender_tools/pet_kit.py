@@ -75,6 +75,46 @@ class PetKit:
                 bump_strength=0.08, emission=glow, metallic=metal)
         return self.materials[key]
 
+    # Finitions « rares » SANS lueur (Chouaib, 25 oct. : « néon sur néon, à la fin on ne voit plus rien ») : la rareté se
+    # voit à la matière (reflets, facettes, nacre), pas à la lumière. Aucune carte Emissive, donc rien à envoyer.
+    # Jamais un visage posé directement sur de l'or ou du chrome : de face, le miroir reflète le fond et devient noir ;
+    # poser une plaque d'émail sous les yeux.
+    def gold(self, key: str, tint: str = "#FFC21E", hammered: float = 0.35, rough: float = 0.22):
+        """Or (ou cuivre, bronze selon tint) martelé : cupules, arêtes polies plus claires, creux ternis."""
+        if key not in self.materials:
+            self.materials[key] = S.create_etched_metal_or_gold(
+                name=f"M_{self.name}_{key}", tint=tint, scratches=0.15, hammered=hammered, roughness=rough,
+                edge_polish=0.8, tarnish=0.45, hammer_scale=6.0, edge_radius=0.02)
+        return self.materials[key]
+
+    def chrome(self, key: str, tint: str = "#DDE4EE", rough: float = 0.1):
+        """Chrome / argent miroir, très lisse."""
+        if key not in self.materials:
+            self.materials[key] = S.create_etched_metal_or_gold(
+                name=f"M_{self.name}_{key}", tint=tint, scratches=0.08, hammered=0.0, roughness=rough,
+                edge_polish=0.9, tarnish=0.25, edge_radius=0.02)
+        return self.materials[key]
+
+    def gem(self, key: str, core: str, mid: str, rim: str):
+        """Cristal / pierre précieuse à facettes : dégradé du cœur au bord, arêtes claires, reflets nets, SANS lueur."""
+        if key not in self.materials:
+            self.materials[key] = S.create_stylized_crystal_or_gem(
+                name=f"M_{self.name}_{key}", core=core, mid=mid, rim=rim, emission=0.0, gradient="height",
+                facet_variation=0.35, edge_glow=0.7, roughness=0.06)
+        return self.materials[key]
+
+    def pearl(self, key: str, color: str = "#F6EEF6", sheen: str = "#CFEFFF"):
+        """Nacre : blanc rosé, arêtes aux reflets bleutés, creux mauves, satiné."""
+        if key not in self.materials:
+            self.materials[key] = S.create_stylized_edge_wear_material(
+                name=f"M_{self.name}_{key}", base=color, edge=sheen, cavity=darken("#D8C4E8", 0.15), wear=0.0,
+                roughness=0.16, brush_scale=0.45, grain_scale=4.0, edge_radius=0.03, bump_strength=0.05, metallic=0.35)
+        return self.materials[key]
+
+    def enamel(self, key: str, color: str):
+        """Émail / laque : couleur pleine très brillante, comme un bijou émaillé."""
+        return self.mat(key, color, rough=0.04)
+
     # --- formes -----------------------------------------------------------------------------------------------
     def _id(self, label: str) -> str:
         self._n += 1
