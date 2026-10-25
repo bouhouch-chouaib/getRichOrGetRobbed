@@ -234,6 +234,25 @@ local machines: { Machine } = {}
 local rolling: { [number]: number } = {} -- propriétaire -> fin du tirage au sort affiché (os.clock)
 local EGG_HEIGHT = 5.2 -- studs au-dessus du socle : le milieu du cylindre de verre
 
+-- Ce que fait [E] sur la capsule (plusieurs chambres, +1 par Rebirth) : ouvrir l'œuf montré s'il n'évoluera plus, sinon
+-- en mettre un autre s'il reste une chambre, sinon ouvrir l'œuf montré dès que son incubation est finie.
+local function machineAction(machine: Machine): string
+	local part = machine.part
+	local occupied = part:GetAttribute("Occupied") == true
+	local readyAt = part:GetAttribute("ReadyAt")
+	local openable = occupied and not (type(readyAt) == "number" and readyAt > Workspace:GetServerTimeNow())
+	local chambers, used = part:GetAttribute("Chambers"), part:GetAttribute("ChambersUsed")
+	local free = if type(chambers) == "number" and type(used) == "number" then used < chambers else not occupied
+	if openable and part:GetAttribute("Done") == true then
+		return "Hatch"
+	elseif free then
+		return "Insert"
+	elseif openable then
+		return "Hatch"
+	end
+	return "Wait"
+end
+
 local function refreshPrompt(machine: Machine)
 	local mine = machine.part:GetAttribute("OwnerUserId") == player.UserId
 	if not mine then
@@ -255,27 +274,24 @@ local function refreshPrompt(machine: Machine)
 		created.RequiresLineOfSight = false
 		created.Parent = machine.part
 		created.Triggered:Connect(function()
-			if machine.part:GetAttribute("Occupied") == true then
+			local action = machineAction(machine)
+			if action == "Hatch" then
+				Remotes.Evolution:FireServer("Hatch")
+			elseif action == "Insert" then
+				openPicker()
+			else
 				local readyAt = machine.part:GetAttribute("ReadyAt")
 				local left = if type(readyAt) == "number" then readyAt - Workspace:GetServerTimeNow() else 0
-				if left > 0 then
-					Sounds.play("Error")
-					Toast.show("PAS ENCORE : L'ŒUF FINIT SON INCUBATION (" .. Eggs.Time(left) .. ")", Color3.fromRGB(255, 140, 140))
-				else
-					Remotes.Evolution:FireServer("Hatch")
-				end
-			else
-				openPicker()
+				Sounds.play("Error")
+				Toast.show("PAS ENCORE : L'ŒUF FINIT SON INCUBATION (" .. Eggs.Time(left) .. ")", Color3.fromRGB(255, 140, 140))
 			end
 		end)
 		machine.prompt = created
 		prompt = created
 	end
-	local occupied = machine.part:GetAttribute("Occupied") == true
-	local readyAt = machine.part:GetAttribute("ReadyAt")
-	local incubating = occupied and type(readyAt) == "number" and readyAt > Workspace:GetServerTimeNow()
-	prompt.ActionText = if incubating then "En incubation" elseif occupied then "Faire éclore" else "Mettre un œuf"
-	prompt.HoldDuration = if occupied and not incubating then 1.2 else 0 -- ouvrir l'œuf se confirme en maintenant la touche
+	local action = machineAction(machine)
+	prompt.ActionText = if action == "Hatch" then "Faire éclore" elseif action == "Insert" then "Mettre un œuf" else "En incubation"
+	prompt.HoldDuration = if action == "Hatch" then 1.2 else 0 -- ouvrir l'œuf se confirme en maintenant la touche
 end
 
 -- Niveau de la capsule (monde le plus loin de son propriétaire) : taille, couleur et décor.
@@ -508,6 +524,11 @@ RunService.Heartbeat:Connect(function(dt)
 			machine.status.Text = string.format("2. TENTATIVE %s DANS %s", stars(stage + 1), Eggs.Time(nextAt - now))
 			machine.status.TextColor3 = WHITE
 			machine.hint.Text = string.format("%d %% DE CHANCES  •  [E] OUVRIR MAINTENANT (%s)", chance, STAGE_NAMES[stage])
+		end
+		-- Chambres (+1 par Rebirth) : plusieurs œufs évoluent en même temps ; la capsule montre le plus avancé.
+		local chambers, used = part:GetAttribute("Chambers"), part:GetAttribute("ChambersUsed")
+		if type(chambers) == "number" and chambers > 1 and type(used) == "number" then
+			machine.title.Text ..= string.format("  •  CHAMBRES %d/%d", used, chambers)
 		end
 		if machine.prompt then
 			refreshPrompt(machine)

@@ -1057,16 +1057,67 @@ end
 
 local evolutionRng = Random.new()
 
--- L'œuf actuellement dans la machine (nil si elle est vide).
-function SessionData.GetEvolving(player: Player): EggIncubation.Egg?
+-- Les œufs dans les chambres de la capsule (Config.GetCapsuleSlots), dans l'ordre d'entrée.
+function SessionData.GetEvolvingList(player: Player): { EggIncubation.Egg }
 	local data = storage[player]
-	if not data then return nil end
+	local list = {}
+	if not data then return list end
 	for _, egg in ipairs(data.eggs) do
 		if egg.evolve then
-			return egg
+			table.insert(list, egg)
 		end
 	end
-	return nil
+	return list
+end
+
+-- Chambres de la capsule de ce joueur (+1 par Rebirth).
+function SessionData.GetCapsuleSlots(player: Player): number
+	local data = storage[player]
+	return Config.GetCapsuleSlots(if data then data.rebirths else 0)
+end
+
+-- L'œuf montré par la capsule (nil si elle est vide) : celui qu'on peut ouvrir et qui n'évoluera plus, sinon le premier
+-- qu'on peut ouvrir, sinon le premier entré. C'est lui que « Faire éclore » ouvre.
+function SessionData.GetEvolving(player: Player): EggIncubation.Egg?
+	local list = SessionData.GetEvolvingList(player)
+	local time = os.time()
+	local openable: EggIncubation.Egg? = nil
+	for _, egg in ipairs(list) do
+		if EggIncubation.CanOpen(egg, time) then
+			if egg.evolve and egg.evolve.done then
+				return egg
+			end
+			openable = openable or egg
+		end
+	end
+	return openable or list[1]
+end
+
+local function newEvolve(egg: EggIncubation.Egg, time: number, tier: number): EggIncubation.Evolve
+	return {
+		stage = 1,
+		maxStage = #Config.Evolution.Names, -- plus de plafond secret : chaque tentative est tirée au sort
+		-- La capsule suit le niveau du joueur (monde le plus loin) : meilleures chances, plus rapide.
+		nextAt = EggIncubation.FirstAttemptAt(egg, time, evolutionRng:NextNumber(), tier),
+		done = false,
+	}
+end
+
+-- Un doublon de sa meilleure rareté entre directement dans une chambre libre (Config.Evolution.DuplicatesToCapsule) au
+-- lieu d'être vendu. Renvoie false si toutes les chambres sont prises.
+function SessionData.AddCapsuleEgg(player: Player, petId: string, time: number): boolean
+	local data = storage[player]
+	if not data or not data.loaded or #SessionData.GetEvolvingList(player) >= SessionData.GetCapsuleSlots(player) then
+		return false
+	end
+	local egg = EggIncubation.Create(petId, 1, time, HttpService:GenerateGUID(false))
+	if not egg then
+		return false
+	end
+	egg.evolve = newEvolve(egg, time, data.tier)
+	table.insert(data.eggs, egg)
+	sync(player)
+	return true
 end
 
 -- Met dans la machine l'œuf de la clé donnée (« lot#n », shared/EggIncubation.UnitKey). Refusé si la machine est pleine,
@@ -1074,8 +1125,8 @@ end
 -- tente d'évoluer (première tentative : EggIncubation.FirstAttemptAt).
 function SessionData.StartEvolution(player: Player, key: string, time: number): boolean
 	local data = storage[player]
-	if not data or not data.loaded or SessionData.GetEvolving(player) then
-		return false
+	if not data or not data.loaded or #SessionData.GetEvolvingList(player) >= SessionData.GetCapsuleSlots(player) then
+		return false -- toutes les chambres sont prises
 	end
 	local lotId, index = string.match(key, "^(.+)#(%d+)$")
 	local unit = tonumber(index)
@@ -1084,13 +1135,7 @@ function SessionData.StartEvolution(player: Player, key: string, time: number): 
 	end
 	for position, egg in ipairs(data.eggs) do
 		if egg.id == lotId and not egg.evolve and unit >= 1 and unit <= egg.count and egg.readyAt > time then
-			local evolve: EggIncubation.Evolve = {
-				stage = 1,
-				maxStage = #Config.Evolution.Names, -- plus de plafond secret : chaque tentative est tirée au sort
-				-- La capsule suit le niveau du joueur (monde le plus loin) : meilleures chances, plus rapide.
-				nextAt = EggIncubation.FirstAttemptAt(egg, time, evolutionRng:NextNumber(), data.tier),
-				done = false,
-			}
+			local evolve = newEvolve(egg, time, data.tier)
 			if egg.count == 1 then
 				egg.evolve = evolve
 			else
@@ -1125,14 +1170,31 @@ function SessionData.TickEvolution(player: Player, time: number, roll: number?):
 	return result
 end
 
+-- Une tentative pour chaque chambre dont c'est l'heure. Renvoie la liste des résultats (œuf, "Evolved" ou "Maxed").
+function SessionData.TickEvolutions(player: Player, time: number): { { egg: EggIncubation.Egg, result: string } }
+	local data = storage[player]
+	local results = {}
+	for _, egg in ipairs(SessionData.GetEvolvingList(player)) do
+		local result = EggIncubation.TryEvolve(egg, time, evolutionRng:NextNumber(), if data then data.tier else 1)
+		if result then
+			table.insert(results, { egg = egg, result = result })
+		end
+	end
+	if #results > 0 then
+		sync(player)
+	end
+	return results
+end
+
 -- Ouvre l'œuf de la machine : le familier, à son stade, rejoint le joueur (sans attente). Renvoie son Id.
 -- Refusé tant que son incubation normale n'est pas finie (sinon la capsule ferait éclore un œuf de 20 min tout de suite).
 function SessionData.HatchEvolving(player: Player, time: number): string?
 	local data = storage[player]
 	if not data or not data.loaded then return nil end
+	local shown = SessionData.GetEvolving(player) -- l'œuf montré par la capsule (plusieurs chambres)
 	for index, egg in ipairs(data.eggs) do
 		local evolve = egg.evolve
-		if evolve then
+		if evolve and egg == shown then
 			if not EggIncubation.CanOpen(egg, time) then
 				return nil
 			end

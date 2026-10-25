@@ -1634,9 +1634,9 @@
       "game": {
         "required_world": 7,
         "base_price": 4000000000000.0,
-        "price_growth": 2.7,
+        "price_growth": 1.62,
         "income_bonus_per_rebirth": 1.0,
-        "formula": "prix(n) = 4e12 x 2,7^n ; revenu x (1 + n) ; +1 familier dans la base par rebirth (max 5)"
+        "formula": "prix(n) = 4e12 x (n + 1) x 1,62^n ; revenu x (1 + n) ; +1 familier dans la base et +1 chambre de capsule par rebirth (max 5 de chaque) ; ECONOMY_REPORT.md règles 15 et 16"
       },
       "reference": "Steal a Brainrot : argent + personnages précis exigés à chaque rebirth"
     },

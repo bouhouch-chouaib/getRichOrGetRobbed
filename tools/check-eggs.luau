@@ -602,10 +602,14 @@ do
 	assert(data.money == 0 and data.tier == 1 and data.world == 1, "back to the first world with no money")
 	assert(data.upgrades.Treadmill == 0 and data.upgrades.WeaponBat == 1, "shop reset, weapons kept")
 	assert(petCount() == petsBefore, "pets are kept")
+	-- Prix du Rebirth n + 1 = base x (n + 1) x croissance^n (ECONOMY_REPORT.md règle 16).
 	assert(
 		config.GetRebirthMultiplier(1) == 2
-			and config.GetRebirthPrice(1) == config.Rebirth.BasePrice * config.Rebirth.PriceGrowth
+			and config.GetRebirthPrice(1) == config.Rebirth.BasePrice * 2 * config.Rebirth.PriceGrowth
 	)
+	-- Une chambre de capsule de plus par Rebirth (règle 15), 6 au plus.
+	assert(config.GetCapsuleSlots(0) == config.Evolution.Slots and config.GetCapsuleSlots(1) == config.Evolution.Slots + 1)
+	assert(config.GetCapsuleSlots(99) == config.Evolution.Slots + config.Rebirth.MaxExtraCapsules)
 	assert(config.GetIncomeSlots(1) == config.Pets.IncomeSlots + 1)
 	assert(config.GetIncomeSlots(99) == config.Pets.IncomeSlots + config.Rebirth.MaxExtraPets)
 
@@ -711,6 +715,9 @@ for _, egg in ipairs(rejoined.GetEggs(player)) do
 	end
 end
 assert(lot, "a lot of two eggs")
+local profile = assert(rejoined.Get(player))
+local keptRebirths = profile.rebirths
+profile.rebirths = 0 -- une seule chambre pour cette partie (Config.GetCapsuleSlots)
 assert(rejoined.StartEvolution(player, lot.id .. "#2", now), "egg enters the machine")
 assert(not rejoined.StartEvolution(player, lot.id .. "#1", now), "one egg at a time")
 local evolving = assert(rejoined.GetEvolving(player))
@@ -731,6 +738,26 @@ local evolvedId = assert(rejoined.HatchEvolving(player, now + 10 ^ 7))
 assert(evolvedId == byRank[3] .. "__E2" and catalog.ById[evolvedId].Stage == 2, "hatches as the Évolué form")
 assert(catalog.GetIncome(evolvedId) == catalog.GetIncome(byRank[3]) * config.Evolution.IncomeMultiplier[2])
 assert(rejoined.GetEvolving(player) == nil and rejoined.Get(player).pets[evolvedId] == 1)
+-- Chambres (ECONOMY_REPORT.md règle 15) : après un Rebirth, deux œufs évoluent en même temps ; plein, un doublon
+-- (Config.Evolution.DuplicatesToCapsule) n'y entre plus ; chaque chambre tente sa chance ; on ouvre l'une puis l'autre.
+profile.rebirths = 1
+assert(rejoined.GetCapsuleSlots(player) == 2, "one more chamber after a Rebirth")
+rejoined.AddEggs(player, { [byRank[4]] = 2 })
+local pair
+for _, egg in ipairs(rejoined.GetEggs(player)) do
+	if egg.petId == byRank[4] and egg.count == 2 and not egg.evolve then
+		pair = egg
+	end
+end
+assert(pair, "a lot of two eggs for the chambers")
+assert(rejoined.StartEvolution(player, pair.id .. "#2", now) and rejoined.StartEvolution(player, pair.id .. "#1", now), "two chambers")
+assert(#rejoined.GetEvolvingList(player) == 2 and not rejoined.AddCapsuleEgg(player, byRank[4], now), "all chambers taken")
+assert(#rejoined.TickEvolutions(player, now + 10 ^ 7) == 2, "every chamber tries to evolve")
+assert(rejoined.HatchEvolving(player, now + 10 ^ 8) and rejoined.HatchEvolving(player, now + 10 ^ 8), "both open")
+assert(rejoined.GetEvolving(player) == nil and rejoined.AddCapsuleEgg(player, byRank[4], now), "a duplicate takes a free chamber")
+assert(rejoined.GetEvolving(player).evolve ~= nil, "it evolves like any capsule egg")
+assert(rejoined.HatchEvolving(player, now + 10 ^ 8), "and opens like one")
+profile.rebirths = keptRebirths
 local maxed = 0
 for i = 1, 1000 do
 	if eggs.RollMaxStage((i - 0.5) / 1000) == #config.Evolution.Names then

@@ -57,6 +57,8 @@ class Game:
         self.worlds = cfg["Worlds"]
         self.pets = {p["id"]: p for p in data["pets"]}
         self.incomes: dict[str, float] = data["incomes"]  # toutes les formes (évoluées, mutées) : PetCatalog.GetIncome
+        # Calculés par le jeu (Config.GetRebirthPrice, Config.GetCapsuleSlots), si l'export les contient.
+        self.derived: dict = data.get("derived", {})
         self.base_by_rarity: dict[int, list[str]] = {}
         self.by_world: dict[str, list[str]] = {}
         for pet in data["pets"]:
@@ -106,10 +108,13 @@ class Game:
         return math.floor(item["BasePrice"] * item["PriceGrowth"] ** level)
 
     def rebirth_price(self, n: int, growth: float | None = None) -> float:
-        """Prix du Rebirth n+1. growth (proposé, étape 4) : prix = base x (n + 1) x growth^n ; sinon Config (base x PriceGrowth^n)."""
+        """Prix du Rebirth n+1. growth (option) : base x (n + 1) x growth^n ; sinon Config.GetRebirthPrice (exporté)."""
         rb = self.cfg["Rebirth"]
         if growth:
             return rb["BasePrice"] * (n + 1) * growth ** n
+        prices = self.derived.get("rebirthPrices")
+        if prices and n < len(prices):
+            return prices[n]
         return rb["BasePrice"] * rb["PriceGrowth"] ** n
 
     def rebirth_mult(self, n: int) -> float:
@@ -401,15 +406,22 @@ class SoloRun:
         return owned
 
     def capsule_slots(self) -> int:
-        extra = min(self.rebirths, self.g.cfg["Rebirth"]["MaxExtraPets"]) if self.options.get("capsules_rebirth") else 0
-        return self.g.cfg["Evolution"]["Slots"] + extra
+        if self.options.get("capsules_rebirth"):
+            return self.g.cfg["Evolution"]["Slots"] + min(self.rebirths, self.g.cfg["Rebirth"]["MaxExtraPets"])
+        slots = self.g.derived.get("capsuleSlots")  # règle du jeu (Config.GetCapsuleSlots) depuis le 25 oct.
+        if slots:
+            return slots[min(self.rebirths, len(slots) - 1)]
+        return self.g.cfg["Evolution"]["Slots"]
+
+    def duplicates_to_capsule(self) -> bool:
+        return bool(self.options.get("doublons_capsule") or self.g.cfg["Evolution"].get("DuplicatesToCapsule"))
 
     def tick_capsule(self):
         """Le joueur y met ses meilleurs œufs, laisse les tentatives se faire, ouvre dès qu'un œuf n'évoluera plus."""
         g = self.g
         while len(self.capsules) < self.capsule_slots() and self.eggs:
             egg = max(self.eggs, key=lambda e: g.income(e[0]))
-            if self.options.get("doublons_capsule") and self.pets:
+            if self.duplicates_to_capsule() and self.pets:
                 # Joueur malin : il garde ses capsules pour sa meilleure rareté (les doublons y arrivent, voir step).
                 best = max(g.rarity_of(p) for p, c in self.pets.items() if c > 0)
                 if g.rarity_of(egg[0]) < best:
@@ -502,7 +514,7 @@ class SoloRun:
         for pet in drops:
             self.discovered.add(pet)
             free = self.use_capsule and len(self.capsules) < self.capsule_slots()
-            if owned.get(pet, 0) >= cfg["Loot"]["KeepCopies"] and self.options.get("doublons_capsule") and free \
+            if owned.get(pet, 0) >= cfg["Loot"]["KeepCopies"] and self.duplicates_to_capsule() and free \
                     and g.rarity_of(pet) >= max(g.rarity_of(p) for p in base):
                 # Doublon de sa meilleure rareté : il part dans une capsule libre au lieu d'être vendu.
                 ready = self.t + cfg["Eggs"]["Seconds"][g.pets[pet]["rarity"]]

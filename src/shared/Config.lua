@@ -93,7 +93,11 @@ Config.Evolution = {
 	-- de sa rareté (Config.Eggs.Seconds) : un œuf Commun tente après 1 min puis 3 min, un Sigma après 2 h puis 6 h.
 	StageTimeFactor = { 4, 12 },
 	TimeJitter = 0.25, -- +/- 25 % au hasard sur chaque attente
-	Slots = 1, -- œufs dans la machine en même temps
+	-- Chambres de la capsule : œufs qui évoluent en même temps (+1 par Rebirth, Config.GetCapsuleSlots).
+	Slots = 1,
+	-- 25 oct. (ECONOMY_REPORT.md règle 15) : un doublon de sa meilleure rareté (au-delà de Config.Loot.KeepCopies) part
+	-- dans une chambre libre au lieu d'être vendu. Sans ça, la capsule ne reçoit plus d'œufs en fin de partie.
+	DuplicatesToCapsule = true,
 	UseDistance = 18, -- studs : distance max pour utiliser la machine
 	-- Un familier évolué est aussi plus fort : stats données quand il est équipé (shared/PetStats) et puissance en duel
 	-- (shared/DuelStats) x PowerMultiplier.
@@ -1023,20 +1027,33 @@ Config.Friends = {
 
 -- Rebirth : quand on a atteint le dernier monde, on paie Price(n) pour recommencer en Prairie avec 0 $ et les
 -- améliorations de la Boutique à zéro (armes et pouvoir gardés). On GARDE familiers, œufs, mutations, entraînement,
--- clés et achats Robux. En échange, à vie : revenu x(1 + IncomeBonus x rebirths) et +ExtraPets familier(s) dans la base
--- (ceux qui rapportent, Config.Pets.IncomeSlots), jusqu'à MaxExtraPets.
+-- clés et achats Robux. En échange, à vie : revenu x(1 + IncomeBonus x rebirths), +ExtraPets familier(s) dans la base
+-- (ceux qui rapportent, Config.Pets.IncomeSlots), jusqu'à MaxExtraPets, et +ExtraCapsules chambre(s) dans la capsule
+-- d'évolution, jusqu'à MaxExtraCapsules (25 oct., ECONOMY_REPORT.md règle 15 : ce qui fait encore monter le revenu en
+-- fin de partie ; la place de base en plus ne rapporte que +2 %).
 Config.Rebirth = {
 	RequiredTier = 7, -- monde à avoir atteint (7 = Divin, le dernier)
 	BasePrice = 4e12, -- prix du 1er Rebirth ($4T) : vers 9 h de jeu (tools/sim-economy.luau)
-	PriceGrowth = 2.7, -- chaque Rebirth coûte 2,7 fois le précédent : ~5 h de plus à chaque fois
+	-- 25 oct. (ECONOMY_REPORT.md règle 16) : prix(n) = BasePrice x (n + 1) x PriceGrowth^n. Le (n + 1) suit le
+	-- multiplicateur de revenu ; 1,62 = croissance de la base par cycle avec les chambres (x1,47, mesurée) x 1,1 (chaque
+	-- cycle un peu plus long que le précédent). Cycles simulés : 3,7 h, 3,6 h, 3,7 h, 4,4 h, 5,2 h, 6,4 h (avant : x2,7,
+	-- cycles de 6 h puis 9 h dès le 5e Rebirth).
+	PriceGrowth = 1.62,
 	IncomeBonus = 1, -- +100 % de revenu par Rebirth : x2, x3, x4...
 	ExtraPets = 1, -- +1 familier qui rapporte dans la base par Rebirth
 	MaxExtraPets = 5,
+	ExtraCapsules = 1, -- +1 chambre de capsule d'évolution par Rebirth
+	MaxExtraCapsules = 5, -- 6 chambres au plus
 	KeepShopItems = { WeaponBat = true, WeaponGrapple = true, PowerInvisible = true }, -- pas remis à zéro
 }
 
 function Config.GetRebirthPrice(rebirths: number): number
-	return Config.Rebirth.BasePrice * Config.Rebirth.PriceGrowth ^ rebirths
+	return Config.Rebirth.BasePrice * (rebirths + 1) * Config.Rebirth.PriceGrowth ^ rebirths
+end
+
+-- Chambres de la capsule d'évolution selon le nombre de Rebirths.
+function Config.GetCapsuleSlots(rebirths: number): number
+	return Config.Evolution.Slots + math.min(rebirths * Config.Rebirth.ExtraCapsules, Config.Rebirth.MaxExtraCapsules)
 end
 
 function Config.GetRebirthMultiplier(rebirths: number): number

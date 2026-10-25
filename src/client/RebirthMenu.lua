@@ -59,6 +59,10 @@ function RebirthMenu.create(gui: Instance): Menu
 	local petsLine = UiStyle.number(gain, "", 30, UiStyle.Colors.Gold)
 	petsLine.Position = UDim2.fromOffset(10, 232)
 	petsLine.Size = UDim2.new(1, -20, 0, 36)
+	text(gain, "CHAMBRES DE LA CAPSULE", 20, WHITE, 276, 24)
+	local capsuleLine = UiStyle.number(gain, "", 30, UiStyle.Colors.Cyan)
+	capsuleLine.Position = UDim2.fromOffset(10, 300)
+	capsuleLine.Size = UDim2.new(1, -20, 0, 36)
 
 	-- À droite : conditions, ce qu'on garde et ce qu'on perd.
 	local side = UiStyle.panel(window.content, UDim2.new(0.56, -6, 1, -80))
@@ -104,6 +108,10 @@ function RebirthMenu.create(gui: Instance): Menu
 		incomeLine.Text = string.format("x%d  →  x%d", Config.GetRebirthMultiplier(count), Config.GetRebirthMultiplier(count + 1))
 		local slots, nextSlots = Config.GetIncomeSlots(count), Config.GetIncomeSlots(count + 1)
 		petsLine.Text = if nextSlots > slots then string.format("%d  →  %d", slots, nextSlots) else string.format("%d (MAX)", slots)
+		-- Une chambre de plus dans la capsule d'évolution (Config.GetCapsuleSlots) : un œuf de plus qui évolue en même temps.
+		local chambers, nextChambers = Config.GetCapsuleSlots(count), Config.GetCapsuleSlots(count + 1)
+		capsuleLine.Text = if nextChambers > chambers then string.format("%d  →  %d", chambers, nextChambers)
+			else string.format("%d (MAX)", chambers)
 		worldLine.Text = (if tierOk then "OK  " else "") .. "Atteindre le monde " .. worldName
 		worldLine.TextColor3 = if tierOk then MONEY else WHITE
 		moneyLine.Text = string.format("Avoir %s  (tu as %s)", NumberFormat.money(price), NumberFormat.money(money))

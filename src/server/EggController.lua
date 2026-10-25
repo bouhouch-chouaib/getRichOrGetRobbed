@@ -78,6 +78,9 @@ function EggController.Init(bases: { Model })
 		machine:SetAttribute("ReadyAt", if evolve and egg then egg.readyAt else nil)
 		machine:SetAttribute("NextAt", if evolve and not evolve.done then evolve.nextAt else nil)
 		machine:SetAttribute("Done", if evolve then evolve.done else nil)
+		-- Chambres (+1 par Rebirth, Config.GetCapsuleSlots) : combien d'œufs y sont, combien il en tient.
+		machine:SetAttribute("Chambers", if player then SessionData.GetCapsuleSlots(player) else nil)
+		machine:SetAttribute("ChambersUsed", if player then #SessionData.GetEvolvingList(player) else nil)
 	end
 
 	local function tickBase(base: Model)
@@ -178,12 +181,12 @@ function EggController.Init(bases: { Model })
 
 		-- 2. La machine d'évolution : une tentative si c'est l'heure.
 		local machine = machineOf(base)
-		local result = SessionData.TickEvolution(player, os.time())
-		local evolving = SessionData.GetEvolving(player)
-		local evolve = evolving and evolving.evolve
-		if result and machine and evolving and evolve then
-			Remotes.Evolution:FireAllClients(player.UserId, result, evolve.stage, machine.CFrame,
-				Catalog.ById[evolving.petId].Rarity)
+		for _, attempt in ipairs(SessionData.TickEvolutions(player, os.time())) do
+			local evolve = attempt.egg.evolve
+			if machine and evolve then
+				Remotes.Evolution:FireAllClients(player.UserId, attempt.result, evolve.stage, machine.CFrame,
+					Catalog.ById[attempt.egg.petId].Rarity)
+			end
 		end
 		publishMachine(base, player)
 

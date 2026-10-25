@@ -23,7 +23,7 @@ local SessionData = require(script.Parent.SessionData)
 
 local PullRewards = {}
 
-export type Drop = { Id: string, New: boolean, Sold: number?, Egg: boolean? }
+export type Drop = { Id: string, New: boolean, Sold: number?, Egg: boolean?, Capsule: boolean? }
 export type Details = { drops: { Drop }, sold: number, floor: number, rank: number, eggs: boolean }
 
 -- Mutation tirée en secret pour un familier gagné (Config.Mutations, la plus rare d'abord), chance fixe.
@@ -72,7 +72,13 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 		-- Mutation secrète, révélée à l'éclosion : un familier muté est un autre familier (jamais vendu comme doublon).
 		local mutation = if paid then nil else PullRewards.RollMutation()
 		local petId = if mutation then PetCatalog.WithMutation(rolledId, mutation) else rolledId
-		if not mutation and (owned[petId] or 0) + (kept[petId] or 0) >= Config.Loot.KeepCopies then
+		local copies = if mutation then 0 else (owned[petId] or 0) + (kept[petId] or 0)
+		local rarity = Config.RarityIndex[PetCatalog.ById[petId].Rarity] or 1
+		if copies >= Config.Loot.KeepCopies and Config.Evolution.DuplicatesToCapsule
+			and rarity >= (SessionData.GetSelfBest(player) or math.huge) and SessionData.AddCapsuleEgg(player, petId, os.time()) then
+			-- Doublon de sa meilleure rareté : il part dans une chambre libre de la capsule au lieu d'être vendu.
+			table.insert(drops, { Id = rolledId, New = false, Egg = true, Capsule = true })
+		elseif copies >= Config.Loot.KeepCopies then
 			local value = PullRewards.SellValue(player, petId)
 			sold += value
 			table.insert(drops, { Id = petId, New = false, Sold = value })

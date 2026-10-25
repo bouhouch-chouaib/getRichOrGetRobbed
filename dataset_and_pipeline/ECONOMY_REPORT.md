@@ -1,8 +1,8 @@
 # Rapport économique (phase 1.7)
 
 **État au 25 oct. 2026 : étapes 1 à 5 faites. Dans le jeu : premier lot (règles 3, 5, 6, 11, 13 et la batte, voir
-5.3) et deuxième lot (verrou à cycle, bouclier, plafond, vol utile, voir 5.5), décidé par Chouaib.** Restent à faire :
-Rebirth (15, 16), couronne (9), pile d'objectifs (12), amis (17 à 19), et au choix 10 et 14. Rien n'a encore été
+5.3), deuxième lot (verrou à cycle, bouclier, plafond, vol utile, voir 5.5) et Rebirth (règles 15 et 16, voir 5.6).**
+Restent à faire : couronne (9), pile d'objectifs (12), amis (17 à 19), et au choix 10 et 14. Rien n'a encore été
 vérifié dans Studio. **Rien n'a encore été changé dans le jeu** :
 les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
@@ -788,3 +788,33 @@ hors ligne. À regarder :
   Index avec un familier donné par un script, aperçu du familier jeté au trou ;
 - à 2 joueurs : bulles [E] seulement sur les familiers utiles, bouclier après une grosse perte (compte à rebours, bulles
   cachées chez le voleur), vol pendant la recharge du verrou.
+
+## 5.6 Appliqué dans le jeu le 25 oct. (Rebirth : règles 15 et 16)
+
+| Règle | Où | Ce qui change |
+| --- | --- | --- |
+| 15. Une chambre de capsule de plus par Rebirth | `Config.Rebirth.ExtraCapsules` (1), `MaxExtraCapsules` (5), `Config.GetCapsuleSlots`, `server/SessionData` (`GetEvolvingList`, `GetCapsuleSlots`, `TickEvolutions`), `server/EggController`, `client/EvolutionMachine`, `client/RebirthMenu` | la capsule tient 1 œuf au départ, puis 2, 3… jusqu'à 6 ; chacun tente d'évoluer de son côté ; la capsule montre l'œuf le plus avancé et « CHAMBRES 2/3 » ; la fenêtre Rebirth affiche « CHAMBRES DE LA CAPSULE 1 → 2 » |
+| 15. Doublons vers une chambre libre | `Config.Evolution.DuplicatesToCapsule`, `SessionData.AddCapsuleEgg`, `server/PullRewards` | un doublon de sa meilleure rareté (au-delà de 5 exemplaires) entre dans une chambre libre au lieu d'être vendu |
+| 16. Prix du Rebirth | `Config.Rebirth.PriceGrowth` (2,7 -> 1,62), `Config.GetRebirthPrice` = 4T x (n + 1) x 1,62^n | 4T, 13T, 31,5T, 68T, 138T, 268T, 506T (avant : 4T, 10,8T, 29T, 79T, 213T, 574T, 1,5Qa) |
+
+**Écart avec la proposition de l'étape 4** : « une capsule de plus » est devenue **une chambre de plus dans la même
+capsule**. Effet de jeu identique (plusieurs œufs qui évoluent en même temps, c'est ce que le simulateur a mesuré), mais
+sans poser jusqu'à 6 capsules derrière chaque base, là où les autres agents posent les décors des mondes, et sans
+réécrire toute l'interface de la capsule. Des capsules visibles en plus pourront venir ensuite si Chouaib le veut.
+
+Avec plusieurs chambres, [E] sur la capsule : ouvrir l'œuf montré s'il n'évoluera plus, sinon mettre un œuf s'il reste
+une chambre, sinon ouvrir l'œuf montré (une fois son incubation finie). Un œuf qui évolue encore ne s'ouvre donc tôt que
+si toutes les chambres sont prises.
+
+Simulateur solo avec les règles du jeu (120 parties de 45 h ; prix et chambres lus dans le jeu par
+`tools/export-economy.luau`) : Rebirths à 8,7 h, 12,5 h, 16,1 h, 20,0 h, 24,2 h, 29,6 h, 36,2 h, soit des cycles de 3,6
+à 6,6 h, comme prévu à l'étape 4 (avant : Rebirth 5 vers 28 h, Rebirth 6 hors de portée). Revenu à 20 h : 5,7B/s (avant 3,4B/s).
+
+Vérifié : analyse Luau sans erreur, `rojo build` réussi, les 10 tests Lune passent. `tools/check-eggs.luau` vérifie
+maintenant, avec la vraie sauvegarde, deux chambres après un Rebirth, le refus quand elles sont pleines, une tentative
+par chambre, l'ouverture de l'une puis de l'autre et le doublon envoyé dans une chambre libre ; il suit aussi la
+nouvelle formule du prix.
+
+**Pas vérifié (Studio)** : la capsule à plusieurs chambres (titre « CHAMBRES », bulle [E] qui passe de « Mettre un
+œuf » à « Faire éclore »), la fenêtre Rebirth (nouvelle ligne), un doublon qui part dans la capsule pendant
+l'ouverture des tirages.

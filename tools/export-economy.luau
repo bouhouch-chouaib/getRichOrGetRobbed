@@ -69,6 +69,13 @@ for _, entry in ipairs(Catalog.Everything) do
 	incomes[entry.Id] = Catalog.GetIncome(entry.Id)
 end
 
-local data = { config = clean(Config), pets = pets, incomes = incomes }
+-- Valeurs calculées par les fonctions de Config (le simulateur ne recopie pas les formules).
+local derived = { rebirthPrices = {}, capsuleSlots = {} }
+for n = 0, 40 do
+	derived.rebirthPrices[n + 1] = Config.GetRebirthPrice(n)
+	derived.capsuleSlots[n + 1] = if Config.GetCapsuleSlots then Config.GetCapsuleSlots(n) else Config.Evolution.Slots
+end
+
+local data = { config = clean(Config), pets = pets, incomes = incomes, derived = derived }
 fs.writeFile(output, serde.encode("json", data, true))
 print(string.format("%d familiers, %d formes -> %s", #pets, #Catalog.Everything, output))

@@ -580,7 +580,8 @@ def core_loop(config: str, walk_speed: float) -> dict:
         "rebirth": {
             "game": {"required_world": int(num(r"RequiredTier = (\d+)", "Rebirth")), "base_price": num(r"BasePrice = ([\d.e]+)", "Rebirth"),
                      "price_growth": num(r"PriceGrowth = ([\d.]+)", "Rebirth"), "income_bonus_per_rebirth": num(r"IncomeBonus = ([\d.]+)", "Rebirth"),
-                     "formula": "prix(n) = 4e12 x 2,7^n ; revenu x (1 + n) ; +1 familier dans la base par rebirth (max 5)"},
+                     "formula": "prix(n) = 4e12 x (n + 1) x 1,62^n ; revenu x (1 + n) ; +1 familier dans la base et +1 chambre de "
+                                "capsule par rebirth (max 5 de chaque) ; ECONOMY_REPORT.md règles 15 et 16"},
             "reference": "Steal a Brainrot : argent + personnages précis exigés à chaque rebirth",
         },
         "base_structure": {
