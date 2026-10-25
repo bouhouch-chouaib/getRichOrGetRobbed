@@ -130,8 +130,21 @@ rendus `qa_renders/map_hero_desert.png`, `map_aesthetic_board_desert.png`, `map_
 - Lancer : `run_map_assets.py -- --world Desert`, `run_map_scene.py -- --world Desert`,
   `export_map_lot.py -- --world Desert` (-> `baked_assets/map/desert/Decors_Desert.fbx`, 19 décors, 34 Mo).
 
-Reste à faire après validation : import de `Decors_Desert.fbx` (l'importateur envoie les textures sur le compte de
-Chouaib : avec son accord), ranger la carte par monde (`Workspace.MapDecor.<Monde>`, `ArtModels.Map`), habillage des
-bases au Désert (muret, porte de temple, escalier) dans `MapGenerator` + bascule par monde dans `WorldSkin`, air du
-Désert dans `shared/Worlds` (valeurs de la charte), braseros allumés la nuit (PointLight + feu de particules Roblox).
-
+**Branché dans Studio (25 oct., style validé par Chouaib)** :
+- Chouaib importe `Decors_Desert.fbx` (**Studio en mode Édition** : un import fait pendant un Play disparaît à l'arrêt,
+  c'est arrivé une fois). `studio_tools/apply_map_look_desert.lua` (par `.rbxm` + `require`, comme la Prairie) range les
+  19 décors dans `ArtModels.Map` (40 avec la Prairie), passe l'ancien rangement à plat dans `MapDecor.Prairie` et pose
+  647 décors dans `Workspace.MapDecor.Desert` (les 296 des bases ignorés). Rien n'a été envoyé par Claude.
+- Code par monde : `server/MapGenerator` crée dans chaque base un dossier `<Monde>Look` par monde dont les modèles
+  sont dans `ArtModels.Map` (`DRESSINGS` : Prairie = Palissade / ArcheAncienne / EscalierPierre, Désert = Desert_Muret /
+  Desert_PorteTemple / Desert_Escalier) ; `client/WorldSkin` montre l'habillage du monde du propriétaire de la base
+  (sinon l'ancienne clôture) et `MapDecor.<Monde>` aux seuls joueurs de ce monde (sinon cachés et traversables), à la
+  place des arbres en cubes / de l'ancien décor ; air du Désert dans `shared/Worlds`.
+- Vérifié en Play (solo ; monde changé côté client seulement, rien dans la sauvegarde) : Prairie inchangée ; au Désert,
+  29 pièces DesertLook par base, palissades / clôture / décors Prairie cachés, MapDecor.Desert visible, vieux cactus
+  retirés ; aucun décor solide dans l'anneau des objets sauvages ; 124 canyons et portes tournés vers le trou ; photos
+  `qa_renders/map_roblox_desert_nuit.jpg`, `map_roblox_desert_entree_base.jpg`. Avant les modèles, un joueur au Désert
+  retrouvait bien l'ancien décor.
+- Pas vu : deux joueurs de mondes différents en même temps, téléphone, braseros (pas posés : à allumer plus tard avec
+  PointLight + feu de particules Roblox). Pour tester un monde sans l'acheter : côté client,
+  `LocalPlayer:SetAttribute("World", 2)` et `SetAttribute("Tier", 2)` (le serveur les remet à la prochaine sauvegarde).
