@@ -1,7 +1,8 @@
 # Rapport économique (phase 1.7)
 
-**État au 25 oct. 2026 : étape 1 (audit) faite.** Les étapes 2 à 5 (courbes, risque du vol, rétention, simulateur
-Monte-Carlo) viennent ensuite. **Rien n'a encore été changé dans le jeu** : ce document constate, il ne règle rien.
+**État au 25 oct. 2026 : étapes 1 (audit) et 2 (courbe coûts / revenus, défenses) faites.** Les étapes 3 à 5
+(risque du vol, rétention, simulateur à plusieurs joueurs) viennent ensuite. **Rien n'a encore été changé dans le jeu** :
+les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
 Règle suivie : aucun chiffre « au doigt mouillé ». Tout ce qui suit vient du code ou d'un calcul refaisable.
 
@@ -15,6 +16,10 @@ Règle suivie : aucun chiffre « au doigt mouillé ». Tout ce qui suit vient du
   dans `Config.lua` (rien n'est recopié à la main) et refait la géométrie de `MapGenerator` / `BaseLayout`.
 - Progression : `lune run tools/sim-economy.luau . 200 30`, le simulateur du 20 oct. (un joueur seul, sans vol),
   200 parties de 30 h.
+- Depuis l'étape 2 : `python -I dataset_and_pipeline/economy_simulator.py solo|segments`. Les valeurs du jeu sont
+  relues à chaque lancement par `tools/export-economy.luau` (Lune charge les vrais modules et écrit
+  `economy_data.json`). Avec `--no-capsule`, il donne les mêmes résultats que le simulateur Luau (1er Rebirth 8,5 h
+  contre 8,6 h, mêmes sources d'argent à 0,1 point près) ; par défaut il joue aussi la capsule d'évolution.
 
 ---
 
@@ -136,8 +141,11 @@ toutes les 14 h après 10 h.
 - **E1. Mur après le Rebirth 3.** Rebirth 4 = +9,7 h (contre +4 à +6 h avant), et plus rien à acheter dans la
   Boutique après ~11 h (Tapis et Banc au max). Le prix monte x2,7 par Rebirth, le revenu seulement x(n+1)/n
   (x1,33 au 4e) : chaque Rebirth demande donc plus de temps que le précédent, sans fin.
-- **E2. Jouer rapporte peu.** 80 % de l'argent vient du revenu passif, et une manche ne donne plus que 24 tirages
-  après 5 h, quoi qu'on fasse. Lancer des objets ou rester sans bouger rapporte presque pareil.
+  *Précision de l'étape 2 :* ce simulateur ne jouait pas la capsule d'évolution. Avec elle, Rebirth 4 = +5,8 h et
+  Rebirth 5 vers +8 h : le mur arrive un cran plus tard, mais il est là (partie 2.1).
+- **E2. Après ~5 h, jouer ne fait presque plus monter le revenu.** Les tirages (le jeu actif) sont ce qui fait
+  grandir la base, mais une manche plafonne à 24 tirages après 5 h, et la base est déjà pleine des meilleures
+  espèces : les nouveaux tirages sont surtout des doublons vendus. 80 % de l'argent vient du revenu passif.
 - **E3. Les premières minutes sont plus lentes que le simulateur ne le croit.** Un vrai débutant (Force 70, sac 1)
   marche 121 studs de sa palette jusqu'à pouvoir lancer : ~3 objets par manche, 1 tirage, 30 $ de points. Le simulateur
   compte 16 objets dès le départ. Le banc (500 $) corrige vite : Force 130 -> 6 objets, niveau 33 -> 34 objets (le max).
@@ -200,11 +208,132 @@ toutes les 14 h après 10 h.
 
 Le simulateur actuel ne joue qu'un joueur seul, toujours présent, sans vol. Il manque :
 plusieurs joueurs sur un serveur (8 bases), le vol et la défense (positions, vitesses, verrou, grappin, batte),
-les profils (prudent, voleur, nouveau dans un serveur avancé, duo d'amis), les absences, la capsule d'évolution,
-les mutations, le marché et les échanges, et les vraies premières minutes (objets par manche selon la Force).
+les profils (prudent, voleur, nouveau dans un serveur avancé, duo d'amis), les absences, ~~la capsule d'évolution~~
+(ajoutée à l'étape 2), les mutations, le marché et les échanges, et les vraies premières minutes (objets par manche
+selon la Force).
 
-## 7. Prochaine étape
+---
 
-Étape 2 : courbe coûts / revenus (montée rapide au début, puis paliers où il vaut mieux prendre des risques) et
-règles pour les défenses qui gênent les autres (verrou, grappin, batte). Les cibles chiffrées seront déduites des
-mesures ci-dessus, puis vérifiées par le simulateur de l'étape 5 avant de toucher `Config.lua`.
+# Étape 2 : courbe coûts / revenus et défenses qui gênent les autres
+
+## 2.1 La courbe mesurée, monde par monde
+
+`python -I dataset_and_pipeline/economy_simulator.py segments --runs 120 --hours 30` (capsule comprise, médianes).
+« Montée » = revenu en quittant le monde / revenu en y arrivant. « Plateau » = part du séjour passée après 90 % de la
+montée : on attend l'argent du monde suivant sans que le revenu bouge.
+
+| Séjour | Durée | Montée | Plateau | Revenu en sortie |
+| --- | --- | --- | --- | --- |
+| Prairie | 10 min | x356 | 40 % | 713/s |
+| Désert | 16 min | x20 | 20 % | 49K/s |
+| Volcan | 30 min | x8,3 | 21 % | 868K/s |
+| Glace | 1,1 h | x9,4 | 17 % | 15M/s |
+| Abysses | 1,9 h | x3,5 | 20 % | 94M/s |
+| Cosmos | 2,5 h | x1,6 | 51 % | 226M/s |
+| Divin | 2,3 h | x1,3 | 60 % | 501M/s |
+| Après le Rebirth 1 : Prairie -> Cosmos | ~1 h en tout | x1 | 100 % | |
+| Rebirth 1 : Divin | 2,5 h | x1,0 | ~100 % | 1,3B/s |
+| Rebirths 2 / 3 / 4 : Divin | 3,3 / 5,4 / 8,3 h | x1,03 à x1,05 | | 2,4 / 3,6 / 5,9B/s |
+
+Calendrier, capsule comprise : Désert 10 min, Volcan 26 min, Glace 54 min, Abysses 2,0 h, Cosmos 3,9 h, Divin 6,4 h,
+Rebirth 1 8,8 h, puis 12,2 h, 16,0 h, 21,8 h (cibles du 20 oct. : 10 min, 30 min, 1 h, 2 h, 3,5 h, 6 h, ~9 h).
+
+Ce que ça dit :
+- **Jusqu'aux Abysses, la dent de scie est bonne** : on arrive, le revenu monte vite (x3 à x20), puis ~20 % du
+  séjour à attendre. On n'y touche pas.
+- **Cosmos et Divin : la moitié du séjour à attendre.** La base est pleine de Sigma et de Divins dès la Glace
+  (meilleure rareté en quittant la Glace : Sigma dans 90 % des parties ; Mythique au Volcan, Légendaire au Désert,
+  Rare en Prairie). Il ne reste à gagner que les exclusifs des mondes.
+- **Après le 1er Rebirth, ce n'est plus une dent de scie, c'est une file d'attente** : on rachète les 5 premiers mondes
+  en ~1 h, puis on attend au Divin 2,5 h, 3,3 h, 5,4 h, 8,3 h sans que le revenu bouge.
+
+Prix ressentis (en minutes du revenu du moment, avant le 1er Rebirth, médianes) : améliorations 0,9 à 1,8 min
+(~8 min pour les 5 derniers niveaux de Tapis et Banc), mondes 12,6 min (8 au début, 15 à la fin). Les améliorations
+sont des achats « en passant » qui accélèrent la montée : rien d'inflationniste. **L'étape 7 du plan du 20 oct.
+(améliorations liées aux mondes) n'est donc pas nécessaire.**
+
+## 2.2 Les relations
+
+1. **Revenu** : `I = M_monde x (1 + Rebirths) x S`, où S = somme des 15 familiers de la base. S a un plafond : avec
+   les 106 familiers, **S_max = 32,6M/s** (les 10 Sigma font 29,3M, puis 5 Divins). La place de plus donnée par chaque
+   Rebirth ajoute un Divin : **+2 % seulement**.
+2. **Attente au Divin quand la base est pleine** : `T_n = prix du Rebirth n / (S x 16 x (1 + n))`. Sans capsule :
+   2,8 h, 5,0 h, 10 h, 21 h, 47 h (le simulateur trouve 3,0 / 4,8 / 9,1 h : la formule suffit à l'expliquer). Le prix
+   monte x2,7 par Rebirth, le revenu x(2 + n)/(1 + n) : l'attente grandit sans fin. La capsule fait grandir S d'environ
+   +20 % par cycle (40M, 50M, 56M, 74M mesurés) : les cycles mesurés durent 3,4 h, 3,8 h, 5,8 h, puis ~8 h.
+3. **Tirages d'une manche** : `tirages = log(1 + 0,11 x points) / log(1,22)`. Doubler ses points ne donne que
+   ~3,5 tirages de plus : la boucle active est volontairement freinée (réglage du 20 oct.) et plafonne à 24.
+4. **Ce que rapporte un vol** (gain de revenu divisé par le revenu du voleur, mesuré en quittant chaque monde, médianes) :
+
+   | Monde du voleur | +1 rareté au-dessus de son meilleur familier | +2 | +3 | +4 |
+   | --- | --- | --- | --- | --- |
+   | Prairie | x2,2 | x16 | x110 | x670 |
+   | Désert | x1,7 | x12 | x55 | |
+   | Volcan | x1,8 | x5,7 | | |
+
+   Un séjour dans un monde fait monter le revenu de x8 à x20 (Désert, Volcan, Glace). Donc : voler **une rareté
+   au-dessus casse le mur** (le revenu triple, l'attente du monde suivant est divisée par ~3) ; **deux raretés ≈ un monde
+   d'avance** ; trois et plus = plusieurs mondes sautés d'un coup (le jackpot C1).
+5. **Cycle du Rebirth** : `durée(n) = rachat des mondes + prix(n) / revenu(n)`. Pour que chaque cycle dure ρ fois le
+   précédent, il faut `prix(n + 1) / prix(n) = ρ x σ x (2 + n) / (1 + n)`, où σ = croissance de S pendant un cycle
+   (~1,2 avec une capsule). Le choix de ρ appartient à l'étape 4 (Rebirth).
+
+## 2.3 Les règles proposées (à prouver à l'étape 5 avant de toucher `Config.lua`)
+
+**Règle 1. Prix des mondes et de la Boutique avant le 1er Rebirth : inchangés.** Le calendrier colle aux cibles à
+±15 % près et une amélioration coûte 1 à 2 min de revenu.
+
+**Règle 2. Plafond pour les familiers « trop forts pour toi ».** Un familier rapporte au plus comme un familier de
+la rareté `r + 2`, où r = la meilleure rareté que le joueur a obtenue lui-même (tirages, fusion, capsule). Ça vaut pour
+les familiers volés, échangés, achetés au marché ou gagnés en duel. Un familier tiré soi-même n'est jamais bridé :
+en solo, la règle ne joue jamais. Dès que le joueur obtient lui-même une rareté de plus, le plafond monte d'autant.
+- D'où vient le « +2 » : relation 4. Deux raretés d'écart rapportent x6 à x16, autant que la montée d'un monde
+  (x8 à x20). Un coup de chance, ou un ami généreux, fait gagner au plus un monde, jamais trois.
+- Ce que ça change : le Sigma volé à 10 min rapporte comme un Légendaire ou un Mythique (gain ~x12 au lieu de x577) ;
+  jeté dans le trou, il rapporte 5M à 34M $ au lieu de 1,7B. Un vétéran ne peut plus remplir la base d'un nouvel ami de
+  Sigma qui rapportent tout de suite.
+- Dans le jeu : le familier affiche « Trop puissant pour toi : il rapporte X au lieu de Y. Obtiens un Mythique pour le
+  libérer. » Le gros familier volé devient un objectif au lieu d'un raccourci.
+
+**Règle 3. Marché : prix plafonné à 1 h du revenu du familier** (revenu plafonné par la règle 2), soit 6 fois le prix
+proposé (10 min). D'où vient 1 h : un séjour dans un monde dure environ 1 h (Glace 1,1 h). Personne n'achète un
+familier plus cher que ce qu'il rapporte pendant un séjour : au-delà, c'est un cadeau d'argent déguisé. Fini le
+Commun à 1T $. Taxe toujours à 0.
+
+**Règle 4. Il faut quelque chose qui fasse monter le revenu en fin de partie.** Quand la base est pleine, seule la
+capsule (une place) fait encore grandir S. Exigence : pendant chaque cycle de Rebirth, S doit pouvoir grandir d'au
+moins x1,5, sinon plus de la moitié du cycle est de l'attente pure. Les pistes, chiffrées, seront tranchées à
+l'étape 4 : une place de capsule de plus par Rebirth (une seule Sigma Ultime ajoute +60 % à S_max), les familiers
+évolués et mutés comme cibles de vol de fin de partie (le vol reste utile aux vétérans), prix du Rebirth recalculés par
+la relation 5.
+
+## 2.4 Les défenses et armes qui gênent les autres
+
+Méthode : pour chaque objet, on regarde qui il gêne, et ce qui se passe quand tout le monde l'a. Un objet utile à
+chacun, mais qui tue le vol quand tout le monde l'a, déclenche une course aux armements. Un prix plus haut ne fait que
+retarder le moment où tout le monde l'a : il faut limiter son **usage**.
+
+| Objet | Aujourd'hui | Quand tout le monde l'a | Règle proposée | D'où viennent les chiffres |
+| --- | --- | --- | --- | --- |
+| Verrou (bouton) | 5 s, relancé tant qu'on est dessus : fermé pour toujours | plus aucun vol chez ceux qui campent ; on ne vole que les absents et les débutants (F1, F4) | **Cycle fixe : fermé 45 s, puis bouton grisé 60 s.** 45 + 60 = 105 s = une manche : on ferme une fois par manche, et on choisit quand (pendant qu'on lance, ou pendant qu'on part voler) | 45 s = le Feeding : un débutant est loin, à lancer, pendant tout le Feeding (121 studs de marche) ; 60 s = la digestion |
+| Verrou renforcé (5M), VIP | 10 s ; +10 s | idem | rallongent la fermeture (55 s, 65 s avec les deux) dans le même cycle de 105 s ; la base reste ouverte **au moins 30 s** par cycle | 30 s = temps d'un débutant pour voler chez son voisin : 8 s d'entrée à entrée, 3 s jusqu'au familier, 0,3 s, puis le retour (20 s en tout pour un Légendaire, 32 s pour un Sigma : le plus lourd reste juste hors de portée d'un débutant) |
+| Batte (2K) | assommé 1,4 s, protégé 2 s : jusqu'à 70 % du temps au sol | harcèlement | **2 coups au plus par victime toutes les 10 s** (28 % du temps au sol au maximum) | 10 s = le trajet d'un vol (109 studs à 16 = 6,8 s) + 1,5 s de réaction + 1,4 s de KO : le temps de se relever et d'agir |
+| Grappin (150K) | défense totale chez soi (0 % de vols réussis) | tout le monde l'a dès le Volcan | prix gardé ; le 0 % est un problème de poursuite : **étape 3** | |
+| Invisibilité (500K), clés (49 R$) | outils du voleur | | gardés ; avec le cycle du verrou, la clé n'est plus le seul moyen de voler un riche qui campe | |
+| Aimant, aspirateur | prennent les objets sauvages, partagés | ~1 objet de moins par manche pour les autres (~5 % de leurs points) | gardés | 11 objets sauvages par Feeding pour tout le serveur |
+| Familier jeté dans le trou | 600 s du revenu du familier | jackpot (C1) | même calcul, sur le revenu plafonné (règle 2) | |
+
+Pourquoi aucune défense réservée aux joueurs qui ont fait un Rebirth : les débutants resteraient sans défense, donc
+seules cibles (F4).
+
+Ce qui change pour le joueur riche : aujourd'hui, camper sur son bouton ne coûte rien et protège à 100 %. C'est la
+meilleure stratégie, et elle tue le vol. Avec le cycle, sa base est ouverte au moins 40 s par manche (60 s sans
+bonus) : il doit être là et se défendre (batte, grappin, « Reprendre ») pendant ces moments. La meilleure stratégie
+devient « être chez soi quand c'est ouvert » : du jeu actif, et une raison de revenir vers sa base.
+
+## 2.5 Suite
+
+- Étape 3 : poursuite et poids (grappin à 100 %, carte qui rétrécit, vol tout ou rien), protection après une grosse perte.
+- Étape 4 : ce qui fait monter le revenu en fin de partie, et le Rebirth (choix de ρ).
+- Étape 5 : simulateur à 8 joueurs avec vols, pour prouver les règles 2 et 3, le cycle du verrou et la règle de la
+  batte avant de toucher `Config.lua`.

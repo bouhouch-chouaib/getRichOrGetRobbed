@@ -1,0 +1,3775 @@
+{
+  "config": {
+    "AntiCheat": {
+      "FlightTimeMargin": 0.15,
+      "MaxFlightTime": 8,
+      "MinFlightRatio": 0.9,
+      "MinThrowInterval": 0.12,
+      "RangeBonus": 15,
+      "RangeMargin": 1.25
+    },
+    "Arena": {
+      "BaseCount": 8,
+      "BaseRingRadius": 215,
+      "BaseSize": [
+        84,
+        1,
+        84
+      ],
+      "DomeRadius": 55,
+      "FloorRadius": 315,
+      "HoleConsumeHeight": 20,
+      "HoleRadius": 40
+    },
+    "Badges": [
+      {
+        "Description": "Rejoindre Get Rich Or Get Robbed pour la première fois.",
+        "Id": 0,
+        "Key": "Welcome",
+        "Name": "Bienvenue !"
+      },
+      {
+        "Description": "Faire éclore son premier œuf.",
+        "Id": 0,
+        "Key": "FirstHatch",
+        "Name": "Premier œuf"
+      },
+      {
+        "Description": "Voler un familier dans une base adverse et le ramener chez soi.",
+        "Id": 0,
+        "Key": "FirstSteal",
+        "Name": "Voleur"
+      },
+      {
+        "Description": "Gagner un duel de familiers.",
+        "Id": 0,
+        "Key": "DuelWin",
+        "Name": "Champion de l'arène"
+      },
+      {
+        "Description": "Atteindre le monde Désert.",
+        "Id": 0,
+        "Key": "WorldDesert",
+        "Name": "Voyageur"
+      },
+      {
+        "Description": "Atteindre le monde Cosmos.",
+        "Id": 0,
+        "Key": "WorldCosmos",
+        "Name": "Explorateur cosmique"
+      },
+      {
+        "Description": "Atteindre le dernier monde : Divin.",
+        "Id": 0,
+        "Key": "WorldDivin",
+        "Name": "Divin"
+      },
+      {
+        "Description": "Faire son premier Rebirth.",
+        "Id": 0,
+        "Key": "FirstRebirth",
+        "Name": "Renaissance"
+      },
+      {
+        "Description": "Découvrir 25 familiers différents.",
+        "Id": 0,
+        "Key": "Index25",
+        "Name": "Collectionneur"
+      },
+      {
+        "Description": "Découvrir 50 familiers différents.",
+        "Id": 0,
+        "Key": "Index50",
+        "Name": "Grand collectionneur"
+      },
+      {
+        "Description": "Découvrir les 75 familiers.",
+        "Id": 0,
+        "Key": "Index75",
+        "Name": "Index complet"
+      },
+      {
+        "Description": "Obtenir un familier Ultime dans la capsule d'évolution.",
+        "Id": 0,
+        "Key": "Ultime",
+        "Name": "Évolution ultime"
+      },
+      {
+        "Description": "Obtenir un familier Sigma.",
+        "Id": 0,
+        "Key": "Sigma",
+        "Name": "Légende Sigma"
+      }
+    ],
+    "BaseColors": [
+      "ff5a5a",
+      "5aaaff",
+      "aa6eff",
+      "ffaa3c",
+      "5af0b4",
+      "ff78d2",
+      "fae65a",
+      "78e6ff"
+    ],
+    "Blackhole": {
+      "Collapse": {
+        "Rewards": [
+          "Legendaire",
+          "Epique",
+          "Epique"
+        ],
+        "ScoreMultiplier": 2
+      },
+      "Combo": {
+        "Max": 2,
+        "Step": 0.25,
+        "Window": 5
+      },
+      "GaugeNeed": [
+        40,
+        50,
+        60,
+        75,
+        90,
+        110,
+        130
+      ],
+      "Gravity": {
+        "MeteorCount": 3,
+        "MeteorInterval": 18,
+        "MeteorValue": 5,
+        "PullRadius": 150,
+        "Speed": 6,
+        "StopRadius": 52
+      },
+      "Jackpot": {
+        "Duration": 10,
+        "Multiplier": 5
+      },
+      "Lava": {
+        "Count": 3,
+        "FlightTime": 2,
+        "Interval": 15,
+        "MaxRadius": 125,
+        "MinRadius": 70,
+        "ValueMultiplier": 3
+      },
+      "PlayerScaling": 0.6,
+      "Target": {
+        "Multiplier": 2,
+        "Radius": 14
+      },
+      "Tentacles": {
+        "MaxAge": 5,
+        "MaxHeight": 10,
+        "Reach": 14
+      },
+      "Tiers": [
+        {
+          "Color": "9600ff",
+          "Color2": "ff5ae6",
+          "Hint": "Le trou noir s'éveille. Nourris-le !",
+          "Name": "ÉVEIL",
+          "Wall": [
+            "9646e6",
+            "7d37c8",
+            "ff78e6"
+          ]
+        },
+        {
+          "Color": "ff6e14",
+          "Color2": "ffdc3c",
+          "Hint": "Il recrache des roches de lave : x3 points !",
+          "Name": "ÉRUPTION",
+          "TopNeon": true,
+          "Wall": [
+            "463c40",
+            "362e32",
+            "ff641e"
+          ]
+        },
+        {
+          "Color": "ff3246",
+          "Color2": "ffffff",
+          "Hint": "Vise le centre : points x2 !",
+          "Name": "CIBLE",
+          "Wall": [
+            "f0323c",
+            "ffffff",
+            "ffcd28"
+          ]
+        },
+        {
+          "Color": "00c8be",
+          "Color2": "783cc8",
+          "Hint": "Ses tentacules rattrapent les lancers trop courts.",
+          "Name": "ABYSSES",
+          "TopNeon": true,
+          "Wall": [
+            "14466e",
+            "0e385e",
+            "3cdcb4"
+          ]
+        },
+        {
+          "Color": "ffa03c",
+          "Color2": "6ebeff",
+          "Hint": "Il attire les objets et fait pleuvoir des météorites.",
+          "Name": "GRAVITÉ",
+          "Wall": [
+            "462878",
+            "361e64",
+            "ffaa3c"
+          ]
+        },
+        {
+          "Color": "78e6ff",
+          "Color2": "ff78dc",
+          "Hint": "Enchaîne les lancers : combo jusqu'à x2 !",
+          "Name": "SUPERNOVA",
+          "Wall": [
+            "3c96e6",
+            "2878d2",
+            "ffffff"
+          ]
+        },
+        {
+          "Color": "ffcd32",
+          "Color2": "fffae1",
+          "Hint": "Jackpot x5 pendant 10 s, une fois par tour !",
+          "Name": "DIVIN",
+          "Wall": [
+            "faf4e6",
+            "ece2cc",
+            "ffcd3c"
+          ]
+        }
+      ]
+    },
+    "Carry": {
+      "MaxCarryTime": 180,
+      "MaxSpeed": 0.95,
+      "MinSpeed": 0.3,
+      "Slow": 0.8,
+      "StrengthPerCapacity": 10,
+      "WalkHomeSpeed": 9,
+      "WeightExponent": 3
+    },
+    "Codes": {
+      "LANCEMENT": {
+        "Reward": {
+          "Pulls": 3,
+          "Seconds": 1800
+        }
+      },
+      "MERCI": {
+        "Reward": {
+          "Seconds": 900
+        }
+      },
+      "TROUNOIR": {
+        "Reward": {
+          "Pulls": 2
+        }
+      }
+    },
+    "Colors": {
+      "Digesting": "ff2828",
+      "Feeding": "9600ff"
+    },
+    "Daily": {
+      "MinMoney": 500,
+      "Rewards": [
+        {
+          "Seconds": 300
+        },
+        {
+          "Pulls": 1
+        },
+        {
+          "Seconds": 900
+        },
+        {
+          "Pulls": 3
+        },
+        {
+          "Seconds": 1800
+        },
+        {
+          "Pulls": 5
+        },
+        {
+          "Pulls": 10,
+          "Seconds": 3600
+        }
+      ]
+    },
+    "Duel": {
+      "ArenaCenter": [
+        0,
+        165,
+        0
+      ],
+      "ArenaSpacing": 120,
+      "AttackInterval": 0.55,
+      "BaseAttack": 12,
+      "BaseHP": 150,
+      "CheerMax": 0.6,
+      "CheerPerClick": 0.05,
+      "CheerRate": 8,
+      "CritChance": 0.12,
+      "CritMultiplier": 2,
+      "InviteTime": 15,
+      "MaxArenas": 3,
+      "MaxRarityGap": 1,
+      "MaxTime": 45,
+      "MinIncome": 50,
+      "PerRarity": 0.35,
+      "PickTime": 60,
+      "PromptDistance": 12,
+      "RequestCooldown": 6,
+      "SizeBonus": 0.1,
+      "SpinTime": 4.5,
+      "Spread": 0.2,
+      "Wheel": [
+        {
+          "Color": "ffcd32",
+          "Kind": "Pet",
+          "Label": "SON FAMILIER !"
+        },
+        {
+          "Color": "6eeb28",
+          "Kind": "Money",
+          "Label": "2 MIN D'ARGENT",
+          "Seconds": 120
+        },
+        {
+          "Color": "36ccfe",
+          "Kind": "Pulls",
+          "Label": "1 TIRAGE",
+          "Pulls": 1
+        },
+        {
+          "Color": "50c83c",
+          "Kind": "Money",
+          "Label": "5 MIN D'ARGENT",
+          "Seconds": 300
+        },
+        {
+          "Color": "ff78d2",
+          "Kind": "Respin",
+          "Label": "RELANCE !"
+        },
+        {
+          "Color": "6eeb28",
+          "Kind": "Money",
+          "Label": "2 MIN D'ARGENT",
+          "Seconds": 120
+        },
+        {
+          "Color": "a828fc",
+          "Kind": "Pulls",
+          "Label": "3 TIRAGES",
+          "Pulls": 3
+        },
+        {
+          "Color": "ffa028",
+          "Kind": "Money",
+          "Label": "10 MIN D'ARGENT",
+          "Seconds": 600
+        }
+      ]
+    },
+    "Durations": {
+      "Digesting": 60,
+      "Feeding": 45
+    },
+    "Economy": {
+      "IncomeSecondsPerPoint": 0.02,
+      "MoneyPerPoint": 15
+    },
+    "Effects": {
+      "RevealMinRarity": 4,
+      "RevealTime": 3.5,
+      "ShakeKnockback": 1,
+      "ShakeReveal": 0.5,
+      "ShakeStealAlarm": 0.35
+    },
+    "Eggs": {
+      "BuildUp": [
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        5,
+        6,
+        7
+      ],
+      "Seconds": {
+        "Commun": 15,
+        "Divin": 1200,
+        "Epique": 180,
+        "Inhabituel": 30,
+        "Legendaire": 300,
+        "Mythique": 600,
+        "Rare": 60,
+        "Sigma": 1800
+      },
+      "ViewDistance": 140
+    },
+    "Evolution": {
+      "IncomeMultiplier": [
+        1,
+        3,
+        8
+      ],
+      "MaxStageWeights": [
+        40,
+        42,
+        18
+      ],
+      "Names": [
+        "",
+        "Évolué",
+        "Ultime"
+      ],
+      "PowerMultiplier": [
+        1,
+        1.4,
+        2
+      ],
+      "SizeMultiplier": [
+        1,
+        1.18,
+        1.36
+      ],
+      "Slots": 1,
+      "SpeedPerTier": 0.06,
+      "StageTimeFactor": [
+        4,
+        12
+      ],
+      "TimeJitter": 0.25,
+      "UltimeWeightPerTier": 2,
+      "UseDistance": 18
+    },
+    "Friends": {
+      "BonusPerFriend": 0.1,
+      "MaxFriends": 5
+    },
+    "Fusion": {
+      "Costs": [
+        250,
+        8000,
+        190000,
+        3500000,
+        60000000,
+        1500000000
+      ],
+      "Count": 5,
+      "MaxFromRarity": 6,
+      "Mutation": {
+        "CarryChance": 0.12,
+        "UpgradeChance": 0.3
+      }
+    },
+    "Group": {
+      "Id": 0,
+      "IncomeBonus": 0.1
+    },
+    "Index": {
+      "MinReward": 100,
+      "RewardSeconds": 120
+    },
+    "ItemColors": [
+      "ff5050",
+      "50c8ff",
+      "ffdc3c",
+      "78ff78",
+      "ff78dc",
+      "ffa032"
+    ],
+    "ItemTiers": [
+      {
+        "Color": "96969b",
+        "Id": "Caillou",
+        "Material": "Enum.Material.Slate",
+        "Name": "Caillou",
+        "Shape": "Enum.PartType.Block",
+        "Size": 1.8,
+        "Value": 0.25,
+        "Weight": 1000
+      },
+      {
+        "Color": "c8553c",
+        "Id": "Brique",
+        "Material": "Enum.Material.Brick",
+        "Name": "Brique",
+        "Shape": "Enum.PartType.Block",
+        "Size": 2.1,
+        "Value": 0.5,
+        "Weight": 350
+      },
+      {
+        "Color": "50dcff",
+        "Id": "Cristal",
+        "Material": "Enum.Material.Neon",
+        "Name": "Cristal",
+        "Shape": "Enum.PartType.Block",
+        "Size": 2,
+        "Value": 1,
+        "Weight": 100
+      },
+      {
+        "Color": "ffc828",
+        "Glow": true,
+        "Id": "Lingot",
+        "Material": "Enum.Material.Foil",
+        "Name": "Lingot d'or",
+        "Shape": "Enum.PartType.Block",
+        "Size": 2.2,
+        "Value": 2.5,
+        "Weight": 25
+      },
+      {
+        "Color": "c8faff",
+        "Glow": true,
+        "Id": "Diamant",
+        "Material": "Enum.Material.Neon",
+        "Name": "Diamant",
+        "Shape": "Enum.PartType.Block",
+        "Size": 2,
+        "Value": 6,
+        "Weight": 6
+      },
+      {
+        "Color": "aa3cff",
+        "Glow": true,
+        "Id": "Meteorite",
+        "Material": "Enum.Material.Neon",
+        "Name": "Météorite",
+        "Shape": "Enum.PartType.Block",
+        "Size": 2.6,
+        "Value": 15,
+        "Weight": 1
+      }
+    ],
+    "Items": {
+      "MaxLooseItems": 80,
+      "MaxPerBase": 12,
+      "QualityBoost": 0.2,
+      "SpawnInterval": 2,
+      "StarterCount": 5,
+      "WildInterval": 4,
+      "WildMax": 25,
+      "WildMaxRadius": 160,
+      "WildMinRadius": 70,
+      "WildQuality": 2
+    },
+    "Keys": {
+      "Duration": 10,
+      "HoldDuration": 0.6,
+      "ProtectAfter": 20,
+      "UseDistance": 14
+    },
+    "Knockback": {
+      "Cooldown": 1.5,
+      "ItemOutwardSpeed": 70,
+      "ItemUpSpeed": 45,
+      "OutwardSpeed": 110,
+      "SitDuration": 1.5,
+      "UpSpeed": 55
+    },
+    "Leaderboard": {
+      "Angle": 67.5,
+      "Radius": 190,
+      "RefreshInterval": 60,
+      "Size": 10
+    },
+    "Lock": {
+      "ButtonRadius": 4,
+      "Duration": 5,
+      "LongDuration": 10
+    },
+    "Loot": {
+      "AnnounceMinRarity": 5,
+      "KeepCopies": 5,
+      "LuckPerPoint": 0.005,
+      "MaxLuck": 1,
+      "NewPetWeight": 5,
+      "PityMinRarity": 4,
+      "PityPulls": 60,
+      "PullCost": 2,
+      "PullCostGrowth": 0.22,
+      "Ranks": [
+        {
+          "Floor": 1,
+          "Name": "APPRENTI",
+          "Pulls": 0
+        },
+        {
+          "Floor": 2,
+          "Name": "DOMPTEUR",
+          "Pulls": 150
+        },
+        {
+          "Floor": 3,
+          "Name": "MAÎTRE",
+          "Pulls": 600
+        }
+      ],
+      "RevealCards": 8,
+      "RevealHold": 2.2,
+      "RevealStep": 0.28,
+      "SellSeconds": 300
+    },
+    "Magnet": {
+      "Interval": 0.35,
+      "Radius": [
+        7,
+        10,
+        13,
+        16,
+        20
+      ]
+    },
+    "Market": {
+      "MaxListings": 3,
+      "MaxPrice": 1e+30,
+      "MinPrice": 1,
+      "MinSuggested": 100,
+      "SuggestedSeconds": 600,
+      "Tax": 0
+    },
+    "Monetization": {
+      "CreatorOwnsPasses": false,
+      "DoubleMoneyMultiplier": 2,
+      "ExtraBackpack": 1,
+      "ExtraEquipSlots": 2,
+      "GamePasses": [
+        {
+          "Description": "Revenu et gains d'argent x2, pour toujours.",
+          "Icon": "Money",
+          "Id": 2025998871,
+          "Key": "DoubleMoney",
+          "Name": "2X ARGENT",
+          "Price": 399
+        },
+        {
+          "Description": "+25 % d'argent, étiquette VIP au-dessus de la tête, verrou de base +10 s.",
+          "Icon": "Crown",
+          "Id": 2026292822,
+          "Key": "VIP",
+          "Name": "VIP",
+          "Price": 299
+        },
+        {
+          "Description": "Aspire TOUS les objets autour de toi, très vite, et porte 4 objets de plus. Active-le ou coupe-le avec son bouton (touche G).",
+          "Icon": "Vortex",
+          "Id": 2038180912,
+          "Key": "Vacuum",
+          "Name": "ASPIRATEUR",
+          "Price": 199
+        },
+        {
+          "Description": "Porte 1 objet de plus.",
+          "Icon": "Backpack",
+          "Id": 2025176879,
+          "Key": "ExtraBackpack",
+          "Name": "SAC À DOS +1",
+          "Price": 149
+        },
+        {
+          "Description": "Équipe 2 familiers de plus.",
+          "Icon": "Paw",
+          "Id": 2025296892,
+          "Key": "EquipPlus2",
+          "Name": "ÉQUIPEMENT +2",
+          "Price": 799
+        },
+        {
+          "Description": "Meilleure chance à tous tes tirages.",
+          "Icon": "Clover",
+          "Id": 2026568802,
+          "Key": "LuckyLuck",
+          "Name": "CHANCE CHANCEUSE",
+          "Price": 399
+        }
+      ],
+      "LuckyLuckBonus": 0.5,
+      "Products": [
+        {
+          "Description": "Cristaux lumineux, étoiles cyan et violettes, et une traînée quand tu cours. Activée automatiquement, pour toujours.",
+          "Icon": "Sparkle",
+          "Id": 3718429232,
+          "Key": "AstralAura",
+          "Name": "AURA ASTRALE",
+          "Price": 19
+        },
+        {
+          "Description": "10 minutes de chance x2 pour TOUT le serveur !",
+          "Icon": "Sparkle",
+          "Id": 3717917081,
+          "Key": "ServerLuck",
+          "Name": "BOOST DE CHANCE SERVEUR",
+          "Price": 149
+        },
+        {
+          "Description": "1 œuf de familier. Délai d’éclosion selon sa rareté.",
+          "Icon": "Dice",
+          "Id": 3717917143,
+          "Key": "Pull1",
+          "Name": "TIRAGE INSTANTANÉ",
+          "Price": 49,
+          "Pulls": 1
+        },
+        {
+          "Description": "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.",
+          "Icon": "Key",
+          "Id": 3718327246,
+          "Key": "Key1",
+          "Keys": 1,
+          "Name": "CLÉ",
+          "Price": 49
+        },
+        {
+          "Description": "10 œufs de familiers. Éclosion en parallèle selon leur rareté.",
+          "Icon": "Gift",
+          "Id": 3717917239,
+          "Key": "Pull10",
+          "Name": "10 TIRAGES",
+          "Price": 399,
+          "Pulls": 10
+        }
+      ],
+      "PullLuck": 0.5,
+      "ServerLuckBonus": 1,
+      "ServerLuckDuration": 600,
+      "StudioTestPasses": {},
+      "VipLockBonus": 10,
+      "VipMoneyMultiplier": 1.25
+    },
+    "MutationIndex": {
+      "Diamond": 2,
+      "Gold": 1,
+      "Rainbow": 3
+    },
+    "Mutations": [
+      {
+        "Announce": true,
+        "Chance": 0.00025,
+        "Color": "ffc828",
+        "Id": "Gold",
+        "Income": 2,
+        "Name": "Doré"
+      },
+      {
+        "Announce": true,
+        "Chance": 0.00004,
+        "Color": "8ce6ff",
+        "Id": "Diamond",
+        "Income": 5,
+        "Name": "Diamant"
+      },
+      {
+        "Announce": true,
+        "Chance": 6.666666666666667e-6,
+        "Color": "ff64d2",
+        "Id": "Rainbow",
+        "Income": 10,
+        "Name": "Arc-en-ciel"
+      }
+    ],
+    "Newcomer": {
+      "BonusMoney": 500,
+      "PetId": "ChienSaucisse",
+      "ProtectionSeconds": 300
+    },
+    "Pets": {
+      "AuraDistance": 110,
+      "AuraUpdateInterval": 0.05,
+      "EquipBonus": {
+        "Levels": [
+          2,
+          3,
+          5,
+          7,
+          10,
+          14,
+          19,
+          26
+        ],
+        "MaxLevels": 30,
+        "SpeedShareBig": 0.2,
+        "SpeedShareSmall": 0.8
+      },
+      "EquipSlots": 1,
+      "IncomeSlots": 15,
+      "ModelStyle": "Sculpted",
+      "MotionDistance": 140,
+      "MotionFarInterval": 0.1,
+      "MotionNearDistance": 60
+    },
+    "PlayerAura": {
+      "Primary": "48e8ff",
+      "RunSpeed": 8,
+      "Secondary": "ae58ff",
+      "TeleportDistance": 14,
+      "TrailLifetime": 0.5,
+      "UnlockId": "AstralAura",
+      "UpdateInterval": 0.03333333333333333,
+      "ViewDistance": 120
+    },
+    "Quests": {
+      "MinMoney": 500,
+      "PerDay": 3,
+      "Pool": [
+        {
+          "Goals": [
+            25,
+            60,
+            150
+          ],
+          "Id": "Feed",
+          "Text": "Fais avaler %d objets au trou noir"
+        },
+        {
+          "Goals": [
+            3,
+            8,
+            20
+          ],
+          "Id": "Pulls",
+          "Text": "Gagne %d tirages"
+        },
+        {
+          "Goals": [
+            3,
+            8,
+            20
+          ],
+          "Id": "Hatch",
+          "Text": "Fais éclore %d œufs"
+        },
+        {
+          "Goals": [
+            2,
+            5,
+            10
+          ],
+          "Id": "Train",
+          "Text": "Gagne %d niveaux de Vitesse ou de Force"
+        },
+        {
+          "Goals": [
+            1,
+            3,
+            6
+          ],
+          "Id": "Upgrade",
+          "Text": "Achète %d améliorations dans la Boutique"
+        },
+        {
+          "Goals": [
+            1,
+            2,
+            4
+          ],
+          "Id": "Steal",
+          "Text": "Vole %d familiers dans les bases adverses"
+        }
+      ],
+      "Rewards": [
+        {
+          "Seconds": 600
+        },
+        {
+          "Pulls": 1,
+          "Seconds": 1200
+        },
+        {
+          "Pulls": 3,
+          "Seconds": 2400
+        }
+      ]
+    },
+    "Rarities": [
+      {
+        "Color": "c8c8c8",
+        "Id": "Commun",
+        "Income": 2,
+        "Multiplier": 1.1,
+        "Name": "Commun",
+        "Weight": 500
+      },
+      {
+        "Color": "64dc5a",
+        "Id": "Inhabituel",
+        "Income": 14,
+        "Multiplier": 1.2,
+        "Name": "Inhabituel",
+        "Weight": 260
+      },
+      {
+        "Color": "46a0ff",
+        "Id": "Rare",
+        "Income": 100,
+        "Multiplier": 1.35,
+        "Name": "Rare",
+        "Weight": 140
+      },
+      {
+        "Color": "b450ff",
+        "Id": "Epique",
+        "Income": 700,
+        "Multiplier": 1.6,
+        "Name": "Épique",
+        "Weight": 60
+      },
+      {
+        "Color": "ffaa1e",
+        "Id": "Legendaire",
+        "Income": 5000,
+        "Multiplier": 2,
+        "Name": "Légendaire",
+        "Weight": 28
+      },
+      {
+        "Color": "ff4678",
+        "Id": "Mythique",
+        "Income": 35000,
+        "Multiplier": 3,
+        "Name": "Mythique",
+        "Weight": 9
+      },
+      {
+        "Color": "78fff5",
+        "Id": "Divin",
+        "Income": 250000,
+        "Multiplier": 5,
+        "Name": "Divin",
+        "Weight": 2.5
+      },
+      {
+        "Color": "ffe63c",
+        "Id": "Sigma",
+        "Income": 1750000,
+        "Multiplier": 10,
+        "Name": "Sigma",
+        "Weight": 0.5
+      }
+    ],
+    "RarityIndex": {
+      "Commun": 1,
+      "Divin": 7,
+      "Epique": 4,
+      "Inhabituel": 2,
+      "Legendaire": 5,
+      "Mythique": 6,
+      "Rare": 3,
+      "Sigma": 8
+    },
+    "Rebirth": {
+      "BasePrice": 4000000000000,
+      "ExtraPets": 1,
+      "IncomeBonus": 1,
+      "KeepShopItems": {
+        "PowerInvisible": true,
+        "WeaponBat": true,
+        "WeaponGrapple": true
+      },
+      "MaxExtraPets": 5,
+      "PriceGrowth": 2.7,
+      "RequiredTier": 7
+    },
+    "Sacrifice": {
+      "IncomeSeconds": 600,
+      "Points": [
+        2,
+        4,
+        8,
+        15,
+        30,
+        60,
+        120,
+        240
+      ],
+      "Range": 22,
+      "Throw": {
+        "End": 0.85,
+        "Release": 0.4,
+        "WindUp": 0.28
+      }
+    },
+    "Save": {
+      "Version": 3
+    },
+    "Shop": [
+      {
+        "BasePrice": 500,
+        "Description": "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 5 modèles (bois, acier, or, cristal, cosmique) : chaque niveau entraîne plus vite.",
+        "Icon": "Treadmill",
+        "Id": "Treadmill",
+        "MaxLevel": 25,
+        "Name": "Tapis de course",
+        "PriceGrowth": 2.44
+      },
+      {
+        "BasePrice": 500,
+        "Description": "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.",
+        "Icon": "Bench",
+        "Id": "Bench",
+        "MaxLevel": 25,
+        "Name": "Banc de muscu",
+        "PriceGrowth": 2.44
+      },
+      {
+        "BasePrice": 2000,
+        "Description": "Plus de lingots, diamants et météorites sur tes palettes (+20 % de chance par niveau sur les objets rares).",
+        "Icon": "Clover",
+        "Id": "ItemQuality",
+        "MaxLevel": 10,
+        "Name": "Chance",
+        "PriceGrowth": 7.7
+      },
+      {
+        "BasePrice": 25000,
+        "Description": "Porte un objet de plus à chaque niveau.",
+        "Icon": "Backpack",
+        "Id": "Backpack",
+        "MaxLevel": 4,
+        "Name": "Sac à dos",
+        "PriceGrowth": 150
+      },
+      {
+        "BasePrice": 20000,
+        "Description": "Active ou coupe l’aimant avec son bouton. Priorité aux objets qui rapportent le plus. Plus de portée à chaque niveau.",
+        "Icon": "Magnet",
+        "Id": "Magnet",
+        "MaxLevel": 5,
+        "Name": "Aimant à objets",
+        "PriceGrowth": 9
+      },
+      {
+        "BasePrice": 5000000,
+        "Description": "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.",
+        "Icon": "Lock",
+        "Id": "LongLock",
+        "MaxLevel": 1,
+        "Name": "Verrou renforcé",
+        "PriceGrowth": 1
+      },
+      {
+        "BasePrice": 2000,
+        "Description": "ARME : un grand coup de batte qui envoie valser un joueur et lui fait TOUT lâcher (objets, familier volé).",
+        "Icon": "Bat",
+        "Id": "WeaponBat",
+        "MaxLevel": 1,
+        "Name": "Batte",
+        "PriceGrowth": 1
+      },
+      {
+        "BasePrice": 500000,
+        "Description": "POUVOIR : 6 s presque invisible pour t'approcher en douce. Se brise dès que tu ramasses, voles, frappes ou te fais toucher. Recharge 45 s.",
+        "Icon": "Ghost",
+        "Id": "PowerInvisible",
+        "MaxLevel": 1,
+        "Name": "Invisibilité",
+        "PriceGrowth": 1
+      },
+      {
+        "BasePrice": 150000,
+        "Description": "ARME : vise un joueur et tire : le crochet l'attrape et le ramène jusqu'à toi. Parfait pour rattraper un voleur !",
+        "Icon": "Grapple",
+        "Id": "WeaponGrapple",
+        "MaxLevel": 1,
+        "Name": "Grappin",
+        "PriceGrowth": 1
+      }
+    ],
+    "Sounds": {
+      "Effects": {
+        "BatHit": {
+          "Id": 9125380872,
+          "Volume": 0.9
+        },
+        "BatSwing": {
+          "Id": 9120711836,
+          "Pitch": 0.85,
+          "Volume": 0.7
+        },
+        "Cash": {
+          "Id": 9113728756,
+          "Volume": 0.6
+        },
+        "Coins": {
+          "Id": 9113704038,
+          "Volume": 0.7
+        },
+        "Consume": {
+          "Id": 9112752639,
+          "Volume": 0.9
+        },
+        "Effort": {
+          "Id": 9120416707,
+          "Volume": 0.7
+        },
+        "Error": {
+          "Id": 9119668978,
+          "Pitch": 0.55,
+          "Volume": 0.6
+        },
+        "FusionDone": {
+          "Id": 1841209502,
+          "Volume": 0.7
+        },
+        "GrappleFire": {
+          "Id": 9120711836,
+          "Pitch": 0.6,
+          "Volume": 0.8
+        },
+        "GrappleLatch": {
+          "Id": 9113760542,
+          "Pitch": 1.2,
+          "Volume": 0.9
+        },
+        "GrappleReel": {
+          "Id": 9118138365,
+          "Pitch": 1.8,
+          "Volume": 0.6
+        },
+        "HoleBonus": {
+          "Id": 9119668796,
+          "Pitch": 1.8,
+          "Volume": 0.7
+        },
+        "HoleCatch": {
+          "Id": 9112752639,
+          "Pitch": 0.6,
+          "Volume": 1
+        },
+        "HoleCollapse": {
+          "Id": 1841209502,
+          "Pitch": 0.7,
+          "Volume": 0.9
+        },
+        "HoleJackpot": {
+          "Id": 9113704038,
+          "Volume": 0.9
+        },
+        "HoleMeteors": {
+          "Id": 9120711836,
+          "Pitch": 0.45,
+          "Volume": 0.9
+        },
+        "HoleRumble": {
+          "Id": 9113564868,
+          "Pitch": 0.45,
+          "Volume": 0.9
+        },
+        "HoleTierUp": {
+          "Id": 1839881844,
+          "Volume": 0.8
+        },
+        "Knockback": {
+          "Id": 9113564868,
+          "Volume": 0.8
+        },
+        "LevelUp": {
+          "Id": 1844016113,
+          "Volume": 0.6
+        },
+        "Lock": {
+          "Id": 9113760542,
+          "Volume": 0.8
+        },
+        "ModelUnlock": {
+          "Id": 9043151109,
+          "Volume": 0.6
+        },
+        "PetArrival": {
+          "Id": 9119668796,
+          "Pitch": 0.8,
+          "Volume": 0.8
+        },
+        "PhaseDigesting": {
+          "Id": 9045119921,
+          "Volume": 0.6
+        },
+        "PhaseFeeding": {
+          "Id": 1841324020,
+          "Volume": 0.6
+        },
+        "Pickup": {
+          "Id": 9119668978,
+          "Volume": 0.8
+        },
+        "Purchase": {
+          "Id": 9044783668,
+          "Volume": 0.7
+        },
+        "RareDrop": {
+          "Id": 1839881844,
+          "Volume": 0.7
+        },
+        "Recovered": {
+          "Id": 9038684308,
+          "Volume": 0.7
+        },
+        "Reveal": {
+          "Id": 9119668978,
+          "Pitch": 0.75,
+          "Volume": 0.8
+        },
+        "Rewards": {
+          "Id": 1840076509,
+          "Volume": 0.7
+        },
+        "Score": {
+          "Id": 9119668796,
+          "Pitch": 1.4,
+          "Volume": 0.5
+        },
+        "StealAlarm": {
+          "Id": 9113085764,
+          "Volume": 0.6
+        },
+        "StealFail": {
+          "Id": 115475565309914,
+          "Volume": 0.7
+        },
+        "StealStart": {
+          "Id": 9120711836,
+          "Pitch": 0.8,
+          "Volume": 0.8
+        },
+        "StealSuccess": {
+          "Id": 9038686624,
+          "Volume": 0.7
+        },
+        "Throw": {
+          "Id": 9120711836,
+          "Volume": 0.6
+        },
+        "Tick": {
+          "Id": 9118138365,
+          "Volume": 0.5
+        },
+        "UiClick": {
+          "Id": 9119668978,
+          "Pitch": 1.35,
+          "Volume": 0.45
+        },
+        "Vanish": {
+          "Id": 9120711836,
+          "Pitch": 1.9,
+          "Volume": 0.7
+        },
+        "WindowOpen": {
+          "Id": 9120711836,
+          "Pitch": 1.5,
+          "Volume": 0.35
+        }
+      },
+      "EffectsVolume": 0.7,
+      "MusicDuck": 0.35,
+      "MusicFade": 2,
+      "MusicVolume": 0.12,
+      "Playlists": [
+        [
+          {
+            "Id": 83546335370083,
+            "Volume": 0.7
+          },
+          {
+            "Id": 136821672329242,
+            "Volume": 0.7
+          },
+          {
+            "Id": 121991101341350,
+            "Volume": 0.7
+          },
+          {
+            "Id": 9046863253,
+            "Volume": 0.6
+          }
+        ],
+        [
+          {
+            "Id": 9046862941,
+            "Volume": 0.6
+          },
+          {
+            "Id": 89402602954424,
+            "Volume": 0.7
+          },
+          {
+            "Id": 136397868028391,
+            "Volume": 0.7
+          },
+          {
+            "Id": 9046691155,
+            "Volume": 0.6
+          }
+        ],
+        [
+          {
+            "Id": 9044974640,
+            "Volume": 0.6
+          },
+          {
+            "Id": 140218338777776,
+            "Volume": 0.7
+          },
+          {
+            "Id": 9046863579,
+            "Volume": 0.6
+          },
+          {
+            "Id": 1846722291,
+            "Volume": 0.6
+          }
+        ],
+        [
+          {
+            "Id": 111630371595891,
+            "Volume": 0.7
+          },
+          {
+            "Id": 138992141339152,
+            "Volume": 0.7
+          },
+          {
+            "Id": 138330265883042,
+            "Volume": 0.7
+          }
+        ],
+        [
+          {
+            "Id": 140195496777664,
+            "Volume": 0.7
+          },
+          {
+            "Id": 140492661889585,
+            "Volume": 0.7
+          },
+          {
+            "Id": 136088611877555,
+            "Volume": 0.7
+          }
+        ],
+        [
+          {
+            "Id": 9046864489,
+            "Volume": 0.6
+          },
+          {
+            "Id": 9046863579,
+            "Volume": 0.6
+          },
+          {
+            "Id": 140218338777776,
+            "Volume": 0.7
+          },
+          {
+            "Id": 140492661889585,
+            "Volume": 0.7
+          }
+        ],
+        [
+          {
+            "Id": 9046909601,
+            "Volume": 0.6
+          },
+          {
+            "Id": 111630371595891,
+            "Volume": 0.7
+          },
+          {
+            "Id": 136397868028391,
+            "Volume": 0.7
+          },
+          {
+            "Id": 9046862941,
+            "Volume": 0.6
+          }
+        ]
+      ]
+    },
+    "Steal": {
+      "HoldDuration": 0.3,
+      "MaxCarryTime": 60,
+      "MaxDistance": 16,
+      "OnlyDuringDigesting": false,
+      "PromptDistance": 8,
+      "RecoverMaxDistance": 18,
+      "RecoverPromptDistance": 10
+    },
+    "StudioDurations": {
+      "Digesting": 20,
+      "Feeding": 30
+    },
+    "StudioGiveAllPets": false,
+    "StudioTestPets": {},
+    "Throw": {
+      "ChargeFov": 55,
+      "ChargeWalkSpeed": 8,
+      "DefaultFov": 70,
+      "MaxChargeTime": 1.5,
+      "MinRatio": 0.35,
+      "UpBias": 0.6
+    },
+    "Trade": {
+      "ConfirmDelay": 3,
+      "InviteTime": 15,
+      "MaxPets": 6,
+      "MaxTime": 240,
+      "PromptDistance": 12,
+      "RequestCooldown": 6
+    },
+    "Training": {
+      "AnimSpeedPerLevel": 0.04,
+      "BeltArrows": {
+        "IdleSpeed": 1.5,
+        "Image": "rbxassetid://131546186740141",
+        "Length": 2.4,
+        "RunSpeed": 7,
+        "Transparency": 0.15
+      },
+      "BenchRepTime": 1.6,
+      "LevelsPerTier": 5,
+      "OldStationLevels": [
+        1,
+        5,
+        9,
+        12,
+        16,
+        19,
+        22,
+        25
+      ],
+      "RunAnimSpeed": 1.3,
+      "Speed": {
+        "Base": 16,
+        "MaxLevel": 60,
+        "PerLevel": 0.5
+      },
+      "StationRateGrowth": 1.17,
+      "StationTiers": [
+        {
+          "Accent": "5ae650",
+          "Belt": "37373e",
+          "Dark": "784c28",
+          "Main": "d8802a",
+          "Name": "Bois"
+        },
+        {
+          "Accent": "2896ff",
+          "Belt": "282c38",
+          "Dark": "6e768a",
+          "Main": "e4e8f0",
+          "Name": "Acier"
+        },
+        {
+          "Accent": "ff781e",
+          "Belt": "1e1e24",
+          "Dark": "cd7016",
+          "Main": "ffc628",
+          "Name": "Or"
+        },
+        {
+          "Accent": "46e6ff",
+          "Belt": "0e101c",
+          "Dark": "141624",
+          "Glow": true,
+          "Main": "242840",
+          "Name": "Cristal",
+          "Trim": "ffc628"
+        },
+        {
+          "Accent": "be5aff",
+          "Belt": "0c0618",
+          "Dark": "140a24",
+          "Glow": true,
+          "Main": "2c184c",
+          "Name": "Cosmique",
+          "Trim": "ff82eb"
+        }
+      ],
+      "Strength": {
+        "Base": 70,
+        "MaxLevel": 60,
+        "PerLevel": 3
+      },
+      "TreadmillScale": 0.6,
+      "XPBase": 5,
+      "XPGrowth": 1.12
+    },
+    "UseStudioDurations": false,
+    "Vacuum": {
+      "ExtraCapacity": 4,
+      "Interval": 0.08,
+      "PassKey": "Vacuum",
+      "Radius": 32
+    },
+    "Weapons": {
+      "Bat": {
+        "Cooldown": 1.1,
+        "Push": 95,
+        "Range": 8,
+        "StrikeAt": 0.45,
+        "Stun": 1.4,
+        "SwingTime": 0.55,
+        "Up": 40,
+        "Word": "BONK !"
+      },
+      "Grapple": {
+        "AimCone": 14,
+        "Cooldown": 5,
+        "HookSpeed": 220,
+        "PullSpeed": 85,
+        "PullTime": 1.1,
+        "Range": 55,
+        "StopDistance": 5
+      },
+      "HitImmunity": 2,
+      "Invisibility": {
+        "Cooldown": 45,
+        "Duration": 6,
+        "FarTransparency": 0.96,
+        "NearDistance": 10,
+        "NearTransparency": 0.72,
+        "SelfTransparency": 0.6
+      },
+      "OldWeapons": {
+        "WeaponPan": [
+          "WeaponBat"
+        ],
+        "WeaponShockwave": [
+          "WeaponBat",
+          "WeaponGrapple"
+        ],
+        "WeaponSlap": [
+          "WeaponBat"
+        ]
+      },
+      "RangeMargin": 3
+    },
+    "WorldIndex": {
+      "Abysses": 5,
+      "Cosmos": 6,
+      "Desert": 2,
+      "Divin": 7,
+      "Glace": 4,
+      "Prairie": 1,
+      "Volcan": 3
+    },
+    "Worlds": [
+      {
+        "Id": "Prairie",
+        "IncomeMultiplier": 1,
+        "Name": "Prairie",
+        "Price": 0,
+        "RarityBoost": 1
+      },
+      {
+        "Id": "Desert",
+        "IncomeMultiplier": 1.6,
+        "Name": "Désert",
+        "Price": 200000,
+        "RarityBoost": 1.08
+      },
+      {
+        "Id": "Volcan",
+        "IncomeMultiplier": 2.5,
+        "Name": "Volcan",
+        "Price": 14000000,
+        "RarityBoost": 1.17
+      },
+      {
+        "Id": "Glace",
+        "IncomeMultiplier": 4,
+        "Name": "Glace",
+        "Price": 450000000,
+        "RarityBoost": 1.27
+      },
+      {
+        "Id": "Abysses",
+        "IncomeMultiplier": 6.5,
+        "Name": "Abysses",
+        "Price": 14000000000,
+        "RarityBoost": 1.38
+      },
+      {
+        "Id": "Cosmos",
+        "IncomeMultiplier": 10,
+        "Name": "Cosmos",
+        "Price": 300000000000,
+        "RarityBoost": 1.5
+      },
+      {
+        "Id": "Divin",
+        "IncomeMultiplier": 16,
+        "Name": "Divin",
+        "Price": 1400000000000,
+        "RarityBoost": 1.8
+      }
+    ]
+  },
+  "incomes": {
+    "AigleRoyal": 5750,
+    "AigleRoyal__E2": 17250,
+    "AigleRoyal__E2__MDiamond": 86250,
+    "AigleRoyal__E2__MGold": 34500,
+    "AigleRoyal__E2__MRainbow": 172500,
+    "AigleRoyal__E3": 46000,
+    "AigleRoyal__E3__MDiamond": 230000,
+    "AigleRoyal__E3__MGold": 92000,
+    "AigleRoyal__E3__MRainbow": 460000,
+    "AigleRoyal__MDiamond": 28750,
+    "AigleRoyal__MGold": 11500,
+    "AigleRoyal__MRainbow": 57500,
+    "AlienGelatine": 103250,
+    "AlienGelatine__E2": 309750,
+    "AlienGelatine__E2__MDiamond": 1548750,
+    "AlienGelatine__E2__MGold": 619500,
+    "AlienGelatine__E2__MRainbow": 3097500,
+    "AlienGelatine__E3": 826000,
+    "AlienGelatine__E3__MDiamond": 4130000,
+    "AlienGelatine__E3__MGold": 1652000,
+    "AlienGelatine__E3__MRainbow": 8260000,
+    "AlienGelatine__MDiamond": 516250,
+    "AlienGelatine__MGold": 206500,
+    "AlienGelatine__MRainbow": 1032500,
+    "ArbreMondeMiniature": 56000,
+    "ArbreMondeMiniature__E2": 168000,
+    "ArbreMondeMiniature__E2__MDiamond": 840000,
+    "ArbreMondeMiniature__E2__MGold": 336000,
+    "ArbreMondeMiniature__E2__MRainbow": 1680000,
+    "ArbreMondeMiniature__E3": 448000,
+    "ArbreMondeMiniature__E3__MDiamond": 2240000,
+    "ArbreMondeMiniature__E3__MGold": 896000,
+    "ArbreMondeMiniature__E3__MRainbow": 4480000,
+    "ArbreMondeMiniature__MDiamond": 280000,
+    "ArbreMondeMiniature__MGold": 112000,
+    "ArbreMondeMiniature__MRainbow": 560000,
+    "AstroBoulon": 4,
+    "AstroBoulon__E2": 12,
+    "AstroBoulon__E2__MDiamond": 60,
+    "AstroBoulon__E2__MGold": 24,
+    "AstroBoulon__E2__MRainbow": 120,
+    "AstroBoulon__E3": 32,
+    "AstroBoulon__E3__MDiamond": 160,
+    "AstroBoulon__E3__MGold": 64,
+    "AstroBoulon__E3__MRainbow": 320,
+    "AstroBoulon__MDiamond": 20,
+    "AstroBoulon__MGold": 8,
+    "AstroBoulon__MRainbow": 40,
+    "AstroHamster": 2170,
+    "AstroHamster__E2": 6510,
+    "AstroHamster__E2__MDiamond": 32550,
+    "AstroHamster__E2__MGold": 13020,
+    "AstroHamster__E2__MRainbow": 65100,
+    "AstroHamster__E3": 17360,
+    "AstroHamster__E3__MDiamond": 86800,
+    "AstroHamster__E3__MGold": 34720,
+    "AstroHamster__E3__MRainbow": 173600,
+    "AstroHamster__MDiamond": 10850,
+    "AstroHamster__MGold": 4340,
+    "AstroHamster__MRainbow": 21700,
+    "AutrucheFusee": 5,
+    "AutrucheFusee__E2": 15,
+    "AutrucheFusee__E2__MDiamond": 75,
+    "AutrucheFusee__E2__MGold": 30,
+    "AutrucheFusee__E2__MRainbow": 150,
+    "AutrucheFusee__E3": 40,
+    "AutrucheFusee__E3__MDiamond": 200,
+    "AutrucheFusee__E3__MGold": 80,
+    "AutrucheFusee__E3__MRainbow": 400,
+    "AutrucheFusee__MDiamond": 25,
+    "AutrucheFusee__MGold": 10,
+    "AutrucheFusee__MRainbow": 50,
+    "BaleineGalaxie": 2800000,
+    "BaleineGalaxie__E2": 8400000,
+    "BaleineGalaxie__E2__MDiamond": 42000000,
+    "BaleineGalaxie__E2__MGold": 16800000,
+    "BaleineGalaxie__E2__MRainbow": 84000000,
+    "BaleineGalaxie__E3": 22400000,
+    "BaleineGalaxie__E3__MDiamond": 112000000,
+    "BaleineGalaxie__E3__MGold": 44800000,
+    "BaleineGalaxie__E3__MRainbow": 224000000,
+    "BaleineGalaxie__MDiamond": 14000000,
+    "BaleineGalaxie__MGold": 5600000,
+    "BaleineGalaxie__MRainbow": 28000000,
+    "BananeChien": 1330,
+    "BananeChien__E2": 3990,
+    "BananeChien__E2__MDiamond": 19950,
+    "BananeChien__E2__MGold": 7980,
+    "BananeChien__E2__MRainbow": 39900,
+    "BananeChien__E3": 10640,
+    "BananeChien__E3__MDiamond": 53200,
+    "BananeChien__E3__MGold": 21280,
+    "BananeChien__E3__MRainbow": 106400,
+    "BananeChien__MDiamond": 6650,
+    "BananeChien__MGold": 2660,
+    "BananeChien__MRainbow": 13300,
+    "BasilicEmeraude": 45500,
+    "BasilicEmeraude__E2": 136500,
+    "BasilicEmeraude__E2__MDiamond": 682500,
+    "BasilicEmeraude__E2__MGold": 273000,
+    "BasilicEmeraude__E2__MRainbow": 1365000,
+    "BasilicEmeraude__E3": 364000,
+    "BasilicEmeraude__E3__MDiamond": 1820000,
+    "BasilicEmeraude__E3__MGold": 728000,
+    "BasilicEmeraude__E3__MRainbow": 3640000,
+    "BasilicEmeraude__MDiamond": 227500,
+    "BasilicEmeraude__MGold": 91000,
+    "BasilicEmeraude__MRainbow": 455000,
+    "BebeGriffon": 18,
+    "BebeGriffon__E2": 54,
+    "BebeGriffon__E2__MDiamond": 270,
+    "BebeGriffon__E2__MGold": 108,
+    "BebeGriffon__E2__MRainbow": 540,
+    "BebeGriffon__E3": 144,
+    "BebeGriffon__E3__MDiamond": 720,
+    "BebeGriffon__E3__MGold": 288,
+    "BebeGriffon__E3__MRainbow": 1440,
+    "BebeGriffon__MDiamond": 90,
+    "BebeGriffon__MGold": 36,
+    "BebeGriffon__MRainbow": 180,
+    "BonsaiMillenaire": 1120,
+    "BonsaiMillenaire__E2": 3360,
+    "BonsaiMillenaire__E2__MDiamond": 16800,
+    "BonsaiMillenaire__E2__MGold": 6720,
+    "BonsaiMillenaire__E2__MRainbow": 33600,
+    "BonsaiMillenaire__E3": 8960,
+    "BonsaiMillenaire__E3__MDiamond": 44800,
+    "BonsaiMillenaire__E3__MGold": 17920,
+    "BonsaiMillenaire__E3__MRainbow": 89600,
+    "BonsaiMillenaire__MDiamond": 5600,
+    "BonsaiMillenaire__MGold": 2240,
+    "BonsaiMillenaire__MRainbow": 11200,
+    "BurritoNebuleuse": 11000,
+    "BurritoNebuleuse__E2": 33000,
+    "BurritoNebuleuse__E2__MDiamond": 165000,
+    "BurritoNebuleuse__E2__MGold": 66000,
+    "BurritoNebuleuse__E2__MRainbow": 330000,
+    "BurritoNebuleuse__E3": 88000,
+    "BurritoNebuleuse__E3__MDiamond": 440000,
+    "BurritoNebuleuse__E3__MGold": 176000,
+    "BurritoNebuleuse__E3__MRainbow": 880000,
+    "BurritoNebuleuse__MDiamond": 55000,
+    "BurritoNebuleuse__MGold": 22000,
+    "BurritoNebuleuse__MRainbow": 110000,
+    "CactusCowboy": 265,
+    "CactusCowboy__E2": 795,
+    "CactusCowboy__E2__MDiamond": 3975,
+    "CactusCowboy__E2__MGold": 1590,
+    "CactusCowboy__E2__MRainbow": 7950,
+    "CactusCowboy__E3": 2120,
+    "CactusCowboy__E3__MDiamond": 10600,
+    "CactusCowboy__E3__MGold": 4240,
+    "CactusCowboy__E3__MRainbow": 21200,
+    "CactusCowboy__MDiamond": 1325,
+    "CactusCowboy__MGold": 530,
+    "CactusCowboy__MRainbow": 2650,
+    "CactusRonchon": 3,
+    "CactusRonchon__E2": 9,
+    "CactusRonchon__E2__MDiamond": 45,
+    "CactusRonchon__E2__MGold": 18,
+    "CactusRonchon__E2__MRainbow": 90,
+    "CactusRonchon__E3": 24,
+    "CactusRonchon__E3__MDiamond": 120,
+    "CactusRonchon__E3__MGold": 48,
+    "CactusRonchon__E3__MRainbow": 240,
+    "CactusRonchon__MDiamond": 15,
+    "CactusRonchon__MGold": 6,
+    "CactusRonchon__MRainbow": 30,
+    "CalmarColosse": 662500,
+    "CalmarColosse__E2": 1987500,
+    "CalmarColosse__E2__MDiamond": 9937500,
+    "CalmarColosse__E2__MGold": 3975000,
+    "CalmarColosse__E2__MRainbow": 19875000,
+    "CalmarColosse__E3": 5300000,
+    "CalmarColosse__E3__MDiamond": 26500000,
+    "CalmarColosse__E3__MGold": 10600000,
+    "CalmarColosse__E3__MRainbow": 53000000,
+    "CalmarColosse__MDiamond": 3312500,
+    "CalmarColosse__MGold": 1325000,
+    "CalmarColosse__MRainbow": 6625000,
+    "CanardTractopelle": 2537500,
+    "CanardTractopelle__E2": 7612500,
+    "CanardTractopelle__E2__MDiamond": 38062500,
+    "CanardTractopelle__E2__MGold": 15225000,
+    "CanardTractopelle__E2__MRainbow": 76125000,
+    "CanardTractopelle__E3": 20300000,
+    "CanardTractopelle__E3__MDiamond": 101500000,
+    "CanardTractopelle__E3__MGold": 40600000,
+    "CanardTractopelle__E3__MRainbow": 203000000,
+    "CanardTractopelle__MDiamond": 12687500,
+    "CanardTractopelle__MGold": 5075000,
+    "CanardTractopelle__MRainbow": 25375000,
+    "CapybaraZen": 1750000,
+    "CapybaraZen__E2": 5250000,
+    "CapybaraZen__E2__MDiamond": 26250000,
+    "CapybaraZen__E2__MGold": 10500000,
+    "CapybaraZen__E2__MRainbow": 52500000,
+    "CapybaraZen__E3": 14000000,
+    "CapybaraZen__E3__MDiamond": 70000000,
+    "CapybaraZen__E3__MGold": 28000000,
+    "CapybaraZen__E3__MRainbow": 140000000,
+    "CapybaraZen__MDiamond": 8750000,
+    "CapybaraZen__MGold": 3500000,
+    "CapybaraZen__MRainbow": 17500000,
+    "CarniflorToxique": 362500,
+    "CarniflorToxique__E2": 1087500,
+    "CarniflorToxique__E2__MDiamond": 5437500,
+    "CarniflorToxique__E2__MGold": 2175000,
+    "CarniflorToxique__E2__MRainbow": 10875000,
+    "CarniflorToxique__E3": 2900000,
+    "CarniflorToxique__E3__MDiamond": 14500000,
+    "CarniflorToxique__E3__MGold": 5800000,
+    "CarniflorToxique__E3__MRainbow": 29000000,
+    "CarniflorToxique__MDiamond": 1812500,
+    "CarniflorToxique__MGold": 725000,
+    "CarniflorToxique__MRainbow": 3625000,
+    "CerbereChiot": 910,
+    "CerbereChiot__E2": 2730,
+    "CerbereChiot__E2__MDiamond": 13650,
+    "CerbereChiot__E2__MGold": 5460,
+    "CerbereChiot__E2__MRainbow": 27300,
+    "CerbereChiot__E3": 7280,
+    "CerbereChiot__E3__MDiamond": 36400,
+    "CerbereChiot__E3__MGold": 14560,
+    "CerbereChiot__E3__MRainbow": 72800,
+    "CerbereChiot__MDiamond": 4550,
+    "CerbereChiot__MGold": 1820,
+    "CerbereChiot__MRainbow": 9100,
+    "CerbereInfernal": 3062500,
+    "CerbereInfernal__E2": 9187500,
+    "CerbereInfernal__E2__MDiamond": 45937500,
+    "CerbereInfernal__E2__MGold": 18375000,
+    "CerbereInfernal__E2__MRainbow": 91875000,
+    "CerbereInfernal__E3": 24500000,
+    "CerbereInfernal__E3__MDiamond": 122500000,
+    "CerbereInfernal__E3__MGold": 49000000,
+    "CerbereInfernal__E3__MRainbow": 245000000,
+    "CerbereInfernal__MDiamond": 15312500,
+    "CerbereInfernal__MGold": 6125000,
+    "CerbereInfernal__MRainbow": 30625000,
+    "ChampignonVeneneux": 175,
+    "ChampignonVeneneux__E2": 525,
+    "ChampignonVeneneux__E2__MDiamond": 2625,
+    "ChampignonVeneneux__E2__MGold": 1050,
+    "ChampignonVeneneux__E2__MRainbow": 5250,
+    "ChampignonVeneneux__E3": 1400,
+    "ChampignonVeneneux__E3__MDiamond": 7000,
+    "ChampignonVeneneux__E3__MGold": 2800,
+    "ChampignonVeneneux__E3__MRainbow": 14000,
+    "ChampignonVeneneux__MDiamond": 875,
+    "ChampignonVeneneux__MGold": 350,
+    "ChampignonVeneneux__MRainbow": 1750,
+    "ChatComete": 15500,
+    "ChatComete__E2": 46500,
+    "ChatComete__E2__MDiamond": 232500,
+    "ChatComete__E2__MGold": 93000,
+    "ChatComete__E2__MRainbow": 465000,
+    "ChatComete__E3": 124000,
+    "ChatComete__E3__MDiamond": 620000,
+    "ChatComete__E3__MGold": 248000,
+    "ChatComete__E3__MRainbow": 1240000,
+    "ChatComete__MDiamond": 77500,
+    "ChatComete__MGold": 31000,
+    "ChatComete__MRainbow": 155000,
+    "ChatCoptere": 4,
+    "ChatCoptere__E2": 12,
+    "ChatCoptere__E2__MDiamond": 60,
+    "ChatCoptere__E2__MGold": 24,
+    "ChatCoptere__E2__MRainbow": 120,
+    "ChatCoptere__E3": 32,
+    "ChatCoptere__E3__MDiamond": 160,
+    "ChatCoptere__E3__MGold": 64,
+    "ChatCoptere__E3__MRainbow": 320,
+    "ChatCoptere__MDiamond": 20,
+    "ChatCoptere__MGold": 8,
+    "ChatCoptere__MRainbow": 40,
+    "ChatRuelle": 2,
+    "ChatRuelle__E2": 6,
+    "ChatRuelle__E2__MDiamond": 30,
+    "ChatRuelle__E2__MGold": 12,
+    "ChatRuelle__E2__MRainbow": 60,
+    "ChatRuelle__E3": 16,
+    "ChatRuelle__E3__MDiamond": 80,
+    "ChatRuelle__E3__MGold": 32,
+    "ChatRuelle__E3__MRainbow": 160,
+    "ChatRuelle__MDiamond": 10,
+    "ChatRuelle__MGold": 4,
+    "ChatRuelle__MRainbow": 20,
+    "CherubinHamster": 16250,
+    "CherubinHamster__E2": 48750,
+    "CherubinHamster__E2__MDiamond": 243750,
+    "CherubinHamster__E2__MGold": 97500,
+    "CherubinHamster__E2__MRainbow": 487500,
+    "CherubinHamster__E3": 130000,
+    "CherubinHamster__E3__MDiamond": 650000,
+    "CherubinHamster__E3__MGold": 260000,
+    "CherubinHamster__E3__MRainbow": 1300000,
+    "CherubinHamster__MDiamond": 81250,
+    "CherubinHamster__MGold": 32500,
+    "CherubinHamster__MRainbow": 162500,
+    "ChienSaucisse": 2,
+    "ChienSaucisse__E2": 6,
+    "ChienSaucisse__E2__MDiamond": 30,
+    "ChienSaucisse__E2__MGold": 12,
+    "ChienSaucisse__E2__MRainbow": 60,
+    "ChienSaucisse__E3": 16,
+    "ChienSaucisse__E3__MDiamond": 80,
+    "ChienSaucisse__E3__MGold": 32,
+    "ChienSaucisse__E3__MRainbow": 160,
+    "ChienSaucisse__MDiamond": 10,
+    "ChienSaucisse__MGold": 4,
+    "ChienSaucisse__MRainbow": 20,
+    "CitrouilleSculptee": 190,
+    "CitrouilleSculptee__E2": 570,
+    "CitrouilleSculptee__E2__MDiamond": 2850,
+    "CitrouilleSculptee__E2__MGold": 1140,
+    "CitrouilleSculptee__E2__MRainbow": 5700,
+    "CitrouilleSculptee__E3": 1520,
+    "CitrouilleSculptee__E3__MDiamond": 7600,
+    "CitrouilleSculptee__E3__MGold": 3040,
+    "CitrouilleSculptee__E3__MRainbow": 15200,
+    "CitrouilleSculptee__MDiamond": 950,
+    "CitrouilleSculptee__MGold": 380,
+    "CitrouilleSculptee__MRainbow": 1900,
+    "CochonTirelire": 28,
+    "CochonTirelire__E2": 84,
+    "CochonTirelire__E2__MDiamond": 420,
+    "CochonTirelire__E2__MGold": 168,
+    "CochonTirelire__E2__MRainbow": 840,
+    "CochonTirelire__E3": 224,
+    "CochonTirelire__E3__MDiamond": 1120,
+    "CochonTirelire__E3__MGold": 448,
+    "CochonTirelire__E3__MRainbow": 2240,
+    "CochonTirelire__MDiamond": 140,
+    "CochonTirelire__MGold": 56,
+    "CochonTirelire__MRainbow": 280,
+    "ConciergeCosmique": 32,
+    "ConciergeCosmique__E2": 96,
+    "ConciergeCosmique__E2__MDiamond": 480,
+    "ConciergeCosmique__E2__MGold": 192,
+    "ConciergeCosmique__E2__MRainbow": 960,
+    "ConciergeCosmique__E3": 256,
+    "ConciergeCosmique__E3__MDiamond": 1280,
+    "ConciergeCosmique__E3__MGold": 512,
+    "ConciergeCosmique__E3__MRainbow": 2560,
+    "ConciergeCosmique__MDiamond": 160,
+    "ConciergeCosmique__MGold": 64,
+    "ConciergeCosmique__MRainbow": 320,
+    "CorbeauHorloge": 220,
+    "CorbeauHorloge__E2": 660,
+    "CorbeauHorloge__E2__MDiamond": 3300,
+    "CorbeauHorloge__E2__MGold": 1320,
+    "CorbeauHorloge__E2__MRainbow": 6600,
+    "CorbeauHorloge__E3": 1760,
+    "CorbeauHorloge__E3__MDiamond": 8800,
+    "CorbeauHorloge__E3__MGold": 3520,
+    "CorbeauHorloge__E3__MRainbow": 17600,
+    "CorbeauHorloge__MDiamond": 1100,
+    "CorbeauHorloge__MGold": 440,
+    "CorbeauHorloge__MRainbow": 2200,
+    "CorbeauVoleur": 114,
+    "CorbeauVoleur__E2": 342,
+    "CorbeauVoleur__E2__MDiamond": 1710,
+    "CorbeauVoleur__E2__MGold": 684,
+    "CorbeauVoleur__E2__MRainbow": 3420,
+    "CorbeauVoleur__E3": 912,
+    "CorbeauVoleur__E3__MDiamond": 4560,
+    "CorbeauVoleur__E3__MGold": 1824,
+    "CorbeauVoleur__E3__MRainbow": 9120,
+    "CorbeauVoleur__MDiamond": 570,
+    "CorbeauVoleur__MGold": 228,
+    "CorbeauVoleur__MRainbow": 1140,
+    "DragonAurore": 550000,
+    "DragonAurore__E2": 1650000,
+    "DragonAurore__E2__MDiamond": 8250000,
+    "DragonAurore__E2__MGold": 3300000,
+    "DragonAurore__E2__MRainbow": 16500000,
+    "DragonAurore__E3": 4400000,
+    "DragonAurore__E3__MDiamond": 22000000,
+    "DragonAurore__E3__MGold": 8800000,
+    "DragonAurore__E3__MRainbow": 44000000,
+    "DragonAurore__MDiamond": 2750000,
+    "DragonAurore__MGold": 1100000,
+    "DragonAurore__MRainbow": 5500000,
+    "DragonBarbecue": 87500,
+    "DragonBarbecue__E2": 262500,
+    "DragonBarbecue__E2__MDiamond": 1312500,
+    "DragonBarbecue__E2__MGold": 525000,
+    "DragonBarbecue__E2__MRainbow": 2625000,
+    "DragonBarbecue__E3": 700000,
+    "DragonBarbecue__E3__MDiamond": 3500000,
+    "DragonBarbecue__E3__MGold": 1400000,
+    "DragonBarbecue__E3__MRainbow": 7000000,
+    "DragonBarbecue__MDiamond": 437500,
+    "DragonBarbecue__MGold": 175000,
+    "DragonBarbecue__MRainbow": 875000,
+    "DragonGrillePain": 61250,
+    "DragonGrillePain__E2": 183750,
+    "DragonGrillePain__E2__MDiamond": 918750,
+    "DragonGrillePain__E2__MGold": 367500,
+    "DragonGrillePain__E2__MRainbow": 1837500,
+    "DragonGrillePain__E3": 490000,
+    "DragonGrillePain__E3__MDiamond": 2450000,
+    "DragonGrillePain__E3__MGold": 980000,
+    "DragonGrillePain__E3__MRainbow": 4900000,
+    "DragonGrillePain__MDiamond": 306250,
+    "DragonGrillePain__MGold": 122500,
+    "DragonGrillePain__MRainbow": 612500,
+    "DragonnetObsidienne": 1015,
+    "DragonnetObsidienne__E2": 3045,
+    "DragonnetObsidienne__E2__MDiamond": 15225,
+    "DragonnetObsidienne__E2__MGold": 6090,
+    "DragonnetObsidienne__E2__MRainbow": 30450,
+    "DragonnetObsidienne__E3": 8120,
+    "DragonnetObsidienne__E3__MDiamond": 40600,
+    "DragonnetObsidienne__E3__MGold": 16240,
+    "DragonnetObsidienne__E3__MRainbow": 81200,
+    "DragonnetObsidienne__MDiamond": 5075,
+    "DragonnetObsidienne__MGold": 2030,
+    "DragonnetObsidienne__MRainbow": 10150,
+    "FennecLunettes": 35,
+    "FennecLunettes__E2": 105,
+    "FennecLunettes__E2__MDiamond": 525,
+    "FennecLunettes__E2__MGold": 210,
+    "FennecLunettes__E2__MRainbow": 1050,
+    "FennecLunettes__E3": 280,
+    "FennecLunettes__E3__MDiamond": 1400,
+    "FennecLunettes__E3__MGold": 560,
+    "FennecLunettes__E3__MRainbow": 2800,
+    "FennecLunettes__MDiamond": 175,
+    "FennecLunettes__MGold": 70,
+    "FennecLunettes__MRainbow": 350,
+    "FeuFollet": 2,
+    "FeuFollet__E2": 6,
+    "FeuFollet__E2__MDiamond": 30,
+    "FeuFollet__E2__MGold": 12,
+    "FeuFollet__E2__MRainbow": 60,
+    "FeuFollet__E3": 16,
+    "FeuFollet__E3__MDiamond": 80,
+    "FeuFollet__E3__MGold": 32,
+    "FeuFollet__E3__MRainbow": 160,
+    "FeuFollet__MDiamond": 10,
+    "FeuFollet__MGold": 4,
+    "FeuFollet__MRainbow": 20,
+    "FougereFibonacci": 2275000,
+    "FougereFibonacci__E2": 6825000,
+    "FougereFibonacci__E2__MDiamond": 34125000,
+    "FougereFibonacci__E2__MGold": 13650000,
+    "FougereFibonacci__E2__MRainbow": 68250000,
+    "FougereFibonacci__E3": 18200000,
+    "FougereFibonacci__E3__MDiamond": 91000000,
+    "FougereFibonacci__E3__MGold": 36400000,
+    "FougereFibonacci__E3__MRainbow": 182000000,
+    "FougereFibonacci__MDiamond": 11375000,
+    "FougereFibonacci__MGold": 4550000,
+    "FougereFibonacci__MRainbow": 22750000,
+    "GardienTrouNoir": 4112499,
+    "GardienTrouNoir__E2": 12337497,
+    "GardienTrouNoir__E2__MDiamond": 61687485,
+    "GardienTrouNoir__E2__MGold": 24674994,
+    "GardienTrouNoir__E2__MRainbow": 123374970,
+    "GardienTrouNoir__E3": 32899992,
+    "GardienTrouNoir__E3__MDiamond": 164499960,
+    "GardienTrouNoir__E3__MGold": 65799984,
+    "GardienTrouNoir__E3__MRainbow": 328999920,
+    "GardienTrouNoir__MDiamond": 20562495,
+    "GardienTrouNoir__MGold": 8224998,
+    "GardienTrouNoir__MRainbow": 41124990,
+    "GargouilleMignonne": 20,
+    "GargouilleMignonne__E2": 60,
+    "GargouilleMignonne__E2__MDiamond": 300,
+    "GargouilleMignonne__E2__MGold": 120,
+    "GargouilleMignonne__E2__MRainbow": 600,
+    "GargouilleMignonne__E3": 160,
+    "GargouilleMignonne__E3__MDiamond": 800,
+    "GargouilleMignonne__E3__MGold": 320,
+    "GargouilleMignonne__E3__MRainbow": 1600,
+    "GargouilleMignonne__MDiamond": 100,
+    "GargouilleMignonne__MGold": 40,
+    "GargouilleMignonne__MRainbow": 200,
+    "GolemCendre": 13250,
+    "GolemCendre__E2": 39750,
+    "GolemCendre__E2__MDiamond": 198750,
+    "GolemCendre__E2__MGold": 79500,
+    "GolemCendre__E2__MRainbow": 397500,
+    "GolemCendre__E3": 106000,
+    "GolemCendre__E3__MDiamond": 530000,
+    "GolemCendre__E3__MGold": 212000,
+    "GolemCendre__E3__MRainbow": 1060000,
+    "GolemCendre__MDiamond": 66250,
+    "GolemCendre__MGold": 26500,
+    "GolemCendre__MRainbow": 132500,
+    "GolemDistributeur": 437500,
+    "GolemDistributeur__E2": 1312500,
+    "GolemDistributeur__E2__MDiamond": 6562500,
+    "GolemDistributeur__E2__MGold": 2625000,
+    "GolemDistributeur__E2__MRainbow": 13125000,
+    "GolemDistributeur__E3": 3500000,
+    "GolemDistributeur__E3__MDiamond": 17500000,
+    "GolemDistributeur__E3__MGold": 7000000,
+    "GolemDistributeur__E3__MRainbow": 35000000,
+    "GolemDistributeur__MDiamond": 2187500,
+    "GolemDistributeur__MGold": 875000,
+    "GolemDistributeur__MRainbow": 4375000,
+    "GraineEtoile": 400000,
+    "GraineEtoile__E2": 1200000,
+    "GraineEtoile__E2__MDiamond": 6000000,
+    "GraineEtoile__E2__MGold": 2400000,
+    "GraineEtoile__E2__MRainbow": 12000000,
+    "GraineEtoile__E3": 3200000,
+    "GraineEtoile__E3__MDiamond": 16000000,
+    "GraineEtoile__E3__MGold": 6400000,
+    "GraineEtoile__E3__MRainbow": 32000000,
+    "GraineEtoile__MDiamond": 2000000,
+    "GraineEtoile__MGold": 800000,
+    "GraineEtoile__MRainbow": 4000000,
+    "GrenouilleGlobuleuse": 14,
+    "GrenouilleGlobuleuse__E2": 42,
+    "GrenouilleGlobuleuse__E2__MDiamond": 210,
+    "GrenouilleGlobuleuse__E2__MGold": 84,
+    "GrenouilleGlobuleuse__E2__MRainbow": 420,
+    "GrenouilleGlobuleuse__E3": 112,
+    "GrenouilleGlobuleuse__E3__MDiamond": 560,
+    "GrenouilleGlobuleuse__E3__MGold": 224,
+    "GrenouilleGlobuleuse__E3__MRainbow": 1120,
+    "GrenouilleGlobuleuse__MDiamond": 70,
+    "GrenouilleGlobuleuse__MGold": 28,
+    "GrenouilleGlobuleuse__MRainbow": 140,
+    "GriffonDore": 737500,
+    "GriffonDore__E2": 2212500,
+    "GriffonDore__E2__MDiamond": 11062500,
+    "GriffonDore__E2__MGold": 4425000,
+    "GriffonDore__E2__MRainbow": 22125000,
+    "GriffonDore__E3": 5900000,
+    "GriffonDore__E3__MDiamond": 29500000,
+    "GriffonDore__E3__MGold": 11800000,
+    "GriffonDore__E3__MRainbow": 59000000,
+    "GriffonDore__MDiamond": 3687500,
+    "GriffonDore__MGold": 1475000,
+    "GriffonDore__MRainbow": 7375000,
+    "HamsterJoufflu": 16,
+    "HamsterJoufflu__E2": 48,
+    "HamsterJoufflu__E2__MDiamond": 240,
+    "HamsterJoufflu__E2__MGold": 96,
+    "HamsterJoufflu__E2__MRainbow": 480,
+    "HamsterJoufflu__E3": 128,
+    "HamsterJoufflu__E3__MDiamond": 640,
+    "HamsterJoufflu__E3__MGold": 256,
+    "HamsterJoufflu__E3__MRainbow": 1280,
+    "HamsterJoufflu__MDiamond": 80,
+    "HamsterJoufflu__MGold": 32,
+    "HamsterJoufflu__MRainbow": 160,
+    "HibouCamera": 1434,
+    "HibouCamera__E2": 4302,
+    "HibouCamera__E2__MDiamond": 21510,
+    "HibouCamera__E2__MGold": 8604,
+    "HibouCamera__E2__MRainbow": 43020,
+    "HibouCamera__E3": 11472,
+    "HibouCamera__E3__MDiamond": 57360,
+    "HibouCamera__E3__MGold": 22944,
+    "HibouCamera__E3__MRainbow": 114720,
+    "HibouCamera__MDiamond": 7170,
+    "HibouCamera__MGold": 2868,
+    "HibouCamera__MRainbow": 14340,
+    "HibouGrincheux": 130,
+    "HibouGrincheux__E2": 390,
+    "HibouGrincheux__E2__MDiamond": 1950,
+    "HibouGrincheux__E2__MGold": 780,
+    "HibouGrincheux__E2__MRainbow": 3900,
+    "HibouGrincheux__E3": 1040,
+    "HibouGrincheux__E3__MDiamond": 5200,
+    "HibouGrincheux__E3__MGold": 2080,
+    "HibouGrincheux__E3__MRainbow": 10400,
+    "HibouGrincheux__MDiamond": 650,
+    "HibouGrincheux__MGold": 260,
+    "HibouGrincheux__MRainbow": 1300,
+    "JumeauxEclipse": 71750,
+    "JumeauxEclipse__E2": 215250,
+    "JumeauxEclipse__E2__MDiamond": 1076250,
+    "JumeauxEclipse__E2__MGold": 430500,
+    "JumeauxEclipse__E2__MRainbow": 2152500,
+    "JumeauxEclipse__E3": 574000,
+    "JumeauxEclipse__E3__MDiamond": 2870000,
+    "JumeauxEclipse__E3__MGold": 1148000,
+    "JumeauxEclipse__E3__MRainbow": 5740000,
+    "JumeauxEclipse__MDiamond": 358750,
+    "JumeauxEclipse__MGold": 143500,
+    "JumeauxEclipse__MRainbow": 717500,
+    "Kitsune3Queues": 7250,
+    "Kitsune3Queues__E2": 21750,
+    "Kitsune3Queues__E2__MDiamond": 108750,
+    "Kitsune3Queues__E2__MGold": 43500,
+    "Kitsune3Queues__E2__MRainbow": 217500,
+    "Kitsune3Queues__E3": 58000,
+    "Kitsune3Queues__E3__MDiamond": 290000,
+    "Kitsune3Queues__E3__MGold": 116000,
+    "Kitsune3Queues__E3__MRainbow": 580000,
+    "Kitsune3Queues__MDiamond": 36250,
+    "Kitsune3Queues__MGold": 14500,
+    "Kitsune3Queues__MRainbow": 72500,
+    "KrakenBaignoire": 40250,
+    "KrakenBaignoire__E2": 120750,
+    "KrakenBaignoire__E2__MDiamond": 603750,
+    "KrakenBaignoire__E2__MGold": 241500,
+    "KrakenBaignoire__E2__MRainbow": 1207500,
+    "KrakenBaignoire__E3": 322000,
+    "KrakenBaignoire__E3__MDiamond": 1610000,
+    "KrakenBaignoire__E3__MGold": 644000,
+    "KrakenBaignoire__E3__MRainbow": 3220000,
+    "KrakenBaignoire__MDiamond": 201250,
+    "KrakenBaignoire__MGold": 80500,
+    "KrakenBaignoire__MRainbow": 402500,
+    "LanterneDisco": 2065,
+    "LanterneDisco__E2": 6195,
+    "LanterneDisco__E2__MDiamond": 30975,
+    "LanterneDisco__E2__MGold": 12390,
+    "LanterneDisco__E2__MRainbow": 61950,
+    "LanterneDisco__E3": 16520,
+    "LanterneDisco__E3__MDiamond": 82600,
+    "LanterneDisco__E3__MGold": 33040,
+    "LanterneDisco__E3__MRainbow": 165200,
+    "LanterneDisco__MDiamond": 10325,
+    "LanterneDisco__MGold": 4130,
+    "LanterneDisco__MRainbow": 20650,
+    "LeviathanAbyssal": 287500,
+    "LeviathanAbyssal__E2": 862500,
+    "LeviathanAbyssal__E2__MDiamond": 4312500,
+    "LeviathanAbyssal__E2__MGold": 1725000,
+    "LeviathanAbyssal__E2__MRainbow": 8625000,
+    "LeviathanAbyssal__E3": 2300000,
+    "LeviathanAbyssal__E3__MDiamond": 11500000,
+    "LeviathanAbyssal__E3__MGold": 4600000,
+    "LeviathanAbyssal__E3__MRainbow": 23000000,
+    "LeviathanAbyssal__MDiamond": 1437500,
+    "LeviathanAbyssal__MGold": 575000,
+    "LeviathanAbyssal__MRainbow": 2875000,
+    "LezardMomie": 12500,
+    "LezardMomie__E2": 37500,
+    "LezardMomie__E2__MDiamond": 187500,
+    "LezardMomie__E2__MGold": 75000,
+    "LezardMomie__E2__MRainbow": 375000,
+    "LezardMomie__E3": 100000,
+    "LezardMomie__E3__MDiamond": 500000,
+    "LezardMomie__E3__MGold": 200000,
+    "LezardMomie__E3__MRainbow": 1000000,
+    "LezardMomie__MDiamond": 62500,
+    "LezardMomie__MGold": 25000,
+    "LezardMomie__MRainbow": 125000,
+    "LicorneBois": 145,
+    "LicorneBois__E2": 435,
+    "LicorneBois__E2__MDiamond": 2175,
+    "LicorneBois__E2__MGold": 870,
+    "LicorneBois__E2__MRainbow": 4350,
+    "LicorneBois__E3": 1160,
+    "LicorneBois__E3__MDiamond": 5800,
+    "LicorneBois__E3__MGold": 2320,
+    "LicorneBois__E3__MRainbow": 11600,
+    "LicorneBois__MDiamond": 725,
+    "LicorneBois__MGold": 290,
+    "LicorneBois__MRainbow": 1450,
+    "LicorneCeleste": 108500,
+    "LicorneCeleste__E2": 325500,
+    "LicorneCeleste__E2__MDiamond": 1627500,
+    "LicorneCeleste__E2__MGold": 651000,
+    "LicorneCeleste__E2__MRainbow": 3255000,
+    "LicorneCeleste__E3": 868000,
+    "LicorneCeleste__E3__MDiamond": 4340000,
+    "LicorneCeleste__E3__MGold": 1736000,
+    "LicorneCeleste__E3__MRainbow": 8680000,
+    "LicorneCeleste__MDiamond": 542500,
+    "LicorneCeleste__MGold": 217000,
+    "LicorneCeleste__MRainbow": 1085000,
+    "LionEnceinte": 475000,
+    "LionEnceinte__E2": 1425000,
+    "LionEnceinte__E2__MDiamond": 7125000,
+    "LionEnceinte__E2__MGold": 2850000,
+    "LionEnceinte__E2__MRainbow": 14250000,
+    "LionEnceinte__E3": 3800000,
+    "LionEnceinte__E3__MDiamond": 19000000,
+    "LionEnceinte__E3__MGold": 7600000,
+    "LionEnceinte__E3__MRainbow": 38000000,
+    "LionEnceinte__MDiamond": 2375000,
+    "LionEnceinte__MGold": 950000,
+    "LionEnceinte__MRainbow": 4750000,
+    "LionNebuleuse": 700000,
+    "LionNebuleuse__E2": 2100000,
+    "LionNebuleuse__E2__MDiamond": 10500000,
+    "LionNebuleuse__E2__MGold": 4200000,
+    "LionNebuleuse__E2__MRainbow": 21000000,
+    "LionNebuleuse__E3": 5600000,
+    "LionNebuleuse__E3__MDiamond": 28000000,
+    "LionNebuleuse__E3__MGold": 11200000,
+    "LionNebuleuse__E3__MRainbow": 56000000,
+    "LionNebuleuse__MDiamond": 3500000,
+    "LionNebuleuse__MGold": 1400000,
+    "LionNebuleuse__MRainbow": 7000000,
+    "LotusEspace": 50750,
+    "LotusEspace__E2": 152250,
+    "LotusEspace__E2__MDiamond": 761250,
+    "LotusEspace__E2__MGold": 304500,
+    "LotusEspace__E2__MRainbow": 1522500,
+    "LotusEspace__E3": 406000,
+    "LotusEspace__E3__MDiamond": 2030000,
+    "LotusEspace__E3__MGold": 812000,
+    "LotusEspace__E3__MRainbow": 4060000,
+    "LotusEspace__MDiamond": 253750,
+    "LotusEspace__MGold": 101500,
+    "LotusEspace__MRainbow": 507500,
+    "LoupPolaire": 700,
+    "LoupPolaire__E2": 2100,
+    "LoupPolaire__E2__MDiamond": 10500,
+    "LoupPolaire__E2__MGold": 4200,
+    "LoupPolaire__E2__MRainbow": 21000,
+    "LoupPolaire__E3": 5600,
+    "LoupPolaire__E3__MDiamond": 28000,
+    "LoupPolaire__E3__MGold": 11200,
+    "LoupPolaire__E3__MRainbow": 56000,
+    "LoupPolaire__MDiamond": 3500,
+    "LoupPolaire__MGold": 1400,
+    "LoupPolaire__MRainbow": 7000,
+    "MachineQuantique": 512499,
+    "MachineQuantique__E2": 1537497,
+    "MachineQuantique__E2__MDiamond": 7687485,
+    "MachineQuantique__E2__MGold": 3074994,
+    "MachineQuantique__E2__MRainbow": 15374970,
+    "MachineQuantique__E3": 4099992,
+    "MachineQuantique__E3__MDiamond": 20499960,
+    "MachineQuantique__E3__MGold": 8199984,
+    "MachineQuantique__E3__MRainbow": 40999920,
+    "MachineQuantique__MDiamond": 2562495,
+    "MachineQuantique__MGold": 1024998,
+    "MachineQuantique__MRainbow": 5124990,
+    "MammouthGlacon": 92750,
+    "MammouthGlacon__E2": 278250,
+    "MammouthGlacon__E2__MDiamond": 1391250,
+    "MammouthGlacon__E2__MGold": 556500,
+    "MammouthGlacon__E2__MRainbow": 2782500,
+    "MammouthGlacon__E3": 742000,
+    "MammouthGlacon__E3__MDiamond": 3710000,
+    "MammouthGlacon__E3__MGold": 1484000,
+    "MammouthGlacon__E3__MRainbow": 7420000,
+    "MammouthGlacon__MDiamond": 463750,
+    "MammouthGlacon__MGold": 185500,
+    "MammouthGlacon__MRainbow": 927500,
+    "MandragoreHurlante": 8000,
+    "MandragoreHurlante__E2": 24000,
+    "MandragoreHurlante__E2__MDiamond": 120000,
+    "MandragoreHurlante__E2__MGold": 48000,
+    "MandragoreHurlante__E2__MRainbow": 240000,
+    "MandragoreHurlante__E3": 64000,
+    "MandragoreHurlante__E3__MDiamond": 320000,
+    "MandragoreHurlante__E3__MGold": 128000,
+    "MandragoreHurlante__E3__MRainbow": 640000,
+    "MandragoreHurlante__MDiamond": 40000,
+    "MandragoreHurlante__MGold": 16000,
+    "MandragoreHurlante__MRainbow": 80000,
+    "MeduseLampion": 14750,
+    "MeduseLampion__E2": 44250,
+    "MeduseLampion__E2__MDiamond": 221250,
+    "MeduseLampion__E2__MGold": 88500,
+    "MeduseLampion__E2__MRainbow": 442500,
+    "MeduseLampion__E3": 118000,
+    "MeduseLampion__E3__MDiamond": 590000,
+    "MeduseLampion__E3__MGold": 236000,
+    "MeduseLampion__E3__MRainbow": 1180000,
+    "MeduseLampion__MDiamond": 73750,
+    "MeduseLampion__MGold": 29500,
+    "MeduseLampion__MRainbow": 147500,
+    "MorseMoustachu": 1959,
+    "MorseMoustachu__E2": 5877,
+    "MorseMoustachu__E2__MDiamond": 29385,
+    "MorseMoustachu__E2__MGold": 11754,
+    "MorseMoustachu__E2__MRainbow": 58770,
+    "MorseMoustachu__E3": 15672,
+    "MorseMoustachu__E3__MDiamond": 78360,
+    "MorseMoustachu__E3__MGold": 31344,
+    "MorseMoustachu__E3__MRainbow": 156720,
+    "MorseMoustachu__MDiamond": 9795,
+    "MorseMoustachu__MGold": 3918,
+    "MorseMoustachu__MRainbow": 19590,
+    "MoutonMeteore": 234,
+    "MoutonMeteore__E2": 702,
+    "MoutonMeteore__E2__MDiamond": 3510,
+    "MoutonMeteore__E2__MGold": 1404,
+    "MoutonMeteore__E2__MRainbow": 7020,
+    "MoutonMeteore__E3": 1872,
+    "MoutonMeteore__E3__MDiamond": 9360,
+    "MoutonMeteore__E3__MGold": 3744,
+    "MoutonMeteore__E3__MRainbow": 18720,
+    "MoutonMeteore__MDiamond": 1170,
+    "MoutonMeteore__MGold": 468,
+    "MoutonMeteore__MRainbow": 2340,
+    "MyrtilleLunaire": 30,
+    "MyrtilleLunaire__E2": 90,
+    "MyrtilleLunaire__E2__MDiamond": 450,
+    "MyrtilleLunaire__E2__MGold": 180,
+    "MyrtilleLunaire__E2__MRainbow": 900,
+    "MyrtilleLunaire__E3": 240,
+    "MyrtilleLunaire__E3__MDiamond": 1200,
+    "MyrtilleLunaire__E3__MGold": 480,
+    "MyrtilleLunaire__E3__MRainbow": 2400,
+    "MyrtilleLunaire__MDiamond": 150,
+    "MyrtilleLunaire__MGold": 60,
+    "MyrtilleLunaire__MRainbow": 300,
+    "NarvalAurore": 625000,
+    "NarvalAurore__E2": 1875000,
+    "NarvalAurore__E2__MDiamond": 9375000,
+    "NarvalAurore__E2__MGold": 3750000,
+    "NarvalAurore__E2__MRainbow": 18750000,
+    "NarvalAurore__E3": 5000000,
+    "NarvalAurore__E3__MDiamond": 25000000,
+    "NarvalAurore__E3__MGold": 10000000,
+    "NarvalAurore__E3__MRainbow": 50000000,
+    "NarvalAurore__MDiamond": 3125000,
+    "NarvalAurore__MGold": 1250000,
+    "NarvalAurore__MRainbow": 6250000,
+    "NavetPeureux": 22,
+    "NavetPeureux__E2": 66,
+    "NavetPeureux__E2__MDiamond": 330,
+    "NavetPeureux__E2__MGold": 132,
+    "NavetPeureux__E2__MRainbow": 660,
+    "NavetPeureux__E3": 176,
+    "NavetPeureux__E3__MDiamond": 880,
+    "NavetPeureux__E3__MGold": 352,
+    "NavetPeureux__E3__MRainbow": 1760,
+    "NavetPeureux__MDiamond": 110,
+    "NavetPeureux__MGold": 44,
+    "NavetPeureux__MRainbow": 220,
+    "OuroborosInfini": 2012499,
+    "OuroborosInfini__E2": 6037497,
+    "OuroborosInfini__E2__MDiamond": 30187485,
+    "OuroborosInfini__E2__MGold": 12074994,
+    "OuroborosInfini__E2__MRainbow": 60374970,
+    "OuroborosInfini__E3": 16099992,
+    "OuroborosInfini__E3__MDiamond": 80499960,
+    "OuroborosInfini__E3__MGold": 32199984,
+    "OuroborosInfini__E3__MRainbow": 160999920,
+    "OuroborosInfini__MDiamond": 10062495,
+    "OuroborosInfini__MGold": 4024998,
+    "OuroborosInfini__MRainbow": 20124990,
+    "PanthereNeon": 804,
+    "PanthereNeon__E2": 2412,
+    "PanthereNeon__E2__MDiamond": 12060,
+    "PanthereNeon__E2__MGold": 4824,
+    "PanthereNeon__E2__MRainbow": 24120,
+    "PanthereNeon__E3": 6432,
+    "PanthereNeon__E3__MDiamond": 32160,
+    "PanthereNeon__E3__MGold": 12864,
+    "PanthereNeon__E3__MRainbow": 64320,
+    "PanthereNeon__MDiamond": 4020,
+    "PanthereNeon__MGold": 1608,
+    "PanthereNeon__MRainbow": 8040,
+    "PegaseMoto": 10250,
+    "PegaseMoto__E2": 30750,
+    "PegaseMoto__E2__MDiamond": 153750,
+    "PegaseMoto__E2__MGold": 61500,
+    "PegaseMoto__E2__MRainbow": 307500,
+    "PegaseMoto__E3": 82000,
+    "PegaseMoto__E3__MDiamond": 410000,
+    "PegaseMoto__E3__MGold": 164000,
+    "PegaseMoto__E3__MRainbow": 820000,
+    "PegaseMoto__MDiamond": 51250,
+    "PegaseMoto__MGold": 20500,
+    "PegaseMoto__MRainbow": 102500,
+    "PegaseNuageux": 6500,
+    "PegaseNuageux__E2": 19500,
+    "PegaseNuageux__E2__MDiamond": 97500,
+    "PegaseNuageux__E2__MGold": 39000,
+    "PegaseNuageux__E2__MRainbow": 195000,
+    "PegaseNuageux__E3": 52000,
+    "PegaseNuageux__E3__MDiamond": 260000,
+    "PegaseNuageux__E3__MGold": 104000,
+    "PegaseNuageux__E3__MRainbow": 520000,
+    "PegaseNuageux__MDiamond": 32500,
+    "PegaseNuageux__MGold": 13000,
+    "PegaseNuageux__MRainbow": 65000,
+    "PhenixCendres": 160,
+    "PhenixCendres__E2": 480,
+    "PhenixCendres__E2__MDiamond": 2400,
+    "PhenixCendres__E2__MGold": 960,
+    "PhenixCendres__E2__MRainbow": 4800,
+    "PhenixCendres__E3": 1280,
+    "PhenixCendres__E3__MDiamond": 6400,
+    "PhenixCendres__E3__MGold": 2560,
+    "PhenixCendres__E3__MRainbow": 12800,
+    "PhenixCendres__MDiamond": 800,
+    "PhenixCendres__MGold": 320,
+    "PhenixCendres__MRainbow": 1600,
+    "PhenixSolaire": 325000,
+    "PhenixSolaire__E2": 975000,
+    "PhenixSolaire__E2__MDiamond": 4875000,
+    "PhenixSolaire__E2__MGold": 1950000,
+    "PhenixSolaire__E2__MRainbow": 9750000,
+    "PhenixSolaire__E3": 2600000,
+    "PhenixSolaire__E3__MDiamond": 13000000,
+    "PhenixSolaire__E3__MGold": 5200000,
+    "PhenixSolaire__E3__MRainbow": 26000000,
+    "PhenixSolaire__MDiamond": 1625000,
+    "PhenixSolaire__MGold": 650000,
+    "PhenixSolaire__MRainbow": 3250000,
+    "PieuvrePirate": 98000,
+    "PieuvrePirate__E2": 294000,
+    "PieuvrePirate__E2__MDiamond": 1470000,
+    "PieuvrePirate__E2__MGold": 588000,
+    "PieuvrePirate__E2__MRainbow": 2940000,
+    "PieuvrePirate__E3": 784000,
+    "PieuvrePirate__E3__MDiamond": 3920000,
+    "PieuvrePirate__E3__MGold": 1568000,
+    "PieuvrePirate__E3__MRainbow": 7840000,
+    "PieuvrePirate__MDiamond": 490000,
+    "PieuvrePirate__MGold": 196000,
+    "PieuvrePirate__MRainbow": 980000,
+    "PigeonVilles": 2,
+    "PigeonVilles__E2": 6,
+    "PigeonVilles__E2__MDiamond": 30,
+    "PigeonVilles__E2__MGold": 12,
+    "PigeonVilles__E2__MRainbow": 60,
+    "PigeonVilles__E3": 16,
+    "PigeonVilles__E3__MDiamond": 80,
+    "PigeonVilles__E3__MGold": 32,
+    "PigeonVilles__E3__MRainbow": 160,
+    "PigeonVilles__MDiamond": 10,
+    "PigeonVilles__MGold": 4,
+    "PigeonVilles__MRainbow": 20,
+    "PingouinComete": 1644,
+    "PingouinComete__E2": 4932,
+    "PingouinComete__E2__MDiamond": 24660,
+    "PingouinComete__E2__MGold": 9864,
+    "PingouinComete__E2__MRainbow": 49320,
+    "PingouinComete__E3": 13152,
+    "PingouinComete__E3__MDiamond": 65760,
+    "PingouinComete__E3__MGold": 26304,
+    "PingouinComete__E3__MRainbow": 131520,
+    "PingouinComete__MDiamond": 8220,
+    "PingouinComete__MGold": 3288,
+    "PingouinComete__MRainbow": 16440,
+    "PingouinPatineur": 295,
+    "PingouinPatineur__E2": 885,
+    "PingouinPatineur__E2__MDiamond": 4425,
+    "PingouinPatineur__E2__MGold": 1770,
+    "PingouinPatineur__E2__MRainbow": 8850,
+    "PingouinPatineur__E3": 2360,
+    "PingouinPatineur__E3__MDiamond": 11800,
+    "PingouinPatineur__E3__MGold": 4720,
+    "PingouinPatineur__E3__MRainbow": 23600,
+    "PingouinPatineur__MDiamond": 1475,
+    "PingouinPatineur__MGold": 590,
+    "PingouinPatineur__MRainbow": 2950,
+    "PoissonAmpoule": 26,
+    "PoissonAmpoule__E2": 78,
+    "PoissonAmpoule__E2__MDiamond": 390,
+    "PoissonAmpoule__E2__MGold": 156,
+    "PoissonAmpoule__E2__MRainbow": 780,
+    "PoissonAmpoule__E3": 208,
+    "PoissonAmpoule__E3__MDiamond": 1040,
+    "PoissonAmpoule__E3__MGold": 416,
+    "PoissonAmpoule__E3__MRainbow": 2080,
+    "PoissonAmpoule__MDiamond": 130,
+    "PoissonAmpoule__MGold": 52,
+    "PoissonAmpoule__MRainbow": 260,
+    "PousseHaricot": 3,
+    "PousseHaricot__E2": 9,
+    "PousseHaricot__E2__MDiamond": 45,
+    "PousseHaricot__E2__MGold": 18,
+    "PousseHaricot__E2__MRainbow": 90,
+    "PousseHaricot__E3": 24,
+    "PousseHaricot__E3__MDiamond": 120,
+    "PousseHaricot__E3__MGold": 48,
+    "PousseHaricot__E3__MRainbow": 240,
+    "PousseHaricot__MDiamond": 15,
+    "PousseHaricot__MGold": 6,
+    "PousseHaricot__MRainbow": 30,
+    "RenardFurtif": 100,
+    "RenardFurtif__E2": 300,
+    "RenardFurtif__E2__MDiamond": 1500,
+    "RenardFurtif__E2__MGold": 600,
+    "RenardFurtif__E2__MRainbow": 3000,
+    "RenardFurtif__E3": 800,
+    "RenardFurtif__E3__MDiamond": 4000,
+    "RenardFurtif__E3__MGold": 1600,
+    "RenardFurtif__E3__MRainbow": 8000,
+    "RenardFurtif__MDiamond": 500,
+    "RenardFurtif__MGold": 200,
+    "RenardFurtif__MRainbow": 1000,
+    "RequinTorpille": 9500,
+    "RequinTorpille__E2": 28500,
+    "RequinTorpille__E2__MDiamond": 142500,
+    "RequinTorpille__E2__MGold": 57000,
+    "RequinTorpille__E2__MRainbow": 285000,
+    "RequinTorpille__E3": 76000,
+    "RequinTorpille__E3__MDiamond": 380000,
+    "RequinTorpille__E3__MGold": 152000,
+    "RequinTorpille__E3__MRainbow": 760000,
+    "RequinTorpille__MDiamond": 47500,
+    "RequinTorpille__MGold": 19000,
+    "RequinTorpille__MRainbow": 95000,
+    "RequinVolant": 35000,
+    "RequinVolant__E2": 105000,
+    "RequinVolant__E2__MDiamond": 525000,
+    "RequinVolant__E2__MGold": 210000,
+    "RequinVolant__E2__MRainbow": 1050000,
+    "RequinVolant__E3": 280000,
+    "RequinVolant__E3__MDiamond": 1400000,
+    "RequinVolant__E3__MGold": 560000,
+    "RequinVolant__E3__MRainbow": 2800000,
+    "RequinVolant__MDiamond": 175000,
+    "RequinVolant__MGold": 70000,
+    "RequinVolant__MRainbow": 350000,
+    "RoiCorail": 3325000,
+    "RoiCorail__E2": 9975000,
+    "RoiCorail__E2__MDiamond": 49875000,
+    "RoiCorail__E2__MGold": 19950000,
+    "RoiCorail__E2__MRainbow": 99750000,
+    "RoiCorail__E3": 26600000,
+    "RoiCorail__E3__MDiamond": 133000000,
+    "RoiCorail__E3__MGold": 53200000,
+    "RoiCorail__E3__MRainbow": 266000000,
+    "RoiCorail__MDiamond": 16625000,
+    "RoiCorail__MGold": 6650000,
+    "RoiCorail__MRainbow": 33250000,
+    "RoseCristal": 1225,
+    "RoseCristal__E2": 3675,
+    "RoseCristal__E2__MDiamond": 18375,
+    "RoseCristal__E2__MGold": 7350,
+    "RoseCristal__E2__MRainbow": 36750,
+    "RoseCristal__E3": 9800,
+    "RoseCristal__E3__MDiamond": 49000,
+    "RoseCristal__E3__MGold": 19600,
+    "RoseCristal__E3__MRainbow": 98000,
+    "RoseCristal__MDiamond": 6125,
+    "RoseCristal__MGold": 2450,
+    "RoseCristal__MRainbow": 12250,
+    "SalamandreBraise": 280,
+    "SalamandreBraise__E2": 840,
+    "SalamandreBraise__E2__MDiamond": 4200,
+    "SalamandreBraise__E2__MGold": 1680,
+    "SalamandreBraise__E2__MRainbow": 8400,
+    "SalamandreBraise__E3": 2240,
+    "SalamandreBraise__E3__MDiamond": 11200,
+    "SalamandreBraise__E3__MGold": 4480,
+    "SalamandreBraise__E3__MRainbow": 22400,
+    "SalamandreBraise__MDiamond": 1400,
+    "SalamandreBraise__MGold": 560,
+    "SalamandreBraise__MRainbow": 2800,
+    "SatelliteRonchon": 1540,
+    "SatelliteRonchon__E2": 4620,
+    "SatelliteRonchon__E2__MDiamond": 23100,
+    "SatelliteRonchon__E2__MGold": 9240,
+    "SatelliteRonchon__E2__MRainbow": 46200,
+    "SatelliteRonchon__E3": 12320,
+    "SatelliteRonchon__E3__MDiamond": 61600,
+    "SatelliteRonchon__E3__MGold": 24640,
+    "SatelliteRonchon__E3__MRainbow": 123200,
+    "SatelliteRonchon__MDiamond": 7700,
+    "SatelliteRonchon__MGold": 3080,
+    "SatelliteRonchon__MRainbow": 15400,
+    "ScorpionSablier": 1750,
+    "ScorpionSablier__E2": 5250,
+    "ScorpionSablier__E2__MDiamond": 26250,
+    "ScorpionSablier__E2__MGold": 10500,
+    "ScorpionSablier__E2__MRainbow": 52500,
+    "ScorpionSablier__E3": 14000,
+    "ScorpionSablier__E3__MDiamond": 70000,
+    "ScorpionSablier__E3__MGold": 28000,
+    "ScorpionSablier__E3__MRainbow": 140000,
+    "ScorpionSablier__MDiamond": 8750,
+    "ScorpionSablier__MGold": 3500,
+    "ScorpionSablier__MRainbow": 17500,
+    "SlimeGlgl": 3,
+    "SlimeGlgl__E2": 9,
+    "SlimeGlgl__E2__MDiamond": 45,
+    "SlimeGlgl__E2__MGold": 18,
+    "SlimeGlgl__E2__MRainbow": 90,
+    "SlimeGlgl__E3": 24,
+    "SlimeGlgl__E3__MDiamond": 120,
+    "SlimeGlgl__E3__MGold": 48,
+    "SlimeGlgl__E3__MRainbow": 240,
+    "SlimeGlgl__MDiamond": 15,
+    "SlimeGlgl__MGold": 6,
+    "SlimeGlgl__MRainbow": 30,
+    "SphinxGrognon": 82249,
+    "SphinxGrognon__E2": 246747,
+    "SphinxGrognon__E2__MDiamond": 1233735,
+    "SphinxGrognon__E2__MGold": 493494,
+    "SphinxGrognon__E2__MRainbow": 2467470,
+    "SphinxGrognon__E3": 657992,
+    "SphinxGrognon__E3__MDiamond": 3289960,
+    "SphinxGrognon__E3__MGold": 1315984,
+    "SphinxGrognon__E3__MRainbow": 6579920,
+    "SphinxGrognon__MDiamond": 411245,
+    "SphinxGrognon__MGold": 164498,
+    "SphinxGrognon__MRainbow": 822490,
+    "TRexPoche": 250000,
+    "TRexPoche__E2": 750000,
+    "TRexPoche__E2__MDiamond": 3750000,
+    "TRexPoche__E2__MGold": 1500000,
+    "TRexPoche__E2__MRainbow": 7500000,
+    "TRexPoche__E3": 2000000,
+    "TRexPoche__E3__MDiamond": 10000000,
+    "TRexPoche__E3__MGold": 4000000,
+    "TRexPoche__E3__MRainbow": 20000000,
+    "TRexPoche__MDiamond": 1250000,
+    "TRexPoche__MGold": 500000,
+    "TRexPoche__MRainbow": 2500000,
+    "TRexTank": 66500,
+    "TRexTank__E2": 199500,
+    "TRexTank__E2__MDiamond": 997500,
+    "TRexTank__E2__MGold": 399000,
+    "TRexTank__E2__MRainbow": 1995000,
+    "TRexTank__E3": 532000,
+    "TRexTank__E3__MDiamond": 2660000,
+    "TRexTank__E3__MGold": 1064000,
+    "TRexTank__E3__MRainbow": 5320000,
+    "TRexTank__MDiamond": 332500,
+    "TRexTank__MGold": 133000,
+    "TRexTank__MRainbow": 665000,
+    "TasseChien": 204,
+    "TasseChien__E2": 612,
+    "TasseChien__E2__MDiamond": 3060,
+    "TasseChien__E2__MGold": 1224,
+    "TasseChien__E2__MRainbow": 6120,
+    "TasseChien__E3": 1632,
+    "TasseChien__E3__MDiamond": 8160,
+    "TasseChien__E3__MGold": 3264,
+    "TasseChien__E3__MRainbow": 16320,
+    "TasseChien__MDiamond": 1020,
+    "TasseChien__MGold": 408,
+    "TasseChien__MRainbow": 2040,
+    "TaupeMagma": 1855,
+    "TaupeMagma__E2": 5565,
+    "TaupeMagma__E2__MDiamond": 27825,
+    "TaupeMagma__E2__MGold": 11130,
+    "TaupeMagma__E2__MRainbow": 55650,
+    "TaupeMagma__E3": 14840,
+    "TaupeMagma__E3__MDiamond": 74200,
+    "TaupeMagma__E3__MGold": 29680,
+    "TaupeMagma__E3__MRainbow": 148400,
+    "TaupeMagma__MDiamond": 9275,
+    "TaupeMagma__MGold": 3710,
+    "TaupeMagma__MRainbow": 18550,
+    "TelecommandePerdue": 250,
+    "TelecommandePerdue__E2": 750,
+    "TelecommandePerdue__E2__MDiamond": 3750,
+    "TelecommandePerdue__E2__MGold": 1500,
+    "TelecommandePerdue__E2__MRainbow": 7500,
+    "TelecommandePerdue__E3": 2000,
+    "TelecommandePerdue__E3__MDiamond": 10000,
+    "TelecommandePerdue__E3__MGold": 4000,
+    "TelecommandePerdue__E3__MRainbow": 20000,
+    "TelecommandePerdue__MDiamond": 1250,
+    "TelecommandePerdue__MGold": 500,
+    "TelecommandePerdue__MRainbow": 2500,
+    "TigreBengal": 5000,
+    "TigreBengal__E2": 15000,
+    "TigreBengal__E2__MDiamond": 75000,
+    "TigreBengal__E2__MGold": 30000,
+    "TigreBengal__E2__MRainbow": 150000,
+    "TigreBengal__E3": 40000,
+    "TigreBengal__E3__MDiamond": 200000,
+    "TigreBengal__E3__MGold": 80000,
+    "TigreBengal__E3__MRainbow": 400000,
+    "TigreBengal__MDiamond": 25000,
+    "TigreBengal__MGold": 10000,
+    "TigreBengal__MRainbow": 50000,
+    "TitanAureole": 3850000,
+    "TitanAureole__E2": 11550000,
+    "TitanAureole__E2__MDiamond": 57750000,
+    "TitanAureole__E2__MGold": 23100000,
+    "TitanAureole__E2__MRainbow": 115500000,
+    "TitanAureole__E3": 30800000,
+    "TitanAureole__E3__MDiamond": 154000000,
+    "TitanAureole__E3__MGold": 61600000,
+    "TitanAureole__E3__MRainbow": 308000000,
+    "TitanAureole__MDiamond": 19250000,
+    "TitanAureole__MGold": 7700000,
+    "TitanAureole__MRainbow": 38500000,
+    "TitanLave": 587499,
+    "TitanLave__E2": 1762497,
+    "TitanLave__E2__MDiamond": 8812485,
+    "TitanLave__E2__MGold": 3524994,
+    "TitanLave__E2__MRainbow": 17624970,
+    "TitanLave__E3": 4699992,
+    "TitanLave__E3__MDiamond": 23499960,
+    "TitanLave__E3__MGold": 9399984,
+    "TitanLave__E3__MRainbow": 46999920,
+    "TitanLave__MDiamond": 2937495,
+    "TitanLave__MGold": 1174998,
+    "TitanLave__MRainbow": 5874990,
+    "TortueBurger": 4,
+    "TortueBurger__E2": 12,
+    "TortueBurger__E2__MDiamond": 60,
+    "TortueBurger__E2__MGold": 24,
+    "TortueBurger__E2__MRainbow": 120,
+    "TortueBurger__E3": 32,
+    "TortueBurger__E3__MDiamond": 160,
+    "TortueBurger__E3__MGold": 64,
+    "TortueBurger__E3__MRainbow": 320,
+    "TortueBurger__MDiamond": 20,
+    "TortueBurger__MGold": 8,
+    "TortueBurger__MRainbow": 40,
+    "ToupieTrouDeVer": 77000,
+    "ToupieTrouDeVer__E2": 231000,
+    "ToupieTrouDeVer__E2__MDiamond": 1155000,
+    "ToupieTrouDeVer__E2__MGold": 462000,
+    "ToupieTrouDeVer__E2__MRainbow": 2310000,
+    "ToupieTrouDeVer__E3": 616000,
+    "ToupieTrouDeVer__E3__MDiamond": 3080000,
+    "ToupieTrouDeVer__E3__MGold": 1232000,
+    "ToupieTrouDeVer__E3__MRainbow": 6160000,
+    "ToupieTrouDeVer__MDiamond": 385000,
+    "ToupieTrouDeVer__MGold": 154000,
+    "ToupieTrouDeVer__MRainbow": 770000,
+    "TournesolJoyeux": 24,
+    "TournesolJoyeux__E2": 72,
+    "TournesolJoyeux__E2__MDiamond": 360,
+    "TournesolJoyeux__E2__MGold": 144,
+    "TournesolJoyeux__E2__MRainbow": 720,
+    "TournesolJoyeux__E3": 192,
+    "TournesolJoyeux__E3__MDiamond": 960,
+    "TournesolJoyeux__E3__MGold": 384,
+    "TournesolJoyeux__E3__MRainbow": 1920,
+    "TournesolJoyeux__MDiamond": 120,
+    "TournesolJoyeux__MGold": 48,
+    "TournesolJoyeux__MRainbow": 240,
+    "Treflant4Feuilles": 8750,
+    "Treflant4Feuilles__E2": 26250,
+    "Treflant4Feuilles__E2__MDiamond": 131250,
+    "Treflant4Feuilles__E2__MGold": 52500,
+    "Treflant4Feuilles__E2__MRainbow": 262500,
+    "Treflant4Feuilles__E3": 70000,
+    "Treflant4Feuilles__E3__MDiamond": 350000,
+    "Treflant4Feuilles__E3__MGold": 140000,
+    "Treflant4Feuilles__E3__MRainbow": 700000,
+    "Treflant4Feuilles__MDiamond": 43750,
+    "Treflant4Feuilles__MGold": 17500,
+    "Treflant4Feuilles__MRainbow": 87500,
+    "TrioAsteroides": 11749,
+    "TrioAsteroides__E2": 35247,
+    "TrioAsteroides__E2__MDiamond": 176235,
+    "TrioAsteroides__E2__MGold": 70494,
+    "TrioAsteroides__E2__MRainbow": 352470,
+    "TrioAsteroides__E3": 93992,
+    "TrioAsteroides__E3__MDiamond": 469960,
+    "TrioAsteroides__E3__MGold": 187984,
+    "TrioAsteroides__E3__MRainbow": 939920,
+    "TrioAsteroides__MDiamond": 58745,
+    "TrioAsteroides__MGold": 23498,
+    "TrioAsteroides__MRainbow": 117490,
+    "TrouNoirPoche": 3587499,
+    "TrouNoirPoche__E2": 10762497,
+    "TrouNoirPoche__E2__MDiamond": 53812485,
+    "TrouNoirPoche__E2__MGold": 21524994,
+    "TrouNoirPoche__E2__MRainbow": 107624970,
+    "TrouNoirPoche__E3": 28699992,
+    "TrouNoirPoche__E3__MDiamond": 143499960,
+    "TrouNoirPoche__E3__MGold": 57399984,
+    "TrouNoirPoche__E3__MRainbow": 286999920,
+    "TrouNoirPoche__MDiamond": 17937495,
+    "TrouNoirPoche__MGold": 7174998,
+    "TrouNoirPoche__MRainbow": 35874990,
+    "YetiCalin": 14000,
+    "YetiCalin__E2": 42000,
+    "YetiCalin__E2__MDiamond": 210000,
+    "YetiCalin__E2__MGold": 84000,
+    "YetiCalin__E2__MRainbow": 420000,
+    "YetiCalin__E3": 112000,
+    "YetiCalin__E3__MDiamond": 560000,
+    "YetiCalin__E3__MGold": 224000,
+    "YetiCalin__E3__MRainbow": 1120000,
+    "YetiCalin__MDiamond": 70000,
+    "YetiCalin__MGold": 28000,
+    "YetiCalin__MRainbow": 140000
+  },
+  "pets": [
+    {
+      "category": "Animaux",
+      "id": "ChienSaucisse",
+      "income": 2,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.51
+    },
+    {
+      "category": "Animaux",
+      "id": "ChatRuelle",
+      "income": 2,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.55
+    },
+    {
+      "category": "Animaux",
+      "id": "PigeonVilles",
+      "income": 2,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.5
+    },
+    {
+      "category": "Animaux",
+      "id": "GrenouilleGlobuleuse",
+      "income": 14,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.65
+    },
+    {
+      "category": "Animaux",
+      "id": "HamsterJoufflu",
+      "income": 16,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.65
+    },
+    {
+      "category": "Animaux",
+      "id": "RenardFurtif",
+      "income": 100,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.838
+    },
+    {
+      "category": "Animaux",
+      "id": "CorbeauVoleur",
+      "income": 114,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.819
+    },
+    {
+      "category": "Animaux",
+      "id": "HibouGrincheux",
+      "income": 130,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.838
+    },
+    {
+      "category": "Animaux",
+      "id": "LoupPolaire",
+      "income": 700,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1.083
+    },
+    {
+      "category": "Animaux",
+      "id": "PanthereNeon",
+      "income": 804,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1.05
+    },
+    {
+      "category": "Animaux",
+      "id": "TigreBengal",
+      "income": 5000,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.329
+    },
+    {
+      "category": "Animaux",
+      "id": "AigleRoyal",
+      "income": 5750,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.293
+    },
+    {
+      "category": "Animaux",
+      "id": "RequinVolant",
+      "income": 35000,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.567
+    },
+    {
+      "category": "Animaux",
+      "id": "TRexPoche",
+      "income": 250000,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 1.75
+    },
+    {
+      "category": "Animaux",
+      "id": "CapybaraZen",
+      "income": 1750000,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.3
+    },
+    {
+      "category": "Fantastiques",
+      "id": "FeuFollet",
+      "income": 2,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.5
+    },
+    {
+      "category": "Fantastiques",
+      "id": "SlimeGlgl",
+      "income": 3,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.55
+    },
+    {
+      "category": "Fantastiques",
+      "id": "BebeGriffon",
+      "income": 18,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.75
+    },
+    {
+      "category": "Fantastiques",
+      "id": "GargouilleMignonne",
+      "income": 20,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.725
+    },
+    {
+      "category": "Fantastiques",
+      "id": "LicorneBois",
+      "income": 145,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.95
+    },
+    {
+      "category": "Fantastiques",
+      "id": "PhenixCendres",
+      "income": 160,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.875
+    },
+    {
+      "category": "Fantastiques",
+      "id": "CerbereChiot",
+      "income": 910,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1.017
+    },
+    {
+      "category": "Fantastiques",
+      "id": "DragonnetObsidienne",
+      "income": 1015,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1.117
+    },
+    {
+      "category": "Fantastiques",
+      "id": "PegaseNuageux",
+      "income": 6500,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.4
+    },
+    {
+      "category": "Fantastiques",
+      "id": "Kitsune3Queues",
+      "income": 7250,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.257
+    },
+    {
+      "category": "Fantastiques",
+      "id": "KrakenBaignoire",
+      "income": 40250,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.5
+    },
+    {
+      "category": "Fantastiques",
+      "id": "BasilicEmeraude",
+      "income": 45500,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.533
+    },
+    {
+      "category": "Fantastiques",
+      "id": "LeviathanAbyssal",
+      "income": 287500,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 2.15
+    },
+    {
+      "category": "Fantastiques",
+      "id": "PhenixSolaire",
+      "income": 325000,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 1.968
+    },
+    {
+      "category": "Fantastiques",
+      "id": "OuroborosInfini",
+      "income": 2012499,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.5
+    },
+    {
+      "category": "Plantes",
+      "id": "PousseHaricot",
+      "income": 3,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.525
+    },
+    {
+      "category": "Plantes",
+      "id": "CactusRonchon",
+      "income": 3,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.575
+    },
+    {
+      "category": "Plantes",
+      "id": "NavetPeureux",
+      "income": 22,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.675
+    },
+    {
+      "category": "Plantes",
+      "id": "TournesolJoyeux",
+      "income": 24,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.8
+    },
+    {
+      "category": "Plantes",
+      "id": "ChampignonVeneneux",
+      "income": 175,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.856
+    },
+    {
+      "category": "Plantes",
+      "id": "CitrouilleSculptee",
+      "income": 190,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.838
+    },
+    {
+      "category": "Plantes",
+      "id": "BonsaiMillenaire",
+      "income": 1120,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1.017
+    },
+    {
+      "category": "Plantes",
+      "id": "RoseCristal",
+      "income": 1225,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 0.983
+    },
+    {
+      "category": "Plantes",
+      "id": "MandragoreHurlante",
+      "income": 8000,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.15
+    },
+    {
+      "category": "Plantes",
+      "id": "Treflant4Feuilles",
+      "income": 8750,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.186
+    },
+    {
+      "category": "Plantes",
+      "id": "LotusEspace",
+      "income": 50750,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.433
+    },
+    {
+      "category": "Plantes",
+      "id": "ArbreMondeMiniature",
+      "income": 56000,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.7
+    },
+    {
+      "category": "Plantes",
+      "id": "CarniflorToxique",
+      "income": 362500,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 1.895
+    },
+    {
+      "category": "Plantes",
+      "id": "GraineEtoile",
+      "income": 400000,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 1.75
+    },
+    {
+      "category": "Plantes",
+      "id": "FougereFibonacci",
+      "income": 2275000,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.7
+    },
+    {
+      "category": "Hybrides",
+      "id": "ChatCoptere",
+      "income": 4,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.6
+    },
+    {
+      "category": "Hybrides",
+      "id": "TortueBurger",
+      "income": 4,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.55
+    },
+    {
+      "category": "Hybrides",
+      "id": "PoissonAmpoule",
+      "income": 26,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.7
+    },
+    {
+      "category": "Hybrides",
+      "id": "CochonTirelire",
+      "income": 28,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.725
+    },
+    {
+      "category": "Hybrides",
+      "id": "TasseChien",
+      "income": 204,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.8
+    },
+    {
+      "category": "Hybrides",
+      "id": "CorbeauHorloge",
+      "income": 220,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.856
+    },
+    {
+      "category": "Hybrides",
+      "id": "BananeChien",
+      "income": 1330,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1.017
+    },
+    {
+      "category": "Hybrides",
+      "id": "HibouCamera",
+      "income": 1434,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 0.983
+    },
+    {
+      "category": "Hybrides",
+      "id": "RequinTorpille",
+      "income": 9500,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.257
+    },
+    {
+      "category": "Hybrides",
+      "id": "PegaseMoto",
+      "income": 10250,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.364
+    },
+    {
+      "category": "Hybrides",
+      "id": "DragonGrillePain",
+      "income": 61250,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.467
+    },
+    {
+      "category": "Hybrides",
+      "id": "TRexTank",
+      "income": 66500,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.633
+    },
+    {
+      "category": "Hybrides",
+      "id": "GolemDistributeur",
+      "income": 437500,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 2.077
+    },
+    {
+      "category": "Hybrides",
+      "id": "LionEnceinte",
+      "income": 475000,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 1.968
+    },
+    {
+      "category": "Hybrides",
+      "id": "CanardTractopelle",
+      "income": 2537500,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.5
+    },
+    {
+      "category": "Absurdes",
+      "id": "AstroBoulon",
+      "income": 4,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.625
+    },
+    {
+      "category": "Absurdes",
+      "id": "AutrucheFusee",
+      "income": 5,
+      "rarity": "Commun",
+      "rarityIndex": 1,
+      "size": 0.65
+    },
+    {
+      "category": "Absurdes",
+      "id": "MyrtilleLunaire",
+      "income": 30,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.675
+    },
+    {
+      "category": "Absurdes",
+      "id": "ConciergeCosmique",
+      "income": 32,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.8
+    },
+    {
+      "category": "Absurdes",
+      "id": "MoutonMeteore",
+      "income": 234,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.894
+    },
+    {
+      "category": "Absurdes",
+      "id": "TelecommandePerdue",
+      "income": 250,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.819
+    },
+    {
+      "category": "Absurdes",
+      "id": "SatelliteRonchon",
+      "income": 1540,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1.117
+    },
+    {
+      "category": "Absurdes",
+      "id": "PingouinComete",
+      "income": 1644,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 0.95
+    },
+    {
+      "category": "Absurdes",
+      "id": "BurritoNebuleuse",
+      "income": 11000,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.15
+    },
+    {
+      "category": "Absurdes",
+      "id": "TrioAsteroides",
+      "income": 11749,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.221
+    },
+    {
+      "category": "Absurdes",
+      "id": "JumeauxEclipse",
+      "income": 71750,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.5
+    },
+    {
+      "category": "Absurdes",
+      "id": "ToupieTrouDeVer",
+      "income": 77000,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.4
+    },
+    {
+      "category": "Absurdes",
+      "id": "MachineQuantique",
+      "income": 512499,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 1.823
+    },
+    {
+      "category": "Absurdes",
+      "id": "DragonAurore",
+      "income": 550000,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 2.15
+    },
+    {
+      "category": "Absurdes",
+      "id": "BaleineGalaxie",
+      "income": 2800000,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.9
+    },
+    {
+      "category": "Monde",
+      "id": "FennecLunettes",
+      "income": 35,
+      "rarity": "Inhabituel",
+      "rarityIndex": 2,
+      "size": 0.72,
+      "world": "Desert"
+    },
+    {
+      "category": "Monde",
+      "id": "CactusCowboy",
+      "income": 265,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.88,
+      "world": "Desert"
+    },
+    {
+      "category": "Monde",
+      "id": "ScorpionSablier",
+      "income": 1750,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1,
+      "world": "Desert"
+    },
+    {
+      "category": "Monde",
+      "id": "LezardMomie",
+      "income": 12500,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.25,
+      "world": "Desert"
+    },
+    {
+      "category": "Monde",
+      "id": "SphinxGrognon",
+      "income": 82249,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.55,
+      "world": "Desert"
+    },
+    {
+      "category": "Monde",
+      "id": "SalamandreBraise",
+      "income": 280,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.86,
+      "world": "Volcan"
+    },
+    {
+      "category": "Monde",
+      "id": "TaupeMagma",
+      "income": 1855,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1,
+      "world": "Volcan"
+    },
+    {
+      "category": "Monde",
+      "id": "GolemCendre",
+      "income": 13250,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.3,
+      "world": "Volcan"
+    },
+    {
+      "category": "Monde",
+      "id": "DragonBarbecue",
+      "income": 87500,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.6,
+      "world": "Volcan"
+    },
+    {
+      "category": "Monde",
+      "id": "TitanLave",
+      "income": 587499,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 2.05,
+      "world": "Volcan"
+    },
+    {
+      "category": "Monde",
+      "id": "CerbereInfernal",
+      "income": 3062500,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.6,
+      "world": "Volcan"
+    },
+    {
+      "category": "Monde",
+      "id": "PingouinPatineur",
+      "income": 295,
+      "rarity": "Rare",
+      "rarityIndex": 3,
+      "size": 0.82,
+      "world": "Glace"
+    },
+    {
+      "category": "Monde",
+      "id": "MorseMoustachu",
+      "income": 1959,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1.05,
+      "world": "Glace"
+    },
+    {
+      "category": "Monde",
+      "id": "YetiCalin",
+      "income": 14000,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.35,
+      "world": "Glace"
+    },
+    {
+      "category": "Monde",
+      "id": "MammouthGlacon",
+      "income": 92750,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.65,
+      "world": "Glace"
+    },
+    {
+      "category": "Monde",
+      "id": "NarvalAurore",
+      "income": 625000,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 1.9,
+      "world": "Glace"
+    },
+    {
+      "category": "Monde",
+      "id": "LanterneDisco",
+      "income": 2065,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 1,
+      "world": "Abysses"
+    },
+    {
+      "category": "Monde",
+      "id": "MeduseLampion",
+      "income": 14750,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.2,
+      "world": "Abysses"
+    },
+    {
+      "category": "Monde",
+      "id": "PieuvrePirate",
+      "income": 98000,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.5,
+      "world": "Abysses"
+    },
+    {
+      "category": "Monde",
+      "id": "CalmarColosse",
+      "income": 662500,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 2.1,
+      "world": "Abysses"
+    },
+    {
+      "category": "Monde",
+      "id": "RoiCorail",
+      "income": 3325000,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.4,
+      "world": "Abysses"
+    },
+    {
+      "category": "Monde",
+      "id": "AstroHamster",
+      "income": 2170,
+      "rarity": "Epique",
+      "rarityIndex": 4,
+      "size": 0.98,
+      "world": "Cosmos"
+    },
+    {
+      "category": "Monde",
+      "id": "ChatComete",
+      "income": 15500,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.2,
+      "world": "Cosmos"
+    },
+    {
+      "category": "Monde",
+      "id": "AlienGelatine",
+      "income": 103250,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.45,
+      "world": "Cosmos"
+    },
+    {
+      "category": "Monde",
+      "id": "LionNebuleuse",
+      "income": 700000,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 2,
+      "world": "Cosmos"
+    },
+    {
+      "category": "Monde",
+      "id": "TrouNoirPoche",
+      "income": 3587499,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.35,
+      "world": "Cosmos"
+    },
+    {
+      "category": "Monde",
+      "id": "CherubinHamster",
+      "income": 16250,
+      "rarity": "Legendaire",
+      "rarityIndex": 5,
+      "size": 1.3,
+      "world": "Divin"
+    },
+    {
+      "category": "Monde",
+      "id": "LicorneCeleste",
+      "income": 108500,
+      "rarity": "Mythique",
+      "rarityIndex": 6,
+      "size": 1.68,
+      "world": "Divin"
+    },
+    {
+      "category": "Monde",
+      "id": "GriffonDore",
+      "income": 737500,
+      "rarity": "Divin",
+      "rarityIndex": 7,
+      "size": 2.1,
+      "world": "Divin"
+    },
+    {
+      "category": "Monde",
+      "id": "TitanAureole",
+      "income": 3850000,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.6,
+      "world": "Divin"
+    },
+    {
+      "category": "Monde",
+      "id": "GardienTrouNoir",
+      "income": 4112499,
+      "rarity": "Sigma",
+      "rarityIndex": 8,
+      "size": 2.85,
+      "world": "Divin"
+    }
+  ]
+}
