@@ -64,7 +64,7 @@ entiers, vols inclinés, capybara qui fait la sieste. Pas vu : sur téléphone, 
 reçu les 30 familiers dans sa sauvegarde Studio (pour tester). **ArtModels n'est que dans le fichier du jeu : Ctrl+S.**
 **25 oct. : carte « niveau studio » (phase 1.6), style validé, décors posés dans Studio** (`Workspace.MapDecor`,
 `ArtModels.Map`, dans le fichier du jeu : Ctrl+S ; éclairage de la charte dans MapGenerator / DayNightController /
-Worlds (Prairie), pas encore vu en Play ; bases pas encore habillées) : lire
+Worlds (Prairie), vérifié en Play de jour et de nuit ; bases pas encore habillées) : lire
 `dataset_and_pipeline/MAP.md`. Charte `map_art_bible.json`, 21 décors en blocs biseautés cuits (`environment_recipes.py`,
 `run_map_assets.py`, `baked_assets/map/`), scène aux vraies dimensions + rendus `qa_renders/map_hero.png` et
 `map_aesthetic_board.png` (`run_map_scene.py`), placement Roblox `map_layout.json` et script Studio

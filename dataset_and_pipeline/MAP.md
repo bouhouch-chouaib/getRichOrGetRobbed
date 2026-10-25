@@ -92,7 +92,9 @@ Eggs, WorldSkin supposent la carte entière présente).
 - Vérifié dans Studio (Édition + Play solo) : import, script lancé, décors à leur place autour de la vraie carte
   (anneau d'arches, arbres et ruines entre les bases, falaises derrière le mur), sens des falaises et arches.
 - Pas vérifié : la couleur des 2 textures renvoyées (modération), performance (surtout téléphone), collisions et
-  parcours des joueurs autour des arches, le nouvel éclairage en jeu (code analysé et construit, pas encore vu en Play).
+  parcours des joueurs autour des arches.
+- Vérifié en Play (solo, 25 oct.) : l'éclairage de la charte la nuit (au démarrage) puis le jour après la transition,
+  valeurs relues sur le serveur, pas d'erreur ; photos `qa_renders/map_roblox_nuit.jpg` et `map_roblox_jour.jpg`.
 - Limites vues sur les rendus : les falaises répètent le même module (varier : 2e module, rochers à leur pied) ;
   le mur d'enceinte reste une grande bande unie (piste : le remplacer par une falaise) ; la prairie sauvage est
   volontairement dégagée (jeu) ; la vue aérienne reste un peu brumeuse.
