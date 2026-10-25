@@ -35,7 +35,8 @@ Worlds.Looks = {
 	Prairie = {
 		Accent = rgb(110, 214, 42),
 		Palette = {},
-		Ambience = { AirColor = rgb(205, 225, 255), AirDecay = rgb(120, 150, 200), AirDensity = 0.22, Tint = rgb(255, 255, 255), Saturation = 0.15, CloudColor = rgb(255, 255, 255), CloudCover = 0.55 },
+		-- air et teinte du préréglage « jour » de dataset_and_pipeline/map_art_bible.json (25 oct.)
+		Ambience = { AirColor = rgb(207, 226, 255), AirDecay = rgb(122, 150, 208), AirDensity = 0.3, Tint = rgb(255, 250, 240), Saturation = 0.18, CloudColor = rgb(255, 255, 255), CloudCover = 0.55 },
 		Decor = "Trees",
 	},
 	Desert = {

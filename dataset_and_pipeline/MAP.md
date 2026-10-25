@@ -68,8 +68,13 @@ Rochers et obsidienne cuits depuis une version détaillée (facettes ébréchée
    renvoyées à la main (`color_override` de `map_roblox.json`, reprises par le script), en attente de la modération
    Roblox au moment de l'écriture.
 
-Reste à faire : garder le look en jeu en reportant les valeurs du préréglage dans `server/MapGenerator.applyLighting` et
-`server/DayNightController` (ils écrasent l'éclairage au Play) ; habiller les bases dans `MapGenerator` (palissades à
+Éclairage en jeu (25 oct., code) : `server/MapGenerator.applyLighting` pose le préréglage « jour » (Atmosphere,
+Bloom, ColorCorrection, DepthOfField, SunRays, latitude, échelles d'environnement, ombres douces) ;
+`server/DayNightController` fait varier en plus le bloom, le contraste, Glare et Haze entre jour et nuit ; l'air de la
+Prairie (`shared/Worlds`) reprend la couleur, la densité, la teinte et la saturation de la charte (les autres mondes
+gardent leur air). La couleur de l'air de nuit de la charte n'est pas appliquée (elle se battrait avec WorldSkin).
+
+Reste à faire : habiller les bases dans `MapGenerator` (palissades à
 la place des clôtures, arche à l'entrée) plutôt que par-dessus ; regarder la performance sur téléphone.
 
 ## Règles de jeu respectées par le placement
@@ -87,7 +92,7 @@ Eggs, WorldSkin supposent la carte entière présente).
 - Vérifié dans Studio (Édition + Play solo) : import, script lancé, décors à leur place autour de la vraie carte
   (anneau d'arches, arbres et ruines entre les bases, falaises derrière le mur), sens des falaises et arches.
 - Pas vérifié : la couleur des 2 textures renvoyées (modération), performance (surtout téléphone), collisions et
-  parcours des joueurs autour des arches, le nouvel éclairage en jeu (le jeu remet l'ancien au Play).
+  parcours des joueurs autour des arches, le nouvel éclairage en jeu (code analysé et construit, pas encore vu en Play).
 - Limites vues sur les rendus : les falaises répètent le même module (varier : 2e module, rochers à leur pied) ;
   le mur d'enceinte reste une grande bande unie (piste : le remplacer par une falaise) ; la prairie sauvage est
   volontairement dégagée (jeu) ; la vue aérienne reste un peu brumeuse.

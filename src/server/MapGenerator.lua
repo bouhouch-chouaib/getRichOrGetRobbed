@@ -144,27 +144,49 @@ local function applyLighting()
 	sky.StarCount = 3000
 	sky.Parent = Lighting
 
-	-- Air léger et bleuté : il ne doit pas ternir les couleurs (la référence est très saturée).
+	-- Préréglage « jour » de dataset_and_pipeline/map_art_bible.json (25 oct.). DayNightController fait varier
+	-- l'heure, la lumière, le bloom, le contraste, Glare et Haze entre le jour et la nuit ; client/WorldSkin teinte l'air
+	-- (Color, Decay, Density) et l'image (TintColor, Saturation) selon le monde.
+	Lighting.GeographicLatitude = 35
+	Lighting.EnvironmentDiffuseScale = 0.6
+	Lighting.EnvironmentSpecularScale = 0.7
+	Lighting.ShadowSoftness = 0.25
+
+	-- Air bleuté qui donne de la profondeur aux falaises lointaines sans ternir l'arène.
 	local atmosphere = Instance.new("Atmosphere")
-	atmosphere.Density = 0.22
-	atmosphere.Offset = 0.2
-	atmosphere.Color = Color3.fromRGB(205, 225, 255)
-	atmosphere.Decay = Color3.fromRGB(120, 150, 200)
-	atmosphere.Glare = 0
-	atmosphere.Haze = 0
+	atmosphere.Density = 0.3
+	atmosphere.Offset = 0.25
+	atmosphere.Color = Color3.fromRGB(207, 226, 255)
+	atmosphere.Decay = Color3.fromRGB(122, 150, 208)
+	atmosphere.Glare = 0.35
+	atmosphere.Haze = 0.6
 	atmosphere.Parent = Lighting
 
-	-- Les néons « bavent » un peu, couleurs légèrement poussées.
+	-- Lueur douce des runes, champignons et cristaux (seuil haut : pas de néon qui bave).
 	local bloom = Instance.new("BloomEffect")
-	bloom.Intensity = 0.5
-	bloom.Size = 24
-	bloom.Threshold = 1.4
+	bloom.Intensity = 0.45
+	bloom.Size = 22
+	bloom.Threshold = 1.6
 	bloom.Parent = Lighting
 
 	local grading = Instance.new("ColorCorrectionEffect")
-	grading.Saturation = 0.15
-	grading.Contrast = 0.05
+	grading.Saturation = 0.18
+	grading.Contrast = 0.08
+	grading.TintColor = Color3.fromRGB(255, 250, 240)
 	grading.Parent = Lighting
+
+	-- Flou léger du très lointain seulement (falaises, monts) : jamais sur l'arène.
+	local depth = Instance.new("DepthOfFieldEffect")
+	depth.FarIntensity = 0.12
+	depth.FocusDistance = 120
+	depth.InFocusRadius = 160
+	depth.NearIntensity = 0
+	depth.Parent = Lighting
+
+	local sunRays = Instance.new("SunRaysEffect")
+	sunRays.Intensity = 0.04
+	sunRays.Spread = 0.6
+	sunRays.Parent = Lighting
 
 	-- Gros cumulus blancs (nuages dynamiques du Terrain).
 	local terrain = Workspace.Terrain
