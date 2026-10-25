@@ -1,0 +1,27 @@
+{
+  "pet": "SlimeGlgl",
+  "model_height_blender": 0.72,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 904,
+      "center": [
+        0.02,
+        0.011,
+        0.36
+      ],
+      "size": [
+        0.86,
+        0.818,
+        0.72
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.083333
+}

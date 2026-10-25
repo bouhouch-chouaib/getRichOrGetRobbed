@@ -26,17 +26,17 @@ def side(s: int) -> str:
 # ---------------------------------------------------------------------------------------------------------------------
 
 def eyes(kit, part, x, y, z, size=0.14, iris="#3A8CFF", pupil="round", lid=None, lid_drop=0.0, brow=None,
-         brow_angle=0.0, look=(0.0, 0.0), glow=0.0, sclera="#FFFFFF", tall=1.0):
+         brow_angle=0.0, look=(0.0, 0.0), glow=0.0, sclera="#FFFFFF", tall=1.0, at=0.0):
     """Deux yeux en couches sur une face qui regarde vers -Y (y = la face) : blanc, iris, pupille, deux reflets,
     paupière (lid_drop 0 = grand ouvert, 0,5 = mi-clos) et sourcil (brow_angle > 0 = froncé vers le centre).
-    pupil : "round" (tuile ronde), "slit" (fente de chat), "square"."""
+    pupil : "round" (tuile ronde), "slit" (fente de chat), "square". at = centre du visage en x (tête décalée)."""
     m_scl = kit.mat("blanc_oeil", sclera, rough=0.12)
     m_iris = kit.mat(f"iris{iris}", iris, rough=0.12, glow=glow)
     m_pup = kit.mat("pupille", "#0C0C10", rough=0.08)
     m_hi = kit.mat("reflet", "#FFFFFF", rough=0.05)
     h = size * tall
     for s in (-1, 1):
-        cx, lx, lz = s * x, look[0] * size * 0.18, look[1] * size * 0.18
+        cx, lx, lz = at + s * x, look[0] * size * 0.18, look[1] * size * 0.18
         kit.add(kit.box((size, 0.04, h), center=(cx, y - 0.015, z)), m_scl, part, bevel=0.012)
         kit.add(kit.box((size * 0.66, 0.02, h * 0.66), center=(cx + lx, y - 0.04, z + lz)), m_iris, part, bevel=0.008)
         if pupil == "round":
@@ -290,3 +290,132 @@ def bird_feet(kit, x, y, h, w, color, claw=None):
                               tip=0.2), claw, part, bevel=0.0)
         kit.add(kit.brick((w * 0.45, w * 0.9, w * 0.4), center=(cx, y + w * 0.65, w * 0.2)), color, part, bevel=0.008)
         kit.part(part, "Leg", pivot=(cx, y, h), phase=0.0 if s > 0 else math.pi)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Créatures fantastiques : ailes déployées, cornes, flammes, corps de serpent, tentacules
+# ---------------------------------------------------------------------------------------------------------------------
+
+def spread_wings(kit, x, y, z, span, height, mats, style="feather", sweep=20.0, lift=15.0, parts=("WingL", "WingR")):
+    """Ailes déployées sur le côté (vol) : style "feather" (rangs de plumes), "bat" (doigts + membrane), "cloud"
+    (nuages en blocs). mats = (principal, secondaire, bout). Pivot à l'épaule, battement « Wing » du jeu."""
+    main, second, tip = (list(mats) + [mats[-1]] * 3)[:3]
+    for s, part in ((1, parts[0]), (-1, parts[1])):
+        def place(u, v, w, d, h, mat, rot=(0, 0, 0), wedge=False, bevel=0.012):
+            # u = distance le long de l'aile (vers l'extérieur), v = vers l'arrière, w = hauteur
+            a, b = math.radians(lift) * s, math.radians(sweep)
+            px = s * x + s * u * math.cos(math.radians(lift))
+            pz = z + u * math.sin(math.radians(lift)) + w
+            py = y + v + u * math.sin(b) * 0.5
+            size = (d, h, 0.06) if not wedge else (d, 0.05, h)
+            piece = kit.wedge(size, center=(px, py, pz), rot=rot, tip=0.15) if wedge else kit.box(size, center=(px, py, pz),
+                                                                                                 rot=rot)
+            kit.add(piece, mat, part, bevel=bevel)
+        if style == "bat":
+            for k in range(4):  # doigts
+                f = (k + 1) / 4
+                place(span * f * 0.5, -0.05 + 0.12 * k, height * 0.3 * (1 - f), span * 0.5, 0.05, main,
+                      rot=(0, s * -lift, s * (k * 14 - 10)))
+            for k in range(3):  # membrane en plaques
+                place(span * (0.25 + k * 0.25), 0.12 + k * 0.06, -height * 0.05, span * 0.32, height * (0.7 - k * 0.15),
+                      second, rot=(0, s * -lift, s * (k * 10)))
+            place(span * 0.95, 0.0, height * 0.12, 0.08, 0.1, tip, rot=(0, 0, 0))
+        elif style == "cloud":
+            for k in range(6):
+                f = k / 5
+                for j in range(2):
+                    kit.add(kit.brick((0.18 - 0.02 * j, 0.2, 0.16 - 0.02 * j),
+                                      center=(s * (x + span * f * 0.9), y + 0.08 * j + f * 0.1,
+                                              z + span * f * 0.22 + 0.1 * j - f * f * 0.1)),
+                            main if (k + j) % 2 == 0 else second, part, bevel=0.05)
+        else:
+            for row, (mat, length, drop) in enumerate(((main, 0.55, 0.0), (second, 0.8, -0.08), (tip, 1.0, -0.16))):
+                n = 3 + row
+                for k in range(n):
+                    f = (k + 0.5) / n
+                    place(span * length * f, 0.05 + row * 0.07, drop + height * 0.1 * (1 - f),
+                          span * length / n * 1.25, height * (0.55 - row * 0.1), mat,
+                          rot=(0, s * -lift, s * (-6 + row * 6 + k * 3)))
+        kit.part(part, "Wing", pivot=(s * x, y, z), phase=float(s))
+
+
+def horn(kit, part, base, direction, length, width, mats, segments=4, twist=0.0, curl=0.0):
+    """Corne / bois / branche : briques qui s'affinent le long d'une courbe, pointe en coin. twist = torsade (°/segment)."""
+    d = Vector(direction).normalized()
+    side = d.cross(Vector((0, 0, 1)))
+    if side.length < 1e-3:
+        side = Vector((1, 0, 0))
+    side.normalize()
+    p = Vector(base)
+    step = length / segments
+    for k in range(segments):
+        w = width * (1 - 0.6 * k / segments)
+        dk = (d + side * curl * k / segments).normalized()
+        q = p + dk * step
+        seg = kit.brick((w, w, step * 1.15), label="Corne")
+        G.transform(seg, G.frame_matrix((p + q) / 2, q - p, roll_hint=(math.cos(math.radians(twist * k)), 0,
+                                                                     math.sin(math.radians(twist * k)))))
+        kit.add(seg, mats[k % len(mats)], part, bevel=min(0.012, w * 0.15))
+        p = q
+    tip = kit.wedge((width * 0.35, width * 0.35, step), tip=0.1, label="Pointe")
+    G.transform(tip, G.frame_matrix(p + d * step * 0.45, d))
+    kit.add(tip, mats[-1], part, bevel=0.0)
+
+
+def flames(kit, part, base, size, mats, n=5, spread=1.0, lean=(0.0, 0.0)):
+    """Couronne de flammes en coins empilés (du foncé au clair), qui montent depuis `base`."""
+    bx, by, bz = base
+    for k in range(n):
+        a = 2 * math.pi * k / n
+        r = size * 0.32 * spread
+        h = size * (0.7 + 0.35 * math.sin(k * 2.3))
+        for j, mat in enumerate(mats):
+            hj = h * (1 - 0.28 * j)
+            w = size * 0.32 * (1 - 0.25 * j)
+            kit.add(kit.wedge((w, w * 0.8, hj), center=(bx + math.cos(a) * r * (1 - 0.3 * j) + lean[0] * hj,
+                                                         by + math.sin(a) * r * (1 - 0.3 * j) + lean[1] * hj,
+                                                         bz + hj / 2 + j * size * 0.05), rot=(0, 0, math.degrees(a)),
+                              tip=0.08), mat, part, bevel=0.0)
+
+
+def snake(kit, points, width, height, mats, belly=None, prefix="Seg", phase_step=0.52, start=0):
+    """Corps de serpent en segments animés (genre « Serpent » du jeu : la vague passe d'un segment à l'autre).
+    Chaque segment est une pièce ; mats alternés (écailles), belly = plaque de ventre."""
+    pts = [Vector(p) for p in points]
+    n = len(pts) - 1
+    for k in range(n):
+        a, b = pts[k], pts[k + 1]
+        f = k / max(1, n - 1)
+        w = width * (1 - 0.55 * max(0.0, f - 0.55) / 0.45) if f > 0.55 else width
+        h = height * w / width
+        part = f"{prefix}{start + k}"
+        seg = kit.brick((w, h, (b - a).length * 1.12), label="Anneau")
+        G.transform(seg, G.frame_matrix((a + b) / 2, b - a, roll_hint=(0, 0, -1)))
+        kit.add(seg, mats[k % len(mats)], part, bevel=min(0.025, w * 0.15))
+        if belly:
+            pl = kit.brick((w * 0.7, h * 0.2, (b - a).length * 1.0), label="Ventre")
+            mid = (a + b) / 2 - Vector((0, 0, h * 0.42))
+            G.transform(pl, G.frame_matrix(mid, b - a, roll_hint=(0, 0, -1)))
+            kit.add(pl, belly, part, bevel=0.008)
+        kit.part(part, "Serpent", pivot=tuple((a + b) / 2), phase=(start + k) * phase_step)
+
+
+def tentacle(kit, part, base, direction, length, width, mat, cups=None, phase=0.0, segments=5, curl=0.6):
+    """Tentacule : briques qui s'affinent et s'enroulent au bout, ventouses en option ; genre « Tentacle »."""
+    d = Vector(direction).normalized()
+    up = Vector((0, 0, 1))
+    p = Vector(base)
+    step = length / segments
+    for k in range(segments):
+        f = k / segments
+        dk = (d * (1 - f * curl) + up * f * curl).normalized()
+        q = p + dk * step
+        w = width * (1 - 0.65 * f)
+        seg = kit.brick((w, w * 0.8, step * 1.18), label="Tentacule")
+        G.transform(seg, G.frame_matrix((p + q) / 2, q - p))
+        kit.add(seg, mat, part, bevel=min(0.02, w * 0.15))
+        if cups and k < segments - 1:
+            c = kit.disc(w * 0.22, 0.02, center=tuple((p + q) / 2 - Vector((0, 0, w * 0.42))), normal=(0, 0, -1), sides=12)
+            kit.add(c, cups, part, bevel=0.0)
+        p = q
+    kit.part(part, "Tentacle", pivot=tuple(Vector(base)), phase=phase)

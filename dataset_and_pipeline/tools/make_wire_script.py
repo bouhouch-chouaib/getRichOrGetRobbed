@@ -14,6 +14,7 @@ Ailes, oreilles, nageoires : la phase devient le côté (-1 / 1) dans Studio, co
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -47,8 +48,10 @@ def pet_data(pet_id: str) -> dict:
         parts[name] = {"kind": p["kind"], "phase": p["phase"], "follows": p.get("follows"), "atlas": p["atlas"],
                        "strength": p.get("emissive_strength"),
                        "pivot": [row[:4] for row in p["pivot"][:3]] if p.get("pivot") else None}
-    body = rig["parts"]["Body"]
-    return {"parts": parts, "bodyCenter": body["center"], "bodySize": body["size"], "emissive": emissive}
+    # pièce de référence pour placer les pivots : Body, sinon la plus grosse (serpent tout en anneaux animés)
+    ref = "Body" if "Body" in rig["parts"] else max(rig["parts"], key=lambda n: math.prod(rig["parts"][n]["size"]))
+    body = rig["parts"][ref]
+    return {"parts": parts, "ref": ref, "bodyCenter": body["center"], "bodySize": body["size"], "emissive": emissive}
 
 
 TEMPLATE = r"""-- Généré par dataset_and_pipeline/tools/make_wire_script.py : branche les familiers importés sur PetMotion.
@@ -85,7 +88,7 @@ end
 
 for petId, data in PETS do
 	local found = sourceParts(petId)
-	local body = found.Body
+	local body = found[data.ref]
 	if not body then
 		table.insert(report, petId .. " : import introuvable (pièces " .. petId .. "__... ou Workspace." .. petId .. "_Rig)")
 		continue

@@ -180,6 +180,13 @@ class PetKit:
         entry = self.parts.setdefault(part, {})
         entry.update(kind=kind, phase=phase, pivot=rot_matrix(pivot, rot), follows=follows)
 
+    def turn(self, part: str, pivot, rot):
+        """Tourne toutes les pièces déjà posées dans `part` autour de `pivot` (rot en degrés) : tête qui regarde ailleurs."""
+        m = rot_matrix(pivot, rot) @ Matrix.Translation(-Vector(pivot))
+        for obj, _material, p, _bevel in self.items:
+            if p == part:
+                G.transform(obj, m)
+
     def result(self) -> dict:
         """Finit les pièces (matériau, chanfrein) et les range par partie : le format de run_pet_rig.py."""
         rig: dict[str, list] = {}

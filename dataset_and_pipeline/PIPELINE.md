@@ -184,10 +184,31 @@ l'import) et UN seul maillage. Recette (à suivre pour tout familier animé) :
 Vérifié en jeu (solo, 25 oct.) : 12 pièces, têtes indépendantes, mâchoire à 21° pendant un aboiement, trot,
 peau nette de jour et de nuit (`qa_renders/cerberus_anime_face.jpg`, `_nuit.jpg`, `_marche.jpg`).
 
+## Tous les familiers en briques LEGO, par lots (25 oct.)
+
+Même recette que le Cerbère, pour chaque familier du jeu. Style validé par Chouaib : briques, plaques, pentes, coins et
+tuiles SANS tenons, les cubes dominent, beaucoup de détails (yeux en couches, touffes, plumes, griffes), couleurs
+saturées pour enfants, **jamais d'aura**.
+
+1. **Un fichier par familier** : `blender_tools/pets/<Id>.py`, fonction `build(name)` qui assemble les pièces avec
+   `pet_kit.PetKit` (`brick`, `slope`, `wedge`, `tile`, `add(obj, mat, part)`, `part(part, kind, pivot)`,
+   `turn(part, pivot, rot)` pour tourner une tête déjà posée) et les aides de `pets/_parts.py` (yeux, oreilles, torse
+   et pattes de quadrupède, ailes repliées ou déployées, queues, cornes, flammes, serpent en anneaux, tentacules).
+   Repère : face = -Y, haut = +Z, gauche du familier = +X.
+2. **Construire** : `blender.exe -b --factory-startup --python dataset_and_pipeline/blender_tools/run_pet_rig.py -- --pet <Id>`
+   → `baked_assets/pets/<Id>/` (textures, `<Id>_Rig.fbx`, `<Id>_rig.json`), planche `qa_renders/pets/<Id>_board.png`.
+3. **Relire** : `python dataset_and_pipeline/tools/make_lot_sheet.py <Lot> <Id>...` (4 familiers par planche, 4 vues).
+4. **Exporter le lot** : `export_lot.py -- --lot <Lot> --pets Id1,Id2,...` → `baked_assets/lots/<Lot>.fbx` (objets `<Id>__<Pièce>`, 6 studs de haut,
+   espacés de 9). Chouaib l'importe dans Studio (Fichier > Importer 3D).
+5. **Lueur** : servir `baked_assets` (`python -m http.server 48901 --bind 127.0.0.1`), envoyer les `_Emissive.png` avec
+   `upload_image`, noter les Id dans `baked_assets/pets/<Id>/<Id>_roblox.json` (`{"emissive": {"Corps": "rbxassetid://…"}}`).
+6. **Brancher** : `python dataset_and_pipeline/tools/make_wire_script.py <Id>...` génère le Luau à lancer dans Studio
+   (Edit) : attributs de mouvement, lueur, rangement dans `ReplicatedStorage.ArtModels.<Id>` (puis sauvegarder le jeu).
+
+Lots : `Lot01_Animaux` (15, exporté), `Lot02_Fantastiques` (15). Restent : Plantes, Hybrides, Absurdes, Mondes.
+
 ## Pistes pour la suite
 
-- Une recette `build_pet_<forme>()` par silhouette de `PetCatalog` (quadrupède, oiseau, blob, plante, objet), à partir
-  de `rounded_blob` + `curve_tube` + `voxel_fuse`.
 - Cuisson par pièce pour garder Leg / Ear animables.
 - Les 5 coquilles d'œufs de `egg_shells` (la Mythique est faite).
 - Comparer une capture Studio de l'asset importé avec `hero.png` (outil MCP Roblox `screen_capture`).

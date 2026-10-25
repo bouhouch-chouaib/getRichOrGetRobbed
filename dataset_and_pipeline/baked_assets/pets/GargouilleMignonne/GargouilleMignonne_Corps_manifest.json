@@ -1,0 +1,67 @@
+{
+  "asset": "GargouilleMignonne_Corps",
+  "triangles": 1460,
+  "vertices": 904,
+  "size_studs": [
+    1.588,
+    1.178,
+    1.517
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 43.0,
+  "source_materials": [
+    "M_GargouilleMignonne_high_blanc_oeil",
+    "M_GargouilleMignonne_high_bouche#2A1418",
+    "M_GargouilleMignonne_high_crocs",
+    "M_GargouilleMignonne_high_fissure",
+    "M_GargouilleMignonne_high_iris#FFB21E",
+    "M_GargouilleMignonne_high_membrane",
+    "M_GargouilleMignonne_high_mousse",
+    "M_GargouilleMignonne_high_pierre",
+    "M_GargouilleMignonne_high_pierre_claire",
+    "M_GargouilleMignonne_high_pierre_fonce",
+    "M_GargouilleMignonne_high_pupille",
+    "M_GargouilleMignonne_high_reflet"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0238,
+    "max_ray": 0.0595,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "GargouilleMignonne_Corps_Color.png",
+    "Roughness": "GargouilleMignonne_Corps_Roughness.png",
+    "Metalness": "GargouilleMignonne_Corps_Metalness.png",
+    "Normal": "GargouilleMignonne_Corps_Normal.png",
+    "AO": "GargouilleMignonne_Corps_AO.png",
+    "Emissive": "GargouilleMignonne_Corps_Emissive.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "GargouilleMignonne_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "GargouilleMignonne_Corps_Color.png",
+      "NormalMap": "GargouilleMignonne_Corps_Normal.png",
+      "RoughnessMap": "GargouilleMignonne_Corps_Roughness.png",
+      "MetalnessMap": "GargouilleMignonne_Corps_Metalness.png",
+      "EmissiveMaskContent": "GargouilleMignonne_Corps_Emissive.png",
+      "EmissiveTint": "#FFFFFF",
+      "EmissiveStrength": 1.8,
+      "coverage_pct": 1.46,
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 22.5
+}

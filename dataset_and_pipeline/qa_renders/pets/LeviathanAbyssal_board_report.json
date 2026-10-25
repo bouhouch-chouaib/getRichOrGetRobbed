@@ -1,0 +1,109 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\LeviathanAbyssal_board.png",
+  "layout": {
+    "rows": [
+      "LeviathanAbyssal cuit, 13 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "LeviathanAbyssal cuit, 13 pièces (repos)",
+      "kind": "baked",
+      "triangles": 1848,
+      "views": {
+        "face": {
+          "coverage": 0.049,
+          "lum_mean": 0.506,
+          "lum_std": 0.282,
+          "detail": 0.0751,
+          "saturation": 0.435,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.088,
+          "lum_mean": 0.489,
+          "lum_std": 0.254,
+          "detail": 0.0846,
+          "saturation": 0.456,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.085,
+          "lum_mean": 0.521,
+          "lum_std": 0.254,
+          "detail": 0.1087,
+          "saturation": 0.481,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.342,
+          "lum_mean": 0.466,
+          "lum_std": 0.265,
+          "detail": 0.0401,
+          "saturation": 0.428,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 1848,
+      "views": {
+        "face": {
+          "coverage": 0.046,
+          "lum_mean": 0.46,
+          "lum_std": 0.278,
+          "detail": 0.0976,
+          "saturation": 0.408,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.071,
+          "lum_mean": 0.481,
+          "lum_std": 0.266,
+          "detail": 0.0973,
+          "saturation": 0.459,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.078,
+          "lum_mean": 0.522,
+          "lum_std": 0.267,
+          "detail": 0.1108,
+          "saturation": 0.473,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.303,
+          "lum_mean": 0.451,
+          "lum_std": 0.26,
+          "detail": 0.048,
+          "saturation": 0.402,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 24.0
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}
