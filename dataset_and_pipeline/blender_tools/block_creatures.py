@@ -181,9 +181,11 @@ def blocky_wolf_head(name: str, jaw_open: float = 30.0, crest: bool = True, seed
 # =====================================================================================================================
 
 CERBERUS_MATERIALS = {
-    "char": ("create_stylized_edge_wear_material", {"name": "M_CerbereB_Roche", "base": "#2F2A29", "accent": "#3B2F2A",
-             "edge": "#7A6E68", "cavity": "#0B0909", "wear": 0.55, "roughness": 0.62, "edge_radius": 0.025,
-             "grain_scale": 16.0, "brush_scale": 1.6, "magma": "#FF5A14", "magma_core": "#FFD45A", "magma_scale": 1.5,
+    # 25 oct. (2e version) : base un peu moins sombre et arêtes plus claires pour que les blocs se lisent sous la lumière
+    # plus plate de Roblox ; grain plus gros (le grain fin devenait de la bouillie une fois réduit dans le jeu)
+    "char": ("create_stylized_edge_wear_material", {"name": "M_CerbereB_Roche", "base": "#36302F", "accent": "#43362F",
+             "edge": "#958980", "cavity": "#0B0909", "wear": 0.55, "roughness": 0.62, "edge_radius": 0.025,
+             "grain_scale": 9.0, "brush_scale": 1.2, "magma": "#FF5A14", "magma_core": "#FFD45A", "magma_scale": 1.5,
              "magma_width": 0.022, "magma_glow": 3.2}),
     "socket": ("create_stylized_edge_wear_material", {"name": "M_CerbereB_Orbite", "base": "#141010", "edge": "#2E2624",
                "cavity": "#000000", "wear": 0.4, "roughness": 0.5}),
@@ -213,12 +215,23 @@ FINISH = {"char": (0.03, 3, 30), "socket": (0.012, 1, 30), "eye": (0.012, 1, 30)
 
 def _finish(items: list[tuple], mats: dict) -> list[bpy.types.Object]:
     out = []
-    for obj, key in items:
+    for obj, key, *_ in items:
         if key == "char":
             G.write_region_attribute(obj, "magma", lambda co: G._smooth01((noise.noise(obj.matrix_world @ co * 1.3 + Vector((4.1, 2.7, 9.3))) + 0.05) / 0.3))
         width, seg, angle = FINISH[key]
         out += G._finish_parts([(obj, mats[key])], bevel=width, segments=seg, angle=angle)
     return out
+
+
+# Pièces animées dans Roblox (shared/PetMotion) : nom de la MeshPart -> genre de mouvement. Les pattes et la queue
+# utilisent les mouvements existants (« Leg », « Tail »), les têtes et mâchoires les nouveaux (« Head », « Jaw »).
+CERBERUS_RIG = {
+    "Body": "Body", "Head0": "Head", "Jaw0": "Jaw", "Head1": "Head", "Jaw1": "Jaw", "Head2": "Head", "Jaw2": "Jaw",
+    "LegFL": "Leg", "LegFR": "Leg", "LegBL": "Leg", "LegBR": "Leg", "Tail": "Tail",
+}
+# phase de chaque pièce : têtes décalées (elles ne regardent jamais au même endroit), pattes en diagonale (trot)
+CERBERUS_PHASES = {"Head0": 0.0, "Jaw0": 0.0, "Head1": 2.1, "Jaw1": 2.1, "Head2": 4.2, "Jaw2": 4.2,
+                   "LegFL": 0.0, "LegBR": 0.0, "LegFR": math.pi, "LegBL": math.pi, "Tail": 0.0, "Body": 0.0}
 
 
 # (attache de la tête, lacet, tangage, roulis, échelle, base du cou, rayon du collier). Têtes ~70 % du volume,
@@ -231,74 +244,85 @@ CERBERUS_HEADS = [
 
 
 def build_blocky_cerberus(name: str = "CerbereInfernal", seed: int = 5, join_parts: bool = True,
-                          heads: list | None = None) -> dict:
+                          heads: list | None = None, rig: bool = False, jaw_open: float | None = None) -> dict:
     """Le Cerbère du modèle : torse en plaques empilées, pattes avant longues et écartées, gros pieds à 4 griffes,
     bracelets et colliers à pointes dorées, trois têtes en blocs gueules ouvertes, crêtes de cristaux.
-    Face = -Y, pivot au sol. Renvoie {"pet": objet joint (ou "parts"), "clipping": {...}}."""
+    Face = -Y, pivot au sol. Renvoie {"pet": objet joint (ou "parts"), "clipping": {...}}.
+
+    rig=True : découpé en pièces animées (CERBERUS_RIG), renvoie {"rig": {pièce: [objets]}, "pivots": {pièce: Matrix}}.
+    Pivot = point de rotation dans le repère du monde (tête : base du crâne au bout du cou ; mâchoire : charnière ;
+    patte : épaule / hanche ; queue : sa base), orienté comme la pièce (la tête de côté tourne autour de SON axe).
+    jaw_open : ouverture des mâchoires au repos (degrés) ; None = gueules grandes ouvertes du modèle de référence."""
     mats = {k: S.PRESETS[p](**dict(params)) for k, (p, params) in CERBERUS_MATERIALS.items()}
-    items: list[tuple] = []
+    items: list[tuple] = []  # (objet, clé de matériau, pièce animée)
+    pivots: dict[str, Matrix] = {}
+
+    def add(obj, key: str, part: str = "Body"):
+        items.append((obj, key, part))
 
     # --- torse : plaques empilées (poitrail en 3 couches), ventre, dos, bosse des épaules ---
-    items += [
-        (block(f"{name}_Poitrail", (1.2, 0.72, 0.86), (0, -0.32, 1.36), rot=(-8, 0, 0), taper=(0.92, 0.9)), "char"),
-        (block(f"{name}_Ventre", (1.0, 0.8, 0.62), (0, 0.26, 1.18), rot=(4, 0, 0), taper=(0.95, 0.9)), "char"),
-        (block(f"{name}_Dos", (1.06, 0.8, 0.24), (0, 0.22, 1.56), rot=(6, 0, 0), taper=(0.9, 0.92)), "char"),
-        (block(f"{name}_Epaules", (1.36, 0.62, 0.36), (0, -0.4, 1.86), rot=(-12, 0, 0), taper=(0.88, 0.85)), "char"),
-        (block(f"{name}_Croupe", (0.86, 0.4, 0.5), (0, 0.68, 1.2), rot=(18, 0, 0), taper=(0.85, 0.8)), "char"),
-    ]
+    add(block(f"{name}_Poitrail", (1.2, 0.72, 0.86), (0, -0.32, 1.36), rot=(-8, 0, 0), taper=(0.92, 0.9)), "char")
+    add(block(f"{name}_Ventre", (1.0, 0.8, 0.62), (0, 0.26, 1.18), rot=(4, 0, 0), taper=(0.95, 0.9)), "char")
+    add(block(f"{name}_Dos", (1.06, 0.8, 0.24), (0, 0.22, 1.56), rot=(6, 0, 0), taper=(0.9, 0.92)), "char")
+    add(block(f"{name}_Epaules", (1.36, 0.62, 0.36), (0, -0.4, 1.86), rot=(-12, 0, 0), taper=(0.88, 0.85)), "char")
+    add(block(f"{name}_Croupe", (0.86, 0.4, 0.5), (0, 0.68, 1.2), rot=(18, 0, 0), taper=(0.85, 0.8)), "char")
     for k, z in enumerate((1.04, 1.3, 1.56)):
         w = 1.26 - 0.1 * k
-        items.append((block(f"{name}_Plaque{k}", (w, 0.2, 0.27), (0, -0.74 - 0.02 * k, z), rot=(-10, 0, 0),
-                            taper=(0.94, 0.8), shift=(0, 0.02)), "char"))
+        add(block(f"{name}_Plaque{k}", (w, 0.2, 0.27), (0, -0.74 - 0.02 * k, z), rot=(-10, 0, 0),
+                  taper=(0.94, 0.8), shift=(0, 0.02)), "char")
 
     # --- pattes avant : longues, écartées, bracelet à pointes, gros pied à 4 griffes ---
+    # côté : +X = gauche du chien (il regarde vers -Y)
     for s in (-1, 1):
-        items += [
-            (block(f"{name}_Epaule{s}", (0.56, 0.58, 0.56), (s * 0.7, -0.46, 1.16), rot=(0, s * 12, 0), taper=(0.9, 0.9)),
-             "char"),
-            (block(f"{name}_Bras{s}", (0.48, 0.48, 0.66), (s * 0.86, -0.62, 0.62), rot=(-6, s * 14, 0), taper=(0.92, 0.95)),
-             "char"),
-            (block(f"{name}_Poignet{s}", (0.52, 0.52, 0.14), (s * 0.94, -0.7, 0.29), rot=(0, s * 8, 0)), "char"),
-            (block(f"{name}_Pied{s}", (0.8, 0.64, 0.22), (s * 0.98, -0.9, 0.11), rot=(0, 0, s * -6), taper=(0.92, 0.85)),
-             "char"),
-        ]
+        leg = "LegFL" if s > 0 else "LegFR"
+        pivots[leg] = Matrix.Translation((s * 0.8, -0.5, 1.02))
+        add(block(f"{name}_Epaule{s}", (0.56, 0.58, 0.56), (s * 0.7, -0.46, 1.16), rot=(0, s * 12, 0), taper=(0.9, 0.9)),
+            "char")
+        add(block(f"{name}_Bras{s}", (0.48, 0.48, 0.66), (s * 0.86, -0.62, 0.62), rot=(-6, s * 14, 0), taper=(0.92, 0.95)),
+            "char", leg)
+        add(block(f"{name}_Poignet{s}", (0.52, 0.52, 0.14), (s * 0.94, -0.7, 0.29), rot=(0, s * 8, 0)), "char", leg)
+        add(block(f"{name}_Pied{s}", (0.8, 0.64, 0.22), (s * 0.98, -0.9, 0.11), rot=(0, 0, s * -6), taper=(0.92, 0.85)),
+            "char", leg)
         band, points = spike_band(f"{name}_Bracelet{s}", 0.3, 0.17, 6, 0.3)
         place = _matrix((s * 0.9, -0.66, 0.44), (-6, s * 14, 0))
-        items.append((G.transform(band, place), "iron"))
-        items += [(G.transform(p, place), "gold") for p in points]
+        add(G.transform(band, place), "iron", leg)
+        for p in points:
+            add(G.transform(p, place), "gold", leg)
         for t, dx in enumerate((-0.27, -0.09, 0.09, 0.27)):
             x = s * 0.98 + dx
-            items.append((block(f"{name}_Doigt{s}{t}", (0.15, 0.22, 0.11), (x, -1.16, 0.13), rot=(-8, 0, 0)), "char"))
-            items.append((claw(f"{name}_Griffe{s}{t}", (x, -1.24, 0.12), (dx * 0.4, -1, -0.15), 0.36, 0.12), "claw"))
+            add(block(f"{name}_Doigt{s}{t}", (0.15, 0.22, 0.11), (x, -1.16, 0.13), rot=(-8, 0, 0)), "char", leg)
+            add(claw(f"{name}_Griffe{s}{t}", (x, -1.24, 0.12), (dx * 0.4, -1, -0.15), 0.36, 0.12), "claw", leg)
     # --- pattes arrière : plus courtes, repliées, 3 griffes ---
     for s in (-1, 1):
-        items += [
-            (block(f"{name}_Cuisse{s}", (0.46, 0.6, 0.6), (s * 0.6, 0.5, 0.86), rot=(-14, s * 6, 0), taper=(0.9, 0.85)),
-             "char"),
-            (block(f"{name}_Jarret{s}", (0.34, 0.36, 0.5), (s * 0.66, 0.62, 0.36), rot=(12, s * 6, 0)), "char"),
-            (block(f"{name}_PiedAR{s}", (0.54, 0.52, 0.18), (s * 0.68, 0.44, 0.09), taper=(0.92, 0.85)), "char"),
-        ]
+        leg = "LegBL" if s > 0 else "LegBR"
+        pivots[leg] = Matrix.Translation((s * 0.6, 0.48, 1.08))
+        add(block(f"{name}_Cuisse{s}", (0.46, 0.6, 0.6), (s * 0.6, 0.5, 0.86), rot=(-14, s * 6, 0), taper=(0.9, 0.85)),
+            "char", leg)
+        add(block(f"{name}_Jarret{s}", (0.34, 0.36, 0.5), (s * 0.66, 0.62, 0.36), rot=(12, s * 6, 0)), "char", leg)
+        add(block(f"{name}_PiedAR{s}", (0.54, 0.52, 0.18), (s * 0.68, 0.44, 0.09), taper=(0.92, 0.85)), "char", leg)
         band, points = spike_band(f"{name}_BraceletAR{s}", 0.2, 0.14, 5, 0.22)
         place = _matrix((s * 0.66, 0.62, 0.42), (12, s * 6, 0))
-        items.append((G.transform(band, place), "iron"))
-        items += [(G.transform(p, place), "gold") for p in points]
+        add(G.transform(band, place), "iron", leg)
+        for p in points:
+            add(G.transform(p, place), "gold", leg)
         for t, dx in enumerate((-0.15, 0.0, 0.15)):
-            items.append((claw(f"{name}_GriffeAR{s}{t}", (s * 0.68 + dx, 0.17, 0.1), (dx * 0.4, -1, -0.15), 0.24, 0.1),
-                          "claw"))
+            add(claw(f"{name}_GriffeAR{s}{t}", (s * 0.68 + dx, 0.17, 0.1), (dx * 0.4, -1, -0.15), 0.24, 0.1), "claw", leg)
 
     # --- queue : segments dégressifs enchaînés (chaque bloc part du bout du précédent) + cristaux ---
     tip, ang = Vector((0, 0.82, 1.32)), 40.0
+    pivots["Tail"] = Matrix.Translation(tip)
     for k in range(4):
         length = 0.3 - 0.03 * k
         d = Vector((0, math.cos(math.radians(ang)), math.sin(math.radians(ang))))
         seg = block(f"{name}_Queue{k}", (0.26 - 0.04 * k, 0.24 - 0.03 * k, length + 0.06), taper=(0.85, 0.85))
-        items.append((G.transform(seg, G.frame_matrix(tip + d * length / 2, d)), "char"))
+        add(G.transform(seg, G.frame_matrix(tip + d * length / 2, d)), "char", "Tail")
         tip, ang = tip + d * length, ang + 12
     tail = G.crystal_cluster(f"{name}_QueueCristaux", count=2, origin=tuple(tip - Vector((0, 0.04, 0.05))), spread=0.06,
                              radius=(0.04, 0.07), height=(0.2, 0.34), tilt=(10, 30), seed=seed + 9)
-    items.append((tail, "flame"))
+    add(tail, "flame", "Tail")
 
     # --- cous, colliers et trois têtes (Alpha au centre, plus grosse et plus haute) ---
+    jaw_parts = ("_Machoire", "_Menton", "_DentB", "_CrocB")
     groups: dict[str, list] = {}
     for i, (anchor, yaw, pitch, roll, scale, base, collar_r) in enumerate(heads or CERBERUS_HEADS):
         anchor, base = Vector(anchor), Vector(base)
@@ -307,20 +331,30 @@ def build_blocky_cerberus(name: str = "CerbereInfernal", seed: int = 5, join_par
         neck = block(f"{name}_Cou{i}", (0.6 * scale, 0.55 * scale, (anchor - base).length + 0.25),
                      (0, 0, 0), taper=(0.92, 0.92))
         G.transform(neck, G.frame_matrix(mid, neck_dir))
-        items.append((neck, "char"))
+        add(neck, "char")
         band, points = spike_band(f"{name}_Collier{i}", collar_r, 0.18, 8, 0.32 * scale)
         place = G.frame_matrix(base.lerp(anchor, 0.42), neck_dir)
-        items.append((G.transform(band, place), "iron"))
-        items += [(G.transform(p, place), "gold") for p in points]
-        head_m = Matrix.Translation(anchor) @ Euler((math.radians(pitch), math.radians(roll), math.radians(yaw)),
-                                                    "XYZ").to_matrix().to_4x4() @ Matrix.Scale(scale, 4)
+        add(G.transform(band, place), "iron")
+        for p in points:
+            add(G.transform(p, place), "gold")
+        turn = Matrix.Translation(anchor) @ Euler((math.radians(pitch), math.radians(roll), math.radians(yaw)),
+                                                  "XYZ").to_matrix().to_4x4()
+        head_m = turn @ Matrix.Scale(scale, 4)
+        pivots[f"Head{i}"] = turn
+        pivots[f"Jaw{i}"] = Matrix.Translation(head_m @ Vector((0, -0.2, 0.12))) @ turn.to_3x3().to_4x4()
         group = groups.setdefault(("Alpha", "Gauche", "Droite")[i], [])
-        for obj, key in blocky_wolf_head(f"{name}_Tete{i}", jaw_open=34.0 if i == 0 else 28.0, crest=i != 1, seed=seed + i):
+        opening = jaw_open if jaw_open is not None else (34.0 if i == 0 else 28.0)
+        for obj, key in blocky_wolf_head(f"{name}_Tete{i}", jaw_open=opening, crest=i != 1, seed=seed + i):
             G.transform(obj, head_m)
-            items.append((obj, key))
+            add(obj, key, f"Jaw{i}" if any(t in obj.name for t in jaw_parts) else f"Head{i}")
             group.append(obj)
     clipping = G.clipping_report(groups)
 
+    if rig:
+        parts: dict[str, list] = {}
+        for obj, key, part in items:
+            parts.setdefault(part, []).extend(_finish([(obj, key)], mats))
+        return {"rig": parts, "pivots": pivots, "clipping": clipping, "materials": mats}
     objs = _finish(items, mats)
     if not join_parts:
         return {"parts": objs, "clipping": clipping, "materials": mats}
@@ -328,4 +362,4 @@ def build_blocky_cerberus(name: str = "CerbereInfernal", seed: int = 5, join_par
 
 
 __all__ = ["block", "stepped_plate", "staircase_spike", "tooth", "claw", "spike_band", "blocky_wolf_head",
-           "build_blocky_cerberus", "CERBERUS_MATERIALS"]
+           "build_blocky_cerberus", "CERBERUS_MATERIALS", "CERBERUS_RIG", "CERBERUS_PHASES"]

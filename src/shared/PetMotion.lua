@@ -3,7 +3,8 @@
 local Catalog = require(script.Parent.PetCatalog)
 local Motion = {}
 local V, CF, A = Vector3.new, CFrame.new, CFrame.Angles
-type Joint = { kind: string, pivot: CFrame, phase: number, members: { number } }
+-- hinge : charnière d'une mâchoire par rapport au pivot de sa tête (genre "Jaw") ; side : -1 / 0 / 1 selon le côté du pivot.
+type Joint = { kind: string, pivot: CFrame, phase: number, members: { number }, hinge: CFrame?, side: number }
 export type Rig = {
 	model: Model,
 	parts: { BasePart },
@@ -98,6 +99,11 @@ function Motion.Prepare(m: Model, e: Catalog.Pet, family: string, center: Vector
 			kind = tostring(q:GetAttribute("MotionKind"))
 			local value = q:GetAttribute("MotionPhase")
 			phase = if type(value) == "number" then value else 0
+			-- Mâchoire d'un modèle fait à la main : pivot = celui de sa tête, charnière gardée par rapport à lui.
+			local hinge = q:GetAttribute("MotionHingeRaw")
+			if typeof(hinge) == "CFrame" then
+				q:SetAttribute("MotionHinge", authoredPivot:Inverse() * hinge)
+			end
 		elseif q:GetAttribute("Spin") then
 			group, kind, pivot = "Rotor", "Rotor", CF(pos)
 		elseif legs[n] and #anchors > 0 and not duck then
@@ -187,9 +193,14 @@ function Motion.Prepare(m: Model, e: Catalog.Pet, family: string, center: Vector
 		q:SetAttribute("MotionPivot", CF(-center) * pivot)
 		q:SetAttribute("MotionRest", scaled(q.CFrame, 1 / scale))
 		q:SetAttribute("MotionPivotRaw", nil)
+		q:SetAttribute("MotionHingeRaw", nil)
 	end
+	local species = e.BaseId or e.Id
 	m:SetAttribute("MotionFamily", family)
-	m:SetAttribute("MotionProfile", if e.Id == "BaleineGalaxie" then "Whale" else family)
+	m:SetAttribute(
+		"MotionProfile",
+		if species == "BaleineGalaxie" then "Whale" elseif species == "CerbereInfernal" then "Cerberus" else family
+	)
 	m:SetAttribute("MotionFlying", e.Look.Float == true or family == "Fish" or family == "Dragon" or family == "Spirit")
 	m:SetAttribute("MotionPhase", phaseFor(e.Id))
 	m:SetAttribute("MotionReady", true)
@@ -223,11 +234,15 @@ function Motion.Create(m: Model): Rig
 		local j: Joint? = groups[group]
 		if not j then
 			local pivot, phase = q:GetAttribute("MotionPivot"), q:GetAttribute("MotionPhase")
+			local hinge = q:GetAttribute("MotionHinge")
+			local x = if typeof(pivot) == "CFrame" then pivot.Position.X else 0
 			local created: Joint = {
 				kind = tostring(q:GetAttribute("MotionKind")),
 				pivot = if typeof(pivot) == "CFrame" then pivot else CF(),
 				phase = if type(phase) == "number" then phase else 0,
 				members = {},
+				hinge = if typeof(hinge) == "CFrame" then hinge else nil,
+				side = if x > 0.05 then 1 elseif x < -0.05 then -1 else 0,
 			}
 			groups[group] = created
 			table.insert(rig.joints, created)
@@ -237,6 +252,17 @@ function Motion.Create(m: Model): Rig
 		table.insert(j.members, index)
 	end
 	return rig
+end
+
+-- Tête (Cerbère, 25 oct.) : chacune regarde autour d'elle à son rythme (celles de côté plutôt vers l'extérieur),
+-- aboie de temps en temps (relève la tête, gueule grande ouverte), regarde devant et hoche au pas quand il marche.
+-- Rotations seules : le mouvement ne dépend pas de la taille du modèle. Renvoie aussi l'aboiement (0 à 1).
+local function headPose(j: Joint, t: number, pace: number, walk: number, carried: boolean): (CFrame, number)
+	local bark = math.max(0, math.sin(t * 0.45 + j.phase * 1.7) - 0.9) / 0.1
+	local calm = (1 - walk * 0.65) * (if carried then 0.4 else 1)
+	local yaw = (-j.side * 0.16 + math.sin(t * 0.55 + j.phase) * 0.3 + math.sin(t * 1.3 + j.phase * 2) * 0.08) * calm
+	local pitch = math.sin(t * 0.8 + j.phase) * 0.06 * calm + bark * 0.16 + math.sin(pace * 2 + j.phase) * 0.05 * walk
+	return A(pitch, yaw, math.sin(t * 0.7 + j.phase) * 0.03 * calm), bark
 end
 
 local function jointPose(
@@ -249,7 +275,15 @@ local function jointPose(
 	profile: string
 ): CFrame
 	local wave, kind = math.sin(t * 1.8 + j.phase), j.kind
-	if kind == "Wing" then
+	if kind == "Head" then
+		return (headPose(j, t, pace, walk, carried))
+	elseif kind == "Jaw" then
+		-- suit sa tête, puis s'ouvre autour de sa charnière : halète, s'ouvre en grand quand la tête aboie
+		local head, bark = headPose(j, t, pace, walk, carried)
+		local pant = (math.sin(t * 3.2 + j.phase) * 0.5 + 0.5) * 0.08 * (1 - bark)
+		local hinge = j.hinge or CF()
+		return head * hinge * A(-(pant + bark * 0.42 + walk * 0.04), 0, 0) * hinge:Inverse()
+	elseif kind == "Wing" then
 		local rate = if flying then 3.5 else 2.5
 		local amplitude = if flying then 0.42 else 0.055 + walk * 0.085
 		return A(0, 0, j.phase * math.sin(t * rate) * (amplitude + walk * 0.08) * (if carried then 0.45 else 1))
@@ -309,6 +343,10 @@ function Motion.Pose(rig: Rig, now: number, dt: number, speed: number, carried: 
 		body = CF(0, (math.sin(t * 2) + 1) * 0.035, 0) * A(0, 0, breath * 0.013)
 	elseif profile == "Top" then
 		body = CF(0, breath * 0.06, 0) * A(0, t * 1.5, math.sin(t * 2) * 0.035)
+	elseif profile == "Cerberus" then
+		-- souffle lourd au repos ; au pas, le corps monte à chaque foulée et roule d'une épaule à l'autre
+		body = CF(0, breath * 0.05 + math.abs(math.sin(rig.pace)) * walk * 0.12, 0)
+			* A(breath * 0.012 + math.sin(rig.pace * 2) * walk * 0.015, 0, math.sin(rig.pace) * walk * 0.025)
 	elseif
 		profile == "Remote"
 		or profile == "Star"

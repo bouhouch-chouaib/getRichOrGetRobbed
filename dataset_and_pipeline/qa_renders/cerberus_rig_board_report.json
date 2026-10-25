@@ -1,0 +1,145 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\cerberus_rig_board.png",
+  "layout": {
+    "rows": [
+      "Cuit pour Roblox, 12 pièces (repos)",
+      "Pose animée (têtes, gueules, pattes, queue)",
+      "Gros plans des têtes"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Cuit pour Roblox, 12 pièces (repos)",
+      "kind": "baked",
+      "triangles": 9328,
+      "views": {
+        "face": {
+          "coverage": 0.173,
+          "lum_mean": 0.305,
+          "lum_std": 0.188,
+          "detail": 0.0849,
+          "saturation": 0.192,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.161,
+          "lum_mean": 0.312,
+          "lum_std": 0.191,
+          "detail": 0.0905,
+          "saturation": 0.191,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.132,
+          "lum_mean": 0.346,
+          "lum_std": 0.185,
+          "detail": 0.0799,
+          "saturation": 0.172,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.545,
+          "lum_mean": 0.355,
+          "lum_std": 0.182,
+          "detail": 0.0462,
+          "saturation": 0.186,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée (têtes, gueules, pattes, queue)",
+      "kind": "baked",
+      "triangles": 9328,
+      "views": {
+        "face": {
+          "coverage": 0.135,
+          "lum_mean": 0.3,
+          "lum_std": 0.189,
+          "detail": 0.0895,
+          "saturation": 0.193,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.127,
+          "lum_mean": 0.308,
+          "lum_std": 0.19,
+          "detail": 0.0885,
+          "saturation": 0.181,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.107,
+          "lum_mean": 0.335,
+          "lum_std": 0.179,
+          "detail": 0.0865,
+          "saturation": 0.168,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.435,
+          "lum_mean": 0.343,
+          "lum_std": 0.18,
+          "detail": 0.0522,
+          "saturation": 0.184,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Gros plans des têtes",
+      "kind": "baked",
+      "triangles": 9328,
+      "views": {
+        "tetes_face": {
+          "coverage": 0.456,
+          "lum_mean": 0.337,
+          "lum_std": 0.183,
+          "detail": 0.0544,
+          "saturation": 0.192,
+          "flags": []
+        },
+        "tete_gauche": {
+          "coverage": 0.476,
+          "lum_mean": 0.347,
+          "lum_std": 0.175,
+          "detail": 0.046,
+          "saturation": 0.194,
+          "flags": []
+        },
+        "tete_droite": {
+          "coverage": 0.483,
+          "lum_mean": 0.343,
+          "lum_std": 0.193,
+          "detail": 0.0462,
+          "saturation": 0.197,
+          "flags": []
+        },
+        "dos": {
+          "coverage": 0.29,
+          "lum_mean": 0.381,
+          "lum_std": 0.158,
+          "detail": 0.0633,
+          "saturation": 0.142,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 48,
+    "resolution": 480,
+    "view_transform": "Standard",
+    "seconds": 51.3
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}
