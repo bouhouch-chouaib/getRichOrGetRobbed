@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local BaseLayout = require(ReplicatedStorage.Shared.BaseLayout)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetGaits = require(ReplicatedStorage.Shared.PetGaits)
 local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 
 local PetWander = {}
@@ -58,6 +59,16 @@ function PetWander.styleFor(petId: string): string
 	return "Walk"
 end
 
+-- Rythme des trajets d'un familier : sa fiche de démarche (shared/PetGaits) s'il en a une, sinon le style de sa
+-- silhouette. ease = accélération le long du trajet (voir PetWander.positionAt).
+function PetWander.styleOf(petId: string): (Style, string)
+	local g = PetGaits.For(petId)
+	if g then
+		return { speed = g.speed, minWait = g.minWait, maxWait = g.maxWait, hover = g.hover }, g.ease
+	end
+	return PetWander.STYLES[PetWander.styleFor(petId)], "Linear"
+end
+
 -- Un point au hasard dans la prairie. Avec petId, les grands familiers (shared/PetSizes) restent plus près du
 -- centre pour ne pas déborder sur la clôture, les palettes ou la couveuse.
 function PetWander.randomSpot(rng: Random, petId: string?): Vector2
@@ -102,18 +113,39 @@ function PetWander.decode(value: unknown): Leg?
 	}
 end
 
--- Position locale à l'instant `now`, et true si le familier est en train de marcher.
-function PetWander.positionAt(leg: Leg, now: number): (Vector2, boolean)
+-- Part du trajet faite quand `a` (0 à 1) du temps est passé. "Smooth" : démarre et freine en douceur ; "Dash" : part
+-- comme une flèche et freine ; "Pounce" : s'approche lentement (40 % du chemin en 70 % du temps) puis bondit ;
+-- "Pulse" : avance par poussées (une tous les 2 studs), comme un poulpe.
+local POUNCE_AT = 0.7
+PetWander.POUNCE_AT = POUNCE_AT
+local function eased(ease: string?, a: number, length: number): number
+	if ease == "Smooth" then
+		return a * a * (3 - 2 * a)
+	elseif ease == "Dash" then
+		return 1 - (1 - a) ^ 2.5
+	elseif ease == "Pounce" then
+		return if a < POUNCE_AT then 0.4 * a / POUNCE_AT else 0.4 + 0.6 * (a - POUNCE_AT) / (1 - POUNCE_AT)
+	elseif ease == "Pulse" then
+		local n = math.max(1, math.round(length / 2))
+		return a + math.sin(2 * math.pi * n * a) / (2 * math.pi * n) * 0.9
+	end
+	return a
+end
+
+-- Position locale à l'instant `now`, true si le familier est en train de marcher, et la part du trajet faite (0 à 1).
+-- ease : accélération propre au familier (PetWander.styleOf), la même chez le serveur et chez les clients.
+function PetWander.positionAt(leg: Leg, now: number, ease: string?): (Vector2, boolean, number)
 	if leg.duration <= 0 then
-		return leg.to, false
+		return leg.to, false, 1
 	end
-	local alpha = (now - leg.start) / leg.duration
-	if alpha <= 0 then
-		return leg.from, false
-	elseif alpha >= 1 then
-		return leg.to, false
+	local a = (now - leg.start) / leg.duration
+	if a <= 0 then
+		return leg.from, false, 0
+	elseif a >= 1 then
+		return leg.to, false, 1
 	end
-	return leg.from:Lerp(leg.to, alpha), true
+	local done = eased(ease, a, (leg.to - leg.from).Magnitude)
+	return leg.from:Lerp(leg.to, done), true, done
 end
 
 -- Repère du sol d'une base : centre du dessus de sa plateforme, orienté comme la base.

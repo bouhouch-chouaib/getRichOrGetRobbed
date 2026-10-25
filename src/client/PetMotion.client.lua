@@ -55,6 +55,8 @@ RunService:BindToRenderStep("SculptedPetMotion", Enum.RenderPriority.Last.Value 
 		end
 		local delta = if entry.last then (position - entry.last) * Vector3.new(1, 0, 1) else Vector3.zero
 		local speed = if entry.elapsed > 0 and delta.Magnitude < 12 then delta.Magnitude / entry.elapsed else 0
+		-- vitesse verticale : les bonds (client/BasePets) tendent puis replient les pattes
+		local rise = if entry.last and entry.elapsed > 0 then (position.Y - entry.last.Y) / entry.elapsed else 0
 		local override = m:GetAttribute("MotionSpeed")
 		if type(override) == "number" then
 			speed = override
@@ -65,7 +67,8 @@ RunService:BindToRenderStep("SculptedPetMotion", Enum.RenderPriority.Last.Value 
 			entry.elapsed,
 			speed,
 			m:GetAttribute("MotionCarried") == true,
-			if sleeping then 0 else 1
+			if sleeping then 0 else 1,
+			rise
 		)
 		for index, q in ipairs(rig.parts) do
 			if q.Parent then

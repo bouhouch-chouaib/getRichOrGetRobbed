@@ -3,7 +3,8 @@
 -- C'est le SERVEUR qui décide (server/BasePetsController) : un repère invisible Base_N.Pets.<PetId> par espèce,
 -- avec son trajet en cours dans l'attribut "Walk". Ici, on construit le modèle et on le place à la position
 -- calculée avec l'horloge commune (shared/PetWander) : tous les joueurs voient les familiers au même endroit.
--- L'animation (marche, sautille, ondule, plane, se balance, tourne) n'est qu'un effet visuel local.
+-- L'animation (marche, sautille, ondule, plane, se balance, tourne) n'est qu'un effet visuel local ; les familiers
+-- refaits en briques ont chacun leur démarche (shared/PetGaits : pas, bonds, roulis, ondulation, envol, roue...).
 -- Vol : on crée ici (localement) la bulle [E] "Voler" sur le repère, on déplace le repère sur le familier pour que
 -- la bulle le suive, et on ne l'affiche que si le vol est possible (base adverse ouverte, mains libres). Validée, elle
 -- envoie Remotes.StealPet ; le serveur revérifie tout (server/StealController).
@@ -23,6 +24,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetGaits = require(ReplicatedStorage.Shared.PetGaits)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
@@ -41,10 +43,14 @@ type Shown = {
 	model: Model,
 	styleName: string,
 	style: PetWander.Style,
+	gait: PetGaits.Gait?, -- démarche propre au familier (sinon : style de sa silhouette)
+	ease: string,
 	leg: PetWander.Leg?,
 	heading: number,
+	bank: number, -- inclinaison dans les virages (démarche)
 	bottomOffset: number, -- distance pivot -> bas du modèle
 	topOffset: number, -- distance pivot -> haut du modèle (pour l'étiquette)
+	centerY: number, -- hauteur du centre du modèle au-dessus du pivot (roue)
 	seed: number,
 	arrivedAt: number?, -- heure serveur de son arrivée (animation de chute)
 }
@@ -239,6 +245,7 @@ local function addPet(display: BaseDisplay, anchor: Instance)
 	local seedValue = anchor:GetAttribute("Seed")
 	local seed = if type(seedValue) == "number" then seedValue else 0
 	local styleName = PetWander.styleFor(petId)
+	local style, ease = PetWander.styleOf(petId)
 	-- Bulle [E] "Voler", propre à ce client : elle suit le familier et prévient le serveur.
 	local entry = PetCatalog.ById[petId]
 	local prompt = Instance.new("ProximityPrompt")
@@ -261,11 +268,15 @@ local function addPet(display: BaseDisplay, anchor: Instance)
 		prompt = prompt,
 		model = model,
 		styleName = styleName,
-		style = PetWander.STYLES[styleName],
+		style = style,
+		gait = PetGaits.For(petId),
+		ease = ease,
 		leg = PetWander.decode(anchor:GetAttribute("Walk")),
 		heading = seed % 7, -- orientation de départ, la même pour tout le monde
+		bank = 0,
 		bottomOffset = -(box.Position.Y - size.Y / 2),
 		topOffset = box.Position.Y + size.Y / 2,
+		centerY = box.Position.Y,
 		seed = seed,
 	}
 	setLabel(shown)
@@ -324,8 +335,114 @@ local function watchBase(base: Instance)
 	end)
 end
 
+-- Hauteur de chute d'un familier qui vient d'arriver (tombe du ciel, accéléré), 0 ensuite.
+local function dropHeight(shown: Shown, now: number): number
+	local arrivedAt = shown.arrivedAt
+	if arrivedAt then
+		local fall = (now - arrivedAt) / DROP_TIME
+		if fall < 1 then
+			return DROP_HEIGHT * (1 - math.max(0, fall) ^ 2)
+		end
+		shown.arrivedAt = nil
+	end
+	return 0
+end
+
+-- Démarche propre au familier (shared/PetGaits). Les secousses suivent la distance parcourue (un pas tous les
+-- `step` studs, un bond tous les `hopLength`) : les pieds ne glissent pas, quelle que soit la vitesse.
+local function gaitPose(shown: Shown, g: PetGaits.Gait, dt: number, now: number): CFrame
+	local t = now + shown.seed
+	local s = math.clamp((shown.topOffset + shown.bottomOffset) / 6, 0.4, 3) -- taille par rapport à 6 studs
+	local position, moving, done, length = Vector2.zero, false, 0, 0
+	local direction = Vector2.new(0, -1)
+	local leg = shown.leg
+	if leg then
+		position, moving, done = PetWander.positionAt(leg, now, g.ease)
+		local delta = leg.to - leg.from
+		length = delta.Magnitude
+		if length > 1e-3 then
+			direction = delta / length
+		end
+	end
+	local diff = 0
+	if moving and length > 1e-3 then
+		local wanted = math.atan2(-direction.X, -direction.Y)
+		diff = (wanted - shown.heading + math.pi) % (math.pi * 2) - math.pi
+		shown.heading += diff * math.min(1, dt * (g.turn or 6))
+	elseif g.spin then
+		shown.heading += g.spin * dt
+	end
+	-- s'incline dans le virage, puis se redresse
+	local wantedBank = if g.bank then math.clamp(-diff * g.bank, -0.6, 0.6) else 0
+	shown.bank += (wantedBank - shown.bank) * math.min(1, dt * 3)
+
+	local traveled = length * done
+	local height = g.hover
+	local yaw, pitch, roll = 0, 0, shown.bank
+	if g.perch then
+		-- ne vole que pour changer de place : décolle, plane, se pose
+		height = if moving then g.hover * math.sin(math.pi * done) ^ 0.6 else 0
+	end
+	if g.float and not (g.perch and not moving) then
+		height += math.sin(t * (g.floatRate or 1)) * g.float
+	end
+	if moving and g.step then
+		local phase = traveled / g.step * math.pi
+		height += math.abs(math.sin(phase)) * (g.bob or 0) * s
+		roll += math.sin(phase) * (g.roll or 0)
+		yaw += math.sin(phase) * (g.wiggle or 0)
+		pitch += math.sin(phase * 2) * (g.rock or 0)
+	end
+	if moving and g.hop then
+		local hops = math.max(1, math.round(length / (g.hopLength or 2)))
+		local f = (done * hops) % 1
+		height += math.sin(math.pi * f) * g.hop * s
+		pitch += (0.5 - f) * 0.35 -- nez en l'air au départ du bond, vers le bas à l'atterrissage
+	elseif g.hop then
+		height += math.abs(math.sin(t * 2)) * 0.06 * s -- respire / tremblote sur place
+	end
+	if moving and g.pounce and done > 0.4 then
+		local f = (done - 0.4) / 0.6
+		height += math.sin(math.pi * f) * g.pounce * s
+		pitch += (0.5 - f) * 0.5
+	end
+	if moving and g.lean then
+		pitch += g.lean
+	end
+	local offset = Vector2.zero
+	if g.sway then
+		local envelope = if moving then math.sin(math.pi * done) else 0
+		local w = traveled / (g.swayLength or 4) * math.pi * 2
+		offset += Vector2.new(-direction.Y, direction.X) * math.sin(w) * g.sway * s * envelope
+		yaw += math.cos(w) * envelope * 0.35
+	end
+	if g.drift then
+		offset += Vector2.new(math.sin(t * 0.9) + math.sin(t * 2.3) * 0.4, math.sin(t * 0.7 + 1) + math.sin(t * 1.9) * 0.4)
+			* g.drift
+	end
+	height += dropHeight(shown, now)
+	local place = CFrame.new(position.X + offset.X, height + shown.bottomOffset, position.Y + offset.Y)
+	if g.wheel then
+		-- roule comme une roue : se met de profil le long du trajet et fait un nombre entier de tours (il s'arrête
+		-- toujours la tête en haut)
+		local radius = math.max(0.5, shown.centerY + shown.bottomOffset)
+		local turns = math.max(1, math.round(length / (2 * math.pi * radius)))
+		local angle = if moving then done * turns * 2 * math.pi else 0
+		return place
+			* CFrame.Angles(0, shown.heading + math.pi / 2, 0)
+			* CFrame.new(0, shown.centerY, 0)
+			* CFrame.Angles(0, 0, -angle)
+			* CFrame.new(0, -shown.centerY, 0)
+	end
+	return place * CFrame.Angles(0, shown.heading + yaw, 0) * CFrame.Angles(pitch, 0, roll)
+end
+
 -- Pose du familier à l'instant `now` (horloge serveur), dans le repère du sol de sa base.
 local function pose(shown: Shown, dt: number, now: number): CFrame
+	local g = shown.gait
+	if g then
+		return gaitPose(shown, g, dt, now)
+	end
 	local position, moving = Vector2.zero, false
 	local leg = shown.leg
 	if leg then
@@ -340,17 +457,8 @@ local function pose(shown: Shown, dt: number, now: number): CFrame
 	end
 
 	local t = now + shown.seed
-	local height = shown.style.hover
 	-- Arrivée : chute depuis le ciel (accélérée), pour que tout le monde voie le nouveau familier.
-	local arrivedAt = shown.arrivedAt
-	if arrivedAt then
-		local fall = (now - arrivedAt) / DROP_TIME
-		if fall < 1 then
-			height += DROP_HEIGHT * (1 - math.max(0, fall) ^ 2)
-		else
-			shown.arrivedAt = nil
-		end
-	end
+	local height = shown.style.hover + dropHeight(shown, now)
 	local yaw = shown.heading
 	local roll = 0
 	local name = shown.styleName
@@ -437,6 +545,7 @@ PetModelBuilder.MeshesReady:Connect(function()
 				shown.model = model
 				shown.bottomOffset = -(box.Position.Y - size.Y / 2)
 				shown.topOffset = box.Position.Y + size.Y / 2
+				shown.centerY = box.Position.Y
 				setLabel(shown)
 				model.Parent = folder
 			end

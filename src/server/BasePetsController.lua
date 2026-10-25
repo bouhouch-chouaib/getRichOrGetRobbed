@@ -31,6 +31,7 @@ BasePetsController.PetTriggered = petTriggered.Event
 type PetState = {
 	anchor: BasePart,
 	style: PetWander.Style,
+	ease: string, -- accélération le long du trajet (shared/PetGaits)
 	leg: PetWander.Leg,
 	nextLegAt: number, -- heure (serveur) du prochain départ
 }
@@ -83,9 +84,11 @@ local function addPet(state: BaseState, petId: string, count: number)
 	anchor:SetAttribute("Seed", rng:NextInteger(0, 1000))
 	anchor:SetAttribute("Walk", PetWander.encode(leg))
 	anchor.Parent = state.folder
+	local style, ease = PetWander.styleOf(petId)
 	state.pets[petId] = {
 		anchor = anchor,
-		style = PetWander.STYLES[PetWander.styleFor(petId)],
+		style = style,
+		ease = ease,
 		leg = leg,
 		-- Départs décalés pour que les familiers ne bougent pas tous en même temps.
 		nextLegAt = now() + rng:NextNumber(0, 2),
@@ -163,7 +166,7 @@ local function updateWalks()
 	for _, state in pairs(states) do
 		for petId, pet in pairs(state.pets) do
 			if time >= pet.nextLegAt then
-				local from = PetWander.positionAt(pet.leg, time)
+				local from = PetWander.positionAt(pet.leg, time, pet.ease)
 				local to = PetWander.randomSpot(rng, petId)
 				local duration = (to - from).Magnitude / pet.style.speed
 				pet.leg = { from = from, to = to, start = time, duration = duration }
@@ -191,7 +194,7 @@ function BasePetsController.Celebrate(player: Player, petIds: { string }, hatchS
 	for _, petId in ipairs(petIds) do
 		local pet = state.pets[petId]
 		if pet then
-			local spot = (hatchSpots and hatchSpots[petId]) or PetWander.positionAt(pet.leg, time)
+			local spot = (hatchSpots and hatchSpots[petId]) or PetWander.positionAt(pet.leg, time, pet.ease)
 			pet.leg = { from = spot, to = spot, start = time, duration = 0 }
 			pet.nextLegAt = time + LANDING_PAUSE
 			pet.anchor:SetAttribute("Walk", PetWander.encode(pet.leg))
@@ -214,7 +217,7 @@ function BasePetsController.GetPetPosition(anchor: Instance): Vector3?
 		local petId = anchor:GetAttribute("PetId")
 		local pet = if type(petId) == "string" then state.pets[petId] else nil
 		if pet and pet.anchor == anchor then
-			local spot = PetWander.positionAt(pet.leg, now())
+			local spot = PetWander.positionAt(pet.leg, now(), pet.ease)
 			return (PetWander.groundOf(state.platform) * CFrame.new(spot.X, 0, spot.Y)).Position
 		end
 	end
