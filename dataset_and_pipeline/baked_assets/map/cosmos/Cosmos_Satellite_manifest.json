@@ -1,0 +1,58 @@
+{
+  "asset": "Cosmos_Satellite",
+  "triangles": 1432,
+  "vertices": 736,
+  "size_studs": [
+    5.347,
+    4.667,
+    8.072
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 44.1,
+  "source_materials": [
+    "M_MetalBlanc",
+    "M_MetalLune",
+    "M_MetalSombre",
+    "M_MousseCyan",
+    "M_RougeFusee"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0323,
+    "max_ray": 0.0807,
+    "ao_distance": 0.9686,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Cosmos_Satellite_Color.png",
+    "Roughness": "Cosmos_Satellite_Roughness.png",
+    "Metalness": "Cosmos_Satellite_Metalness.png",
+    "Normal": "Cosmos_Satellite_Normal.png",
+    "AO": "Cosmos_Satellite_AO.png"
+  },
+  "exports": [
+    "Cosmos_Satellite.fbx",
+    "Cosmos_Satellite.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Cosmos_Satellite (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Cosmos_Satellite_Color.png",
+      "NormalMap": "Cosmos_Satellite_Normal.png",
+      "RoughnessMap": "Cosmos_Satellite_Roughness.png",
+      "MetalnessMap": "Cosmos_Satellite_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 16.6
+}

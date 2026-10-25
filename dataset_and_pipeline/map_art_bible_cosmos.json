@@ -1,0 +1,59 @@
+{
+  "title": "Bible artistique de la carte - monde Cosmos (6e palier)",
+  "date": "2026-10-25",
+  "status": "proposition, a valider par Chouaib sur qa_renders/map_hero_cosmos.png et map_aesthetic_board_cosmos.png",
+  "method": "Meme methode que les mondes precedents : carte ronde inchangee, decors en blocs biseautes cuits, relief autour de l'arene, eclairage dans le code, surfaces en pieces Roblox. Chaque monde a sa charte.",
+  "story": "L'Observatoire de l'Astro-Hamster : une base lunaire posee sur un asteroide qui derive dans une nebuleuse violette. L'Astro-Hamster y a gare sa fusee, le Chat Comete file entre les antennes, l'Alien Gelatine a fait pousser un jardin de champignons et d'arbres extraterrestres, la criniere du Lion Nebuleuse colore le ciel, et le Trou Noir de Poche dort dans le cratere de poussiere d'etoiles.",
+
+  "sources": {
+    "local_reference": "src/shared/Worlds.lua (Cosmos : sol violet profond, chemins cyan en Neon, mur violet au sommet rose en Neon, arbres lavande / rose, etoiles), src/shared/PetCatalog.lua (familiers du Cosmos)",
+    "web": [
+      {"what": "Palette nebuleuse : indigo profond et bleu electrique, orchidee et lavande en accents", "url": "https://60sec.site/color-palettes/celestial-chill"},
+      {"what": "Sol lunaire en gris neutres pour faire ressortir le ciel violet ; base de recherche dans un cratere facette", "url": "https://cubebrush.co/ilhamgod/products/yqk06q/sci-fi-lunar-outpost-moon-base"},
+      {"what": "Pack lunaire low poly : peu de materiaux partages pour un style coherent", "url": "https://superhivemarket.com/products/low-poly-sci-fi-tiles-lunar-zones"},
+      {"what": "Roblox : ambiance violette (Ambient / OutdoorAmbient), Atmosphere teintee, soleil bas", "url": "https://create.roblox.com/docs/tutorials/use-case-tutorials/lighting/enhance-outdoor-environments"}
+    ]
+  },
+
+  "palette": {
+    "rule": "Fond froid et sombre (violets, indigo) contre la roche lunaire gris-lavande et des accents vifs : cristaux cyan et roses, champignons cyan, metal blanc de la base, rouge et or de la fusee. Les chemins cyan (Neon du jeu) restent la zone la plus lumineuse. Aucune lueur cuite : les cristaux sont des couleurs vives, la lumiere vient de PointLight posees par le script.",
+    "gradient_center_to_edge": [
+      {"zone": "coeur du trou noir", "hex": "#2E1B5C", "note": "inchange : vortex violet"},
+      {"zone": "dalles du sanctuaire", "hex": "#8A80B4", "accent": "#FFC830", "note": "metal lunaire, constellation incrustee en or"},
+      {"zone": "arene", "hex": "#382260", "alt": "#2A184E", "note": "damier violet du jeu (Worlds.Cosmos.GrassA/B)"},
+      {"zone": "chemins", "hex": "#78DCFF", "alt": "#5ABEFF", "note": "Neon cyan du jeu (Worlds.Cosmos.PathA/B)"},
+      {"zone": "mur d'enceinte", "hex": "#462878", "top": "#FF78F0", "note": "inchange (haut en Neon)"},
+      {"zone": "falaises d'asteroide", "hex": "#6A6290", "caps": ["#B48CFF", "#78DCFF", "#FF96F0"], "note": "roche lunaire en strates, terrasses de cristaux et de mousse alien"}
+    ],
+    "materials": {
+      "roche_lune": {"tones": ["#6A6290", "#585080", "#7A74A0"], "cavity": "#241E3E"},
+      "regolithe": {"base": "#9A94BC"},
+      "cristaux": {"cyan": "#78DCFF", "rose": "#FF96F0", "violet": "#B48CFF"},
+      "flore_alien": {"tronc": "#9A6EDC", "feuilles": ["#BE8CFF", "#7850DC", "#FF96F0"], "champignon": "#5AE6D2"},
+      "base": {"metal_blanc": "#E6E8F4", "metal_sombre": "#3A3858", "rouge_fusee": "#F0463C", "or": "#FFC830"}
+    }
+  },
+
+  "atmosphere": {
+    "tone": "Espace : ciel violet profond, nebuleuse rose au loin, air peu dense (on voit loin), lumiere froide et nette ; la nuit est indigo et les cristaux deviennent les reperes.",
+    "Worlds.Cosmos.Ambience": {"AirColor": "#966EFF", "AirDecay": "#28145A", "AirDensity": 0.3, "Tint": "#E1D2FF", "Saturation": 0.25, "note": "deja dans le jeu, coherent avec la charte : garde tel quel (a verifier en jeu)"},
+    "no_glow": "Aucun masque de lueur. Cristaux des pylones et du cratere : PointLight cyan et roses posees par le script (rien a envoyer), eteintes pour les autres mondes."
+  },
+
+  "zones": {
+    "arene_centrale": {"story": "La plate-forme de l'observatoire : anneau de dalles de metal a constellations, 8 portes stellaires (anneau ouvert sur deux pylones, etoile d'or au sommet) sur les chemins, pylones a cristal de part et d'autre, meteorites entre les chemins."},
+    "chemins": {"story": "Pistes de lumiere cyan bordees de touffes d'herbe alien et de petits cristaux."},
+    "bases": {"story": "Barrieres de metal a balises, porte stellaire, escalier en grille, caisses de ravitaillement et antennes paraboliques."},
+    "entre_les_bases": {"story": "Falaises d'asteroide en gradins couronnees de cristaux, arbres et champignons extraterrestres, meteorites, fusee de l'Astro-Hamster sur son pas de tir, planete a anneaux sur son socle, cratere de poussiere d'etoiles."},
+    "peripherie": {"story": "Deux couronnes de falaises d'asteroide (55-75 puis 85-110 studs) ; au loin, aiguilles de cristal geantes et asteroides arrondis qui se perdent dans la nebuleuse."}
+  },
+
+  "assets": {
+    "budget_triangles": 6000,
+    "prefix": "Cosmos_",
+    "list": ["Cosmos_Falaise", "Cosmos_Cristaux", "Cosmos_ArbreAlien", "Cosmos_Champignon", "Cosmos_Rocher", "Cosmos_Touffe", "Cosmos_Meteorite", "Cosmos_Aiguille", "Cosmos_PorteStellaire", "Cosmos_Pylone", "Cosmos_Dalle", "Cosmos_Barriere", "Cosmos_Escalier", "Cosmos_Fusee", "Cosmos_Satellite", "Cosmos_Caisse", "Cosmos_Planete"]
+  },
+
+  "gameplay_constraints": "Identiques aux autres mondes : chemins et cercle du trou degages, rien de solide dans l'anneau des objets sauvages (r 70-160), gros decors entre les bases, kiosques degages.",
+  "roblox_integration": "Apres validation : import de Decors_Cosmos.fbx (Studio en mode Edition), MapDecor.Cosmos, habillage CosmosLook dans MapGenerator.DRESSINGS ; PointLight cyan / roses sur les cristaux ; cratere de poussiere d'etoiles en Neon violet + PointLight."
+}

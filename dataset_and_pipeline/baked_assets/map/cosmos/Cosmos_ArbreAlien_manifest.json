@@ -1,0 +1,59 @@
+{
+  "asset": "Cosmos_ArbreAlien",
+  "triangles": 3888,
+  "vertices": 2014,
+  "size_studs": [
+    13.535,
+    8.248,
+    15.687
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 18.6,
+  "source_materials": [
+    "M_ChampiRose",
+    "M_FeuilleAlienA",
+    "M_FeuilleAlienB",
+    "M_FeuilleAlienC",
+    "M_RocheLuneB",
+    "M_TroncAlien"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0627,
+    "max_ray": 0.1569,
+    "ao_distance": 1.8825,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Cosmos_ArbreAlien_Color.png",
+    "Roughness": "Cosmos_ArbreAlien_Roughness.png",
+    "Metalness": "Cosmos_ArbreAlien_Metalness.png",
+    "Normal": "Cosmos_ArbreAlien_Normal.png",
+    "AO": "Cosmos_ArbreAlien_AO.png"
+  },
+  "exports": [
+    "Cosmos_ArbreAlien.fbx",
+    "Cosmos_ArbreAlien.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Cosmos_ArbreAlien (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Cosmos_ArbreAlien_Color.png",
+      "NormalMap": "Cosmos_ArbreAlien_Normal.png",
+      "RoughnessMap": "Cosmos_ArbreAlien_Roughness.png",
+      "MetalnessMap": "Cosmos_ArbreAlien_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 22.9
+}

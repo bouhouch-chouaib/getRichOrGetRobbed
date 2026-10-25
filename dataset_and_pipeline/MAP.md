@@ -249,3 +249,32 @@ Corail, Calmar Colosse, Poisson-Lanterne Disco). 17 décors dans `blender_tools/
   (215, 242, 250), saturation 0,15 -> 0,26 ; l'ancien air voilait tout et délavait les coraux. Vérifié en Play
   (Atmosphere 0,34, ColorCorrection 0,26 au monde Abysses) : coraux roses et jaunes nets, de jour comme de nuit
   (photos jour / nuit ci-dessus, reprises après le changement).
+
+---
+
+# Monde 6 : Cosmos (25 oct. 2026) — proposition à valider
+
+« L'Observatoire de l'Astro-Hamster » (charte `map_art_bible_cosmos.json`, d'après Astro-Hamster, Chat Comète, Alien
+Gélatine, Lion Nébuleuse, Trou Noir de Poche) : une base lunaire sur un astéroïde dans une nébuleuse violette. 17 décors
+dans `blender_tools/environment_cosmos.py`, rendus `qa_renders/map_hero_cosmos.png`, `map_aesthetic_board_cosmos.png`,
+`map_assets_board_cosmos.png`.
+
+- **Aucune lueur** : cristaux en couleurs vives (matériau cristal sans émission ; les pièces de cristal qui ne viennent pas
+  de `G.crystal_cluster` reçoivent leurs attributs `grad` / `facet` par `gem()`, sinon elles sortent sombres) ; PointLight
+  posées par le script : cyan sur les pylônes du sanctuaire, roses sur les cristaux des chemins et des collines (42 en
+  tout, aucune en périphérie). Rien à envoyer.
+- Décors (< 6 000 triangles) : Falaise (roche lunaire en strates, terrasses de mousse alien), Cristaux, ArbreAlien
+  (houppier en dôme de cubes), Champignon (chapeaux cyan / rose à pois), Rocher (bord de cratère), Touffe, Meteorite
+  (cratère, roche sombre aux creux roses), Aiguille (cristaux géants), PorteStellaire (anneau sur deux pylônes, clé en
+  cristal, étoile d'or, astéroïdes en orbite), Pylone (griffe d'or, cristal), Dalle (constellation en or), Barriere
+  (balises), Escalier, Fusee (pas de tir, tour de lancement), Satellite, Caisse, Planete (anneau). Pancarte reprise.
+- Scène : `run_map_scene.py -- --world Cosmos` -> `baked_assets/map/cosmos/map_layout.json` (891 décors + cratère de
+  poussière d'étoiles : surface « stardust », Neon violet + PointLight dans Roblox) ; au loin, aiguilles de cristal et
+  astéroïdes arrondis ; un module de falaise sur trois remplacé par une aiguille de cristal (~95 studs) ; jour lavande
+  (exposition +0,45) pour qu'il se distingue de la nuit indigo. `export_map_lot.py -- --world Cosmos` ->
+  `Decors_Cosmos.fbx` (30,3 Mo).
+- Le script Studio sait maintenant poser une lumière sur n'importe quelle surface (`light` dans `SURFACE_LOOK`).
+- Pas encore dans Studio : attend la validation du style par Chouaib puis l'import de `Decors_Cosmos.fbx` (mode
+  Édition) ; ensuite `apply_map_look_cosmos.lua` et les bases `CosmosLook` (déjà déclarées dans `MapGenerator`).
+- Différence attendue avec les rendus : en jeu le ciel ne change pas selon le monde (bleu le jour) ; dans l'espace ça se
+  verra plus qu'ailleurs. Piste : un Sky par monde dans `client/WorldSkin`.

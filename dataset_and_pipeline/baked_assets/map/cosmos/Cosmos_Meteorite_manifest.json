@@ -1,0 +1,58 @@
+{
+  "asset": "Cosmos_Meteorite",
+  "triangles": 3404,
+  "vertices": 1744,
+  "size_studs": [
+    10.129,
+    10.2,
+    5.254
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 26.0,
+  "source_materials": [
+    "M_CristalRose",
+    "M_CristalViolet",
+    "M_Regolithe",
+    "M_RocheMeteore"
+  ],
+  "presets": [
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0408,
+    "max_ray": 0.102,
+    "ao_distance": 1.2239,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Cosmos_Meteorite_Color.png",
+    "Roughness": "Cosmos_Meteorite_Roughness.png",
+    "Metalness": "Cosmos_Meteorite_Metalness.png",
+    "Normal": "Cosmos_Meteorite_Normal.png",
+    "AO": "Cosmos_Meteorite_AO.png"
+  },
+  "exports": [
+    "Cosmos_Meteorite.fbx",
+    "Cosmos_Meteorite.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Cosmos_Meteorite (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Cosmos_Meteorite_Color.png",
+      "NormalMap": "Cosmos_Meteorite_Normal.png",
+      "RoughnessMap": "Cosmos_Meteorite_Roughness.png",
+      "MetalnessMap": "Cosmos_Meteorite_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 31.7
+}

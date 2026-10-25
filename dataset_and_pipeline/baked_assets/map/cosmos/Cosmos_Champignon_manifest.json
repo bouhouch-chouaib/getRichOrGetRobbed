@@ -1,0 +1,58 @@
+{
+  "asset": "Cosmos_Champignon",
+  "triangles": 3044,
+  "vertices": 1560,
+  "size_studs": [
+    7.753,
+    5.149,
+    6.943
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 34.9,
+  "source_materials": [
+    "M_ChampiCyan",
+    "M_ChampiPied",
+    "M_ChampiRose",
+    "M_PoisBlanc",
+    "M_Regolithe"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.031,
+    "max_ray": 0.0775,
+    "ao_distance": 0.9303,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Cosmos_Champignon_Color.png",
+    "Roughness": "Cosmos_Champignon_Roughness.png",
+    "Metalness": "Cosmos_Champignon_Metalness.png",
+    "Normal": "Cosmos_Champignon_Normal.png",
+    "AO": "Cosmos_Champignon_AO.png"
+  },
+  "exports": [
+    "Cosmos_Champignon.fbx",
+    "Cosmos_Champignon.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Cosmos_Champignon (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Cosmos_Champignon_Color.png",
+      "NormalMap": "Cosmos_Champignon_Normal.png",
+      "RoughnessMap": "Cosmos_Champignon_Roughness.png",
+      "MetalnessMap": "Cosmos_Champignon_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 16.1
+}

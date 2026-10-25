@@ -1,0 +1,62 @@
+{
+  "asset": "Cosmos_PorteStellaire",
+  "triangles": 4694,
+  "vertices": 2425,
+  "size_studs": [
+    28.047,
+    4.6,
+    29.975
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 17.0,
+  "source_materials": [
+    "M_CristalCyan",
+    "M_CristalViolet",
+    "M_MetalBlanc",
+    "M_MetalLune",
+    "M_MetalSombre",
+    "M_OrDecor",
+    "M_RocheLuneC"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.1199,
+    "max_ray": 0.2998,
+    "ao_distance": 2.5,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Cosmos_PorteStellaire_Color.png",
+    "Roughness": "Cosmos_PorteStellaire_Roughness.png",
+    "Metalness": "Cosmos_PorteStellaire_Metalness.png",
+    "Normal": "Cosmos_PorteStellaire_Normal.png",
+    "AO": "Cosmos_PorteStellaire_AO.png"
+  },
+  "exports": [
+    "Cosmos_PorteStellaire.fbx",
+    "Cosmos_PorteStellaire.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Cosmos_PorteStellaire (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Cosmos_PorteStellaire_Color.png",
+      "NormalMap": "Cosmos_PorteStellaire_Normal.png",
+      "RoughnessMap": "Cosmos_PorteStellaire_Roughness.png",
+      "MetalnessMap": "Cosmos_PorteStellaire_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 15.4
+}

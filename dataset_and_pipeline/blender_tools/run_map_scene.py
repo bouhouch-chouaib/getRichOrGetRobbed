@@ -118,6 +118,18 @@ ABYSSES_LOOKS = {
              "exposure": 0.95},
 }
 
+COSMOS_LOOKS = {
+    # espace : ciel violet profond, nébuleuse rose à l'horizon, air peu dense, lumière froide (map_art_bible_cosmos.json)
+    "jour": {"sun": 3.6, "sun_color": (0.94, 0.94, 1.0), "sun_elev": 48, "sun_az": 200, "sky_top": "#2A1660",
+             "sky_horizon": "#9A6AD8", "sky_strength": 1.0, "fog": "#7A5AB8", "fog_density": 0.0008,
+             "fog_start": 120, "fog_max": 0.42, "bloom": (1.3, 0.6, 26), "saturation": 0.28, "contrast": 0.15,
+             "exposure": 0.45},
+    "nuit": {"sun": 1.0, "sun_color": (0.62, 0.6, 1.0), "sun_elev": 50, "sun_az": 120, "sky_top": "#06031A",
+             "sky_horizon": "#2A1658", "sky_strength": 1.2, "fog": "#1A0E3A", "fog_density": 0.0012,
+             "fog_start": 80, "fog_max": 0.6, "bloom": (1.2, 0.7, 28), "saturation": 0.25, "contrast": 0.12,
+             "exposure": 0.95},
+}
+
 # Rôle -> décor, couleurs du sol et lumière de chaque monde. Le code de placement ne connaît que les rôles.
 WORLD_CFG = {
     "Prairie": {
@@ -236,6 +248,32 @@ WORLD_CFG = {
                    "base_sol": ("#2E7A8E", "#22667A"), "paille": ("#C8B07A", "#B89C68"), "dalle": ("#4A8A96", "#3A7A86"),
                    "mur": ("#14466E", "#0E385E"), "mur_haut": ("#3CDCB4", "#30C8A0"), "loin": "#103A52"},
         "glow": {"mur_haut": 1.8},
+    },
+    "Cosmos": {
+        "lib": [("Cosmos", None), ("Prairie", ["Pancarte"])], "suffix": "_cosmos", "looks": COSMOS_LOOKS,
+        "clouds": 0, "water": "stardust",
+        "slab": "Cosmos_Dalle", "gate": "Cosmos_PorteStellaire", "flank": "Cosmos_Pylone",
+        "between": ("Cosmos_Meteorite", "Cosmos_Planete"), "between_z": -0.2,
+        "tuft": "Cosmos_Touffe", "path_small": ("Cosmos_Cristaux", 0.4, 0.6), "sign": "Pancarte",
+        "fence": "Cosmos_Barriere", "stairs": "Cosmos_Escalier", "base_gate": "Cosmos_PorteStellaire",
+        "prop_a": "Cosmos_Caisse", "prop_b": "Cosmos_Satellite", "hill": "Cosmos_Falaise",
+        "hill_trees": ("Cosmos_Aiguille", ("Cosmos_ArbreAlien", "Cosmos_Champignon")),
+        "gap_trees": ("Cosmos_ArbreAlien", "Cosmos_Champignon", "Cosmos_ArbreAlien", "Cosmos_Cristaux"),
+        "rocks": ("Cosmos_Rocher", "Cosmos_Meteorite", "Cosmos_Rocher"), "ruin": "Cosmos_Satellite",
+        "landmark": ("Cosmos_Fusee", "Cosmos_Planete", "Cosmos_Aiguille", "Cosmos_Satellite"),
+        "bank_rock": "Cosmos_Rocher", "bridge": None,
+        "cliff": "Cosmos_Falaise", "cliff_trees": ("Cosmos_Aiguille", ("Cosmos_ArbreAlien", "Cosmos_Cristaux")),
+        "cliff_tree_scale": 1.3,
+        # aiguilles de cristal géantes et astéroïdes arrondis qui se perdent dans la nébuleuse
+        "far": ("Cosmos_Aiguille", "Cosmos_Rocher"), "far_spire": "Cosmos_Aiguille",
+        "far_scale": ((6.0, 9.0), (6.0, 9.0), (7.0, 11.0)),
+        "cliff_alt": ("Cosmos_Aiguille", (3.6, 3.6, 6.2)),  # aiguilles de cristal (~95 studs) : cassent la ligne des falaises
+        "pets": (("AstroHamster", -14, -2, 6.0), ("ChatComete", 10, 6, 7.0), ("AlienGelatine", -2, 12, 6.5),
+                 ("LionNebuleuse", 18, -12, 9.0), ("TrouNoirPoche", -24, 8, 6.0)),
+        "colors": {"sol": ("#382260", "#2A184E", "#3E2868", "#301C58"), "chemin": ("#78DCFF", "#5ABEFF"),
+                   "base_sol": ("#3E2A6A", "#2E1E58"), "paille": ("#9A94BC", "#8A84AC"), "dalle": ("#6E62A0", "#5E5290"),
+                   "mur": ("#462878", "#361E64"), "mur_haut": ("#FF78F0", "#F060E0"), "loin": "#241446"},
+        "glow": {"chemin": 2.0, "mur_haut": 2.0},
     },
 }
 W: dict = WORLD_CFG["Prairie"]
@@ -676,6 +714,29 @@ def add_trench(M, k: int, rnd):
             collide=asset in ("Abysses_Rocher", "Abysses_Corail"))
 
 
+def add_stardust_crater(M, k: int, rnd):
+    """Cratère de poussière d'étoiles du Cosmos entre la base 1 et la base 8 (où dort le Trou Noir de Poche) : bassin
+    violet lumineux (Neon dans Roblox), bord de régolithe, cristaux et météorites autour."""
+    phi = -(k + 0.5) * 45.0
+    cx, cy = polar(272, phi)
+    pool = disc("PoussiereEtoiles", 13.0, 0.08, M["poussiere"], segs=48)  # ronde : un cylindre Roblox ne peut pas être ovale
+    G.transform(pool, Matrix.Translation((cx, cy, 0)))
+    surface("stardust", "disc", cx, cy, 26.0, 26.0)
+    light = bpy.data.lights.new("PoussiereLumiere", "POINT")
+    light.energy = 12000
+    light.color = (0.7, 0.45, 1.0)
+    light.shadow_soft_size = 8
+    lo = bpy.data.objects.new("PoussiereLumiere", light)
+    lo.location = (cx, cy, 6)
+    SCENE_COLL.objects.link(lo)
+    for j in range(8):
+        a = j * 2 * math.pi / 8 + rnd.uniform(-0.2, 0.2)
+        x, y = cx + math.cos(a) * 17.0, cy + math.sin(a) * 17.0
+        asset = ("Cosmos_Cristaux", "Cosmos_Rocher", "Cosmos_Champignon", "Cosmos_Meteorite")[j % 4]
+        put(asset, x, y, -0.3, rnd.uniform(0, 360), rnd.uniform(0.6, 0.9), "colline",
+            collide=asset in ("Cosmos_Rocher", "Cosmos_Meteorite"))
+
+
 def add_frozen_lake(M, k: int, rnd):
     """Lac gelé de la Glace entre la base 1 et la base 8 (où patine le Pingouin) : glace lisse, congères, sapins,
     rochers enneigés autour."""
@@ -1075,6 +1136,7 @@ def main() -> None:
         "lave": flat_mat("M_LaveScene", "#FF7A1A", 0.3, emission=2.4),
         "glace_lac": flat_mat("M_GlaceLac", "#BEE6FF", 0.05, emission=0.1),
         "fosse": flat_mat("M_Fosse", "#0A2A4A", 0.1, emission=0.15),
+        "poussiere": flat_mat("M_PoussiereEtoiles", "#B482FF", 0.3, emission=1.8),
         "avatar_haut": flat_mat("M_AvatarHaut", "#1E7BFF", 0.6),
         "avatar_bas": flat_mat("M_AvatarBas", "#2B2F45", 0.6),
         "avatar_peau": flat_mat("M_AvatarPeau", "#F5CD30", 0.5),
@@ -1095,6 +1157,8 @@ def main() -> None:
         add_frozen_lake(M, 7, rnd)
     elif W["water"] == "trench":
         add_trench(M, 7, rnd)
+    elif W["water"] == "stardust":
+        add_stardust_crater(M, 7, rnd)
     else:
         add_lava_pool(M, 7, rnd)
     build_periphery(rnd)

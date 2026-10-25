@@ -25,6 +25,8 @@ LIGHTS = {
     "Glace": {"Glace_Lanterne": (0.25, 20, 1.4), "Glace_Igloo": (-0.1, 14, 1.0)},
     "Abysses": {"Abysses_PilierPerle": (0.42, 20, 1.4, (120, 230, 255)),
                 "Abysses_Coquillage": (0.1, 16, 1.2, (150, 240, 255))},
+    "Cosmos": {"Cosmos_Pylone": (0.45, 20, 1.4, (120, 220, 255)),
+               "Cosmos_Cristaux": (0.15, 12, 1.0, (255, 150, 240))},
 }
 
 
@@ -214,11 +216,14 @@ end
 local LAVA_LIGHT = Color3.fromRGB(255, 110, 40)
 local SURFACE_LOOK = {
 	water = { name = "Eau", color = Color3.fromRGB(47, 168, 255), material = Enum.Material.Glass, transparency = 0.35 },
-	lava = { name = "Lave", color = Color3.fromRGB(255, 122, 26), material = Enum.Material.Neon, transparency = 0 },
+	lava = { name = "Lave", color = Color3.fromRGB(255, 122, 26), material = Enum.Material.Neon, transparency = 0, light = LAVA_LIGHT },
 	-- bleu soutenu : un bleu pâle disparaît sur le sol de neige (vu en jeu le 25 oct.)
 	ice = { name = "Glace", color = Color3.fromRGB(110, 190, 240), material = Enum.Material.Ice, transparency = 0 },
 	-- fosse des Abysses : eau sombre presque opaque, le sol ne doit pas transparaître
 	trench = { name = "Fosse", color = Color3.fromRGB(12, 46, 84), material = Enum.Material.Glass, transparency = 0.12 },
+	-- cratère de poussière d'étoiles du Cosmos : Neon violet (pièce du jeu, rien à envoyer) + sa lumière
+	stardust = { name = "PoussiereEtoiles", color = Color3.fromRGB(180, 130, 255), material = Enum.Material.Neon,
+		transparency = 0, light = Color3.fromRGB(190, 140, 255) },
 }
 
 local function addLight(part: BasePart, spec)
@@ -257,9 +262,9 @@ local function makeSurface(parent: Instance, s)
 		part.Size = Vector3.new(sx, sy, sz)
 		part.CFrame = CFrame.new(x, y, z) * CFrame.Angles(0, math.rad(yaw), 0)
 	end
-	if kind == "lava" then
+	if look.light then
 		local light = Instance.new("PointLight")
-		light.Color = LAVA_LIGHT
+		light.Color = look.light
 		light.Range = 40
 		light.Brightness = 2
 		light.Shadows = false

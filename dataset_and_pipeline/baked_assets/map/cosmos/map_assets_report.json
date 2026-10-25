@@ -1,0 +1,189 @@
+{
+  "Cosmos_Falaise": {
+    "triangles": 5832,
+    "within_6000": true,
+    "size_studs": [
+      36.078,
+      15.032,
+      29.623
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 9.4
+  },
+  "Cosmos_Cristaux": {
+    "triangles": 2384,
+    "within_6000": true,
+    "size_studs": [
+      4.945,
+      3.944,
+      4.954
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 10.4
+  },
+  "Cosmos_ArbreAlien": {
+    "triangles": 3888,
+    "within_6000": true,
+    "size_studs": [
+      13.535,
+      8.248,
+      15.687
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 22.9
+  },
+  "Cosmos_Champignon": {
+    "triangles": 3044,
+    "within_6000": true,
+    "size_studs": [
+      7.753,
+      5.149,
+      6.943
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 16.1
+  },
+  "Cosmos_Rocher": {
+    "triangles": 2048,
+    "within_6000": true,
+    "size_studs": [
+      9.571,
+      6.592,
+      5.5
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 21.9
+  },
+  "Cosmos_Touffe": {
+    "triangles": 440,
+    "within_6000": true,
+    "size_studs": [
+      2.177,
+      2.131,
+      2.945
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 12.0
+  },
+  "Cosmos_Meteorite": {
+    "triangles": 3404,
+    "within_6000": true,
+    "size_studs": [
+      10.129,
+      10.2,
+      5.254
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 31.7
+  },
+  "Cosmos_Aiguille": {
+    "triangles": 1182,
+    "within_6000": true,
+    "size_studs": [
+      7.268,
+      7.525,
+      13.879
+    ],
+    "uv_overlap_pct": 0.01,
+    "seconds": 35.0
+  },
+  "Cosmos_PorteStellaire": {
+    "triangles": 4694,
+    "within_6000": true,
+    "size_studs": [
+      28.047,
+      4.6,
+      29.975
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 15.4
+  },
+  "Cosmos_Pylone": {
+    "triangles": 2062,
+    "within_6000": true,
+    "size_studs": [
+      4.4,
+      4.4,
+      13.888
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 55.7
+  },
+  "Cosmos_Dalle": {
+    "triangles": 1512,
+    "within_6000": true,
+    "size_studs": [
+      8.084,
+      5.984,
+      1.38
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 24.2
+  },
+  "Cosmos_Barriere": {
+    "triangles": 2376,
+    "within_6000": true,
+    "size_studs": [
+      12.01,
+      0.81,
+      3.3
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 20.8
+  },
+  "Cosmos_Escalier": {
+    "triangles": 1620,
+    "within_6000": true,
+    "size_studs": [
+      19.2,
+      5.805,
+      2.3
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 32.1
+  },
+  "Cosmos_Fusee": {
+    "triangles": 3608,
+    "within_6000": true,
+    "size_studs": [
+      10.734,
+      9.168,
+      14.0
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 24.3
+  },
+  "Cosmos_Satellite": {
+    "triangles": 1432,
+    "within_6000": true,
+    "size_studs": [
+      5.347,
+      4.667,
+      8.072
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 16.6
+  },
+  "Cosmos_Caisse": {
+    "triangles": 2562,
+    "within_6000": true,
+    "size_studs": [
+      5.545,
+      3.582,
+      4.24
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 15.1
+  },
+  "Cosmos_Planete": {
+    "triangles": 2250,
+    "within_6000": true,
+    "size_studs": [
+      12.396,
+      11.71,
+      11.4
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 27.1
+  }
+}
