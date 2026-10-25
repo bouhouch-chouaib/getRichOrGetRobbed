@@ -32,6 +32,12 @@ VIEWS = {
     "trois_quarts": {"dir": (0.85, -1.0, 0.5), "zoom": 1.0, "aim": 0.0},
     "profil": {"dir": (1.0, 0.0, 0.14), "zoom": 1.0, "aim": 0.0},
     "detail": {"dir": (-0.6, -1.0, 0.6), "zoom": 0.48, "aim": 0.2},
+    # gros plans pour les créatures à plusieurs têtes
+    "tetes_face": {"dir": (0.0, -1.0, 0.3), "zoom": 0.55, "aim": 0.22},
+    "tete_gauche": {"dir": (-1.0, -0.55, 0.35), "zoom": 0.5, "aim": 0.18},
+    "tete_droite": {"dir": (1.0, -0.55, 0.35), "zoom": 0.5, "aim": 0.18},
+    "dos": {"dir": (0.35, 1.0, 0.75), "zoom": 0.75, "aim": 0.05},
+    "vitrine": {"dir": (0.3, -1.0, 0.38), "zoom": 0.95, "aim": 0.0},  # 3/4 presque de face : les 3 têtes visibles
 }
 KIND_COLORS = {"procedural": (1.0, 0.55, 0.1), "baked": (0.2, 0.85, 0.35)}
 BG_TOP = np.array([0.30, 0.34, 0.45])
@@ -104,7 +110,9 @@ class Studio:
         self.world = world
         scene.world = world
 
-    def frame(self, objs, view: str, energy: float = 1.0) -> None:
+    def frame(self, objs, view: str, energy: float = 1.0, ground=None) -> None:
+        """Cadre `objs` ; le sol attrape-ombres va sous `ground` (défaut : objs). Il doit être sous TOUT ce qui est
+        rendu : posé plus haut (ex. au pied d'un familier sur un socle), il masque ce qui est dessous."""
         spec = VIEWS[view]
         lo, hi = bounds(objs)
         center = (lo + hi) / 2
@@ -116,7 +124,7 @@ class Studio:
         direction = Vector(spec["dir"]).normalized()
         self.camera.location = target + direction * dist
         self.camera.rotation_euler = (target - self.camera.location).to_track_quat("-Z", "Y").to_euler()
-        self.floor.location = (center.x, center.y, lo.z)
+        self.floor.location = (center.x, center.y, bounds(ground)[0].z if ground else lo.z)
         self.floor.scale = (radius * 12, radius * 12, 1)
         # lumières placées par rapport au sujet (pas à la caméra) : l'éclairage ne change pas d'une vue à l'autre
         d = radius * 3.2
@@ -300,7 +308,8 @@ def _save_rgb(rgb: np.ndarray, path: Path) -> None:
 
 def render_qa_grid(rows: list[dict], out_path: Path | str | None = None, resolution: int = 420, samples: int = 48,
                    views=("face", "trois_quarts", "profil", "detail"), gpu: bool = True) -> dict:
-    """rows = [{"label": "Piédestal cuit", "objects": [obj, ...], "kind": "baked" | "procedural"}, ...].
+    """rows = [{"label": "Piédestal cuit", "objects": [obj, ...], "kind": "baked" | "procedural",
+    "views": (optionnel, sinon `views`)}, ...]. Vues possibles : clés de VIEWS.
 
     Écrit preview.png (une ligne par sujet, une colonne par vue) et preview_report.json à côté. Renvoie le rapport.
     """
@@ -318,7 +327,7 @@ def render_qa_grid(rows: list[dict], out_path: Path | str | None = None, resolut
             saved = _isolate(row["objects"])
             row_tiles, row_metrics = [], {}
             try:
-                for view in views:
+                for view in row.get("views", views):
                     studio.frame(row["objects"], view)
                     rgba = _render_to_array(scene, tmp / f"r{i}_{view}.png")
                     row_metrics[view] = metrics(rgba)
@@ -358,8 +367,9 @@ def render_qa_grid(rows: list[dict], out_path: Path | str | None = None, resolut
 
 
 def render_hero(objects, out_path: Path | str, resolution: int = 1024, samples: int = 96, view: str = "trois_quarts",
-                gpu: bool = True) -> Path:
-    """Une image soignée d'une composition (ex. l'œuf posé sur le piédestal), même studio que la planche."""
+                gpu: bool = True, frame=None) -> Path:
+    """Une image soignée d'une composition (ex. l'œuf posé sur le piédestal), même studio que la planche.
+    frame = objets sur lesquels cadrer (défaut : tous) : cadrer sur le familier laisse le socle déborder du cadre."""
     scene = bpy.context.scene
     out = Path(out_path)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -367,7 +377,7 @@ def render_hero(objects, out_path: Path | str, resolution: int = 1024, samples: 
     _configure(scene, resolution, samples, gpu)
     saved = _isolate(objects)
     try:
-        studio.frame(objects, view)
+        studio.frame(frame or objects, view, ground=objects)
         rgba = _render_to_array(scene, out.with_name(out.stem + "_raw.png"))
     finally:
         _restore(saved)

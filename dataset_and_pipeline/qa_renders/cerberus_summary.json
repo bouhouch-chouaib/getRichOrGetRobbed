@@ -1,0 +1,27 @@
+{
+  "triangles_game": 9328,
+  "triangles_high": 34134,
+  "head_clipping": {
+    "Alpha/Gauche": 0,
+    "Alpha/Droite": 0,
+    "Gauche/Droite": 0
+  },
+  "uv": {
+    "overlap_pct": 0.0,
+    "coverage_pct": 29.3
+  },
+  "maps": {
+    "Color": "CerbereInfernal_Color.png",
+    "Roughness": "CerbereInfernal_Roughness.png",
+    "Metalness": "CerbereInfernal_Metalness.png",
+    "Normal": "CerbereInfernal_Normal.png",
+    "AO": "CerbereInfernal_AO.png",
+    "Emissive": "CerbereInfernal_Emissive.png"
+  },
+  "qa_flags": {
+    "Procédural (high)": [],
+    "Cuit pour Roblox (low)": [],
+    "Cuit : gros plans": []
+  },
+  "seconds": 160.5
+}

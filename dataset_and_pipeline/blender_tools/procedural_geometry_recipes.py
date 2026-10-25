@@ -118,8 +118,10 @@ def join(objs: Sequence[bpy.types.Object], name: str) -> bpy.types.Object:
         return objs[0]
     target = objs[0]
     view_layer = bpy.context.view_layer
+    view_layer.update()  # après des suppressions, la liste de la vue peut contenir des objets disparus
     for o in view_layer.objects:
-        o.select_set(False)
+        if o is not None:
+            o.select_set(False)
     for o in objs:
         o.select_set(True)
     view_layer.objects.active = target
@@ -677,7 +679,210 @@ def build_mythic_gem_egg(name: str = "OeufMythique", egg_height: float = 3.6, eg
     return {"high": high, "low": low}
 
 
+# =====================================================================================================================
+# Outils de formes pour créatures (phase 1.5) : sections en « carré arrondi » (superellipse) reliées par des quads,
+# le long d'un axe (loft) ou d'un chemin (sweep). Le Cerbère lisse « jouet vinyle » bâti avec a été refusé (trop
+# cartoon) : la créature validée est en blocs biseautés, voir block_creatures.py, qui se sert de ces outils.
+
+def superellipse_ring(w: float, h: float, n: int = 12, p: float = 2.6, taper: float = 0.0,
+                      phase: float = 0.0) -> list[tuple[float, float]]:
+    """Section 2D (x, z) : p=2 ellipse, p=4 presque carré, p=1 losange. taper > 0 élargit le bas (trapèze)."""
+    pts = []
+    for k in range(n):
+        a = phase + 2 * math.pi * k / n
+        c, s = math.cos(a), math.sin(a)
+        x = math.copysign(abs(c) ** (2 / p), c) * w / 2
+        z = math.copysign(abs(s) ** (2 / p), s) * h / 2
+        if h > 0:
+            x *= 1 + taper * (-z / (h / 2))
+        pts.append((x, z))
+    return pts
+
+
+def _bridge(bm, rings: list[list], cap_start: tuple | None, cap_end: tuple | None, layer=None) -> None:
+    """Relie des anneaux de même taille par des quads ; un anneau d'un seul sommet = pointe. cap = (point, grad)."""
+    for lo, up in zip(rings, rings[1:]):
+        if len(lo) == 1 and len(up) == 1:
+            continue
+        n = max(len(lo), len(up))
+        for k in range(n):
+            k1 = (k + 1) % n
+            if len(lo) == 1:
+                bm.faces.new((lo[0], up[k1], up[k]))
+            elif len(up) == 1:
+                bm.faces.new((lo[k], lo[k1], up[0]))
+            else:
+                bm.faces.new((lo[k], lo[k1], up[k1], up[k]))
+    for ring, cap in ((rings[0], cap_start), (rings[-1], cap_end)):
+        if len(ring) == 1 or cap is None:
+            continue
+        pole = bm.verts.new(cap[0])
+        if layer is not None:
+            pole[layer] = cap[1]
+        n = len(ring)
+        for k in range(n):
+            bm.faces.new((ring[k], ring[(k + 1) % n], pole))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+
+
+def sweep(name: str, points, sizes, n: int = 8, p: float = 2.0, normal_hint=None, up=None, twist: float = 0.0,
+          bulge: tuple[float, float] = (0.0, 0.0)) -> bpy.types.Object:
+    """Promène une section le long d'un chemin (crocs, oreilles, cous, pointes, lames d'énergie).
+
+    sizes[i] = (w, h) ou (w, h, p, taper) ; (0, 0) = pointe. Le repère suit le chemin sans vriller (transport
+    parallèle) : `normal_hint` = direction de la largeur w au départ, `up` = côté où va la hauteur h (retourne la
+    section si besoin). bulge = bombé des bouchons (début, fin). Écrit l'attribut grad (0 départ -> 1 bout).
+    """
+    pts = [Vector(q) for q in points]
+    tangents = []
+    for i in range(len(pts)):
+        a, b = pts[max(i - 1, 0)], pts[min(i + 1, len(pts) - 1)]
+        tangents.append((b - a).normalized())
+    hint = Vector(normal_hint) if normal_hint is not None else Vector((0, 0, 1))
+    if abs(hint.normalized().dot(tangents[0])) > 0.97:
+        hint = Vector((1, 0, 0)) if abs(tangents[0].x) < 0.9 else Vector((0, 1, 0))
+    normal = (hint - tangents[0] * hint.dot(tangents[0])).normalized()
+    frames = []
+    for i, t in enumerate(tangents):
+        if i:
+            proj = normal - t * normal.dot(t)
+            normal = proj.normalized() if proj.length > 1e-6 else normal
+        binormal = t.cross(normal).normalized()
+        if up is not None and binormal.dot(Vector(up)) < 0:
+            normal, binormal = -normal, -binormal
+        frames.append((normal.copy(), binormal))
+    lengths = [0.0]
+    for i in range(1, len(pts)):
+        lengths.append(lengths[-1] + (pts[i] - pts[i - 1]).length)
+    total = lengths[-1] or 1.0
+
+    bm = bmesh.new()
+    grad = bm.verts.layers.float.new("grad")
+    rings = []
+    for i, (pt, (nrm, bnm), size) in enumerate(zip(pts, frames, sizes)):
+        w, h = size[0], size[1]
+        sp = size[2] if len(size) > 2 else p
+        taper = size[3] if len(size) > 3 else 0.0
+        g = lengths[i] / total
+        if w <= 1e-5 and h <= 1e-5:
+            v = bm.verts.new(pt)
+            v[grad] = g
+            rings.append([v])
+            continue
+        rot = twist * g
+        ring = []
+        for x, z in superellipse_ring(w, h, n, sp, taper):
+            xr, zr = x * math.cos(rot) - z * math.sin(rot), x * math.sin(rot) + z * math.cos(rot)
+            v = bm.verts.new(pt + nrm * xr + bnm * zr)
+            v[grad] = g
+            ring.append(v)
+        rings.append(ring)
+    first, last = sizes[0], sizes[-1]
+    cap_start = (pts[0] - tangents[0] * bulge[0] * max(first[0], first[1]), 0.0)
+    cap_end = (pts[-1] + tangents[-1] * bulge[1] * max(last[0], last[1]), 1.0)
+    _bridge(bm, rings, cap_start, cap_end, grad)
+    return _object_from_bmesh(name, bm)
+
+
+def loft(name: str, sections, axis: str = "-Y", n: int = 12, bulge: tuple[float, float] = (0.15, 0.15)) -> bpy.types.Object:
+    """Volume le long d'un axe à partir de sections (t, a, b, w, h, p, taper).
+
+    axis "-Y" : t = position avant/arrière (de l'arrière vers l'avant), a = x, b = z (crâne, museau, torse, pattes
+    avant-arrière). axis "-Z" : t = hauteur (du haut vers le bas), a = x, b = y (pattes). w = largeur (x), h = hauteur.
+    """
+    pts, sizes = [], []
+    for t, a, b, w, h, sp, taper in sections:
+        if axis == "-Y":
+            pts.append((a, t, b))
+        else:
+            pts.append((a, b, t))
+        sizes.append((w, h, sp, taper))
+    up = (0, 0, 1) if axis == "-Y" else (0, -1, 0)
+    return sweep(name, pts, sizes, n=n, normal_hint=(1, 0, 0), up=up, bulge=bulge)
+
+
+def transform(obj: bpy.types.Object, matrix: Matrix) -> bpy.types.Object:
+    obj.data.transform(matrix)
+    obj.data.update()
+    return obj
+
+
+def frame_matrix(origin, direction, roll_hint=(0, -1, 0)) -> Matrix:
+    """Matrice qui envoie l'axe local +Z sur `direction` (et local -Y vers `roll_hint`), placée en `origin`."""
+    z = Vector(direction).normalized()
+    y = -(Vector(roll_hint) - z * Vector(roll_hint).dot(z)).normalized()
+    x = y.cross(z)
+    m = Matrix((x, y, z)).transposed().to_4x4()
+    m.translation = Vector(origin)
+    return m
+
+
+def write_region_attribute(obj: bpy.types.Object, name: str, fn) -> None:
+    """Peint un attribut 0-1 par sommet avec fn(co) (ex. zone des fissures de magma lue par le matériau)."""
+    mesh = obj.data
+    attr = mesh.attributes.get(name) or mesh.attributes.new(name, "FLOAT", "POINT")
+    attr.data.foreach_set("value", [max(0.0, min(1.0, fn(v.co))) for v in mesh.vertices])
+
+
+def _smooth01(x: float) -> float:
+    x = max(0.0, min(1.0, x))
+    return x * x * (3 - 2 * x)
+
+
+_DETAIL = {"max_segments": 9, "max_subdiv": 9, "min_bevel": 0.0}
+
+
+def set_detail(level: str = "high") -> None:
+    """Niveau de finition des créatures. "high" = celle de la recette (high-poly : bevel 2-3 segments, subdivision).
+    "low" = maillage de jeu : 1 segment de bevel, plus de bevel sur les petites pièces (< 0,015 : crocs, griffes,
+    mèches), plus de subdivision sauf pour les masses principales (keep_subdiv). Mêmes graines -> même forme : le
+    baker projette le high sur le low (ses arêtes douces passent dans la Normal map)."""
+    if level == "high":
+        _DETAIL.update(max_segments=9, max_subdiv=9, min_bevel=0.0)
+    else:
+        _DETAIL.update(max_segments=1, max_subdiv=0, min_bevel=0.015)
+
+
+def _finish_parts(parts: list[tuple], bevel: float = 0.0, segments: int = 2, angle: float = 25.0,
+                  subdiv: int = 0, keep_subdiv: bool = False) -> list[bpy.types.Object]:
+    """Matériau + finition + application, pour une liste de (objet, matériau)."""
+    wanted_subdiv = subdiv
+    segments = min(segments, _DETAIL["max_segments"])
+    subdiv = subdiv if keep_subdiv else min(subdiv, _DETAIL["max_subdiv"])
+    if bevel < _DETAIL["min_bevel"]:
+        bevel = 0.0
+    out = []
+    for obj, mat in parts:
+        assign_material(obj, mat)
+        if subdiv:
+            sub = obj.modifiers.new("Subdivision", "SUBSURF")
+            sub.levels = sub.render_levels = subdiv
+        if bevel > 0:
+            add_bevel_finish(obj, width=bevel, segments=segments, angle_deg=angle, harden=True)
+        elif subdiv or wanted_subdiv:
+            smooth_by_angle(obj, 60.0)
+        out.append(apply_modifiers(obj))
+    return out
+
+
+def clipping_report(groups: dict[str, list[bpy.types.Object]]) -> dict[str, int]:
+    """Nombre de paires de faces qui se traversent entre groupes de pièces (ex. les 3 têtes + leurs crinières).
+    0 partout = aucune interpénétration visible entre groupes. À appeler avant join()."""
+    def tree(objs):
+        verts, polys, offset = [], [], 0
+        for o in objs:
+            verts += [o.matrix_world @ v.co for v in o.data.vertices]
+            polys += [tuple(i + offset for i in p.vertices) for p in o.data.polygons]
+            offset += len(o.data.vertices)
+        return BVHTree.FromPolygons(verts, polys)
+    names = list(groups)
+    trees = {n: tree(groups[n]) for n in names}
+    return {f"{a}/{b}": len(trees[a].overlap(trees[b])) for i, a in enumerate(names) for b in names[i + 1:]}
+
+
 __all__ = [
+    "superellipse_ring", "sweep", "loft", "transform", "frame_matrix", "write_region_attribute", "set_detail",
+    "clipping_report",
     "collection", "apply_modifiers", "bake_transform", "duplicate", "delete", "join", "assign_material",
     "smooth_by_angle", "clear_custom_normals", "shade_flat", "triangle_count", "write_facet_attribute", "write_grad_attribute", "lathe",
     "egg_profile", "profile_radius_at", "ring_profile", "curve_tube", "rounded_blob", "crystal", "crystal_cluster",

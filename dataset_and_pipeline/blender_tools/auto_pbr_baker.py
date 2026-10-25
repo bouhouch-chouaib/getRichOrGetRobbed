@@ -105,6 +105,13 @@ def unwrap(obj: bpy.types.Object, angle_deg: float = 66.0, island_margin: float 
         bpy.ops.mesh.select_all(action="SELECT")
         bpy.ops.uv.smart_project(angle_limit=math.radians(angle_deg), island_margin=island_margin,
                                  area_weight=0.0, correct_aspect=True, scale_to_bounds=False)
+        # Rangement serré des îlots (formes réelles, rotation) : Smart UV seul laisse ~80 % de vide sur un asset
+        # fait de nombreuses pièces (mesuré : 16 % de couverture sur le Cerbère).
+        try:
+            bpy.ops.uv.select_all(action="SELECT")
+            bpy.ops.uv.pack_islands(rotate=True, margin=island_margin, shape_method="CONCAVE")
+        except (TypeError, RuntimeError) as err:
+            print(f"[baker] pack_islands ignoré : {err}")
         bpy.ops.object.mode_set(mode="OBJECT")
 
 
@@ -136,6 +143,17 @@ def uv_overlap_ratio(obj: bpy.types.Object, grid: int = 512) -> float:
         count[y0:y1 + 1, x0:x1 + 1] += inside.astype(np.uint8)
     covered = (count > 0).sum()
     return float((count > 1).sum() / covered) if covered else 0.0
+
+
+def uv_coverage(obj: bpy.types.Object) -> float:
+    """Part de la texture réellement couverte par les UV (0-1). Sous 0,3 : trop de marge entre îlots, texture gâchée."""
+    uv = obj.data.uv_layers.active.data
+    total = 0.0
+    for poly in obj.data.polygons:
+        pts = [uv[i].uv for i in poly.loop_indices]
+        total += abs(sum(pts[k].x * pts[(k + 1) % len(pts)].y - pts[(k + 1) % len(pts)].x * pts[k].y
+                         for k in range(len(pts)))) / 2
+    return min(total, 1.0)
 
 
 def set_origin_bottom_center(obj: bpy.types.Object) -> None:
@@ -548,6 +566,7 @@ def bake_asset(
         "pivot": "sol, au centre",
         "resolution": resolution,
         "uv_overlap_pct": round(overlap * 100, 2),
+        "uv_coverage_pct": round(uv_coverage(low) * 100, 1),
         "source_materials": sorted(m.name for m in high_mats),
         "presets": sorted({m.get("pipeline_preset", "?") for m in high_mats}),
         "bake": {"backend": state.get("backend"), "samples": samples, "ao_samples": ao_samples, "cage": round(cage, 4),
@@ -574,5 +593,5 @@ def bake_asset(
     return report
 
 
-__all__ = ["pipeline_root", "prepare_mesh", "unwrap", "uv_overlap_ratio", "set_origin_bottom_center", "enable_gpu",
+__all__ = ["pipeline_root", "prepare_mesh", "unwrap", "uv_overlap_ratio", "uv_coverage", "set_origin_bottom_center", "enable_gpu",
            "use_cycles", "restore_render", "save_png", "build_baked_material", "export_asset", "bake_asset"]

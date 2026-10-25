@@ -15,3 +15,6 @@ sourcemap.json
 
 # Sauvegardes automatiques de Blender
 *.blend1
+
+# Aperçu Studio local du pipeline 3D (se refait avec blender_tools/export_studio_mesh.py)
+/dataset_and_pipeline/studio_import/

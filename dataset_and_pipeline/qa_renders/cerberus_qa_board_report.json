@@ -1,0 +1,145 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\cerberus_qa_board.png",
+  "layout": {
+    "rows": [
+      "Procédural (high)",
+      "Cuit pour Roblox (low)",
+      "Cuit : gros plans"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Procédural (high)",
+      "kind": "procedural",
+      "triangles": 34134,
+      "views": {
+        "face": {
+          "coverage": 0.175,
+          "lum_mean": 0.315,
+          "lum_std": 0.201,
+          "detail": 0.0905,
+          "saturation": 0.201,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.162,
+          "lum_mean": 0.317,
+          "lum_std": 0.198,
+          "detail": 0.096,
+          "saturation": 0.192,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.133,
+          "lum_mean": 0.344,
+          "lum_std": 0.191,
+          "detail": 0.0839,
+          "saturation": 0.171,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.545,
+          "lum_mean": 0.349,
+          "lum_std": 0.183,
+          "detail": 0.0503,
+          "saturation": 0.183,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Cuit pour Roblox (low)",
+      "kind": "baked",
+      "triangles": 9328,
+      "views": {
+        "face": {
+          "coverage": 0.175,
+          "lum_mean": 0.309,
+          "lum_std": 0.191,
+          "detail": 0.0743,
+          "saturation": 0.201,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.162,
+          "lum_mean": 0.312,
+          "lum_std": 0.19,
+          "detail": 0.0781,
+          "saturation": 0.193,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.133,
+          "lum_mean": 0.342,
+          "lum_std": 0.183,
+          "detail": 0.0687,
+          "saturation": 0.174,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.544,
+          "lum_mean": 0.348,
+          "lum_std": 0.181,
+          "detail": 0.0402,
+          "saturation": 0.188,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Cuit : gros plans",
+      "kind": "baked",
+      "triangles": 9328,
+      "views": {
+        "tetes_face": {
+          "coverage": 0.46,
+          "lum_mean": 0.336,
+          "lum_std": 0.184,
+          "detail": 0.0471,
+          "saturation": 0.201,
+          "flags": []
+        },
+        "tete_gauche": {
+          "coverage": 0.479,
+          "lum_mean": 0.341,
+          "lum_std": 0.175,
+          "detail": 0.0399,
+          "saturation": 0.191,
+          "flags": []
+        },
+        "tete_droite": {
+          "coverage": 0.487,
+          "lum_mean": 0.346,
+          "lum_std": 0.192,
+          "detail": 0.0394,
+          "saturation": 0.198,
+          "flags": []
+        },
+        "dos": {
+          "coverage": 0.29,
+          "lum_mean": 0.367,
+          "lum_std": 0.154,
+          "detail": 0.0531,
+          "saturation": 0.14,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 64,
+    "resolution": 520,
+    "view_transform": "Standard",
+    "seconds": 93.9
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

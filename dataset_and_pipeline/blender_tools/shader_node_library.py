@@ -417,6 +417,12 @@ def create_stylized_edge_wear_material(
     metallic: float = 0.0,
     emission: float = 0.0,
     bump_strength: float = 0.4,
+    magma=None,
+    magma_core="#FFE27A",
+    magma_scale: float = 2.4,
+    magma_width: float = 0.06,
+    magma_glow: float = 3.0,
+    magma_attribute: str = "magma",
     **_ignored,
 ):
     """Matériau « peint à la main » façon jeu stylisé.
@@ -428,6 +434,9 @@ def create_stylized_edge_wear_material(
     - Creux assombris : Ambient Occlusion + concavité vers la couleur `cavity`.
     - `crackle` > 0 : craquelures de céramique (Voronoi DISTANCE_TO_EDGE) dans la couleur et le relief.
     - `studs` = pas des tenons en studs (ex. 1.0) pour couvrir la surface de tenons Roblox (relief + anneau sombre).
+    - `magma` = couleur de fissures incandescentes (Voronoi DISTANCE_TO_EDGE : liseré `magma`, cœur `magma_core`, halo
+      chaud), creusées dans le relief et émissives, SEULEMENT là où l'attribut `magma_attribute` (0-1, peint par la
+      recette : poitrail, front...) vaut 1. Lueur = couleur de la fissure, intensité = masque x `magma_glow`.
     """
     mat, kit, bsdf = _new_material(name, "create_stylized_edge_wear_material")
     base_c = color(base)
@@ -463,6 +472,24 @@ def create_stylized_edge_wear_material(
         col = kit.mix(kit.math("MULTIPLY", crack, 0.8), col, shade(cav_c, -0.3))
         crack_h = kit.math("MULTIPLY", crack, -1.0)
 
+    magma_glow_mask = None
+    magma_h = None
+    if magma:
+        region = kit.map_range(kit.attribute(magma_attribute), 0.2, 0.7, 0.0, 1.0)
+        warped = kit.vmath("ADD", obj, kit.vmath("SCALE", kit.vmath("SUBTRACT", kit.out(brush, "Color"), (0.5, 0.5, 0.5)),
+                                                  scale=0.3))
+        lava = kit.voronoi(warped, magma_scale, feature="DISTANCE_TO_EDGE", randomness=0.95)
+        dist = kit.out(lava, "Distance")
+        line = kit.math("MULTIPLY", kit.map_range(dist, 0.0, magma_width, 1.0, 0.0, interp="SMOOTHSTEP"), region)
+        core = kit.math("MULTIPLY", kit.map_range(dist, 0.0, magma_width * 0.4, 1.0, 0.0), region)
+        halo = kit.math("MULTIPLY", kit.map_range(dist, 0.0, magma_width * 3.5, 0.7, 0.0, interp="SMOOTHSTEP"), region)
+        mag_c = color(magma)
+        col = kit.mix(halo, col, shade(mag_c, -0.6))
+        col = kit.mix(line, col, mag_c)
+        col = kit.mix(core, col, color(magma_core))
+        magma_glow_mask = kit.math("ADD", kit.math("MULTIPLY", line, magma_glow), kit.math("MULTIPLY", halo, magma_glow * 0.12))
+        magma_h = kit.math("MULTIPLY", line, -1.0)
+
     stud_h = None
     if studs:
         stud_h, ring = stud_pattern(kit, stud_size=studs, radius=stud_radius)
@@ -473,13 +500,18 @@ def create_stylized_edge_wear_material(
     rough = kit.math("SUBTRACT", rough, kit.math("MULTIPLY", edge_paint, 0.18))
     rough = kit.math("ADD", rough, kit.math("MULTIPLY", cav, 0.15), clamp=True)
 
-    height = _sum_heights(kit, [(grain_fac, 0.25), (kit.out(brush, "Fac"), 0.35), (crack_h, 0.6)])
+    height = _sum_heights(kit, [(grain_fac, 0.25), (kit.out(brush, "Fac"), 0.35), (crack_h, 0.6), (magma_h, 0.8)])
     normal = kit.bump(height, strength=bump_strength, distance=0.02)
     if stud_h is not None:
         # relief propre aux tenons (vrais petits cylindres, ~0,1 stud de haut), enchaîné sur le relief de surface
         normal = kit.bump(stud_h, strength=1.0, distance=0.1 * studs, normal=normal)
-    return _finish(mat, kit, bsdf, col, rough, normal, metallic=metallic, emission_color=col,
-                   emission_strength=emission, extra={"Specular IOR Level": 0.45})
+    mat = _finish(mat, kit, bsdf, col, rough, normal, metallic=metallic, emission_color=col,
+                  emission_strength=max(emission, 1e-3 if magma_glow_mask is not None else 0.0),
+                  extra={"Specular IOR Level": 0.45})
+    if magma_glow_mask is not None:
+        kit.set(bsdf, "Emission Strength", kit.math("ADD", magma_glow_mask, emission))
+        _auto_layout(kit.tree)
+    return mat
 
 
 # =====================================================================================================================

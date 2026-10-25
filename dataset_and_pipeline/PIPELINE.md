@@ -15,6 +15,10 @@ Preuve de concept : un piédestal de base et un œuf Mythique (`qa_renders/hero.
 | `blender_tools/auto_pbr_baker.py` | UV automatiques, cuisson Cycles, PNG, FBX / GLB, manifeste. |
 | `blender_tools/visual_qa_renderer.py` | Studio 3 points, 4 vues, planche `preview.png` + rapport chiffré. |
 | `blender_tools/run_poc.py` | Exemple complet (piédestal + œuf + planche des matériaux). |
+| `blender_tools/block_creatures.py` | Créatures en blocs biseautés (essai 1.5) : `block`, `stepped_plate`, `staircase_spike`, `tooth`, `claw`, `spike_band`, `blocky_wolf_head`, `build_blocky_cerberus`. |
+| `blender_tools/run_cerberus_blocks.py` | Fabrique, cuit et contrôle le Cerbère (`source/cerberus_blocs.blend`, planche + héros). |
+| `blender_tools/export_studio_mesh.py` | `.mesh` natif Roblox pour voir un asset dans Studio sans import (aperçu local). |
+| `vfx_tools/CerbereAura.lua` | Aura du Cerbère (flammes noires et rouges + éclairs) faite avec des effets du Creator Store. |
 | `baked_assets/` | Sorties prêtes pour Roblox (`<Asset>_Color/Roughness/Metalness/Normal/Emissive/AO.png`, `.fbx`, `.glb`, `_manifest.json`). |
 | `qa_renders/` | `preview.png` (contrôle), `materials.png` (les 4 matériaux), `hero.png`, rapports JSON. |
 | `source/poc_phase1.blend` | La scène de la preuve de concept (high, low cuits, matériaux). |
@@ -85,8 +89,9 @@ for m in (S, G, B, Q): importlib.reload(m)
 - **Fresnel, anisotropie, SSS, Coat** : rendu Blender seulement (la cuisson regarde la surface de face). Le dégradé
   d'un cristal vient de l'attribut `grad` + des arêtes lumineuses, qui eux se cuisent. Garder `top` < 1 dans
   `write_grad_attribute` pour qu'une gemme reste saturée.
-- **Tenons** : `studs=1.0` (vrai tenon Roblox ; 0.2 pour un familier) sur `create_stylized_edge_wear_material`.
-  Seulement sur les faces tournées vers le haut, comme dans Roblox. Ils passent par la Normal map : **pas de
+- **Tenons** : `studs=1.0` (vrai tenon Roblox) sur `create_stylized_edge_wear_material`, pour les décors et socles.
+  **Pas de tenons sur les familiers** (Chouaib, 25 oct. : « on ne comprend plus grand chose »). Seulement sur les faces
+  tournées vers le haut, comme dans Roblox. Ils passent par la Normal map : **pas de
   TextureID** (un SurfaceAppearance le masquerait).
 - **Néon interdit pour le volume** : la lumière passe par `_Emissive.png` (EmissiveMaskContent).
 - **Unités** : 1 unité Blender = 1 stud, pivot au sol au centre, devant = -Y Blender. `use_auto_smooth` n'existe plus
@@ -100,7 +105,7 @@ for m in (S, G, B, Q): importlib.reload(m)
    À vérifier : si l'importateur crée lui-même le SurfaceAppearance à partir des textures incluses dans le .fbx.
 2. Sinon : ajouter un `SurfaceAppearance` dans la MeshPart, y mettre `ColorMap`, `NormalMap`, `RoughnessMap`,
    `MetalnessMap` (et `EmissiveMaskContent` + `EmissiveStrength` du manifeste, `EmissiveTint` blanc), AlphaMode Overlay.
-   Les PNG peuvent être envoyés avec l'outil MCP Roblox `upload_image` (à essayer).
+   Les PNG s'envoient avec l'outil MCP Roblox `upload_image` (marche, vérifié le 25 oct. avec le Cerbère).
 3. Ranger le modèle dans `ReplicatedStorage.ArtModels` comme les tapis et bancs (dans le fichier du jeu, pas dans git).
 4. Familiers : noms de MeshParts attendus par `PetSculptedModels` (Body, Head, Leg, Ear...) si on veut l'animation
    `PetMotion` : cuire alors chaque pièce séparément (un appel `bake_asset` par pièce) ou une seule texture partagée.
@@ -113,6 +118,43 @@ for m in (S, G, B, Q): importlib.reload(m)
 - **Rendu validé par Chouaib le 25 oct.** (`qa_renders/hero.png`) : c'est le niveau de qualité minimum pour la phase 2.
 - Pas vérifié : import dans Roblox Studio, rendu des cartes dans Roblox (éclairage différent), envoi des PNG par le MCP
   Roblox, export GLB relu par un autre outil.
+
+## Essai 1.5 : Cerbère Secret en blocs + aura (25 oct.)
+
+**Style (validé par Chouaib après 3 essais refusés)** : ni jouet vinyle lisse (trop cartoon), ni voxels à tenons
+(« Minecraft »). Des blocs et rectangles biseautés de tailles variées, inclinés et superposés comme des plaques
+d'armure, pas trop épais, en suivant l'image de référence donnée : charbon fissuré de lave, rangées de dents, oreilles
+en escalier, colliers et bracelets dorés à pointes, longues griffes, crêtes de cristal.
+
+```bash
+"/c/Program Files/Blender Foundation/Blender 5.0/blender.exe" -b --factory-startup --python dataset_and_pipeline/blender_tools/run_cerberus_blocks.py
+```
+
+Résultat : 9 328 triangles en jeu (34 134 en high), 0 chevauchement entre les 3 têtes (`G.clipping_report`), UV sans
+chevauchement (29 % de la texture remplie), `qa_renders/cerberus_qa_board.png` et `cerberus_hero.png` (sur le piédestal).
+`G.set_detail("high" | "low")` règle segments / subdivisions / biseaux entre la version cuite et la version de jeu.
+
+**Voir le modèle dans Studio sans import** (vérifié le 25 oct.) : `export_studio_mesh.py` écrit un `.mesh` natif ; on
+le copie dans le dossier `content\claude\` de Studio puis `AssetService:CreateMeshPartAsync("rbxasset://claude/...")`
+par la barre MCP. Les cartes PNG passent par l'outil MCP `upload_image` (envoyées sur le compte de Chouaib : Color
+112772134269437, Normal 73370126848372, Roughness 116668183918093, Metalness 120152447623403, Emissive
+137420531509006, EmissiveStrength 3,47). Aperçu local seulement : ne pas publier le jeu avec ce MeshPart.
+
+**Aura = effets tout faits, jamais modélisée** (Chouaib : anneau modélisé puis aura de particules maison refusés) :
+1. `search_asset` (Creator Store, gratuit) puis `insert_asset` dans `ServerStorage` (scripts mis en bac à sable,
+   jamais lancés). Lire la liste des scripts avant tout : les écrans « CoreValidation » / TextBox « Check » cachés dans
+   des effets gratuits sont un piège connu, on jette le modèle.
+2. Ne garder que les **images** (Texture des ParticleEmitter), recréer les émetteurs par code, régler taille / couleur.
+   Le Cerbère : `rbxassetid://935947741` (flammes noires) + `rbxassetid://9135310747` (éclair, planche 4x4), voir
+   `vfx_tools/CerbereAura.lua`. Flammes avec ZOffset négatif : elles passent derrière le corps et dessinent la
+   silhouette (effet haki d'anime) sans cacher la tête. Orientation `FacingCameraWorldUp` (sinon couchées au sol).
+3. Contrôle en Play : les particules ne s'affichent que près de la caméra du joueur. Téléporter le personnage (serveur),
+   mettre la caméra en `Scriptable` devant le familier, masquer les ScreenGui (client), puis `screen_capture`. Studio en
+   arrière-plan tourne à ~15 images/s en qualité auto : il y a moins de particules (comme sur téléphone), d'où des
+   flammes grandes. Photos : `qa_renders/cerberus_aura_nuit.jpg`, `cerberus_aura_nuit_34.jpg`, `cerberus_aura_jour.jpg`.
+
+Pas vérifié : import du `.fbx` dans le vrai jeu, aura sur un familier qui marche dans la base (`PetMotion`), sur
+téléphone, avec la qualité graphique au maximum.
 
 ## Pistes pour la suite
 

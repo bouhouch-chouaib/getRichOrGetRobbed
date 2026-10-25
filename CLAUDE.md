@@ -32,6 +32,11 @@ Après chaque `render_qa_grid` : **ouvrir `qa_renders/preview.png` avec l'outil 
 lueur = couleur de la surface (seule l'intensité varie), tenons par la Normal map (pas de TextureID), pas de Néon.
 Vérifié dans Blender, rendu validé par Chouaib (`qa_renders/hero.png` = niveau minimum attendu) ; **import Roblox pas
 encore testé**.
+**Essai 1.5 (25 oct.) : Cerbère Secret validé** (`blender_tools/block_creatures.py`, `run_cerberus_blocks.py`, 9 328 triangles) :
+familiers en blocs biseautés superposés, **sans tenons**, pas trop épais, en suivant l'image de référence (ni jouet lisse, ni
+voxels « Minecraft »). **Une aura ne se modélise jamais** : effets tout faits du Creator Store (on garde les images, jamais
+les scripts), recréés et réglés par code (`vfx_tools/CerbereAura.lua`). Aperçu dans Studio sans import par un `.mesh` dans
+le dossier content (`export_studio_mesh.py`). Méthode, pièges et photos : `PIPELINE.md` « Essai 1.5 ».
 
 ## L'utilisateur et la façon de travailler
 
