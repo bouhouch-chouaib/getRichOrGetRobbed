@@ -1,0 +1,105 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\RequinVolant_board.png",
+  "layout": {
+    "rows": [
+      "RequinVolant cuit, 4 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "RequinVolant cuit, 4 pièces (repos)",
+      "kind": "baked",
+      "triangles": 604,
+      "views": {
+        "face": {
+          "coverage": 0.082,
+          "lum_mean": 0.468,
+          "lum_std": 0.259,
+          "detail": 0.0435,
+          "saturation": 0.107,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.148,
+          "lum_mean": 0.502,
+          "lum_std": 0.222,
+          "detail": 0.048,
+          "saturation": 0.161,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.157,
+          "lum_mean": 0.488,
+          "lum_std": 0.188,
+          "detail": 0.0315,
+          "saturation": 0.198,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.374,
+          "lum_mean": 0.544,
+          "lum_std": 0.21,
+          "detail": 0.0215,
+          "saturation": 0.144,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 604,
+      "views": {
+        "face": {
+          "coverage": 0.084,
+          "lum_mean": 0.471,
+          "lum_std": 0.253,
+          "detail": 0.0434,
+          "saturation": 0.111,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.136,
+          "lum_mean": 0.485,
+          "lum_std": 0.216,
+          "detail": 0.0479,
+          "saturation": 0.165,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.146,
+          "lum_mean": 0.488,
+          "lum_std": 0.199,
+          "detail": 0.0326,
+          "saturation": 0.191,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.412,
+          "lum_mean": 0.509,
+          "lum_std": 0.233,
+          "detail": 0.0191,
+          "saturation": 0.138,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 20.2
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

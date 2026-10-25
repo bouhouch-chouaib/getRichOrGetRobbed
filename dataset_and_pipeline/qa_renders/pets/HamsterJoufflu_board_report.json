@@ -1,0 +1,105 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\HamsterJoufflu_board.png",
+  "layout": {
+    "rows": [
+      "HamsterJoufflu cuit, 5 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "HamsterJoufflu cuit, 5 pièces (repos)",
+      "kind": "baked",
+      "triangles": 616,
+      "views": {
+        "face": {
+          "coverage": 0.252,
+          "lum_mean": 0.565,
+          "lum_std": 0.236,
+          "detail": 0.0315,
+          "saturation": 0.324,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.282,
+          "lum_mean": 0.546,
+          "lum_std": 0.222,
+          "detail": 0.0419,
+          "saturation": 0.345,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.245,
+          "lum_mean": 0.502,
+          "lum_std": 0.175,
+          "detail": 0.0205,
+          "saturation": 0.437,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.732,
+          "lum_mean": 0.565,
+          "lum_std": 0.206,
+          "detail": 0.0214,
+          "saturation": 0.444,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 616,
+      "views": {
+        "face": {
+          "coverage": 0.237,
+          "lum_mean": 0.567,
+          "lum_std": 0.235,
+          "detail": 0.0331,
+          "saturation": 0.324,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.266,
+          "lum_mean": 0.55,
+          "lum_std": 0.22,
+          "detail": 0.0422,
+          "saturation": 0.346,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.234,
+          "lum_mean": 0.504,
+          "lum_std": 0.174,
+          "detail": 0.0214,
+          "saturation": 0.439,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.704,
+          "lum_mean": 0.568,
+          "lum_std": 0.202,
+          "detail": 0.0222,
+          "saturation": 0.441,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 17.9
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

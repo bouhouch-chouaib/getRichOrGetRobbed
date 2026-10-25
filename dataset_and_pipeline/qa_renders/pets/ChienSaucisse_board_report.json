@@ -1,0 +1,107 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\ChienSaucisse_board.png",
+  "layout": {
+    "rows": [
+      "ChienSaucisse cuit, 7 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "ChienSaucisse cuit, 7 pièces (repos)",
+      "kind": "baked",
+      "triangles": 900,
+      "views": {
+        "face": {
+          "coverage": 0.065,
+          "lum_mean": 0.304,
+          "lum_std": 0.141,
+          "detail": 0.0376,
+          "saturation": 0.284,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.129,
+          "lum_mean": 0.383,
+          "lum_std": 0.164,
+          "detail": 0.0504,
+          "saturation": 0.265,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.132,
+          "lum_mean": 0.376,
+          "lum_std": 0.126,
+          "detail": 0.0282,
+          "saturation": 0.29,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.471,
+          "lum_mean": 0.422,
+          "lum_std": 0.241,
+          "detail": 0.0222,
+          "saturation": 0.266,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 900,
+      "views": {
+        "face": {
+          "coverage": 0.046,
+          "lum_mean": 0.37,
+          "lum_std": 0.104,
+          "detail": 0.0404,
+          "saturation": 0.322,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.079,
+          "lum_mean": 0.425,
+          "lum_std": 0.116,
+          "detail": 0.0611,
+          "saturation": 0.297,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.085,
+          "lum_mean": 0.402,
+          "lum_std": 0.081,
+          "detail": 0.0344,
+          "saturation": 0.331,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.409,
+          "lum_mean": 0.51,
+          "lum_std": 0.209,
+          "detail": 0.0245,
+          "saturation": 0.288,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 16.0
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

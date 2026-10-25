@@ -1,0 +1,64 @@
+{
+  "asset": "AigleRoyal_Corps",
+  "triangles": 1044,
+  "vertices": 616,
+  "size_studs": [
+    0.969,
+    1.729,
+    1.61
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 58.8,
+  "source_materials": [
+    "M_AigleRoyal_high_bec",
+    "M_AigleRoyal_high_blanc",
+    "M_AigleRoyal_high_brun",
+    "M_AigleRoyal_high_brun_fonce",
+    "M_AigleRoyal_high_iris_#F2C230",
+    "M_AigleRoyal_high_or",
+    "M_AigleRoyal_high_pupille",
+    "M_AigleRoyal_high_reflet",
+    "M_AigleRoyal_high_serres"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0259,
+    "max_ray": 0.0648,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "AigleRoyal_Corps_Color.png",
+    "Roughness": "AigleRoyal_Corps_Roughness.png",
+    "Metalness": "AigleRoyal_Corps_Metalness.png",
+    "Normal": "AigleRoyal_Corps_Normal.png",
+    "AO": "AigleRoyal_Corps_AO.png",
+    "Emissive": "AigleRoyal_Corps_Emissive.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "AigleRoyal_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "AigleRoyal_Corps_Color.png",
+      "NormalMap": "AigleRoyal_Corps_Normal.png",
+      "RoughnessMap": "AigleRoyal_Corps_Roughness.png",
+      "MetalnessMap": "AigleRoyal_Corps_Metalness.png",
+      "EmissiveMaskContent": "AigleRoyal_Corps_Emissive.png",
+      "EmissiveTint": "#FFFFFF",
+      "EmissiveStrength": 0.4,
+      "coverage_pct": 9.25,
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 24.2
+}
