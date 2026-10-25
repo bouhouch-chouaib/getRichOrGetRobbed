@@ -1,0 +1,247 @@
+{
+  "pet": "CherubinHamster",
+  "model_height_blender": 0.9965,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 632,
+      "center": [
+        0.0,
+        -0.055,
+        0.56426
+      ],
+      "size": [
+        0.52943,
+        0.57,
+        0.89148
+      ],
+      "pivot": null
+    },
+    "Halo": {
+      "kind": "Toast",
+      "phase": 0.5,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 120,
+      "center": [
+        0.0,
+        -0.04,
+        1.1
+      ],
+      "size": [
+        0.34,
+        0.34808,
+        0.03
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.04
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.08
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "WingL": {
+      "kind": "Wing",
+      "phase": 1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 144,
+      "center": [
+        0.34918,
+        0.35583,
+        0.53831
+      ],
+      "size": [
+        0.35398,
+        0.3266,
+        0.29747
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.2
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.56
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "WingR": {
+      "kind": "Wing",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 144,
+      "center": [
+        -0.34918,
+        0.35583,
+        0.53831
+      ],
+      "size": [
+        0.35398,
+        0.3266,
+        0.29747
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.2
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.56
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "ArmL": {
+      "kind": "Arm",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 44,
+      "center": [
+        0.16,
+        -0.24,
+        0.46
+      ],
+      "size": [
+        0.08,
+        0.1,
+        0.12
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.18
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.16
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "ArmR": {
+      "kind": "Arm",
+      "phase": 3.1416,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 44,
+      "center": [
+        -0.16,
+        -0.24,
+        0.46
+      ],
+      "size": [
+        0.08,
+        0.1,
+        0.12
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.18
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.16
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.060212
+}

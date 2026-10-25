@@ -1,0 +1,109 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\SalamandreBraise_board.png",
+  "layout": {
+    "rows": [
+      "SalamandreBraise cuit, 8 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "SalamandreBraise cuit, 8 pièces (repos)",
+      "kind": "baked",
+      "triangles": 1340,
+      "views": {
+        "face": {
+          "coverage": 0.056,
+          "lum_mean": 0.334,
+          "lum_std": 0.224,
+          "detail": 0.055,
+          "saturation": 0.405,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.105,
+          "lum_mean": 0.35,
+          "lum_std": 0.23,
+          "detail": 0.0613,
+          "saturation": 0.438,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.09,
+          "lum_mean": 0.377,
+          "lum_std": 0.197,
+          "detail": 0.0455,
+          "saturation": 0.479,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.35,
+          "lum_mean": 0.386,
+          "lum_std": 0.189,
+          "detail": 0.0334,
+          "saturation": 0.547,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 1340,
+      "views": {
+        "face": {
+          "coverage": 0.058,
+          "lum_mean": 0.367,
+          "lum_std": 0.23,
+          "detail": 0.0656,
+          "saturation": 0.414,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.087,
+          "lum_mean": 0.363,
+          "lum_std": 0.223,
+          "detail": 0.0727,
+          "saturation": 0.45,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.077,
+          "lum_mean": 0.4,
+          "lum_std": 0.199,
+          "detail": 0.0543,
+          "saturation": 0.485,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.362,
+          "lum_mean": 0.356,
+          "lum_std": 0.209,
+          "detail": 0.0364,
+          "saturation": 0.503,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 25.1
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

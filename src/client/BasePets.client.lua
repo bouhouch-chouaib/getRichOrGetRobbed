@@ -366,7 +366,7 @@ local function gaitPose(shown: Shown, g: PetGaits.Gait, dt: number, now: number)
 	end
 	local diff = 0
 	if moving and length > 1e-3 then
-		local wanted = math.atan2(-direction.X, -direction.Y)
+		local wanted = math.atan2(-direction.X, -direction.Y) + (g.sideways or 0) -- le crabe se met de profil
 		diff = (wanted - shown.heading + math.pi) % (math.pi * 2) - math.pi
 		shown.heading += diff * math.min(1, dt * (g.turn or 6))
 	elseif g.spin then

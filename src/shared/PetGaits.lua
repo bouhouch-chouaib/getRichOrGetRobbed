@@ -34,6 +34,7 @@ export type Gait = {
 	wheel: boolean?, -- roule comme une roue le long du trajet
 	spin: number?, -- tourne sur lui-même au repos (rad / s)
 	turn: number?, -- vitesse pour se tourner vers sa destination
+	sideways: number?, -- angle ajouté au cap pendant les trajets (crabe : math.pi / 2, il marche de côté)
 	roam: number?, -- longueur maximale d'un trajet (studs) : les casaniers font de petits tours
 	-- gestes (PetMotion)
 	stride: number, -- cadence des pattes
@@ -307,6 +308,111 @@ PetGaits.ById = {
 	-- baleine galaxie : nage majestueuse dans le ciel, en grandes ondulations
 	BaleineGalaxie = gait({ speed = 3, minWait = 2, maxWait = 5, ease = "Smooth", hover = 4, float = 1, floatRate = 0.4,
 		sway = 0.6, swayLength = 10, bank = 0.25, turn = 1.2 }),
+
+	-- Mondes : Désert ---------------------------------------------------------------------------------------------
+	-- fennec : file à petits pas nerveux puis s'arrête net, renifle, grandes oreilles aux aguets
+	FennecLunettes = gait({ speed = 6.5, minWait = 0.5, maxWait = 3, ease = "Dash", roam = 12, step = 0.8, bob = 0.16,
+		roll = 0.04, turn = 10, stride = 2, swing = 1.1, head = "Sniff", tail = "Wag" }),
+	-- cactus cowboy : démarche de shérif, lente et chaloupée, puis s'arrête pour le duel
+	CactusCowboy = gait({ speed = 3, minWait = 2, maxWait = 6, ease = "Smooth", roam = 12, step = 1.2, bob = 0.05,
+		roll = 0.14, turn = 2.5, stride = 1, swing = 0.9 }),
+	-- scorpion : détale sur ses huit pattes et s'arrête net, la queue dressée
+	ScorpionSablier = gait({ speed = 6, minWait = 1, maxWait = 4, ease = "Dash", roam = 12, step = 0.4, bob = 0.02,
+		wiggle = 0.03, turn = 12, stride = 3, swing = 0.8, tail = "Stiff" }),
+	-- lézard momie : toujours pressé, sprints en S, le corps qui se tortille, bandelettes au vent
+	LezardMomie = gait({ speed = 8, minWait = 0.5, maxWait = 3, ease = "Dash", sway = 0.25, swayLength = 2, step = 0.6,
+		wiggle = 0.15, lean = -0.04, turn = 9, stride = 2.6, swing = 1.3, tail = "Swish", flicker = 1.5 }),
+	-- sphinx grognon : pas lents et hautains, longues poses, la queue qui claque d'agacement
+	SphinxGrognon = gait({ speed = 3, minWait = 4, maxWait = 9, ease = "Smooth", roam = 10, step = 1.6, bob = 0.04,
+		roll = 0.04, turn = 2, stride = 0.7, swing = 0.8, head = "Proud", tail = "Flick" }),
+
+	-- Mondes : Volcan ---------------------------------------------------------------------------------------------
+	-- salamandre : trottine au ras du sol en ondulant, la crête de flammes crépite
+	SalamandreBraise = gait({ speed = 4.5, minWait = 1, maxWait = 4, ease = "Linear", sway = 0.3, swayLength = 2.5,
+		step = 0.7, wiggle = 0.18, stride = 2.2, swing = 1.1, tail = "Swish", flicker = 2.5 }),
+	-- taupe : avance par poussées en creusant, renifle avec son nez étoilé
+	TaupeMagma = gait({ speed = 3, minWait = 1.5, maxWait = 5, ease = "Pulse", roam = 10, step = 0.6, bob = 0.06,
+		roll = 0.06, stride = 2, swing = 1.2, head = "Sniff" }),
+	-- golem de cendre : marche lente et pesante, la fumée monte doucement
+	GolemCendre = gait({ speed = 2, minWait = 3, maxWait = 7, ease = "Smooth", step = 1.6, bob = 0.08, roll = 0.1,
+		turn = 1.8, stride = 0.6, swing = 1, body = "Heavy", flicker = 0.8 }),
+	-- dragon barbecue : s'affaire comme un chef en cuisine, se dandine, ouvre grand la gueule
+	DragonBarbecue = gait({ speed = 4, minWait = 1, maxWait = 3.5, ease = "Smooth", roam = 10, step = 0.9, bob = 0.08,
+		roll = 0.1, stride = 1.4, swing = 1, head = "Roar", wing = "Flutter", tail = "Swish" }),
+	-- titan de lave : chaque pas fait trembler le volcan
+	TitanLave = gait({ speed = 2.5, minWait = 2, maxWait = 6, ease = "Linear", step = 2.2, bob = 0.16, roll = 0.08,
+		lean = -0.03, turn = 1.5, stride = 0.55, swing = 1.2, body = "Heavy", head = "Roar" }),
+
+	-- Mondes : Glace ----------------------------------------------------------------------------------------------
+	-- pingouin patineur : glisse en grandes courbes de patineur, fait la pirouette à l'arrêt
+	PingouinPatineur = gait({ speed = 6, minWait = 1, maxWait = 4, ease = "Smooth", sway = 0.5, swayLength = 3,
+		bank = 0.4, spin = 1.2, turn = 4, stride = 0.6, swing = 0.6, wing = "Flutter" }),
+	-- morse : avance en se hissant sur ses nageoires, par poussées, et bombe le torse
+	MorseMoustachu = gait({ speed = 2, minWait = 3, maxWait = 8, ease = "Pulse", roam = 8, step = 1.4, bob = 0.12,
+		rock = 0.1, turn = 2, body = "Heavy", head = "Proud" }),
+	-- yéti câlin : gros pas joyeux et dandinés, les bras ouverts
+	YetiCalin = gait({ speed = 3, minWait = 1.5, maxWait = 5, ease = "Linear", step = 1.6, bob = 0.14, roll = 0.12,
+		turn = 3, stride = 0.8, swing = 1.2 }),
+	-- mammouth : pas lents et lourds, la trompe qui se balance, hoche la tête
+	MammouthGlacon = gait({ speed = 2.2, minWait = 3, maxWait = 8, ease = "Smooth", step = 2, bob = 0.08, roll = 0.06,
+		turn = 1.5, stride = 0.6, swing = 0.9, body = "Heavy", head = "Nod" }),
+	-- narval : nage dans le ciel en grandes vagues, ses voiles d'aurore ondulent
+	NarvalAurore = gait({ speed = 4, minWait = 1, maxWait = 3, ease = "Smooth", hover = 4, float = 0.8, floatRate = 0.6,
+		sway = 0.5, swayLength = 7, bank = 0.3, turn = 2, flicker = 0.8 }),
+
+	-- Mondes : Abysses --------------------------------------------------------------------------------------------
+	-- poisson-lanterne disco : nage en se trémoussant au rythme de la fête
+	LanterneDisco = gait({ speed = 4, minWait = 1, maxWait = 3, ease = "Smooth", hover = 2.5, float = 0.25,
+		floatRate = 4, sway = 0.3, swayLength = 4, bank = 0.3, turn = 3, body = "Wobble" }),
+	-- méduse lampion : monte par battements de cloche et redescend lentement, dérive
+	MeduseLampion = gait({ speed = 2, minWait = 1, maxWait = 4, ease = "Pulse", hover = 3, float = 0.6, floatRate = 0.8,
+		drift = 0.3, turn = 1.5, body = "Pulse" }),
+	-- pieuvre pirate : démarche de marin sur un pont qui tangue
+	PieuvrePirate = gait({ speed = 3, minWait = 1.5, maxWait = 5, ease = "Linear", roam = 12, step = 1.2, bob = 0.06,
+		roll = 0.14, wiggle = 0.05, turn = 3 }),
+	-- calmar colosse : file par jets d'eau puis se laisse flotter
+	CalmarColosse = gait({ speed = 7, minWait = 1.5, maxWait = 4, ease = "Dash", hover = 3, float = 0.5, floatRate = 0.9,
+		bank = 0.3, turn = 3, body = "Pulse" }),
+	-- roi corail : marche de côté comme un vrai crabe, à petits pas pressés
+	RoiCorail = gait({ speed = 4, minWait = 1.5, maxWait = 5, ease = "Linear", sideways = math.pi / 2, step = 0.5,
+		bob = 0.04, roll = 0.04, turn = 6, stride = 2.6, swing = 0.9 }),
+
+	-- Mondes : Cosmos ---------------------------------------------------------------------------------------------
+	-- astro-hamster : court à toute vitesse dans sa roue en apesanteur
+	AstroHamster = gait({ speed = 5, minWait = 1, maxWait = 4, ease = "Linear", roam = 12, step = 0.5, bob = 0.03,
+		float = 0.15, floatRate = 1.4, turn = 4, stride = 3, swing = 1.3 }),
+	-- chat comète : file d'un bout à l'autre du ciel, pattes tendues, la traînée d'étoiles derrière
+	ChatComete = gait({ speed = 9, minWait = 1, maxWait = 4, ease = "Dash", hover = 2.5, float = 0.4, floatRate = 1.2,
+		lean = -0.1, bank = 0.5, turn = 5, airSwing = 0.8, tail = "Flow" }),
+	-- alien gélatine : glisse en tremblotant, se tortille pour imiter ce qu'il voit
+	AlienGelatine = gait({ speed = 3, minWait = 1, maxWait = 4, ease = "Smooth", roam = 10, step = 0.8, wiggle = 0.12,
+		roll = 0.1, turn = 5, stride = 1.2, body = "Squish" }),
+	-- lion nébuleuse : marche majestueuse sur le vide, rugit
+	LionNebuleuse = gait({ speed = 4.5, minWait = 1.5, maxWait = 5, ease = "Smooth", hover = 1, float = 0.3,
+		floatRate = 0.8, step = 2, bob = 0.08, roll = 0.06, turn = 3, stride = 0.9, swing = 1.1, airSwing = 1,
+		head = "Roar", tail = "Swish" }),
+	-- trou noir de poche : flotte, tourne lentement sur lui-même et dérive
+	TrouNoirPoche = gait({ speed = 3, minWait = 1, maxWait = 4, ease = "Smooth", hover = 2, float = 0.4, floatRate = 1.6,
+		spin = 0.6, drift = 0.2, body = "Pulse" }),
+
+	-- Mondes : Divin ----------------------------------------------------------------------------------------------
+	-- chérubin hamster : voltige à petits coups d'ailes rapides en jouant de la harpe
+	CherubinHamster = gait({ speed = 3.5, minWait = 1, maxWait = 4, ease = "Smooth", hover = 2.5, float = 0.4,
+		floatRate = 2.4, drift = 0.2, bank = 0.2, turn = 3, wing = "Buzz" }),
+	-- licorne céleste : galope sur ses nuages, juste au-dessus du sol
+	LicorneCeleste = gait({ speed = 6, minWait = 1, maxWait = 3, ease = "Smooth", hover = 1.5, float = 0.4,
+		floatRate = 0.8, step = 2.2, bob = 0.25, rock = 0.1, turn = 3, stride = 1.1, swing = 1.3, airSwing = 1.2,
+		head = "Proud", tail = "Flow" }),
+	-- griffon doré : se pose et observe fièrement, ne vole que pour changer de place
+	GriffonDore = gait({ speed = 7, minWait = 2, maxWait = 6, ease = "Smooth", hover = 5, perch = true, bank = 0.4,
+		turn = 3, head = "Proud", wing = "Slow", tail = "Swish" }),
+	-- titan auréole : marche solennelle, lévite à peine au-dessus du sol
+	TitanAureole = gait({ speed = 2.5, minWait = 2, maxWait = 6, ease = "Smooth", hover = 0.6, float = 0.25,
+		floatRate = 0.7, step = 1.8, bob = 0.06, roll = 0.03, turn = 2, stride = 0.6, swing = 0.6, airSwing = 0.6,
+		head = "Proud" }),
+	-- gardien du trou noir : vole lentement, immense, grands battements, rugit
+	GardienTrouNoir = gait({ speed = 5, minWait = 1, maxWait = 3, ease = "Smooth", hover = 4, float = 0.8, floatRate = 0.6,
+		bank = 0.5, turn = 2, airSwing = 0.3, head = "Roar", wing = "Slow", tail = "Flow" }),
 } :: { [string]: Gait }
 
 -- Fiche du familier (formes évoluées et mutations comprises : « <Id>__E2 », « <Id>__MGold »...), ou nil.

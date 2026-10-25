@@ -1,0 +1,335 @@
+{
+  "pet": "AlienGelatine",
+  "model_height_blender": 1.19,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 556,
+      "center": [
+        0.0,
+        0.0,
+        0.4
+      ],
+      "size": [
+        0.74,
+        0.7,
+        0.8
+      ],
+      "pivot": null
+    },
+    "Eye0": {
+      "kind": "Ear",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 68,
+      "center": [
+        -0.16,
+        -0.1125,
+        0.93
+      ],
+      "size": [
+        0.12,
+        0.125,
+        0.26
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.16
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.08
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Eye1": {
+      "kind": "Ear",
+      "phase": 0.5,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 68,
+      "center": [
+        -0.0,
+        -0.1125,
+        0.97
+      ],
+      "size": [
+        0.12,
+        0.125,
+        0.34
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.08
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Eye2": {
+      "kind": "Ear",
+      "phase": 1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 68,
+      "center": [
+        0.16,
+        -0.1125,
+        0.92
+      ],
+      "size": [
+        0.12,
+        0.125,
+        0.24
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.16
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.08
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Antenna1": {
+      "kind": "Leaf",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 68,
+      "center": [
+        -0.28475,
+        0.14144,
+        0.98471
+      ],
+      "size": [
+        0.2105,
+        0.11712,
+        0.41059
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.1
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Antenna0": {
+      "kind": "Leaf",
+      "phase": 2.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 68,
+      "center": [
+        0.28475,
+        0.14144,
+        0.98471
+      ],
+      "size": [
+        0.2105,
+        0.11712,
+        0.41059
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.1
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "ArmL": {
+      "kind": "Arm",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 66,
+      "center": [
+        0.40993,
+        -0.08804,
+        0.56443
+      ],
+      "size": [
+        0.29513,
+        0.17772,
+        0.34114
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.28
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.04
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.44
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "ArmR": {
+      "kind": "Arm",
+      "phase": 3.1416,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 24,
+      "center": [
+        -0.40138,
+        -0.08804,
+        0.52318
+      ],
+      "size": [
+        0.27803,
+        0.17772,
+        0.25864
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.28
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.04
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.44
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.05042
+}

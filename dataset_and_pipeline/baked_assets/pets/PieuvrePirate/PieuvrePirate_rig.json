@@ -1,0 +1,379 @@
+{
+  "pet": "PieuvrePirate",
+  "model_height_blender": 1.1605,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 756,
+      "center": [
+        0.11018,
+        -0.0775,
+        0.58025
+      ],
+      "size": [
+        0.95964,
+        0.865,
+        1.16049
+      ],
+      "pivot": null
+    },
+    "Tentacle0": {
+      "kind": "Tentacle",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 372,
+      "center": [
+        0.18805,
+        -0.41386,
+        0.49031
+      ],
+      "size": [
+        0.30409,
+        0.51428,
+        0.60465
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.099498
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.181731
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.28
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tentacle1": {
+      "kind": "Tentacle",
+      "phase": 0.8,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 348,
+      "center": [
+        0.4745,
+        -0.13649,
+        0.34067
+      ],
+      "size": [
+        0.52924,
+        0.2727,
+        0.29407
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.240209
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.051844
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.28
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tentacle2": {
+      "kind": "Tentacle",
+      "phase": 1.6,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 348,
+      "center": [
+        0.4745,
+        0.21649,
+        0.34067
+      ],
+      "size": [
+        0.52924,
+        0.2727,
+        0.29407
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.240209
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.131844
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.28
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tentacle3": {
+      "kind": "Tentacle",
+      "phase": 2.4,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 372,
+      "center": [
+        0.18805,
+        0.49386,
+        0.49031
+      ],
+      "size": [
+        0.30409,
+        0.51428,
+        0.60465
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.099498
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.261731
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.28
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tentacle4": {
+      "kind": "Tentacle",
+      "phase": 3.2,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 372,
+      "center": [
+        -0.18805,
+        0.49386,
+        0.49031
+      ],
+      "size": [
+        0.30409,
+        0.51428,
+        0.60465
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.099498
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.261731
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.28
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tentacle5": {
+      "kind": "Tentacle",
+      "phase": 4.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 348,
+      "center": [
+        -0.4745,
+        0.21649,
+        0.34067
+      ],
+      "size": [
+        0.52924,
+        0.2727,
+        0.29407
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.240209
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.131844
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.28
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tentacle6": {
+      "kind": "Tentacle",
+      "phase": 4.8,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 348,
+      "center": [
+        -0.4745,
+        -0.13649,
+        0.34067
+      ],
+      "size": [
+        0.52924,
+        0.2727,
+        0.29407
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.240209
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.051844
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.28
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tentacle7": {
+      "kind": "Tentacle",
+      "phase": 5.6,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 372,
+      "center": [
+        -0.18805,
+        -0.41386,
+        0.49031
+      ],
+      "size": [
+        0.30409,
+        0.51428,
+        0.60465
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.099498
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.181731
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.28
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.051702
+}

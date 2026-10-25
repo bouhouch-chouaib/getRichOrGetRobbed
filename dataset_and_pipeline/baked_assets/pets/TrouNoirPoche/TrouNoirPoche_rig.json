@@ -1,0 +1,115 @@
+{
+  "pet": "TrouNoirPoche",
+  "model_height_blender": 0.6236,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 812,
+      "center": [
+        0.0,
+        -0.034,
+        0.68422
+      ],
+      "size": [
+        0.52,
+        0.588,
+        0.62355
+      ],
+      "pivot": null
+    },
+    "Disk": {
+      "kind": "Orbit",
+      "phase": 0.9,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 792,
+      "center": [
+        -0.0,
+        0.0,
+        0.7
+      ],
+      "size": [
+        1.25149,
+        1.25175,
+        0.04
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.970296,
+          -0.241922,
+          0.0
+        ],
+        [
+          0.0,
+          0.241922,
+          0.970296,
+          0.7
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Debris": {
+      "kind": "Orbit",
+      "phase": -0.6,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 36,
+      "center": [
+        0.17756,
+        -0.04545,
+        0.69583
+      ],
+      "size": [
+        1.21469,
+        1.35628,
+        0.32996
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.7
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.096223
+}

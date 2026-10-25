@@ -1,0 +1,65 @@
+{
+  "asset": "PingouinPatineur_Corps",
+  "triangles": 996,
+  "vertices": 578,
+  "size_studs": [
+    1.0,
+    0.797,
+    1.08
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 64.6,
+  "source_materials": [
+    "M_PingouinPatineur_high_bec",
+    "M_PingouinPatineur_high_blanc_oeil",
+    "M_PingouinPatineur_high_dos",
+    "M_PingouinPatineur_high_echarpe",
+    "M_PingouinPatineur_high_iris#1A1A2A",
+    "M_PingouinPatineur_high_joues",
+    "M_PingouinPatineur_high_justaucorps",
+    "M_PingouinPatineur_high_lames",
+    "M_PingouinPatineur_high_medaille",
+    "M_PingouinPatineur_high_paillettes",
+    "M_PingouinPatineur_high_patins",
+    "M_PingouinPatineur_high_pupille",
+    "M_PingouinPatineur_high_reflet",
+    "M_PingouinPatineur_high_ventre"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0162,
+    "max_ray": 0.0405,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "PingouinPatineur_Corps_Color.png",
+    "Roughness": "PingouinPatineur_Corps_Roughness.png",
+    "Metalness": "PingouinPatineur_Corps_Metalness.png",
+    "Normal": "PingouinPatineur_Corps_Normal.png",
+    "AO": "PingouinPatineur_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "PingouinPatineur_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "PingouinPatineur_Corps_Color.png",
+      "NormalMap": "PingouinPatineur_Corps_Normal.png",
+      "RoughnessMap": "PingouinPatineur_Corps_Roughness.png",
+      "MetalnessMap": "PingouinPatineur_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 27.6
+}

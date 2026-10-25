@@ -1,0 +1,64 @@
+{
+  "asset": "PieuvrePirate_Corps",
+  "triangles": 3636,
+  "vertices": 2054,
+  "size_studs": [
+    1.478,
+    1.422,
+    1.16
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 33.2,
+  "source_materials": [
+    "M_PieuvrePirate_high_blanc_oeil",
+    "M_PieuvrePirate_high_bouche#2A1418",
+    "M_PieuvrePirate_high_coffre",
+    "M_PieuvrePirate_high_iris#2A8A4A",
+    "M_PieuvrePirate_high_lames",
+    "M_PieuvrePirate_high_or",
+    "M_PieuvrePirate_high_pieuvre",
+    "M_PieuvrePirate_high_pupille",
+    "M_PieuvrePirate_high_reflet",
+    "M_PieuvrePirate_high_taches",
+    "M_PieuvrePirate_high_tete_de_mort",
+    "M_PieuvrePirate_high_tricorne",
+    "M_PieuvrePirate_high_ventouses"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0222,
+    "max_ray": 0.0554,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "PieuvrePirate_Corps_Color.png",
+    "Roughness": "PieuvrePirate_Corps_Roughness.png",
+    "Metalness": "PieuvrePirate_Corps_Metalness.png",
+    "Normal": "PieuvrePirate_Corps_Normal.png",
+    "AO": "PieuvrePirate_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "PieuvrePirate_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "PieuvrePirate_Corps_Color.png",
+      "NormalMap": "PieuvrePirate_Corps_Normal.png",
+      "RoughnessMap": "PieuvrePirate_Corps_Roughness.png",
+      "MetalnessMap": "PieuvrePirate_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 66.9
+}

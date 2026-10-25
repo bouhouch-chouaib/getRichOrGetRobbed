@@ -1,0 +1,105 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\TrouNoirPoche_board.png",
+  "layout": {
+    "rows": [
+      "TrouNoirPoche cuit, 3 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "TrouNoirPoche cuit, 3 pièces (repos)",
+      "kind": "baked",
+      "triangles": 1640,
+      "views": {
+        "face": {
+          "coverage": 0.086,
+          "lum_mean": 0.342,
+          "lum_std": 0.265,
+          "detail": 0.0975,
+          "saturation": 0.166,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.112,
+          "lum_mean": 0.393,
+          "lum_std": 0.27,
+          "detail": 0.1225,
+          "saturation": 0.172,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.08,
+          "lum_mean": 0.339,
+          "lum_std": 0.25,
+          "detail": 0.0876,
+          "saturation": 0.168,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.491,
+          "lum_mean": 0.441,
+          "lum_std": 0.243,
+          "detail": 0.07,
+          "saturation": 0.211,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 1640,
+      "views": {
+        "face": {
+          "coverage": 0.086,
+          "lum_mean": 0.342,
+          "lum_std": 0.265,
+          "detail": 0.0975,
+          "saturation": 0.166,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.112,
+          "lum_mean": 0.393,
+          "lum_std": 0.27,
+          "detail": 0.1225,
+          "saturation": 0.172,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.08,
+          "lum_mean": 0.339,
+          "lum_std": 0.25,
+          "detail": 0.0876,
+          "saturation": 0.168,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.491,
+          "lum_mean": 0.441,
+          "lum_std": 0.243,
+          "detail": 0.07,
+          "saturation": 0.211,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 33.0
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

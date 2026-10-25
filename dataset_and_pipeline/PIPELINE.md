@@ -214,7 +214,12 @@ saturées pour enfants, **jamais d'aura**.
 
 Lots : `Lot01_Animaux` (15), `Lot02_Fantastiques` (15), `Lot03_Plantes` (15 ; aides `leaf`, `pot`, `petals`),
 `Lot04_Hybrides` (15 ; aides `gear`, `speaker`, `treads`), `Lot05_Absurdes` (15, **sans aucune lueur** : finitions
-`gold`, `chrome`, `gem`, `pearl`, `enamel` du kit). Reste : Mondes.
+`gold`, `chrome`, `gem`, `pearl`, `enamel` du kit), `Lot06_Mondes` (15 : Désert, Volcan, Glace) et `Lot07_Mondes` (15 :
+Abysses, Cosmos, Divin), sans lueur aussi. Pièges vus sur les Mondes : un casque en cristal plein cache le visage (le
+cristal est opaque une fois cuit : casque ouvert devant) ; une couche d'octogone tournée de 45° doit faire 0,7 fois la
+couche droite, sinon ses coins passent devant le visage, et un peu plus haute (deux briques superposées de même
+épaisseur ont des faces confondues qui cuisent en NOIR : étoiles en deux carrés, octogones) ; une pièce qui tourne (`Orbit`, `Drum`) ne suit pas une tige
+animée (garder la tige fixe) ; `Drum` tourne autour de l'axe avant-arrière du pivot (roue de hamster : `rot=(0, 0, 90)`).
 
 ## Pistes pour la suite
 

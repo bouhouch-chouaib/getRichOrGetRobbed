@@ -1,0 +1,203 @@
+{
+  "pet": "MorseMoustachu",
+  "model_height_blender": 0.87,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 124,
+      "center": [
+        0.0,
+        0.08,
+        0.385
+      ],
+      "size": [
+        0.78,
+        0.9,
+        0.67
+      ],
+      "pivot": null
+    },
+    "Head": {
+      "kind": "Head",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 776,
+      "center": [
+        0.0,
+        -0.46561,
+        0.425
+      ],
+      "size": [
+        0.52,
+        0.57121,
+        0.87
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.52
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "FinL": {
+      "kind": "Fin",
+      "phase": 1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 40,
+      "center": [
+        0.44943,
+        -0.24,
+        0.05
+      ],
+      "size": [
+        0.29921,
+        0.26,
+        0.10945
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.34
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "FinR": {
+      "kind": "Fin",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 40,
+      "center": [
+        -0.44943,
+        -0.24,
+        0.05
+      ],
+      "size": [
+        0.29921,
+        0.26,
+        0.10945
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.34
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tail": {
+      "kind": "Tail",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 24,
+      "center": [
+        0.0,
+        0.66,
+        0.04
+      ],
+      "size": [
+        0.68399,
+        0.32813,
+        0.05
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.068966
+}

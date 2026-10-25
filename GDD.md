@@ -422,7 +422,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   pièces (recette : `dataset_and_pipeline/PIPELINE.md`, « Tous les familiers en briques LEGO, par lots »). Faits : les 15
   Animaux (`Lot01_Animaux`), les 15 Fantastiques (`Lot02_Fantastiques`) et le Cerbère Infernal ; ils sont dans
   `ReplicatedStorage.ArtModels.<Id>` (fichier du jeu). Les 15 Plantes sont en jeu (`Lot03_Plantes`) ; les 15 Hybrides
-  sont en jeu aussi (`Lot04_Hybrides`) ; les 15 Absurdes aussi (`Lot05_Absurdes`). Reste : les familiers des Mondes.
+  sont en jeu aussi (`Lot04_Hybrides`) ; les 15 Absurdes aussi (`Lot05_Absurdes`). Les 30 familiers des Mondes sont
+  faits (`Lot06_Mondes` : Désert, Volcan, Glace ; `Lot07_Mondes` : Abysses, Cosmos, Divin), sans lueur, avec leur
+  démarche ; à importer et brancher dans Studio. Le roi corail marche de côté (`sideways` dans sa fiche).
 - **Rareté sans néon** (25 oct.) : plus de lueur sur les familiers ; la rareté se lit à la matière (plastique, émail,
   chrome et cristal, or martelé, nacre, or blanc, or massif), ce qui évite aussi tout envoi d'image sur le compte.
 - Plus de cercle lumineux au sol sous les familiers Épique+ ni d'anneau sous les évolués (Chouaib, 25 oct.).

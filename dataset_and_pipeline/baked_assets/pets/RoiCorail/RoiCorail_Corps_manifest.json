@@ -1,0 +1,62 @@
+{
+  "asset": "RoiCorail_Corps",
+  "triangles": 1172,
+  "vertices": 708,
+  "size_studs": [
+    1.461,
+    1.163,
+    1.114
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 53.1,
+  "source_materials": [
+    "M_RoiCorail_high_blanc_oeil",
+    "M_RoiCorail_high_bouche#2A1418",
+    "M_RoiCorail_high_cape",
+    "M_RoiCorail_high_carapace",
+    "M_RoiCorail_high_carapace_fonce",
+    "M_RoiCorail_high_corail_orange",
+    "M_RoiCorail_high_corail_rose",
+    "M_RoiCorail_high_or_massif",
+    "M_RoiCorail_high_pupille",
+    "M_RoiCorail_high_ventre"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0219,
+    "max_ray": 0.0548,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "RoiCorail_Corps_Color.png",
+    "Roughness": "RoiCorail_Corps_Roughness.png",
+    "Metalness": "RoiCorail_Corps_Metalness.png",
+    "Normal": "RoiCorail_Corps_Normal.png",
+    "AO": "RoiCorail_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "RoiCorail_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "RoiCorail_Corps_Color.png",
+      "NormalMap": "RoiCorail_Corps_Normal.png",
+      "RoughnessMap": "RoiCorail_Corps_Roughness.png",
+      "MetalnessMap": "RoiCorail_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 55.8
+}

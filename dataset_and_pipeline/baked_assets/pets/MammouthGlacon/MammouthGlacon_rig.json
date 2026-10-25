@@ -1,0 +1,291 @@
+{
+  "pet": "MammouthGlacon",
+  "model_height_blender": 1.33,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 704,
+      "center": [
+        0.0,
+        0.19529,
+        0.4937
+      ],
+      "size": [
+        1.08149,
+        1.28058,
+        1.0874
+      ],
+      "pivot": null
+    },
+    "Head": {
+      "kind": "Head",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 384,
+      "center": [
+        0.0,
+        -0.58423,
+        0.93568
+      ],
+      "size": [
+        0.5,
+        0.76846,
+        0.68864
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.28
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.82
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "EarL": {
+      "kind": "Ear",
+      "phase": 1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 44,
+      "center": [
+        0.28,
+        -0.36,
+        1.0
+      ],
+      "size": [
+        0.08,
+        0.14,
+        0.16
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.25
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.36
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.04
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "EarR": {
+      "kind": "Ear",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 44,
+      "center": [
+        -0.28,
+        -0.36,
+        1.0
+      ],
+      "size": [
+        0.08,
+        0.14,
+        0.16
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.25
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.36
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.04
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Trunk": {
+      "kind": "Tentacle",
+      "phase": 0.4,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 112,
+      "center": [
+        0.02088,
+        -0.6883,
+        0.53418
+      ],
+      "size": [
+        0.16175,
+        0.20425,
+        0.70683
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.64
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.86
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LegFL": {
+      "kind": "Leg",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 88,
+      "center": [
+        0.2,
+        -0.27,
+        0.255
+      ],
+      "size": [
+        0.2,
+        0.22,
+        0.51
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.26
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LegFR": {
+      "kind": "Leg",
+      "phase": 3.1416,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 88,
+      "center": [
+        -0.2,
+        -0.27,
+        0.255
+      ],
+      "size": [
+        0.2,
+        0.22,
+        0.51
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.26
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.045113
+}

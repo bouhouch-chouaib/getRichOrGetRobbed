@@ -1,0 +1,203 @@
+{
+  "pet": "NarvalAurore",
+  "model_height_blender": 1.1055,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 800,
+      "center": [
+        0.0,
+        -0.17572,
+        0.585
+      ],
+      "size": [
+        0.58,
+        1.93144,
+        0.65
+      ],
+      "pivot": null
+    },
+    "Aurora": {
+      "kind": "Leaf",
+      "phase": 0.7,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 156,
+      "center": [
+        0.03394,
+        -0.7284,
+        1.11337
+      ],
+      "size": [
+        0.35151,
+        0.57265,
+        0.50422
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.06
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.96
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.84
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "FinL": {
+      "kind": "Fin",
+      "phase": 1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 24,
+      "center": [
+        0.38329,
+        -0.2475,
+        0.3653
+      ],
+      "size": [
+        0.30559,
+        0.235,
+        0.16019
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.27
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "FinR": {
+      "kind": "Fin",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 24,
+      "center": [
+        -0.38329,
+        -0.2475,
+        0.3653
+      ],
+      "size": [
+        0.30559,
+        0.235,
+        0.16019
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.27
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tail": {
+      "kind": "SwimTail",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 68,
+      "center": [
+        0.0,
+        0.93925,
+        0.54
+      ],
+      "size": [
+        0.72455,
+        0.3585,
+        0.16
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.78
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.54
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.054275
+}
