@@ -610,6 +610,17 @@ local function loadPlayer(player: Player)
 			data.starter = StarterJourney.Restore(if type(saved) == "table" then (saved :: { [string]: any }).starter else nil, saved == nil)
 			data.onboarding = OnboardingAnalytics.Restore(if type(saved) == "table" then (saved :: { [string]: any }).onboarding else nil, saved == nil)
 			refreshPerks(player, data)
+			-- Résumé d'absence (client/NextGoals) : œufs prêts à éclore et tentatives de la capsule arrivées pendant
+			-- l'absence (les œufs et la capsule avancent hors ligne) : la raison de revenir.
+			local readyEggs, attempts, time = 0, 0, os.time()
+			for _, egg in ipairs(data.eggs) do
+				if egg.evolve then
+					attempts += if not egg.evolve.done and egg.evolve.nextAt <= time then 1 else 0
+				elseif egg.readyAt <= time then
+					readyEggs += egg.count
+				end
+			end
+			player:SetAttribute("AwaySummary", if readyEggs + attempts > 0 then readyEggs .. "," .. attempts else nil)
 			data.loaded = true
 			OnboardingAnalytics.Loaded(player, data.onboarding)
 			applySpeed(player, statValue(data, "Speed"))

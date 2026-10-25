@@ -81,4 +81,27 @@ table.insert(log, { at = 1300, thief = 9 })
 assert(not CrownRules.CanReward(log, 10, 1400), "au plus 3 défenses récompensées par heure")
 assert(CrownRules.CanReward(log, 10, 1000 + 3600), "une heure après la première")
 
-print("PASS: plafond de revenu, rareté à obtenir, vol utile, durée du verrou à cycle, couronne")
+-- Pile « prochain objectif » (shared/NextGoals, règle 12) : le plus proche dans le temps, puis le plus avancé des autres.
+local NextGoals = load("NextGoals")
+local state = {
+	money = 150e3, income = 1000, tier = 1, rebirths = 0, pity = 90, pityAt = 100, pityTarget = 6, pullsPerRound = 5,
+	capsuleWait = 30, discovered = 40, totalPets = 106, cappedName = nil, cappedSelfBest = 3, cappedUnlock = nil,
+}
+local goals = NextGoals.List(state)
+local byId = {}
+for _, goal in ipairs(goals) do
+	byId[goal.id] = goal
+end
+assert(byId.world and byId.world.label == "MONDE DÉSERT" and math.abs(byId.world.progress - 0.75) < 1e-9, "prochain monde à 75 %")
+assert(math.abs(byId.world.eta - 50) < 1e-9, "50K manquants à 1K/s = 50 s")
+assert(byId.pity and byId.pity.label == "MYTHIQUE GARANTI DANS 10 TIRAGES", "pitié : " .. tostring(byId.pity and byId.pity.label))
+assert(byId.capsule and byId.capsule.eta == 30 and byId.index and not byId.capped, "capsule et Index")
+local picked = NextGoals.Pick(goals)
+assert(#picked == 2 and picked[1].id == "capsule" and picked[2].id == "pity", "le plus proche (capsule 30 s) puis le plus avancé (pitié 90 %)")
+state.tier = #Config.Worlds
+assert(NextGoals.List(state)[1].label == "REBIRTH 1", "au dernier monde : le Rebirth")
+state.cappedName, state.cappedUnlock = "Le Capybara Zen", rarity("Mythique")
+local last = NextGoals.List(state)
+assert(last[#last].id == "capped" and last[#last].label == "LE CAPYBARA ZEN BRIDÉ : OBTIENS UN MYTHIQUE", "familier bridé")
+
+print("PASS: plafond de revenu, rareté à obtenir, vol utile, durée du verrou à cycle, couronne, prochain objectif")

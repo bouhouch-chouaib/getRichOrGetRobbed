@@ -2,7 +2,8 @@
 
 **État au 25 oct. 2026 : étapes 1 à 5 faites. Dans le jeu : premier lot (règles 3, 5, 6, 11, 13 et la batte, voir
 5.3), deuxième lot (verrou à cycle, bouclier, plafond, vol utile, voir 5.5), Rebirth (règles 15 et 16, voir 5.6) et
-couronne du plus riche (règle 9, voir 5.7).** Restent à faire : pile d'objectifs (12), amis (17 à 19), et au choix 10 et 14. Rien n'a encore été
+couronne du plus riche (règle 9, voir 5.7) et pile « prochain objectif » (règle 12, voir 5.8).** Restent à faire : jeu
+entre amis (17 à 19), et au choix 10 et 14. Rien n'a encore été
 vérifié dans Studio. **Rien n'a encore été changé dans le jeu** :
 les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
@@ -837,3 +838,19 @@ le choix du roi, la marge de 10 % et les limites de récompense). **Pas vérifi�
 2 joueurs (Test > Clients et serveurs) : couronne au-dessus de la tête et sur la base, changement de roi, prime du
 voleur, défense du roi (Reprendre ou batte) et ses limites. Après l'ajout de nouveaux fichiers, vérifier qu'il n'y a pas
 de scripts en double dans Studio (déjà arrivé, voir CLAUDE.md).
+
+## 5.8 Appliqué dans le jeu le 25 oct. (pile « prochain objectif » : règle 12)
+
+| Où | Ce qui change |
+| --- | --- |
+| nouveau `shared/NextGoals` (calcul pur) | la liste des objectifs entamés, avec avancée et temps restant : prochain monde (ou Rebirth au dernier monde), pitié (« MYTHIQUE GARANTI DANS 10 TIRAGES »), prochaine tentative de la capsule, Index (40 / 106), familier bridé à libérer (« LE CAPYBARA ZEN BRIDÉ : OBTIENS UN MYTHIQUE ») ; on en montre deux : celui qui arrivera le plus tôt, puis le plus avancé des autres |
+| nouveau `client/NextGoals` | deux lignes avec une barre dans la pile sous l'horloge (sous le compte à rebours ANTI-VOL / BOUCLIER) : « MONDE DÉSERT • 75 % • 50 s » |
+| `server/SessionData` (au chargement), `client/NextGoals` | résumé d'absence : « PENDANT TON ABSENCE : 3 ŒUFS ONT ÉCLOS • TA CAPSULE A 2 TENTATIVES D'ÉVOLUTION » (œufs et capsule avancent hors ligne) |
+
+Temps restants : argent manquant / revenu ; pitié = tirages restants / tirages de la dernière manche x 105 s ; capsule =
+heure de la prochaine tentative publiée par la capsule.
+
+Vérifié : analyse Luau sans erreur, `rojo build` réussi, les 10 tests Lune passent (`check-steal-rules` teste maintenant
+les objectifs : 75 % du Désert en 50 s, la pitié, le choix des deux objectifs, le Rebirth au dernier monde, le familier
+bridé, accents compris). **Pas vérifié (Studio)** : la place de la pile à l'écran (PC et téléphone, aperçu
+`DebugPhone`), les deux lignes qui changent au fil de la partie, le résumé d'absence en revenant après une éclosion.
