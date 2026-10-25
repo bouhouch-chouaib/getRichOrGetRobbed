@@ -212,5 +212,5 @@ Mammouth Glaçon, Narval Aurore). 17 décors dans `blender_tools/environment_gla
 - Vérifié en Play (solo, monde changé côté client) : à la Glace, GlaceLook visible (les 3 autres cachés), 33 lumières de
   la Glace allumées et les 37 du Volcan éteintes, vieux cristaux retirés ; photos `qa_renders/map_roblox_glace_nuit.jpg`,
   `map_roblox_glace_lac_jour.jpg`. Le lac (bleu pâle) se voyait à peine sur la neige : recoloré en bleu soutenu
-  (110, 190, 240), pas encore revu en Play.
-- À proposer : saturation de l'air de la Glace 0,05 -> 0,12 (`shared/Worlds`), la neige paraît terne sinon.
+  (110, 190, 240). Saturation de l'air de la Glace passée de 0,05 à 0,12 (`shared/Worlds`, accord de Chouaib) : vérifié
+  en Play (ColorCorrection à 0,12 au monde Glace, glaciers plus bleus, lac bien visible).

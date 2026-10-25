@@ -78,7 +78,8 @@ Worlds.Looks = {
 			WoodRail = rgb(120, 170, 220), WoodPost = rgb(80, 120, 170), WoodCap = rgb(255, 255, 255),
 			Trunk = rgb(110, 80, 60), LeavesA = rgb(60, 130, 100), LeavesB = rgb(40, 110, 86), LeavesC = rgb(250, 252, 255),
 		},
-		Ambience = { AirColor = rgb(220, 240, 255), AirDecay = rgb(150, 190, 230), AirDensity = 0.32, Tint = rgb(225, 240, 255), Saturation = 0.05, CloudColor = rgb(240, 248, 255), CloudCover = 0.7, Particles = "Snow" },
+		-- saturation 0,12 (avant 0,05 : la neige paraissait terne ; map_art_bible_glace.json, 25 oct.)
+		Ambience = { AirColor = rgb(220, 240, 255), AirDecay = rgb(150, 190, 230), AirDensity = 0.32, Tint = rgb(225, 240, 255), Saturation = 0.12, CloudColor = rgb(240, 248, 255), CloudCover = 0.7, Particles = "Snow" },
 		Decor = "IceCrystal",
 	},
 	Abysses = {
