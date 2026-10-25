@@ -1,8 +1,8 @@
 # Rapport économique (phase 1.7)
 
-**État au 25 oct. 2026 : étapes 1 (audit), 2 (courbe coûts / revenus, défenses), 3 (risque du vol,
-anti-boule de neige) et 4 (rétention, Rebirth, amis) faites.** L'étape 5 (simulateur à plusieurs joueurs, puis
-`Config.lua` et le code) vient ensuite. **Rien n'a encore été changé dans le jeu** :
+**État au 25 oct. 2026 : étapes 1 à 4 faites ; étape 5 : simulateur à 8 joueurs fait, premier lot de règles appliqué
+dans le jeu (règles 3, 5, 6, 11, 13 et la batte, voir 5.3).** Les règles qui changent qui se fait voler (verrou,
+bouclier, plafond, vol utile) attendent la décision de Chouaib (5.4). Rien n'a encore été vérifié dans Studio. **Rien n'a encore été changé dans le jeu** :
 les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
 Règle suivie : aucun chiffre « au doigt mouillé ». Tout ce qui suit vient du code ou d'un calcul refaisable.
@@ -557,11 +557,15 @@ l'effondrement). Mais leur rythme dépend de la Chance des joueurs. Durée d'un 
 
 | Joueurs en sont à | seul | 4 joueurs | 8 joueurs |
 | --- | --- | --- | --- |
-| 10 min | 71 min | 41 min | 31 min |
-| 1 h | 21 min | 12 min | 9 min |
-| 10 h | 11 min | 6 min | 5 min |
+| 10 min | 37 min | 21 min | 16 min |
+| 1 h | 16 min | 9 min | 7 min |
+| 10 h | 10 min | 6 min | 4 min |
 
-En fin de partie, les 7 paliers passent en 5 min : moins d'une manche (105 s) chacun. On n'a même pas le temps de
+*(Corrigé à l'étape 5 : le jeu compte au moins 1 point de jauge par objet, `math.max(1, valeur)` dans
+`BlackholeTiers.OnScored` ; la première version de ce tableau comptait la valeur brute et donnait des tours 1,1 à
+2,5 fois trop longs. La règle 13 n'en dépend pas : elle compte déjà 1 par objet ordinaire.)*
+
+En fin de partie, les 7 paliers passent en 4 min : moins d'une manche (105 s) chacun. On n'a même pas le temps de
 voir la mécanique d'un palier qu'il a déjà changé.
 
 **Règle 13. Jauge du trou en « objets », pas en valeur.** Chaque objet avalé compte sa valeur divisée par la valeur
@@ -652,3 +656,114 @@ Rien n'est codé : cette table sert à l'étape 5, après la preuve par le simul
 positions, les vols et les règles 2 à 19. On mesure les vols réussis, les pertes, l'écart entre le plus riche et les
 autres, et le temps jusqu'aux mondes pour chaque profil. Ensuite seulement : `Config.lua`, `game_design_matrix.json`
 (et son générateur, qui lit de mauvaises valeurs) et le code Luau, règle par règle, chacune testée.
+
+---
+
+# Étape 5 : le serveur à 8 joueurs, puis les premières règles dans le jeu
+
+## 5.1 Le simulateur de serveur
+
+`dataset_and_pipeline/economy_server.py`, lancé par `python -I dataset_and_pipeline/economy_simulator.py serveur`
+(scénarios détaillés) ou `balayage` (`--second` pour le second balayage).
+
+- Chaque joueur est une partie complète du simulateur solo (tirages, œufs, capsule, Boutique, mondes, Rebirth). Les
+  vétérans sont des parties jouées seul jusqu'à leur ancienneté (1 à 12 h), copiées dans le serveur.
+- Chaque manche a deux phases (Feeding, digestion). Les voleurs choisissent le vol qui rapporte le plus en moyenne
+  (chance de réussite x gain), parmi les bases ouvertes et non protégées.
+- La réussite vient des tables de poursuite des étapes 1 et 3 : rareté, endroit où est le propriétaire, écart entre les
+  bases, niveau d'entraînement des deux, grappin, attention du propriétaire, ami de la victime.
+- Mesure principale : **base / seul** = valeur de la base (somme des revenus des familiers, sans monde ni Rebirth) en
+  fin de session, divisée par celle de la même partie jouée seule sans vols. 1,00 = les vols n'ont rien changé.
+- Scénarios : « mixte » (nouveau, voleur 1 h, prudent 2 h, duo 2 h, prudent 5 h, voleur 8 h, prudent 12 h) ; « nouveau
+  chez les vétérans » (un nouveau, 7 joueurs de 5 à 12 h) ; « duo de nouveaux » (2 amis nouveaux, 2 nouveaux seuls,
+  4 joueurs de 2 à 5 h).
+
+**Hypothèses de comportement** (aucune donnée réelle encore : à remplacer par Roblox Analytics après la sortie) :
+
+| Profil | Où pendant la digestion | Attention à l'alerte de vol | Verrou | Vols tentés |
+| --- | --- | --- | --- | --- |
+| prudent | base 60 %, tapis 40 % | 9 fois sur 10 | quand il est chez lui | jamais |
+| voleur | part voler | 1 fois sur 2 | pendant qu'il vole | 1 par digestion, 1 Feeding sur 2 (~50 / h) |
+| nouveau | tapis, kiosque, base | 1 fois sur 2 | 1 fois sur 3 | 1 digestion sur 3 |
+| duo | partent voler ensemble | 6 fois sur 10 | pendant qu'ils volent | 1 par digestion, l'autre escorte |
+
+Pendant le Feeding, chacun lance : depuis sa base dès le niveau « moyen » (stations au niveau 8), sinon près du trou.
+Le grappin est acheté dès 300K $ ; on suppose qu'un tir touche 6 fois sur 10 avec les règles proposées (cône de 8°),
+toujours avec les règles actuelles (cône de 14°).
+
+## 5.2 Résultats (30 serveurs, sessions de 1 h)
+
+| Réglages | nouveau chez les vétérans : base / seul, jackpots | prudent 12 h : base / seul, vols subis / h | voleur 8 h : base / seul, réussis / h | duo de nouveaux | écart riche / médiane |
+| --- | --- | --- | --- | --- | --- |
+| **règles actuelles** | x1,86, **5,3** | x0,99, 0,5 | x1,00, 30 | x2,7 | 2,34 |
+| **règles proposées (étapes 2 à 4)** | x2,0 à x3,6, 0,3 à 0,4 | **x0,77**, 2,3 | x1,3, 17 | x23 à x25 | 1,9 |
+| fenêtre ouverte 30 s au lieu de 60 | x1,09, 0,1 | x0,63, 3,1 | x1,72, 11 | x8 | 2,34 |
+| bouclier 20 % cumulés en 10 min -> 5 min | x1,98, 0,3 | x0,73, 2,9 | x1,66, 13 | x20 | 1,77 |
+| **bouclier 10 % perdus en 1 h -> 30 min** | **x1,72, 0,07** | x0,77, 3,5 | x1,34, 6,7 | x10 | 2,30 |
+| bouclier 15 % en 1 h -> 15 min | x2,2, 0,3 | x0,70, 3,2 | x1,69, 9,3 | x14 | 1,98 |
+| prudents moins attentifs (8 fois sur 10) | x2,37, 0,3 | x0,73, 5,3 | x1,40, 20 | x27 | 1,99 |
+| prudents très attentifs (97 fois sur 100) | x2,04, 0,4 | **x1,00**, 0,7 | x1,00, 15 | x18 | 2,01 |
+| grappin qui touche 4 / 8 fois sur 10 | x2,1 / x2,0 | x0,77 / x0,77 | x1,29 / x1,14 | x23 / x26 | 1,9 |
+| plafond à +1 rareté | x1,49, 0 | x0,77, 2,3 | x1,29, 17 | x12 | 2,07 |
+| plafond à +3 raretés | x2,20, 2,0 | x0,77, 2,4 | x1,29, 17 | x33 | 1,87 |
+| duo sans escorte, ou sans refuge, ou sans « Reprendre » pour un ami | inchangé | inchangé | inchangé | x25 | 1,9 à 2,0 |
+
+Jackpot = un vol qui multiplie le revenu du voleur par 20 ou plus. Les chiffres bougent d'un lancement à l'autre
+(même réglage : nouveau x2,0 puis x3,6) : l'ordre des familiers dépendait du hasard de Python (corrigé depuis), et
+30 serveurs restent peu. Les ordres de grandeur sont fiables, pas les décimales.
+
+Ce que ça montre :
+- **Le jackpot disparaît** : 5,3 jackpots par session pour un nouveau aujourd'hui, 0,3 avec les règles proposées
+  (0,07 avec le bouclier sur 1 h). Le nouveau avance quand même 1,7 à 3,6 fois plus vite que seul : le rattrapage reste.
+- **Voler paie enfin** : aujourd'hui, les voleurs se volent entre eux 30 fois par heure sans rien gagner au total
+  (x1,00). Avec les règles proposées, ils réussissent moins (7 à 17 par heure) mais gagnent (x1,3).
+- **L'écart entre le plus riche et les autres se réduit** : 2,3 -> 1,9.
+- **Le prix à payer : le joueur prudent.** Sa base n'est plus fermée en permanence. S'il réagit 9 fois sur 10 à
+  l'alerte, il perd ~23 % de sa base en 1 h face à trois voleurs qui tentent chacun ~50 vols par heure ; s'il réagit
+  97 fois sur 100, il ne perd rien. La précision du grappin n'y change presque rien : les vols réussis viennent des
+  moments d'inattention. C'est voulu (« sois là quand c'est ouvert »), mais le chiffre dépend d'hypothèses
+  (attention, nombre de tentatives) qu'on ne connaîtra qu'avec de vrais joueurs.
+- **Le plafond à +2** est le bon compromis : à +1, plus aucun jackpot mais le rattrapage tombe à x1,5 ; à +3, les
+  jackpots reviennent (2 par session).
+- **Fenêtre de 30 s au lieu de 60** : pire pour les prudents (x0,63). Les voleurs, mieux fermés eux-mêmes, se
+  rabattent sur eux. On garde 60 s.
+- **Le duo** : ce qui le rend si fort (x23), c'est le nombre de vols tentés (le profil vole à chaque digestion), pas
+  l'escorte ni le refuge. Sans eux, le résultat ne change pas. Les règles 17 à 19 restent utiles pour le plaisir de
+  jouer ensemble, pas pour l'équilibre. En revanche, un nouveau qui vole à chaque manche avance très vite (x10 à x25)
+  : le plafond limite chaque vol, mais pas leur nombre. Le bouclier sur 1 h divise ce chiffre par 2,5.
+
+## 5.3 Appliqué dans le jeu le 25 oct. (premier lot)
+
+Les règles dont l'effet ne dépend pas du comportement des joueurs, ou qui ne font que retirer un abus :
+
+| Règle | Où | Ce qui change |
+| --- | --- | --- |
+| 11. Pitié par palier | `Config.Loot.PityPercentile`, `shared/LootEngine` (`pityTarget`, `pityAt`), `server/PullRewards`, `client/HUD`, `client/RobuxShop` | la rareté au-dessus de ta meilleure est garantie au tirage où 9 joueurs sur 10 l'auraient eue ; la carte de résultats dit « MYTHIQUE OU MIEUX GARANTI DANS 23 TIRAGES » ; l'onglet Chances l'explique (tirages Robux compris) |
+| 13. Jauge en objets | `Config.MeanGaugePerItem`, `Config.Blackhole.GaugeNeed` (x1,26), `server/BlackholeTiers.OnScored` | chaque palier dure au moins une manche, même à 8 joueurs avancés |
+| 5. Vitesse en portant | `Config.Carry.SpeedByRarity`, `server/StealController.CarrySpeed` | 0,95 -> 0,38 selon la rareté, jamais plus vite que le propriétaire ; la Force ne compte plus pour porter |
+| 6. Grappin | `Config.Weapons.Grapple` | cône 14° -> 8°, recharge 5 s -> 9 s |
+| Batte (étape 2) | `Config.Weapons.HitWindow`, `MaxHitsPerWindow`, `server/WeaponController` | 2 coups au plus par victime toutes les 10 s |
+| 3. Marché | `Config.Market.MaxPriceSeconds`, `Config.GetMarketMaxPrice`, `server/MarketController`, `client/MarketMenu` | prix au plus 1 h du revenu du familier ; la fenêtre affiche le maximum |
+| Matrice | `dataset_and_pipeline/tools/build_game_design_matrix.py`, `game_design_matrix.json` | valeurs lues dans le bon tableau (Rebirth 4T, x2,7, +100 % ; vol en 0,3 s) ; nouvelles vitesses de transport |
+
+Vérifié : analyse Luau (`luau-lsp analyze`, mode strict) sans erreur ; `rojo build` réussi ; les 9 tests Lune passent,
+dont le nouveau `tools/check-pity.luau` (seuil, garantie, compteur, pas de garantie au-dessus du Sigma, ~1 garantie
+pour 9 Mythiques tirés au hasard). Les tests du marché et du vol des nouveaux ont reçu les nouveaux réglages, et le test
+du marché vérifie qu'un prix trop haut est refusé. Simulateur solo relancé avec le nouveau `Config.lua` (200 parties de
+30 h) : 1er Rebirth 8,7 h (inchangé), 1er Sigma avant 2,0 h pour 9 joueurs sur 10 (2,4 h avant), mêmes sources d'argent.
+`economy_data.json` contient maintenant les valeurs du jeu modifié ; celles d'avant restent dans l'historique git.
+
+**Pas vérifié : rien n'a été joué dans Studio.** À regarder : la ligne de pitié sur la carte de résultats, l'onglet
+Chances, la vitesse en portant (message « TRÈS LOURD »), le prix maximum au marché ; à 2 joueurs, le grappin plus
+étroit et la batte limitée.
+
+## 5.4 Ce qui attend une décision de Chouaib (deuxième lot)
+
+1. **Verrou à cycle fixe (étape 2), bouclier sur 1 h (règle 8 : 10 % perdus en 1 h -> 30 min de protection), plafond
+   +2 (règle 2), vol utile (règle 7).** Ensemble : plus de jackpots, voler paie, l'écart se réduit. Mais un joueur qui
+   reste chez lui sans surveiller sa base peut perdre ~20 % de sa base par heure. À décider : on y va ? et faut-il
+   adoucir pour les prudents (par exemple un bouclier plus long) ?
+2. **Rebirth (règles 15 et 16)** : une capsule de plus par Rebirth et le nouveau prix. C'est le plus gros chantier
+   (plusieurs capsules sur la carte et dans l'interface).
+3. **Couronne du plus riche (9)**, **pile « prochain objectif » (12)**, **jeu entre amis (17 à 19)**.
+4. **Au choix** : gros butin signalé à tous (10), ruée des voleurs après l'effondrement (14).

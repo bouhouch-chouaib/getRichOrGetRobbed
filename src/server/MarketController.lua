@@ -82,6 +82,11 @@ function MarketController.List(player: Player, petId: unknown, price: unknown): 
 	if price ~= price or price < Config.Market.MinPrice or price > Config.Market.MaxPrice then
 		return false, "PRIX INVALIDE"
 	end
+	-- Au plus 1 h du revenu du familier (Config.Market.MaxPriceSeconds) : pas de cadeau d'argent déguisé.
+	local maxPrice = Config.GetMarketMaxPrice(PetCatalog.GetIncome(petId))
+	if price > maxPrice then
+		return false, "PRIX TROP HAUT : " .. MarketController.FormatMoney(maxPrice) .. " AU PLUS"
+	end
 	if not SessionData.IsLoaded(player) then
 		return false, "SAUVEGARDE EN CHARGEMENT"
 	end

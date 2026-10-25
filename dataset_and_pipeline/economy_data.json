@@ -126,13 +126,13 @@
         "Window": 5
       },
       "GaugeNeed": [
-        40,
         50,
-        60,
-        75,
-        90,
-        110,
-        130
+        63,
+        76,
+        95,
+        113,
+        139,
+        164
       ],
       "Gravity": {
         "MeteorCount": 3,
@@ -250,10 +250,17 @@
       "MaxCarryTime": 180,
       "MaxSpeed": 0.95,
       "MinSpeed": 0.3,
-      "Slow": 0.8,
-      "StrengthPerCapacity": 10,
-      "WalkHomeSpeed": 9,
-      "WeightExponent": 3
+      "SpeedByRarity": [
+        0.95,
+        0.83,
+        0.73,
+        0.64,
+        0.56,
+        0.49,
+        0.43,
+        0.38
+      ],
+      "WalkHomeSpeed": 9
     },
     "Codes": {
       "LANCEMENT": {
@@ -598,8 +605,7 @@
       "LuckPerPoint": 0.005,
       "MaxLuck": 1,
       "NewPetWeight": 5,
-      "PityMinRarity": 4,
-      "PityPulls": 60,
+      "PityPercentile": 0.9,
       "PullCost": 2,
       "PullCostGrowth": 0.22,
       "Ranks": [
@@ -637,6 +643,7 @@
     "Market": {
       "MaxListings": 3,
       "MaxPrice": 1e+30,
+      "MaxPriceSeconds": 3600,
       "MinPrice": 1,
       "MinSuggested": 100,
       "SuggestedSeconds": 600,
@@ -1525,8 +1532,8 @@
         "Word": "BONK !"
       },
       "Grapple": {
-        "AimCone": 14,
-        "Cooldown": 5,
+        "AimCone": 8,
+        "Cooldown": 9,
         "HookSpeed": 220,
         "PullSpeed": 85,
         "PullTime": 1.1,
@@ -1534,6 +1541,7 @@
         "StopDistance": 5
       },
       "HitImmunity": 2,
+      "HitWindow": 10,
       "Invisibility": {
         "Cooldown": 45,
         "Duration": 6,
@@ -1542,6 +1550,7 @@
         "NearTransparency": 0.72,
         "SelfTransparency": 0.6
       },
+      "MaxHitsPerWindow": 2,
       "OldWeapons": {
         "WeaponPan": [
           "WeaponBat"

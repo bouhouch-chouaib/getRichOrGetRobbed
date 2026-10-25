@@ -8,6 +8,8 @@ avec Lune et les écrit dans economy_data.json. Les règles (tirages, pitié, ra
     python -I dataset_and_pipeline/economy_simulator.py segments [--runs 200] [--hours 30]
     python -I dataset_and_pipeline/economy_simulator.py cibles [--runs 120] [--hours 11]
     python -I dataset_and_pipeline/economy_simulator.py retention [--runs 150] [--hours 12]
+    python -I dataset_and_pipeline/economy_simulator.py serveur [--servers 40] [--hours 2] [--grappin 0.6]
+    python -I dataset_and_pipeline/economy_simulator.py balayage [--servers 30] [--hours 1]
     options des règles proposées (tous les modes sauf retention) : --pitie-palier, --capsules-rebirth, --doublons-capsule,
     --rebirth-croissance 1.62
 
@@ -15,6 +17,9 @@ avec Lune et les écrit dans economy_data.json. Les règles (tirages, pitié, ra
 `segments` : les dents de scie, monde par monde (montée à l'arrivée, plateau, temps d'attente du monde suivant).
 `cibles` : qui a intérêt à voler qui selon l'avancée de chacun (vols utiles, gain du meilleur vol, effet du plafond).
 `retention` : pitié (chances réelles, garanties données, malchance extrême), jauge du trou noir, avancée de l'Index.
+`serveur` : 8 joueurs sur un serveur (prudent, voleur, nouveau, duo d'amis), vols entre eux, règles actuelles contre
+proposées (dataset_and_pipeline/economy_server.py).
+`balayage` : les réglages incertains des règles proposées (fenêtre du verrou, bouclier, attention, grappin, plafond).
 """
 from __future__ import annotations
 
@@ -128,6 +133,16 @@ class Game:
             value += weight * tier["Value"]
         return value / total
 
+    def gauge_per_item(self, quality: int) -> float:
+        """Jauge du trou noir apportée par un objet en moyenne : BlackholeTiers.OnScored ajoute max(1, valeur)."""
+        boost = 1 + quality * self.cfg["Items"]["QualityBoost"]
+        total = value = 0.0
+        for index, tier in enumerate(self.cfg["ItemTiers"]):
+            weight = tier["Weight"] * boost ** index
+            total += weight
+            value += weight * max(1.0, tier["Value"])
+        return value / total
+
     def count_pulls(self, score: float) -> int:
         if score <= 0:
             return 0
@@ -210,14 +225,14 @@ class Game:
             pity += 1
             count += 1
             min_index = 1
-            if pity >= loot["PityPulls"]:
+            if "PityPulls" in loot and pity >= loot["PityPulls"]:  # pitié d'avant le 25 oct. (Épique au 60e tirage)
                 min_index = loot["PityMinRarity"]
                 old_hits += 1
             if frontier and count >= frontier[1]:
                 min_index = max(min_index, frontier[0])
                 forced += 1
             rarity = self.roll_rarity(rng, luck, min_index, floor_index, tier)
-            if rarity >= loot["PityMinRarity"]:
+            if "PityPulls" in loot and rarity >= loot["PityMinRarity"]:
                 pity = 0
             if frontier and rarity >= frontier[0]:
                 count = 0
@@ -233,8 +248,10 @@ class Game:
         weights = self.rarity_weights(luck, floor_index, tier)
         return sum(weights[rarity - 1:]) / sum(weights)
 
-    def frontier_threshold(self, rarity: int, luck: float, floor_index: int, tier: int, percentile: float = 0.9) -> int:
+    def frontier_threshold(self, rarity: int, luck: float, floor_index: int, tier: int, percentile: float | None = None) -> int:
         """Tirages après lesquels seuls (1 - percentile) des joueurs n'ont toujours pas cette rareté (loi géométrique)."""
+        if percentile is None:
+            percentile = self.cfg["Loot"].get("PityPercentile", 0.9)
         p = self.chance_at_least(rarity, luck, floor_index, tier)
         return max(1, math.ceil(math.log(1 - percentile) / math.log(1 - p))) if 0 < p < 1 else 1
 
@@ -253,7 +270,8 @@ class SoloRun:
         self.rng = rng
         self.fusion = fusion
         self.use_capsule = capsule
-        # Règles proposées à l'étape 4 (pas dans Config.lua) : "pitie_palier", "capsules_rebirth", "doublons_capsule".
+        # Règles proposées (pas dans Config.lua) : "pitie_palier", "capsules_rebirth", "doublons_capsule",
+        # "rebirth_croissance" (étape 4), "plafond" (règle 2). "record" = False : pas d'historique (serveur, plus rapide).
         self.options = options or {}
         self.capsules: list[dict] = []  # œufs dans les capsules d'évolution (Config.Evolution.Slots places)
         self.frontier_count = 0
@@ -283,6 +301,23 @@ class SoloRun:
         self.purchases: list[tuple[float, str, int, float, float]] = []  # (t, objet, niveau, prix, revenu/s)
         self.income_now = 0.0
         self.snapshots: dict[int, tuple[list[str], float, int, int]] = {}  # point de contrôle -> (base, revenu/s, monde, rebirths)
+        self.self_best = g.rarity_of(start)  # meilleure rareté obtenue soi-même (tirages, fusion, capsule) : règle 2
+        self.record = self.options.get("record", True)
+
+    def eff_income(self, pet: str) -> float:
+        """Revenu d'un familier pour ce joueur ; règle 2 : au plus le revenu de base de la rareté self_best + 2."""
+        value = self.g.income(pet)
+        top = self.self_best + self.options.get("plafond_ecart", 2)
+        if self.options.get("plafond") and top <= len(self.g.rarities):
+            value = min(value, self.g.rarities[top - 1]["Income"])
+        return value
+
+    def receive_pet(self, pet: str):
+        """Familier volé : il arrive tout de suite dans la collection, sans compter comme obtenu soi-même."""
+        self.pets[pet] = self.pets.get(pet, 0) + 1
+
+    def lose_pet(self, pet: str):
+        self.pets[pet] -= 1
 
     def earn(self, source: str, amount: float):
         self.money += amount
@@ -295,7 +330,7 @@ class SoloRun:
     def layout(self):
         g = self.g
         slots = g.income_slots(self.rebirths)
-        species = sorted((p for p, c in self.pets.items() if c > 0), key=g.income, reverse=True)
+        species = sorted((p for p, c in self.pets.items() if c > 0), key=self.eff_income, reverse=True)
         base, used = [], {}
         for pet in species:
             if len(base) < slots:
@@ -319,7 +354,7 @@ class SoloRun:
 
     def per_second(self, base) -> float:
         g = self.g
-        return sum(g.income(p) for p in base) * g.world(self.tier)["IncomeMultiplier"] * g.rebirth_mult(self.rebirths)
+        return sum(self.eff_income(p) for p in base) * g.world(self.tier)["IncomeMultiplier"] * g.rebirth_mult(self.rebirths)
 
     def shop(self):
         g = self.g
@@ -396,6 +431,7 @@ class SoloRun:
             if cap["done"] and self.t >= cap["ready"]:
                 form = cap["pet"] if cap["stage"] == 1 else f"{cap['pet']}__E{cap['stage']}"
                 self.pets[form] = self.pets.get(form, 0) + 1
+                self.self_best = max(self.self_best, g.rarity_of(form))
                 if cap["stage"] > 1:
                     self.mark(f"1er {g.cfg['Evolution']['Names'][cap['stage'] - 1]}")
                 self.capsules.remove(cap)
@@ -406,6 +442,7 @@ class SoloRun:
             self.eggs.remove(egg)
             pet = egg[0]
             self.pets[pet] = self.pets.get(pet, 0) + 1
+            self.self_best = max(self.self_best, g.rarity_of(pet))
             if pet not in self.claimed:
                 self.claimed.add(pet)
                 self.earn("Index", g.index_reward(pet))
@@ -414,8 +451,9 @@ class SoloRun:
         self.shop()
         base, equipped, reserve = self.layout()
         income = self.income_now = self.per_second(base)
-        best = max(g.rarity_of(p) for p, c in self.pets.items() if c > 0)
-        self.trace.append((self.t, income, self.tier, self.rebirths, self.spent_shop, best))
+        if self.record:
+            best = max(g.rarity_of(p) for p, c in self.pets.items() if c > 0)
+            self.trace.append((self.t, income, self.tier, self.rebirths, self.spent_shop, best))
         checkpoint = None
         while next_check < len(CHECKPOINTS) and self.t >= CHECKPOINTS[next_check]:
             self.income_at[CHECKPOINTS[next_check]] = income
@@ -443,8 +481,8 @@ class SoloRun:
         pulls = g.count_pulls(score)
         if checkpoint:
             self.round_stats[checkpoint] = (score, pulls)
-            # Jauge commune du trou noir : valeur des objets avalés, sans multiplicateur (server/BlackholeTiers).
-            self.gauge[checkpoint] = items * g.item_value(up.get("ItemQuality", 0))
+            # Jauge commune du trou noir : max(1, valeur) par objet avalé, sans multiplicateur (server/BlackholeTiers).
+            self.gauge[checkpoint] = items * g.gauge_per_item(up.get("ItemQuality", 0))
         owned = self.owned_with_eggs()
         floor_index = g.floor(self.total_pulls, self.discovered)
         luck = g.luck(score)
@@ -452,7 +490,8 @@ class SoloRun:
             self.scores_by_tier.setdefault(self.tier, []).append((score, pulls))
         frontier = None
         target = max(g.rarity_of(p) for p in owned) + 1
-        if self.options.get("pitie_palier") and target <= len(g.rarities):
+        # Pitié par palier : règle du jeu depuis le 25 oct. (Config.Loot.PityPercentile), ou forcée par l'option.
+        if (self.options.get("pitie_palier") or "PityPercentile" in cfg["Loot"]) and target <= len(g.rarities):
             frontier = (target, g.frontier_threshold(target, luck, floor_index, self.tier), self.frontier_count)
         drops, self.pity, self.frontier_count, forced, old_hits = g.roll_pulls(
             self.rng, pulls, self.pity, luck, owned, floor_index, self.tier, g.world(self.tier)["Id"], frontier)
@@ -474,7 +513,7 @@ class SoloRun:
             else:
                 owned[pet] = owned.get(pet, 0) + 1
                 self.eggs.append((pet, self.t + cfg["Eggs"]["Seconds"][g.pets[pet]["rarity"]]))
-                if g.rarity_of(pet) >= cfg["Loot"]["PityMinRarity"]:
+                if g.rarity_of(pet) >= 4:  # Épique et plus
                     self.mark(f"1er {g.pets[pet]['rarity']}")
         if not self.events.get("Index : les 75 de base") and all(p in self.discovered for p in g.base_species()):
             self.mark("Index : les 75 de base")
@@ -725,9 +764,19 @@ def report_retention(game: Game, runs: int, hours: float):
         print(f"  {name:24s} médiane {duration(pct(values, 0.5, len(base)))}, atteint dans {len(values) / len(base) * 100:.0f} % des parties")
 
 
+def report_server(game: Game, servers: int, hours: float, grapple_hit: float, cap_offset: int):
+    sys.path.insert(0, str(Path(__file__).resolve().parent))  # python -I n'ajoute pas le dossier du script
+    import economy_server  # même dossier ; importé ici pour éviter une importation circulaire
+    economy_server.run_scenarios(game, servers, hours, {"grapple_hit": grapple_hit, "cap_offset": cap_offset})
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("mode", choices=["solo", "segments", "cibles", "retention"])
+    parser.add_argument("mode", choices=["solo", "segments", "cibles", "retention", "serveur", "balayage"])
+    parser.add_argument("--servers", type=int, default=40, help="serveur : nombre de serveurs simulés par scénario")
+    parser.add_argument("--grappin", type=float, default=0.6, help="serveur : chance qu'un tir de grappin touche (règle 6)")
+    parser.add_argument("--plafond-ecart", type=int, default=2, help="serveur : écart de rareté du plafond (règle 2)")
+    parser.add_argument("--second", action="store_true", help="balayage : second balayage (bouclier sur 1 h, duo)")
     parser.add_argument("--runs", type=int, default=200)
     parser.add_argument("--hours", type=float, default=30)
     parser.add_argument("--no-refresh", action="store_true", help="ne pas relire les valeurs du jeu avec Lune")
@@ -742,6 +791,14 @@ def main():
     game = Game(load_data(refresh=not args.no_refresh))
     if args.mode == "retention":
         report_retention(game, args.runs, args.hours)
+        return
+    if args.mode == "serveur":
+        report_server(game, args.servers, args.hours, args.grappin, args.plafond_ecart)
+        return
+    if args.mode == "balayage":
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import economy_server
+        (economy_server.sweep2 if args.second else economy_server.sweep)(game, args.servers, args.hours)
         return
     options = {"pitie_palier": args.pitie_palier, "capsules_rebirth": args.capsules_rebirth,
                "doublons_capsule": args.doublons_capsule, "rebirth_croissance": args.rebirth_croissance}

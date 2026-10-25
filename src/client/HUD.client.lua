@@ -519,7 +519,7 @@ end)
 player:GetAttributeChangedSignal("CarryingPet"):Connect(function()
 	local petId = player:GetAttribute("CarryingPet")
 	if petId ~= nil then
-		-- Plus le familier est lourd (et moins on est fort), plus on avance lentement (Config.Carry).
+		-- Plus le familier est rare, plus on avance lentement, et jamais plus vite que son propriétaire (Config.Carry).
 		local speed = player:GetAttribute("SpeedMultiplier")
 		local percent = math.floor((if type(speed) == "number" then speed else 1) * 100 + 0.5)
 		local heavy = if percent <= 50 then "TRÈS LOURD" elseif percent <= 75 then "LOURD" else "LÉGER"
@@ -667,8 +667,14 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 			rankLine ..= string.format("  •  %d/%d → %s", total, nextRank.Pulls, nextRank.Name)
 		end
 		table.insert(lines, '<font color="#9BDCFF">' .. rankLine .. "</font>")
-		local pityLeft = math.max(1, Config.Loot.PityPulls - numberAttribute("Pity"))
-		table.insert(lines, string.format('<font color="#C8A0FF">ÉPIQUE OU MIEUX GARANTI DANS %d TIRAGE%s</font>', pityLeft, if pityLeft > 1 then "S" else ""))
+		-- Pitié par palier (Config.Loot.PityPercentile) : la rareté juste au-dessus de ta meilleure (attributs de PullRewards).
+		local pityRarity = Config.Rarities[numberAttribute("PityTarget")]
+		local pityAt = numberAttribute("PityAt")
+		if pityRarity and pityAt > 0 then
+			local pityLeft = math.max(1, pityAt - numberAttribute("Pity"))
+			table.insert(lines, string.format('<font color="#%s">%s OU MIEUX GARANTI DANS %d TIRAGE%s</font>', pityRarity.Color:ToHex(),
+				TextFormat.upper(pityRarity.Name), pityLeft, if pityLeft > 1 then "S" else ""))
+		end
 		rewardBody.Text = table.concat(lines, "\n")
 	end
 

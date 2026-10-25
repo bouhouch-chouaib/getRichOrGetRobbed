@@ -38,6 +38,26 @@ local POWER_ID = "PowerInvisible" -- pouvoir d'invisibilité (server/PowerContro
 local WEAPON_IDS = { BAT_ID, GRAPPLE_ID, POWER_ID }
 
 local immuneUntil: { [Player]: number } = {} -- batte : pas deux coups de suite sur le même joueur
+local recentHits: { [Player]: { number } } = {} -- batte : heures des derniers coups reçus (Config.Weapons.HitWindow)
+
+-- La batte peut-elle toucher ce joueur maintenant ? Protégé juste après un coup (HitImmunity), et au plus
+-- MaxHitsPerWindow coups sur HitWindow secondes (anti-acharnement).
+local function canBat(victim: Player, now: number): boolean
+	if (immuneUntil[victim] or 0) > now then
+		return false
+	end
+	local hits = recentHits[victim]
+	if not hits then
+		return true
+	end
+	local count = 0
+	for _, at in ipairs(hits) do
+		if now - at < WEAPONS.HitWindow then
+			count += 1
+		end
+	end
+	return count < WEAPONS.MaxHitsPerWindow
+end
 local grappleImmuneUntil: { [Player]: number } = {} -- grappin : pas rattrapé en boucle
 local grappleReadyAt: { [Player]: number } = {}
 
@@ -248,7 +268,14 @@ local function batHit(attacker: Player, victim: Player, from: Vector3)
 	if not humanoid or not root or humanoid.Health <= 0 then
 		return
 	end
-	immuneUntil[victim] = os.clock() + WEAPONS.HitImmunity
+	local now = os.clock()
+	immuneUntil[victim] = now + WEAPONS.HitImmunity
+	local hits = recentHits[victim] or {}
+	table.insert(hits, now)
+	while #hits > WEAPONS.MaxHitsPerWindow do
+		table.remove(hits, 1)
+	end
+	recentHits[victim] = hits
 	PowerController.Reveal(victim)
 	TrainingController.Stop(victim) -- frappé sur le tapis / le banc : il en descend (sinon il serait ancré)
 	ItemInteraction.ReleaseHeld(victim) -- objets lâchés ; un vol en cours échoue (StealController)
@@ -274,7 +301,7 @@ local function batStrike(player: Player, tool: Tool)
 	local bestDistance = math.huge
 	for _, other in ipairs(Players:GetPlayers()) do
 		local otherRoot = getRoot(other.Character)
-		if other ~= player and otherRoot and isAlive(other) and (immuneUntil[other] or 0) <= now then
+		if other ~= player and otherRoot and isAlive(other) and canBat(other, now) then
 			local offset = otherRoot.Position - root.Position
 			local distance = offset.Magnitude
 			local flat = Vector3.new(offset.X, 0, offset.Z)
@@ -485,6 +512,7 @@ function WeaponController.Init()
 	end
 	Players.PlayerRemoving:Connect(function(player: Player)
 		immuneUntil[player] = nil
+		recentHits[player] = nil
 		grappleImmuneUntil[player] = nil
 		grappleReadyAt[player] = nil
 	end)

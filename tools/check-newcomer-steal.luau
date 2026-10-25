@@ -54,9 +54,7 @@ local modules = {
 	Config = {
 		Steal = { OnlyDuringDigesting = false, MaxDistance = 15, MaxCarryTime = 30, RecoverPromptDistance = 8 },
 		Carry = {
-			WeightExponent = 3,
-			StrengthPerCapacity = 10,
-			Slow = 0.8,
+			SpeedByRarity = { 0.95, 0.83, 0.73, 0.64, 0.56, 0.49, 0.43, 0.38 },
 			MinSpeed = 0.3,
 			MaxSpeed = 0.95,
 			MaxCarryTime = 180,

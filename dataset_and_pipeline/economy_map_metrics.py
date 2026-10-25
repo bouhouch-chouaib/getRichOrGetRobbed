@@ -55,7 +55,12 @@ STAT = r"{} = \{{ Base = ([\d.]+), PerLevel = ([\d.]+), MaxLevel = (\d+)"
 SPEED_BASE, SPEED_PER, SPEED_MAX = (float(x) for x in re.search(STAT.format("Speed"), TRAINING).groups())
 STR_BASE, STR_PER, STR_MAX = (float(x) for x in re.search(STAT.format("Strength"), TRAINING).groups())
 EQUIP_MAX = num(block("Pets"), "MaxLevels")
-W_EXP, PER_CAP, SLOW = num(CARRY, "WeightExponent"), num(CARRY, "StrengthPerCapacity"), num(CARRY, "Slow")
+# Formule de portage d'avant le 25 oct. (taille^3 et Force), gardée pour comparer : Config.Carry l'a remplacée par
+# SpeedByRarity (ECONOMY_REPORT.md, règle 5). Lue dans Config.lua si elle y est encore.
+OLD_CARRY = {"WeightExponent": 3.0, "StrengthPerCapacity": 10.0, "Slow": 0.8}
+W_EXP, PER_CAP, SLOW = (num(CARRY, k) if re.search(rf"\b{k}\s*=", CARRY) else v for k, v in OLD_CARRY.items())
+_speeds = re.search(r"SpeedByRarity = \{([^}]*)\}", CARRY)
+SPEED_BY_RARITY = [float(x) for x in _speeds.group(1).split(",")] if _speeds else None  # courbe dans le jeu
 MIN_SPEED, MAX_SPEED = num(CARRY, "MinSpeed"), num(CARRY, "MaxSpeed")
 RECOVER = num(STEAL, "RecoverPromptDistance")
 GRAPPLE = float(re.search(r"Grapple = \{\s*Range = ([\d.]+)", WEAPONS).group(1))
@@ -121,6 +126,7 @@ def path_len(a, b, avoid=DOME):
 
 
 def carry_mult(size, power):
+    """Formule de portage d'avant le 25 oct. (taille^3 et Force)."""
     weight = size ** W_EXP
     return max(MIN_SPEED, min(MAX_SPEED, 1 / (1 + SLOW * weight / max(power / PER_CAP, 0.1))))
 
@@ -335,7 +341,9 @@ def main():
     sac = sorted(math.hypot(*random_pet()) - HOLE - SAC_RANGE for _ in range(3000))
     print(f"vers la zone de sacrifice : {sac[1500]:.0f}")
 
-    print("\n== 4. Vitesse de transport (x WalkSpeed), milieu de tranche ==")
+    print("\n== 4. Vitesse de transport (x WalkSpeed), milieu de tranche, formule d'avant le 25 oct. ==")
+    if SPEED_BY_RARITY:
+        print("   dans le jeu depuis le 25 oct. (Config.Carry.SpeedByRarity) : " + " / ".join(f"{v:.2f}" for v in SPEED_BY_RARITY))
     print(f"{'rareté':11s} {'taille':>6s} {'poids':>6s} " + " ".join(f"{n:>15s}" for n in POWER))
     for rarity, (a, b) in BANDS.items():
         s = (a + b) / 2

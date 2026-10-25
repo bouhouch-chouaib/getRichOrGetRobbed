@@ -7,7 +7,8 @@
 --     base : on le PORTE (pour le jeter dans le trou noir). Mains libres (ni objet ni arme). La bulle est créée par le
 --     client (client/BasePets) qui envoie Remotes.StealPet -> BasePetsController.PetTriggered.
 --   - Le porteur le tient à deux mains au-dessus de la tête (attribut "CarryingPet", affiché par client/PetFollow) et avance plus ou moins vite
---     selon sa force et le poids du familier (Config.Carry, attribut "SpeedMultiplier"). Un seul familier à la fois.
+--     selon la rareté du familier, sans dépasser la vitesse du propriétaire (Config.Carry, attribut "SpeedMultiplier").
+--     Un seul familier à la fois.
 --   - Voleur arrivé dans SA base : le familier change de propriétaire. Propriétaire revenu dans sa base : il le repose.
 --   - Près du trou noir pendant le Feeding : Remotes.ThrowPet le JETTE dedans. Il est perdu pour son propriétaire et le
 --     porteur gagne argent + points + jauge selon le familier (Config.Sacrifice).
@@ -135,13 +136,19 @@ local function isInsideBase(base: Model, position: Vector3): boolean
 	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -3 and localPosition.Y < 25
 end
 
--- Vitesse du porteur (x vitesse normale) selon sa force et le poids du familier (Config.Carry).
-function StealController.CarrySpeed(player: Player, petId: string): number
+-- Vitesse du porteur (x sa vitesse normale) : selon la rareté du familier, et jamais plus vite que le propriétaire
+-- (Config.Carry.SpeedByRarity x min(1, vitesse du propriétaire / vitesse du porteur)).
+function StealController.CarrySpeed(player: Player, petId: string, owner: Player?): number
 	local entry = PetCatalog.ById[petId]
-	local weight = PetSizes.Of(petId, entry and entry.Rarity) ^ CARRY.WeightExponent
-	local power = player:GetAttribute("ThrowPower")
-	local capacity = (if type(power) == "number" then power else Config.Training.Strength.Base) / CARRY.StrengthPerCapacity
-	return math.clamp(1 / (1 + CARRY.Slow * weight / math.max(capacity, 0.1)), CARRY.MinSpeed, CARRY.MaxSpeed)
+	local rarity = if entry then Config.RarityIndex[entry.Rarity] or 1 else 1
+	local speed = math.clamp(CARRY.SpeedByRarity[rarity] or CARRY.MaxSpeed, CARRY.MinSpeed, CARRY.MaxSpeed)
+	if owner and owner ~= player then
+		local mine, theirs = player:GetAttribute("Speed"), owner:GetAttribute("Speed")
+		if type(mine) == "number" and type(theirs) == "number" and mine > 0 then
+			speed *= math.min(1, theirs / mine)
+		end
+	end
+	return speed
 end
 
 ----------------------------------------------------------------------
@@ -330,7 +337,7 @@ end
 local function beginCarry(carrier: Player, owner: Player, ownerBase: Model, petId: string)
 	if carrier ~= owner then SessionData.EndNewcomerProtection(carrier) end
 	local own = carrier == owner
-	local speed = StealController.CarrySpeed(carrier, petId)
+	local speed = StealController.CarrySpeed(carrier, petId, owner)
 	local root = getRoot(carrier)
 	local deadline = now() + math.min(STEAL.MaxCarryTime / speed, CARRY.MaxCarryTime)
 	local carry: Carry = {

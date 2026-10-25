@@ -87,6 +87,9 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 	end
 
 	SessionData.SetPity(player, outcome.pity)
+	-- Pitié par palier (Config.Loot.PityPercentile) : rareté garantie et à quel tirage, pour la carte de résultats (client/HUD).
+	player:SetAttribute("PityTarget", outcome.pityTarget)
+	player:SetAttribute("PityAt", outcome.pityAt or 0)
 	SessionData.AddTotalPulls(player, outcome.pulls)
 	if next(kept) then
 		SessionData.AddEggs(player, kept)

@@ -255,9 +255,9 @@ function RobuxShop.create(content: Frame, cardHeight: number, topStack: Frame): 
 			table.insert(lines, string.format('<font color="#%s">%s</font> : %s', rarity.Color:ToHex(), TextFormat.upper(rarity.Name), formatPercent(odds[index])))
 		end
 		table.insert(lines, string.format(
-			'<font size="15">Dans une rareté, un familier que tu n\'as pas encore a %d fois plus de chances que ceux que tu as déjà. Garantie : un Épique ou mieux au plus tard au %de tirage sans en avoir eu. Ton rang de tirage retire les petites raretés dont tu as découvert tous les familiers. Au-delà de %d exemplaires d\'un familier, les suivants sont vendus automatiquement. Dans chaque monde après la Prairie, ses 5 familiers exclusifs peuvent aussi sortir (dans leur rareté).</font>',
+			'<font size="15">Dans une rareté, un familier que tu n\'as pas encore a %d fois plus de chances que ceux que tu as déjà. Garantie : la rareté juste au-dessus de ta meilleure arrive au plus tard au tirage où %d joueurs sur 10 l\'auraient déjà eue (le compte à rebours s\'affiche après chaque tirage). Ton rang de tirage retire les petites raretés dont tu as découvert tous les familiers. Au-delà de %d exemplaires d\'un familier, les suivants sont vendus automatiquement. Dans chaque monde après la Prairie, ses familiers exclusifs peuvent aussi sortir (dans leur rareté).</font>',
 			Config.Loot.NewPetWeight,
-			Config.Loot.PityPulls,
+			math.floor(Config.Loot.PityPercentile * 10 + 0.5),
 			Config.Loot.KeepCopies
 		))
 		oddsLabel.Text = table.concat(lines, "\n")

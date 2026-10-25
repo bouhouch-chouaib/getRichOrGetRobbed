@@ -301,7 +301,8 @@ function MarketMenu.create(gui: Instance): Menu
 		viewport.ZIndex = 3
 		sideName.Text = if entry then entry.Name else petId
 		sideIncome.Text = NumberFormat.perSecond(PetCatalog.GetIncome(petId))
-		priceHint.Text = "Prix conseillé : " .. NumberFormat.money(suggestedPrice(petId))
+		priceHint.Text = "Prix conseillé : " .. NumberFormat.money(suggestedPrice(petId)) .. "  •  au plus "
+			.. NumberFormat.money(Config.GetMarketMaxPrice(PetCatalog.GetIncome(petId)))
 		UiStyle.setButtonColor(sellButton, if mine < Config.Market.MaxListings then UiStyle.Colors.Green else GREY)
 	end
 

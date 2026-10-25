@@ -48,6 +48,21 @@ def parse_number(config: str, pattern: str) -> float:
     return float(m[1])
 
 
+def config_block(config: str, name: str) -> str:
+    """Texte du tableau `Config.<name> = { ... }` : chercher une valeur DANS le bon tableau (BasePrice, HoldDuration et
+    IncomeBonus existent dans plusieurs tableaux ; avant le 25 oct., la matrice prenait le premier venu)."""
+    start = config.index(f"Config.{name} = {{")
+    depth = 0
+    for index in range(start, len(config)):
+        if config[index] == "{":
+            depth += 1
+        elif config[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return config[start:index + 1]
+    raise ValueError(name)
+
+
 def parse_catalog(catalog: str) -> list[dict]:
     pets = []
     for m in re.finditer(r'\b(pet|worldPet)\("(\w+)", "([^"]+)", "(\w+)"', catalog):
@@ -426,12 +441,12 @@ def main() -> None:
     pets = parse_catalog(catalog_src)
     heights, bands, player = parse_sizes(sizes_src)
 
+    carry_block = config_block(config, "Carry")
     carry = {
-        "exponent": parse_number(config, r"WeightExponent = ([\d.]+)"),
-        "per_capacity": parse_number(config, r"StrengthPerCapacity = ([\d.]+)"),
-        "slow": parse_number(config, r"\tSlow = ([\d.]+)"),
-        "min": parse_number(config, r"\tMinSpeed = ([\d.]+)"),
-        "max": parse_number(config, r"\tMaxSpeed = ([\d.]+)"),
+        # Depuis le 25 oct. (ECONOMY_REPORT.md règle 5) : vitesse selon la rareté, plus selon la taille et la Force.
+        "by_rarity": [float(x) for x in re.search(r"SpeedByRarity = \{([^}]*)\}", carry_block)[1].split(",")],
+        "min": parse_number(carry_block, r"MinSpeed = ([\d.]+)"),
+        "max": parse_number(carry_block, r"MaxSpeed = ([\d.]+)"),
     }
     strength_base = parse_number(config, r"Strength = \{ Base = (\d+)")
     strength_max = strength_base + parse_number(config, r"Strength = \{ Base = \d+, PerLevel = (\d+)") * \
@@ -450,9 +465,9 @@ def main() -> None:
             base_count[pet["rarity"]] = base_count.get(pet["rarity"], 0) + 1
     by_id = {p["id"]: p for p in pets}
 
-    def carry_speed(weight: float, strength: float) -> float:
-        capacity = strength / carry["per_capacity"]
-        return min(max(1 / (1 + carry["slow"] * weight / max(capacity, 0.1)), carry["min"]), carry["max"])
+    def carry_speed(rarity_index: int) -> float:
+        """x vitesse de marche, propriétaire aussi rapide que le porteur (sinon x min(1, sa vitesse / celle du porteur))."""
+        return min(max(carry["by_rarity"][rarity_index - 1], carry["min"]), carry["max"])
 
     creatures = []
     for spec in ART_SPECS:
@@ -460,9 +475,8 @@ def main() -> None:
         rarity = rarity_by_id[pet["rarity"]]
         band = bands[pet["rarity"]]
         size = heights.get(pet["id"], (band[0] + band[1]) / 2)
-        weight = size ** carry["exponent"]
-        start = carry_speed(weight, strength_base)
-        strong = carry_speed(weight, strength_max)
+        weight = size ** 3  # indicatif : ne sert plus au transport depuis le 25 oct.
+        start = strong = carry_speed(rarities.index(rarity) + 1)
         drop = rarity["weight"] / total_weight / base_count[pet["rarity"]]
         entry = {
             "id": pet["id"], "name": pet["name"], "tier": spec["tier"], "game_rarity": pet["rarity"],
@@ -496,9 +510,10 @@ def main() -> None:
                        "des jeux de référence : on n'en garde que des ordres de grandeur et des principes.",
             "drop_rate_note": "chance par tirage gratuit, monde Prairie, familier déjà découvert (x5 s'il est nouveau : "
                               "Config.Loot.NewPetWeight), hors exclusifs des mondes",
-            "carry_note": f"vitesse de transport = clamp(1 / (1 + Slow x poids / capacité), Min, Max), capacité = force / "
-                          f"{carry['per_capacity']:.0f} ; force de départ {strength_base:.0f}, force max {strength_max:.0f}, "
-                          f"WalkSpeed de base {walk_speed:.0f}",
+            "carry_note": "vitesse de transport = Config.Carry.SpeedByRarity[rareté] x min(1, vitesse du propriétaire / "
+                          "vitesse du porteur) (25 oct., ECONOMY_REPORT.md règle 5) : la Force ne compte plus, d'où "
+                          "carry_speed_pct_at_start = carry_speed_pct_max_strength ; « weight » (taille^3) est indicatif ; "
+                          f"WalkSpeed de base {walk_speed:.0f}, force de départ {strength_base:.0f}, force max {strength_max:.0f}",
         },
         "research_benchmarks": BENCHMARKS,
         "design_principles": DESIGN_PRINCIPLES,
@@ -523,8 +538,8 @@ def main() -> None:
 
 
 def core_loop(config: str, walk_speed: float) -> dict:
-    def num(pattern: str) -> float:
-        return parse_number(config, pattern)
+    def num(pattern: str, block: str | None = None) -> float:
+        return parse_number(config_block(config, block) if block else config, pattern)
 
     return {
         "_lecture": "« game » = valeur actuelle du jeu (Config.lua) ; « proposed » = mécanique absente des jeux de "
@@ -533,10 +548,11 @@ def core_loop(config: str, walk_speed: float) -> dict:
         "income": {"game": "revenu/s = Income(rareté) x (1 + 0,15 x (rang - 1)) x évolution (x3 / x8) x mutation (x2 / x5 / x10) "
                             "x monde (1 à 16) x (1 + rebirths) ; seuls les 15 meilleurs de la base rapportent (+1 par rebirth, max +5)"},
         "steal": {
-            "game": {"hold_e_s": num(r"HoldDuration = ([\d.]+)"), "prompt_distance_studs": num(r"PromptDistance = (\d+)"),
+            "game": {"hold_e_s": num(r"HoldDuration = ([\d.]+)", "Steal"), "prompt_distance_studs": num(r"PromptDistance = (\d+)", "Steal"),
                      "max_carry_time_s": num(r"MaxCarryTime = (\d+), -- secondes"), "walk_home_speed": num(r"WalkHomeSpeed = (\d+)"),
                      "drop_on_hit": True},
-            "carry_formula": "speed = clamp(1 / (1 + 0,8 x taille^3 / (force / 10)), 0,3, 0,95)",
+            "carry_formula": "speed = SpeedByRarity[rareté] x min(1, vitesse du propriétaire / vitesse du porteur) ; "
+                             "SpeedByRarity = 0,95 x 0,876^(rang - 1) (Commun 0,95 -> Sigma 0,38)",
         },
         "base_defense": {
             "game": {"lock_s": num(r"Lock = \{\s*Duration = (\d+)"), "long_lock_s": num(r"LongDuration = (\d+)"),
@@ -558,8 +574,8 @@ def core_loop(config: str, walk_speed: float) -> dict:
             "attack": "1 coup = le voleur lâche le familier (même règle que la batte)", "cooldown_s": 8,
         },
         "rebirth": {
-            "game": {"required_world": int(num(r"RequiredTier = (\d+)")), "base_price": num(r"BasePrice = ([\d.e]+)"),
-                     "price_growth": num(r"PriceGrowth = ([\d.]+)"), "income_bonus_per_rebirth": num(r"IncomeBonus = (\d+)"),
+            "game": {"required_world": int(num(r"RequiredTier = (\d+)", "Rebirth")), "base_price": num(r"BasePrice = ([\d.e]+)", "Rebirth"),
+                     "price_growth": num(r"PriceGrowth = ([\d.]+)", "Rebirth"), "income_bonus_per_rebirth": num(r"IncomeBonus = ([\d.]+)", "Rebirth"),
                      "formula": "prix(n) = 4e12 x 2,7^n ; revenu x (1 + n) ; +1 familier dans la base par rebirth (max 5)"},
             "reference": "Steal a Brainrot : argent + personnages précis exigés à chaque rebirth",
         },

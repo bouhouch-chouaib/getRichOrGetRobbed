@@ -68,7 +68,17 @@ Config.Market = {
 	Tax = 0,
 	SuggestedSeconds = 600, -- prix proposé = 10 min du revenu du familier (au moins MinSuggested)
 	MinSuggested = 100,
+	-- Prix maximum = 1 h du revenu du familier (au moins 6 x MinSuggested) : personne n'achète un familier plus cher que ce
+	-- qu'il rapporte pendant un séjour dans un monde (~1 h) ; au-delà, c'était un cadeau d'argent déguisé (un Commun à 1T $).
+	-- 25 oct., dataset_and_pipeline/ECONOMY_REPORT.md règle 3.
+	MaxPriceSeconds = 3600,
 }
+
+-- Prix maximum d'un familier au marché (Config.Market.MaxPriceSeconds).
+function Config.GetMarketMaxPrice(petIncome: number): number
+	local market = Config.Market
+	return math.floor(math.max(market.MinSuggested * market.MaxPriceSeconds / market.SuggestedSeconds, petIncome * market.MaxPriceSeconds))
+end
 
 -- Machine d'évolution (couveuse au fond de la base, shared/BaseLayout) : le joueur y met un de ses œufs. Il n'éclot
 -- plus tout seul ; plus il reste, plus le familier qui en sortira peut être évolué (3 stades). Le joueur choisit quand
@@ -157,6 +167,19 @@ Config.ItemTiers = {
 	{ Id = "Diamant", Name = "Diamant", Value = 6, Weight = 6, Color = Color3.fromRGB(200, 250, 255), Shape = Enum.PartType.Block, Size = 2, Material = Enum.Material.Neon, Glow = true },
 	{ Id = "Meteorite", Name = "Météorite", Value = 15, Weight = 1, Color = Color3.fromRGB(170, 60, 255), Shape = Enum.PartType.Block, Size = 2.6, Material = Enum.Material.Neon, Glow = true },
 } :: { ItemTier }
+
+-- Jauge du trou noir apportée en moyenne par un objet avalé (server/BlackholeTiers : max(1, valeur)) avec ce niveau de
+-- Chance, mêmes poids que server/ItemSpawner. La jauge compte en « objets ordinaires » : valeur / cette moyenne.
+function Config.MeanGaugePerItem(quality: number): number
+	local boost = 1 + quality * Config.Items.QualityBoost
+	local total, gauge = 0, 0
+	for index, tier in ipairs(Config.ItemTiers) do
+		local weight = tier.Weight * boost ^ (index - 1)
+		total += weight
+		gauge += weight * math.max(1, tier.Value)
+	end
+	return gauge / total
+end
 
 -- Lancer (côté client). La vitesse max dépend de la Force (attribut "ThrowPower").
 Config.Throw = {
@@ -252,8 +275,11 @@ Config.Loot = {
 	PullCostGrowth = 0.22, -- +22 % de coût à chaque tirage suivant de la manche (8 % avant le 20 oct. : trop de tirages)
 	LuckPerPoint = 0.005, -- chaque point augmente un peu le poids des raretés hautes
 	MaxLuck = 1, -- au maximum, poids des raretés hautes ×2
-	PityPulls = 60, -- au plus tard au 60e tirage sans Épique+, un Épique+ est garanti
-	PityMinRarity = 4, -- index de rareté garanti par la pitié (4 = Épique)
+	-- Pitié par palier (25 oct., dataset_and_pipeline/ECONOMY_REPORT.md règle 11) : la rareté juste au-dessus de la
+	-- meilleure que le joueur possède (œufs compris) est garantie au tirage où PityPercentile des joueurs l'auraient
+	-- déjà eue : ln(1 - PityPercentile) / ln(1 - p), p = chance de cette rareté ou mieux (LootEngine.pityAt).
+	-- Seuls les 10 % les plus malchanceux en profitent. Avant : un Épique garanti au 60e tirage, jamais atteint.
+	PityPercentile = 0.9,
 	AnnounceMinRarity = 5, -- annonce serveur à partir de cet index (5 = Légendaire)
 	-- Dans une rareté, un familier que le joueur n'a PAS encore a ce poids (1 pour ceux déjà possédés) :
 	-- la collection avance bien plus vite. Les chances de chaque rareté ne changent pas.
@@ -489,7 +515,7 @@ Config.Keys = {
 -- Vol de familiers : [E] sur un familier d'une base adverse déverrouillée, à ramener dans sa propre base.
 Config.Steal = {
 	OnlyDuringDigesting = false, -- false : vol possible à tout moment (nuit comme jour)
-	-- La vitesse pendant le transport dépend de la force et du poids du familier : voir Config.Carry.
+	-- La vitesse pendant le transport dépend de la rareté du familier et de la vitesse du propriétaire : Config.Carry.
 	MaxCarryTime = 60, -- à vitesse normale ; plus long si on est ralenti (au-delà, le familier est lâché et rentre seul)
 	HoldDuration = 0.3, -- temps d'appui sur [E] pour voler
 	PromptDistance = 8, -- distance d'affichage de la bulle [E] (studs)
@@ -500,17 +526,16 @@ Config.Steal = {
 }
 
 -- Porter un familier (volé, ou le sien pris dans sa base) : server/StealController.
---   Poids = taille du familier (shared/PetSizes, en tailles de joueur) ^ WeightExponent : 0,1 pour un pigeon, 24 pour la baleine.
---   Capacité = force de lancer du joueur (attribut ThrowPower, 70 au départ) / StrengthPerCapacity.
---   Vitesse = 1 / (1 + Slow x poids / capacité), entre MinSpeed et MaxSpeed.
---   Ex. au départ (capacité 7) : Commun 95 %, Épique ~85 %, Légendaire ~76 %, Divin ~50 %, Sigma 30 % ;
---   force 60 (capacité 25) : Divin ~75 %, Sigma ~55 %.
+--   Vitesse = SpeedByRarity[rareté] x min(1, vitesse du propriétaire / vitesse du porteur) (25 oct.,
+--   dataset_and_pipeline/ECONOMY_REPORT.md règle 5) : un voleur ne va jamais plus vite que le propriétaire avec un gros
+--   butin, et la Force ne compte plus pour porter (elle sert à lancer loin). Avant : poids = taille^3 et Force, qui
+--   faisaient disparaître le poids dès qu'on s'entraînait (un Sigma partait dès que son propriétaire était au tapis).
+--   SpeedByRarity = 0,95 x 0,876^(rang - 1) : Commun au plafond (MaxSpeed) ; Sigma tout juste volable, à vitesse égale,
+--   quand le propriétaire est de l'autre côté du trou (110 / (278 - 10 + 16 x 1,5) = 0,376).
 -- Frappé à la batte, éjecté par le dôme, mort ou trop lent : le porteur LÂCHE le familier, qui rentre à pied vers la base
 -- de son propriétaire (WalkHomeSpeed) ; n'importe qui peut le ramasser en chemin.
 Config.Carry = {
-	WeightExponent = 3,
-	StrengthPerCapacity = 10,
-	Slow = 0.8,
+	SpeedByRarity = { 0.95, 0.83, 0.73, 0.64, 0.56, 0.49, 0.43, 0.38 } :: { number }, -- Commun -> Sigma
 	MinSpeed = 0.3,
 	MaxSpeed = 0.95,
 	MaxCarryTime = 180, -- secondes, même très ralenti
@@ -754,14 +779,17 @@ Config.Weapons = {
 		Stun = 1.4,
 		Cooldown = 1.1,
 	} :: BatDef,
+	-- 25 oct. (dataset_and_pipeline/ECONOMY_REPORT.md règle 6) : il faut viser. AimCone 14 -> 8 : ~4 studs de marge à
+	-- mi-portée (28 studs), la largeur d'un joueur qui porte plus le décalage du ping. Cooldown 5 -> 9 : la moitié du plus
+	-- long trajet d'un voleur (Sigma, 18 s) : 2 tirs au plus sur un gros butin, 1 sur un petit. À vérifier à 2 joueurs.
 	Grapple = {
 		Range = 55,
-		AimCone = 14,
+		AimCone = 8,
 		HookSpeed = 220,
 		PullSpeed = 85,
 		PullTime = 1.1,
 		StopDistance = 5,
-		Cooldown = 5,
+		Cooldown = 9,
 	} :: GrappleDef,
 	-- Anciennes armes (sauvegardes d'avant le 13 oct.) : converties à la lecture.
 	OldWeapons = { WeaponSlap = { "WeaponBat" }, WeaponPan = { "WeaponBat" }, WeaponShockwave = { "WeaponBat", "WeaponGrapple" } } :: { [string]: { string } },
@@ -776,6 +804,11 @@ Config.Weapons = {
 		NearDistance = 10,
 	},
 	HitImmunity = 2, -- secondes pendant lesquelles un joueur touché ne peut pas être retouché (batte et grappin)
+	-- Anti-acharnement (25 oct., ECONOMY_REPORT.md étape 2) : au plus MaxHitsPerWindow coups de batte par victime sur
+	-- HitWindow secondes (28 % du temps au sol au maximum, au lieu de 70 %). 10 s = le trajet d'un vol (109 studs à 16)
+	-- + la réaction + le KO : le temps de se relever et d'agir.
+	HitWindow = 10,
+	MaxHitsPerWindow = 2,
 	RangeMargin = 3, -- studs de marge sur la portée (latence)
 }
 
@@ -863,8 +896,11 @@ export type HoleTier = {
 }
 Config.Blackhole = {
 	-- Jauge à remplir pour quitter chaque palier, pour 1 joueur ; multipliée par (nombre de joueurs) ^ PlayerScaling.
-	-- Un joueur seul marque ~10 à 15 points de jauge par tour : ~3 tours par palier au début.
-	GaugeNeed = { 40, 50, 60, 75, 90, 110, 130 },
+	-- 25 oct. (ECONOMY_REPORT.md règle 13) : la jauge compte en « objets ordinaires » (Config.MeanGaugePerItem), plus en
+	-- valeur : le tour ne s'accélère plus avec la Chance (avant : 7 paliers en 5 min en fin de partie). Un joueur lance
+	-- 16 à 38 objets par manche. Total x1,26 (555 -> 700) pour qu'à 8 joueurs au maximum (8 x 38 objets) chaque palier dure
+	-- au moins une manche : 8 manches x 8 x 38 / 8^0,6 = 699. Tour complet : 14 à 33 min à 8, 32 à 76 min seul.
+	GaugeNeed = { 50, 63, 76, 95, 113, 139, 164 },
 	PlayerScaling = 0.6,
 	Tiers = {
 		{ Name = "ÉVEIL", Color = Color3.fromRGB(150, 0, 255), Color2 = Color3.fromRGB(255, 90, 230), Hint = "Le trou noir s'éveille. Nourris-le !",

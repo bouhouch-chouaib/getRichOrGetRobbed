@@ -81,11 +81,19 @@ local Remotes = {
 	end },
 }
 local modules = {
-	Config = { Market = { MaxListings = 3, MinPrice = 1, MaxPrice = 1e30, Tax = 0.1 } },
+	Config = {
+		Market = { MaxListings = 3, MinPrice = 1, MaxPrice = 1e30, Tax = 0.1, SuggestedSeconds = 600, MinSuggested = 100, MaxPriceSeconds = 3600 },
+		-- Même calcul que Config.GetMarketMaxPrice : au plus 1 h du revenu du familier (au moins 600).
+		GetMarketMaxPrice = function(income)
+			return math.floor(math.max(100 * 3600 / 600, income * 3600))
+		end,
+	},
 	NumberFormat = { money = function(value)
 		return "$" .. tostring(value)
 	end },
-	PetCatalog = { ById = { Rex = { Name = "Rex" }, Fish = { Name = "Fish" } } },
+	PetCatalog = { ById = { Rex = { Name = "Rex" }, Fish = { Name = "Fish" } }, GetIncome = function()
+		return 1
+	end },
 	Remotes = Remotes,
 	BaseManager = { GetBase = function()
 		return nil
@@ -138,6 +146,7 @@ assert(not Market.List(seller, "Rex", 0), "price 0 accepted")
 assert(not Market.List(seller, "Rex", 0 / 0), "NaN price accepted")
 assert(not Market.List(seller, "Nope", 10), "unknown pet accepted")
 assert(not Market.List(seller, "Fish", 10), "equipped pet listed")
+assert(not Market.List(seller, "Rex", 3601), "price above 1 h of the pet's income accepted")
 assert(Market.List(seller, "Rex", 300.7), "listing refused")
 assert(Market.List(seller, "Rex", 500), "second copy refused")
 assert(not Market.List(seller, "Rex", 500), "listed more copies than owned")

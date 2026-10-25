@@ -3,7 +3,8 @@
 --   - Le 1er tirage coûte Config.Loot.PullCost points, chaque suivant coûte PullCostGrowth % de plus.
 --   - Minimum 1 tirage dès qu'un point a été marqué.
 --   - Plus le score est haut, plus les raretés hautes ont de poids (chance plafonnée).
---   - Pitié : après PityPulls tirages sans rareté >= PityMinRarity, ce palier est garanti.
+--   - Pitié par palier : la rareté juste au-dessus de la meilleure possédée est garantie au tirage où
+--     Config.Loot.PityPercentile des joueurs l'auraient déjà eue (LootEngine.pityAt).
 --   - Dans une rareté, les familiers pas encore possédés sortent Config.Loot.NewPetWeight fois plus souvent.
 --   - Rang de tirage (Config.Loot.Ranks, selon les tirages faits depuis le début) : un tirage sous la rareté
 --     plancher monte au plancher (les raretés au-dessus gardent exactement leurs chances).
@@ -21,6 +22,8 @@ export type Outcome = {
 	results: Results,
 	pulls: number,
 	pity: number, -- compteur de pitié mis à jour (à sauvegarder pour la manche suivante)
+	pityTarget: number, -- rareté garantie par la pitié (index ; > #Config.Rarities : plus rien à garantir)
+	pityAt: number?, -- tirage (compteur pity) où elle est garantie ; nil si plus rien à garantir
 	drops: { string }, -- petIds dans l'ordre des tirages
 }
 
@@ -176,18 +179,56 @@ function LootEngine.odds(luck: number, floorIndex: number?, tier: number?): { nu
 	return weights
 end
 
+-- Rareté visée par la pitié : celle juste au-dessus de la meilleure de `owned` (formes évoluées et mutées comprises).
+function LootEngine.pityTarget(owned: Owned): number
+	local best = 0
+	for petId, count in pairs(owned) do
+		local entry = PetCatalog.ById[petId]
+		if count > 0 and entry then
+			best = math.max(best, Config.RarityIndex[entry.Rarity] or 1)
+		end
+	end
+	return best + 1
+end
+
+-- Tirage (valeur du compteur de pitié) où la rareté `target` (ou mieux) est garantie : celui où PityPercentile des
+-- joueurs l'auraient déjà eue, ln(1 - PityPercentile) / ln(1 - p). nil s'il n'y a plus de rareté au-dessus.
+function LootEngine.pityAt(target: number, luck: number, floorIndex: number?, tier: number?): number?
+	if target > #Config.Rarities then
+		return nil
+	end
+	local odds = LootEngine.odds(luck, floorIndex, tier)
+	local p = 0
+	for index = target, #odds do
+		p += odds[index]
+	end
+	if p >= 1 then
+		return 1
+	end
+	if p <= 0 then
+		return nil
+	end
+	return math.max(1, math.ceil(math.log(1 - Config.Loot.PityPercentile) / math.log(1 - p)))
+end
+
 -- Effectue `pulls` tirages avec cette chance (tirages achetés, ou ceux d'une manche).
 -- owned : familiers du joueur (non modifié : une copie suit les tirages de la série). floorIndex : rareté plancher.
 -- tier : monde le plus loin atteint (bonus de rareté). worldId : monde où se trouve le joueur (ses exclusifs).
+-- pity : tirages faits depuis la dernière rareté visée par la pitié (Config.Loot.PityPercentile).
 function LootEngine.rollPulls(pulls: number, pity: number, luck: number, owned: Owned?, floorIndex: number?, tier: number?, worldId: string?): Outcome
-	local outcome: Outcome = { results = {}, pulls = 0, pity = pity, drops = {} }
 	local have: Owned = table.clone(owned or {})
+	local target = LootEngine.pityTarget(have)
+	local at = LootEngine.pityAt(target, luck, floorIndex, tier)
+	local outcome: Outcome = { results = {}, pulls = 0, pity = pity, pityTarget = target, pityAt = at, drops = {} }
 	for _ = 1, pulls do
 		outcome.pity += 1
-		local minIndex = if outcome.pity >= Config.Loot.PityPulls then Config.Loot.PityMinRarity else 1
+		local minIndex = if at and outcome.pity >= at then target else 1
 		local rarityIndex = rollRarity(luck, minIndex, floorIndex or 1, tier)
-		if rarityIndex >= Config.Loot.PityMinRarity then
+		if rarityIndex >= target then
+			-- La rareté visée est arrivée : le compteur repart, et la pitié vise la suivante.
 			outcome.pity = 0
+			target = rarityIndex + 1
+			at = LootEngine.pityAt(target, luck, floorIndex, tier)
 		end
 		local petId = pickPet(rarityIndex, have, worldId)
 		have[petId] = (have[petId] or 0) + 1
@@ -196,6 +237,8 @@ function LootEngine.rollPulls(pulls: number, pity: number, luck: number, owned: 
 	end
 
 	outcome.pulls = pulls
+	outcome.pityTarget = target
+	outcome.pityAt = at
 	return outcome
 end
 
