@@ -74,8 +74,17 @@ Bloom, ColorCorrection, DepthOfField, SunRays, latitude, échelles d'environneme
 Prairie (`shared/Worlds`) reprend la couleur, la densité, la teinte et la saturation de la charte (les autres mondes
 gardent leur air). La couleur de l'air de nuit de la charte n'est pas appliquée (elle se battrait avec WorldSkin).
 
-Reste à faire : habiller les bases dans `MapGenerator` (palissades à
-la place des clôtures, arche à l'entrée) plutôt que par-dessus ; regarder la performance sur téléphone.
+Bases habillées (25 oct., code, **Prairie seulement** : chaque monde aura plus tard son propre habillage) :
+`server/MapGenerator.createPrairieDressing` copie d'`ArtModels.Map` 27 palissades (rail vers l'extérieur ; 3 étirées de
+chaque côté de l'entrée), l'arche ancienne sur l'entrée et l'escalier devant (hauteur = plateforme), sans collision,
+dans le dossier `PrairieLook` de chaque base. L'ancienne clôture reste (collisions, porte, verrou inchangés) et
+`client/WorldSkin` montre l'une ou l'autre selon le monde du propriétaire de la base ; les décors de l'arène
+(`Workspace.MapDecor`) ne sont visibles et solides que pour un joueur en Prairie (CanCollide local), et remplacent alors
+les arbres en cubes. Vérifié en Play (solo) : 29 pièces par base, bascules, entrée à pied, photo
+`qa_renders/map_roblox_entree_base.jpg`. Déjà vrai avant : le personnage enjambe la clôture (rail bas à 1,9 stud),
+donc on traverse aussi les palissades à côté de l'entrée.
+
+Reste à faire : décider si les bases deviennent fermées (mur invisible à la hauteur des palissades) ; regarder la performance sur téléphone.
 
 ## Règles de jeu respectées par le placement
 
