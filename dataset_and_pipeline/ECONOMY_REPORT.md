@@ -1,7 +1,8 @@
 # Rapport économique (phase 1.7)
 
-**État au 25 oct. 2026 : étapes 1 (audit), 2 (courbe coûts / revenus, défenses) et 3 (risque du vol,
-anti-boule de neige) faites.** Les étapes 4 et 5 (rétention, simulateur à plusieurs joueurs) viennent ensuite. **Rien n'a encore été changé dans le jeu** :
+**État au 25 oct. 2026 : étapes 1 (audit), 2 (courbe coûts / revenus, défenses), 3 (risque du vol,
+anti-boule de neige) et 4 (rétention, Rebirth, amis) faites.** L'étape 5 (simulateur à plusieurs joueurs, puis
+`Config.lua` et le code) vient ensuite. **Rien n'a encore été changé dans le jeu** :
 les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
 Règle suivie : aucun chiffre « au doigt mouillé ». Tout ce qui suit vient du code ou d'un calcul refaisable.
@@ -489,3 +490,165 @@ serveur ; n'importe qui peut le frapper (le familier tombe et rentre à pied, et
 - Étape 5 : simulateur à 8 joueurs (prudent, voleur, nouveau dans un serveur avancé, duo d'amis) avec les règles 2 à 10,
   pour mesurer les vols réussis, les pertes et l'écart entre le plus riche et les autres, avant de toucher
   `Config.lua`. Le grappin (règle 6) sera testé à 2 joueurs dans Studio.
+
+---
+
+# Étape 4 : rétention, Rebirth et jeu entre amis
+
+Calculs : `python -I dataset_and_pipeline/economy_simulator.py retention --runs 150 --hours 12` (pitié, jauge, Index),
+`segments` / `solo` avec les options `--capsules-rebirth --doublons-capsule --rebirth-croissance 1.62` (Rebirth),
+`python -I dataset_and_pipeline/economy_map_metrics.py --etape4` (amis).
+
+Ce qui existe déjà et marche : cadeau du jour (7 jours), 3 quêtes par jour, codes, barre « prochain tirage », Index
+avec récompenses, œufs et capsule qui avancent même hors ligne, paliers du trou noir et effondrement, +10 % de revenu
+par ami présent. Ce qui manque : aucune jauge vers le prochain monde, aucune pitié utile, une fin de partie plate.
+
+## 4.1 Une pitié qui sert vraiment
+
+Tirages qu'il faut pour obtenir une rareté (ou mieux) : 1 chance sur 2 / 9 chances sur 10. Chance réelle de chaque
+monde (points médians d'une manche x 0,005), tirages par heure mesurés.
+
+| Monde | Tirages / h | Épique | Légendaire | Mythique | Divin | Sigma |
+| --- | --- | --- | --- | --- | --- | --- |
+| Prairie | 133 | 7 / 22 | 17 / 55 | 56 / 186 | 225 / 747 | 1350 / 4482 |
+| Désert | 243 | 5 / 17 | 13 / 41 | 39 / 128 | 145 / 479 | 814 / 2702 |
+| Volcan | 374 | 4 / 13 | 9 / 29 | 26 / 86 | 91 / 301 | 479 / 1590 |
+| Glace | 524 | 3 / 9 | 6 / 20 | 17 / 55 | 55 / 182 | 272 / 902 |
+| Divin | 823 | 2 / 4 | 3 / 8 | 5 / 16 | 13 / 41 | 48 / 157 |
+
+**La pitié actuelle (un Épique garanti au 60e tirage) ne se déclenche jamais** : 0 fois en 150 parties de 12 h. Il
+faut au pire 22 tirages pour avoir un Épique 9 fois sur 10 : personne n'atteint 60.
+
+**Règle 11. Pitié par palier.** La rareté juste au-dessus de la meilleure qu'on possède est garantie au tirage où
+9 joueurs sur 10 l'auraient déjà eue (`ln(0,1) / ln(1 - p)`, p = chance de cette rareté ou mieux, calculée par
+`LootEngine.odds` avec le monde et la chance du moment). Seuls les 10 % les plus malchanceux en profitent ; elle
+remplace l'ancienne.
+
+| Mesuré (150 parties) | sans | avec la règle 11 |
+| --- | --- | --- |
+| 1er Légendaire, 1 joueur sur 100 le plus malchanceux | 38 min | 28 min |
+| 1er Sigma, 9 sur 10 / 99 sur 100 | 2,4 h / 3,1 h | 2,0 h / 2,5 h |
+| Monde Divin, 99 sur 100 | 8,1 h | 7,5 h |
+| 1er Rebirth, médiane | 8,7 h | 8,7 h (inchangé) |
+
+0,8 garantie par partie de 12 h : elle coupe la très grosse malchance sans accélérer le jeu. Elle s'affiche :
+« Mythique garanti dans 23 tirages » (objectif entamé, toujours visible). Les tirages achetés en Robux suivent la même
+règle, qui doit alors être écrite dans l'onglet Chances (règle Roblox sur les objets aléatoires payants).
+
+## 4.2 Toujours un objectif entamé sous les yeux
+
+**Règle 12. Le prochain objectif à l'écran.** Une petite pile dans le HUD montre les deux objectifs les plus proches,
+avec une barre : prochain monde (argent / prix), garantie de la pitié, prochaine tentative de la capsule, Index
+(64 / 106), familier bridé à libérer (règle 2). Choix : celui qui arrivera le plus tôt (argent manquant / revenu, etc.)
+et celui qui est le plus avancé. Raison : on se souvient mieux d'une tâche commencée que d'une tâche pas encore
+lancée (effet Zeigarnik). Une barre à 70 % retient plus qu'un prix affiché.
+
+Avancée de l'Index mesurée : 21 familiers à 10 min, 64 à 1 h, 95 à 5 h, 100 à 10 h ; les 75 de base vers 4,5 h. Les
+106 ne sont jamais complets en 12 h : les exclusifs d'un monde ne sortent que là, et on n'y retourne pas. C'est un bon
+objectif de long terme (le bouton « Y ALLER » existe), à montrer dans la pile (« 6 exclusifs du Volcan à trouver »).
+
+**Au retour** : un résumé « Pendant ton absence : 3 œufs ont éclos, ta capsule a tenté 2 évolutions » (les œufs et la
+capsule avancent hors ligne). C'est la raison de revenir le lendemain.
+
+## 4.3 Des moments forts sur le serveur
+
+Les paliers du trou noir sont déjà ces moments (lave x3, cible x2, tentacules, gravité, combo, jackpot, puis
+l'effondrement). Mais leur rythme dépend de la Chance des joueurs. Durée d'un tour complet des 7 paliers aujourd'hui :
+
+| Joueurs en sont à | seul | 4 joueurs | 8 joueurs |
+| --- | --- | --- | --- |
+| 10 min | 71 min | 41 min | 31 min |
+| 1 h | 21 min | 12 min | 9 min |
+| 10 h | 11 min | 6 min | 5 min |
+
+En fin de partie, les 7 paliers passent en 5 min : moins d'une manche (105 s) chacun. On n'a même pas le temps de
+voir la mécanique d'un palier qu'il a déjà changé.
+
+**Règle 13. Jauge du trou en « objets », pas en valeur.** Chaque objet avalé compte sa valeur divisée par la valeur
+moyenne d'un objet à la Chance du lanceur (un objet ordinaire = 1, un rare compte plus). Le tour ne dépend plus de
+l'avancée. Pour qu'à 8 joueurs au maximum (38 objets par manche chacun) chaque palier dure au moins une manche, il
+faut `jauge totale >= 8 manches x 8 x 38 / 8^0,6 = 699` : `GaugeNeed` x1,26 (50, 63, 76, 95, 113, 139, 164). Tour
+complet : 14 à 33 min à 8 joueurs, 18 à 44 min à 4, 32 à 76 min seul.
+
+**Règle 14 (au choix de Chouaib). La ruée des voleurs.** Pendant la digestion qui suit l'effondrement, tous les verrous
+sont coupés 60 s. Le grand moment du trou noir devient aussi un grand moment de vol, une fois par tour (14 à 76 min).
+Les règles 7 (vol utile) et 8 (bouclier) et la protection des nouveaux empêchent que ça tourne au massacre des
+débutants.
+
+## 4.4 Le Rebirth : une récompense qui change le jeu, au bon moment
+
+Aujourd'hui, la place de base en plus (+2 % de revenu) ne change presque rien. Après le 1er Rebirth, le revenu ne
+monte plus pendant les séjours au Divin (étape 2), et le prix x2,7 allonge les cycles sans fin.
+
+Essais dans le simulateur, séjour au Divin : montée du revenu / part du séjour sur le plateau.
+
+| Cycle | aujourd'hui (1 capsule) | + 1 capsule par Rebirth | + un doublon de sa meilleure rareté va dans une capsule libre |
+| --- | --- | --- | --- |
+| Rebirth 2 | x1,03 / 68 % | x1,3 / 34 % | x1,3 / 34 % |
+| Rebirth 3 | x1,05 / 47 % | x1,11 / 31 % | x1,33 / 33 % |
+| Rebirth 4 | x1,05 / 34 % | x1,1 / 26 % | x1,43 / 19 % |
+
+Ce qui bloquait : en fin de partie, les doublons au-delà de 5 sont vendus aussitôt, les capsules ne reçoivent plus
+que des œufs de Divin et la base n'évolue plus. Avec les deux règles, la base grandit de x1,46 à x1,48 par cycle : c'est
+l'exigence de la règle 4 (x1,5).
+
+**Règle 15. Chaque Rebirth donne une capsule d'évolution de plus** (6 au maximum, la place de base en plus est gardée).
+Un doublon de sa meilleure rareté va dans une capsule libre au lieu d'être vendu. Récompense visible (une capsule de
+plus derrière la base, de plus en plus grande avec le monde : `client/CapsuleDecor`) et récompense de jeu (de quoi
+grandir à chaque cycle). Le multiplicateur x(1 + Rebirths) reste.
+
+**Règle 16. Prix du Rebirth : `4T x (n + 1) x 1,62^n`.** Relation 5 de l'étape 2 :
+`prix(n + 1) / prix(n) = ρ x σ x (2 + n) / (1 + n)`. Le produit des `(2 + n) / (1 + n)` fait simplement `(n + 1)`.
+σ = 1,47 (croissance de la base par cycle, mesurée avec la règle 15), ρ = 1,1 (chaque cycle un peu plus long que le
+précédent, un mur doux, pas un mur dur).
+
+| Rebirth | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Prix aujourd'hui | 4T | 10,8T | 29T | 79T | 213T | 574T | 1,5Qa |
+| Prix règle 16 | 4T | 13T | 31T | 68T | 138T | 268T | 506T |
+| Atteint (aujourd'hui + règle 15) | 8,8 h | 12,2 h | 15,6 h | 19,8 h | 25,9 h | 35,0 h | après 45 h |
+| Atteint (règles 15 + 16) | 8,8 h | 12,5 h | 16,1 h | 19,8 h | 24,2 h | 29,4 h | 35,8 h |
+
+Les cycles durent 3,6 à 3,7 h, puis 4,4 h, 5,2 h et 6,4 h (au lieu de 6,1 h puis 9,1 h). Le Rebirth est payable
+quand le séjour au Divin a passé 26 à 39 % de son temps sur le plateau, comme dans les mondes qui marchent bien
+(20 à 35 %). C'est le « bon moment » : le revenu a fini de monter, on n'attend pas des heures pour rien.
+
+## 4.5 Jouer avec un ami doit vraiment aider
+
+Aujourd'hui : +10 % de revenu par ami présent (5 au plus). Rien dans le vol ni la défense.
+
+- **Règle 17. Base voisine et refuge.** Un joueur qui arrive reçoit, si elle est libre, la base à côté d'un ami. Un
+  familier volé peut être rapporté dans la base d'un ami présent (il va quand même au voleur). Trajet médian depuis
+  les bases éloignées : 308 -> 241 studs (-22 %).
+- **Règle 18. Escorte.** Si un ami reste à moins de 15 studs du porteur (portée de la batte, 8 + 3, avec un peu de
+  marge), le familier compte comme une rareté plus légère : +14 % de vitesse. D\* d'un Sigma : 278 -> 241 studs (volable
+  quand le propriétaire vole deux bases plus loin, plus seulement de l'autre côté du trou). Un gros vol se fait à deux.
+- **Règle 19. Reprendre pour un ami.** Les amis de la victime voient aussi la bulle « Reprendre ». Deux défenseurs
+  couvrent deux fois plus de terrain.
+- **Invitation récompensée.** Quand un ami arrive par ton invitation, vous recevez chacun un œuf gratuit (une fois
+  par ami et par jour). À vérifier : `Player:GetJoinData()` donne qui a invité (champ `ReferredByPlayerId` dans la
+  documentation Roblox).
+
+## 4.6 Où ça va dans le code (pour l'étape 5)
+
+Rien n'est codé : cette table sert à l'étape 5, après la preuve par le simulateur.
+
+| Règle | Fichiers | Ce qui change |
+| --- | --- | --- |
+| 2, 7 | `shared/PetCatalog` (revenu plafonné), `server/EconomyController`, `server/StealController`, `client/BasePets` | revenu plafonné par la meilleure rareté obtenue soi-même (nouveau champ sauvegardé `selfBest`) ; bulle [E] seulement sur les vols utiles |
+| 3 | `server/MarketController`, `Config.Market` | prix max = 3 600 s du revenu plafonné |
+| Verrou, batte (étape 2) | `server/LockController`, `server/WeaponController`, `Config.Lock`, `Config.Weapons` | cycle fermé 45 s / grisé 60 s ; 2 coups au plus en 10 s par victime |
+| 5, 6 | `server/StealController.CarrySpeed`, `Config.Carry`, `Config.Weapons.Grapple` | table `SpeedByRarity`, min(vitesse du voleur, du propriétaire) ; cône 8°, recharge 9 s |
+| 8, 9 | `server/StealController`, nouveau `server/CrownController` | bouclier 105 s après 20 % de perte ; couronne du plus gros revenu, prime et défenses |
+| 11 | `shared/LootEngine`, `server/PullRewards`, `server/SessionData` | seuil du palier, compteur sauvegardé, attribut pour le HUD |
+| 12 | nouveau `shared/NextGoals` (calcul pur, testable avec Lune), `client/HUD` | pile « prochain objectif » ; résumé d'absence au chargement |
+| 13, 14 | `server/BlackholeTiers`, `server/LockController`, `Config.Blackhole` | jauge en objets, `GaugeNeed` x1,26 ; verrous coupés après l'effondrement |
+| 15, 16 | `server/EggController`, `server/SessionData`, `server/ProgressionController`, `client/EvolutionMachine`, `Config.Evolution`, `Config.Rebirth` | plusieurs capsules, doublons vers une capsule libre ; `GetRebirthPrice` = base x (n + 1) x 1,62^n |
+| 17-19 | `server/BaseManager`, `server/StealController`, `server/ProgressionController` (liste des amis présents) | base voisine, refuge, escorte, « Reprendre » pour un ami, œuf d'invitation |
+
+## 4.7 Suite
+
+Étape 5 : simulateur à 8 joueurs sur un serveur (prudent, voleur, nouveau dans un serveur avancé, duo d'amis), avec les
+positions, les vols et les règles 2 à 19. On mesure les vols réussis, les pertes, l'écart entre le plus riche et les
+autres, et le temps jusqu'aux mondes pour chaque profil. Ensuite seulement : `Config.lua`, `game_design_matrix.json`
+(et son générateur, qui lit de mauvaises valeurs) et le code Luau, règle par règle, chacune testée.

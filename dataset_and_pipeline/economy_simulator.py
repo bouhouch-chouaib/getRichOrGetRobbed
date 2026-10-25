@@ -7,10 +7,14 @@ avec Lune et les écrit dans economy_data.json. Les règles (tirages, pitié, ra
     python -I dataset_and_pipeline/economy_simulator.py solo [--runs 200] [--hours 30]
     python -I dataset_and_pipeline/economy_simulator.py segments [--runs 200] [--hours 30]
     python -I dataset_and_pipeline/economy_simulator.py cibles [--runs 120] [--hours 11]
+    python -I dataset_and_pipeline/economy_simulator.py retention [--runs 150] [--hours 12]
+    options des règles proposées (tous les modes sauf retention) : --pitie-palier, --capsules-rebirth, --doublons-capsule,
+    --rebirth-croissance 1.62
 
 `solo` : même sortie que tools/sim-economy.luau ; avec --no-capsule, mêmes règles (vérifié : mêmes résultats).
 `segments` : les dents de scie, monde par monde (montée à l'arrivée, plateau, temps d'attente du monde suivant).
 `cibles` : qui a intérêt à voler qui selon l'avancée de chacun (vols utiles, gain du meilleur vol, effet du plafond).
+`retention` : pitié (chances réelles, garanties données, malchance extrême), jauge du trou noir, avancée de l'Index.
 """
 from __future__ import annotations
 
@@ -96,8 +100,11 @@ class Game:
             return None
         return math.floor(item["BasePrice"] * item["PriceGrowth"] ** level)
 
-    def rebirth_price(self, n: int) -> float:
+    def rebirth_price(self, n: int, growth: float | None = None) -> float:
+        """Prix du Rebirth n+1. growth (proposé, étape 4) : prix = base x (n + 1) x growth^n ; sinon Config (base x PriceGrowth^n)."""
         rb = self.cfg["Rebirth"]
+        if growth:
+            return rb["BasePrice"] * (n + 1) * growth ** n
         return rb["BasePrice"] * rb["PriceGrowth"] ** n
 
     def rebirth_mult(self, n: int) -> float:
@@ -191,20 +198,45 @@ class Game:
                 return bucket[-1]
         return next(iter(self.pets))
 
-    def roll_pulls(self, rng, pulls, pity, luck, owned, floor_index, tier, world_id):
+    def roll_pulls(self, rng, pulls, pity, luck, owned, floor_index, tier, world_id, frontier=None):
+        """frontier = (rareté, seuil, compteur) : pitié par palier (proposée à l'étape 4) ; au seuil-ième tirage sans cette
+        rareté ou mieux, elle est garantie. Renvoie (tirages, pitié, compteur, garanties du palier, garanties actuelles)."""
         loot = self.cfg["Loot"]
         have = dict(owned)
         drops = []
+        count = frontier[2] if frontier else 0
+        forced = old_hits = 0
         for _ in range(pulls):
             pity += 1
-            min_index = loot["PityMinRarity"] if pity >= loot["PityPulls"] else 1
+            count += 1
+            min_index = 1
+            if pity >= loot["PityPulls"]:
+                min_index = loot["PityMinRarity"]
+                old_hits += 1
+            if frontier and count >= frontier[1]:
+                min_index = max(min_index, frontier[0])
+                forced += 1
             rarity = self.roll_rarity(rng, luck, min_index, floor_index, tier)
             if rarity >= loot["PityMinRarity"]:
                 pity = 0
+            if frontier and rarity >= frontier[0]:
+                count = 0
             pet = self.pick_pet(rng, rarity, have, world_id)
             have[pet] = have.get(pet, 0) + 1
             drops.append(pet)
-        return drops, pity
+        return drops, pity, count, forced, old_hits
+
+    def base_species(self) -> list[str]:
+        return [p for bucket in self.base_by_rarity.values() for p in bucket]
+
+    def chance_at_least(self, rarity: int, luck: float, floor_index: int, tier: int) -> float:
+        weights = self.rarity_weights(luck, floor_index, tier)
+        return sum(weights[rarity - 1:]) / sum(weights)
+
+    def frontier_threshold(self, rarity: int, luck: float, floor_index: int, tier: int, percentile: float = 0.9) -> int:
+        """Tirages après lesquels seuls (1 - percentile) des joueurs n'ont toujours pas cette rareté (loi géométrique)."""
+        p = self.chance_at_least(rarity, luck, floor_index, tier)
+        return max(1, math.ceil(math.log(1 - percentile) / math.log(1 - p))) if 0 < p < 1 else 1
 
 
 # Hypothèses de jeu de tools/sim-economy.luau (un joueur seul, toujours présent).
@@ -216,12 +248,20 @@ CHECKPOINTS = [600, 1800, 3600, 7200, 18000, 36000, 72000, 144000]
 class SoloRun:
     """Une partie d'un joueur seul : port de tools/sim-economy.luau, manche après manche."""
 
-    def __init__(self, game: Game, rng: random.Random, fusion: bool = True, capsule: bool = True):
+    def __init__(self, game: Game, rng: random.Random, fusion: bool = True, capsule: bool = True, options: dict | None = None):
         g = self.g = game
         self.rng = rng
         self.fusion = fusion
         self.use_capsule = capsule
-        self.capsule: dict | None = None  # œuf dans la capsule d'évolution (1 place, Config.Evolution.Slots)
+        # Règles proposées à l'étape 4 (pas dans Config.lua) : "pitie_palier", "capsules_rebirth", "doublons_capsule".
+        self.options = options or {}
+        self.capsules: list[dict] = []  # œufs dans les capsules d'évolution (Config.Evolution.Slots places)
+        self.frontier_count = 0
+        self.forced = 0  # garanties données par la pitié par palier
+        self.old_pity_hits = 0  # garanties données par la pitié actuelle (Épique+ au 60e tirage)
+        self.gauge: dict[int, float] = {}  # point de contrôle -> jauge du trou noir apportée en une manche
+        self.discovered_at: dict[int, int] = {}
+        self.scores_by_tier: dict[int, list[tuple[float, int]]] = {}  # avant le 1er Rebirth : (points, tirages) par manche
         start = g.cfg["Newcomer"]["PetId"]
         self.t = 0.0
         self.money = float(g.cfg["Newcomer"]["BonusMoney"])
@@ -293,7 +333,7 @@ class SoloRun:
                 self.purchases.append((self.t, "Monde", self.tier, next_world["Price"], self.income_now))
                 self.mark(f"Monde {self.tier} {next_world['Id']}")
                 bought = True
-            elif not next_world and self.tier >= g.cfg["Rebirth"]["RequiredTier"] and self.money >= g.rebirth_price(self.rebirths):
+            elif not next_world and self.tier >= g.cfg["Rebirth"]["RequiredTier"] and self.money >= g.rebirth_price(self.rebirths, self.options.get("rebirth_croissance")):
                 self.rebirths += 1
                 self.money, self.tier, self.up = 0.0, 1, {}
                 self.mark(f"Rebirth {self.rebirths}")
@@ -304,7 +344,7 @@ class SoloRun:
                     cost = g.upgrade_price(item, self.up.get(item, 0))
                     if cost is not None and cost < price:
                         cheapest, price = item, cost
-                goal = next_world["Price"] if next_world else g.rebirth_price(self.rebirths)
+                goal = next_world["Price"] if next_world else g.rebirth_price(self.rebirths, self.options.get("rebirth_croissance"))
                 if cheapest and price <= 0.3 * self.money and price <= 0.15 * goal:
                     self.money -= price
                     self.spent_shop += price
@@ -321,35 +361,44 @@ class SoloRun:
         owned = dict(self.pets)
         for pet, _ in self.eggs:
             owned[pet] = owned.get(pet, 0) + 1
-        if self.capsule:
-            owned[self.capsule["pet"]] = owned.get(self.capsule["pet"], 0) + 1
+        for cap in self.capsules:
+            owned[cap["pet"]] = owned.get(cap["pet"], 0) + 1
         return owned
 
+    def capsule_slots(self) -> int:
+        extra = min(self.rebirths, self.g.cfg["Rebirth"]["MaxExtraPets"]) if self.options.get("capsules_rebirth") else 0
+        return self.g.cfg["Evolution"]["Slots"] + extra
+
     def tick_capsule(self):
-        """Le joueur y met son meilleur œuf, laisse les tentatives se faire, l'ouvre dès qu'il n'évoluera plus."""
+        """Le joueur y met ses meilleurs œufs, laisse les tentatives se faire, ouvre dès qu'un œuf n'évoluera plus."""
         g = self.g
-        if self.capsule is None and self.eggs:
+        while len(self.capsules) < self.capsule_slots() and self.eggs:
             egg = max(self.eggs, key=lambda e: g.income(e[0]))
+            if self.options.get("doublons_capsule") and self.pets:
+                # Joueur malin : il garde ses capsules pour sa meilleure rareté (les doublons y arrivent, voir step).
+                best = max(g.rarity_of(p) for p, c in self.pets.items() if c > 0)
+                if g.rarity_of(egg[0]) < best:
+                    break
             self.eggs.remove(egg)
             rarity = g.pets[egg[0]]["rarity"]
-            self.capsule = {"pet": egg[0], "ready": egg[1], "stage": 1, "done": False,
-                            "next": max(self.t, egg[1]) + g.evolve_delay(rarity, 1, self.rng.random(), self.tier)}
-        cap = self.capsule
-        while cap and not cap["done"] and self.t >= cap["next"]:
-            if self.rng.random() < g.stage_chance(cap["stage"], self.tier):
-                cap["stage"] += 1
-                if cap["stage"] >= len(g.cfg["Evolution"]["Names"]):
-                    cap["done"] = True
+            self.capsules.append({"pet": egg[0], "ready": egg[1], "stage": 1, "done": False,
+                                  "next": max(self.t, egg[1]) + g.evolve_delay(rarity, 1, self.rng.random(), self.tier)})
+        for cap in list(self.capsules):
+            while not cap["done"] and self.t >= cap["next"]:
+                if self.rng.random() < g.stage_chance(cap["stage"], self.tier):
+                    cap["stage"] += 1
+                    if cap["stage"] >= len(g.cfg["Evolution"]["Names"]):
+                        cap["done"] = True
+                    else:
+                        cap["next"] += g.evolve_delay(g.pets[cap["pet"]]["rarity"], cap["stage"], self.rng.random(), self.tier)
                 else:
-                    cap["next"] += g.evolve_delay(g.pets[cap["pet"]]["rarity"], cap["stage"], self.rng.random(), self.tier)
-            else:
-                cap["done"] = True
-        if cap and cap["done"] and self.t >= cap["ready"]:
-            form = cap["pet"] if cap["stage"] == 1 else f"{cap['pet']}__E{cap['stage']}"
-            self.pets[form] = self.pets.get(form, 0) + 1
-            if cap["stage"] > 1:
-                self.mark(f"1er {g.cfg['Evolution']['Names'][cap['stage'] - 1]}")
-            self.capsule = None
+                    cap["done"] = True
+            if cap["done"] and self.t >= cap["ready"]:
+                form = cap["pet"] if cap["stage"] == 1 else f"{cap['pet']}__E{cap['stage']}"
+                self.pets[form] = self.pets.get(form, 0) + 1
+                if cap["stage"] > 1:
+                    self.mark(f"1er {g.cfg['Evolution']['Names'][cap['stage'] - 1]}")
+                self.capsules.remove(cap)
 
     def step(self, next_check: int) -> int:
         g, cfg = self.g, self.g.cfg
@@ -371,6 +420,7 @@ class SoloRun:
         while next_check < len(CHECKPOINTS) and self.t >= CHECKPOINTS[next_check]:
             self.income_at[CHECKPOINTS[next_check]] = income
             self.snapshots[CHECKPOINTS[next_check]] = (list(base), income, self.tier, self.rebirths)
+            self.discovered_at[CHECKPOINTS[next_check]] = len(self.discovered)
             checkpoint = CHECKPOINTS[next_check]
             next_check += 1
 
@@ -393,21 +443,43 @@ class SoloRun:
         pulls = g.count_pulls(score)
         if checkpoint:
             self.round_stats[checkpoint] = (score, pulls)
+            # Jauge commune du trou noir : valeur des objets avalés, sans multiplicateur (server/BlackholeTiers).
+            self.gauge[checkpoint] = items * g.item_value(up.get("ItemQuality", 0))
         owned = self.owned_with_eggs()
         floor_index = g.floor(self.total_pulls, self.discovered)
-        drops, self.pity = g.roll_pulls(self.rng, pulls, self.pity, g.luck(score), owned, floor_index, self.tier,
-                                        g.world(self.tier)["Id"])
+        luck = g.luck(score)
+        if self.rebirths == 0:
+            self.scores_by_tier.setdefault(self.tier, []).append((score, pulls))
+        frontier = None
+        target = max(g.rarity_of(p) for p in owned) + 1
+        if self.options.get("pitie_palier") and target <= len(g.rarities):
+            frontier = (target, g.frontier_threshold(target, luck, floor_index, self.tier), self.frontier_count)
+        drops, self.pity, self.frontier_count, forced, old_hits = g.roll_pulls(
+            self.rng, pulls, self.pity, luck, owned, floor_index, self.tier, g.world(self.tier)["Id"], frontier)
+        self.forced += forced
+        self.old_pity_hits += old_hits
         self.total_pulls += pulls
         world = g.world(self.tier)
         for pet in drops:
             self.discovered.add(pet)
-            if owned.get(pet, 0) >= cfg["Loot"]["KeepCopies"]:
+            free = self.use_capsule and len(self.capsules) < self.capsule_slots()
+            if owned.get(pet, 0) >= cfg["Loot"]["KeepCopies"] and self.options.get("doublons_capsule") and free \
+                    and g.rarity_of(pet) >= max(g.rarity_of(p) for p in base):
+                # Doublon de sa meilleure rareté : il part dans une capsule libre au lieu d'être vendu.
+                ready = self.t + cfg["Eggs"]["Seconds"][g.pets[pet]["rarity"]]
+                self.capsules.append({"pet": pet, "ready": ready, "stage": 1, "done": False,
+                                      "next": ready + g.evolve_delay(g.pets[pet]["rarity"], 1, self.rng.random(), self.tier)})
+            elif owned.get(pet, 0) >= cfg["Loot"]["KeepCopies"]:
                 self.earn("Doublons vendus", g.income(pet) * cfg["Loot"]["SellSeconds"] * world["IncomeMultiplier"])
             else:
                 owned[pet] = owned.get(pet, 0) + 1
                 self.eggs.append((pet, self.t + cfg["Eggs"]["Seconds"][g.pets[pet]["rarity"]]))
-                if g.rarity_of(pet) >= len(g.rarities) - 1:
+                if g.rarity_of(pet) >= cfg["Loot"]["PityMinRarity"]:
                     self.mark(f"1er {g.pets[pet]['rarity']}")
+        if not self.events.get("Index : les 75 de base") and all(p in self.discovered for p in g.base_species()):
+            self.mark("Index : les 75 de base")
+        if len(self.discovered) >= len(g.pets):
+            self.mark("Index complet (106)")
         self.earn("Points du trou", score * max(cfg["Economy"]["MoneyPerPoint"], income * cfg["Economy"]["IncomeSecondsPerPoint"]))
         self.earn("Revenu des familiers", income * g.round)
         self.t += g.round
@@ -446,9 +518,10 @@ def pct(values: list, p: float, runs: int):
     return ordered[index - 1] if 0 < index <= len(ordered) else None
 
 
-def run_many(game: Game, runs: int, hours: float, seed: int = 1234, fusion: bool = True, capsule: bool = True) -> list[SoloRun]:
+def run_many(game: Game, runs: int, hours: float, seed: int = 1234, fusion: bool = True, capsule: bool = True,
+             options: dict | None = None) -> list[SoloRun]:
     rng = random.Random(seed)
-    return [SoloRun(game, random.Random(rng.random()), fusion, capsule).play(hours) for _ in range(runs)]
+    return [SoloRun(game, random.Random(rng.random()), fusion, capsule, options).play(hours) for _ in range(runs)]
 
 
 def report_solo(results: list[SoloRun], runs: int, hours: float, game: Game):
@@ -598,17 +671,81 @@ def report_targets(results: list[SoloRun], game: Game):
         print(f"{duration(a):>16s} " + " ".join(row))
 
 
+def report_retention(game: Game, runs: int, hours: float):
+    """Étape 4 : pitié calibrée sur l'espérance des tirages, cadence de la jauge du trou noir, avancée de l'Index."""
+    base = run_many(game, runs, hours)
+    pity = run_many(game, runs, hours, options={"pitie_palier": True})
+    names = [r["Id"] for r in game.rarities]
+    print("Chances par tirage (avant le 1er Rebirth) : chance typique du monde (points médians x 0,005), tirages par heure,")
+    print("et pour chaque rareté : tirages pour en avoir une avec 1 chance sur 2 / 9 chances sur 10 (loi géométrique).")
+    for tier in range(1, len(game.worlds) + 1):
+        rounds = [x for run in base for x in run.scores_by_tier.get(tier, [])]
+        if not rounds:
+            continue
+        score = pct([r[0] for r in rounds], 0.5, len(rounds))
+        per_hour = sum(r[1] for r in rounds) / len(rounds) * 3600 / game.round
+        luck = game.luck(score)
+        cells = []
+        for rarity in range(4, len(game.rarities) + 1):
+            p = game.chance_at_least(rarity, luck, 1, tier)
+            n50 = math.ceil(math.log(0.5) / math.log(1 - p))
+            cells.append(f"{names[rarity - 1][:6]} {n50}/{game.frontier_threshold(rarity, luck, 1, tier)}")
+        print(f"  {game.world(tier)['Id']:8s} chance {luck:4.2f}, {per_hour:5.0f} tirages/h : " + " | ".join(cells))
+
+    for label, results in (("pitié actuelle", base), ("+ pitié par palier", pity)):
+        old = sum(r.old_pity_hits for r in results) / len(results)
+        forced = sum(r.forced for r in results) / len(results)
+        print(f"\n{label} : garanties « Épique+ au 60e tirage » {old:.2f} par partie de {hours:g} h ; garanties du palier {forced:.1f}")
+        for name in ["1er Legendaire", "1er Mythique", "1er Divin", "1er Sigma", "Monde 7 Divin", "Rebirth 1"]:
+            values = [r.events[name] for r in results if name in r.events]
+            if values:
+                print(f"  {name:16s} médiane {duration(pct(values, 0.5, len(results)))}  9 sur 10 {duration(pct(values, 0.9, len(results)))}"
+                      f"  99 sur 100 {duration(pct(values, 0.99, len(results)))}")
+
+    print("\nJauge commune du trou noir (Config.Blackhole) : points de jauge par joueur et par manche, et durée d'un tour complet")
+    print("des 7 paliers (jusqu'à l'effondrement) si tous les joueurs du serveur en sont au même point.")
+    need = sum(game.cfg["Blackhole"]["GaugeNeed"])
+    scaling = game.cfg["Blackhole"]["PlayerScaling"]
+    for checkpoint in CHECKPOINTS[:6]:
+        values = [r.gauge[checkpoint] for r in base if checkpoint in r.gauge]
+        if not values:
+            continue
+        g1 = pct(values, 0.5, len(values))
+        cycle = {n: need * n ** scaling / (n * g1) * game.round / 60 for n in (1, 4, 8)}
+        print(f"  après {duration(checkpoint)} : {g1:5.1f} par manche -> tour complet en {cycle[1]:4.0f} min seul, "
+              f"{cycle[4]:3.0f} min à 4, {cycle[8]:3.0f} min à 8")
+
+    print(f"\nIndex (familiers découverts sur {len(game.pets)}, dont {len(game.base_species())} de base) :")
+    for checkpoint in CHECKPOINTS[:7]:
+        values = [r.discovered_at[checkpoint] for r in base if checkpoint in r.discovered_at]
+        if values:
+            print(f"  après {duration(checkpoint)} : {pct(values, 0.5, len(values))}")
+    for name in ["Index : les 75 de base", "Index complet (106)"]:
+        values = [r.events[name] for r in base if name in r.events]
+        print(f"  {name:24s} médiane {duration(pct(values, 0.5, len(base)))}, atteint dans {len(values) / len(base) * 100:.0f} % des parties")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("mode", choices=["solo", "segments", "cibles"])
+    parser.add_argument("mode", choices=["solo", "segments", "cibles", "retention"])
     parser.add_argument("--runs", type=int, default=200)
     parser.add_argument("--hours", type=float, default=30)
     parser.add_argument("--no-refresh", action="store_true", help="ne pas relire les valeurs du jeu avec Lune")
     parser.add_argument("--no-capsule", action="store_true", help="sans capsule d'évolution (comme tools/sim-economy.luau)")
+    parser.add_argument("--pitie-palier", action="store_true", help="règle proposée : pitié par palier (étape 4)")
+    parser.add_argument("--capsules-rebirth", action="store_true", help="règle proposée : une capsule de plus par Rebirth")
+    parser.add_argument("--doublons-capsule", action="store_true", help="règle proposée : un doublon va dans une capsule libre")
+    parser.add_argument("--rebirth-croissance", type=float, default=None,
+                        help="règle proposée : prix du Rebirth n+1 = base x (n + 1) x valeur^n (étape 4 : 1,62)")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     game = Game(load_data(refresh=not args.no_refresh))
-    results = run_many(game, args.runs, args.hours, capsule=not args.no_capsule)
+    if args.mode == "retention":
+        report_retention(game, args.runs, args.hours)
+        return
+    options = {"pitie_palier": args.pitie_palier, "capsules_rebirth": args.capsules_rebirth,
+               "doublons_capsule": args.doublons_capsule, "rebirth_croissance": args.rebirth_croissance}
+    results = run_many(game, args.runs, args.hours, capsule=not args.no_capsule, options=options)
     if args.mode == "solo":
         report_solo(results, args.runs, args.hours, game)
     elif args.mode == "cibles":

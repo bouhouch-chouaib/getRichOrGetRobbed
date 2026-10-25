@@ -282,9 +282,35 @@ def escapes_from(pet, target, v_thief, other, v_other, radius, react):
     return True
 
 
+def etape4():
+    """Jouer à deux : base d'un ami voisine (refuge pour rentrer un vol), ami qui escorte le porteur."""
+    random.seed(4)
+    curve, d, _, _ = proposed_curve()
+    print("== Étape 4. Jouer à deux ==")
+    print("-- Trajet du voleur (base 0) depuis les autres bases (2 à 7), jusqu'à sa base ou celle d'un ami (base 1, voisine) --")
+    alone, duo = [], []
+    for victim in range(2, 8):
+        for _ in range(500):
+            pet = to_world(victim, (random.uniform(*PET_X), random.uniform(*PET_Z)))
+            own = path_len(pet, nearest_inside(0, pet))
+            ally = path_len(pet, nearest_inside(1, pet))
+            alone.append(own)
+            duo.append(min(own, ally))
+    print(f"   seul : médiane {median(alone):.0f} studs ; avec la base d'un ami voisin comme refuge : {median(duo):.0f} studs"
+          f" (x{median(duo) / median(alone):.2f})")
+    print("-- Ami qui escorte le porteur (le familier compte comme une rareté plus légère) : D* à vitesse 16 --")
+    for i, rarity in enumerate(RARITY_NAMES):
+        alone_d = RECOVER + d / curve[i] - SPEED_BASE * REACT
+        escort = RECOVER + d / curve[max(0, i - 1)] - SPEED_BASE * REACT
+        print(f"   {rarity:11s} seul {alone_d:4.0f} -> escorté {escort:4.0f} studs")
+
+
 def main():
     if "--etape3" in sys.argv:
         etape3()
+        return
+    if "--etape4" in sys.argv:
+        etape4()
         return
     random.seed(1)
     gate = to_world(0, GATE)
