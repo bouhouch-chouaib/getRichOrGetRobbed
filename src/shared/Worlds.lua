@@ -93,7 +93,9 @@ Worlds.Looks = {
 			Trunk = rgb(255, 120, 140), LeavesA = rgb(255, 150, 90), LeavesB = rgb(230, 90, 160), LeavesC = rgb(90, 230, 200),
 		},
 		Neon = { WallTop = true, LeavesC = true },
-		Ambience = { AirColor = rgb(80, 180, 210), AirDecay = rgb(20, 70, 120), AirDensity = 0.45, Tint = rgb(190, 235, 245), Saturation = 0.15, CloudColor = rgb(100, 180, 210), CloudCover = 0.2, Particles = "Bubbles" },
+		-- air moins dense (0,45 -> 0,34), teinte moins cyan, saturation 0,15 -> 0,26 : les coraux étaient délavés dans le
+		-- bleu (vu en jeu le 25 oct., map_art_bible_abysses.json)
+		Ambience = { AirColor = rgb(80, 180, 210), AirDecay = rgb(20, 70, 120), AirDensity = 0.34, Tint = rgb(215, 242, 250), Saturation = 0.26, CloudColor = rgb(100, 180, 210), CloudCover = 0.2, Particles = "Bubbles" },
 		Decor = "Coral",
 	},
 	Cosmos = {

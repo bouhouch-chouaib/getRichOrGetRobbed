@@ -244,5 +244,8 @@ Corail, Calmar Colosse, Poisson-Lanterne Disco). 17 décors dans `blender_tools/
 - Vérifié en Play (solo, monde changé côté client) : aux Abysses, seuls les décors des Abysses visibles (596 pièces, les
   4 autres mondes cachés), 22 lumières allumées (0 pour la Glace), AbyssesLook visible et les 4 autres habillages
   cachés ; retour en Prairie : tout s'éteint et se cache. Photos `qa_renders/map_roblox_abysses_jour.jpg`,
-  `map_roblox_abysses_fosse.jpg`, `map_roblox_abysses_nuit.jpg`, `map_roblox_abysses_sanctuaire_nuit.jpg`. En jeu, l'air
-  du monde (déjà réglé avant : densité 0,45, saturation 0,15 dans `shared/Worlds`) est plus voilé que dans les rendus.
+  `map_roblox_abysses_fosse.jpg`, `map_roblox_abysses_nuit.jpg`, `map_roblox_abysses_sanctuaire_nuit.jpg`.
+- Air des Abysses éclairci (`shared/Worlds`, accord de Chouaib) : densité 0,45 -> 0,34, teinte moins cyan
+  (215, 242, 250), saturation 0,15 -> 0,26 ; l'ancien air voilait tout et délavait les coraux. Vérifié en Play
+  (Atmosphere 0,34, ColorCorrection 0,26 au monde Abysses) : coraux roses et jaunes nets, de jour comme de nuit
+  (photos jour / nuit ci-dessus, reprises après le changement).
