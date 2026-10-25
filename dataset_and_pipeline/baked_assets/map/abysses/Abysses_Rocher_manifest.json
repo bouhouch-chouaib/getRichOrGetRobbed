@@ -1,0 +1,58 @@
+{
+  "asset": "Abysses_Rocher",
+  "triangles": 2248,
+  "vertices": 1160,
+  "size_studs": [
+    9.324,
+    6.855,
+    6.693
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 39.3,
+  "source_materials": [
+    "M_CorailJaune",
+    "M_EtoileMer",
+    "M_Nacre",
+    "M_RocheMerA",
+    "M_RocheMerB"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0373,
+    "max_ray": 0.0932,
+    "ao_distance": 1.1189,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Abysses_Rocher_Color.png",
+    "Roughness": "Abysses_Rocher_Roughness.png",
+    "Metalness": "Abysses_Rocher_Metalness.png",
+    "Normal": "Abysses_Rocher_Normal.png",
+    "AO": "Abysses_Rocher_AO.png"
+  },
+  "exports": [
+    "Abysses_Rocher.fbx",
+    "Abysses_Rocher.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Abysses_Rocher (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Abysses_Rocher_Color.png",
+      "NormalMap": "Abysses_Rocher_Normal.png",
+      "RoughnessMap": "Abysses_Rocher_Roughness.png",
+      "MetalnessMap": "Abysses_Rocher_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 56.1
+}

@@ -17,11 +17,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MAP = ROOT / "baked_assets" / "map"
-# Décors qui éclairent, par monde : asset -> (hauteur relative de la lumière -0,5..0,5, portée, luminosité)
+# Décors qui éclairent, par monde : asset -> (hauteur relative de la lumière -0,5..0,5, portée, luminosité[, couleur])
+# (sans couleur : orange de la lave)
 LIGHTS = {
     "Volcan": {"Volcan_PilierBrasier": (0.45, 22, 1.6), "Volcan_Cheminee": (0.3, 18, 1.4),
                "Volcan_Chaudron": (0.35, 12, 1.0)},
     "Glace": {"Glace_Lanterne": (0.25, 20, 1.4), "Glace_Igloo": (-0.1, 14, 1.0)},
+    "Abysses": {"Abysses_PilierPerle": (0.42, 20, 1.4, (120, 230, 255)),
+                "Abysses_Coquillage": (0.1, 16, 1.2, (150, 240, 255))},
 }
 
 
@@ -108,8 +111,10 @@ def main() -> None:
     w("-- Décors qui éclairent (PointLight sans ombre, à une hauteur relative de la pièce) : seulement dans leur monde,")
     w("-- client/WorldSkin les éteint pour les joueurs des autres mondes.")
     w("local LIGHTS = {")
-    for asset, (rel, rng, bright) in sorted(LIGHTS.get(world, {}).items()):
-        w(f"\t{asset} = {{ rel = {rel}, range = {rng}, brightness = {bright} }},")
+    for asset, spec in sorted(LIGHTS.get(world, {}).items()):
+        rel, rng, bright = spec[:3]
+        color = f", color = Color3.fromRGB({spec[3][0]}, {spec[3][1]}, {spec[3][2]})" if len(spec) > 3 else ""
+        w(f"\t{asset} = {{ rel = {rel}, range = {rng}, brightness = {bright}{color} }},")
     w("}")
     w("")
     w('''local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -212,6 +217,8 @@ local SURFACE_LOOK = {
 	lava = { name = "Lave", color = Color3.fromRGB(255, 122, 26), material = Enum.Material.Neon, transparency = 0 },
 	-- bleu soutenu : un bleu pâle disparaît sur le sol de neige (vu en jeu le 25 oct.)
 	ice = { name = "Glace", color = Color3.fromRGB(110, 190, 240), material = Enum.Material.Ice, transparency = 0 },
+	-- fosse des Abysses : eau sombre presque opaque, le sol ne doit pas transparaître
+	trench = { name = "Fosse", color = Color3.fromRGB(12, 46, 84), material = Enum.Material.Glass, transparency = 0.12 },
 }
 
 local function addLight(part: BasePart, spec)
@@ -219,7 +226,7 @@ local function addLight(part: BasePart, spec)
 	attachment.Name = "Lumiere"
 	attachment.Position = Vector3.new(0, part.Size.Y * spec.rel, 0)
 	local light = Instance.new("PointLight")
-	light.Color = LAVA_LIGHT
+	light.Color = spec.color or LAVA_LIGHT
 	light.Range = spec.range
 	light.Brightness = spec.brightness
 	light.Shadows = false

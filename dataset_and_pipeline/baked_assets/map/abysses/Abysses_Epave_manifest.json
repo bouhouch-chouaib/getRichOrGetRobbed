@@ -1,0 +1,62 @@
+{
+  "asset": "Abysses_Epave",
+  "triangles": 5616,
+  "vertices": 2912,
+  "size_studs": [
+    23.615,
+    8.938,
+    16.425
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 17.2,
+  "source_materials": [
+    "M_BlancDrapeau",
+    "M_BoisEpave",
+    "M_BoisEpaveX",
+    "M_CorailJaune",
+    "M_CorailOrange",
+    "M_CorailViolet",
+    "M_DrapeauNoir",
+    "M_EtoileMer",
+    "M_VoileDechiree"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0945,
+    "max_ray": 0.2362,
+    "ao_distance": 2.5,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Abysses_Epave_Color.png",
+    "Roughness": "Abysses_Epave_Roughness.png",
+    "Metalness": "Abysses_Epave_Metalness.png",
+    "Normal": "Abysses_Epave_Normal.png",
+    "AO": "Abysses_Epave_AO.png"
+  },
+  "exports": [
+    "Abysses_Epave.fbx",
+    "Abysses_Epave.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Abysses_Epave (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Abysses_Epave_Color.png",
+      "NormalMap": "Abysses_Epave_Normal.png",
+      "RoughnessMap": "Abysses_Epave_Roughness.png",
+      "MetalnessMap": "Abysses_Epave_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 19.3
+}

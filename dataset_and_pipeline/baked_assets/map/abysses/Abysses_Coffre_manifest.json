@@ -1,0 +1,57 @@
+{
+  "asset": "Abysses_Coffre",
+  "triangles": 2710,
+  "vertices": 1401,
+  "size_studs": [
+    4.335,
+    4.126,
+    4.049
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 36.7,
+  "source_materials": [
+    "M_BoisEpaveX",
+    "M_OrDecor",
+    "M_Perle"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0173,
+    "max_ray": 0.0433,
+    "ao_distance": 0.5201,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Abysses_Coffre_Color.png",
+    "Roughness": "Abysses_Coffre_Roughness.png",
+    "Metalness": "Abysses_Coffre_Metalness.png",
+    "Normal": "Abysses_Coffre_Normal.png",
+    "AO": "Abysses_Coffre_AO.png"
+  },
+  "exports": [
+    "Abysses_Coffre.fbx",
+    "Abysses_Coffre.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Abysses_Coffre (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Abysses_Coffre_Color.png",
+      "NormalMap": "Abysses_Coffre_Normal.png",
+      "RoughnessMap": "Abysses_Coffre_Roughness.png",
+      "MetalnessMap": "Abysses_Coffre_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 11.0
+}

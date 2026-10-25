@@ -1,0 +1,189 @@
+{
+  "Abysses_Recif": {
+    "triangles": 5832,
+    "within_6000": true,
+    "size_studs": [
+      36.078,
+      15.029,
+      29.623
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 9.0
+  },
+  "Abysses_Corail": {
+    "triangles": 3878,
+    "within_6000": true,
+    "size_studs": [
+      4.774,
+      4.321,
+      7.208
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 34.1
+  },
+  "Abysses_CorailEventail": {
+    "triangles": 2916,
+    "within_6000": true,
+    "size_studs": [
+      9.439,
+      0.983,
+      7.1
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 14.0
+  },
+  "Abysses_Algue": {
+    "triangles": 4036,
+    "within_6000": true,
+    "size_studs": [
+      5.921,
+      4.04,
+      14.81
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 23.2
+  },
+  "Abysses_Anemone": {
+    "triangles": 3634,
+    "within_6000": true,
+    "size_studs": [
+      5.651,
+      3.896,
+      3.276
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 14.4
+  },
+  "Abysses_Rocher": {
+    "triangles": 2248,
+    "within_6000": true,
+    "size_studs": [
+      9.324,
+      6.855,
+      6.693
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 56.1
+  },
+  "Abysses_Coquillage": {
+    "triangles": 2792,
+    "within_6000": true,
+    "size_studs": [
+      11.383,
+      8.715,
+      7.518
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 37.1
+  },
+  "Abysses_Touffe": {
+    "triangles": 440,
+    "within_6000": true,
+    "size_studs": [
+      2.418,
+      2.379,
+      3.114
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 11.0
+  },
+  "Abysses_ColonneEngloutie": {
+    "triangles": 3168,
+    "within_6000": true,
+    "size_studs": [
+      8.559,
+      6.274,
+      9.264
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 47.4
+  },
+  "Abysses_PorteAtlante": {
+    "triangles": 5400,
+    "within_6000": true,
+    "size_studs": [
+      25.607,
+      5.207,
+      28.02
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 25.4
+  },
+  "Abysses_PilierPerle": {
+    "triangles": 1974,
+    "within_6000": true,
+    "size_studs": [
+      4.44,
+      4.4,
+      14.135
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 42.7
+  },
+  "Abysses_Dalle": {
+    "triangles": 1404,
+    "within_6000": true,
+    "size_studs": [
+      8.072,
+      6.002,
+      1.451
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 13.2
+  },
+  "Abysses_Muret": {
+    "triangles": 3348,
+    "within_6000": true,
+    "size_studs": [
+      11.92,
+      2.993,
+      3.938
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 17.2
+  },
+  "Abysses_Escalier": {
+    "triangles": 1620,
+    "within_6000": true,
+    "size_studs": [
+      19.2,
+      5.838,
+      2.3
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 19.0
+  },
+  "Abysses_Coffre": {
+    "triangles": 2710,
+    "within_6000": true,
+    "size_studs": [
+      4.335,
+      4.126,
+      4.049
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 11.0
+  },
+  "Abysses_Ancre": {
+    "triangles": 1830,
+    "within_6000": true,
+    "size_studs": [
+      7.94,
+      4.179,
+      7.427
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 10.5
+  },
+  "Abysses_Epave": {
+    "triangles": 5616,
+    "within_6000": true,
+    "size_studs": [
+      23.615,
+      8.938,
+      16.425
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 19.3
+  }
+}

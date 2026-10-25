@@ -1,0 +1,61 @@
+{
+  "title": "Bible artistique de la carte - monde Abysses (5e palier)",
+  "date": "2026-10-25",
+  "status": "proposition, a valider par Chouaib sur qa_renders/map_hero_abysses.png et map_aesthetic_board_abysses.png",
+  "method": "Meme methode que les mondes precedents : carte ronde inchangee, decors en blocs biseautes cuits, relief autour de l'arene, eclairage dans le code, eau en pieces Roblox. Chaque monde a sa charte.",
+  "story": "Le Royaume Englouti du Roi Corail : une cite atlante coulee au fond de l'ocean, envahie de coraux. Le Roi Corail y regne, la Pieuvre Pirate a echoue son navire sur le recif, la Meduse Lampion et le Poisson-Lanterne Disco eclairent les ruines, le Calmar Colosse rode dans la fosse.",
+
+  "sources": {
+    "local_reference": "src/shared/Worlds.lua (Abysses : sol bleu-vert, chemins de sable, mur bleu profond au sommet cyan en Neon, coraux rose / orange / violet, bulles), src/shared/PetCatalog.lua (familiers des Abysses)",
+    "web": [
+      {"what": "Recif stylise : brouillard pour la profondeur, palette trop etroite = probleme de lisibilite", "url": "https://polycount.com/discussion/comment/1448439"},
+      {"what": "Warframe : jaunes-verts contre les bleus pour faire paraitre le fond lointain", "url": "https://warframe.com/amp/building-warframe-undersea-skybox"},
+      {"what": "Lisibilite : avant-plan de sable clair (la ou on joue), degrade bleu sur le fond ; recifs, epaves, algues", "url": "https://babel.speldesign.uu.se/?p=84178"},
+      {"what": "Pack sous-marin stylise : couleur et brouillard reglables", "url": "https://www.fab.com/listings/2a8d6910-df2a-4fd4-a8a7-65366cc0bfb5"},
+      {"what": "Roblox : Atmosphere (Density, Offset) pour la profondeur, palette oceane froide", "url": "https://create.roblox.com/docs/tutorials/curriculums/core/building/customize-global-lighting"}
+    ]
+  },
+
+  "palette": {
+    "rule": "Fond froid et profond (bleus marine, bleus-violets, turquoise) contre des accents chauds et satures : coraux rose / orange / violet / jaune, or des tresors. Le sable clair des chemins reste la zone la plus lumineuse (on y joue). Les perles et la nacre donnent des reperes pales.",
+    "gradient_center_to_edge": [
+      {"zone": "coeur du trou noir", "hex": "#2E1B5C", "note": "inchange : vortex violet"},
+      {"zone": "dalles du sanctuaire", "hex": "#4A8A96", "accent": "#FFC830", "note": "pierre atlante, mosaique trident et coquillage (turquoise et or)"},
+      {"zone": "arene", "hex": "#286E82", "alt": "#1E5C72", "note": "damier bleu-vert du jeu (Worlds.Abysses.GrassA/B)"},
+      {"zone": "chemins", "hex": "#E6D296", "alt": "#D2BE82", "note": "sable (Worlds.Abysses.PathA/B)"},
+      {"zone": "mur d'enceinte", "hex": "#14466E", "top": "#3CDCB4", "note": "inchange (haut en Neon)"},
+      {"zone": "recifs exterieurs", "hex": "#2E4A78", "caps": ["#FF6A8C", "#FF9A4A", "#B45AE6"], "note": "roche bleu-violet, terrasses de coraux"}
+    ],
+    "materials": {
+      "roche_mer": {"tones": ["#2E4A78", "#3A3A7A", "#24607A"], "cavity": "#101E3A"},
+      "sable_mer": {"base": "#E6D296"},
+      "coraux": {"rose": "#FF6A8C", "orange": "#FF9A4A", "violet": "#B45AE6", "jaune": "#FFD24A"},
+      "algues": {"tones": ["#2EA88A", "#46C27A"]},
+      "nacre": {"perle": "#E8F6FF", "coquille": "#F2A6C8"},
+      "epave": {"bois": "#6A4A3A", "algues_sur_aretes": "#7AB8A0", "voile": "#D8D0B8"}
+    }
+  },
+
+  "atmosphere": {
+    "tone": "Sous l'eau : bleu-turquoise dense, le lointain se perd vite dans l'eau (brume forte), la lumiere tombe d'en haut ; la nuit est bleu nuit profond et les perles deviennent les reperes.",
+    "Worlds.Abysses.Ambience": {"AirColor": "#50B4D2", "AirDecay": "#144678", "AirDensity": 0.45, "Tint": "#BEEBF5", "Saturation": 0.15, "note": "deja dans le jeu, coherent avec la charte : garde tel quel"},
+    "no_glow": "Aucun masque de lueur. Perles des piliers et des coquillages geants : PointLight cyan posees par le script (rien a envoyer), eteintes pour les autres mondes."
+  },
+
+  "zones": {
+    "arene_centrale": {"story": "La place atlante : anneau de dalles a mosaique, 8 portes atlantes (piliers couverts de corail, arche en coquillage, trident d'or) sur les chemins, piliers a perle de part et d'autre, colonnes englouties entre les chemins."},
+    "chemins": {"story": "Allees de sable bordees d'herbiers et de petites anemones."},
+    "bases": {"story": "Murets de pierre couverts de coraux avec cordage, porte atlante, escalier de sable, coffres au tresor et ancres."},
+    "entre_les_bases": {"story": "Recifs en gradins adosses au mur, forets d'algues geantes, coraux branchus et eventails, coquillage geant a perle, epave du navire de la Pieuvre Pirate, fosse d'eau sombre."},
+    "peripherie": {"story": "Deux couronnes de recifs (55-75 puis 85-110 studs) couronnes d'algues ; au loin, algues geantes qui se perdent dans l'eau."}
+  },
+
+  "assets": {
+    "budget_triangles": 6000,
+    "prefix": "Abysses_",
+    "list": ["Abysses_Recif", "Abysses_Corail", "Abysses_CorailEventail", "Abysses_Algue", "Abysses_Anemone", "Abysses_Rocher", "Abysses_Coquillage", "Abysses_Touffe", "Abysses_ColonneEngloutie", "Abysses_PorteAtlante", "Abysses_PilierPerle", "Abysses_Dalle", "Abysses_Muret", "Abysses_Escalier", "Abysses_Coffre", "Abysses_Ancre", "Abysses_Epave"]
+  },
+
+  "gameplay_constraints": "Identiques aux autres mondes : chemins et cercle du trou degages, rien de solide dans l'anneau des objets sauvages (r 70-160), gros decors entre les bases, kiosques degages.",
+  "roblox_integration": "Apres validation : import de Decors_Abysses.fbx (Studio en mode Edition), MapDecor.Abysses, habillage AbyssesLook dans MapGenerator.DRESSINGS ; PointLight cyan sur les perles."
+}

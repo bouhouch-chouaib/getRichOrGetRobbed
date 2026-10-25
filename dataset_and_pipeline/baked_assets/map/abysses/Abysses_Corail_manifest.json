@@ -1,0 +1,56 @@
+{
+  "asset": "Abysses_Corail",
+  "triangles": 3878,
+  "vertices": 2009,
+  "size_studs": [
+    4.774,
+    4.321,
+    7.208
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 16.9,
+  "source_materials": [
+    "M_CorailJaune",
+    "M_CorailRose",
+    "M_RocheMerC"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0288,
+    "max_ray": 0.0721,
+    "ao_distance": 0.865,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Abysses_Corail_Color.png",
+    "Roughness": "Abysses_Corail_Roughness.png",
+    "Metalness": "Abysses_Corail_Metalness.png",
+    "Normal": "Abysses_Corail_Normal.png",
+    "AO": "Abysses_Corail_AO.png"
+  },
+  "exports": [
+    "Abysses_Corail.fbx",
+    "Abysses_Corail.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Abysses_Corail (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Abysses_Corail_Color.png",
+      "NormalMap": "Abysses_Corail_Normal.png",
+      "RoughnessMap": "Abysses_Corail_Roughness.png",
+      "MetalnessMap": "Abysses_Corail_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 34.1
+}

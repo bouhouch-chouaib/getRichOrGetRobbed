@@ -214,3 +214,27 @@ Mammouth Glaçon, Narval Aurore). 17 décors dans `blender_tools/environment_gla
   `map_roblox_glace_lac_jour.jpg`. Le lac (bleu pâle) se voyait à peine sur la neige : recoloré en bleu soutenu
   (110, 190, 240). Saturation de l'air de la Glace passée de 0,05 à 0,12 (`shared/Worlds`, accord de Chouaib) : vérifié
   en Play (ColorCorrection à 0,12 au monde Glace, glaciers plus bleus, lac bien visible).
+
+---
+
+# Monde 5 : Abysses (25 oct. 2026) — proposition à valider
+
+« Le Royaume Englouti du Roi Corail » (charte `map_art_bible_abysses.json`, d'après Pieuvre Pirate, Méduse Lampion, Roi
+Corail, Calmar Colosse, Poisson-Lanterne Disco). 17 décors dans `blender_tools/environment_abysses.py`, rendus
+`qa_renders/map_hero_abysses.png`, `map_aesthetic_board_abysses.png`, `map_assets_board_abysses.png`.
+
+- **Aucune lueur** : perles et nacre en couleur pâle ; PointLight cyan posées par le script (perles des piliers du
+  sanctuaire, coquillages géants), éteintes pour les autres mondes. Rien à envoyer. Les lumières peuvent maintenant avoir
+  leur couleur (4e valeur de `LIGHTS` dans `make_map_look_script.py`, orange de la lave sinon).
+- Décors (< 6 000 triangles) : Recif (roche bleu-violet en gradins, corniches de coraux), Corail (branchu, bouts jaunes),
+  CorailEventail, Algue, Anemone, Rocher (étoile de mer), Coquillage (bénitier géant à perle), Touffe (herbier),
+  ColonneEngloutie, PorteAtlante (arche en coquillage, trident d'or), PilierPerle, Dalle (mosaïque trident), Muret
+  (pierre, coraux, cordage), Escalier (sable), Coffre (trésor), Ancre, Epave (navire de la Pieuvre Pirate, 5 616
+  triangles). Pancarte reprise de la Prairie.
+- Scène : `run_map_scene.py -- --world Abysses` -> `baked_assets/map/abysses/map_layout.json` (891 décors + fosse d'eau
+  sombre : surface « trench », Glass bleu nuit presque opaque) ; au loin, algues géantes et monts arrondis dans l'eau ;
+  un module de récif sur trois remplacé par un corail géant (~85 studs : les récifs en gradins faisaient une « ligne
+  d'immeubles ») ; algues des récifs x1,8 (`cliff_tree_scale`). Brume moins forte et saturation 0,32 : sinon les coraux
+  chauds disparaissent dans le bleu. `export_map_lot.py -- --world Abysses` -> `Decors_Abysses.fbx`.
+- Pas encore dans Studio : attend la validation du style par Chouaib puis l'import de `Decors_Abysses.fbx` (mode
+  Édition) ; ensuite `apply_map_look_abysses.lua` et les bases `AbyssesLook` (déjà déclarées dans `MapGenerator`).

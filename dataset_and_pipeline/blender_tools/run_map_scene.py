@@ -106,6 +106,18 @@ GLACE_LOOKS = {
              "exposure": 0.7},
 }
 
+ABYSSES_LOOKS = {
+    # sous l'eau : lumière qui tombe d'en haut, brume turquoise dense (map_art_bible_abysses.json)
+    "jour": {"sun": 3.2, "sun_color": (0.78, 0.96, 1.0), "sun_elev": 58, "sun_az": 200, "sky_top": "#08345E",
+             "sky_horizon": "#2AA6C8", "sky_strength": 0.9, "fog": "#2384A4", "fog_density": 0.0011,
+             "fog_start": 90, "fog_max": 0.5, "bloom": (1.4, 0.5, 24), "saturation": 0.32, "contrast": 0.16,
+             "exposure": 0.3},
+    "nuit": {"sun": 0.9, "sun_color": (0.42, 0.62, 1.0), "sun_elev": 50, "sun_az": 120, "sky_top": "#020A1E",
+             "sky_horizon": "#0E3A5A", "sky_strength": 1.2, "fog": "#0A2A44", "fog_density": 0.0015,
+             "fog_start": 60, "fog_max": 0.7, "bloom": (1.2, 0.7, 28), "saturation": 0.22, "contrast": 0.12,
+             "exposure": 0.95},
+}
+
 # Rôle -> décor, couleurs du sol et lumière de chaque monde. Le code de placement ne connaît que les rôles.
 WORLD_CFG = {
     "Prairie": {
@@ -198,6 +210,32 @@ WORLD_CFG = {
         "colors": {"sol": ("#F0F8FF", "#D6EAFA", "#E6F2FC", "#CCE2F4"), "chemin": ("#96D2F5", "#7CBEEB"),
                    "base_sol": ("#E8F4FC", "#D0E6F6"), "paille": ("#C8B08A", "#B89C74"), "dalle": ("#D8E8F4", "#C8DCEC"),
                    "mur": ("#AAD7F5", "#92C4EC"), "mur_haut": ("#FFFFFF", "#F0F8FF"), "loin": "#E8F2FA"},
+    },
+    "Abysses": {
+        "lib": [("Abysses", None), ("Prairie", ["Pancarte"])], "suffix": "_abysses", "looks": ABYSSES_LOOKS,
+        "clouds": 0, "water": "trench",
+        "slab": "Abysses_Dalle", "gate": "Abysses_PorteAtlante", "flank": "Abysses_PilierPerle",
+        "between": ("Abysses_ColonneEngloutie", "Abysses_Coquillage"), "between_z": -0.2,
+        "tuft": "Abysses_Touffe", "path_small": ("Abysses_Anemone", 0.45, 0.65), "sign": "Pancarte",
+        "fence": "Abysses_Muret", "stairs": "Abysses_Escalier", "base_gate": "Abysses_PorteAtlante",
+        "prop_a": "Abysses_Coffre", "prop_b": "Abysses_Ancre", "hill": "Abysses_Recif",
+        "hill_trees": ("Abysses_CorailEventail", ("Abysses_Corail", "Abysses_Algue")),
+        "gap_trees": ("Abysses_Algue", "Abysses_Corail", "Abysses_CorailEventail", "Abysses_Algue"),
+        "rocks": ("Abysses_Rocher", "Abysses_Anemone", "Abysses_Rocher"), "ruin": "Abysses_ColonneEngloutie",
+        "landmark": ("Abysses_Epave", "Abysses_Coquillage", "Abysses_Corail", "Abysses_Coffre"),
+        "bank_rock": "Abysses_Rocher", "bridge": None,
+        "cliff": "Abysses_Recif", "cliff_trees": ("Abysses_CorailEventail", ("Abysses_Algue", "Abysses_Corail")),
+        "far": ("Abysses_Algue", "Abysses_Rocher"), "far_spire": "Abysses_Algue",
+        # algues géantes (100-150 studs) et monts sous-marins arrondis qui se perdent dans l'eau
+        "far_scale": ((5.0, 7.0), (5.0, 7.0), (7.0, 10.0)),
+        "cliff_alt": ("Abysses_Corail", (10.0, 10.0, 14.0)),  # coraux géants (~85 studs) : cassent la ligne des récifs
+        "cliff_tree_scale": 1.8,  # forêts d'algues sur les récifs, lisibles depuis l'arène
+        "pets": (("PieuvrePirate", -14, -2, 7.0), ("MeduseLampion", 10, 6, 6.0), ("RoiCorail", -2, 12, 8.0),
+                 ("CalmarColosse", 18, -12, 9.0), ("LanterneDisco", -24, 8, 5.5)),
+        "colors": {"sol": ("#286E82", "#1E5C72", "#2E7A8A", "#24687A"), "chemin": ("#E6D296", "#D2BE82"),
+                   "base_sol": ("#2E7A8E", "#22667A"), "paille": ("#C8B07A", "#B89C68"), "dalle": ("#4A8A96", "#3A7A86"),
+                   "mur": ("#14466E", "#0E385E"), "mur_haut": ("#3CDCB4", "#30C8A0"), "loin": "#103A52"},
+        "glow": {"mur_haut": 1.8},
     },
 }
 W: dict = WORLD_CFG["Prairie"]
@@ -622,6 +660,22 @@ def add_stream(M, k: int):
         put(W["bank_rock"], x - t * math.sin(a), y + t * math.cos(a), -0.6, j * 47.0, 0.45, "colline")
 
 
+def add_trench(M, k: int, rnd):
+    """Fosse des Abysses entre la base 1 et la base 8 (où rôde le Calmar Colosse) : eau sombre, anémones, coraux,
+    coquillage géant au bord."""
+    phi = -(k + 0.5) * 45.0
+    cx, cy = polar(272, phi)
+    pit = disc("Fosse", 14.0, 0.08, M["fosse"], segs=48)  # ronde : un cylindre Roblox ne peut pas être ovale
+    G.transform(pit, Matrix.Translation((cx, cy, 0)))
+    surface("trench", "disc", cx, cy, 28.0, 28.0)
+    for j in range(8):
+        a = j * 2 * math.pi / 8 + rnd.uniform(-0.2, 0.2)
+        x, y = cx + math.cos(a) * 17.5, cy + math.sin(a) * 17.5
+        asset = ("Abysses_Corail", "Abysses_Anemone", "Abysses_Rocher", "Abysses_Algue")[j % 4]
+        put(asset, x, y, -0.2, rnd.uniform(0, 360), rnd.uniform(0.7, 1.0), "colline",
+            collide=asset in ("Abysses_Rocher", "Abysses_Corail"))
+
+
 def add_frozen_lake(M, k: int, rnd):
     """Lac gelé de la Glace entre la base 1 et la base 8 (où patine le Pingouin) : glace lisse, congères, sapins,
     rochers enneigés autour."""
@@ -769,7 +823,8 @@ def build_periphery(rnd):
             for j in range(2):
                 tx, ty = polar(r + rnd.uniform(3, 7) * sxy[1], phi + rnd.uniform(-3.5, 3.5))
                 asset = W["cliff_trees"][0] if rnd.random() < 0.12 else rnd.choice(W["cliff_trees"][1])
-                put(asset, tx, ty, top_of(W["cliff"], sz) - 3, rnd.uniform(0, 360), rnd.uniform(1.3, 2.0), "peripherie")
+                put(asset, tx, ty, top_of(W["cliff"], sz) - 3, rnd.uniform(0, 360),
+                    rnd.uniform(1.3, 2.0) * W.get("cliff_tree_scale", 1.0), "peripherie")
     for k in range(18):
         phi = k * 20 + rnd.uniform(-6, 6)
         x, y = polar(rnd.uniform(520, 720), phi)
@@ -1019,6 +1074,7 @@ def main() -> None:
         "nuage": flat_mat("M_Nuage", W.get("cloud", "#FFFFFF"), 0.95, emission=0.25),
         "lave": flat_mat("M_LaveScene", "#FF7A1A", 0.3, emission=2.4),
         "glace_lac": flat_mat("M_GlaceLac", "#BEE6FF", 0.05, emission=0.1),
+        "fosse": flat_mat("M_Fosse", "#0A2A4A", 0.1, emission=0.15),
         "avatar_haut": flat_mat("M_AvatarHaut", "#1E7BFF", 0.6),
         "avatar_bas": flat_mat("M_AvatarBas", "#2B2F45", 0.6),
         "avatar_peau": flat_mat("M_AvatarPeau", "#F5CD30", 0.5),
@@ -1037,6 +1093,8 @@ def main() -> None:
         add_oasis(M, 7, rnd)
     elif W["water"] == "ice":
         add_frozen_lake(M, 7, rnd)
+    elif W["water"] == "trench":
+        add_trench(M, 7, rnd)
     else:
         add_lava_pool(M, 7, rnd)
     build_periphery(rnd)

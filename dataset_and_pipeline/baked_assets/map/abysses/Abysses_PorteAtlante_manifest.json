@@ -1,0 +1,64 @@
+{
+  "asset": "Abysses_PorteAtlante",
+  "triangles": 5400,
+  "vertices": 2796,
+  "size_studs": [
+    25.607,
+    5.207,
+    28.02
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 17.6,
+  "source_materials": [
+    "M_Coquille",
+    "M_CorailJaune",
+    "M_CorailOrange",
+    "M_CorailRose",
+    "M_CorailViolet",
+    "M_EtoileMer",
+    "M_Nacre",
+    "M_OrDecor",
+    "M_PierreAtlante",
+    "M_SableMer"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.1121,
+    "max_ray": 0.2802,
+    "ao_distance": 2.5,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Abysses_PorteAtlante_Color.png",
+    "Roughness": "Abysses_PorteAtlante_Roughness.png",
+    "Metalness": "Abysses_PorteAtlante_Metalness.png",
+    "Normal": "Abysses_PorteAtlante_Normal.png",
+    "AO": "Abysses_PorteAtlante_AO.png"
+  },
+  "exports": [
+    "Abysses_PorteAtlante.fbx",
+    "Abysses_PorteAtlante.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Abysses_PorteAtlante (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Abysses_PorteAtlante_Color.png",
+      "NormalMap": "Abysses_PorteAtlante_Normal.png",
+      "RoughnessMap": "Abysses_PorteAtlante_Roughness.png",
+      "MetalnessMap": "Abysses_PorteAtlante_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 25.4
+}
