@@ -422,7 +422,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   pièces (recette : `dataset_and_pipeline/PIPELINE.md`, « Tous les familiers en briques LEGO, par lots »). Faits : les 15
   Animaux (`Lot01_Animaux`), les 15 Fantastiques (`Lot02_Fantastiques`) et le Cerbère Infernal ; ils sont dans
   `ReplicatedStorage.ArtModels.<Id>` (fichier du jeu). Les 15 Plantes sont en jeu (`Lot03_Plantes`) ; les 15 Hybrides
-  sont faits (`Lot04_Hybrides`, à importer). Restent : Absurdes, familiers des Mondes.
+  sont en jeu aussi (`Lot04_Hybrides`). Restent : Absurdes, familiers des Mondes.
 - Plus de cercle lumineux au sol sous les familiers Épique+ ni d'anneau sous les évolués (Chouaib, 25 oct.).
 - **Chaque familier refait a sa propre démarche** (demande de Chouaib) : une fiche dans `shared/PetGaits`, lue par
   - `PetWander.styleOf` : vitesse, pauses, longueur des trajets (`roam`, pour les casaniers), accélération (`Smooth`,

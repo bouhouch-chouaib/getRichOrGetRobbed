@@ -54,8 +54,11 @@ style validé : briques sans tenons, cubes d'abord, très détaillé, couleurs s
 `blender_tools/pets/<Id>.py` par familier, recette dans `PIPELINE.md` (« Tous les familiers en briques LEGO, par lots »).
 Faits et branchés dans `ArtModels` : les 15 Animaux (`Lot01_Animaux.fbx`) et les 15 Fantastiques (`Lot02_Fantastiques.fbx`),
 lueurs envoyées (`<Id>_roblox.json`). Les 15 Plantes sont faites (`Lot03_Plantes.fbx`, lueurs envoyées, démarches
-écrites), branchées et vérifiées en jeu. Les 15 Hybrides sont faits (`Lot04_Hybrides.fbx`, lueurs envoyées, démarches
-écrites) : à importer puis brancher. Restent : Absurdes, Mondes. Le cercle lumineux au sol des familiers
+écrites), branchées et vérifiées en jeu. Les 15 Hybrides sont branchés et vérifiés en jeu (`Lot04_Hybrides.fbx` ; le masque de
+lueur du Requin-Torpille a été retiré par la modération Roblox, il n'a pas de lueur). Restent : Absurdes, Mondes.
+⚠️ Plus aucun envoi d'image sur le compte de Chouaib sans son accord (avertissement de modération du 25 oct., faux positif).
+⚠️ Deux sessions travaillent dans le même dossier : avant un Play de test, vérifier que `Shared.PetGaits` contient bien
+les derniers familiers (une synchro par .rbxm d'une autre session a déjà remis une ancienne version). Le cercle lumineux au sol des familiers
 Épique+ (« RuneArc ») et l'anneau des évolués sont retirés (« bizarre et moche », 25 oct.). **Chaque familier refait a sa propre
 démarche** (`shared/PetGaits`, GDD « Familiers en briques LEGO et démarches propres ») : trajets, déplacement du corps entier
 et gestes ; tout nouveau familier refait reçoit sa fiche. Vérifié en jeu (solo, mesures sur 10 à 20 s) : bonds (Kitsune,
