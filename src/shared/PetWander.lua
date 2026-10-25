@@ -24,6 +24,7 @@ export type Style = {
 	minWait: number, -- pause entre deux trajets (s)
 	maxWait: number,
 	hover: number, -- hauteur au-dessus du sol (affichage)
+	roam: number?, -- longueur maximale d'un trajet (studs) ; sinon n'importe où dans la prairie
 }
 
 PetWander.STYLES = {
@@ -64,7 +65,7 @@ end
 function PetWander.styleOf(petId: string): (Style, string)
 	local g = PetGaits.For(petId)
 	if g then
-		return { speed = g.speed, minWait = g.minWait, maxWait = g.maxWait, hover = g.hover }, g.ease
+		return { speed = g.speed, minWait = g.minWait, maxWait = g.maxWait, hover = g.hover, roam = g.roam }, g.ease
 	end
 	return PetWander.STYLES[PetWander.styleFor(petId)], "Linear"
 end
@@ -80,6 +81,21 @@ function PetWander.randomSpot(rng: Random, petId: string?): Vector2
 	local halfX = math.max(2, ZONE_HALF.X - margin)
 	local halfZ = math.max(2, ZONE_HALF.Y - margin)
 	return ZONE_CENTER + Vector2.new(rng:NextNumber(-halfX, halfX), rng:NextNumber(-halfZ, halfZ))
+end
+
+-- Un point pas trop loin de `from` (entre 40 % et 100 % de `roam` studs), dans la prairie : petits trajets des
+-- familiers casaniers (shared/PetGaits « roam »).
+function PetWander.nearbySpot(rng: Random, petId: string, from: Vector2, roam: number): Vector2
+	local entry = PetCatalog.ById[petId]
+	local margin = math.max(0, PetSizes.Radius(petId, entry and entry.Rarity) - 4)
+	local halfX = math.max(2, ZONE_HALF.X - margin)
+	local halfZ = math.max(2, ZONE_HALF.Y - margin)
+	local angle = rng:NextNumber(0, math.pi * 2)
+	local spot = from + Vector2.new(math.cos(angle), math.sin(angle)) * rng:NextNumber(roam * 0.4, roam)
+	return Vector2.new(
+		math.clamp(spot.X, ZONE_CENTER.X - halfX, ZONE_CENTER.X + halfX),
+		math.clamp(spot.Y, ZONE_CENTER.Y - halfZ, ZONE_CENTER.Y + halfZ)
+	)
 end
 
 -- Un trajet : de `from` à `to`, départ à `start` (horloge serveur), pendant `duration` secondes.
@@ -122,7 +138,7 @@ local function eased(ease: string?, a: number, length: number): number
 	if ease == "Smooth" then
 		return a * a * (3 - 2 * a)
 	elseif ease == "Dash" then
-		return 1 - (1 - a) ^ 2.5
+		return 1 - (1 - a) ^ 2
 	elseif ease == "Pounce" then
 		return if a < POUNCE_AT then 0.4 * a / POUNCE_AT else 0.4 + 0.6 * (a - POUNCE_AT) / (1 - POUNCE_AT)
 	elseif ease == "Pulse" then

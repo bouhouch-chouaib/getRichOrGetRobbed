@@ -34,6 +34,7 @@ export type Gait = {
 	wheel: boolean?, -- roule comme une roue le long du trajet
 	spin: number?, -- tourne sur lui-même au repos (rad / s)
 	turn: number?, -- vitesse pour se tourner vers sa destination
+	roam: number?, -- longueur maximale d'un trajet (studs) : les casaniers font de petits tours
 	-- gestes (PetMotion)
 	stride: number, -- cadence des pattes
 	swing: number, -- amplitude des pattes
@@ -75,7 +76,7 @@ PetGaits.ById = {
 	ChatRuelle = gait({ speed = 4.5, minWait = 2, maxWait = 6, ease = "Pounce", pounce = 1.3, step = 1.4, bob = 0.05,
 		roll = 0.03, lean = -0.06, turn = 4, stride = 0.9, swing = 0.8, tail = "Flick" }),
 	-- pigeon : se dandine à petits pas rapides, tête qui avance et recule, picore à l'arrêt
-	PigeonVilles = gait({ speed = 3.2, minWait = 0.5, maxWait = 2.5, ease = "Linear", step = 0.6, bob = 0.08,
+	PigeonVilles = gait({ speed = 3.2, minWait = 1, maxWait = 3.5, ease = "Linear", roam = 7, step = 0.6, bob = 0.08,
 		roll = 0.13, stride = 1.9, swing = 1.1, head = "Bob", tail = "Fan", wing = "Fold" }),
 	-- grenouille : grands bonds, longues pauses à gonfler la gorge
 	GrenouilleGlobuleuse = gait({ speed = 5, minWait = 1.5, maxWait = 5, ease = "Linear", hop = 2.2, hopLength = 3.5,
@@ -84,13 +85,14 @@ PetGaits.ById = {
 	ChienSaucisse = gait({ speed = 6, minWait = 0.5, maxWait = 2.5, ease = "Linear", step = 0.7, bob = 0.06,
 		wiggle = 0.12, stride = 2.3, swing = 1.1, head = "Sniff", tail = "Wag" }),
 	-- hamster : sprints courts puis freinage, mille petits pas, s'arrête souvent
-	HamsterJoufflu = gait({ speed = 8, minWait = 0.3, maxWait = 2.5, ease = "Dash", step = 0.5, bob = 0.12, roll = 0.04,
+	HamsterJoufflu = gait({ speed = 7, minWait = 0.5, maxWait = 2.5, ease = "Dash", roam = 12, step = 0.5, bob = 0.12,
+		roll = 0.04,
 		turn = 10, stride = 2.6, swing = 1.2 }),
 	-- renard : trotte en furtif, renifle, et finit par le bond du renard qui chasse la souris
 	RenardFurtif = gait({ speed = 5.5, minWait = 1, maxWait = 4, ease = "Pounce", pounce = 1.7, step = 1.3, bob = 0.08,
 		lean = -0.05, stride = 1.1, swing = 0.9, head = "Sniff", tail = "Swish" }),
 	-- corbeau : avance par petits sauts à pieds joints, picore
-	CorbeauVoleur = gait({ speed = 3.5, minWait = 0.8, maxWait = 3, ease = "Linear", hop = 0.7, hopLength = 1.2,
+	CorbeauVoleur = gait({ speed = 3.5, minWait = 0.8, maxWait = 3, ease = "Linear", roam = 9, hop = 0.7, hopLength = 1.2,
 		stride = 1, swing = 0.6, head = "Peck", tail = "Fan", wing = "Fold" }),
 	-- hibou : reste perché longtemps, tourne la tête presque à l'envers, ne vole que pour changer de place
 	HibouGrincheux = gait({ speed = 6, minWait = 4, maxWait = 9, ease = "Smooth", hover = 4, perch = true,
@@ -114,7 +116,8 @@ PetGaits.ById = {
 	TRexPoche = gait({ speed = 3.5, minWait = 1.5, maxWait = 5, ease = "Linear", step = 1.6, bob = 0.14, roll = 0.09,
 		wiggle = 0.06, lean = -0.08, stride = 0.8, swing = 1.2, body = "Heavy", head = "Roar", tail = "Stiff" }),
 	-- capybara zen : se traîne tranquillement, longues siestes, la tête qui pique du nez
-	CapybaraZen = gait({ speed = 2, minWait = 5, maxWait = 12, ease = "Smooth", step = 1.6, bob = 0.06, roll = 0.03,
+	CapybaraZen = gait({ speed = 2, minWait = 5, maxWait = 12, ease = "Smooth", roam = 8, step = 1.6, bob = 0.06,
+		roll = 0.03,
 		turn = 2, stride = 0.6, swing = 0.7, head = "Nod" }),
 	-- Cerbère Infernal (Sigma du Volcan) : pas lourds, souffle, têtes qui aboient
 	CerbereInfernal = gait({ speed = 4, minWait = 1.5, maxWait = 5, ease = "Smooth", step = 2, bob = 0.1, roll = 0.05,
@@ -130,13 +133,13 @@ PetGaits.ById = {
 	BebeGriffon = gait({ speed = 5.5, minWait = 1, maxWait = 3.5, ease = "Linear", step = 1.2, bob = 0.22, roll = 0.06,
 		stride = 1.4, swing = 1.1, wing = "Flutter", tail = "Swish" }),
 	-- gargouille : se dandine lourdement sur ses pattes de pierre
-	GargouilleMignonne = gait({ speed = 3, minWait = 1.5, maxWait = 5, ease = "Linear", step = 0.9, bob = 0.08,
+	GargouilleMignonne = gait({ speed = 3, minWait = 1.5, maxWait = 5, ease = "Linear", roam = 12, step = 0.9, bob = 0.08,
 		roll = 0.15, stride = 1.4, swing = 1, wing = "Fold" }),
 	-- licorne : trot dansant, genoux hauts, tête fière
 	LicorneBois = gait({ speed = 4.5, minWait = 1, maxWait = 4, ease = "Linear", step = 1.5, bob = 0.3, rock = 0.08,
 		stride = 1.1, swing = 1.4, head = "Proud", tail = "Swish" }),
 	-- phénix de cendres : petits sauts fatigués, pique du nez, fumée lente
-	PhenixCendres = gait({ speed = 2.5, minWait = 2, maxWait = 6, ease = "Linear", hop = 0.5, hopLength = 1,
+	PhenixCendres = gait({ speed = 2.5, minWait = 2, maxWait = 6, ease = "Linear", roam = 8, hop = 0.5, hopLength = 1,
 		head = "Nod", wing = "Fold", tail = "Fan", flicker = 0.7 }),
 	-- cerbère chiot : chiot fou, sprints et rebonds, trois têtes curieuses, queue qui frétille
 	CerbereChiot = gait({ speed = 6.5, minWait = 0.5, maxWait = 2.5, ease = "Dash", step = 1, bob = 0.25, roll = 0.08,
@@ -152,7 +155,7 @@ PetGaits.ById = {
 	Kitsune3Queues = gait({ speed = 6, minWait = 1, maxWait = 4, ease = "Linear", hop = 1, hopLength = 3, lean = -0.04,
 		stride = 1.2, swing = 1, tail = "Flow" }),
 	-- kraken : rampe par poussées de tentacules, monte et redescend
-	KrakenBaignoire = gait({ speed = 2.5, minWait = 2, maxWait = 6, ease = "Pulse", step = 2, bob = 0.2, turn = 3,
+	KrakenBaignoire = gait({ speed = 2.5, minWait = 2, maxWait = 6, ease = "Pulse", roam = 10, step = 2, bob = 0.2, turn = 3,
 		body = "Pulse" }),
 	-- basilic : ondule en S, tête qui se balance pour hypnotiser
 	BasilicEmeraude = gait({ speed = 3, minWait = 1, maxWait = 4, ease = "Smooth", sway = 0.7, swayLength = 4, turn = 3,

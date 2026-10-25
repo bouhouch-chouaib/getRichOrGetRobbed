@@ -167,7 +167,8 @@ local function updateWalks()
 		for petId, pet in pairs(state.pets) do
 			if time >= pet.nextLegAt then
 				local from = PetWander.positionAt(pet.leg, time, pet.ease)
-				local to = PetWander.randomSpot(rng, petId)
+				local roam = pet.style.roam
+				local to = if roam then PetWander.nearbySpot(rng, petId, from, roam) else PetWander.randomSpot(rng, petId)
 				local duration = (to - from).Magnitude / pet.style.speed
 				pet.leg = { from = from, to = to, start = time, duration = duration }
 				pet.nextLegAt = time + duration + rng:NextNumber(pet.style.minWait, pet.style.maxWait)
