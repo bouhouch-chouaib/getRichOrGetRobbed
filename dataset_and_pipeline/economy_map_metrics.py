@@ -151,7 +151,141 @@ def pulls_for(score):
     return max(1, n) if score > 0 else 0
 
 
+def median(values):
+    ordered = sorted(values)
+    return ordered[len(ordered) // 2]
+
+
+# --- Étape 3 : courbe de vitesse proposée, déduite des repères de la carte (pas encore dans Config.lua)
+RARITY_NAMES = list(BANDS)
+HOLD = num(STEAL, "HoldDuration")
+
+
+def landmarks():
+    """Où peut se trouver le propriétaire (base 0) quand le vol commence, et sa distance médiane au familier volé."""
+    kiosk = (lambda a: (203 * math.cos(a), 203 * math.sin(a)))(-math.pi / 8)  # kiosque de l'autre côté du trajet
+    spots = {
+        "dans sa base (spawn)": to_world(0, SPAWN),
+        "à son tapis": to_world(0, TREADMILL),
+        "au kiosque voisin": kiosk,
+        "objets sauvages (r 115)": (115.0, 0.0),
+        "lance près du trou (r 65)": (65.0, 0.0),
+        "de l'autre côté du trou": (-65.0, 0.0),
+        "vole 2 bases plus loin": to_world(2, (0, -3)),
+    }
+    pets = [random_pet() for _ in range(2000)]
+    return {name: (spot, median(dist(spot, p) for p in pets)) for name, spot in spots.items()}
+
+
+def proposed_curve():
+    """m(r) = MaxSpeed x q^(r-1). Ancres : Commun au plafond actuel (MaxSpeed) ; Sigma tout juste volable, à vitesse
+    égale, quand le propriétaire est de l'autre côté du trou (D* = cette distance)."""
+    trips = [path_len(p, nearest_inside(1, p)) for p in (random_pet() for _ in range(2000))]
+    d = median(trips)
+    far = landmarks()["de l'autre côté du trou"][1]
+    lam8 = d / (far - RECOVER + SPEED_BASE * REACT)
+    q = (lam8 / MAX_SPEED) ** (1 / (len(BANDS) - 1))
+    return [MAX_SPEED * q ** i for i in range(len(BANDS))], d, far, q
+
+
+def etape3():
+    random.seed(3)
+    curve, d, far, q = proposed_curve()
+    gate_gate = dist(to_world(0, GATE), to_world(1, GATE))
+    gate_pet = median(dist(to_world(0, GATE), random_pet()) for _ in range(2000))
+    print("== Étape 3. Courbe proposée : vitesse en portant = min(sa vitesse, celle du propriétaire) x m(rareté) ==")
+    print(f"trajet médian vers la base voisine d = {d:.0f} studs ; propriétaire « de l'autre côté du trou » à {far:.0f} studs")
+    print(f"ancre Sigma : m = d / (D* - Reprendre + vitesse x réaction) = {d:.0f} / ({far:.0f} - {RECOVER:.0f} + {SPEED_BASE:.0f} x {REACT})"
+          f" = {curve[-1]:.3f} ; q = {q:.3f} par rareté")
+    approach = gate_gate / SPEED_BASE + gate_pet / SPEED_BASE + HOLD
+    print(f"contrôle : un débutant met {approach:.1f} s pour aller jusqu'au familier, puis {d / (SPEED_BASE * curve[-1]):.1f} s pour"
+          f" rentrer avec un Sigma = {approach + d / (SPEED_BASE * curve[-1]):.0f} s (fenêtre ouverte minimale de l'étape 2 : 30 s)")
+    print(f"\n{'rareté':11s} {'m actuel débutant':>17s} {'m actuel entraîné':>17s} {'m proposé':>10s}")
+    for i, (rarity, (a, b)) in enumerate(BANDS.items()):
+        s = (a + b) / 2
+        print(f"{rarity:11s} {carry_mult(s, POWER['départ']):17.2f} {carry_mult(s, POWER['entraîné max']):17.2f} {curve[i]:10.2f}")
+
+    print("\n-- Distance minimale du propriétaire pour qu'un vol réussisse (D*, studs ; vitesse égale, « Reprendre » à 10) --")
+    print("   D* = 10 + d / (vitesse du voleur / vitesse du propriétaire) - vitesse du propriétaire x 1,5 s")
+    marks = landmarks()
+    print("   repères : " + ", ".join(f"{n} {v:.0f}" for n, (_, v) in marks.items()))
+    print(f"{'rareté':11s} {'actuel débutants':>17s} {'actuel entraînés':>17s} {'proposé débutants':>18s} {'proposé entraînés':>18s}")
+    for i, (rarity, (a, b)) in enumerate(BANDS.items()):
+        s = (a + b) / 2
+        cells = []
+        for lam, w in ((carry_mult(s, POWER["départ"]), SPEED_BASE), (carry_mult(s, POWER["entraîné max"]), WALK["entraîné max"]),
+                       (curve[i], SPEED_BASE), (curve[i], WALK["entraîné max"])):
+            cells.append(RECOVER + d / lam - w * REACT)
+        print(f"{rarity:11s} {cells[0]:17.0f} {cells[1]:17.0f} {cells[2]:18.0f} {cells[3]:18.0f}")
+
+    print("\n-- Vols réussis vers la base voisine selon où est le propriétaire (courbe actuelle -> proposée, sans grappin) --")
+    duels = {
+        "débutants": (SPEED_BASE, POWER["départ"], SPEED_BASE),
+        "entraînés": (WALK["entraîné max"], POWER["entraîné max"], WALK["entraîné max"]),
+        "voleur débutant, propriétaire entraîné": (SPEED_BASE, POWER["départ"], WALK["entraîné max"]),
+    }
+    for duel, (w_t, p_t, w_v) in duels.items():
+        print(f"## {duel}")
+        print(f"   {'propriétaire':28s} " + " ".join(f"{r[:6]:>13s}" for r in RARITY_NAMES[::2] + [RARITY_NAMES[-1]]))
+        for name, (spot, _) in marks.items():
+            row = []
+            for i in list(range(0, len(BANDS), 2)) + [len(BANDS) - 1]:
+                a, b = list(BANDS.values())[i]
+                s = (a + b) / 2
+                rates = []
+                for version in ("actuel", "proposé"):
+                    v = w_t * carry_mult(s, p_t) if version == "actuel" else min(w_t, w_v) * curve[i]
+                    wins = 0
+                    for _ in range(120):
+                        pet = random_pet()
+                        wins += escapes(pet, nearest_inside(1, pet), v, spot, w_v, RECOVER)
+                    rates.append(wins / 120)
+                row.append(f"{rates[0] * 100:4.0f}->{rates[1] * 100:3.0f}%")
+            print(f"   {name:28s} " + " ".join(f"{c:>13s}" for c in row))
+
+    print("\n-- Temps d'exposition : secondes à porter jusqu'à la base voisine (médiane) --")
+    print(f"{'rareté':11s} {'actuel débutant':>16s} {'actuel entraîné':>16s} {'proposé (vitesse 16)':>21s} {'proposé (46)':>13s}")
+    for i, (rarity, (a, b)) in enumerate(BANDS.items()):
+        s = (a + b) / 2
+        print(f"{rarity:11s} {d / (SPEED_BASE * carry_mult(s, POWER['départ'])):16.1f} "
+              f"{d / (WALK['entraîné max'] * carry_mult(s, POWER['entraîné max'])):16.1f} "
+              f"{d / (SPEED_BASE * curve[i]):21.1f} {d / (WALK['entraîné max'] * curve[i]):13.1f}")
+
+    print("\n-- Interception par les AUTRES joueurs (le porteur est signalé à tous) --")
+    print("   tiers placés au hasard sur la carte, partent après 2,5 s, batte à 11 studs ; k = tiers qui veulent intercepter")
+    for w in (SPEED_BASE, WALK["entraîné max"]):
+        print(f"   ## tout le monde à la vitesse {w:.0f}")
+        for i, rarity in enumerate(RARITY_NAMES):
+            hits = 0
+            trials = 600
+            for _ in range(trials):
+                pet = random_pet()
+                target = nearest_inside(1, pet)
+                angle, radius = random.uniform(0, 2 * math.pi), 257 * math.sqrt(random.random())
+                third = (radius * math.cos(angle), radius * math.sin(angle))
+                hits += not escapes_from(pet, target, w * curve[i], third, w, 11.0, 2.5)
+            a = hits / trials
+            print(f"   {rarity:11s} un tiers : {a * 100:4.0f} %   k=1 {a * 100:4.0f} %  k=2 {(1 - (1 - a) ** 2) * 100:4.0f} %"
+                  f"  k=3 {(1 - (1 - a) ** 3) * 100:4.0f} %")
+
+
+def escapes_from(pet, target, v_thief, other, v_other, radius, react):
+    """Comme escapes(), avec un temps de réaction au choix (un tiers met plus longtemps à réagir que la victime)."""
+    length = dist(pet, target)
+    total = length / v_thief
+    ux, uy = (target[0] - pet[0]) / length, (target[1] - pet[1]) / length
+    for n in range(121):
+        t = total * n / 120
+        p = (pet[0] + ux * v_thief * t, pet[1] + uy * v_thief * t)
+        if dist(p, other) <= radius + v_other * max(0.0, t - react):
+            return False
+    return True
+
+
 def main():
+    if "--etape3" in sys.argv:
+        etape3()
+        return
     random.seed(1)
     gate = to_world(0, GATE)
     print("== 1. Distances (studs) ==")

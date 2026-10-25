@@ -6,9 +6,11 @@ avec Lune et les écrit dans economy_data.json. Les règles (tirages, pitié, ra
 
     python -I dataset_and_pipeline/economy_simulator.py solo [--runs 200] [--hours 30]
     python -I dataset_and_pipeline/economy_simulator.py segments [--runs 200] [--hours 30]
+    python -I dataset_and_pipeline/economy_simulator.py cibles [--runs 120] [--hours 11]
 
 `solo` : même sortie que tools/sim-economy.luau ; avec --no-capsule, mêmes règles (vérifié : mêmes résultats).
 `segments` : les dents de scie, monde par monde (montée à l'arrivée, plateau, temps d'attente du monde suivant).
+`cibles` : qui a intérêt à voler qui selon l'avancée de chacun (vols utiles, gain du meilleur vol, effet du plafond).
 """
 from __future__ import annotations
 
@@ -240,6 +242,7 @@ class SoloRun:
         self.spent_shop = 0.0
         self.purchases: list[tuple[float, str, int, float, float]] = []  # (t, objet, niveau, prix, revenu/s)
         self.income_now = 0.0
+        self.snapshots: dict[int, tuple[list[str], float, int, int]] = {}  # point de contrôle -> (base, revenu/s, monde, rebirths)
 
     def earn(self, source: str, amount: float):
         self.money += amount
@@ -367,6 +370,7 @@ class SoloRun:
         checkpoint = None
         while next_check < len(CHECKPOINTS) and self.t >= CHECKPOINTS[next_check]:
             self.income_at[CHECKPOINTS[next_check]] = income
+            self.snapshots[CHECKPOINTS[next_check]] = (list(base), income, self.tier, self.rebirths)
             checkpoint = CHECKPOINTS[next_check]
             next_check += 1
 
@@ -552,9 +556,51 @@ def report_walls(results: list[SoloRun], game: Game):
               f" | 5 derniers {late[len(late) // 2]:7.2f} min")
 
 
+def steal_gain(game: Game, thief: tuple, pet: str, cap: bool) -> float:
+    """Gain de revenu du voleur s'il ajoute `pet` à sa base (à la place de son moins bon), divisé par son revenu.
+    cap : règle 2 de l'étape 2 : un familier rapporte au plus le revenu de base de la rareté r + 2 (Config.Rarities,
+    r = meilleure rareté du voleur), formes évoluées et mutées comprises. Pas de plafond quand r + 2 dépasse le Sigma."""
+    base, income, tier, rebirths = thief
+    value = game.income(pet)
+    top = max(game.rarity_of(p) for p in base) + 2
+    if cap and top <= len(game.rarities):
+        value = min(value, game.rarities[top - 1]["Income"])
+    low = min(game.income(p) for p in base) if len(base) >= game.income_slots(rebirths) else 0.0
+    gain = max(0.0, value - low) * game.world(tier)["IncomeMultiplier"] * game.rebirth_mult(rebirths)
+    return gain / income if income > 0 else 0.0
+
+
+def report_targets(results: list[SoloRun], game: Game):
+    """Qui a intérêt à voler qui : pour un voleur et une victime à deux moments de la partie, part des familiers de la
+    victime qui feraient monter le revenu du voleur (« vol utile »), et gain du meilleur vol, sans et avec plafond."""
+    points = [600, 1800, 3600, 7200, 18000, 36000]
+    rng = random.Random(5)
+    print("Qui a intérêt à voler qui (médianes sur des paires de parties) :")
+    print("  case = part des familiers de la victime utiles au voleur / gain du meilleur vol sans plafond / avec plafond")
+    print(f"{'voleur / victime':>16s} " + " ".join(f"{duration(p):>24s}" for p in points))
+    for a in points:
+        row = []
+        for b in points:
+            useful, best_raw, best_cap = [], [], []
+            for _ in range(60):
+                thief = rng.choice(results).snapshots.get(a)
+                victim = rng.choice(results).snapshots.get(b)
+                if not thief or not victim:
+                    continue
+                gains = [steal_gain(game, thief, p, False) for p in victim[0]]
+                capped = [steal_gain(game, thief, p, True) for p in victim[0]]
+                useful.append(sum(1 for x in capped if x > 0) / len(victim[0]))
+                best_raw.append(max(gains))
+                best_cap.append(max(capped))
+            cell = (f"{pct(useful, 0.5, len(useful)) * 100:3.0f}% x{pct(best_raw, 0.5, len(best_raw)):.2g}"
+                    f"/x{pct(best_cap, 0.5, len(best_cap)):.2g}") if useful else "-"
+            row.append(f"{cell:>24s}")
+        print(f"{duration(a):>16s} " + " ".join(row))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("mode", choices=["solo", "segments"])
+    parser.add_argument("mode", choices=["solo", "segments", "cibles"])
     parser.add_argument("--runs", type=int, default=200)
     parser.add_argument("--hours", type=float, default=30)
     parser.add_argument("--no-refresh", action="store_true", help="ne pas relire les valeurs du jeu avec Lune")
@@ -565,6 +611,8 @@ def main():
     results = run_many(game, args.runs, args.hours, capsule=not args.no_capsule)
     if args.mode == "solo":
         report_solo(results, args.runs, args.hours, game)
+    elif args.mode == "cibles":
+        report_targets(results, game)
     else:
         report_segments(results, game)
         report_walls(results, game)

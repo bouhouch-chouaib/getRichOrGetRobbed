@@ -1,7 +1,7 @@
 # Rapport économique (phase 1.7)
 
-**État au 25 oct. 2026 : étapes 1 (audit) et 2 (courbe coûts / revenus, défenses) faites.** Les étapes 3 à 5
-(risque du vol, rétention, simulateur à plusieurs joueurs) viennent ensuite. **Rien n'a encore été changé dans le jeu** :
+**État au 25 oct. 2026 : étapes 1 (audit), 2 (courbe coûts / revenus, défenses) et 3 (risque du vol,
+anti-boule de neige) faites.** Les étapes 4 et 5 (rétention, simulateur à plusieurs joueurs) viennent ensuite. **Rien n'a encore été changé dans le jeu** :
 les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
 Règle suivie : aucun chiffre « au doigt mouillé ». Tout ce qui suit vient du code ou d'un calcul refaisable.
@@ -337,3 +337,155 @@ devient « être chez soi quand c'est ouvert » : du jeu actif, et une raison de
 - Étape 4 : ce qui fait monter le revenu en fin de partie, et le Rebirth (choix de ρ).
 - Étape 5 : simulateur à 8 joueurs avec vols, pour prouver les règles 2 et 3, le cycle du verrou et la règle de la
   batte avant de toucher `Config.lua`.
+
+---
+
+# Étape 3 : le risque du vol et l'anti-boule de neige
+
+Calculs : `python -I dataset_and_pipeline/economy_map_metrics.py --etape3` (poursuites) et
+`python -I dataset_and_pipeline/economy_simulator.py cibles --runs 120 --hours 10.5` (qui a intérêt à voler qui).
+Même modèle de poursuite qu'à l'étape 1 : lignes droites, la victime part après 1,5 s, « Reprendre » à 10 studs.
+
+## 3.1 Le principe : la distance qui sauve
+
+Pour chaque rareté, on calcule **D\***, la distance à laquelle le propriétaire doit se trouver pour qu'un vol réussisse,
+à vitesse égale :
+
+`D* = 10 + d / λ - vitesse du propriétaire x 1,5 s`, avec d = trajet du voleur (110 studs vers la base voisine) et
+λ = vitesse du voleur chargé / vitesse du propriétaire.
+
+On compare D\* aux endroits où le propriétaire se trouve vraiment (distance médiane au familier volé, en studs) :
+dans sa base 23, à son tapis 54, au kiosque voisin 84, aux objets sauvages 99, en train de lancer près du trou 149,
+de l'autre côté du trou 278, en train de voler 2 bases plus loin 300.
+
+**La bonne tension, c'est une échelle** : un Commun se vole dès que le propriétaire s'éloigne un peu, un Sigma
+seulement s'il est à l'autre bout de la carte. Le joueur doit choisir son moment (le timing), et plus le butin est gros,
+plus il faut attendre une vraie ouverture.
+
+## 3.2 La courbe actuelle s'écrase quand on s'entraîne
+
+| Rareté | m actuel, débutant (Force 70) | m actuel, entraîné (Force 250) | D\* actuel, débutants | D\* actuel, entraînés |
+| --- | --- | --- | --- | --- |
+| Commun | 0,95 | 0,95 | 101 | 56 |
+| Rare | 0,93 | 0,95 | 104 | 56 |
+| Légendaire | 0,81 | 0,94 | 122 | 58 |
+| Divin | 0,54 | 0,81 | 189 | 77 |
+| Sigma | 0,33 | 0,64 | 316 | 112 |
+
+Entre joueurs entraînés, toutes les raretés se volent de la même façon (D\* de 56 à 112) : un Sigma part dès que le
+propriétaire est à son tapis. La Force fait disparaître le poids, et la vitesse x2,9 fait fondre la carte (C3).
+
+## 3.3 Règle 5 : vitesse en portant = min(sa vitesse, celle du propriétaire) x m(rareté)
+
+`m(rareté) = 0,95 x 0,876^(rang - 1)` : **0,95 / 0,83 / 0,73 / 0,64 / 0,56 / 0,49 / 0,43 / 0,38** (Commun -> Sigma).
+La Force ne compte plus pour porter (elle garde son rôle : lancer loin).
+
+D'où viennent les chiffres :
+- Commun = 0,95 : le plafond actuel (`Config.Carry.MaxSpeed`), porter ralentit toujours un peu.
+- Sigma = 0,38 : à vitesse égale, il doit être volable **tout juste** quand le propriétaire est de l'autre côté du trou :
+  `m = 110 / (278 - 10 + 16 x 1,5) = 0,376`.
+- Entre les deux, chaque rareté retire le même pourcentage (x0,876) : l'échelle est régulière.
+- Vérification croisée avec l'étape 2 : un débutant met 11,3 s pour arriver au familier, puis 18,2 s pour rentrer avec
+  un Sigma = 30 s, exactement la fenêtre ouverte minimale du verrou. Deux calculs indépendants donnent la même borne.
+- « min(sa vitesse, celle du propriétaire) » : un voleur plus rapide que sa victime ne la distance plus avec un gros
+  butin ; la carte ne fond plus quand tout le monde s'entraîne.
+
+| Rareté | D\* proposé, débutants | D\* proposé, entraînés | secondes à porter (vitesse 16 / 46) |
+| --- | --- | --- | --- |
+| Commun | 101 | 56 | 7,2 / 2,5 |
+| Rare | 136 | 91 | 9,4 / 3,3 |
+| Légendaire | 182 | 137 | 12,2 / 4,3 |
+| Divin | 241 | 196 | 16,0 / 5,6 |
+| Sigma | 277 | 232 | 18,2 / 6,3 |
+
+Porter ne descend jamais sous 38 % de sa vitesse, et le trajet le plus long dure 18 s : lent, mais pas pénible.
+
+Vols réussis vers la base voisine, **entre joueurs entraînés**, courbe actuelle -> proposée (sans grappin) :
+
+| Propriétaire | Commun | Rare | Légendaire | Divin | Sigma |
+| --- | --- | --- | --- | --- | --- |
+| dans sa base | 76 -> 79 % | 82 -> 58 % | 78 -> 25 % | 74 -> 0 % | 52 -> 0 % |
+| à son tapis | 100 -> 100 % | 100 -> 100 % | 100 -> 67 % | 100 -> 22 % | 92 -> 6 % |
+| au kiosque voisin | 100 -> 100 % | 100 -> 100 % | 100 -> 88 % | 100 -> 36 % | 100 -> 9 % |
+| lance près du trou | 100 -> 100 % | 100 -> 97 % | 100 -> 48 % | 100 -> 2 % | 68 -> 0 % |
+| de l'autre côté du trou | 100 -> 100 % | 100 -> 100 % | 100 -> 100 % | 100 -> 85 % | 100 -> 57 % |
+| en train de voler 2 bases plus loin | 100 -> 100 % | 100 -> 100 % | 100 -> 100 % | 100 -> 50 % | 100 -> 28 % |
+
+Entre débutants, l'échelle existait déjà et reste proche (Sigma : 0 % partout sauf de l'autre côté du trou, 6 -> 19 %).
+Un voleur débutant contre un propriétaire entraîné : ~0 % partout avec les deux courbes (seul un Commun passe, 30 %,
+quand le propriétaire est de l'autre côté du trou) : il ne vole un riche que s'il est absent, et s'entraîner en Vitesse
+devient le chemin pour voler les riches.
+
+## 3.4 Règle 6 : un grappin qui demande de viser
+
+Aujourd'hui, un propriétaire chez lui avec un grappin gagne à 100 %, quelle que soit la rareté : il vise à 14° près
+(13 studs de marge à 55 studs) et peut retirer toutes les 5 s (4 tirs pendant qu'un Sigma est porté).
+- **Cône de visée 14° -> 8°** : la cible fait ~2,5 studs de large (plus le familier porté), plus ~1,5 stud de décalage
+  dû au ping (0,1 s à 16 studs/s) ; ~4 studs de marge à mi-portée (28 studs) = 8°.
+- **Recharge 5 s -> 9 s** : 9 s = la moitié du plus long trajet (Sigma, 18,2 s). Au plus 2 tirs sur un gros butin,
+  1 seul sur un petit (moins de 9 s) ou contre un voleur entraîné (moins de 6,3 s). Rater coûte cher : c'est de l'adresse.
+- Ces deux valeurs ne se vérifient pas hors ligne (il faudrait mesurer l'adresse réelle) : **test à 2 joueurs dans Studio**.
+
+## 3.5 Qui a intérêt à voler qui
+
+Pour un voleur et une victime pris à deux moments de la partie : part des familiers de la victime qui feraient monter le
+revenu du voleur, et gain du meilleur vol (sans plafond -> avec le plafond de la règle 2).
+
+| Voleur \ victime | 10 min | 1 h | 2 h | 10 h |
+| --- | --- | --- | --- | --- |
+| 10 min | 87 %, x0,6 | 100 %, x130 -> x7,7 | 100 %, x710 -> x11 | 100 %, x5000 -> x11 |
+| 30 min | 7 %, x0,004 | 100 %, x2,7 | 100 %, x16 -> x5,7 | 100 %, x76 -> x11 |
+| 1 h | 0 % | 93 %, x0,26 | 100 %, x2,3 | 100 %, x16 -> x6,6 |
+| 2 h | 0 % | 20 %, x0,02 | 100 %, x0,21 | 100 %, x1,4 |
+| 10 h | 0 % | 0 % | 13 %, x0,004 | 94 %, x0,12 |
+
+Ce que ça montre :
+- **Voler un plus avancé** : tous ses familiers sont utiles, et le plafond ramène le gain à x6 à x11 au plus (un monde
+  d'avance environ, comme voulu à l'étape 2). C'est le rattrapage naturel du jeu.
+- **Voler un moins avancé ne rapporte rien** dès 30 min à 1 h d'écart : 0 à 7 % de ses familiers serviraient, pour
+  +0,4 % de revenu. Un riche qui vole un débutant ne le fait que pour gêner (ou pour la quête « Vole N familiers »).
+- **Entre joueurs du même niveau**, un vol vaut +12 à +60 % de revenu : la vraie rivalité.
+
+## 3.6 Règles anti-boule de neige et anti-harcèlement
+
+**Règle 7. Vol utile.** On ne peut prendre que les familiers qui feraient monter son revenu (revenu plafonné par la
+règle 2 plus grand que son moins bon familier de base, ou une place libre). La bulle [E] ne s'affiche pas sur les
+autres. Raison (théorie des jeux) : un vol qui ne rapporte rien au voleur et fait perdre la victime n'est que du
+harcèlement ; l'interdire ne retire aucun choix intéressant. Effet mesuré (3.5) : un joueur avancé ne peut plus voler
+quelqu'un qui a 30 min à 1 h de retard. La quête « Vole N familiers » ne compte donc plus que des vols utiles.
+
+**Règle 8. Bouclier après une grosse perte.** Si un vol fait perdre au moins 20 % de son revenu (après remplacement
+par le suivant de la réserve), la base ne peut plus être volée pendant 105 s.
+- 20 % = la part du séjour passée sur le plateau (étape 2) : au-delà, une seule perte renvoie plus loin que le mur.
+- 105 s = un cycle du verrou (étape 2) : le temps de revenir (le point le plus loin, la base d'en face, est à
+  ~430 studs = 27 s à vitesse 16) et de refermer.
+- Un vétéran qui a des doublons perd souvent 0 % (le doublon prend la place) : pas de bouclier, il peut se faire
+  piller s'il s'absente, c'est le jeu.
+
+**Règle 9. La couronne du plus riche (prime).** Le joueur qui a le plus gros revenu du serveur porte une couronne
+(au-dessus de sa tête et sur sa base).
+- Voler la couronne : en plus du familier, **prime = 10 min du revenu du familier volé** (plafonné), comme le jeter
+  dans le trou (`Config.Sacrifice.IncomeSeconds`) : le familier vaut deux fois plus à prendre chez le roi que chez un
+  autre, sans casser l'économie (montants déjà bornés par la règle 2).
+- Défendre la couronne : chaque voleur arrêté dans sa base (Reprendre, batte, grappin) donne au roi la même somme,
+  un compteur « défenses » et une annonce. La domination est récompensée par du jeu (défendre) et du prestige
+  (couronne, annonces), pas par plus de revenu : ça ne nourrit pas la boule de neige.
+- Effet attendu : les voleurs visent le roi plutôt que le joueur moyen ; le roi doit rester actif ; s'il s'absente, il
+  perd des familiers (des doublons, le plus souvent) et la couronne peut changer de tête.
+
+**Règle 10 (au choix de Chouaib). Gros butin signalé à tous.** Un porteur de Mythique ou plus est signalé à tout le
+serveur ; n'importe qui peut le frapper (le familier tombe et rentre à pied, et peut être ramassé, en respectant la règle 7).
+- Seuil Mythique : à partir de là, le trajet (14 s et plus à vitesse 16) dure à peu près le temps qu'il faut à un
+  autre joueur pour réagir et traverser la moitié de la carte (2,5 s + ~200 studs à 16 = 15 s) : il a le temps d'arriver.
+- Risque mesuré (un autre joueur qui veut l'intercepter, placé au hasard) : Mythique 44 %, Divin 48 %, Sigma 62 % à
+  vitesse 16 ; 20 %, 22 %, 38 % à vitesse 46. Plus le butin est gros, plus le voleur est exposé longtemps.
+- Contre : avec cette règle, un vol de Sigma entre joueurs entraînés, propriétaire de l'autre côté du trou, réussit
+  ~35 % du temps au lieu de 57 %. C'est rare, mais encore possible.
+
+## 3.7 Suite
+
+- Étape 4 : rétention (objectifs entamés, pitié, événements de serveur), Rebirth et ce qui fait monter le revenu en fin
+  de partie (règle 4), avantages réels à jouer avec un ami.
+- Étape 5 : simulateur à 8 joueurs (prudent, voleur, nouveau dans un serveur avancé, duo d'amis) avec les règles 2 à 10,
+  pour mesurer les vols réussis, les pertes et l'écart entre le plus riche et les autres, avant de toucher
+  `Config.lua`. Le grappin (règle 6) sera testé à 2 joueurs dans Studio.
