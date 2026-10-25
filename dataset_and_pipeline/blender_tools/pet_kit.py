@@ -1,8 +1,10 @@
 """Kit des familiers « en briques LEGO lisses » (25 oct. 2026), pour tous les familiers du jeu.
 
-Référence de style : images LEGO générées (dataset_and_pipeline/lego_refs/<Id>.png) : pièces en plastique brillant,
-SANS tenons (Chouaib), formes rondes faites de plaques empilées, couleurs franches, grands yeux. Chaque familier est un
-petit fichier pets/<Id>.py qui assemble ces pièces et dit à quelle partie animée chacune appartient :
+Style : un familier CONSTRUIT EN BRIQUES LEGO (briques, plaques, pentes, tuiles de tailles variées), plastique brillant,
+SANS tenons, couleurs franches, gros yeux. Les cubes dominent (Chouaib, 25 oct. : « trop rond », c'est un jeu Roblox) ;
+egg() / rounded() / disc() seulement pour de petits détails. Pas de grille de voxels régulière non plus (« Minecraft »).
+Chaque familier est un petit fichier pets/<Id>.py qui assemble ces pièces et dit à quelle partie animée chacune
+appartient :
 
     kit = PetKit(name)
     body = kit.mat("corps", "#8F9398")
@@ -81,6 +83,30 @@ class PetKit:
     def box(self, size, center=(0, 0, 0), rot=(0, 0, 0), taper=(1.0, 1.0), shift=(0.0, 0.0), label="Bloc"):
         """Brique droite (block_creatures.block) : taper / shift pour les pentes LEGO."""
         return BC.block(self._id(label), size, center, rot, taper, shift)
+
+    # Briques LEGO (sans tenons) : la forme de base de TOUS les familiers (Chouaib, 25 oct. : « trop rond, les formes
+    # les plus utilisées doivent rester des cubes »). Rondeurs seulement pour de petits détails (pupilles, tuiles rondes).
+    def brick(self, size, center=(0, 0, 0), rot=(0, 0, 0), label="Brique"):
+        return self.box(size, center, rot, label=label)
+
+    def slope(self, size, center=(0, 0, 0), facing="-Y", top=0.3, rot=(0, 0, 0), label="Pente"):
+        """Brique en pente (LEGO « slope ») : le dessus ne garde que `top` de la profondeur, collé au côté opposé à
+        `facing` (-Y = pente vers l'avant, +Y vers l'arrière, -X / +X vers les côtés)."""
+        sx, sy, _ = size
+        axis, sign = facing[1], (-1 if facing[0] == "-" else 1)
+        if axis == "Y":
+            taper, shift = (1.0, top), (0.0, -sign * sy / 2 * (1 - top))
+        else:
+            taper, shift = (top, 1.0), (-sign * sx / 2 * (1 - top), 0.0)
+        return self.box(size, center, rot, taper=taper, shift=shift, label=label)
+
+    def wedge(self, size, center=(0, 0, 0), rot=(0, 0, 0), tip=0.12, label="Coin"):
+        """Brique triangulaire vue de face (oreille, pointe, épine) : le dessus se resserre en largeur."""
+        return self.box(size, center, rot, taper=(tip, 1.0), label=label)
+
+    def tile(self, w, d, center=(0, 0, 0), rot=(0, 0, 0), thick=0.03, label="Tuile"):
+        """Tuile plate (œil carré, rayure, tache, pansement) posée à plat ; tourner avec rot pour la plaquer."""
+        return self.box((w, d, thick), center, rot, label=label)
 
     @staticmethod
     def _smooth(obj):

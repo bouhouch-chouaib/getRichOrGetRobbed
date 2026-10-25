@@ -1,0 +1,291 @@
+{
+  "pet": "ChatRuelle",
+  "model_height_blender": 1.5981,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 322,
+      "center": [
+        0.0,
+        0.01819,
+        0.6245
+      ],
+      "size": [
+        0.57,
+        1.00638,
+        0.569
+      ],
+      "pivot": null
+    },
+    "Head": {
+      "kind": "Head",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 520,
+      "center": [
+        0.0,
+        -0.565,
+        1.20905
+      ],
+      "size": [
+        0.8646,
+        0.59,
+        0.7781
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.36
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.9
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LegFL": {
+      "kind": "Leg",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 88,
+      "center": [
+        0.16,
+        -0.33,
+        0.18
+      ],
+      "size": [
+        0.19,
+        0.22,
+        0.36
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.16
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.3
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LegBL": {
+      "kind": "Leg",
+      "phase": 3.1416,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 132,
+      "center": [
+        0.1825,
+        0.3,
+        0.275
+      ],
+      "size": [
+        0.235,
+        0.32,
+        0.55
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.3
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.54
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LegFR": {
+      "kind": "Leg",
+      "phase": 3.1416,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 88,
+      "center": [
+        -0.16,
+        -0.33,
+        0.18
+      ],
+      "size": [
+        0.19,
+        0.22,
+        0.36
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.16
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.3
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LegBR": {
+      "kind": "Leg",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 132,
+      "center": [
+        -0.1825,
+        0.3,
+        0.275
+      ],
+      "size": [
+        0.235,
+        0.32,
+        0.55
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.3
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.54
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tail": {
+      "kind": "Tail",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 220,
+      "center": [
+        0.0,
+        0.72996,
+        1.08252
+      ],
+      "size": [
+        0.13,
+        0.46694,
+        0.80522
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.74
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.037545
+}
