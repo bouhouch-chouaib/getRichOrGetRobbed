@@ -127,19 +127,7 @@ function FX.Add(m: Model, e: Catalog.Pet, box: CFrame, size: Vector3)
 			)
 			fx.Acceleration = V(s * 0.2, 1.3, 0)
 		end
-		-- Broken octagonal rune circle: no solid luminous slab under the pet.
-		for i = 0, 7 do
-			local a = i * math.pi / 4
-			local q = auraPart(
-				m,
-				"RuneArc",
-				CF(0, bottom + 0.06, 0) * A(0, a, 0) * CF(0, 0, -radius),
-				V(radius * 0.48, 0.06, 0.09 * h),
-				color,
-				0.42
-			)
-			q:SetAttribute("PulsePhase", a)
-		end
+		-- Pas de cercle lumineux au sol (Chouaib, 25 oct. : « bizarre et moche, qui les suit »).
 		if rank >= 5 then
 			local lamp = Instance.new("PointLight")
 			lamp.Name = "AuraLight"

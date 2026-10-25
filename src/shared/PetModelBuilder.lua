@@ -648,8 +648,9 @@ if RunService:IsClient() and Config.Pets.ModelStyle == "Legacy" then
 end
 
 -- Construit le modèle du familier petId (nil si l'Id est inconnu).
--- Familier évolué (Config.Evolution) : le modèle de son espèce, plus grand, avec un anneau de lumière aux pieds ;
--- au stade Ultime, une couronne d'éclats dorés qui flotte au-dessus de la tête et plus d'étincelles.
+-- Familier évolué (Config.Evolution) : le modèle de son espèce, plus grand, avec des étincelles ; au stade Ultime, une
+-- couronne d'éclats dorés qui flotte au-dessus de la tête et plus d'étincelles. Pas d'anneau de lumière au sol
+-- (Chouaib, 25 oct. : « cercle lumineux au sol bizarre et moche »).
 local EVOLUTION_GOLD = Color3.fromRGB(255, 214, 70)
 local function applyEvolution(model: Model, entry: PetCatalog.Pet)
 	local stage = entry.Stage or 1
@@ -659,18 +660,6 @@ local function applyEvolution(model: Model, entry: PetCatalog.Pet)
 	local pivot = model:GetPivot()
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity] or 1]
 	local color = if stage >= 3 then EVOLUTION_GOLD else rarity.Color
-	local bottom = pivot:PointToObjectSpace(box.Position).Y - size.Y / 2
-	local width = math.max(size.X, size.Z) * 1.15 + 1
-	local glow = Instance.new("Part")
-	glow.Name = "EvolutionRing"
-	glow.Shape = Enum.PartType.Cylinder
-	glow.Size = Vector3.new(0.12, width, width)
-	glow.CFrame = pivot * CFrame.new(0, bottom + 0.08, 0) * CFrame.Angles(0, 0, math.pi / 2)
-	glow.Color = color
-	glow.Material = Enum.Material.Neon
-	glow.Transparency = 0.45
-	glow:SetAttribute("Aura", true)
-	glow.Parent = model
 	local root = model.PrimaryPart
 	if root then
 		local sparkles = Instance.new("ParticleEmitter")
