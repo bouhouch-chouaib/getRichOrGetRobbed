@@ -85,7 +85,7 @@ Worlds (Prairie), vérifié en Play de jour et de nuit ; bases habillées en Pra
 travail de design (charte, décors, éclairage, bases) pour chaque monde ; Prairie et Désert en jeu (Désert : 19 décors sans
 lueur, `MapDecor.Desert`, bases `DesertLook`, vérifié en Play le 25 oct.) ; Volcan en jeu (17 décors sans lueur,
 `MapDecor.Volcan`, bases `VolcanLook`, 37 PointLight, vérifié en Play le 25 oct.) ; Glace en jeu (17 décors,
-`MapDecor.Glace`, bases `GlaceLook`, lac gelé, 33 PointLight, vérifié en Play le 25 oct.) ; Abysses proposé (17 décors, rendus `map_hero_abysses.png`, en attente de validation et d'import) ; eau / lave en pièces Roblox via les scripts ; importer un
+`MapDecor.Glace`, bases `GlaceLook`, lac gelé, 33 PointLight, vérifié en Play le 25 oct.) ; Abysses en jeu (17 décors, `MapDecor.Abysses`, bases `AbyssesLook`, fosse, 22 PointLight cyan, vérifié en Play le 25 oct.) ; prochain monde : Cosmos ; eau / lave en pièces Roblox via les scripts ; importer un
 .fbx seulement Studio en mode Édition** : lire
 `dataset_and_pipeline/MAP.md`. Charte `map_art_bible.json`, 21 décors en blocs biseautés cuits (`environment_recipes.py`,
 `run_map_assets.py`, `baked_assets/map/`), scène aux vraies dimensions + rendus `qa_renders/map_hero.png` et
@@ -235,6 +235,10 @@ Pas vu : la fenêtre de choix de l'œuf (l'insertion a été testée par le remo
 **Capsule par niveau de monde** (`client/CapsuleDecor`, attribut `CapsuleTier`, `Config.Evolution.SpeedPerTier / UltimeWeightPerTier`) :
 7 versions de plus en plus grandes et épiques (photographiées en jeu) et de plus en plus efficaces. **Familiers évolués complets** :
 Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stats et duel x1,4 / x2, étiquette dorée dans la base.
+**25 oct. : évolutions sans néon** (`PetModelBuilder.addCrown`) : plus d'étincelles ni de couronne d'éclats en néon ;
+Évolué = plus grand + petite couronne d'argent (4 pointes, gemme saphir), Ultime = plus grand + grande couronne d'or
+(8 pointes, 4 rubis, flèche), en briques, posée sur la plus haute pièce « Head » (sinon le haut du corps) et dont elle
+copie les attributs de mouvement : elle suit la tête. Une mutation ne recolore pas la couronne.
 
 **19 oct. : remise à zéro + places de la base** (GDD « Places de la base et réserve ») : sauvegardes v3 (tout le monde
 repart de zéro), 15 places, le joueur choisit qui va dans la base (Index), étiquettes BASE / RÉSERVE ; corrigés : étiquette

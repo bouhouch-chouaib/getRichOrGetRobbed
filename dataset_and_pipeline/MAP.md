@@ -236,5 +236,13 @@ Corail, Calmar Colosse, Poisson-Lanterne Disco). 17 décors dans `blender_tools/
   un module de récif sur trois remplacé par un corail géant (~85 studs : les récifs en gradins faisaient une « ligne
   d'immeubles ») ; algues des récifs x1,8 (`cliff_tree_scale`). Brume moins forte et saturation 0,32 : sinon les coraux
   chauds disparaissent dans le bleu. `export_map_lot.py -- --world Abysses` -> `Decors_Abysses.fbx`.
-- Pas encore dans Studio : attend la validation du style par Chouaib puis l'import de `Decors_Abysses.fbx` (mode
-  Édition) ; ensuite `apply_map_look_abysses.lua` et les bases `AbyssesLook` (déjà déclarées dans `MapGenerator`).
+- **Branché dans Studio (25 oct., style validé par Chouaib)** : import de `Decors_Abysses.fbx` (Édition),
+  `apply_map_look_abysses.lua` -> 17 décors dans `ArtModels.Map` (91 pour les 5 mondes), 595 posés dans
+  `MapDecor.Abysses` + fosse, 22 PointLight cyan (16 piliers à perle, 6 coquillages) ; 8 / 8 portes et 90 / 90 récifs
+  tournés vers le trou ; bases `AbyssesLook` (8 bases, 29 pièces chacune). Rojo n'a pas repris la ligne ajoutée à
+  `MapGenerator` (fichier réécrit puis touché sans effet) : source envoyée dans Studio par rbxm, la même que dans OneDrive.
+- Vérifié en Play (solo, monde changé côté client) : aux Abysses, seuls les décors des Abysses visibles (596 pièces, les
+  4 autres mondes cachés), 22 lumières allumées (0 pour la Glace), AbyssesLook visible et les 4 autres habillages
+  cachés ; retour en Prairie : tout s'éteint et se cache. Photos `qa_renders/map_roblox_abysses_jour.jpg`,
+  `map_roblox_abysses_fosse.jpg`, `map_roblox_abysses_nuit.jpg`, `map_roblox_abysses_sanctuaire_nuit.jpg`. En jeu, l'air
+  du monde (déjà réglé avant : densité 0,45, saturation 0,15 dans `shared/Worlds`) est plus voilé que dans les rendus.
