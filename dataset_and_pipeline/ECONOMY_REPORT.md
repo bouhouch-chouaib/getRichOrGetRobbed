@@ -1,8 +1,8 @@
 # Rapport économique (phase 1.7)
 
 **État au 25 oct. 2026 : étapes 1 à 5 faites. Dans le jeu : premier lot (règles 3, 5, 6, 11, 13 et la batte, voir
-5.3), deuxième lot (verrou à cycle, bouclier, plafond, vol utile, voir 5.5) et Rebirth (règles 15 et 16, voir 5.6).**
-Restent à faire : couronne (9), pile d'objectifs (12), amis (17 à 19), et au choix 10 et 14. Rien n'a encore été
+5.3), deuxième lot (verrou à cycle, bouclier, plafond, vol utile, voir 5.5), Rebirth (règles 15 et 16, voir 5.6) et
+couronne du plus riche (règle 9, voir 5.7).** Restent à faire : pile d'objectifs (12), amis (17 à 19), et au choix 10 et 14. Rien n'a encore été
 vérifié dans Studio. **Rien n'a encore été changé dans le jeu** :
 les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
@@ -818,3 +818,22 @@ nouvelle formule du prix.
 **Pas vérifié (Studio)** : la capsule à plusieurs chambres (titre « CHAMBRES », bulle [E] qui passe de « Mettre un
 œuf » à « Faire éclore »), la fenêtre Rebirth (nouvelle ligne), un doublon qui part dans la capsule pendant
 l'ouverture des tirages.
+
+## 5.7 Appliqué dans le jeu le 25 oct. (couronne du plus riche : règle 9)
+
+| Où | Ce qui change |
+| --- | --- |
+| `Config.Crown`, nouveau `shared/CrownRules` (règles pures), nouveau `server/CrownController`, `server/Main.server` | toutes les 2 s, le plus gros revenu du serveur prend la couronne (dès 2 joueurs) ; pour la lui prendre, il faut le dépasser de 10 % ; annonce à tout le serveur |
+| `server/StealController` | voler le roi rapporte, en plus du familier, une prime égale à ce que rapporterait de jeter ce familier au trou (600 s de son revenu plafonné x monde x passes du voleur) ; un voleur arrêté chez le roi (repris, frappé, trop lent) rapporte au roi la même somme, +1 au compteur de défenses et une annonce |
+| nouveau `client/Crown`, `client/HUD` | couronne et « ROI DU SERVEUR • 3 DÉFENSES » au-dessus de la tête du roi, panneau « BASE DU ROI • PRIME SUR SES FAMILIERS » sur sa base ; messages « X EST LE ROI DU SERVEUR », « TU ES LE ROI… », « X A DÉFENDU SA COURONNE CONTRE Y », « PRIME DU ROI : +… » |
+
+Garde-fous : la récompense de défense est payée au plus 3 fois par heure et une fois par voleur toutes les 10 min
+(`CrownRules.CanReward`). Sans ça, deux amis pourraient s'enrichir en se volant exprès ; avec, au plus ~+7 % du revenu du
+roi par heure. La prime du voleur n'a pas besoin de limite : le roi perd vraiment le familier, et son bouclier (règle 8)
+se déclenche après 10 % de pertes. La couronne ne donne aucun revenu en plus : prestige et jeu, pas de boule de neige.
+
+Vérifié : analyse Luau sans erreur, `rojo build` réussi, les 10 tests Lune passent (`check-steal-rules` teste maintenant
+le choix du roi, la marge de 10 % et les limites de récompense). **Pas vérifié (Studio)** : c'est une règle à au moins
+2 joueurs (Test > Clients et serveurs) : couronne au-dessus de la tête et sur la base, changement de roi, prime du
+voleur, défense du roi (Reprendre ou batte) et ses limites. Après l'ajout de nouveaux fichiers, vérifier qu'il n'y a pas
+de scripts en double dans Studio (déjà arrivé, voir CLAUDE.md).

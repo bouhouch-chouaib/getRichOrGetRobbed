@@ -510,6 +510,23 @@ Config.StealShield = {
 	ShieldSeconds = 1800,
 }
 
+-- Couronne du plus riche (25 oct., ECONOMY_REPORT.md règle 9) : server/CrownController, shared/CrownRules, client/Crown.
+--   Le joueur qui a le plus gros revenu du serveur porte une couronne (au-dessus de la tête et sur sa base), dès MinPlayers
+--   joueurs. Pour la lui prendre, il faut le dépasser de Hysteresis (sinon elle changerait de tête à chaque seconde).
+--   Voler le roi rapporte, en plus du familier, une prime égale à ce que rapporterait de jeter ce familier dans le trou
+--   (Config.Sacrifice.IncomeSeconds de son revenu plafonné) : il vaut deux fois plus à prendre chez le roi.
+--   Chaque voleur arrêté chez le roi (repris, frappé, trop lent) rapporte au roi la même somme, un compteur et une annonce,
+--   au plus MaxDefenseRewardsPerHour fois par heure et une fois par voleur toutes les DefenseCooldown secondes : deux amis
+--   ne peuvent pas s'enrichir en se volant exprès (au plus ~+7 % du revenu du roi par heure). Pas de revenu en plus : la
+--   domination donne du prestige et du jeu (défendre), pas de boule de neige.
+Config.Crown = {
+	MinPlayers = 2,
+	Hysteresis = 0.1,
+	CheckInterval = 2,
+	DefenseCooldown = 600,
+	MaxDefenseRewardsPerHour = 3,
+}
+
 -- Mondes (paliers) : le joueur paie Price pour voyager au monde suivant (server/TierController, fenêtre client/WorldMenu).
 -- Tout change pour lui (client/WorldSkin) : l'arène entière s'affiche dans SON monde, sa base dans son monde aux yeux de
 -- tous, la musique (Config.Sounds.Playlists[palier]). Chaque monde multiplie son revenu (IncomeMultiplier).

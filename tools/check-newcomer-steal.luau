@@ -121,6 +121,11 @@ local modules = {
 		end,
 	},
 	BlackholeTiers = {},
+	CrownController = { -- pas de roi dans ce test (Config.Crown)
+		IsCrowned = function()
+			return false
+		end,
+	},
 	-- Vol utile et bouclier (Config.StealShield) : tout vol est utile ici, une perte ne déclenche pas de bouclier.
 	EconomyController = {
 		GetBaseMin = function()

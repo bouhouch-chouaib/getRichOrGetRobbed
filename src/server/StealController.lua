@@ -48,6 +48,7 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local BasePetsController = require(script.Parent.BasePetsController)
 local BlackholeTiers = require(script.Parent.BlackholeTiers)
+local CrownController = require(script.Parent.CrownController)
 local EconomyController = require(script.Parent.EconomyController)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
@@ -291,6 +292,11 @@ local function finish(carry: Carry, outcome: Outcome)
 			outcome = "Gone" -- le propriétaire ne l'a plus (fusion, équipement...) ou une sauvegarde n'est pas chargée
 		elseif transfer then
 			SessionData.AddPets(carrier, { [carry.petId] = 1 })
+			if not carry.own and CrownController.IsCrowned(owner) then
+				-- Couronne (Config.Crown) : voler le roi rapporte en plus ce que rapporterait de jeter ce familier au trou.
+				local bounty = StealController.SacrificeReward(carrier, carry.petId)
+				money = CrownController.PayBounty(carrier, owner, bounty)
+			end
 			Quests.Add(carrier, "Steal", 1)
 			BadgeController.Award(carrier, "FirstSteal")
 			BasePetsController.Celebrate(carrier, { carry.petId })
@@ -303,11 +309,17 @@ local function finish(carry: Carry, outcome: Outcome)
 			Remotes.HoleEvent:FireAllClients("Sacrifice", if root then root.Position else carry.lastPosition,
 				carry.petId, carrier, money)
 		end
-		if ok and not carry.own and before > 0 and present(owner) then
+		if ok and not carry.own and before > 0 and present(owner) then -- bouclier
 			recordLoss(owner, math.max(0, before - EconomyController.GetBaseValue(owner)) / before)
 		end
 	end
 	local gone = outcome == "Gone"
+	-- Voleur arrêté chez le roi (repris, frappé, trop lent) : la défense de la couronne (Config.Crown).
+	if not carry.own and (outcome == "Recovered" or outcome == "Dropped" or outcome == "Timeout")
+		and CrownController.IsCrowned(owner) and present(owner) then
+		local reward = StealController.SacrificeReward(owner, carry.petId)
+		CrownController.Defended(owner, carrier, reward)
+	end
 
 	if outcome == "Dropped" or outcome == "Timeout" then
 		dropLoose(carry, carry.lastPosition)

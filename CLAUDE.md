@@ -181,7 +181,8 @@ en 1 h -> 30 min sans vol, `Config.StealShield`), **plafond** (`Config.PowerCap`
 et **vol utile** (bulle [E] seulement sur ce qui ferait monter son revenu). Vérifié : analyse Luau, build, 10 tests Lune
 (`check-pity`, `check-steal-rules` nouveaux). **Rien n'a été joué dans Studio** (liste à vérifier : ECONOMY_REPORT.md 5.3 et 5.5).
 **Rebirth** : +1 chambre de capsule d'évolution par Rebirth (6 au plus, `Config.GetCapsuleSlots`, plusieurs œufs évoluent en même temps), doublons de sa meilleure rareté vers une chambre libre, prix 4T x (n+1) x 1,62^n.
-Restent proposés : couronne du plus riche, pile « prochain objectif », jeu entre amis. Pour l'analyse Luau : luau-lsp 1.70.1 (page des versions) dans un dossier temporaire, projet copié sans accents.
+**Couronne du plus riche** (`Config.Crown`, `server/CrownController`, `shared/CrownRules`, `client/Crown`) : plus gros revenu du serveur, prime pour qui le vole, récompense limitée pour chaque voleur arrêté.
+Restent proposés : pile « prochain objectif », jeu entre amis. Pour l'analyse Luau : luau-lsp 1.70.1 (page des versions) dans un dossier temporaire, projet copié sans accents.
 
 **15 oct. : œufs (Codex) puis corrections Claude** (`server/EggController`, `client/Eggs`, `shared/EggIncubation`,
 `docs/INCUBATION.md`) : toutes les récompenses arrivent en œufs qui incubent (15 s à 30 min). Claude : un nid par œuf

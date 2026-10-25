@@ -1,6 +1,6 @@
 -- Test hors Studio des calculs du deuxième lot (ECONOMY_REPORT.md, étape 5) : plafond de revenu (shared/PowerCap,
--- Config.PowerCap), vol utile, durée du verrou à cycle (Config.GetLockDuration). Les contrôleurs (LockController,
--- bouclier de StealController) ne sont pas joués ici : à vérifier dans Studio.
+-- Config.PowerCap), vol utile, durée du verrou à cycle (Config.GetLockDuration), couronne (shared/CrownRules). Les
+-- contrôleurs (LockController, bouclier de StealController, CrownController) ne sont pas joués ici : à vérifier dans Studio.
 --
 --   lune run tools/check-steal-rules.luau .
 local fs, luau, r = require("@lune/fs"), require("@lune/luau"), require("@lune/roblox")
@@ -63,4 +63,22 @@ assert(Config.GetLockDuration(true, 10) == 65, "Verrou renforcé + VIP = 65 s")
 assert(Config.GetLockDuration(true, 1000) == lock.Cycle - lock.MinOpen, "plafonné pour laisser la base ouverte")
 assert(lock.Cycle == Config.Durations.Feeding + Config.Durations.Digesting, "un cycle = une manche")
 
-print("PASS: plafond de revenu, rareté à obtenir, vol utile, durée du verrou à cycle")
+-- Couronne (Config.Crown, shared/CrownRules) : le plus gros revenu, dès 2 joueurs ; le roi la garde tant qu'on ne le
+-- dépasse pas de 10 % ; défenses récompensées au plus 3 fois par heure et une fois par voleur toutes les 10 min.
+local CrownRules = load("CrownRules")
+assert(CrownRules.Pick({ { id = 1, income = 100 } }, nil) == nil, "pas de roi seul sur le serveur")
+assert(CrownRules.Pick({ { id = 1, income = 100 }, { id = 2, income = 300 } }, nil) == 2, "le plus riche")
+assert(CrownRules.Pick({ { id = 1, income = 105 }, { id = 2, income = 100 } }, 2) == 2, "le roi garde la couronne à 5 % près")
+assert(CrownRules.Pick({ { id = 1, income = 120 }, { id = 2, income = 100 } }, 2) == 1, "dépassé de 20 % : nouveau roi")
+assert(CrownRules.Pick({ { id = 1, income = 0 }, { id = 2, income = 0 } }, nil) == nil, "personne ne gagne rien : pas de roi")
+local log = {}
+assert(CrownRules.CanReward(log, 7, 1000), "première défense")
+table.insert(log, { at = 1000, thief = 7 })
+assert(not CrownRules.CanReward(log, 7, 1100), "même voleur trop tôt")
+assert(CrownRules.CanReward(log, 7, 1000 + Config.Crown.DefenseCooldown), "même voleur 10 min plus tard")
+table.insert(log, { at = 1200, thief = 8 })
+table.insert(log, { at = 1300, thief = 9 })
+assert(not CrownRules.CanReward(log, 10, 1400), "au plus 3 défenses récompensées par heure")
+assert(CrownRules.CanReward(log, 10, 1000 + 3600), "une heure après la première")
+
+print("PASS: plafond de revenu, rareté à obtenir, vol utile, durée du verrou à cycle, couronne")
