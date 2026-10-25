@@ -698,6 +698,7 @@ end
 -- Familier muté (Config.Mutations) : tout le corps change de matière, sauf le visage (yeux, pupilles, reflets).
 --   Doré : or brillant ; Diamant : cristal bleu clair qui reflète ; Arc-en-ciel : dégradé de couleurs du bas vers le haut,
 --   qui défile en continu (tag "RainbowPet", client/RainbowPets). Étincelles à la couleur de la mutation.
+--   Familiers en briques (texture cuite) : teinte de la texture + coque transparente (SHELL_LOOKS, plus bas).
 local MUTATION_LOOKS = {
 	Gold = { color = Color3.fromRGB(255, 196, 40), mix = 0.72, material = Enum.Material.Foil, reflectance = 0.15, transparency = 0 },
 	Diamond = { color = Color3.fromRGB(90, 215, 255), mix = 0.9, material = Enum.Material.Glass, reflectance = 0.2, transparency = 0.15 },
@@ -719,6 +720,36 @@ local function isFacePart(part: BasePart): boolean
 	return value < 0.18 or (saturation < 0.08 and value > 0.93)
 end
 
+-- Familiers en briques (MeshParts à texture cuite, 25 oct.) : la texture (SurfaceAppearance) cache la couleur de la
+-- pièce, et un script ne peut pas changer la texture. On la teinte (SurfaceAppearance.Color) et on pose par-dessus une
+-- coque transparente à la couleur de la mutation : un clone de la pièce un peu plus grand, avec les mêmes attributs,
+-- donc il suit l'animation (shared/PetMotion). Sans néon (Chouaib).
+type ShellLook = { tint: Color3, color: Color3, material: Enum.Material, transparency: number, reflectance: number }
+local SHELL_LOOKS: { [string]: ShellLook } = {
+	Gold = { tint = Color3.fromRGB(255, 235, 170), color = Color3.fromRGB(255, 205, 60), material = Enum.Material.Foil, transparency = 0.28, reflectance = 0.1 },
+	Diamond = { tint = Color3.fromRGB(200, 240, 255), color = Color3.fromRGB(150, 225, 255), material = Enum.Material.Glass, transparency = 0.35, reflectance = 0.2 },
+	Rainbow = { tint = Color3.new(1, 1, 1), color = Color3.new(1, 1, 1), material = Enum.Material.SmoothPlastic, transparency = 0.5, reflectance = 0 },
+}
+local SHELL_GROWTH = 1.03
+
+local function addShell(part: BasePart, look: ShellLook, rainbowOffset: number?)
+	local shell = part:Clone()
+	for _, child in ipairs(shell:GetChildren()) do
+		child:Destroy()
+	end
+	shell.Name = "MutationShell"
+	shell.Size = part.Size * SHELL_GROWTH
+	shell.Color = if rainbowOffset then Color3.fromHSV(rainbowOffset % 1, 0.75, 1) else look.color
+	shell.Material = look.material
+	shell.Reflectance = look.reflectance
+	shell.Transparency = look.transparency
+	shell.CastShadow = false
+	if rainbowOffset then
+		shell:SetAttribute("RainbowOffset", rainbowOffset)
+	end
+	shell.Parent = part.Parent
+end
+
 local function applyMutation(model: Model, entry: PetCatalog.Pet)
 	local mutationId = entry.Mutation :: string
 	local mutation = Config.Mutations[Config.MutationIndex[mutationId] or 1]
@@ -734,9 +765,18 @@ local function applyMutation(model: Model, entry: PetCatalog.Pet)
 		if isFacePart(part) then
 			continue -- yeux, pupilles, reflets, bouche : le visage reste reconnaissable
 		end
-		if rainbow then
-			local height = (pivot:PointToObjectSpace(part.Position).Y - bottom) / math.max(size.Y, 0.1)
-			local offset = height * 0.85
+		local offset = if rainbow
+			then (pivot:PointToObjectSpace(part.Position).Y - bottom) / math.max(size.Y, 0.1) * 0.85
+			else nil
+		local appearance = part:FindFirstChildOfClass("SurfaceAppearance")
+		local shellLook = SHELL_LOOKS[mutationId]
+		if appearance and shellLook then
+			appearance.Color = shellLook.tint
+			if offset then
+				part:SetAttribute("RainbowOffset", offset) -- client/RainbowPets teinte aussi la texture
+			end
+			addShell(part, shellLook, offset)
+		elseif offset then
 			part.Color = Color3.fromHSV(offset % 1, 0.75, 1)
 			part:SetAttribute("RainbowOffset", offset)
 		elseif look then

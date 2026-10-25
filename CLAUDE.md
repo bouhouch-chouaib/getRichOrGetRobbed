@@ -262,6 +262,10 @@ Diamant, l'annonce, l'Index sans mutation.
 Vérifié en jeu (solo) : aspect des 3 mutations dans la base (y compris un familier blanc), dégradé arc-en-ciel qui défile,
 éclosion d'un œuf Diamant (bandeau « ÉCLOSION RARE DIAMANT ! », familier qui sort du nid), Index (rangée — / OR / DIAM. / ARC,
 revenu x10, losanges). Pas vu : l'annonce à tout le serveur, à 2 joueurs, sur téléphone.
+**25 oct. : mutations réparées sur les familiers en briques** (elles ne se voyaient plus : la texture cuite cachait la
+couleur) : teinte de la texture + coque transparente par pièce (`PetModelBuilder` « MutationShell », `SHELL_LOOKS`), sans
+néon. Vérifié : aperçu de 4 familiers x 3 mutations (or réglé pour rester net sur un familier bleu nuit) ; en Play, coques
+collées à leurs pièces pendant l'animation (écart 0), arc-en-ciel qui défile. Shiny de test retirés de la sauvegarde.
 
 **15 oct. : 7 mondes (paliers) achetables** (`Config.Worlds`, `shared/Worlds`, `client/WorldSkin`, `client/WorldMenu`,
 `server/TierController`) : l'arène dans le monde du joueur, chaque base dans le monde de son propriétaire, revenu x1,5 par monde.

@@ -2,6 +2,8 @@
 -- RainbowPets : les familiers Arc-en-ciel (mutation, Config.Mutations) changent de couleur en continu. Chaque pièce garde
 -- sa place dans le dégradé (attribut "RainbowOffset" posé par shared/PetModelBuilder) et toutes défilent ensemble.
 -- Seulement les modèles proches de la caméra, 15 fois par seconde.
+-- Familiers en briques (texture cuite) : on teinte la texture en pastel (SurfaceAppearance.Color, la couleur de la pièce
+-- est cachée) ; leur coque transparente (« MutationShell ») défile avec les couleurs vives.
 local CollectionService = game:GetService("CollectionService")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -9,7 +11,7 @@ local Workspace = game:GetService("Workspace")
 local SPEED = 0.18 -- tours du cercle des couleurs par seconde
 local VIEW_DISTANCE = 160
 
-type Rainbow = { model: Model, parts: { { part: BasePart, offset: number } } }
+type Rainbow = { model: Model, parts: { { part: BasePart, offset: number, appearance: SurfaceAppearance? } } }
 local rainbows: { [Model]: Rainbow } = {}
 
 local function add(instance: Instance)
@@ -20,7 +22,11 @@ local function add(instance: Instance)
 	for _, descendant in ipairs(instance:GetDescendants()) do
 		local offset = descendant:GetAttribute("RainbowOffset")
 		if descendant:IsA("BasePart") and type(offset) == "number" then
-			table.insert(parts, { part = descendant, offset = offset })
+			table.insert(parts, {
+				part = descendant,
+				offset = offset,
+				appearance = descendant:FindFirstChildOfClass("SurfaceAppearance"),
+			})
 		end
 	end
 	rainbows[instance] = { model = instance, parts = parts }
@@ -56,7 +62,12 @@ RunService.Heartbeat:Connect(function(dt: number)
 			continue
 		end
 		for _, item in ipairs(rainbow.parts) do
-			item.part.Color = Color3.fromHSV((item.offset + shift) % 1, 0.75, 1)
+			local hue = (item.offset + shift) % 1
+			if item.appearance then
+				item.appearance.Color = Color3.fromHSV(hue, 0.4, 1)
+			else
+				item.part.Color = Color3.fromHSV(hue, 0.75, 1)
+			end
 		end
 	end
 end)

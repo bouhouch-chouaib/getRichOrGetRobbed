@@ -319,6 +319,10 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Identifiant : `<Id>__M<Mutation>`, combiné avec l'évolution : `<Id>__E3__MRainbow` (`PetCatalog.Compose`,
   `WithMutation`, `Mutation`, `FormsOf[espèce]` = les 12 formes). Revenu = base x évolution x mutation. Une mutation
   reste quand l'œuf évolue dans la capsule (`PetCatalog.Variant`). Les doublons se comptent forme par forme.
+- **Familiers en briques (25 oct.)** : leur texture cuite (SurfaceAppearance) cachait la couleur, les 3 mutations ne se
+  voyaient plus. Désormais : teinte de la texture (`SurfaceAppearance.Color`) + coque transparente posée sur chaque pièce
+  (« MutationShell », clone un peu plus grand avec les mêmes attributs : elle suit l'animation), sans néon. Doré = coque
+  Foil or, Diamant = coque Glass bleu glacé, Arc-en-ciel = coque et teinte qui défilent (`client/RainbowPets`).
 - Aspect (`PetModelBuilder.applyMutation`) : Doré = or brillant (Foil), Diamant = cristal bleu translucide (Glass),
   Arc-en-ciel = dégradé du bas vers le haut qui défile (`client/RainbowPets`, tag `RainbowPet`) ; le visage (pièces
   `EyeSocket`, `Iris`, `Pupil`, `Mouth`...) ne change pas ; étincelles à la couleur de la mutation.
