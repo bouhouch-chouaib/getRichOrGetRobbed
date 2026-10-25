@@ -61,8 +61,10 @@ vérifiés en jeu (`Lot05_Absurdes.fbx`). Les 30 familiers des Mondes sont faits
 le 25 oct. (solo, 16 s par lot : chaque pièce animée bouge, roi corail de profil à 89° de sa marche, griffon qui s'envole à
 5 studs et se pose, roue du hamster sur l'axe gauche-droite, disques inclinés). Les 106 familiers ont une fiche dans
 `PetGaits` (champ `sideways` pour le crabe). La sauvegarde Studio de Chouaib a reçu les 30 familiers des Mondes (test).
-Les familiers Épique+ gardent les effets de rareté du jeu (`PetSculptedEffects` : CrownHalo, OrbitShard, AscendantRune,
-particules, lumière) : à retirer seulement si Chouaib le demande (liste `NO_AURA`).
+**Plus aucune aura sur les familiers refaits** (Chouaib, 25 oct.) : un familier qui a un modèle dans `ArtModels` n'a plus
+les effets de rareté du jeu (`PetSculptedEffects.Add(..., handmade)` : ni CrownHalo, OrbitShard, AscendantRune, ni
+particules, ni lumière) ; la rareté se lit à la matière. Vérifié en Play : 15 familiers, 0 pièce d'aura, 0 particule,
+0 lumière, tous animés. Gardés : marques d'évolution et de mutation (ce ne sont pas des effets de rareté).
 **Rareté sans néon** (Chouaib, 25 oct. : « néon sur néon, à la fin on ne voit plus rien ») : à partir des Absurdes, la
 rareté se voit à la matière, sans aucune lueur : plastique (Commun) → émail (Rare) → chrome + cristal (Épique) → or martelé
 (Légendaire) → nacre + or (Mythique) → or blanc + cristal (Divin) → or massif (Sigma) ; `PetKit.gold / chrome / gem / pearl /

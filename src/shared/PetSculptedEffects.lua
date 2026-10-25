@@ -7,7 +7,8 @@ local Config = require(script.Parent.Config)
 local FX = {}
 
 -- Familiers sans aura (ni particules ni pièces d'aura) : leur modèle fait à la main se suffit à lui-même.
--- 25 oct. : Chouaib a refusé les auras du Cerbère Infernal (modélisée, puis en particules).
+-- 25 oct. : Chouaib a refusé les auras du Cerbère Infernal (modélisée, puis en particules), puis les a fait retirer de
+-- tous les familiers refaits en briques (handmade : modèle dans ArtModels) ; leur rareté se lit à la matière.
 local NO_AURA: { [string]: boolean } = {
 	CerbereInfernal = true,
 }
@@ -60,12 +61,12 @@ local function auraPart(m: Model, name: string, cf: CFrame, size: Vector3, color
 	return q
 end
 
-function FX.Add(m: Model, e: Catalog.Pet, box: CFrame, size: Vector3)
+function FX.Add(m: Model, e: Catalog.Pet, box: CFrame, size: Vector3, handmade: boolean?)
 	local root = m.PrimaryPart
 	if not root then
 		return
 	end
-	if NO_AURA[e.BaseId or e.Id] then
+	if handmade or NO_AURA[e.BaseId or e.Id] then
 		CollectionService:AddTag(m, "SculptedPetVisual")
 		return
 	end

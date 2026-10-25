@@ -1115,8 +1115,8 @@ end
 
 -- Modèle fait à la main (Blender -> Importer 3D de Studio, 19 oct.) : ReplicatedStorage.ArtModels.<Id>, un Model de
 -- MeshParts nommées comme les pièces des modèles générés (Body, Head, Leg, Ear, Tail...), qui regarde vers -Z (sinon
--- attribut "FacingYaw" en degrés). Il remplace la silhouette générée ; la taille, l'animation (Leg / Ear / Tail bougent)
--- et les auras restent celles du jeu.
+-- attribut "FacingYaw" en degrés). Il remplace la silhouette générée ; la taille et l'animation (Leg / Ear / Tail bougent)
+-- restent celles du jeu, mais pas d'aura de rareté (Chouaib, 25 oct. : la rareté se lit à la matière des briques).
 local function authored(m: Model, id: string): boolean
 	local folder = ReplicatedStorage:FindFirstChild("ArtModels")
 	local source = folder and folder:FindFirstChild(id)
@@ -1150,7 +1150,8 @@ function Models.Build(e: Pet): Model
 	root.Transparency = 1
 	m.PrimaryPart = root
 	local c = S.palette(e.Look.Body, e.Look.Detail)
-	if authored(m, e.Id) then
+	local handmade = authored(m, e.Id)
+	if handmade then
 		-- modèle fait à la main (ArtModels)
 	elseif kind == "Beast" then
 		beast(m, e, c)
@@ -1194,7 +1195,7 @@ function Models.Build(e: Pet): Model
 	m:SetAttribute("Float", e.Look.Float == true)
 	m:SetAttribute("VisualStyle", "SculptedBlocksV2")
 	Motion.Prepare(m, e, kind, box.Position)
-	FX.Add(m, e, visualBox, visualSize)
+	FX.Add(m, e, visualBox, visualSize, handmade)
 	return m
 end
 
