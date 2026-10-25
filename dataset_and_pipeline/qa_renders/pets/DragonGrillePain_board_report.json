@@ -1,0 +1,105 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\DragonGrillePain_board.png",
+  "layout": {
+    "rows": [
+      "DragonGrillePain cuit, 12 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "DragonGrillePain cuit, 12 pièces (repos)",
+      "kind": "baked",
+      "triangles": 1476,
+      "views": {
+        "face": {
+          "coverage": 0.089,
+          "lum_mean": 0.426,
+          "lum_std": 0.198,
+          "detail": 0.0731,
+          "saturation": 0.167,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.135,
+          "lum_mean": 0.476,
+          "lum_std": 0.225,
+          "detail": 0.0816,
+          "saturation": 0.2,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.124,
+          "lum_mean": 0.48,
+          "lum_std": 0.206,
+          "detail": 0.0564,
+          "saturation": 0.208,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.514,
+          "lum_mean": 0.486,
+          "lum_std": 0.228,
+          "detail": 0.0472,
+          "saturation": 0.194,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 1476,
+      "views": {
+        "face": {
+          "coverage": 0.082,
+          "lum_mean": 0.415,
+          "lum_std": 0.216,
+          "detail": 0.0756,
+          "saturation": 0.169,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.119,
+          "lum_mean": 0.462,
+          "lum_std": 0.234,
+          "detail": 0.0835,
+          "saturation": 0.207,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.124,
+          "lum_mean": 0.463,
+          "lum_std": 0.193,
+          "detail": 0.0613,
+          "saturation": 0.214,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.48,
+          "lum_mean": 0.472,
+          "lum_std": 0.247,
+          "detail": 0.05,
+          "saturation": 0.199,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 27.1
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

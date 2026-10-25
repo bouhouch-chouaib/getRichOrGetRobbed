@@ -1,0 +1,67 @@
+{
+  "asset": "BananeChien_Corps",
+  "triangles": 1784,
+  "vertices": 1044,
+  "size_studs": [
+    0.604,
+    1.888,
+    1.1
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 45.2,
+  "source_materials": [
+    "M_BananeChien_high_banane",
+    "M_BananeChien_high_blanc_oeil",
+    "M_BananeChien_high_bouche#2A1418",
+    "M_BananeChien_high_bout_tige",
+    "M_BananeChien_high_bout_vert",
+    "M_BananeChien_high_chair",
+    "M_BananeChien_high_cotes",
+    "M_BananeChien_high_creme",
+    "M_BananeChien_high_golden",
+    "M_BananeChien_high_iris#5A3412",
+    "M_BananeChien_high_langue",
+    "M_BananeChien_high_narine#1A1416",
+    "M_BananeChien_high_pupille",
+    "M_BananeChien_high_reflet",
+    "M_BananeChien_high_taches",
+    "M_BananeChien_high_tige",
+    "M_BananeChien_high_truffe#1A1210"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0283,
+    "max_ray": 0.0708,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "BananeChien_Corps_Color.png",
+    "Roughness": "BananeChien_Corps_Roughness.png",
+    "Metalness": "BananeChien_Corps_Metalness.png",
+    "Normal": "BananeChien_Corps_Normal.png",
+    "AO": "BananeChien_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "BananeChien_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "BananeChien_Corps_Color.png",
+      "NormalMap": "BananeChien_Corps_Normal.png",
+      "RoughnessMap": "BananeChien_Corps_Roughness.png",
+      "MetalnessMap": "BananeChien_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 21.7
+}

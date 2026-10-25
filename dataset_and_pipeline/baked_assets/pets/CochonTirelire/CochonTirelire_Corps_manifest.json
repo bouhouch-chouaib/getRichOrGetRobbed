@@ -1,0 +1,64 @@
+{
+  "asset": "CochonTirelire_Corps",
+  "triangles": 1152,
+  "vertices": 694,
+  "size_studs": [
+    0.592,
+    1.12,
+    1.05
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 63.4,
+  "source_materials": [
+    "M_CochonTirelire_high_blanc_oeil",
+    "M_CochonTirelire_high_bouche#2A1418",
+    "M_CochonTirelire_high_bouchon",
+    "M_CochonTirelire_high_coeur_fleur",
+    "M_CochonTirelire_high_fente",
+    "M_CochonTirelire_high_fleur",
+    "M_CochonTirelire_high_iris#2A1A1E",
+    "M_CochonTirelire_high_or",
+    "M_CochonTirelire_high_or_fonce",
+    "M_CochonTirelire_high_pupille",
+    "M_CochonTirelire_high_reflet",
+    "M_CochonTirelire_high_rose",
+    "M_CochonTirelire_high_rose_clair",
+    "M_CochonTirelire_high_rose_fonce"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0168,
+    "max_ray": 0.042,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "CochonTirelire_Corps_Color.png",
+    "Roughness": "CochonTirelire_Corps_Roughness.png",
+    "Metalness": "CochonTirelire_Corps_Metalness.png",
+    "Normal": "CochonTirelire_Corps_Normal.png",
+    "AO": "CochonTirelire_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "CochonTirelire_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "CochonTirelire_Corps_Color.png",
+      "NormalMap": "CochonTirelire_Corps_Normal.png",
+      "RoughnessMap": "CochonTirelire_Corps_Roughness.png",
+      "MetalnessMap": "CochonTirelire_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 25.3
+}

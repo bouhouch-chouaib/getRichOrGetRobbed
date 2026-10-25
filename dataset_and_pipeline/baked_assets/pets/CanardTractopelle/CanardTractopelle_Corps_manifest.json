@@ -1,0 +1,71 @@
+{
+  "asset": "CanardTractopelle_Corps",
+  "triangles": 2148,
+  "vertices": 1264,
+  "size_studs": [
+    0.974,
+    1.578,
+    1.404
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 39.7,
+  "source_materials": [
+    "M_CanardTractopelle_high_bande",
+    "M_CanardTractopelle_high_bec",
+    "M_CanardTractopelle_high_bec_fonce",
+    "M_CanardTractopelle_high_blanc_oeil",
+    "M_CanardTractopelle_high_casque",
+    "M_CanardTractopelle_high_chenille",
+    "M_CanardTractopelle_high_chrome",
+    "M_CanardTractopelle_high_dents",
+    "M_CanardTractopelle_high_gyrophare",
+    "M_CanardTractopelle_high_iris#2A1A0E",
+    "M_CanardTractopelle_high_or",
+    "M_CanardTractopelle_high_or_clair",
+    "M_CanardTractopelle_high_or_fonce",
+    "M_CanardTractopelle_high_patins",
+    "M_CanardTractopelle_high_pupille",
+    "M_CanardTractopelle_high_reflet"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0237,
+    "max_ray": 0.0592,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "CanardTractopelle_Corps_Color.png",
+    "Roughness": "CanardTractopelle_Corps_Roughness.png",
+    "Metalness": "CanardTractopelle_Corps_Metalness.png",
+    "Normal": "CanardTractopelle_Corps_Normal.png",
+    "AO": "CanardTractopelle_Corps_AO.png",
+    "Emissive": "CanardTractopelle_Corps_Emissive.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "CanardTractopelle_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "CanardTractopelle_Corps_Color.png",
+      "NormalMap": "CanardTractopelle_Corps_Normal.png",
+      "RoughnessMap": "CanardTractopelle_Corps_Roughness.png",
+      "MetalnessMap": "CanardTractopelle_Corps_Metalness.png",
+      "EmissiveMaskContent": "CanardTractopelle_Corps_Emissive.png",
+      "EmissiveTint": "#FFFFFF",
+      "EmissiveStrength": 3.0,
+      "coverage_pct": 0.43,
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 20.6
+}

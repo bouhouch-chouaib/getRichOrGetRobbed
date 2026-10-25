@@ -1,0 +1,105 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\PegaseMoto_board.png",
+  "layout": {
+    "rows": [
+      "PegaseMoto cuit, 9 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "PegaseMoto cuit, 9 pièces (repos)",
+      "kind": "baked",
+      "triangles": 2144,
+      "views": {
+        "face": {
+          "coverage": 0.082,
+          "lum_mean": 0.369,
+          "lum_std": 0.197,
+          "detail": 0.074,
+          "saturation": 0.2,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.121,
+          "lum_mean": 0.377,
+          "lum_std": 0.185,
+          "detail": 0.0715,
+          "saturation": 0.188,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.114,
+          "lum_mean": 0.376,
+          "lum_std": 0.162,
+          "detail": 0.0528,
+          "saturation": 0.212,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.41,
+          "lum_mean": 0.411,
+          "lum_std": 0.222,
+          "detail": 0.0445,
+          "saturation": 0.176,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 2144,
+      "views": {
+        "face": {
+          "coverage": 0.076,
+          "lum_mean": 0.365,
+          "lum_std": 0.207,
+          "detail": 0.0723,
+          "saturation": 0.18,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.096,
+          "lum_mean": 0.353,
+          "lum_std": 0.183,
+          "detail": 0.0757,
+          "saturation": 0.198,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.112,
+          "lum_mean": 0.357,
+          "lum_std": 0.165,
+          "detail": 0.0523,
+          "saturation": 0.203,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.343,
+          "lum_mean": 0.41,
+          "lum_std": 0.197,
+          "detail": 0.0416,
+          "saturation": 0.178,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 25.4
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

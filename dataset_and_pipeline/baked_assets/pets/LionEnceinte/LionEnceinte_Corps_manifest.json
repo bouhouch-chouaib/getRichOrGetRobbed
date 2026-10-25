@@ -1,0 +1,70 @@
+{
+  "asset": "LionEnceinte_Corps",
+  "triangles": 2524,
+  "vertices": 1488,
+  "size_studs": [
+    0.824,
+    2.07,
+    1.396
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 34.4,
+  "source_materials": [
+    "M_LionEnceinte_high_anneau",
+    "M_LionEnceinte_high_anthracite",
+    "M_LionEnceinte_high_blanc_oeil",
+    "M_LionEnceinte_high_bouche#2A1418",
+    "M_LionEnceinte_high_cache",
+    "M_LionEnceinte_high_caisson",
+    "M_LionEnceinte_high_iris#2AE6FF",
+    "M_LionEnceinte_high_jack",
+    "M_LionEnceinte_high_membrane",
+    "M_LionEnceinte_high_museau",
+    "M_LionEnceinte_high_narine#1A1416",
+    "M_LionEnceinte_high_noir",
+    "M_LionEnceinte_high_pupille",
+    "M_LionEnceinte_high_reflet",
+    "M_LionEnceinte_high_truffe#0A0A0E"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0311,
+    "max_ray": 0.0776,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "LionEnceinte_Corps_Color.png",
+    "Roughness": "LionEnceinte_Corps_Roughness.png",
+    "Metalness": "LionEnceinte_Corps_Metalness.png",
+    "Normal": "LionEnceinte_Corps_Normal.png",
+    "AO": "LionEnceinte_Corps_AO.png",
+    "Emissive": "LionEnceinte_Corps_Emissive.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "LionEnceinte_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "LionEnceinte_Corps_Color.png",
+      "NormalMap": "LionEnceinte_Corps_Normal.png",
+      "RoughnessMap": "LionEnceinte_Corps_Roughness.png",
+      "MetalnessMap": "LionEnceinte_Corps_Metalness.png",
+      "EmissiveMaskContent": "LionEnceinte_Corps_Emissive.png",
+      "EmissiveTint": "#FFFFFF",
+      "EmissiveStrength": 2.6,
+      "coverage_pct": 8.07,
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 26.4
+}

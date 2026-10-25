@@ -477,3 +477,64 @@ def petals(kit, part, center, n, length, width, mats, facing=(0, -1, 0), tilt=0.
         d = (radial + f * tilt).normalized()
         leaf(kit, part, tuple(c + radial * length * 0.08), tuple(d), length, width, mats[k % len(mats)],
              normal=tuple(f), thick=thick, segments=2)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Machines (Hybrides, 25 oct.)
+# ---------------------------------------------------------------------------------------------------------------------
+
+def _plane(normal):
+    """Deux axes du plan perpendiculaire à `normal`."""
+    f = Vector(normal).normalized()
+    a = Vector((0, 0, 1)) if abs(f.z) < 0.9 else Vector((1, 0, 0))
+    u = a.cross(f).normalized()
+    return f, u, f.cross(u).normalized()
+
+
+def gear(kit, part, center, radius, thick, teeth, mat, normal=(0, -1, 0), hub=None):
+    """Engrenage : moyeu octogonal, dents en briques tout autour, axe central d'une autre couleur."""
+    f, u, v = _plane(normal)
+    c = Vector(center)
+    kit.add(kit.disc(radius * 0.82, thick, center=tuple(c), normal=tuple(f), sides=8), mat, part, bevel=0.0)
+    for k in range(teeth):
+        a = 2 * math.pi * k / teeth
+        r = u * math.cos(a) + v * math.sin(a)
+        tooth = kit.brick((radius * 0.32, thick, radius * 0.26), label="Dent")
+        G.transform(tooth, G.frame_matrix(c + r * radius * 0.9, r, roll_hint=tuple(-f)))
+        kit.add(tooth, mat, part, bevel=0.0)
+    if hub:
+        kit.add(kit.disc(radius * 0.3, thick * 1.6, center=tuple(c), normal=tuple(f), sides=8), hub, part, bevel=0.0)
+
+
+def speaker(kit, part, center, size, mats, rot=(0, 0, 0)):
+    """Caisson de basses : boîte, anneau lumineux, membrane foncée, cache central ; tourné de `rot` (face = -Y)."""
+    from pet_kit import rot_matrix
+    box, ring, cone, cap = (list(mats) + [mats[-1]] * 4)[:4]
+    m = rot_matrix(center, rot)
+    pieces = [(kit.brick((size, size * 0.62, size)), box, 0.03),
+              (kit.brick((size * 0.84, 0.03, size * 0.84), center=(0, -size * 0.32, 0)), ring, 0.0),
+              (kit.brick((size * 0.7, 0.04, size * 0.7), center=(0, -size * 0.33, 0)), cone, 0.0),
+              (kit.brick((size * 0.26, 0.05, size * 0.26), center=(0, -size * 0.36, 0)), cap, 0.006)]
+    for obj, mat, bevel in pieces:
+        G.transform(obj, m)
+        kit.add(obj, mat, part, bevel=bevel)
+
+
+def treads(kit, part, x, y0, y1, z, h, w, mat, wheel, link):
+    """Chenille d'engin : longue brique arrondie par des pentes, roues octogonales sur le flanc, patins dessus et dessous."""
+    length = y1 - y0
+    cy = (y0 + y1) / 2
+    kit.add(kit.brick((w, length - h * 0.6, h), center=(x, cy, z)), mat, part, bevel=0.03)
+    for y, facing in ((y0 + h * 0.3, "-Y"), (y1 - h * 0.3, "+Y")):
+        kit.add(kit.slope((w, h * 0.6, h), center=(x, y, z), facing=facing, top=0.5), mat, part, bevel=0.02)
+    s = 1 if x > 0 else -1
+    n = max(2, int(length / (h * 0.9)))
+    for k in range(n):
+        y = y0 + h * 0.45 + k * (length - h * 0.9) / max(1, n - 1)
+        kit.add(kit.disc(h * 0.34, 0.03, center=(x + s * (w / 2 + 0.012), y, z), normal=(s, 0, 0), sides=8), wheel, part,
+                bevel=0.0)
+    m = max(4, int(length / 0.09))
+    for k in range(m):
+        y = y0 + h * 0.3 + k * (length - h * 0.6) / (m - 1)
+        for zz in (z + h / 2 + 0.012, z - h / 2 - 0.012):
+            kit.add(kit.box((w * 1.04, 0.04, 0.024), center=(x, y, zz)), link, part, bevel=0.0)

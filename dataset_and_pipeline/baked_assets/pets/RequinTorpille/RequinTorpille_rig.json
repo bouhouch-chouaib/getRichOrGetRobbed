@@ -1,0 +1,247 @@
+{
+  "pet": "RequinTorpille",
+  "model_height_blender": 0.9657,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.2,
+      "triangles": 912,
+      "center": [
+        0.0,
+        -0.0575,
+        0.705
+      ],
+      "size": [
+        0.78,
+        1.615,
+        0.89
+      ],
+      "pivot": null
+    },
+    "FinL": {
+      "kind": "Fin",
+      "phase": 1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.2,
+      "triangles": 24,
+      "center": [
+        0.40974,
+        -0.2525,
+        0.36
+      ],
+      "size": [
+        0.3195,
+        0.245,
+        0.17267
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.27
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.38
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "FinR": {
+      "kind": "Fin",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.2,
+      "triangles": 24,
+      "center": [
+        -0.40974,
+        -0.2525,
+        0.36
+      ],
+      "size": [
+        0.3195,
+        0.245,
+        0.17267
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.27
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.38
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tail": {
+      "kind": "SwimTail",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.2,
+      "triangles": 68,
+      "center": [
+        0.0,
+        0.92,
+        0.58908
+      ],
+      "size": [
+        0.2,
+        0.408,
+        0.80948
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.72
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.55
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Flame1": {
+      "kind": "Leaf",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.2,
+      "triangles": 24,
+      "center": [
+        -0.3,
+        0.81,
+        0.62
+      ],
+      "size": [
+        0.12,
+        0.3,
+        0.12
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.3
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.65
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.62
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Flame0": {
+      "kind": "Leaf",
+      "phase": 2.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.2,
+      "triangles": 24,
+      "center": [
+        0.3,
+        0.81,
+        0.62
+      ],
+      "size": [
+        0.12,
+        0.3,
+        0.12
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.3
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.65
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.62
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.062134
+}

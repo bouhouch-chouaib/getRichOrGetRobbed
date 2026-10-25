@@ -435,6 +435,12 @@ local function jointPose(
 	elseif kind == "Orbit" then
 		-- anneau, galaxie : tourne autour de l'axe de son pivot, phase = vitesse (rad / s, négative = autre sens)
 		return A(0, t * j.phase, 0)
+	elseif kind == "Turret" then
+		-- tourelle de char : balaie l'horizon lentement
+		return A(0, math.sin(t * 0.45 + j.phase) * 0.7, 0)
+	elseif kind == "Thump" then
+		-- membrane de haut-parleur : pompe vers l'avant à chaque temps
+		return CF(0, 0, -math.max(0, math.sin(t * 7.5 + j.phase)) ^ 6 * 0.035)
 	elseif kind == "Drum" then
 		return A(0, 0, t * 1.6)
 	elseif kind == "Rotor" then

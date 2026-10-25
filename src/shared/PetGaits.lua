@@ -214,6 +214,52 @@ PetGaits.ById = {
 	-- fougère de Fibonacci : flotte lentement, ses frondes ondulent
 	FougereFibonacci = gait({ speed = 2, minWait = 2, maxWait = 6, ease = "Smooth", hover = 2.5, float = 0.5,
 		floatRate = 0.7, spin = 0.15, bank = 0.15, turn = 2, flicker = 0.6 }),
+
+	-- Hybrides --------------------------------------------------------------------------------------------------
+	-- chat-coptère : vole en tanguant comme un hélicoptère, pattes qui pendent
+	ChatCoptere = gait({ speed = 5, minWait = 1, maxWait = 3.5, ease = "Smooth", hover = 3, float = 0.5, floatRate = 2,
+		bank = 0.4, turn = 4, airSwing = 0.6 }),
+	-- tortue-burger : avance tout doucement en se balançant sous son burger
+	TortueBurger = gait({ speed = 1.8, minWait = 3, maxWait = 8, ease = "Linear", roam = 8, step = 0.9, bob = 0.03,
+		roll = 0.07, turn = 2, stride = 0.7, swing = 0.8 }),
+	-- poisson-ampoule : nage dans l'air en ondulant, sa lanterne se balance
+	PoissonAmpoule = gait({ speed = 3.5, minWait = 1, maxWait = 3.5, ease = "Smooth", hover = 2.5, float = 0.5,
+		floatRate = 1.3, sway = 0.5, swayLength = 5, bank = 0.25, turn = 3 }),
+	-- cochon-tirelire : trottine en se dandinant, la queue en tire-bouchon frétille
+	CochonTirelire = gait({ speed = 4, minWait = 1, maxWait = 4, ease = "Linear", roam = 12, step = 0.7, bob = 0.1,
+		roll = 0.1, stride = 1.6, swing = 1, tail = "Wag" }),
+	-- tasse-chien : la tasse avance par petits sauts, le carlin regarde partout
+	TasseChien = gait({ speed = 3, minWait = 1.5, maxWait = 5, ease = "Linear", roam = 10, hop = 0.4, hopLength = 1 }),
+	-- corbeau-horloge : sautille mécaniquement, picore, ses engrenages tournent
+	CorbeauHorloge = gait({ speed = 3, minWait = 1, maxWait = 4, ease = "Linear", roam = 10, hop = 0.5, hopLength = 1,
+		head = "Peck", wing = "Fold", tail = "Fan" }),
+	-- banane-chien : trotte joyeusement en se tortillant, renifle, frétille de la queue
+	BananeChien = gait({ speed = 5.5, minWait = 0.5, maxWait = 3, ease = "Linear", step = 1.1, bob = 0.15, roll = 0.05,
+		wiggle = 0.06, stride = 1.3, swing = 1.1, head = "Sniff", tail = "Wag" }),
+	-- hibou-caméra : reste posé à filmer en tournant la tête, s'envole pour changer de place
+	HibouCamera = gait({ speed = 5, minWait = 4, maxWait = 8, ease = "Smooth", hover = 3.5, perch = true, head = "Swivel",
+		wing = "Flit", tail = "Fan" }),
+	-- requin-torpille : fonce à toute vitesse dans l'air, réacteur à fond
+	RequinTorpille = gait({ speed = 9, minWait = 1, maxWait = 3, ease = "Dash", hover = 3, float = 0.4, sway = 0.4,
+		swayLength = 8, bank = 0.5, turn = 4, flicker = 3 }),
+	-- pégase-moto : galop mécanique, crinière au vent
+	PegaseMoto = gait({ speed = 7, minWait = 1, maxWait = 3, ease = "Linear", step = 1.8, bob = 0.22, rock = 0.08,
+		roll = 0.03, stride = 1.2, swing = 1.4, head = "Proud", wing = "Fold", tail = "Swish" }),
+	-- dragon-grille-pain : se dandine lourdement, bat des ailes, rugit et fait sauter ses tartines
+	DragonGrillePain = gait({ speed = 3, minWait = 1.5, maxWait = 4, ease = "Linear", roam = 12, step = 0.8, bob = 0.06,
+		roll = 0.12, stride = 1.5, swing = 1, head = "Roar", wing = "Buzz" }),
+	-- T-Rex tank : pas lourds qui font trembler, rugit, sa tourelle balaie l'horizon
+	TRexTank = gait({ speed = 3, minWait = 2, maxWait = 5, ease = "Linear", step = 1.6, bob = 0.12, roll = 0.08,
+		wiggle = 0.05, lean = -0.06, turn = 2.5, stride = 0.8, swing = 1.2, body = "Heavy", head = "Roar", tail = "Stiff" }),
+	-- golem distributeur : marche lente et pesante, balance les bras
+	GolemDistributeur = gait({ speed = 2.2, minWait = 3, maxWait = 7, ease = "Smooth", step = 1.4, bob = 0.1, roll = 0.1,
+		turn = 2, stride = 0.7, swing = 1, body = "Heavy" }),
+	-- lion enceinte : se pavane au rythme de ses basses
+	LionEnceinte = gait({ speed = 4.5, minWait = 1.5, maxWait = 4, ease = "Linear", step = 1.6, bob = 0.12, roll = 0.05,
+		stride = 1, swing = 1.1, tail = "Swish" }),
+	-- canard-tractopelle : roule sur ses chenilles sans à-coups, tourne lentement comme un engin, creuse avec son bras
+	CanardTractopelle = gait({ speed = 2.5, minWait = 2, maxWait = 5, ease = "Smooth", step = 3, bob = 0.02, rock = 0.02,
+		turn = 1.5, head = "Proud" }),
 } :: { [string]: Gait }
 
 -- Fiche du familier (formes évoluées et mutations comprises : « <Id>__E2 », « <Id>__MGold »...), ou nil.

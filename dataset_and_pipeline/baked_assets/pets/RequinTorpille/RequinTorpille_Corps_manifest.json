@@ -1,0 +1,66 @@
+{
+  "asset": "RequinTorpille_Corps",
+  "triangles": 1076,
+  "vertices": 664,
+  "size_studs": [
+    1.139,
+    1.989,
+    0.966
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 56.4,
+  "source_materials": [
+    "M_RequinTorpille_high_acier",
+    "M_RequinTorpille_high_acier_fonce",
+    "M_RequinTorpille_high_bandes",
+    "M_RequinTorpille_high_dents",
+    "M_RequinTorpille_high_flamme",
+    "M_RequinTorpille_high_flamme_jaune",
+    "M_RequinTorpille_high_gueule",
+    "M_RequinTorpille_high_rivets",
+    "M_RequinTorpille_high_ventre",
+    "M_RequinTorpille_high_visiere",
+    "M_RequinTorpille_high_yeux"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0298,
+    "max_ray": 0.0746,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "RequinTorpille_Corps_Color.png",
+    "Roughness": "RequinTorpille_Corps_Roughness.png",
+    "Metalness": "RequinTorpille_Corps_Metalness.png",
+    "Normal": "RequinTorpille_Corps_Normal.png",
+    "AO": "RequinTorpille_Corps_AO.png",
+    "Emissive": "RequinTorpille_Corps_Emissive.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "RequinTorpille_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "RequinTorpille_Corps_Color.png",
+      "NormalMap": "RequinTorpille_Corps_Normal.png",
+      "RoughnessMap": "RequinTorpille_Corps_Roughness.png",
+      "MetalnessMap": "RequinTorpille_Corps_Metalness.png",
+      "EmissiveMaskContent": "RequinTorpille_Corps_Emissive.png",
+      "EmissiveTint": "#FFFFFF",
+      "EmissiveStrength": 3.2,
+      "coverage_pct": 6.84,
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 22.9
+}

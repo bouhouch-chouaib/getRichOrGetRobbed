@@ -1,0 +1,159 @@
+{
+  "pet": "CanardTractopelle",
+  "model_height_blender": 1.404,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.0,
+      "triangles": 1352,
+      "center": [
+        0.0,
+        0.10669,
+        0.533
+      ],
+      "size": [
+        0.974,
+        1.04189,
+        1.074
+      ],
+      "pivot": null
+    },
+    "Head": {
+      "kind": "Head",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.0,
+      "triangles": 468,
+      "center": [
+        0.0,
+        -0.305,
+        1.095
+      ],
+      "size": [
+        0.52,
+        0.65,
+        0.61
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Arm": {
+      "kind": "Excavator",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.0,
+      "triangles": 284,
+      "center": [
+        0.0,
+        -0.6425,
+        0.3775
+      ],
+      "size": [
+        0.46,
+        0.615,
+        0.265
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.34
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.42
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Beacon": {
+      "kind": "Rotor",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": 3.0,
+      "triangles": 44,
+      "center": [
+        -0.2,
+        0.3,
+        0.89
+      ],
+      "size": [
+        0.08,
+        0.08,
+        0.1
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.3
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.86
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.042735
+}
