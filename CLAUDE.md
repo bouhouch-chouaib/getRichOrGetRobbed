@@ -55,8 +55,8 @@ style validé : briques sans tenons, cubes d'abord, très détaillé, couleurs s
 Faits et branchés dans `ArtModels` : les 15 Animaux (`Lot01_Animaux.fbx`) et les 15 Fantastiques (`Lot02_Fantastiques.fbx`),
 lueurs envoyées (`<Id>_roblox.json`). Les 15 Plantes sont faites (`Lot03_Plantes.fbx`, lueurs envoyées, démarches
 écrites), branchées et vérifiées en jeu. Les 15 Hybrides sont branchés et vérifiés en jeu (`Lot04_Hybrides.fbx` ; le masque de
-lueur du Requin-Torpille a été retiré par la modération Roblox, il n'a pas de lueur). Les 15 Absurdes sont faits
-(`Lot05_Absurdes.fbx`, démarches écrites) : à importer puis brancher. Reste : les 30 familiers des Mondes.
+lueur du Requin-Torpille a été retiré par la modération Roblox, il n'a pas de lueur). Les 15 Absurdes sont branchés et
+vérifiés en jeu (`Lot05_Absurdes.fbx`). Reste : les 30 familiers des Mondes. 91 familiers sur 106 sont refaits.
 **Rareté sans néon** (Chouaib, 25 oct. : « néon sur néon, à la fin on ne voit plus rien ») : à partir des Absurdes, la
 rareté se voit à la matière, sans aucune lueur : plastique (Commun) → émail (Rare) → chrome + cristal (Épique) → or martelé
 (Légendaire) → nacre + or (Mythique) → or blanc + cristal (Divin) → or massif (Sigma) ; `PetKit.gold / chrome / gem / pearl /
