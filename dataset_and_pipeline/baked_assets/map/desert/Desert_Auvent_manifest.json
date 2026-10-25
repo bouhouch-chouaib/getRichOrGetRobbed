@@ -1,0 +1,57 @@
+{
+  "asset": "Desert_Auvent",
+  "triangles": 2292,
+  "vertices": 1192,
+  "size_studs": [
+    8.02,
+    6.794,
+    6.209
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 28.1,
+  "source_materials": [
+    "M_BoisSeche",
+    "M_BoisSecheX",
+    "M_TissuCreme",
+    "M_TissuRouge"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0321,
+    "max_ray": 0.0802,
+    "ao_distance": 0.9624,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Desert_Auvent_Color.png",
+    "Roughness": "Desert_Auvent_Roughness.png",
+    "Metalness": "Desert_Auvent_Metalness.png",
+    "Normal": "Desert_Auvent_Normal.png",
+    "AO": "Desert_Auvent_AO.png"
+  },
+  "exports": [
+    "Desert_Auvent.fbx",
+    "Desert_Auvent.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Desert_Auvent (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Desert_Auvent_Color.png",
+      "NormalMap": "Desert_Auvent_Normal.png",
+      "RoughnessMap": "Desert_Auvent_Roughness.png",
+      "MetalnessMap": "Desert_Auvent_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 19.4
+}

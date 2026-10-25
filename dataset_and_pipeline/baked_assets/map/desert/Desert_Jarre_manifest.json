@@ -1,0 +1,55 @@
+{
+  "asset": "Desert_Jarre",
+  "triangles": 4416,
+  "vertices": 2212,
+  "size_studs": [
+    4.89,
+    3.59,
+    3.74
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 33.2,
+  "source_materials": [
+    "M_Argile",
+    "M_TurquoiseEmail"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0196,
+    "max_ray": 0.0489,
+    "ao_distance": 0.5868,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Desert_Jarre_Color.png",
+    "Roughness": "Desert_Jarre_Roughness.png",
+    "Metalness": "Desert_Jarre_Metalness.png",
+    "Normal": "Desert_Jarre_Normal.png",
+    "AO": "Desert_Jarre_AO.png"
+  },
+  "exports": [
+    "Desert_Jarre.fbx",
+    "Desert_Jarre.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Desert_Jarre (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Desert_Jarre_Color.png",
+      "NormalMap": "Desert_Jarre_Normal.png",
+      "RoughnessMap": "Desert_Jarre_Roughness.png",
+      "MetalnessMap": "Desert_Jarre_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 14.9
+}

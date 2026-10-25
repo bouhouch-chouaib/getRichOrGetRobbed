@@ -1,0 +1,55 @@
+{
+  "asset": "Desert_CactusTonneau",
+  "triangles": 3540,
+  "vertices": 1806,
+  "size_studs": [
+    6.48,
+    3.742,
+    2.9
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 34.7,
+  "source_materials": [
+    "M_Cactus",
+    "M_FleurCactus"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0259,
+    "max_ray": 0.0648,
+    "ao_distance": 0.7776,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Desert_CactusTonneau_Color.png",
+    "Roughness": "Desert_CactusTonneau_Roughness.png",
+    "Metalness": "Desert_CactusTonneau_Metalness.png",
+    "Normal": "Desert_CactusTonneau_Normal.png",
+    "AO": "Desert_CactusTonneau_AO.png"
+  },
+  "exports": [
+    "Desert_CactusTonneau.fbx",
+    "Desert_CactusTonneau.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Desert_CactusTonneau (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Desert_CactusTonneau_Color.png",
+      "NormalMap": "Desert_CactusTonneau_Normal.png",
+      "RoughnessMap": "Desert_CactusTonneau_Roughness.png",
+      "MetalnessMap": "Desert_CactusTonneau_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 11.8
+}

@@ -1,0 +1,55 @@
+{
+  "asset": "Desert_Fossile",
+  "triangles": 3744,
+  "vertices": 1984,
+  "size_studs": [
+    29.778,
+    13.851,
+    8.716
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 9.8,
+  "source_materials": [
+    "M_GresStrateD",
+    "M_Os"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.1191,
+    "max_ray": 0.2978,
+    "ao_distance": 2.5,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Desert_Fossile_Color.png",
+    "Roughness": "Desert_Fossile_Roughness.png",
+    "Metalness": "Desert_Fossile_Metalness.png",
+    "Normal": "Desert_Fossile_Normal.png",
+    "AO": "Desert_Fossile_AO.png"
+  },
+  "exports": [
+    "Desert_Fossile.fbx",
+    "Desert_Fossile.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Desert_Fossile (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Desert_Fossile_Color.png",
+      "NormalMap": "Desert_Fossile_Normal.png",
+      "RoughnessMap": "Desert_Fossile_Roughness.png",
+      "MetalnessMap": "Desert_Fossile_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 15.9
+}

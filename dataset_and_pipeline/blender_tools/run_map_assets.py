@@ -2,10 +2,11 @@
 
     blender.exe -b --factory-startup --python dataset_and_pipeline/blender_tools/run_map_assets.py -- [options]
 
-Options : --only A,B (assets du catalogue)  --no-bake (formes seules, planche procédurale)  --samples 16
-          --sheet-res 360  --sheet-samples 32
-Sorties : baked_assets/map/<Asset>_*.png / .fbx / .glb / _manifest.json, baked_assets/map/map_assets_report.json,
+Options : --world Prairie|Desert|...  --only A,B (assets du catalogue)  --no-bake (formes seules, planche procédurale)
+          --samples 16  --sheet-res 360  --sheet-samples 32
+Sorties (Prairie) : baked_assets/map/<Asset>_*.png / .fbx / .glb / _manifest.json, map_assets_report.json,
           source/map_assets.blend (les low cuits, relus par run_map_scene.py), qa_renders/map_assets_board.png.
+Autres mondes : baked_assets/map/<monde>/, source/map_assets_<monde>.blend, qa_renders/map_assets_board_<monde>.png.
 """
 
 from __future__ import annotations
@@ -33,12 +34,20 @@ for m in (S, G, B, Q, E):
     importlib.reload(m)
 
 ROOT = HERE.parent
-OUT = ROOT / "baked_assets" / "map"
+
+
+def world_paths(world: str) -> tuple[Path, Path, str]:
+    """(dossier des décors cuits, .blend des low cuits, suffixe des planches) d'un monde ; la Prairie garde ses chemins."""
+    if world == "Prairie":
+        return ROOT / "baked_assets" / "map", ROOT / "source" / "map_assets.blend", ""
+    w = world.lower()
+    return ROOT / "baked_assets" / "map" / w, ROOT / "source" / f"map_assets_{w}.blend", f"_{w}"
 
 
 def _args():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     p = argparse.ArgumentParser()
+    p.add_argument("--world", default="Prairie")
     p.add_argument("--only", default="")
     p.add_argument("--no-bake", action="store_true")
     p.add_argument("--samples", type=int, default=16)
@@ -78,7 +87,8 @@ def main() -> None:
     a = _args()
     t0 = time.time()
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    names = [n for n in E.BUILDERS if not a.only or n in a.only.split(",")]
+    names = [n for n in E.catalog(a.world) if not a.only or n in a.only.split(",")]
+    OUT, blend, suffix = world_paths(a.world)
     OUT.mkdir(parents=True, exist_ok=True)
     report = {}
     lows = []
@@ -105,8 +115,8 @@ def main() -> None:
                                                 encoding="utf-8")
     if not a.no_bake:
         (ROOT / "source").mkdir(exist_ok=True)
-        bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "source" / "map_assets.blend"), compress=True)
-    board = ROOT / "qa_renders" / ("map_assets_board.png" if not a.no_bake else "map_assets_shapes.png")
+        bpy.ops.wm.save_as_mainfile(filepath=str(blend), compress=True)
+    board = ROOT / "qa_renders" / (("map_assets_board" if not a.no_bake else "map_assets_shapes") + suffix + ".png")
     contact_sheet(lows, board, a.sheet_res, a.sheet_samples, a.cols)
     over = [n for n, r in report.items() if not r["within_6000"]]
     print(f"[map] {len(names)} assets en {time.time() - t0:.0f} s ; planche {board}")

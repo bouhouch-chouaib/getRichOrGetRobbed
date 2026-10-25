@@ -2,8 +2,12 @@
 
     blender.exe -b --factory-startup --python dataset_and_pipeline/blender_tools/run_map_scene.py -- [options]
 
-Prérequis : run_map_assets.py (source/map_assets.blend, décors cuits = ce que Roblox affichera).
-Options : --samples 64  --hero-res 1600  --tile-res 800  --views hero,aerien,...  --no-layout
+Prérequis : run_map_assets.py --world <monde> (décors cuits = ce que Roblox affichera).
+Options : --world Prairie|Desert  --samples 64  --hero-res 1600  --tile-res 800  --views hero,aerien,...|none
+          --no-layout
+Chaque monde (WORLD_CFG) choisit ses décors pour chaque rôle (dalle du sanctuaire, porte des chemins, clôture des
+bases, falaise, arbres...), ses couleurs de sol et sa lumière ; le placement (positions, règles de jeu) est commun.
+Autres mondes que la Prairie : sorties suffixées (_desert...), placement dans baked_assets/map/<monde>/.
 Sorties : qa_renders/map_hero.png (depuis la base 1, face à l'arène), qa_renders/map_aesthetic_board.png
           (6 vues : survol, entrée de base, entrée de l'arène, colline, nuit, depuis le trou),
           baked_assets/map/map_layout.json (positions en coordonnées Roblox pour studio_tools/apply_map_look.lua),
@@ -44,7 +48,6 @@ for m in (S, G, Q, E):
     importlib.reload(m)
 
 ROOT = HERE.parent
-LIB_BLEND = ROOT / "source" / "map_assets.blend"
 QA = ROOT / "qa_renders"
 
 # --- Config.Arena -----------------------------------------------------------------------------------------------
@@ -53,13 +56,12 @@ BASE_COUNT, BASE_RING, BASE_HALF = 8, 215.0, 42.0
 WALL_H, WALL_T = 36.0, 10.0
 PATH_W = 16.0
 WILD = (70.0, 160.0)
-CLIFF_TOP = 28.2  # hauteur de FalaiseGradins à l'échelle 1 (5 strates)
 STEP = 2 * math.pi / BASE_COUNT
 KIOSK_ROBLOX_DEG = [22.5 + 90 * k for k in range(4)]
 LEADERBOARD_ROBLOX_DEG = 67.5
 
-# Préréglages = map_art_bible.json -> atmosphere.presets
-LOOKS = {
+# Préréglages = map_art_bible.json -> atmosphere.presets (Prairie) ; map_art_bible_<monde>.json pour les autres
+PRAIRIE_LOOKS = {
     "jour": {"sun": 4.2, "sun_color": (1.0, 0.94, 0.84), "sun_elev": 50, "sun_az": 205, "sky_top": "#3E9BFF",
              "sky_horizon": "#D2EAFF", "sky_strength": 1.0, "fog": "#CFE2FF", "fog_density": 0.0005,
              "fog_start": 180, "fog_max": 0.4, "bloom": (1.6, 0.45, 22), "saturation": 0.18, "contrast": 0.08,
@@ -70,10 +72,76 @@ LOOKS = {
              "exposure": 0.9},
 }
 
+DESERT_LOOKS = {
+    "jour": {"sun": 4.6, "sun_color": (1.0, 0.88, 0.72), "sun_elev": 40, "sun_az": 222, "sky_top": "#2E8CE6",
+             "sky_horizon": "#FFE6C0", "sky_strength": 1.0, "fog": "#FFE0B0", "fog_density": 0.0007,
+             "fog_start": 150, "fog_max": 0.45, "bloom": (1.6, 0.45, 22), "saturation": 0.2, "contrast": 0.1,
+             "exposure": 0.0},
+    "nuit": {"sun": 1.4, "sun_color": (0.66, 0.70, 1.0), "sun_elev": 36, "sun_az": 120, "sky_top": "#121A4E",
+             "sky_horizon": "#6A5AB0", "sky_strength": 1.6, "fog": "#56508E", "fog_density": 0.001,
+             "fog_start": 100, "fog_max": 0.55, "bloom": (1.3, 0.6, 26), "saturation": 0.22, "contrast": 0.1,
+             "exposure": 0.9},
+}
+
+# Rôle -> décor, couleurs du sol et lumière de chaque monde. Le code de placement ne connaît que les rôles.
+WORLD_CFG = {
+    "Prairie": {
+        "lib": [("Prairie", None)], "suffix": "", "looks": PRAIRIE_LOOKS, "clouds": 16, "water": "stream",
+        "slab": "DalleRunique", "gate": "ArcheAncienne", "flank": "TotemEnergie",
+        "between": ("RocherObsidienne_A", "RocherObsidienne_B"), "between_z": -0.3,
+        "tuft": "TouffeHerbe", "path_small": ("ChampignonGeant", 0.3, 0.42), "sign": "Pancarte",
+        "fence": "Palissade", "stairs": "EscalierPierre", "base_gate": "ArcheAncienne",
+        "prop_a": "Caisse", "prop_b": "Tonneau", "hill": "FalaiseGradins",
+        "hill_trees": ("ArbreCerisier", ("ArbreMajestueux_A", "ArbreMajestueux_B")),
+        "gap_trees": ("ArbreMajestueux_A", "ArbreMajestueux_B", "ArbreCerisier", "ChampignonGeant"),
+        "rocks": ("RocherCalcaire_A", "RocherCalcaire_B", "RocherCalcaire_C"), "ruin": "MurRuine",
+        "landmark": ("ChampignonGeant",), "bank_rock": "RocherCalcaire_B", "bridge": "PontBois",
+        "cliff": "FalaiseGradins", "cliff_trees": ("ArbreCerisier", ("ArbreMajestueux_A", "ArbreMajestueux_B")),
+        "far": ("RocherCalcaire_C", "RocherCalcaire_B"), "far_spire": "RocherObsidienne_A",
+        "far_scale": ((9, 14), (9, 14), (9, 16)),
+        "pets": (("CapybaraZen", -14, -2, 6.0), ("RenardFurtif", 10, 6, 6.5), ("Kitsune3Queues", -2, 12, 8.5),
+                 ("ChatRuelle", 18, -12, 5.0), ("PegaseNuageux", -24, 8, 9.0)),
+        "colors": {"sol": ("#98E634", "#7FD52C", "#B8E64A", "#A2D83C"), "chemin": ("#F6D680", "#E8C268"),
+                   "base_sol": ("#A8E04A", "#8FCF38"), "paille": ("#F2CF6B", "#E4BC52"), "dalle": ("#D8D2C4", "#C6BFB0"),
+                   "mur": ("#CA9156", "#B97D49"), "mur_haut": ("#6EDC2A", "#5CCB22"), "loin": "#79C83A"},
+    },
+    "Desert": {
+        # Caisse et Pancarte sont reprises de la Prairie (déjà dans ArtModels.Map)
+        "lib": [("Desert", None), ("Prairie", ["Caisse", "Pancarte"])], "suffix": "_desert", "looks": DESERT_LOOKS,
+        "clouds": 5, "water": "oasis",
+        "slab": "Desert_Dalle", "gate": "Desert_PorteTemple", "flank": "Desert_Obelisque",
+        "between": ("Desert_ColonneBrisee", "Desert_ColonneBrisee"), "between_z": -0.2,
+        "tuft": "Desert_Touffe", "path_small": ("Desert_CactusTonneau", 0.7, 1.0), "sign": "Pancarte",
+        "fence": "Desert_Muret", "stairs": "Desert_Escalier", "base_gate": "Desert_PorteTemple",
+        "prop_a": "Caisse", "prop_b": "Desert_Jarre", "hill": "Desert_Mesa",
+        "hill_trees": ("Desert_Figuier", ("Desert_Saguaro", "Desert_Saguaro")),
+        "gap_trees": ("Desert_Saguaro", "Desert_Palmier", "Desert_Figuier", "Desert_RocherGres_A"),
+        "rocks": ("Desert_RocherGres_B", "Desert_RocherGres_A", "Desert_RocherGres_B"), "ruin": "Desert_ColonneBrisee",
+        "landmark": ("Desert_ArcheNaturelle", "Desert_Fossile", "Desert_RocherGres_A", "Desert_Auvent"),
+        "bank_rock": "Desert_RocherGres_B", "bridge": None,
+        "cliff": "Desert_Mesa", "cliff_trees": ("Desert_Palmier", ("Desert_Saguaro", "Desert_Saguaro")),
+        "far": ("Desert_Mesa", "Desert_RocherGres_B"), "far_spire": "Desert_RocherGres_A",
+        "far_scale": ((2.4, 3.6), (2.0, 2.8), (2.2, 3.4)),  # la mesa fait déjà 36 x 15 x 30 studs
+        "pets": (("CactusRonchon", -14, -2, 6.0), ("RenardFurtif", 10, 6, 6.5), ("TRexPoche", -2, 12, 8.5),
+                 ("ChatRuelle", 18, -12, 5.0), ("CapybaraZen", -24, 8, 6.0)),
+        "colors": {"sol": ("#FAD682", "#EEC46A", "#F6C67A", "#ECB866"), "chemin": ("#D6965A", "#C4844C"),
+                   "base_sol": ("#F4D07E", "#E8BE66"), "paille": ("#F2CF6B", "#E4BC52"), "dalle": ("#E6CFA4", "#D8BE90"),
+                   "mur": ("#E2A05C", "#CE8C4E"), "mur_haut": ("#FADC8C", "#F0CC78"), "loin": "#E8B670"},
+    },
+}
+W: dict = WORLD_CFG["Prairie"]
+LOOKS = PRAIRIE_LOOKS
+
+
+def top_of(asset: str, scale_z: float) -> float:
+    """Hauteur du sommet d'un décor posé à l'échelle verticale scale_z (pour poser des arbres dessus)."""
+    return LIB[asset].dimensions.z * scale_z
+
 
 def _args():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     p = argparse.ArgumentParser()
+    p.add_argument("--world", default="Prairie")
     p.add_argument("--samples", type=int, default=64)
     p.add_argument("--hero-res", type=int, default=1600)
     p.add_argument("--tile-res", type=int, default=800)
@@ -91,22 +159,29 @@ PLACED: list[dict] = []
 SCENE_COLL: bpy.types.Collection | None = None
 
 
+def lib_blend(world: str) -> Path:
+    return ROOT / "source" / ("map_assets.blend" if world == "Prairie" else f"map_assets_{world.lower()}.blend")
+
+
 def load_library() -> None:
-    with bpy.data.libraries.load(str(LIB_BLEND), link=False) as (src, dst):
-        dst.objects = [n for n in src.objects if n in E.BUILDERS]
     lib_coll = bpy.data.collections.new("MapLibrary")
     bpy.context.scene.collection.children.link(lib_coll)
-    for obj in dst.objects:
-        if obj is None:
-            continue
-        lib_coll.objects.link(obj)
-        obj.matrix_world = Matrix.Identity(4)
-        obj.hide_render = True
-        obj.hide_viewport = True
-        LIB[obj.name] = obj
-    missing = [n for n in E.BUILDERS if n not in LIB]
-    if missing:
-        raise RuntimeError(f"décors absents de {LIB_BLEND.name} : {missing} (relancer run_map_assets.py)")
+    for world, only in W["lib"]:
+        wanted = only or E.catalog(world)
+        path = lib_blend(world)
+        with bpy.data.libraries.load(str(path), link=False) as (src, dst):
+            dst.objects = [n for n in src.objects if n in wanted]
+        for obj in dst.objects:
+            if obj is None:
+                continue
+            lib_coll.objects.link(obj)
+            obj.matrix_world = Matrix.Identity(4)
+            obj.hide_render = True
+            obj.hide_viewport = True
+            LIB[obj.name] = obj
+        missing = [n for n in wanted if n not in LIB]
+        if missing:
+            raise RuntimeError(f"décors absents de {path.name} : {missing} (relancer run_map_assets.py --world {world})")
 
 
 def put(asset: str, x: float, y: float, z: float = 0.0, yaw: float = 0.0, scale=1.0, zone: str = "",
@@ -306,16 +381,16 @@ def build_hole(M):
     for k in range(24):  # anneau de dalles runiques au ras du sol
         phi = k * 15 + 7.5
         x, y = polar(HOLE_R + 5.0, phi)
-        put("DalleRunique", x, y, -0.55, phi - 90, (1.12, 1.4, 1.0), "trou")
+        put(W["slab"], x, y, -0.55, phi - 90, (1.12, 1.4, 1.0), "trou")
     for k in range(BASE_COUNT):
         phi = -k * 45.0
         x, y = polar(66, phi)
-        put("ArcheAncienne", x, y, 0, facing_center(phi), 1.0, "trou", collide=True)
-        for side in (-1, 1):  # totems de part et d'autre de l'arche
+        put(W["gate"], x, y, 0, facing_center(phi), 1.0, "trou", collide=True)
+        for side in (-1, 1):  # totems / obélisques de part et d'autre de la porte
             tx, ty = polar(64, phi + side * 13.5)
-            put("TotemEnergie", tx, ty, 0, phi + 45, 0.9, "trou", collide=True)
-        ox, oy = polar(57, phi - 22.5)  # obsidienne entre deux chemins, hors de l'anneau des objets sauvages
-        put("RocherObsidienne_A" if k % 2 else "RocherObsidienne_B", ox, oy, -0.3, k * 53.0, 0.9 + 0.1 * (k % 3),
+            put(W["flank"], tx, ty, 0, phi + 45, 0.9, "trou", collide=True)
+        ox, oy = polar(57, phi - 22.5)  # entre deux chemins, avant l'anneau des objets sauvages
+        put(W["between"][0] if k % 2 else W["between"][1], ox, oy, W["between_z"], k * 53.0, 0.9 + 0.1 * (k % 3),
             "trou", collide=True)
 
 
@@ -330,19 +405,20 @@ def build_paths_decor(rnd):
                 t = side * (PATH_W / 2 + rnd.uniform(1.6, 3.4))
                 x, y = r * math.cos(a) - t * math.sin(a), r * math.sin(a) + t * math.cos(a)
                 if rnd.random() < 0.16:
-                    put("ChampignonGeant", x, y, 0, rnd.uniform(0, 360), rnd.uniform(0.3, 0.42), "chemin")
+                    small, s0, s1 = W["path_small"]
+                    put(small, x, y, 0, rnd.uniform(0, 360), rnd.uniform(s0, s1), "chemin")
                 else:
-                    put("TouffeHerbe", x, y, 0, rnd.uniform(0, 360), rnd.uniform(0.9, 1.5), "chemin")
+                    put(W["tuft"], x, y, 0, rnd.uniform(0, 360), rnd.uniform(0.9, 1.5), "chemin")
                 r += rnd.uniform(9, 17)
         sx, sy = base_xform(phi, 11, -BASE_HALF - 9)
-        put("Pancarte", sx, sy, 0, facing_center(phi) + 180 - 20, 1.0, "chemin")
+        put(W["sign"], sx, sy, 0, facing_center(phi) + 180 - 20, 1.0, "chemin")
     for _ in range(46):  # quelques grappes dans la prairie sauvage, entre les chemins
         phi = rnd.uniform(0, 360)
         r = rnd.uniform(WILD[0] + 6, WILD[1])
         off = (phi % 45.0)
         if 6 < off < 39:
             x, y = polar(r, phi)
-            put("TouffeHerbe", x, y, 0, rnd.uniform(0, 360), rnd.uniform(0.8, 1.6), "prairie")
+            put(W["tuft"], x, y, 0, rnd.uniform(0, 360), rnd.uniform(0.8, 1.6), "prairie")
 
 
 def build_base(M, k: int, hero: bool, rnd):
@@ -361,20 +437,20 @@ def build_base(M, k: int, hero: bool, rnd):
                 continue
             u, v = (s, fixed_v) if fixed_v is not None else (axis, s)
             x, y = base_xform(phi, u, v)
-            put("Palissade", x, y, 0, yaw + side_yaw, 1.0, "base", collide=True)
+            put(W["fence"], x, y, 0, yaw + side_yaw, 1.0, "base", collide=True)
     ex, ey = base_xform(phi, 0, -BASE_HALF - 2.6)
-    put("EscalierPierre", ex, ey, 0, yaw, (1.0, 1.0, 0.6), "base")
+    put(W["stairs"], ex, ey, 0, yaw, (1.0, 1.0, 0.6), "base")
     ax, ay = base_xform(phi, 0, -BASE_HALF + 0.4)
-    put("ArcheAncienne", ax, ay, 0, yaw, (0.82, 0.9, 0.82), "base", collide=True)
+    put(W["base_gate"], ax, ay, 0, yaw, (0.82, 0.9, 0.82), "base", collide=True)
     for u in (-1, 1):  # palettes à objets : caisses et tonneaux
         px, py = base_xform(phi, u * (BASE_HALF - 10), -BASE_HALF + 10)
-        put("Caisse", px, py, 1.0, yaw + rnd.uniform(-8, 8), 1.0, "base")
+        put(W["prop_a"], px, py, 1.0, yaw + rnd.uniform(-8, 8), 1.0, "base")
         qx, qy = base_xform(phi, u * (BASE_HALF - 6), -BASE_HALF + 6)
-        put("Tonneau", qx, qy, 1.0, rnd.uniform(0, 360), 0.9, "base")
+        put(W["prop_b"], qx, qy, 1.0, rnd.uniform(0, 360), 0.9, "base")
         rx, ry = base_xform(phi, u * (BASE_HALF - 5), BASE_HALF - 24)
-        put("Tonneau", rx, ry, 1.0, rnd.uniform(0, 360), 0.85, "base")
+        put(W["prop_b"], rx, ry, 1.0, rnd.uniform(0, 360), 0.85, "base")
         sx, sy = base_xform(phi, u * (BASE_HALF - 5.5), BASE_HALF - 29)
-        put("Caisse", sx, sy, 1.0, yaw + rnd.uniform(-10, 10), 0.8, "base")
+        put(W["prop_a"], sx, sy, 1.0, yaw + rnd.uniform(-10, 10), 0.8, "base")
     lx, ly = base_xform(phi, 0, -BASE_HALF + 11)  # bouton de verrouillage
     lathe_obj(f"Base{k}_Verrou", [(0, 1.0), (2.6, 1.0), (2.6, 1.8), (1.9, 1.8), (1.8, 2.6), (0, 2.9)], 12,
               M["verrou"], (lx, ly, 0))
@@ -404,25 +480,26 @@ def build_gap(M, k: int, rnd):
     for dphi, r, scale in ((-7.5, 299, (0.7, 0.75, 0.95)), (0.0, 303, (0.75, 0.75, 1.0)), (7.5, 299, (0.7, 0.75, 0.9)),
                            (-4.0, 281, (0.6, 0.6, 0.5)), (4.0, 281, (0.6, 0.6, 0.45))):
         x, y = polar(r, phi + dphi)
-        put("FalaiseGradins", x, y, -0.5, facing_center(phi + dphi) + rnd.uniform(-6, 6), scale, "colline",
+        put(W["hill"], x, y, -0.5, facing_center(phi + dphi) + rnd.uniform(-6, 6), scale, "colline",
             collide=True)
-        top = CLIFF_TOP * scale[2] - 1.0
+        top = top_of(W["hill"], scale[2]) - 1.0
         for j in range(2 if scale[2] > 0.8 else 1):
             tx, ty = polar(r + 2.5, phi + dphi + rnd.uniform(-3.0, 3.0))
-            asset = "ArbreCerisier" if rnd.random() < 0.2 else rnd.choice(("ArbreMajestueux_A", "ArbreMajestueux_B"))
+            asset = W["hill_trees"][0] if rnd.random() < 0.2 else rnd.choice(W["hill_trees"][1])
             put(asset, tx, ty, top, rnd.uniform(0, 360), rnd.uniform(0.9, 1.3), "colline", collide=True)
     for j in range(3):
         x, y = polar(rnd.uniform(240, 262), phi + rnd.choice((-1, 1)) * rnd.uniform(5, 11))
-        asset = rnd.choice(("ArbreMajestueux_A", "ArbreMajestueux_B", "ArbreCerisier", "ChampignonGeant"))
+        asset = rnd.choice(W["gap_trees"])
         put(asset, x, y, 0, rnd.uniform(0, 360), rnd.uniform(0.8, 1.15), "colline", collide=True)
     for j in range(3):
         x, y = polar(rnd.uniform(228, 270), phi + rnd.uniform(-10, 10))
-        put(rnd.choice(("RocherCalcaire_A", "RocherCalcaire_B", "RocherCalcaire_C")), x, y, -0.4,
+        put(rnd.choice(W["rocks"]), x, y, -0.4,
             rnd.uniform(0, 360), rnd.uniform(0.8, 1.3), "colline", collide=True)
     x, y = polar(232, phi + rnd.choice((-1, 1)) * 8)
-    put("MurRuine", x, y, 0, facing_center(phi) + rnd.uniform(-30, 30), 1.0, "colline", collide=True)
+    put(W["ruin"], x, y, 0, facing_center(phi) + rnd.uniform(-30, 30), 1.0, "colline", collide=True)
     mx, my = polar(255, phi + rnd.uniform(-4, 4))
-    put("ChampignonGeant", mx, my, 0, rnd.uniform(0, 360), rnd.uniform(0.9, 1.2), "colline", collide=True)
+    landmark = W["landmark"][k % len(W["landmark"])]
+    put(landmark, mx, my, 0, rnd.uniform(0, 360), rnd.uniform(0.9, 1.2), "colline", collide=True)
 
 
 def add_stream(M, k: int):
@@ -450,13 +527,32 @@ def add_stream(M, k: int):
     wig = math.sin(12 * 0.55) * 5
     bx_ -= wig * math.sin(a)
     by_ += wig * math.cos(a)
-    put("PontBois", bx_, by_, 0, phi + 90, 1.0, "colline", collide=True)
+    if W["bridge"]:
+        put(W["bridge"], bx_, by_, 0, phi + 90, 1.0, "colline", collide=True)
     for j in range(6):  # berges en rochers
         r = 312 - (j * 4 + 2) * 4.8
         side = 1 if j % 2 else -1
         x, y = polar(r, phi)
         t = side * 7.5
-        put("RocherCalcaire_B", x - t * math.sin(a), y + t * math.cos(a), -0.6, j * 47.0, 0.45, "colline")
+        put(W["bank_rock"], x - t * math.sin(a), y + t * math.cos(a), -0.6, j * 47.0, 0.45, "colline")
+
+
+def add_oasis(M, k: int, rnd):
+    """Oasis du Désert entre la base 1 et la base 8 : mare turquoise, palmiers penchés, figuiers, rochers de grès."""
+    phi = -(k + 0.5) * 45.0
+    cx, cy = polar(272, phi)
+    pond = disc("Oasis", 15.0, 0.08, M["eau"], segs=48)
+    G.transform(pond, Matrix.Translation((cx, cy, 0)) @ Matrix.Diagonal((1.0, 0.7, 1.0, 1.0)))
+    for j in range(7):
+        a = j * 2 * math.pi / 7 + rnd.uniform(-0.2, 0.2)
+        x, y = cx + math.cos(a) * 17.5, cy + math.sin(a) * 12.5
+        put("Desert_Palmier", x, y, 0, math.degrees(a) + 180 + rnd.uniform(-20, 20), rnd.uniform(0.9, 1.25), "colline",
+            collide=True)
+    for j in range(5):
+        a = j * 2 * math.pi / 5 + 0.4
+        x, y = cx + math.cos(a) * 15.5, cy + math.sin(a) * 11.0
+        put(W["bank_rock"] if j % 2 else "Desert_Figuier", x, y, -0.3, rnd.uniform(0, 360), rnd.uniform(0.5, 0.8),
+            "colline")
 
 
 def add_kiosk(M, phi):
@@ -487,9 +583,7 @@ def add_leaderboard(M, phi):
 
 def add_pets(phi):
     """Quelques familiers déjà refaits en briques (baked_assets/pets), pour l'échelle et la vie de la base."""
-    pets = (("CapybaraZen", -14, -2, 6.0), ("RenardFurtif", 10, 6, 6.5), ("Kitsune3Queues", -2, 12, 8.5),
-            ("ChatRuelle", 18, -12, 5.0), ("PegaseNuageux", -24, 8, 9.0))
-    for pid, u, v, height in pets:
+    for pid, u, v, height in W["pets"]:
         fbx = ROOT / "baked_assets" / "pets" / pid / f"{pid}_Rig.fbx"
         if not fbx.exists():
             continue
@@ -543,24 +637,24 @@ def build_periphery(rnd):
             r = r0 + rnd.uniform(0, 8)
             x, y = polar(r, phi)
             sz = rnd.uniform(*sz_range)
-            put("FalaiseGradins", x, y, -1, facing_center(phi) + rnd.uniform(-5, 5), (sxy[0], sxy[1], sz), "peripherie")
+            put(W["cliff"], x, y, -1, facing_center(phi) + rnd.uniform(-5, 5), (sxy[0], sxy[1], sz), "peripherie")
             for j in range(2):
                 tx, ty = polar(r + rnd.uniform(3, 7) * sxy[1], phi + rnd.uniform(-3.5, 3.5))
-                asset = "ArbreCerisier" if rnd.random() < 0.12 else rnd.choice(("ArbreMajestueux_A", "ArbreMajestueux_B"))
-                put(asset, tx, ty, CLIFF_TOP * sz - 3, rnd.uniform(0, 360), rnd.uniform(1.3, 2.0), "peripherie")
+                asset = W["cliff_trees"][0] if rnd.random() < 0.12 else rnd.choice(W["cliff_trees"][1])
+                put(asset, tx, ty, top_of(W["cliff"], sz) - 3, rnd.uniform(0, 360), rnd.uniform(1.3, 2.0), "peripherie")
     for k in range(18):
         phi = k * 20 + rnd.uniform(-6, 6)
         x, y = polar(rnd.uniform(520, 720), phi)
-        put("RocherCalcaire_C" if k % 2 else "RocherCalcaire_B", x, y, -6, rnd.uniform(0, 360),
-            (rnd.uniform(9, 14), rnd.uniform(9, 14), rnd.uniform(9, 16)), "lointain")
+        put(W["far"][0] if k % 2 else W["far"][1], x, y, -6, rnd.uniform(0, 360),
+            tuple(rnd.uniform(*rng) for rng in W["far_scale"]), "lointain")
     for k in range(7):
         phi = k * 51 + 10
         x, y = polar(rnd.uniform(640, 780), phi)
-        put("RocherObsidienne_A", x, y, -4, rnd.uniform(0, 360), rnd.uniform(6, 9), "lointain")
+        put(W["far_spire"], x, y, -4, rnd.uniform(0, 360), rnd.uniform(6, 9), "lointain")
 
 
 def build_clouds(M, rnd):
-    for k in range(16):
+    for k in range(W["clouds"]):
         phi = rnd.uniform(0, 360)
         x, y = polar(rnd.uniform(520, 1000), phi)
         z = rnd.uniform(190, 300)
@@ -754,8 +848,12 @@ def export_layout(path: Path) -> None:
 # =====================================================================================================================
 
 def main() -> None:
-    global SCENE_COLL
+    global SCENE_COLL, W, LOOKS
     a = _args()
+    W = WORLD_CFG[a.world]
+    LOOKS = W["looks"]
+    suffix = W["suffix"]
+    C = W["colors"]
     t0 = time.time()
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -766,14 +864,14 @@ def main() -> None:
     load_library()
     rnd = random.Random(2026)
     M = {
-        "sol": checker_mat("M_SolArene", "#98E634", "#7FD52C", 12, warm=("#B8E64A", "#A2D83C", 150, 205)),
-        "chemin": checker_mat("M_Chemin", "#F6D680", "#E8C268", 8),
-        "base_sol": checker_mat("M_SolBase", "#A8E04A", "#8FCF38", 7),
-        "paille": checker_mat("M_Paille", "#F2CF6B", "#E4BC52", 4),
-        "dalle": checker_mat("M_DalleKiosque", "#D8D2C4", "#C6BFB0", 6),
-        "mur": checker_mat("M_Mur", "#CA9156", "#B97D49", 12, sides=True),
-        "mur_herbe": checker_mat("M_MurHerbe", "#6EDC2A", "#5CCB22", 6),
-        "herbe_loin": flat_mat("M_HerbeLoin", "#79C83A", 0.8),
+        "sol": checker_mat("M_SolArene", C["sol"][0], C["sol"][1], 12, warm=(C["sol"][2], C["sol"][3], 150, 205)),
+        "chemin": checker_mat("M_Chemin", *C["chemin"], 8),
+        "base_sol": checker_mat("M_SolBase", *C["base_sol"], 7),
+        "paille": checker_mat("M_Paille", *C["paille"], 4),
+        "dalle": checker_mat("M_DalleKiosque", *C["dalle"], 6),
+        "mur": checker_mat("M_Mur", *C["mur"], 12, sides=True),
+        "mur_herbe": checker_mat("M_MurHerbe", *C["mur_haut"], 6),
+        "herbe_loin": flat_mat("M_HerbeLoin", C["loin"], 0.8),
         "eau": water_mat(),
         "vortex": vortex_mat(),
         "verrou": flat_mat("M_Verrou", "#F23A3A", 0.35, emission=0.4),
@@ -797,20 +895,24 @@ def main() -> None:
         build_base(M, k, hero=(k == 0), rnd=rnd)
     for k in range(BASE_COUNT):
         build_gap(M, k, rnd)
-    add_stream(M, 7)
+    if W["water"] == "stream":
+        add_stream(M, 7)
+    else:
+        add_oasis(M, 7, rnd)
     build_periphery(rnd)
     build_clouds(M, rnd)
     print(f"[scene] construite en {time.time() - t0:.0f} s : {len(PLACED)} décors posés")
     if not a.no_layout:
-        export_layout(ROOT / "baked_assets" / "map" / "map_layout.json")
-    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "source" / "map_scene.blend"), compress=True)
+        folder = ROOT / "baked_assets" / "map" / ("" if a.world == "Prairie" else a.world.lower())
+        export_layout(folder / "map_layout.json")
+    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "source" / f"map_scene{suffix}.blend"), compress=True)
 
-    wanted = [v for v in (a.views.split(",") if a.views else VIEWS) if v]
+    wanted = [] if a.views == "none" else [v for v in (a.views.split(",") if a.views else VIEWS) if v]
     images = {}
     for name in wanted:
         if name == "hero":
             images[name] = render_view(name, a.hero_res, int(a.hero_res * 9 / 16), a.samples)
-            Q._save_rgb(images[name], QA / "map_hero.png")
+            Q._save_rgb(images[name], QA / f"map_hero{suffix}.png")
         else:
             images[name] = render_view(name, a.tile_res, int(a.tile_res * 9 / 16), max(a.samples // 2, 16))
     board_views = [v for v in ("aerien", "entree_base", "entree_arene", "colline", "nuit", "depuis_trou") if v in images]
@@ -819,11 +921,12 @@ def main() -> None:
         rows = [tiles[i:i + 2] for i in range(0, len(tiles), 2)]
         if len(rows[-1]) < 2:
             rows[-1].append(np.zeros_like(tiles[0]))
-        Q._save_rgb(Q._grid(rows, gap=8), QA / "map_aesthetic_board.png")
-        (QA / "map_aesthetic_board_report.json").write_text(json.dumps({
+        Q._save_rgb(Q._grid(rows, gap=8), QA / f"map_aesthetic_board{suffix}.png")
+        (QA / f"map_aesthetic_board{suffix}_report.json").write_text(json.dumps({
             "layout": "2 colonnes, de gauche à droite et de haut en bas", "views": board_views,
+            "world": a.world,
             "render": {"engine": "CYCLES", "samples": max(a.samples // 2, 16), "post": "Atmosphere + Bloom + "
-                       "ColorCorrection du preset (map_art_bible.json)"},
+                       "ColorCorrection du preset (map_art_bible*.json)"},
             "seconds": round(time.time() - t0, 1)}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"[scene] terminé en {time.time() - t0:.0f} s")
 

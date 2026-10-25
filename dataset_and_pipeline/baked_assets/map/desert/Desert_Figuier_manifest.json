@@ -1,0 +1,56 @@
+{
+  "asset": "Desert_Figuier",
+  "triangles": 1512,
+  "vertices": 784,
+  "size_studs": [
+    9.433,
+    1.41,
+    7.692
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 42.2,
+  "source_materials": [
+    "M_Cactus",
+    "M_CactusFonce",
+    "M_FleurCactus"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0377,
+    "max_ray": 0.0943,
+    "ao_distance": 1.132,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Desert_Figuier_Color.png",
+    "Roughness": "Desert_Figuier_Roughness.png",
+    "Metalness": "Desert_Figuier_Metalness.png",
+    "Normal": "Desert_Figuier_Normal.png",
+    "AO": "Desert_Figuier_AO.png"
+  },
+  "exports": [
+    "Desert_Figuier.fbx",
+    "Desert_Figuier.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Desert_Figuier (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Desert_Figuier_Color.png",
+      "NormalMap": "Desert_Figuier_Normal.png",
+      "RoughnessMap": "Desert_Figuier_Roughness.png",
+      "MetalnessMap": "Desert_Figuier_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 13.9
+}

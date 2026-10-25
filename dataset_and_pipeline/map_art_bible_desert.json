@@ -1,0 +1,77 @@
+{
+  "title": "Bible artistique de la carte - monde Desert (2e palier)",
+  "date": "2026-10-25",
+  "status": "proposition, a valider par Chouaib sur qa_renders/map_hero_desert.png et map_aesthetic_board_desert.png",
+  "method": "Meme methode que la Prairie (map_art_bible.json) : carte ronde inchangee, decors en blocs biseautes cuits, relief autour de l'arene, eclairage reporte dans le code. Chaque monde a sa propre charte ; la Prairie ne change pas.",
+  "story": "L'Oasis des Pharaons oublies : un desert de canyons rouges ou un ancien royaume de gres s'est fait engloutir par le trou noir. Les familiers du monde (Fennec a Lunettes, Cactus Cowboy, Scorpion Sablier, Lezard Momie, Sphinx Grognon) en sont les habitants : cactus, momies, devinettes de sphinx, sable qui s'ecoule.",
+
+  "sources": {
+    "local_reference": "src/shared/Worlds.lua (palette et air du Desert deja dans le jeu), docs/DIRECTION_ARTISTIQUE.md, src/shared/PetCatalog.lua (familiers du Desert)",
+    "web": [
+      {"what": "Desert canyon stylise : terre cuite et or sableux, accents turquoise / or / cramoisi, soleil dur et ombres courtes", "url": "https://www.summerengine.com/asset-store/ancient-desert-canyon-city-d3f94c22"},
+      {"what": "Kit savane-desert stylise : falaises, rochers, couleurs reglables", "url": "https://www.fab.com/listings/12ec20bd-ce21-4d3d-8051-13ffb0fe851e"},
+      {"what": "Gres #d8b68a + turquoise lagon #51a09e : contraste chaud / froid apaisant", "url": "https://pixeliro.com/news/image-palette-gaming-2026-07-31-summer-gaming-palette-study"},
+      {"what": "Atmosphere : la couleur de l'air ne se voit qu'avec Haze, Decay a besoin de Haze et Glare", "url": "https://create.roblox.com/docs/reference/engine/classes/Atmosphere"},
+      {"what": "Tutoriel officiel : eclairage exterieur (soleil, couches de l'air)", "url": "https://create.roblox.com/docs/tutorials/use-case-tutorials/lighting/enhance-outdoor-environments"},
+      {"what": "Simulateurs stylises : rester cartoon, ne pas pousser vers le realisme", "url": "https://devforum.roblox.com/t/good-warm-lighting/2128280"}
+    ]
+  },
+
+  "palette": {
+    "rule": "Gres chaud (creme, orange, rouge brique) contre turquoise emaille et or : le turquoise est l'accent froid, reserve aux objets fabriques (dalles, bandeaux des obelisques, tuiles). Le vert ne vient que des cactus et des palmiers, donc il attire l'oeil vers l'oasis.",
+    "gradient_center_to_edge": [
+      {"zone": "coeur du trou noir", "hex": "#2E1B5C", "note": "inchange : le vortex reste violet dans tous les mondes"},
+      {"zone": "dalles du sanctuaire", "hex": "#E6C48E", "accent": "#2FB7B0", "note": "gres creme, disque solaire turquoise et or incruste (aucune lueur)"},
+      {"zone": "arene", "hex": "#FAD682", "alt": "#EEC46A", "note": "damier de sable du jeu (Worlds.Desert.GrassA/B)"},
+      {"zone": "chemins", "hex": "#D6965A", "alt": "#C4844C", "note": "terre cuite (Worlds.Desert.PathA/B)"},
+      {"zone": "abords des bases", "hex": "#F2C27A", "note": "sable plus orange : appel vers la base"},
+      {"zone": "mur d'enceinte", "hex": "#E2A05C", "alt": "#CE8C4E", "note": "inchange (Worlds.Desert.WallA/B)"},
+      {"zone": "canyons exterieurs", "hex": "#D9733F", "bands": ["#F2C48A", "#C95A32", "#E89A5A"], "note": "strates creme / rouge brique / orange, sommets dores"}
+    ],
+    "materials": {
+      "gres_strates": {"bands": ["#F0C08A", "#D06A3A", "#E8955A", "#B8502E"], "cavity": "#6E3A3A"},
+      "gres_taille": {"base": "#E6C48E", "edge": "#FFF0D0", "cavity": "#8A5A4A"},
+      "turquoise": {"base": "#2FB7B0", "edge": "#A8F0E8"},
+      "or": {"tint": "#FFC830"},
+      "adobe": {"base": "#D9A06A", "edge": "#F6D2A0", "cavity": "#7A4A30"},
+      "bois_seche": {"base": "#A8743E", "edge": "#E0B07A"},
+      "cactus": {"base": "#4FB54A", "edge": "#B8F06A", "flower": "#FF6FB0"},
+      "palmier": {"fronds": ["#5CC23C", "#86DA44"], "trunk": "#B07A44"},
+      "os": {"base": "#F4EAD2", "cavity": "#A89070"},
+      "tissu": {"stripes": ["#E8141A", "#FFF4E0", "#2FB7B0"]}
+    }
+  },
+
+  "atmosphere": {
+    "tone": "Apres-midi brulant et dore (soleil plus bas qu'en Prairie : ombres qui modelent les canyons), brume de chaleur ; la nuit est indigo, froide, tres etoilee.",
+    "presets": {
+      "jour_digestion": {
+        "Worlds.Desert.Ambience": {"AirColor": "#FFE0B0", "AirDecay": "#E89A5A", "AirDensity": 0.32, "Tint": "#FFF0DC", "Saturation": 0.2, "CloudCover": 0.2},
+        "note": "l'heure, la lumiere, le bloom, Glare et Haze restent ceux de DayNightController (communs a tous les mondes) ; le Desert change l'air et la teinte via WorldSkin"
+      },
+      "nuit_feeding": {"note": "meme preset de nuit que la Prairie ; l'air dore se refroidit tout seul avec le ciel bleu nuit"}
+    },
+    "no_glow": "Aucun masque de lueur (EmissiveMask) dans ce monde : avertissement de moderation du 25 oct. sur ce type d'image. La nuit, les reperes sont les braseros (PointLight + feu de particules Roblox, rien a envoyer), a poser au branchement."
+  },
+
+  "zones": {
+    "arene_centrale": {
+      "story": "Le sanctuaire englouti : un anneau de dalles de gres a disque solaire, 8 portes de temple (pylones) sur les chemins, des obelisques a bandeaux turquoise de part et d'autre, des colonnes brisees entre les chemins.",
+      "elements": ["24 dalles a r 45", "8 portes de temple a r 66 (ouverture 18 studs, comme les arches de la Prairie)", "16 obelisques a r 64", "8 colonnes brisees a r 57 (avant l'anneau des objets sauvages)"]
+    },
+    "chemins": {"story": "Pistes de terre cuite bordees de touffes d'herbe seche, de petits cactus en tonneau et de jarres ; pancarte en bois au depart."},
+    "bases": {"story": "Des forts de terre crue : muret d'adobe crenele avec poutres qui depassent, porte de temple a l'entree, escalier de gres, jarres et caisses.", "rules": ["meme regle qu'en Prairie : purement visuel, l'ancienne cloture garde collisions, porte et verrou", "montre seulement si le proprietaire de la base est au Desert"]},
+    "entre_les_bases": {"story": "Mesas en gradins adossees au mur, oasis (mare turquoise, palmiers) entre deux bases, arche de roche naturelle, squelette fossile geant, cactus et rochers de gres sculptes par le vent."},
+    "peripherie": {"story": "Deux couronnes de falaises de canyon striees (55-75 puis 85-110 studs), puis des buttes isolees dans la brume doree."}
+  },
+
+  "assets": {
+    "budget_triangles": 6000,
+    "prefix": "Desert_",
+    "nature": ["Desert_Mesa", "Desert_RocherGres_A", "Desert_RocherGres_B", "Desert_ArcheNaturelle", "Desert_Saguaro", "Desert_CactusTonneau", "Desert_Figuier", "Desert_Palmier", "Desert_Touffe", "Desert_Fossile"],
+    "civilisation": ["Desert_Obelisque", "Desert_ColonneBrisee", "Desert_PorteTemple", "Desert_Dalle", "Desert_Muret", "Desert_Escalier", "Desert_Jarre", "Desert_Auvent"]
+  },
+
+  "gameplay_constraints": "Identiques a la Prairie (map_art_bible.json) : chemins et cercle du trou degages, rien de solide dans l'anneau des objets sauvages (r 70-160), gros decors entre les bases, kiosques degages, CanQuery/CanTouch a false.",
+  "roblox_integration": "Apres validation : import Decors_Desert.fbx par Chouaib, Workspace.MapDecor range par monde (MapDecor/Desert), habillage des bases DesertLook ; WorldSkin montre l'habillage du monde du joueur / du proprietaire."
+}

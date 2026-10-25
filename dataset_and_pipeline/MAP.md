@@ -109,3 +109,29 @@ Eggs, WorldSkin supposent la carte entière présente).
 - Limites vues sur les rendus : les falaises répètent le même module (varier : 2e module, rochers à leur pied) ;
   le mur d'enceinte reste une grande bande unie (piste : le remplacer par une falaise) ; la prairie sauvage est
   volontairement dégagée (jeu) ; la vue aérienne reste un peu brumeuse.
+
+---
+
+# Monde 2 : Désert (25 oct. 2026) — proposition à valider
+
+Même méthode que la Prairie, **chaque monde a la sienne** (décision de Chouaib) : charte `map_art_bible_desert.json`
+(« L'Oasis des Pharaons oubliés », d'après les 5 familiers du Désert), 19 décors dans `blender_tools/environment_desert.py`,
+rendus `qa_renders/map_hero_desert.png`, `map_aesthetic_board_desert.png`, `map_assets_board_desert.png`.
+
+- **Aucune lueur** dans ce monde : pas d'émission, donc aucun `_Emissive.png` à envoyer (avertissement de modération du
+  25 oct. sur ce type d'image). L'accent froid est le turquoise émaillé (dalles, bandeaux, hiéroglyphes) avec l'or.
+- Décors (tous < 6 000 triangles) : Mesa (canyon en strates crème / rouge brique, terrasses de sable doré), RocherGres A
+  (cheminée de fée) et B, ArcheNaturelle, Saguaro, CactusTonneau, Figuier, Palmier, Touffe (herbe sèche), Fossile
+  (cage thoracique géante), Obelisque, ColonneBrisee, PorteTemple (pylônes, disque solaire), Dalle (disque solaire),
+  Muret (fort d'adobe crénelé, poutres), Escalier (grès), Jarre, Auvent, Brasero. Caisse et Pancarte : celles de la
+  Prairie (déjà dans `ArtModels.Map`).
+- Placement : `run_map_scene.py --world Desert` (même plan et mêmes règles de jeu que la Prairie ; chaque monde choisit
+  un décor par rôle dans `WORLD_CFG`) -> `baked_assets/map/desert/map_layout.json` (943 décors).
+- Lancer : `run_map_assets.py -- --world Desert`, `run_map_scene.py -- --world Desert`,
+  `export_map_lot.py -- --world Desert` (-> `baked_assets/map/desert/Decors_Desert.fbx`, 19 décors, 34 Mo).
+
+Reste à faire après validation : import de `Decors_Desert.fbx` (l'importateur envoie les textures sur le compte de
+Chouaib : avec son accord), ranger la carte par monde (`Workspace.MapDecor.<Monde>`, `ArtModels.Map`), habillage des
+bases au Désert (muret, porte de temple, escalier) dans `MapGenerator` + bascule par monde dans `WorldSkin`, air du
+Désert dans `shared/Worlds` (valeurs de la charte), braseros allumés la nuit (PointLight + feu de particules Roblox).
+

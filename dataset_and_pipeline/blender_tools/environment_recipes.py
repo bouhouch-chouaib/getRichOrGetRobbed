@@ -16,6 +16,7 @@ la Normal map). Pivot au sol au centre, devant = -Y, 1 unité = 1 stud.
 
 from __future__ import annotations
 
+import importlib
 import math
 import random
 
@@ -234,13 +235,15 @@ def obsidian(name: str, seed: int = 1, height: float = 13.0):
 
 
 def cliff(name: str, seed: int = 4, width: float = 36.0, depth: float = 14.0, layers: int = 5,
-          layer_h: float = 5.6):
-    """Falaise modulaire en gradins : strates de calcaire qui reculent, chaque terrasse couronnée d'herbe à tenons."""
+          layer_h: float = 5.6, strata=("calcaire",), caps=("feuille_a", "feuille_b"), step_back: float = 0.16):
+    """Falaise modulaire en gradins : strates qui reculent (`strata` = matériau de chaque rangée, en boucle), chaque
+    terrasse couronnée d'une plaque à tenons (`caps` : herbe en Prairie, sable doré au Désert). `step_back` = recul
+    d'une rangée sur l'autre (part de la profondeur) : petit = paroi raide de canyon."""
     M = mats()
     r = random.Random(seed)
     items = []
     for k in range(layers):
-        inset = k * depth * 0.16
+        inset = k * depth * step_back
         d = depth - inset
         x = -width / 2 + r.uniform(0, 1.5) + k * 0.8
         x_end = width / 2 - k * 1.2
@@ -250,11 +253,11 @@ def cliff(name: str, seed: int = 4, width: float = 36.0, depth: float = 14.0, la
             cy = inset / 2 + r.uniform(-0.5, 0.5)
             rot = (r.uniform(-2.5, 2.5), r.uniform(-2, 2), r.uniform(-4, 4))
             items.append((bx(f"{name}_strate{k}_{len(items)}", (w, d, h), (x + w / 2, cy, k * layer_h - 0.4), rot,
-                             taper=(0.94, 0.92), shift=(0, 0.25)), M["calcaire"]))
+                             taper=(0.94, 0.92), shift=(0, 0.25)), M[strata[k % len(strata)]]))
             if k == layers - 1 or r.random() < 0.85:
                 items.append((bx(f"{name}_herbe{k}_{len(items)}", (w * 0.97, d * 0.9, 0.8),
                                  (x + w / 2, cy + 0.2, k * layer_h - 0.4 + h * 0.97), (0, 0, rot[2])),
-                              M[r.choice(["feuille_a", "feuille_b"])]))
+                              M[r.choice(list(caps))]))
             x += w * r.uniform(0.86, 0.98)
     low = finish(items, bevel=0.07, max_bevel=0.45, segments=2, angle=25)
     return assemble(name, low), None
@@ -368,8 +371,8 @@ def mushroom(name: str, seed: int = 3, height: float = 11.0):
     return assemble(name, low), None
 
 
-def grass_tuft(name: str, seed: int = 2, height: float = 3.2):
-    """Touffe d'herbe géante : lames effilées qui s'ouvrent en éventail, deux tons."""
+def grass_tuft(name: str, seed: int = 2, height: float = 3.2, tones=("herbe", "feuille_b")):
+    """Touffe d'herbe géante : lames effilées qui s'ouvrent en éventail, deux tons (`tones`)."""
     M = mats()
     r = random.Random(seed)
     items = []
@@ -379,7 +382,7 @@ def grass_tuft(name: str, seed: int = 2, height: float = 3.2):
         h = height * r.uniform(0.6, 1.1)
         items.append((bx(f"{name}_lame{k}", (0.62, 0.3, h), (math.cos(a) * d, math.sin(a) * d, -0.1),
                          (0, r.uniform(12, 32), math.degrees(a)), taper=(0.12, 0.5)),
-                      M["herbe"] if k % 3 else M["feuille_b"]))
+                      M[tones[0]] if k % 3 else M[tones[1]]))
     low = finish(items, bevel=0.2, max_bevel=0.06, segments=1, angle=30)
     return assemble(name, low), None
 
@@ -517,7 +520,8 @@ def rune_slab(name: str, seed: int = 13, size=(8.0, 6.0, 1.2)):
     return assemble(name, low), None
 
 
-def stairs(name: str, seed: int = 15, width: float = 16.0, steps: int = 3, rise: float = 0.6, run: float = 1.8):
+def stairs(name: str, seed: int = 15, width: float = 16.0, steps: int = 3, rise: float = 0.6, run: float = 1.8,
+           step_mat: str = "calcaire_taille", cheek_mat: str = "ruine"):
     """Escalier de pierre : marches faites de plusieurs blocs taillés, joues latérales, montée vers +Y."""
     M = mats()
     r = random.Random(seed)
@@ -528,11 +532,11 @@ def stairs(name: str, seed: int = 15, width: float = 16.0, steps: int = 3, rise:
             w = min(r.uniform(3.0, 5.0), width / 2 - x)
             items.append((bx(f"{name}_marche{k}_{len(items)}", (w - 0.08, run * (steps - k), rise),
                              (x + w / 2, k * run / 2 + r.uniform(-0.05, 0.05), k * rise),
-                             (0, 0, r.uniform(-0.8, 0.8))), M["calcaire_taille"]))
+                             (0, 0, r.uniform(-0.8, 0.8))), M[step_mat]))
             x += w
     for side in (-1, 1):
         items.append((bx(f"{name}_joue{side}", (1.6, run * steps, rise * steps + 0.5),
-                         (side * (width / 2 + 0.8), 0, 0), taper=(1, 0.75), shift=(0, run * 0.6)), M["ruine"]))
+                         (side * (width / 2 + 0.8), 0, 0), taper=(1, 0.75), shift=(0, run * 0.6)), M[cheek_mat]))
     low = finish(items, bevel=0.12, max_bevel=0.2, segments=2, angle=30)
     return assemble(name, low), None
 
@@ -700,12 +704,26 @@ BUILDERS = {
 }
 
 
+# Décors par monde. La Prairie est ici ; chaque autre monde a son module environment_<monde>.py qui ajoute ses
+# décors (préfixe « <Monde>_ ») à BUILDERS et sa liste à WORLDS quand on l'importe.
+WORLDS: dict[str, list[str]] = {"Prairie": list(BUILDERS)}
+
+
+def catalog(world: str = "Prairie") -> list[str]:
+    """Noms des décors d'un monde (charge son module au besoin)."""
+    if world not in WORLDS:
+        importlib.import_module(f"environment_{world.lower()}")
+    return WORLDS[world]
+
+
 def build(asset: str):
     """Construit l'asset du catalogue : renvoie (low, high | None)."""
+    if asset not in BUILDERS and "_" in asset:
+        catalog(asset.split("_", 1)[0])
     fn, _ = BUILDERS[asset]
     return fn(asset)
 
 
 __all__ = ["mats", "bx", "hull", "ring_sector", "finish", "assemble", "rock", "obsidian", "cliff", "tree", "mushroom",
            "grass_tuft", "ruin_wall", "arch", "totem", "rune_slab", "stairs", "crate", "barrel", "signpost",
-           "palisade", "bridge", "BUILDERS", "build"]
+           "palisade", "bridge", "BUILDERS", "WORLDS", "catalog", "build"]

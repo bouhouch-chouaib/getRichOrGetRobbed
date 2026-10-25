@@ -1,0 +1,57 @@
+{
+  "asset": "Desert_Brasero",
+  "triangles": 1264,
+  "vertices": 650,
+  "size_studs": [
+    3.362,
+    3.198,
+    4.2
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 47.8,
+  "source_materials": [
+    "M_Argile",
+    "M_Fer",
+    "M_OrDecor"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0168,
+    "max_ray": 0.042,
+    "ao_distance": 0.504,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Desert_Brasero_Color.png",
+    "Roughness": "Desert_Brasero_Roughness.png",
+    "Metalness": "Desert_Brasero_Metalness.png",
+    "Normal": "Desert_Brasero_Normal.png",
+    "AO": "Desert_Brasero_AO.png"
+  },
+  "exports": [
+    "Desert_Brasero.fbx",
+    "Desert_Brasero.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Desert_Brasero (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Desert_Brasero_Color.png",
+      "NormalMap": "Desert_Brasero_Normal.png",
+      "RoughnessMap": "Desert_Brasero_Roughness.png",
+      "MetalnessMap": "Desert_Brasero_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 14.3
+}

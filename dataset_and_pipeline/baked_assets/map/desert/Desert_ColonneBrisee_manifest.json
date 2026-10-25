@@ -1,0 +1,56 @@
+{
+  "asset": "Desert_ColonneBrisee",
+  "triangles": 1668,
+  "vertices": 848,
+  "size_studs": [
+    12.039,
+    8.806,
+    8.905
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 47.3,
+  "source_materials": [
+    "M_GresStrateA",
+    "M_GresTaille",
+    "M_TurquoiseEmail"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0482,
+    "max_ray": 0.1204,
+    "ao_distance": 1.4446,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Desert_ColonneBrisee_Color.png",
+    "Roughness": "Desert_ColonneBrisee_Roughness.png",
+    "Metalness": "Desert_ColonneBrisee_Metalness.png",
+    "Normal": "Desert_ColonneBrisee_Normal.png",
+    "AO": "Desert_ColonneBrisee_AO.png"
+  },
+  "exports": [
+    "Desert_ColonneBrisee.fbx",
+    "Desert_ColonneBrisee.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Desert_ColonneBrisee (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Desert_ColonneBrisee_Color.png",
+      "NormalMap": "Desert_ColonneBrisee_Normal.png",
+      "RoughnessMap": "Desert_ColonneBrisee_Roughness.png",
+      "MetalnessMap": "Desert_ColonneBrisee_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 31.5
+}
