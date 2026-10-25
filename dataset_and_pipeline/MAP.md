@@ -206,6 +206,11 @@ Mammouth Glaçon, Narval Aurore). 17 décors dans `blender_tools/environment_gla
   « ice », matériau Ice de Roblox) ; pics de glace géants au loin, un module de glacier sur trois remplacé par des pics ;
   neige : soleil moins fort, exposition -0,2, saturation et contraste remontés (sinon tout est bleu pâle).
   `export_map_lot.py -- --world Glace` -> `Decors_Glace.fbx` (26,5 Mo).
-- Branchement prévu (après validation, import Studio en mode Édition) : `apply_map_look_glace.lua`, `MapDecor.Glace`,
-  bases `GlaceLook` (déjà dans `MapGenerator.DRESSINGS`). À proposer : saturation de l'air de la Glace 0,05 -> 0,12
-  (`shared/Worlds`), la neige paraît terne sinon.
+- **Branché dans Studio (25 oct., style validé par Chouaib)** : import de `Decors_Glace.fbx` (Édition),
+  `apply_map_look_glace.lua` -> 17 décors dans `ArtModels.Map` (74 pour les 4 mondes), 595 posés dans `MapDecor.Glace` +
+  lac gelé, 33 PointLight (lanternes, igloos) ; 98 / 98 portes et glaciers tournés vers le trou ; bases `GlaceLook`.
+- Vérifié en Play (solo, monde changé côté client) : à la Glace, GlaceLook visible (les 3 autres cachés), 33 lumières de
+  la Glace allumées et les 37 du Volcan éteintes, vieux cristaux retirés ; photos `qa_renders/map_roblox_glace_nuit.jpg`,
+  `map_roblox_glace_lac_jour.jpg`. Le lac (bleu pâle) se voyait à peine sur la neige : recoloré en bleu soutenu
+  (110, 190, 240), pas encore revu en Play.
+- À proposer : saturation de l'air de la Glace 0,05 -> 0,12 (`shared/Worlds`), la neige paraît terne sinon.
