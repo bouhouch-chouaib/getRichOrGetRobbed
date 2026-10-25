@@ -1,6 +1,7 @@
 --!strict
 -- StationLooks : habillage du tapis de course et du banc selon leur niveau (style briques à tenons).
--- 25 niveaux = 5 modèles (Config.Training.StationTiers) : Bois, Acier, Or, Cristal, Cosmique.
+-- 25 niveaux = 10 modèles (Config.Training.StationTiers, Training.ModelStarts) : Bois, Acier, Sport, Or, Jade, Cristal,
+-- Lave, Royal, Cosmique, Céleste.
 -- Dans un modèle, chaque niveau allume un voyant de plus ; au 5e, une étoile dorée coiffe la station.
 --
 -- La station garde ses pièces « utiles » créées par MapGenerator (Zone, Bar, Plate, Seat... marquées "Tint") :
@@ -19,7 +20,6 @@ local Config = require(ReplicatedStorage.Shared.Config)
 
 local StationLooks = {}
 
-local FLAT = CFrame.Angles(0, 0, math.pi / 2) -- cylindre couché à plat
 local OFF_LAMP = Color3.fromRGB(45, 45, 52)
 local GOLD = Color3.fromRGB(255, 205, 50)
 
@@ -46,31 +46,22 @@ local function block(name: string, size: Vector3, cframe: CFrame, color: Color3,
 	return part
 end
 
-local function neon(part: Part, transparency: number?): Part
-	part.Material = Enum.Material.Neon
+-- Pièce « allumée » (voyant, écran, étoile, cristal) : couleur vive mais SANS néon (Chouaib, 25 oct. : plus de néon sur
+-- les stations, ni cercle lumineux au sol, ni lumière ni étincelles autour).
+local function lit(part: Part, transparency: number?): Part
+	part.Material = Enum.Material.SmoothPlastic
 	part.Transparency = transparency or 0
 	part.CastShadow = false
 	return part
 end
 
--- Cercle lumineux au sol sous la station (anneau + disque plus pâle), comme les zones de la référence.
-local function groundCircle(origin: CFrame, diameter: number, color: Color3, parent: Instance)
-	local ring = block("GlowRing", Vector3.new(0.1, diameter, diameter), origin * CFrame.new(0, 0.07, 0) * FLAT, color, parent)
-	ring.Shape = Enum.PartType.Cylinder
-	neon(ring, 0.25)
-	local fill = block("GlowFill", Vector3.new(0.1, diameter - 1.6, diameter - 1.6), origin * CFrame.new(0, 0.1, 0) * FLAT, color:Lerp(Color3.new(1, 1, 1), 0.5), parent)
-	fill.Shape = Enum.PartType.Cylinder
-	neon(fill, 0.7)
-end
-
--- Rangée de voyants : `lit` allumés sur LevelsPerTier.
-local function lamps(origin: CFrame, spacing: number, lit: number, tier: Tier, parent: Instance)
-	local count = Config.Training.LevelsPerTier
+-- Rangée de voyants : `on` allumés sur `count` (les niveaux du modèle).
+local function lamps(origin: CFrame, spacing: number, on: number, count: number, tier: Tier, parent: Instance)
 	for index = 1, count do
 		local x = (index - (count + 1) / 2) * spacing
-		local lamp = block("Lamp", Vector3.new(0.7, 0.7, 0.4), origin * CFrame.new(x, 0, 0), if index <= lit then tier.Accent else OFF_LAMP, parent)
-		if index <= lit then
-			neon(lamp)
+		local lamp = block("Lamp", Vector3.new(0.7, 0.7, 0.4), origin * CFrame.new(x, 0, 0), if index <= on then tier.Accent else OFF_LAMP, parent)
+		if index <= on then
+			lit(lamp)
 		end
 	end
 end
@@ -78,7 +69,7 @@ end
 -- Étoile dorée (niveau max du modèle) : deux blocs croisés à 45°.
 local function star(origin: CFrame, parent: Instance)
 	for _, angle in ipairs({ 0, math.pi / 4 }) do
-		neon(block("Star", Vector3.new(1.6, 1.6, 0.5), origin * CFrame.Angles(0, 0, angle), GOLD, parent))
+		lit(block("Star", Vector3.new(1.6, 1.6, 0.5), origin * CFrame.Angles(0, 0, angle), GOLD, parent))
 	end
 end
 
@@ -99,37 +90,16 @@ local function crystal(origin: CFrame, height: number, color: Color3, parent: In
 	shard.Material = Enum.Material.Glass
 	shard.Transparency = 0.15
 	local core = block("CrystalCore", Vector3.new(0.6, height * 0.7, 0.6), shard.CFrame, color, parent)
-	neon(core)
+	lit(core)
 end
 
--- Halo de blocs (Cosmique) : un cercle vertical de petits cubes néon.
+-- Halo de blocs (Cosmique) : un cercle vertical de petits cubes.
 local function halo(origin: CFrame, radius: number, color: Color3, parent: Instance)
 	local count = 14
 	for index = 0, count - 1 do
 		local angle = index / count * math.pi * 2
-		neon(block("Halo", Vector3.new(0.8, 0.8, 0.8), origin * CFrame.new(math.cos(angle) * radius, math.sin(angle) * radius, 0) * CFrame.Angles(0, 0, angle), color, parent))
+		lit(block("Halo", Vector3.new(0.8, 0.8, 0.8), origin * CFrame.new(math.cos(angle) * radius, math.sin(angle) * radius, 0) * CFrame.Angles(0, 0, angle), color, parent))
 	end
-end
-
-local function glowEffects(anchor: BasePart, tier: Tier)
-	local light = Instance.new("PointLight")
-	light.Name = "StationLight"
-	light.Range = 16
-	light.Brightness = 1.6
-	light.Color = tier.Accent
-	light.Parent = anchor
-	local sparkles = Instance.new("ParticleEmitter")
-	sparkles.Name = "StationSparkles"
-	sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparkles.Rate = 16
-	sparkles.Lifetime = NumberRange.new(0.8, 1.6)
-	sparkles.Speed = NumberRange.new(2, 5)
-	sparkles.SpreadAngle = Vector2.new(30, 30)
-	sparkles.EmissionDirection = Enum.NormalId.Top
-	sparkles.Size = NumberSequence.new(0.6, 0)
-	sparkles.LightEmission = 1
-	sparkles.Color = ColorSequence.new(tier.Accent, tier.Trim or tier.Accent)
-	sparkles.Parent = anchor
 end
 
 local function authoredStation(name: string, origin: CFrame, tier: Tier, parent: Instance): Model?
@@ -158,8 +128,7 @@ end
 -- Tapis de course (repère : sol, -Z vers la console)
 ----------------------------------------------------------------------
 
-local function treadmill(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Model)
-	groundCircle(origin, 27, tier.Accent, look)
+local function treadmill(origin: CFrame, tier: Tier, rank: number, count: number, tierIndex: number, look: Model)
 	local authored = authoredStation("Treadmill_" .. tier.Name, origin, tier, look)
 	if not authored then
 		block("Deck", Vector3.new(11.2, 0.5, 21), origin * CFrame.new(0, 0.25, 0), tier.Dark, look)
@@ -176,16 +145,16 @@ local function treadmill(origin: CFrame, tier: Tier, rank: number, tierIndex: nu
 		block("Console", Vector3.new(12.6, 1.8, 2.2), origin * CFrame.new(0, 6.3, -9.6), tier.Main, look)
 		block("ConsoleBase", Vector3.new(12.8, 0.5, 2.4), origin * CFrame.new(0, 5.2, -9.6), tier.Dark, look)
 	end
-	neon(block("Screen", Vector3.new(5, 0.9, 0.2), origin * CFrame.new(0, 6.05, -8.45), tier.Accent, look))
-	lamps(origin * CFrame.new(0, 6.95, -8.4), 1.3, rank, tier, look)
-	lamps(origin * CFrame.new(0, 6.95, -10.8), 1.3, rank, tier, look) -- visibles aussi du côté du trou noir
+	lit(block("Screen", Vector3.new(5, 0.9, 0.2), origin * CFrame.new(0, 6.05, -8.45), tier.Accent, look))
+	lamps(origin * CFrame.new(0, 6.95, -8.4), 1.3, rank, count, tier, look)
+	lamps(origin * CFrame.new(0, 6.95, -10.8), 1.3, rank, count, tier, look) -- visibles aussi du côté du trou noir
 	-- Chevrons lumineux sur le tapis (Cristal et au-delà).
 	if tierIndex >= 4 then
 		for index = 0, 3 do
 			local z = -6 + index * 4.5
 			for _, side in ipairs({ -1, 1 }) do
 				local chevron = block("Chevron", Vector3.new(3.2, 0.1, 0.6), origin * CFrame.new(side * 1.4, 0.64, z) * CFrame.Angles(0, side * math.rad(35), 0), tier.Accent, look)
-				neon(chevron)
+				lit(chevron)
 			end
 		end
 	end
@@ -200,10 +169,10 @@ local function treadmill(origin: CFrame, tier: Tier, rank: number, tierIndex: nu
 	if tierIndex == 5 and not authored then
 		halo(origin * CFrame.new(0, 10.5, 9.6), 5.2, tier.Accent, look)
 		for _, side in ipairs({ -1, 1 }) do
-			neon(block("TrimLine", Vector3.new(0.3, 0.3, 21.4), origin * CFrame.new(side * 6.45, 1.5, 0), tier.Trim or tier.Accent, look))
+			lit(block("TrimLine", Vector3.new(0.3, 0.3, 21.4), origin * CFrame.new(side * 6.45, 1.5, 0), tier.Trim or tier.Accent, look))
 		end
 	end
-	if rank == Config.Training.LevelsPerTier then
+	if rank == count then
 		local starY = if authored then authored:GetAttribute("StarY") else nil
 		star(origin * CFrame.new(0, if type(starY) == "number" then starY else 8.2, -9.6), look)
 	end
@@ -223,8 +192,7 @@ end
 -- Modèle fait à la main (ReplicatedStorage.ArtModels.Bench_<Niveau>, 22 oct.) : il remplace le banc en blocs (banc,
 -- pieds, montants, panneau, haltères, porte-disques, décors). Le jeu garde la barre et les disques (animés pendant le
 -- développé couché), le cercle, les voyants et l'étoile. Renvoie le modèle s'il existe.
-local function bench(origin: CFrame, tier: Tier, rank: number, tierIndex: number, look: Model): Model?
-	groundCircle(origin, 22, tier.Accent, look)
+local function bench(origin: CFrame, tier: Tier, rank: number, count: number, tierIndex: number, look: Model): Model?
 	local authored = authoredStation("Bench_" .. tier.Name, origin, tier, look)
 	if not authored then
 		for _, side in ipairs({ -1, 1 }) do
@@ -254,8 +222,8 @@ local function bench(origin: CFrame, tier: Tier, rank: number, tierIndex: number
 			halo(origin * CFrame.new(0, 9.4, -6.2), 4.6, tier.Accent, look)
 		end
 	end
-	lamps(origin * CFrame.new(0, 1.85, 7.2), 1.3, rank, tier, look)
-	if rank == Config.Training.LevelsPerTier then
+	lamps(origin * CFrame.new(0, 1.85, 7.2), 1.3, rank, count, tier, look)
+	if rank == count then
 		local starY = if authored then authored:GetAttribute("StarY") else nil
 		star(origin * CFrame.new(0, if type(starY) == "number" then starY else 3.2, 7.2), look)
 	end
@@ -274,7 +242,7 @@ local function recolor(model: Model, tier: Tier, tierIndex: number)
 				part.Color = if tierIndex >= 3 then GOLD else Color3.fromRGB(205, 208, 215)
 			elseif part.Name == "Plate" then
 				part.Color = if tierIndex == 1 then Color3.fromRGB(35, 35, 40) else tier.Accent
-				part.Material = if tierIndex >= 4 then Enum.Material.Neon else Enum.Material.Plastic
+				part.Material = Enum.Material.Plastic
 			elseif part:GetAttribute("Tint") then
 				part.Color = if part.Name == "Seat" then tier.Belt else tier.Main
 			end
@@ -333,18 +301,18 @@ function StationLooks.Apply(model: Model, kind: string, level: number)
 		return
 	end
 
-	local tier, rank = Config.GetStationTier(level)
+	local tier, rank, count = Config.GetStationTier(level)
 	local tierIndex = table.find(Config.Training.StationTiers, tier) or 1
 	local look = Instance.new("Model")
 	look.Name = "Look"
 	local origin = originOf(zone)
 	if kind == "Treadmill" then
 		-- Construit à la taille d'origine puis réduit autour du sol (Config.Training.TreadmillScale).
-		treadmill(origin, tier, rank, tierIndex, look)
+		treadmill(origin, tier, rank, count, tierIndex, look)
 		look.WorldPivot = origin
 		look:ScaleTo(Config.Training.TreadmillScale)
 		beltArrows(zone, tier)
-	elseif bench(origin, tier, rank, tierIndex, look) then
+	elseif bench(origin, tier, rank, count, tierIndex, look) then
 		-- Le modèle a son propre banc et ses montants : ceux en blocs de MapGenerator sont cachés (la barre et les
 		-- disques restent, ils bougent pendant le développé couché).
 		for _, part in ipairs(model:GetChildren()) do
@@ -355,9 +323,6 @@ function StationLooks.Apply(model: Model, kind: string, level: number)
 		end
 	end
 	recolor(model, tier, tierIndex)
-	if tier.Glow then
-		glowEffects(zone, tier)
-	end
 	look.Parent = model
 end
 

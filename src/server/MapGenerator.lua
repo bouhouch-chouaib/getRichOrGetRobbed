@@ -109,6 +109,46 @@ local function makeGhost(part: BasePart)
 	part.CanQuery = false
 end
 
+-- Objets faits à la main (Blender, 25 oct.) : ReplicatedStorage.ArtModels.<name> (Shop, FusionMachine, EvolutionCapsule),
+-- pivot au sol au centre, -Z vers l'avant du repère. Ses pièces sont copiées dans `model` sans collision ; le jeu garde
+-- des volumes invisibles pour les collisions, les bulles [E] et les panneaux. Renvoie false s'il n'existe pas.
+local function addArt(name: string, cframe: CFrame, model: Model): boolean
+	local folder = ReplicatedStorage:FindFirstChild("ArtModels")
+	local source = folder and folder:FindFirstChild(name)
+	if not source or not source:IsA("Model") then
+		return false
+	end
+	local pivot = source:GetPivot()
+	for _, descendant in ipairs(source:GetDescendants()) do
+		if descendant:IsA("BasePart") and descendant ~= source.PrimaryPart then
+			local copy = descendant:Clone()
+			for _, child in ipairs(copy:GetChildren()) do
+				if not child:IsA("SurfaceAppearance") then
+					child:Destroy()
+				end
+			end
+			copy.CFrame = cframe * pivot:ToObjectSpace(descendant.CFrame)
+			copy.Anchored = true
+			makeGhost(copy)
+			copy.Parent = model
+		end
+	end
+	return true
+end
+
+-- Volume invisible (collision, ancre d'une bulle [E] ou d'un panneau) sous un objet fait à la main.
+local function invisible(name: string, size: Vector3, cframe: CFrame, parent: Instance): Part
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Anchored = true
+	part.Size = size
+	part.CFrame = cframe
+	part.Transparency = 1
+	part.CastShadow = false
+	part.Parent = parent
+	return part
+end
+
 -- Texte des panneaux dans le décor : police cartoon + gros contour noir (style Steal a Brainrot).
 local function styleSignText(label: TextLabel, color: Color3)
 	label.FontFace = Typography.Face
@@ -393,6 +433,7 @@ local DRESSINGS: { [string]: { Fence: string, Gate: string, Stairs: string } } =
 	Glace = { Fence = "Glace_Barriere", Gate = "Glace_PorteGlace", Stairs = "Glace_Escalier" },
 	Abysses = { Fence = "Abysses_Muret", Gate = "Abysses_PorteAtlante", Stairs = "Abysses_Escalier" },
 	Cosmos = { Fence = "Cosmos_Barriere", Gate = "Cosmos_PorteStellaire", Stairs = "Cosmos_Escalier" },
+	Divin = { Fence = "Divin_Balustrade", Gate = "Divin_PorteCeleste", Stairs = "Divin_Escalier" },
 }
 
 local function createDressing(origin: CFrame, top: number, base: Model, worldId: string, library: Instance)
@@ -611,22 +652,6 @@ local function createBench(cframe: CFrame, outward: number, base: Model)
 	model.Parent = base
 end
 
--- Cercle lumineux au sol devant une machine (boutique, fusion).
-local function createGlowCircle(cframe: CFrame, diameter: number, color: Color3, parent: Instance)
-	local ring = makePart("GlowRing", Vector3.new(0.1, diameter, diameter), cframe * CFrame.new(0, 0.05, 0) * FLAT, color, parent)
-	ring.Shape = Enum.PartType.Cylinder
-	ring.Material = Enum.Material.Neon
-	ring.Transparency = 0.25
-	ring.CastShadow = false
-	makeGhost(ring)
-	local fill = makePart("GlowFill", Vector3.new(0.1, diameter - 1.4, diameter - 1.4), cframe * CFrame.new(0, 0.08, 0) * FLAT, color:Lerp(Color3.new(1, 1, 1), 0.5), parent)
-	fill.Shape = Enum.PartType.Cylinder
-	fill.Material = Enum.Material.Neon
-	fill.Transparency = 0.7
-	fill.CastShadow = false
-	makeGhost(fill)
-end
-
 -- Grand panneau flottant au-dessus d'un bâtiment (boutique, fusion).
 local function createTitleSign(adornee: BasePart, title: string, color: Color3, height: number, icon: string?)
 	local sign = Instance.new("BillboardGui")
@@ -668,6 +693,16 @@ end
 local function createShop(cframe: CFrame, parent: Instance)
 	local model = Instance.new("Model")
 	model.Name = "Shop"
+	if addArt("Shop", cframe, model) then
+		local counter = invisible("Counter", Vector3.new(12, 3.5, 3), cframe * CFrame.new(0, 1.75, -1.5), model)
+		invisible("BackWall", Vector3.new(12, 8, 0.8), cframe * CFrame.new(0, 4, 4), model)
+		local hitbox = invisible("Hitbox", Vector3.new(12, 1, 1), cframe * CFrame.new(0, 2, -3.5), model)
+		makeGhost(hitbox)
+		addWindowPrompt(hitbox, "Boutique", "Shop")
+		createTitleSign(counter, "BOUTIQUE", Color3.fromRGB(255, 210, 60), 9.5, "Shop")
+		model.Parent = parent
+		return
+	end
 	local wood = COLORS.WoodRail
 	local dark = COLORS.WoodPost
 
@@ -706,6 +741,17 @@ end
 local function createFusionMachine(cframe: CFrame, parent: Instance)
 	local model = Instance.new("Model")
 	model.Name = "FusionMachine"
+	if addArt("FusionMachine", cframe, model) then
+		-- sans néon, sans lumière ni étincelles (Chouaib, 25 oct.)
+		local platform = invisible("Platform", Vector3.new(1, 12, 12), cframe * CFrame.new(0, 0.5, 0.5) * FLAT, model)
+		platform.Shape = Enum.PartType.Cylinder
+		invisible("Body", Vector3.new(11, 10, 4.4), cframe * CFrame.new(0, 6, 2), model)
+		local console = invisible("Console", Vector3.new(5, 3, 2), cframe * CFrame.new(0, 1.5, -3.5), model)
+		addWindowPrompt(console, "Machine de fusion", "Fusion")
+		createTitleSign(console, "FUSION", Color3.fromRGB(220, 140, 255), 14, "Fusion")
+		model.Parent = parent
+		return
+	end
 	local metal = Color3.fromRGB(150, 155, 170)
 	local darkMetal = Color3.fromRGB(70, 72, 85)
 	local glow = Color3.fromRGB(200, 90, 255)
@@ -787,8 +833,7 @@ local function createKiosks(map: Folder)
 		makePart("Floor", Vector3.new(36, 0.2, 18), origin * CFrame.new(0, 0.1, 0.5), COLORS.Stone, kiosk)
 		createShop(origin * CFrame.new(-9, 0.2, 0), kiosk)
 		createFusionMachine(origin * CFrame.new(9, 0.2, 0), kiosk)
-		createGlowCircle(origin * CFrame.new(-9, 0.2, -6), 9, Color3.fromRGB(90, 235, 70), kiosk)
-		createGlowCircle(origin * CFrame.new(9, 0.2, -6.5), 9, Color3.fromRGB(200, 100, 255), kiosk)
+		-- (plus de cercles lumineux au sol devant les machines : Chouaib, 25 oct.)
 		kiosk.Parent = folder
 	end
 end
@@ -929,6 +974,36 @@ local function createEvolutionCapsule(origin: CFrame, base: Model)
 	local pad = piece("EvolutionMachine", Vector3.new(11, 1.2, 11), CFrame.new(0, 0.6, 0), METAL_DARK)
 	pad.CanCollide = true
 	pad.CanQuery = true -- la bulle [E] du client s'y accroche
+	if addArt("EvolutionCapsule", cframe, model) then
+		-- Capsule en briques (Blender, 25 oct.), sans néon : le jeu garde le socle (invisible, bulle [E]), la vitre où
+		-- l'on voit l'œuf et l'écran ÉVOLUTION.
+		pad.Transparency = 1
+		local artGlass = piece("StasisGlass", Vector3.new(9.5, 6.4, 6.4), CFrame.new(0, 2.4 + 4.75, 0) * FLAT, Color3.fromRGB(200, 245, 255))
+		artGlass.Shape = Enum.PartType.Cylinder
+		artGlass.Material = Enum.Material.Glass
+		artGlass.Transparency = 0.6
+		local consoleBase = piece("ConsoleBase", Vector3.new(5, 3, 2), CFrame.new(0, 1.5, -6.6), METAL_DARK)
+		consoleBase.Transparency = 1
+		consoleBase.CanCollide = true
+		local artScreen = piece("ConsoleScreen", Vector3.new(4.6, 2.6, 0.4), CFrame.new(0, 3.6, -6.9) * CFrame.Angles(math.rad(-35), 0, 0), Color3.fromRGB(20, 40, 60))
+		local artGui = Instance.new("SurfaceGui")
+		artGui.Face = Enum.NormalId.Front
+		artGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		artGui.PixelsPerStud = 40
+		artGui.LightInfluence = 0
+		artGui.MaxDistance = 120
+		local artLabel = Instance.new("TextLabel")
+		artLabel.Name = "Label"
+		artLabel.Size = UDim2.fromScale(1, 1)
+		artLabel.BackgroundTransparency = 1
+		artLabel.Text = "ÉVOLUTION"
+		styleSignText(artLabel, STASIS)
+		artLabel.Parent = artGui
+		artGui.Parent = artScreen
+		model.PrimaryPart = pad
+		model.Parent = base
+		return
+	end
 	for _, corner in ipairs({ Vector2.new(-1, -1), Vector2.new(1, -1), Vector2.new(-1, 1), Vector2.new(1, 1) }) do
 		piece("Foot", Vector3.new(2, 0.8, 2), CFrame.new(corner.X * 4.6, 1.4, corner.Y * 4.6), STASIS):SetAttribute("Light", true)
 	end

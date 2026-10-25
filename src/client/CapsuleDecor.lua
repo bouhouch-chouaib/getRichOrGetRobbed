@@ -46,7 +46,8 @@ local function block(folder: Instance, name: string, size: Vector3, cf: CFrame, 
 	local part = Instance.new("Part")
 	part.Name = name
 	part.Size, part.CFrame, part.Color = size, cf, color
-	part.Material = if neon then Enum.Material.Neon else (material or Enum.Material.Plastic)
+	-- plus de néon sur la capsule (Chouaib, 25 oct.) : les pièces « vives » restent en plastique lisse coloré
+	part.Material = if neon then Enum.Material.SmoothPlastic else (material or Enum.Material.Plastic)
 	part.TopSurface = Enum.SurfaceType.Studs
 	part.Anchored, part.CanCollide, part.CanQuery, part.CanTouch, part.CastShadow = true, false, false, false, false
 	part.Parent = folder

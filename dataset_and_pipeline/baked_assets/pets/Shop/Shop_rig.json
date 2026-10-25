@@ -1,0 +1,65 @@
+{
+  "pet": "Shop",
+  "model_height_blender": 10.6963,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Stall": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1000,
+      "center": [
+        0.0,
+        0.515,
+        5.15
+      ],
+      "size": [
+        12.8,
+        7.83,
+        10.3
+      ],
+      "pivot": null
+    },
+    "Goods": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1752,
+      "center": [
+        -0.39,
+        0.76718,
+        5.61
+      ],
+      "size": [
+        10.08,
+        5.92564,
+        3.98
+      ],
+      "pivot": null
+    },
+    "Awning": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 380,
+      "center": [
+        0.0,
+        0.33128,
+        9.11672
+      ],
+      "size": [
+        14.0,
+        9.11255,
+        3.15913
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.005609
+}

@@ -98,9 +98,9 @@ for _, station in ipairs(STATIONS) do
 		local level = levelOf(id)
 		refreshPrompt(id)
 		-- Nouveau modèle débloqué (niveaux 6, 11, 16, 21) : on le fête.
-		if level > previous and level > 1 and (level - 1) % Config.Training.LevelsPerTier == 0 then
+		if level > previous and Config.IsNewStationModel(level) then
 			local tier = Config.GetStationTier(level)
-			Toast.show(string.format("%s : MODÈLE %s !", TextFormat.upper(station.title), TextFormat.upper(tier.Name)), tier.Accent)
+			Toast.show(string.format("%s : MODÈLE %s !", TextFormat.upper(station.title), TextFormat.upper(tier.Title or tier.Name)), tier.Accent)
 		end
 		previous = level
 	end)

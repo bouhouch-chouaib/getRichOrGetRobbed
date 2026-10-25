@@ -203,7 +203,7 @@ local function render(station: Station, level: number, owned: boolean)
 		end
 		if station.label then
 			local tier = Config.GetStationTier(level)
-			station.label.Text = string.format("%s\nNIVEAU %d • %s • XP x%s", station.kind.title, level, TextFormat.upper(tier.Name), NumberFormat.short(Config.GetStationRate(level)))
+			station.label.Text = string.format("%s\nNIVEAU %d • %s • XP x%s", station.kind.title, level, TextFormat.upper(tier.Title or tier.Name), NumberFormat.short(Config.GetStationRate(level)))
 		end
 	end
 	station.shownOwned = owned

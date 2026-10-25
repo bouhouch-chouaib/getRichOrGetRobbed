@@ -1,0 +1,65 @@
+{
+  "pet": "Treadmill_Cristal",
+  "model_height_blender": 9.7,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Frame": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1060,
+      "center": [
+        0.0,
+        -0.18,
+        0.75
+      ],
+      "size": [
+        12.22,
+        22.76,
+        1.5
+      ],
+      "pivot": null
+    },
+    "Console": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1864,
+      "center": [
+        -0.12964,
+        -7.5,
+        5.0
+      ],
+      "size": [
+        11.66073,
+        7.3,
+        7.9
+      ],
+      "pivot": null
+    },
+    "Decor": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1196,
+      "center": [
+        0.0,
+        -0.65113,
+        4.85
+      ],
+      "size": [
+        13.98,
+        20.80258,
+        9.7
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.006186
+}

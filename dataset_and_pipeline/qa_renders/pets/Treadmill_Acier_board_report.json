@@ -1,0 +1,105 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Treadmill_Acier_board.png",
+  "layout": {
+    "rows": [
+      "Treadmill_Acier cuit, 2 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Treadmill_Acier cuit, 2 pièces (repos)",
+      "kind": "baked",
+      "triangles": 2924,
+      "views": {
+        "face": {
+          "coverage": 0.145,
+          "lum_mean": 0.539,
+          "lum_std": 0.181,
+          "detail": 0.0451,
+          "saturation": 0.092,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.174,
+          "lum_mean": 0.511,
+          "lum_std": 0.179,
+          "detail": 0.0671,
+          "saturation": 0.1,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.118,
+          "lum_mean": 0.508,
+          "lum_std": 0.171,
+          "detail": 0.0692,
+          "saturation": 0.135,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.395,
+          "lum_mean": 0.574,
+          "lum_std": 0.167,
+          "detail": 0.028,
+          "saturation": 0.068,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 2924,
+      "views": {
+        "face": {
+          "coverage": 0.145,
+          "lum_mean": 0.539,
+          "lum_std": 0.181,
+          "detail": 0.0451,
+          "saturation": 0.092,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.174,
+          "lum_mean": 0.511,
+          "lum_std": 0.179,
+          "detail": 0.0671,
+          "saturation": 0.1,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.118,
+          "lum_mean": 0.508,
+          "lum_std": 0.171,
+          "detail": 0.0692,
+          "saturation": 0.135,
+          "flags": []
+        },
+        "detail": {
+          "coverage": 0.395,
+          "lum_mean": 0.574,
+          "lum_std": 0.167,
+          "detail": 0.028,
+          "saturation": 0.068,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 30.1
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

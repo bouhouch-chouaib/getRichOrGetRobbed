@@ -1,0 +1,63 @@
+{
+  "asset": "Bench_Jade_Corps",
+  "triangles": 4816,
+  "vertices": 2550,
+  "size_studs": [
+    12.241,
+    13.3,
+    8.141
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 45.6,
+  "source_materials": [
+    "M_Bench_Jade_high_accent",
+    "M_Bench_Jade_high_caoutchouc",
+    "M_Bench_Jade_high_chrome_brosse",
+    "M_Bench_Jade_high_coussin",
+    "M_Bench_Jade_high_couture",
+    "M_Bench_Jade_high_embleme",
+    "M_Bench_Jade_high_jade",
+    "M_Bench_Jade_high_laque",
+    "M_Bench_Jade_high_laque_fonce",
+    "M_Bench_Jade_high_lisere",
+    "M_Bench_Jade_high_plastique_noir"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.1995,
+    "max_ray": 0.4987,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "Bench_Jade_Corps_Color.png",
+    "Roughness": "Bench_Jade_Corps_Roughness.png",
+    "Metalness": "Bench_Jade_Corps_Metalness.png",
+    "Normal": "Bench_Jade_Corps_Normal.png",
+    "AO": "Bench_Jade_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "Bench_Jade_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Bench_Jade_Corps_Color.png",
+      "NormalMap": "Bench_Jade_Corps_Normal.png",
+      "RoughnessMap": "Bench_Jade_Corps_Roughness.png",
+      "MetalnessMap": "Bench_Jade_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 58.9
+}

@@ -23,7 +23,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-for p in (HERE, HERE / "pets"):
+for p in (HERE, HERE / "pets", HERE / "props"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 os.environ.setdefault("GRGR_PIPELINE_ROOT", str(ROOT))

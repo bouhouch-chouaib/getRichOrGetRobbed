@@ -1,0 +1,65 @@
+{
+  "pet": "Bench_Acier",
+  "model_height_blender": 6.5414,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Bench": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 636,
+      "center": [
+        -0.0,
+        1.215,
+        1.25118
+      ],
+      "size": [
+        3.8,
+        9.63,
+        2.55764
+      ],
+      "pivot": null
+    },
+    "Rack": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 2608,
+      "center": [
+        0.0,
+        -3.3,
+        3.2293
+      ],
+      "size": [
+        7.6,
+        4.6,
+        6.5414
+      ],
+      "pivot": null
+    },
+    "Weights": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1540,
+      "center": [
+        -0.10437,
+        5.56379,
+        2.125
+      ],
+      "size": [
+        12.24127,
+        4.27242,
+        4.25
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.009172
+}

@@ -415,10 +415,16 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   d'origine puis `ScaleTo` autour du sol) suivent. Flèches sur la bande (Texture « BeltArrows » sur la Zone, image
   `assets/textures/belt_arrow.png`, couleur du niveau) qui défilent vers l'arrière (`client/TreadmillBelt`), vite quand
   quelqu'un court.
-- Station : `ArtModels.Treadmill_<Niveau>` (Bois, Acier, Or, Cristal, Cosmique), à la taille d'origine (le code réduit),
-  pivot = sol au centre, -Z vers la console. Les MeshParts « Main » / « Dark » prennent les couleurs du modèle de niveau, les
-  autres gardent les leurs (néon, verre réglés dans le modèle). `server/StationLooks` garde le cercle, l'écran, les voyants
-  et l'étoile (hauteur : attribut `StarY` du modèle) ; plus de portique / cristaux / halo en blocs quand le modèle existe.
+- Station : `ArtModels.Treadmill_<Modèle>` / `Bench_<Modèle>`, **10 modèles sur les 25 niveaux** (26 oct., Chouaib : « 10
+  tapis tous plus spectaculaires ») : Bois, Acier, Sport, Or, Jade, Cristal, Lave, Royal, Cosmique, Céleste
+  (`Config.Training.StationTiers`, 1er niveau de chaque modèle dans `Training.ModelStarts` : 1, 3, 6, 8, 11, 13, 16, 18,
+  21, 23 ; prix et vitesses d'entraînement inchangés). Machines réalistes en briques sans néon (Blender,
+  `blender_tools/props/_station.py`) : tapis avec capot moteur, montants coudés, console penchée et poignées ; banc plat
+  avec râtelier à crochets en J, pied en T, arbre à disques ; le décor du modèle s'y greffe (bandes de course, couronnes,
+  cristaux, flammes, bannières, planète et réacteurs, ailes d'ange et auréole), jamais de portique derrière. À la taille
+  d'origine (le code réduit le tapis), pivot = sol au centre, -Z vers la console. `server/StationLooks` garde l'écran, les
+  voyants (un par niveau du modèle) et l'étoile du dernier niveau du modèle (hauteur : attribut `StarY`), sans néon, sans
+  cercle lumineux au sol ni lumière / étincelles.
 
 ## Familiers en briques LEGO et démarches propres (25 oct., `shared/PetGaits`)
 
@@ -598,7 +604,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   - `ItemInteraction` : ramassage / lancer / lâcher (autorité serveur).
   - `BlackholeController` : consommation, dôme répulsif, récompenses.
   - `TrainingController` : stations tapis (Vitesse) et banc (Force), niveaux, XP, panneaux « Amélioration ».
-  - `StationLooks` : modèle du tapis et du banc selon le niveau (5 modèles × 5 niveaux).
+  - `StationLooks` : modèle du tapis et du banc selon le niveau (10 modèles sur 25 niveaux, `Config.GetStationTier`).
   - `LeaderboardController` : tableau « LES PLUS RICHES » dans l'arène (top 10 de tous les serveurs, `Config.Leaderboard`).
     Chaque minute : écrit l'argent des joueurs dans l'OrderedDataStore `RichestBoard_v2` (valeur = log10(argent + 1) × 10¹²,
     pour ranger les très grands nombres dans un entier) puis relit le top. Affichage seulement : la vraie sauvegarde reste

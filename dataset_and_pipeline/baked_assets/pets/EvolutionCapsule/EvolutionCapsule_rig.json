@@ -1,0 +1,84 @@
+{
+  "pet": "EvolutionCapsule",
+  "model_height_blender": 18.8,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Base": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 632,
+      "center": [
+        0.0,
+        -0.0,
+        1.2125
+      ],
+      "size": [
+        11.2,
+        11.2,
+        2.425
+      ],
+      "pivot": null
+    },
+    "Frame": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1688,
+      "center": [
+        0.0,
+        0.0,
+        7.1
+      ],
+      "size": [
+        10.7,
+        8.25188,
+        10.6
+      ],
+      "pivot": null
+    },
+    "Top": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 616,
+      "center": [
+        0.0,
+        0.0,
+        15.3375
+      ],
+      "size": [
+        8.77686,
+        8.77686,
+        6.925
+      ],
+      "pivot": null
+    },
+    "Console": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 420,
+      "center": [
+        0.0,
+        -5.55,
+        1.68
+      ],
+      "size": [
+        5.4,
+        4.5,
+        3.36
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.003191
+}

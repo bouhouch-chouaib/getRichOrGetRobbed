@@ -202,6 +202,14 @@ rareté, sans néon, sans lumière ni étincelles dans la couveuse (`client/Eggs
 rareté, 0 néon / lumière / particule), éclosion d'un Commun (5 morceaux qui s'écartent puis s'effacent), sans erreur.
 Œufs et familiers de test retirés de la sauvegarde. Pas vu : capsule d'évolution, fenêtres, téléphone.
 
+**26 oct. : objets annexes refaits en briques, sans néon** (Blender, `blender_tools/props/`, lot `Lot09_Objets`) :
+boutique (échoppe à auvent rayé), machine de fusion (cuves de cristal, chambre centrale), capsule d'évolution (la vitre,
+l'écran et la bulle restent faits par le jeu), et **10 tapis + 10 bancs** réalistes de plus en plus spectaculaires (voir
+GDD « Station »). `server/MapGenerator` (`addArt` + volumes invisibles pour collisions, bulles et panneaux ; plus de
+cercles lumineux devant les kiosques), `server/StationLooks` (sans néon), `client/CapsuleDecor` (sans néon), `Config`
+(10 modèles, `GetStationTier` -> modèle, rang, nombre de niveaux). Branchement : `tools/make_props_wire.py` ->
+`ArtModels.<Id>`. Analyse + 10 tests OK ; **pas encore importés ni vus en jeu**.
+
 **15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, en argent du jeu seulement) :
 les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`, mêmes règles que [E]). Vérifié en jeu (solo) :
 achat de 3 niveaux, objet attiré depuis 9 studs.

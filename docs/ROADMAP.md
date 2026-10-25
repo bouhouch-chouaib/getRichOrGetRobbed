@@ -76,7 +76,7 @@
 
 ### Progression
 - Vitesse et Force par niveaux jusqu'à 60, +12 % d'XP par niveau.
-- Tapis et banc : 25 niveaux, 5 modèles (bois, acier, or, cristal, cosmique), ×1 à ×43, panneau « Amélioration » à côté.
+- Tapis et banc : 25 niveaux, 10 modèles (du bois au céleste, 26 oct.), ×1 à ×43, panneau « Amélioration » à côté.
 - Boutique à niveaux : Tapis/banc (500 $ → 104 milliards), Chance (2 000 $ → ~400 000 milliards), Sac à dos (25 000 $ → 1 600 milliards), Verrou renforcé (5 millions).
 
 ### Bases et vol

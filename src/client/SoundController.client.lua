@@ -120,7 +120,7 @@ for _, item in ipairs(Config.Shop) do
 		local last = numberAttribute("Upgrade_" .. item.Id)
 		player:GetAttributeChangedSignal("Upgrade_" .. item.Id):Connect(function()
 			local level = numberAttribute("Upgrade_" .. item.Id)
-			if level > last and level > 1 and (level - 1) % Config.Training.LevelsPerTier == 0 and ready() then
+			if level > last and Config.IsNewStationModel(level) and ready() then
 				Sounds.play("ModelUnlock")
 			end
 			last = level

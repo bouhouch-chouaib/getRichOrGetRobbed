@@ -1,0 +1,65 @@
+{
+  "pet": "FusionMachine",
+  "model_height_blender": 11.2091,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Machine": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1144,
+      "center": [
+        0.0,
+        0.0,
+        5.60456
+      ],
+      "size": [
+        11.45611,
+        11.45611,
+        11.20912
+      ],
+      "pivot": null
+    },
+    "Tanks": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1552,
+      "center": [
+        0.0,
+        2.0,
+        5.57686
+      ],
+      "size": [
+        10.71074,
+        3.51074,
+        8.95372
+      ],
+      "pivot": null
+    },
+    "Console": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 632,
+      "center": [
+        0.0625,
+        -2.1,
+        2.2875
+      ],
+      "size": [
+        5.525,
+        5.4,
+        4.575
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.005353
+}

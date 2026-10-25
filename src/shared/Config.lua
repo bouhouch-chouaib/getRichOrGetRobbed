@@ -221,17 +221,18 @@ Config.Knockback = {
 -- Entraînement : Vitesse (tapis de course) et Force (banc de développé couché).
 -- XP pour passer du niveau L au niveau L+1 = XPBase × XPGrowth^L (progression longue).
 -- XP gagnée par seconde sur la station = StationRateGrowth^(niveau - 1) (Config.GetStationRate).
--- Stations : 25 niveaux, un nouveau modèle tous les LevelsPerTier niveaux (server/StationLooks), de plus en plus
--- épique. Dans un modèle, chaque niveau allume un voyant de plus ; le 5e ajoute une étoile au sommet.
+-- Stations : 25 niveaux et 10 modèles (Chouaib, 26 oct. : « 10 tapis tous plus spectaculaires ») : un nouveau modèle
+-- tous les 2 ou 3 niveaux (Training.ModelStarts, server/StationLooks). Dans un modèle, chaque niveau allume un voyant de
+-- plus ; son dernier niveau ajoute une étoile au sommet.
 export type StatConfig = { Base: number, PerLevel: number, MaxLevel: number }
 export type StationTier = {
-	Name: string,
+	Name: string, -- nom du modèle 3D : ReplicatedStorage.ArtModels.Treadmill_<Name> / Bench_<Name>
+	Title: string?, -- nom affiché (accents)
 	Main: Color3, -- couleur principale (châssis)
 	Dark: Color3, -- pièces sombres (pieds, dessous)
 	Accent: Color3, -- voyants, écran, cercle au sol
 	Belt: Color3, -- tapis / matelas
-	Trim: Color3?, -- liserés (modèles Cristal et Cosmique)
-	Glow: boolean?, -- lumière + étincelles
+	Trim: Color3?, -- liserés
 }
 Config.Training = {
 	Speed = { Base = 16, PerLevel = 0.5, MaxLevel = 60 } :: StatConfig, -- WalkSpeed
@@ -239,18 +240,24 @@ Config.Training = {
 	XPBase = 5,
 	XPGrowth = 1.12,
 	StationRateGrowth = 1.17, -- niveau 25 : x43 (l'ancien niveau 8 donnait x40)
-	LevelsPerTier = 5,
+	ModelStarts = { 1, 3, 6, 8, 11, 13, 16, 18, 21, 23 }, -- 1er niveau de chacun des 10 modèles
+	StationLevels = 25,
 	-- Tapis de course (19 oct.) : taille par rapport aux premières mesures (trop grand à côté de l'avatar) ; tout le tapis
 	-- (zone, décor, modèles de ReplicatedStorage.ArtModels) est réduit d'autant. Flèches sur la bande qui défilent vers
 	-- l'arrière (client/TreadmillBelt) : Length = studs entre deux flèches, vitesses en studs / s (à vide / quelqu'un court).
 	TreadmillScale = 0.6,
 	BeltArrows = { Image = "rbxassetid://131546186740141", Length = 2.4, IdleSpeed = 1.5, RunSpeed = 7, Transparency = 0.15 },
 	StationTiers = {
-		{ Name = "Bois", Main = Color3.fromRGB(216, 128, 42), Dark = Color3.fromRGB(120, 76, 40), Accent = Color3.fromRGB(90, 230, 80), Belt = Color3.fromRGB(55, 55, 62) },
-		{ Name = "Acier", Main = Color3.fromRGB(228, 232, 240), Dark = Color3.fromRGB(110, 118, 138), Accent = Color3.fromRGB(40, 150, 255), Belt = Color3.fromRGB(40, 44, 56) },
-		{ Name = "Or", Main = Color3.fromRGB(255, 198, 40), Dark = Color3.fromRGB(205, 112, 22), Accent = Color3.fromRGB(255, 120, 30), Belt = Color3.fromRGB(30, 30, 36) },
-		{ Name = "Cristal", Main = Color3.fromRGB(36, 40, 64), Dark = Color3.fromRGB(20, 22, 36), Accent = Color3.fromRGB(70, 230, 255), Belt = Color3.fromRGB(14, 16, 28), Trim = Color3.fromRGB(255, 198, 40), Glow = true },
-		{ Name = "Cosmique", Main = Color3.fromRGB(44, 24, 76), Dark = Color3.fromRGB(20, 10, 36), Accent = Color3.fromRGB(190, 90, 255), Belt = Color3.fromRGB(12, 6, 24), Trim = Color3.fromRGB(255, 130, 235), Glow = true },
+		{ Name = "Bois", Main = Color3.fromRGB(184, 120, 58), Dark = Color3.fromRGB(110, 70, 38), Accent = Color3.fromRGB(90, 230, 80), Belt = Color3.fromRGB(55, 55, 62) },
+		{ Name = "Acier", Main = Color3.fromRGB(212, 216, 226), Dark = Color3.fromRGB(94, 102, 122), Accent = Color3.fromRGB(40, 150, 255), Belt = Color3.fromRGB(40, 44, 56) },
+		{ Name = "Sport", Main = Color3.fromRGB(232, 40, 58), Dark = Color3.fromRGB(30, 30, 38), Accent = Color3.fromRGB(255, 210, 30), Belt = Color3.fromRGB(34, 34, 40), Trim = Color3.fromRGB(244, 244, 248) },
+		{ Name = "Or", Main = Color3.fromRGB(255, 198, 40), Dark = Color3.fromRGB(138, 74, 18), Accent = Color3.fromRGB(255, 120, 30), Belt = Color3.fromRGB(30, 30, 36), Trim = Color3.fromRGB(255, 198, 40) },
+		{ Name = "Jade", Main = Color3.fromRGB(30, 154, 90), Dark = Color3.fromRGB(14, 74, 46), Accent = Color3.fromRGB(106, 255, 176), Belt = Color3.fromRGB(16, 30, 24), Trim = Color3.fromRGB(255, 198, 40) },
+		{ Name = "Cristal", Main = Color3.fromRGB(36, 40, 64), Dark = Color3.fromRGB(20, 22, 36), Accent = Color3.fromRGB(70, 230, 255), Belt = Color3.fromRGB(14, 16, 28), Trim = Color3.fromRGB(255, 198, 40) },
+		{ Name = "Lave", Main = Color3.fromRGB(46, 38, 48), Dark = Color3.fromRGB(20, 16, 20), Accent = Color3.fromRGB(255, 106, 18), Belt = Color3.fromRGB(20, 14, 16), Trim = Color3.fromRGB(255, 194, 58) },
+		{ Name = "Royal", Main = Color3.fromRGB(90, 30, 138), Dark = Color3.fromRGB(42, 14, 68), Accent = Color3.fromRGB(255, 210, 58), Belt = Color3.fromRGB(180, 20, 42), Trim = Color3.fromRGB(255, 198, 40) },
+		{ Name = "Cosmique", Main = Color3.fromRGB(44, 24, 76), Dark = Color3.fromRGB(20, 10, 36), Accent = Color3.fromRGB(190, 90, 255), Belt = Color3.fromRGB(12, 6, 24), Trim = Color3.fromRGB(255, 130, 235) },
+		{ Name = "Celeste", Title = "Céleste", Main = Color3.fromRGB(246, 248, 255), Dark = Color3.fromRGB(200, 210, 230), Accent = Color3.fromRGB(122, 200, 255), Belt = Color3.fromRGB(220, 228, 244), Trim = Color3.fromRGB(255, 198, 40) },
 	} :: { StationTier },
 	-- Sauvegardes d'avant les 25 niveaux (8 niveaux) : ancien niveau -> nouveau (même XP par seconde à peu près).
 	OldStationLevels = { 1, 5, 9, 12, 16, 19, 22, 25 },
@@ -265,11 +272,23 @@ function Config.GetStationRate(level: number): number
 	return Config.Training.StationRateGrowth ^ (math.max(level, 1) - 1)
 end
 
--- Modèle (StationTiers) d'une station de ce niveau, et rang du niveau dans ce modèle (1 à LevelsPerTier).
-function Config.GetStationTier(level: number): (StationTier, number)
-	local perTier = Config.Training.LevelsPerTier
-	local index = math.clamp((math.max(level, 1) - 1) // perTier + 1, 1, #Config.Training.StationTiers)
-	return Config.Training.StationTiers[index], (math.max(level, 1) - 1) % perTier + 1
+-- Modèle (StationTiers) d'une station de ce niveau, rang du niveau dans ce modèle et nombre de niveaux du modèle.
+function Config.GetStationTier(level: number): (StationTier, number, number)
+	local starts = Config.Training.ModelStarts
+	level = math.clamp(level, 1, Config.Training.StationLevels)
+	local index = 1
+	for i, first in ipairs(starts) do
+		if level >= first then
+			index = i
+		end
+	end
+	local nextStart = starts[index + 1] or (Config.Training.StationLevels + 1)
+	return Config.Training.StationTiers[index], level - starts[index] + 1, nextStart - starts[index]
+end
+
+-- Vrai si ce niveau de station est le premier d'un nouveau modèle (son « MODÈLE ... ! », client/UpgradeSigns).
+function Config.IsNewStationModel(level: number): boolean
+	return level > 1 and table.find(Config.Training.ModelStarts, level) ~= nil
 end
 
 -- Tirages : un objet avalé rapporte sa valeur (Config.ItemTiers) × multiplicateur des familiers équipés.
@@ -787,8 +806,8 @@ export type ShopItem = {
 
 -- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Icon = "Treadmill", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 5 modèles (bois, acier, or, cristal, cosmique) : chaque niveau entraîne plus vite.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 2.44 },
-	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 5 modèles, du bois au cosmique.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 2.44 },
+	{ Id = "Treadmill", Icon = "Treadmill", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 10 modèles, du tapis en bois au tapis céleste : chaque niveau entraîne plus vite.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 2.44 },
+	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 10 modèles, du banc en bois au banc céleste.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 2.44 },
 	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+20 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 7.7 },
 	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 150 },
 	{ Id = "Magnet", Icon = "Magnet", Name = "Aimant à objets", Description = "Active ou coupe l’aimant avec son bouton. Priorité aux objets qui rapportent le plus. Plus de portée à chaque niveau.", MaxLevel = 5, BasePrice = 20e3, PriceGrowth = 9 },
