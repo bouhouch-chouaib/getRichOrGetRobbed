@@ -1,0 +1,291 @@
+{
+  "pet": "PigeonVilles",
+  "model_height_blender": 1.6169,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 716,
+      "center": [
+        0.0,
+        0.05228,
+        0.70034
+      ],
+      "size": [
+        0.84,
+        1.39656,
+        0.94932
+      ],
+      "pivot": null
+    },
+    "Head": {
+      "kind": "Head",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 696,
+      "center": [
+        0.0,
+        -0.17595,
+        1.38
+      ],
+      "size": [
+        0.544,
+        0.74445,
+        0.47376
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.13
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.17
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "WingL": {
+      "kind": "Wing",
+      "phase": 1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 532,
+      "center": [
+        0.34,
+        0.17947,
+        0.68
+      ],
+      "size": [
+        0.24515,
+        1.06833,
+        0.57958
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.36
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.16
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.86
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "WingR": {
+      "kind": "Wing",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 532,
+      "center": [
+        -0.34,
+        0.17947,
+        0.68
+      ],
+      "size": [
+        0.24515,
+        1.06833,
+        0.57958
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.36
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.16
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.86
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "Tail": {
+      "kind": "Tail",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 132,
+      "center": [
+        0.0,
+        0.77952,
+        0.74
+      ],
+      "size": [
+        0.46312,
+        0.40361,
+        0.25462
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.56
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.7
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LegL": {
+      "kind": "Leg",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 92,
+      "center": [
+        0.17,
+        0.00718,
+        0.15
+      ],
+      "size": [
+        0.24744,
+        0.32564,
+        0.3
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.17
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.04
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "LegR": {
+      "kind": "Leg",
+      "phase": 3.1416,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 92,
+      "center": [
+        -0.17,
+        0.00718,
+        0.15
+      ],
+      "size": [
+        0.24744,
+        0.32564,
+        0.3
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.17
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.04
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.037109
+}
