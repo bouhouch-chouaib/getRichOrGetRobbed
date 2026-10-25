@@ -596,8 +596,10 @@
     },
     "Lock": {
       "ButtonRadius": 4,
-      "Duration": 5,
-      "LongDuration": 10
+      "Cycle": 105,
+      "Duration": 45,
+      "LongBonus": 10,
+      "MinOpen": 30
     },
     "Loot": {
       "AnnounceMinRarity": 5,
@@ -827,6 +829,9 @@
       "UnlockId": "AstralAura",
       "UpdateInterval": 0.03333333333333333,
       "ViewDistance": 120
+    },
+    "PowerCap": {
+      "RarityGap": 2
     },
     "Quests": {
       "MinMoney": 500,
@@ -1060,7 +1065,7 @@
       },
       {
         "BasePrice": 5000000,
-        "Description": "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.",
+        "Description": "Ta base reste fermée 55 s au lieu de 45 s quand tu passes sur le bouton (une fois par manche).",
         "Icon": "Lock",
         "Id": "LongLock",
         "MaxLevel": 1,
@@ -1412,6 +1417,11 @@
       "PromptDistance": 8,
       "RecoverMaxDistance": 18,
       "RecoverPromptDistance": 10
+    },
+    "StealShield": {
+      "ShieldLoss": 0.1,
+      "ShieldSeconds": 1800,
+      "ShieldWindow": 3600
     },
     "StudioDurations": {
       "Digesting": 20,

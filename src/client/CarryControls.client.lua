@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PowerCap = require(ReplicatedStorage.Shared.PowerCap)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local ScreenScale = require(script.Parent.ScreenScale)
 local UiStyle = require(script.Parent.UiStyle)
@@ -77,7 +78,7 @@ RunService.Heartbeat:Connect(function()
 		-- Aperçu de la récompense (le serveur ajoute les bonus des passes).
 		local tier = player:GetAttribute("Tier")
 		local world = Config.GetWorld(if type(tier) == "number" then tier else 1)
-		local money = PetCatalog.GetIncome(petId) * Config.Sacrifice.IncomeSeconds * world.IncomeMultiplier
+		local money = PowerCap.Income(petId, PowerCap.SelfBestOf(player)) * Config.Sacrifice.IncomeSeconds * world.IncomeMultiplier
 		local entry = PetCatalog.ById[petId]
 		local points = Config.Sacrifice.Points[if entry then Config.RarityIndex[entry.Rarity] or 1 else 1] or 1
 		caption.Text = "JETER DANS LE TROU !" .. key

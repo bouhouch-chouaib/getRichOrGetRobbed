@@ -77,7 +77,7 @@ local function effectAt(id: string, level: number): string?
 	elseif id == "Magnet" then
 		return if level > 0 then "Portée " .. Config.Magnet.Radius[math.min(level, #Config.Magnet.Radius)] .. " studs" else "Aucun aimant"
 	elseif id == "LongLock" then
-		return "Verrou " .. (if level > 0 then Config.Lock.LongDuration else Config.Lock.Duration) .. " s"
+		return "Verrou " .. Config.GetLockDuration(level > 0, 0) .. " s"
 	end
 	return nil
 end

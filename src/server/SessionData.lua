@@ -24,6 +24,7 @@ local StarterJourney = require(ReplicatedStorage.Shared.StarterJourney)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local PetStats = require(ReplicatedStorage.Shared.PetStats)
+local PowerCap = require(ReplicatedStorage.Shared.PowerCap)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 export type Stat = "Speed" | "Strength"
@@ -41,6 +42,9 @@ export type PlayerData = {
 	equipped: { string }, -- petIds équipés (un même Id peut apparaître plusieurs fois si possédé en plusieurs exemplaires)
 	equipSlots: number,
 	pity: number,
+	-- Meilleure rareté obtenue soi-même (œufs éclos : tirages, fusion, capsule, récompenses) : plafond de revenu des
+	-- familiers volés, échangés ou achetés (Config.PowerCap, shared/PowerCap).
+	selfBest: number,
 	totalPulls: number, -- tirages faits depuis le début (rang de tirage : Config.Loot.Ranks)
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
@@ -129,6 +133,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		eggs = table.clone(data.eggs),
 		equipped = table.clone(data.equipped),
 		pity = data.pity,
+		selfBest = data.selfBest,
 		totalPulls = data.totalPulls,
 		upgrades = table.clone(data.upgrades),
 		stationScale = 25, -- tapis et banc sur 25 niveaux (avant : 8, converti à la lecture)
@@ -297,6 +302,17 @@ local function numberOr(value: any, default: number): number
 end
 
 -- Applique une sauvegarde lue sur les données du joueur (en validant chaque champ).
+-- Index de rareté d'un familier (formes évoluées et mutées comprises), 0 s'il est inconnu.
+local function rarityIndexOf(petId: string): number
+	local entry = PetCatalog.ById[petId]
+	return if entry then Config.RarityIndex[entry.Rarity] or 0 else 0
+end
+
+-- Un œuf vient d'éclore chez le joueur : sa rareté compte comme obtenue par lui-même (plafond de revenu).
+local function raiseSelfBest(data: PlayerData, petId: string)
+	data.selfBest = math.max(data.selfBest, rarityIndexOf(petId))
+end
+
 local function applySaved(data: PlayerData, saved: { [string]: any })
 	data.magnetEnabled = saved.magnetEnabled == true
 	if type(saved.levels) == "table" then
@@ -323,6 +339,17 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 		end
 	end
 	data.eggs = EggIncubation.Merge(saved.eggs, data.eggs)
+	if type(saved.selfBest) == "number" then
+		data.selfBest = math.max(data.selfBest, math.clamp(math.floor(saved.selfBest), 0, #Config.Rarities))
+	else
+		-- Sauvegarde d'avant le plafond (25 oct.) : tout ce que le joueur possède compte comme obtenu par lui-même.
+		for petId in pairs(data.pets) do
+			data.selfBest = math.max(data.selfBest, rarityIndexOf(petId))
+		end
+		for _, egg in ipairs(data.eggs) do
+			data.selfBest = math.max(data.selfBest, rarityIndexOf(egg.petId))
+		end
+	end
 	if type(saved.upgrades) == "table" then
 		for id, level in pairs(saved.upgrades) do
 			if type(id) == "string" and type(level) == "number" then
@@ -507,6 +534,7 @@ local function sync(player: Player)
 	player:SetAttribute("World", data.world)
 	player:SetAttribute("IndexClaimed", table.concat(data.indexClaimed, ","))
 	player:SetAttribute("Pity", data.pity)
+	player:SetAttribute("SelfBest", if data.loaded then data.selfBest else nil)
 	player:SetAttribute("TotalPulls", data.totalPulls)
 	player:SetAttribute("Multiplier", SessionData.GetMultiplier(player))
 	player:SetAttribute("Rebirths", data.rebirths)
@@ -618,6 +646,7 @@ local function onPlayerAdded(player: Player)
 		equipped = {},
 		equipSlots = Config.Pets.EquipSlots,
 		pity = 0,
+		selfBest = 0,
 		totalPulls = 0,
 		upgrades = {},
 		tutorialDone = false,
@@ -938,7 +967,7 @@ function SessionData.ClaimIndex(player: Player, petId: string): number
 		return 0
 	end
 	table.insert(data.indexClaimed, petId)
-	local reward = Config.GetIndexReward(petId)
+	local reward = Config.GetIndexReward(petId, PowerCap.Max(data.selfBest)) -- un familier bridé rapporte bridé
 	data.money += reward
 	sync(player)
 	return reward
@@ -1111,6 +1140,7 @@ function SessionData.HatchEvolving(player: Player, time: number): string?
 			local petId = PetCatalog.Variant(egg.petId, evolve.stage)
 			data.money += StarterJourney.Hatched(data.starter, egg.id)
 			data.pets[petId] = (data.pets[petId] or 0) + 1
+			raiseSelfBest(data, petId)
 			OnboardingAnalytics.Mark(player, "Hatched")
 			sync(player)
 			return petId
@@ -1127,7 +1157,10 @@ function SessionData.HatchEggs(player: Player, time: number): ({ [string]: numbe
 	if next(hatched) then
 		data.eggs = pending
 		for _, egg in ipairs(done) do data.money += StarterJourney.Hatched(data.starter, egg.id) end
-		for petId, count in pairs(hatched) do data.pets[petId] = (data.pets[petId] or 0) + count end
+		for petId, count in pairs(hatched) do
+			data.pets[petId] = (data.pets[petId] or 0) + count
+			raiseSelfBest(data, petId)
+		end
 		OnboardingAnalytics.Mark(player, "Hatched")
 		sync(player)
 	end
@@ -1246,6 +1279,12 @@ function SessionData.Unequip(player: Player, petId: string)
 		applySpeed(player, statValue(data, "Speed"))
 		sync(player)
 	end
+end
+
+-- Meilleure rareté obtenue soi-même (Config.PowerCap) ; nil tant que la sauvegarde n'est pas chargée.
+function SessionData.GetSelfBest(player: Player): number?
+	local data = storage[player]
+	return if data and data.loaded then data.selfBest else nil
 end
 
 function SessionData.GetPity(player: Player): number

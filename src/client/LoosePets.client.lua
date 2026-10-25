@@ -16,6 +16,7 @@ local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local PetPath = require(ReplicatedStorage.Shared.PetPath)
 local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
+local PowerCap = require(ReplicatedStorage.Shared.PowerCap)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 
@@ -149,8 +150,15 @@ RunService:BindToRenderStep("LoosePetsPlacement", Enum.RenderPriority.Last.Value
 		local ownerId = walker.anchor:GetAttribute("OwnerUserId")
 		local owner = if type(ownerId) == "number" then Players:GetPlayerByUserId(ownerId) else nil
 		local protectedUntil = owner and owner:GetAttribute("NewcomerProtectedUntil")
-		local protected = not walker.mine and type(protectedUntil) == "number" and protectedUntil > now
-		local enabled = handsFree and not protected
+		local shieldUntil = owner and owner:GetAttribute("StealShieldUntil") -- bouclier (Config.StealShield)
+		local protected = not walker.mine and ((type(protectedUntil) == "number" and protectedUntil > now)
+			or (type(shieldUntil) == "number" and shieldUntil > now))
+		-- Vol utile : chez un autre, seulement un familier qui ferait monter ton revenu.
+		local petId = walker.anchor:GetAttribute("PetId")
+		local baseMin = player:GetAttribute("BaseMin")
+		local useful = walker.mine or (type(petId) == "string"
+			and PowerCap.IsUseful(petId, PowerCap.SelfBestOf(player), if type(baseMin) == "number" then baseMin else 0))
+		local enabled = handsFree and not protected and useful
 		if walker.prompt.Enabled ~= enabled then
 			walker.prompt.Enabled = enabled
 		end

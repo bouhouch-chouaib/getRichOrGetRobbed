@@ -16,6 +16,8 @@ local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local PetStats = require(ReplicatedStorage.Shared.PetStats)
+local PowerCap = require(ReplicatedStorage.Shared.PowerCap)
+local player = game:GetService("Players").LocalPlayer
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 local MenuKit = require(script.Parent.MenuKit)
@@ -311,7 +313,14 @@ function IndexMenu.create(gui: Instance): Index
 			then rarity.Name .. "  •  EXCLUSIF " .. TextFormat.upper(Config.Worlds[Config.WorldIndex[entry.World] or 1].Name)
 			else rarity.Name
 		detailRarity.TextColor3 = UiStyle.lighter(rarity.Color, 0.4)
-		detailIncome.Text = if known then NumberFormat.perSecond(PetCatalog.GetIncome(petId)) else "???"
+		-- Trop fort pour toi (Config.PowerCap) : il rapporte bridé tant que tu n'as pas obtenu toi-même la rareté du dessous.
+		local selfBest = PowerCap.SelfBestOf(player)
+		local unlock = PowerCap.UnlockRarity(petId, selfBest)
+		detailIncome.Text = if not known then "???"
+			elseif unlock then NumberFormat.perSecond(PowerCap.Income(petId, selfBest)) .. " (BRIDÉ : "
+				.. NumberFormat.perSecond(PetCatalog.GetIncome(petId)) .. " avec un " .. Config.Rarities[unlock].Name
+				.. " à toi)"
+			else NumberFormat.perSecond(PetCatalog.GetIncome(petId))
 		local stats = PetStats.Of(petId)
 		detailSpeed.Text = if known then "+" .. stats.Speed else "?"
 		detailStrength.Text = if known then "+" .. stats.Strength else "?"
@@ -352,7 +361,7 @@ function IndexMenu.create(gui: Instance): Index
 			whereChip.BackgroundColor3 = UiStyle.Colors.Orange
 		end
 
-		rewardAmount.Text = if known then NumberFormat.money(Config.GetIndexReward(petId)) else "???"
+		rewardAmount.Text = if known then NumberFormat.money(Config.GetIndexReward(petId, PowerCap.Max(selfBest))) else "???"
 		local claimCaption = claimButton:FindFirstChild("Caption") :: TextLabel
 		if canClaim(petId, claimed) then
 			claimCaption.Text = "RÉCLAMER !"

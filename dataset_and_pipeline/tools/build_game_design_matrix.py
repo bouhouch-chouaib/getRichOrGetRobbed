@@ -555,8 +555,12 @@ def core_loop(config: str, walk_speed: float) -> dict:
                              "SpeedByRarity = 0,95 x 0,876^(rang - 1) (Commun 0,95 -> Sigma 0,38)",
         },
         "base_defense": {
-            "game": {"lock_s": num(r"Lock = \{\s*Duration = (\d+)"), "long_lock_s": num(r"LongDuration = (\d+)"),
-                     "lock_effect": "dôme qui expulse les intrus (knockback), relancé à chaque passage du propriétaire"},
+            "game": {"lock_s": num(r"Duration = (\d+)", "Lock"),
+                     "long_lock_s": num(r"Duration = (\d+)", "Lock") + num(r"LongBonus = (\d+)", "Lock"),
+                     "cycle_s": num(r"Cycle = (\d+)", "Lock"), "min_open_s": num(r"MinOpen = (\d+)", "Lock"),
+                     "lock_effect": "portail qui expulse les intrus ; un passage sur le bouton ferme la base, puis le bouton "
+                                    "reste grisé jusqu'à la fin du cycle (une fermeture par manche, 25 oct.)",
+                     "shield": "bouclier : 10 % de la valeur de la base perdus en 1 h -> 30 min sans vol (Config.StealShield)"},
             "reference": "Steal a Brainrot : verrou laser 60 s",
             "proposed_lasers": {
                 "_status": "proposed",

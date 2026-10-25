@@ -468,10 +468,42 @@ Config.Economy = {
 }
 
 -- Verrouillage de base (bouton au sol, comme Steal a Brainrot).
+-- 25 oct. (dataset_and_pipeline/ECONOMY_REPORT.md, étape 2) : cycle fixe. Un passage sur le bouton ferme la base Duration
+-- secondes (+ LongBonus avec « Verrou renforcé », + le bonus VIP), et le bouton reste grisé jusqu'à la fin du cycle
+-- (Cycle secondes après le passage). On ferme donc une fois par manche (45 s + 60 s = Feeding + digestion), au moment
+-- choisi. La base reste ouverte au moins MinOpen secondes par cycle, même avec tous les bonus (le temps d'un débutant pour
+-- voler chez son voisin). Avant : 5 s relancées tant qu'on restait sur le bouton, donc fermée pour toujours.
 Config.Lock = {
-	Duration = 5, -- relancé à chaque fois que le propriétaire repasse sur le bouton
-	LongDuration = 10, -- avec l'amélioration "LongLock"
+	Duration = 45, -- = la durée du Feeding : on peut aller lancer pendant que la base est fermée
+	LongBonus = 10, -- avec l'amélioration "LongLock"
+	Cycle = 105, -- = une manche (Feeding + digestion)
+	MinOpen = 30,
 	ButtonRadius = 4,
+}
+
+-- Durée de fermeture d'un passage sur le bouton (bonus compris, plafonnée pour laisser MinOpen secondes ouvertes).
+function Config.GetLockDuration(longLock: boolean, vipBonus: number): number
+	local lock = Config.Lock
+	return math.min(lock.Duration + (if longLock then lock.LongBonus else 0) + vipBonus, lock.Cycle - lock.MinOpen)
+end
+
+-- Plafond de revenu (25 oct., ECONOMY_REPORT.md règle 2) : un familier rapporte au plus le revenu de base de la rareté
+-- RarityGap au-dessus de la meilleure que le joueur a obtenue LUI-MÊME (œufs : tirages, fusion, capsule, récompenses).
+-- Concerne les familiers volés, échangés, achetés ou gagnés en duel : un vol fait gagner au plus un monde d'avance
+-- (deux raretés ≈ x6 à x16 de revenu, autant que la montée d'un monde). Calcul : shared/PowerCap.
+Config.PowerCap = {
+	RarityGap = 2,
+}
+
+-- Vol utile et bouclier (25 oct., ECONOMY_REPORT.md règles 7 et 8) : server/StealController.
+--   - On ne peut prendre chez un autre que les familiers qui feraient monter son revenu (plafonné) : plus que le moins bon de
+--     sa base, ou s'il reste une place. Un vol qui ne rapporte rien au voleur n'est que du harcèlement.
+--   - Bouclier : un joueur qui a perdu ShieldLoss de la valeur de sa base en ShieldWindow secondes (vols et familiers jetés
+--     au trou) ne peut plus être volé pendant ShieldSeconds secondes (simulateur : jackpots des nouveaux 5,3 -> 0,07 par session).
+Config.StealShield = {
+	ShieldLoss = 0.1,
+	ShieldWindow = 3600,
+	ShieldSeconds = 1800,
 }
 
 -- Mondes (paliers) : le joueur paie Price pour voyager au monde suivant (server/TierController, fenêtre client/WorldMenu).
@@ -739,7 +771,7 @@ Config.Shop = {
 	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+20 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 7.7 },
 	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 150 },
 	{ Id = "Magnet", Icon = "Magnet", Name = "Aimant à objets", Description = "Active ou coupe l’aimant avec son bouton. Priorité aux objets qui rapportent le plus. Plus de portée à chaque niveau.", MaxLevel = 5, BasePrice = 20e3, PriceGrowth = 9 },
-	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 10 s au lieu de 5 s à chaque passage sur le bouton.", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
+	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 55 s au lieu de 45 s quand tu passes sur le bouton (une fois par manche).", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2).
 	{ Id = "WeaponBat", Icon = "Bat", Name = "Batte", Description = "ARME : un grand coup de batte qui envoie valser un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },
 	{ Id = "PowerInvisible", Icon = "Ghost", Name = "Invisibilité", Description = "POUVOIR : 6 s presque invisible pour t'approcher en douce. Se brise dès que tu ramasses, voles, frappes ou te fais toucher. Recharge 45 s.", MaxLevel = 1, BasePrice = 500e3, PriceGrowth = 1 },
@@ -814,9 +846,11 @@ Config.Weapons = {
 
 -- Prix du prochain niveau (nil si niveau max atteint).
 -- Récompense d'Index d'un familier (argent).
-function Config.GetIndexReward(petId: string): number
+-- incomeCap : plafond de revenu du joueur (shared/PowerCap) ; nil = pas de plafond.
+function Config.GetIndexReward(petId: string, incomeCap: number?): number
 	local PetCatalog = require(script.Parent.PetCatalog) :: any
-	return math.max(Config.Index.MinReward, math.floor(PetCatalog.GetIncome(petId) * Config.Index.RewardSeconds))
+	local income = math.min(PetCatalog.GetIncome(petId), incomeCap or math.huge)
+	return math.max(Config.Index.MinReward, math.floor(income * Config.Index.RewardSeconds))
 end
 
 function Config.GetUpgradePrice(item: ShopItem, currentLevel: number): number?

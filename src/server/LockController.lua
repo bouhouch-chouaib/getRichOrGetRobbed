@@ -1,9 +1,10 @@
 --!strict
 -- LockController : bouton au sol de chaque base (comme Steal a Brainrot).
--- Le propriétaire marche sur le bouton -> la base est fermée pendant Config.Lock.Duration secondes
--- (compte à rebours relancé à chaque passage sur le bouton) :
--- le portail apparaît et tout autre joueur à l'intérieur est expulsé devant l'entrée.
--- Attributs écrits sur la base : "Locked" (bool) et "LockedUntil" (temps serveur).
+-- Le propriétaire marche sur le bouton -> la base est fermée Config.GetLockDuration secondes (45 s, bonus compris) :
+-- le portail apparaît et tout autre joueur à l'intérieur est expulsé devant l'entrée. Puis le bouton est grisé jusqu'à
+-- la fin du cycle (Config.Lock.Cycle secondes après le passage) : une fermeture par manche, la base reste ouverte au moins
+-- Config.Lock.MinOpen secondes (ECONOMY_REPORT.md, étape 2). Rester sur le bouton ne prolonge plus la fermeture.
+-- Attributs écrits sur la base : "Locked" (bool), "LockedUntil" et "LockReadyAt" (temps serveur : bouton de nouveau prêt).
 -- Clé (Config.Keys, achetée en Robux) : un autre joueur près du portail d'une base FERMÉE l'utilise (Remotes.UseKey, bulle
 -- créée par client/BaseKeys) -> la base est ouverte Config.Keys.Duration secondes (attribut "ForcedOpenUntil") : pas
 -- d'expulsion, vol possible, même si le propriétaire repasse sur le bouton. Ensuite, elle redevient fermée si le compte à
@@ -24,6 +25,7 @@ local LockController = {}
 local TICK = 0.1
 local COLOR_OPEN = Color3.fromRGB(220, 50, 50)
 local COLOR_LOCKED = Color3.fromRGB(60, 200, 80)
+local COLOR_COOLDOWN = Color3.fromRGB(120, 120, 130)
 
 type BaseParts = {
 	base: Model,
@@ -35,6 +37,7 @@ type BaseParts = {
 
 local entries: { BaseParts } = {}
 local lockedUntil: { [Model]: number } = {}
+local readyAt: { [Model]: number } = {} -- le bouton peut de nouveau fermer la base à cette heure serveur
 local forcedUntil: { [Model]: number } = {} -- ouverte par une clé jusqu'à cette heure serveur
 local protectedUntil: { [Model]: number } = {} -- pas de nouvelle clé avant cette heure
 
@@ -94,29 +97,41 @@ local function update(entry: BaseParts, now: number)
 	end
 
 	if not owner then
+		if readyAt[entry.base] then
+			readyAt[entry.base] = nil
+			entry.base:SetAttribute("LockReadyAt", nil)
+		end
 		return
 	end
 
-	-- Le propriétaire marche sur le bouton : (re)lance le compte à rebours.
+	-- Le propriétaire marche sur le bouton, base ouverte et bouton prêt : la base se ferme (une fois par cycle).
+	local ready = readyAt[entry.base] or 0
 	local ownerRoot = getRoot(owner)
-	if ownerRoot then
+	if ownerRoot and not untilTime and now >= ready then
 		local offset = entry.button.CFrame:PointToObjectSpace(ownerRoot.Position)
 		-- Le bouton est un cylindre couché : son axe (hauteur) est l'axe X local.
 		local flat = Vector2.new(offset.Y, offset.Z).Magnitude
 		if flat <= Config.Lock.ButtonRadius and offset.X > -1 and offset.X < 6 then
-			local duration = (if SessionData.HasUnlock(owner, "LongLock") then Config.Lock.LongDuration else Config.Lock.Duration)
-				+ Perks.LockBonus(owner) -- passe VIP
-			local wasLocked = untilTime ~= nil
+			local duration = Config.GetLockDuration(SessionData.HasUnlock(owner, "LongLock"), Perks.LockBonus(owner))
 			local newUntil = now + duration
 			untilTime = newUntil
 			lockedUntil[entry.base] = newUntil
+			ready = now + Config.Lock.Cycle
+			readyAt[entry.base] = ready
 			entry.base:SetAttribute("LockedUntil", newUntil)
-			if not wasLocked and not forced then
+			entry.base:SetAttribute("LockReadyAt", ready)
+			if not forced then
 				setLocked(entry, true)
 			end
 		end
 	end
 	if not untilTime then
+		-- Ouverte : bouton grisé jusqu'à la fin du cycle, puis de nouveau prêt.
+		local cooling = now < ready
+		entry.button.Color = if cooling then COLOR_COOLDOWN else COLOR_OPEN
+		if entry.label then
+			entry.label.Text = if cooling then string.format("RECHARGE : %ds", math.ceil(ready - now)) else "FERMER LA BASE"
+		end
 		return
 	end
 

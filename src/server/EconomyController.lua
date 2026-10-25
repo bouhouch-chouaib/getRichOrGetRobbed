@@ -9,6 +9,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetRoster = require(ReplicatedStorage.Shared.PetRoster)
 local Perks = require(ReplicatedStorage.Shared.Perks)
+local PowerCap = require(ReplicatedStorage.Shared.PowerCap)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Quests = require(script.Parent.Quests)
 local SessionData = require(script.Parent.SessionData)
@@ -23,6 +24,14 @@ end
 
 local petIncome = PetCatalog.GetIncome
 
+-- Revenu de chaque familier pour CE joueur : plafonné s'il est trop fort pour lui (Config.PowerCap, shared/PowerCap).
+function EconomyController.IncomeFor(player: Player): (string) -> number
+	local cap = PowerCap.Max(SessionData.GetSelfBest(player)) or math.huge
+	return function(petId: string): number
+		return math.min(petIncome(petId), cap)
+	end
+end
+
 -- Places de base + Rebirths (Config.GetIncomeSlots) : une place par espèce non équipée avant les doublons, par revenu.
 -- Ce sont ceux
 -- qui se baladent dans sa base et rapportent de l'argent. Un familier équipé suit le joueur (bonus de points) mais ne
@@ -36,15 +45,38 @@ function EconomyController.GetTopPets(player: Player): { string }
 	local available: { [string]: number } = {}
 	for petId in pairs(data.pets) do available[petId] = SessionData.GetSpareCount(player, petId) end
 	local placed, removed = SessionData.GetBasePicks(player)
-	return PetRoster.Select(available, slots, petIncome, placed, removed)
+	return PetRoster.Select(available, slots, EconomyController.IncomeFor(player), placed, removed)
+end
+
+-- Revenu (plafonné) du moins bon familier de la base, 0 s'il reste une place : un vol n'est utile que s'il rapporte
+-- plus (Config.StealShield, règle du vol utile ; attribut "BaseMin" lu par client/BasePets et client/LoosePets).
+function EconomyController.GetBaseMin(player: Player): number
+	local data = SessionData.Get(player)
+	local top = EconomyController.GetTopPets(player)
+	if not data or #top < Config.GetIncomeSlots(data.rebirths) then
+		return 0
+	end
+	local income = EconomyController.IncomeFor(player)
+	local low = math.huge
+	for _, petId in ipairs(top) do
+		low = math.min(low, income(petId))
+	end
+	return low
+end
+
+-- Valeur de la base (somme des revenus plafonnés, sans monde ni bonus) : sert à mesurer une perte (bouclier).
+function EconomyController.GetBaseValue(player: Player): number
+	local income = EconomyController.IncomeFor(player)
+	local total = 0
+	for _, petId in ipairs(EconomyController.GetTopPets(player)) do
+		total += income(petId)
+	end
+	return total
 end
 
 -- Revenu par seconde : seuls les familiers qui se baladent dans la base rapportent.
 function EconomyController.GetIncome(player: Player): number
-	local income = 0
-	for _, petId in ipairs(EconomyController.GetTopPets(player)) do
-		income += petIncome(petId)
-	end
+	local income = EconomyController.GetBaseValue(player)
 	-- Passes 2X Argent et VIP (shared/Perks), puis bonus du monde le plus loin débloqué (Config.Worlds, attribut Tier),
 	-- même s'il est retourné dans un monde précédent, puis Rebirths (Config.Rebirth) et amis présents (Config.Friends).
 	local tier = player:GetAttribute("Tier")
@@ -103,6 +135,10 @@ function EconomyController.Init()
 				local text = table.concat(list, ",")
 				if player:GetAttribute("InBase") ~= text then
 					player:SetAttribute("InBase", text)
+				end
+				local baseMin = EconomyController.GetBaseMin(player)
+				if player:GetAttribute("BaseMin") ~= baseMin then
+					player:SetAttribute("BaseMin", baseMin)
 				end
 				if income > 0 then
 					SessionData.AddMoney(player, income)

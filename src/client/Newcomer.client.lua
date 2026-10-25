@@ -42,14 +42,28 @@ end)
 
 task.spawn(function()
 	local wasProtected = false
+	local wasShielded = false
 	while shield.Parent do
 		local deadline = player:GetAttribute("NewcomerProtectedUntil")
 		local seconds = if type(deadline) == "number"
 			then math.max(0, math.ceil(deadline - Workspace:GetServerTimeNow()))
 			else 0
 		local protected = player:GetAttribute("DataLoaded") == true and seconds > 0
-		shield.Visible = protected
-		if protected then
+		-- Bouclier après une grosse perte (Config.StealShield, server/StealController).
+		local shieldUntil = player:GetAttribute("StealShieldUntil")
+		local shieldSeconds = if type(shieldUntil) == "number"
+			then math.max(0, math.ceil(shieldUntil - Workspace:GetServerTimeNow()))
+			else 0
+		local shielded = not protected and shieldSeconds > 0
+		if shielded and not wasShielded then
+			Toast.show("TU AS BEAUCOUP PERDU : TA BASE EST PROTÉGÉE DES VOLS PENDANT "
+				.. math.ceil(shieldSeconds / 60) .. " MIN.", UiStyle.Colors.Cyan)
+		end
+		wasShielded = shielded
+		shield.Visible = protected or shielded
+		if shielded then
+			shield.Text = string.format("BOUCLIER %d:%02d • Personne ne peut te voler", shieldSeconds // 60, shieldSeconds % 60)
+		elseif protected then
 			shield.Text =
 				string.format("ANTI-VOL %d:%02d • Voler met fin à ta protection", seconds // 60, seconds % 60)
 		elseif wasProtected then

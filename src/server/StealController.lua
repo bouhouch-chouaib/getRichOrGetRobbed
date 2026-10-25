@@ -22,6 +22,9 @@
 --     valide assez près (vérifié ici), le familier rentre chez elle. Elle peut aussi le frapper pour qu'il le lâche.
 --   - Annonces (Remotes.StealNotice) : le propriétaire est prévenu au début et à la fin d'un vol ; tout le serveur
 --     apprend les vols (et les familiers jetés au trou) de rareté >= Config.Loot.AnnounceMinRarity.
+--   - Vol utile (Config.StealShield) : on ne prend chez un autre que ce qui ferait monter son revenu (plafonné,
+--     shared/PowerCap). Bouclier : après avoir perdu ShieldLoss de la valeur de sa base en ShieldWindow s, un joueur ne
+--     peut plus être volé pendant ShieldSeconds s (attribut "StealShieldUntil", affiché par client/Newcomer).
 --
 -- Anti-duplication : pendant le transport (et quand il rentre à pied), le familier reste au propriétaire (simplement
 -- "réservé", caché de sa base). Transfert et sacrifice se font en UNE étape serveur sans attente, seulement si les
@@ -40,10 +43,12 @@ local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetPath = require(ReplicatedStorage.Shared.PetPath)
 local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
+local PowerCap = require(ReplicatedStorage.Shared.PowerCap)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local BasePetsController = require(script.Parent.BasePetsController)
 local BlackholeTiers = require(script.Parent.BlackholeTiers)
+local EconomyController = require(script.Parent.EconomyController)
 local GameLoopManager = require(script.Parent.GameLoopManager)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local PowerController = require(script.Parent.PowerController)
@@ -54,6 +59,7 @@ local SessionData = require(script.Parent.SessionData)
 local StealController = {}
 
 local STEAL = Config.Steal
+local SHIELD = Config.StealShield
 local CARRY = Config.Carry
 local SACRIFICE = Config.Sacrifice
 
@@ -95,6 +101,7 @@ type Loose = {
 local carries: { [Player]: Carry } = {} -- porteur -> transport en cours
 local looses: { [Part]: Loose } = {} -- familiers lâchés qui rentrent à pied
 local leaving: { [Player]: boolean } = {} -- joueurs en train de quitter le serveur
+local losses: { [Player]: { { at: number, loss: number } } } = {} -- pertes récentes (part de la valeur de la base)
 local looseFolder: Folder
 
 local function now(): number
@@ -134,6 +141,38 @@ local function isInsideBase(base: Model, position: Vector3): boolean
 	local localPosition = platform.CFrame:PointToObjectSpace(position)
 	local half = platform.Size / 2 + Vector3.new(1.5, 0, 1.5)
 	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -3 and localPosition.Y < 25
+end
+
+-- Bouclier en cours : ce joueur ne peut plus être volé (Config.StealShield).
+function StealController.IsShielded(player: Player): boolean
+	local untilTime = player:GetAttribute("StealShieldUntil")
+	return type(untilTime) == "number" and untilTime > now()
+end
+
+-- Vol utile : ce familier ferait-il monter le revenu (plafonné) de ce joueur ?
+function StealController.IsUseful(player: Player, petId: string): boolean
+	return PowerCap.IsUseful(petId, SessionData.GetSelfBest(player), EconomyController.GetBaseMin(player))
+end
+
+-- Une perte (part de la valeur de la base) : au-delà de ShieldLoss sur ShieldWindow secondes, bouclier.
+local function recordLoss(owner: Player, loss: number)
+	local time = now()
+	local list = losses[owner] or {}
+	local kept, total = {}, 0
+	for _, entry in ipairs(list) do
+		if time - entry.at <= SHIELD.ShieldWindow then
+			table.insert(kept, entry)
+			total += entry.loss
+		end
+	end
+	table.insert(kept, { at = time, loss = loss })
+	total += loss
+	if total >= SHIELD.ShieldLoss then
+		owner:SetAttribute("StealShieldUntil", time + SHIELD.ShieldSeconds)
+		kept = {}
+		print(string.format("[Steal] %s : bouclier %d s (%.0f %% perdus)", owner.Name, SHIELD.ShieldSeconds, total * 100))
+	end
+	losses[owner] = kept
 end
 
 -- Vitesse du porteur (x sa vitesse normale) : selon la rareté du familier, et jamais plus vite que le propriétaire
@@ -224,9 +263,8 @@ end
 -- Récompense d'un familier jeté dans le trou noir : argent, points du tour, jauge commune.
 function StealController.SacrificeReward(carrier: Player, petId: string): (number, number)
 	local world = Config.GetWorld(SessionData.GetTier(carrier))
-	local money = math.floor(
-		PetCatalog.GetIncome(petId) * SACRIFICE.IncomeSeconds * world.IncomeMultiplier * Perks.MoneyMultiplier(carrier)
-	)
+	local income = PowerCap.Income(petId, SessionData.GetSelfBest(carrier)) -- trop fort pour lui : plafonné
+	local money = math.floor(income * SACRIFICE.IncomeSeconds * world.IncomeMultiplier * Perks.MoneyMultiplier(carrier))
 	local points = SACRIFICE.Points[rarityIndex(petId)] or SACRIFICE.Points[1]
 	return money, points
 end
@@ -245,6 +283,7 @@ local function finish(carry: Carry, outcome: Outcome)
 	local money, points = 0, 0
 	if transfer or outcome == "Sacrificed" then
 		-- Une seule étape, sans aucune attente entre le retrait et l'ajout.
+		local before = if carry.own then 0 else EconomyController.GetBaseValue(owner)
 		local ok = SessionData.IsLoaded(owner)
 			and SessionData.IsLoaded(carrier)
 			and SessionData.RemovePets(owner, { [carry.petId] = 1 })
@@ -263,6 +302,9 @@ local function finish(carry: Carry, outcome: Outcome)
 			local root = getRoot(carrier)
 			Remotes.HoleEvent:FireAllClients("Sacrifice", if root then root.Position else carry.lastPosition,
 				carry.petId, carrier, money)
+		end
+		if ok and not carry.own and before > 0 and present(owner) then
+			recordLoss(owner, math.max(0, before - EconomyController.GetBaseValue(owner)) / before)
 		end
 	end
 	local gone = outcome == "Gone"
@@ -397,7 +439,7 @@ local function tryStart(anchor: BasePart, player: Player)
 		return
 	end
 	if owner ~= player then
-		if SessionData.IsNewcomerProtected(owner) then return end
+		if SessionData.IsNewcomerProtected(owner) or StealController.IsShielded(owner) then return end
 		if STEAL.OnlyDuringDigesting and GameLoopManager.GetState() ~= "Digesting" then
 			return
 		end
@@ -412,6 +454,9 @@ local function tryStart(anchor: BasePart, player: Player)
 	-- Un exemplaire non équipé et pas déjà porté.
 	if SessionData.GetSpareCount(owner, petId) - BasePetsController.GetReserved(base, petId) < 1 then
 		return
+	end
+	if owner ~= player and not StealController.IsUseful(player, petId) then
+		return -- il ne lui rapporterait rien
 	end
 	-- Distance réelle (position officielle du familier, côté serveur), avec une marge pour la latence.
 	local root = getRoot(player)
@@ -440,7 +485,10 @@ local function tryPickLoose(player: Player, anchor: unknown)
 	if not SessionData.IsLoaded(loose.owner) or not SessionData.IsLoaded(player) then
 		return
 	end
-	if player ~= loose.owner and SessionData.IsNewcomerProtected(loose.owner) then return end
+	if player ~= loose.owner and (SessionData.IsNewcomerProtected(loose.owner) or StealController.IsShielded(loose.owner)
+		or not StealController.IsUseful(player, loose.petId)) then
+		return
+	end
 	local root = getRoot(player)
 	if not root then
 		return
@@ -520,6 +568,7 @@ local function onLeaving(player: Player)
 			endLoose(loose, false)
 		end
 	end
+	losses[player] = nil
 	task.delay(10, function()
 		leaving[player] = nil
 	end)

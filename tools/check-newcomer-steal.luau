@@ -121,6 +121,23 @@ local modules = {
 		end,
 	},
 	BlackholeTiers = {},
+	-- Vol utile et bouclier (Config.StealShield) : tout vol est utile ici, une perte ne déclenche pas de bouclier.
+	EconomyController = {
+		GetBaseMin = function()
+			return 0
+		end,
+		GetBaseValue = function()
+			return 1
+		end,
+	},
+	PowerCap = {
+		IsUseful = function()
+			return true
+		end,
+		Income = function()
+			return 1
+		end,
+	},
 	GameLoopManager = {
 		GetState = function()
 			return "Digesting"
@@ -137,6 +154,9 @@ local modules = {
 	SessionData = {
 		IsLoaded = function()
 			return true
+		end,
+		GetSelfBest = function()
+			return nil
 		end,
 		GetSpareCount = function()
 			return 1

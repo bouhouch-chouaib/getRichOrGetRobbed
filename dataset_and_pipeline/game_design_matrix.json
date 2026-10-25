@@ -1601,9 +1601,12 @@
     },
     "base_defense": {
       "game": {
-        "lock_s": 5.0,
-        "long_lock_s": 10.0,
-        "lock_effect": "dôme qui expulse les intrus (knockback), relancé à chaque passage du propriétaire"
+        "lock_s": 45.0,
+        "long_lock_s": 55.0,
+        "cycle_s": 105.0,
+        "min_open_s": 30.0,
+        "lock_effect": "portail qui expulse les intrus ; un passage sur le bouton ferme la base, puis le bouton reste grisé jusqu'à la fin du cycle (une fermeture par manche, 25 oct.)",
+        "shield": "bouclier : 10 % de la valeur de la base perdus en 1 h -> 30 min sans vol (Config.StealShield)"
       },
       "reference": "Steal a Brainrot : verrou laser 60 s",
       "proposed_lasers": {

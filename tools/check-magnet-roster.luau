@@ -148,6 +148,9 @@ cache.SessionData = {
 	GetBasePicks = function()
 		return {}, {}
 	end,
+	GetSelfBest = function()
+		return nil -- pas de plafond de revenu (Config.PowerCap)
+	end,
 }
 cache.BaseManager = {
 	GetOwner = function()

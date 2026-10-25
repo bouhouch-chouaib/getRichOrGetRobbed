@@ -7,6 +7,9 @@ grappin à 55), précalculé en tables.
 
 Lancé par : python -I dataset_and_pipeline/economy_simulator.py serveur [--servers 40] [--hours 2]
 
+« actuelles » = les règles d'avant le 25 oct. (verrou permanent, poids et Force, pas de plafond) ; « proposées » = celles
+appliquées depuis dans le jeu (lots 1 et 2 de ECONOMY_REPORT.md), comportements codés ici, pas lus dans Config.lua.
+
 Hypothèses de comportement (à remplacer par les vraies mesures de Roblox Analytics quand il y aura des joueurs) :
 PROFILES ci-dessous (où est chaque profil, s'il fait attention, s'il ferme sa base, combien il tente de vols).
 Niveau d'entraînement d'un joueur = niveau moyen de son tapis et de son banc : < 8 débutant, < 17 moyen, sinon

@@ -28,6 +28,7 @@ local PetGaits = require(ReplicatedStorage.Shared.PetGaits)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local PetSizes = require(ReplicatedStorage.Shared.PetSizes)
 local PetWander = require(ReplicatedStorage.Shared.PetWander)
+local PowerCap = require(ReplicatedStorage.Shared.PowerCap)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local Sounds = require(script.Parent.Sounds)
@@ -53,6 +54,7 @@ type Shown = {
 	centerY: number, -- hauteur du centre du modèle au-dessus du pivot (roue)
 	seed: number,
 	arrivedAt: number?, -- heure serveur de son arrivée (animation de chute)
+	own: boolean, -- dans la base du joueur local (étiquette : revenu plafonné, shared/PowerCap)
 }
 
 local DROP_TIME = 0.7 -- durée de la chute (s)
@@ -89,6 +91,11 @@ local function setLabel(shown: Shown)
 	local stage = entry.Stage or 1 -- familier évolué (capsule d'évolution) ou muté : une ligne en plus au-dessus du nom
 	local mutation = if entry.Mutation then Config.Mutations[Config.MutationIndex[entry.Mutation]] else nil
 	local special = stage > 1 or mutation ~= nil
+	-- Chez soi : le revenu réel, plafonné si le familier est trop fort pour soi (Config.PowerCap).
+	local selfBest = if shown.own then PowerCap.SelfBestOf(player) else nil
+	local capped = shown.own and PowerCap.IsCapped(petId, selfBest)
+	local incomeText = NumberFormat.perSecond(if shown.own then PowerCap.Income(petId, selfBest) else PetCatalog.GetIncome(petId))
+		.. (if capped then " (BRIDÉ)" else "")
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "PetLabel"
 	sign.Adornee = root
@@ -117,10 +124,10 @@ local function setLabel(shown: Shown)
 			.. (if mutation then (if stage > 1 then " " else "") .. TextFormat.upper(mutation.Name) else "")
 		line(tag, if mutation then mutation.Color else Color3.fromRGB(255, 214, 70), 0, 0.3)
 		line(name .. (if count > 1 then " x" .. count else ""), rarity.Color, 0.3, 0.4)
-		line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.7, 0.3)
+		line(incomeText, if capped then Color3.fromRGB(255, 170, 60) else Color3.fromRGB(110, 240, 70), 0.7, 0.3)
 	else
 		line(TextFormat.upper(entry.Name) .. (if count > 1 then " x" .. count else ""), rarity.Color, 0, 0.55)
-		line(NumberFormat.perSecond(PetCatalog.GetIncome(petId)), Color3.fromRGB(110, 240, 70), 0.55, 0.45)
+		line(incomeText, if capped then Color3.fromRGB(255, 170, 60) else Color3.fromRGB(110, 240, 70), 0.55, 0.45)
 	end
 	sign.Parent = shown.model
 end
@@ -278,6 +285,7 @@ local function addPet(display: BaseDisplay, anchor: Instance)
 		topOffset = box.Position.Y + size.Y / 2,
 		centerY = box.Position.Y,
 		seed = seed,
+		own = display.base:GetAttribute("BaseIndex") == player:GetAttribute("BaseIndex"),
 	}
 	setLabel(shown)
 	model.Parent = folder
@@ -496,6 +504,11 @@ local function canTake(base: Model): (boolean, string)
 	if type(protectedUntil) == "number" and protectedUntil > Workspace:GetServerTimeNow() then
 		return false, "Protégé"
 	end
+	-- Bouclier après une grosse perte (Config.StealShield).
+	local shieldUntil = owner and owner:GetAttribute("StealShieldUntil")
+	if type(shieldUntil) == "number" and shieldUntil > Workspace:GetServerTimeNow() then
+		return false, "Protégé"
+	end
 	if Config.Steal.OnlyDuringDigesting and ReplicatedStorage:GetAttribute("GameState") ~= "Digesting" then
 		return false, "Voler"
 	end
@@ -509,11 +522,20 @@ RunService:BindToRenderStep("BasePetsPlacement", Enum.RenderPriority.Last.Value 
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local now = Workspace:GetServerTimeNow()
+	local selfBest = PowerCap.SelfBestOf(player)
+	local baseMinValue = player:GetAttribute("BaseMin")
+	local baseMin = if type(baseMinValue) == "number" then baseMinValue else 0
 	for _, display in pairs(displays) do
 		local platform = display.platform
 		local ground = PetWander.groundOf(platform)
 		local stealable, action = canTake(display.base)
 		for _, shown in pairs(display.pets) do
+			-- Vol utile : la bulle ne s'affiche que sur un familier qui ferait monter ton revenu (le serveur revérifie).
+			local enabled = stealable
+			if enabled and action == "Voler" then
+				local petId = shown.anchor:GetAttribute("PetId")
+				enabled = type(petId) == "string" and PowerCap.IsUseful(petId, selfBest, baseMin)
+			end
 		local visible = (platform.Position - camera.CFrame.Position).Magnitude < VIEW_DISTANCE
 			or (root ~= nil and root:IsA("BasePart") and (platform.Position - root.Position).Magnitude < NEAR_CHARACTER)
 			if visible then
@@ -523,8 +545,8 @@ RunService:BindToRenderStep("BasePetsPlacement", Enum.RenderPriority.Last.Value 
 			end
 			-- Bulle [E] affichée seulement si le vol est possible (mise à jour même pour les bases lointaines).
 			local prompt = shown.prompt
-			if prompt and prompt.Enabled ~= stealable then
-				prompt.Enabled = stealable
+			if prompt and prompt.Enabled ~= enabled then
+				prompt.Enabled = enabled
 			end
 			if prompt and prompt.ActionText ~= action then
 				prompt.ActionText = action

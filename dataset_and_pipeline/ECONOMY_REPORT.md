@@ -1,8 +1,9 @@
 # Rapport économique (phase 1.7)
 
-**État au 25 oct. 2026 : étapes 1 à 4 faites ; étape 5 : simulateur à 8 joueurs fait, premier lot de règles appliqué
-dans le jeu (règles 3, 5, 6, 11, 13 et la batte, voir 5.3).** Les règles qui changent qui se fait voler (verrou,
-bouclier, plafond, vol utile) attendent la décision de Chouaib (5.4). Rien n'a encore été vérifié dans Studio. **Rien n'a encore été changé dans le jeu** :
+**État au 25 oct. 2026 : étapes 1 à 5 faites. Dans le jeu : premier lot (règles 3, 5, 6, 11, 13 et la batte, voir
+5.3) et deuxième lot (verrou à cycle, bouclier, plafond, vol utile, voir 5.5), décidé par Chouaib.** Restent à faire :
+Rebirth (15, 16), couronne (9), pile d'objectifs (12), amis (17 à 19), et au choix 10 et 14. Rien n'a encore été
+vérifié dans Studio. **Rien n'a encore été changé dans le jeu** :
 les règles proposées seront d'abord prouvées par le simulateur (étape 5).
 
 Règle suivie : aucun chiffre « au doigt mouillé ». Tout ce qui suit vient du code ou d'un calcul refaisable.
@@ -757,13 +758,33 @@ du marché vérifie qu'un prix trop haut est refusé. Simulateur solo relancé a
 Chances, la vitesse en portant (message « TRÈS LOURD »), le prix maximum au marché ; à 2 joueurs, le grappin plus
 étroit et la batte limitée.
 
-## 5.4 Ce qui attend une décision de Chouaib (deuxième lot)
+## 5.4 Ce qui restait à décider
 
-1. **Verrou à cycle fixe (étape 2), bouclier sur 1 h (règle 8 : 10 % perdus en 1 h -> 30 min de protection), plafond
-   +2 (règle 2), vol utile (règle 7).** Ensemble : plus de jackpots, voler paie, l'écart se réduit. Mais un joueur qui
-   reste chez lui sans surveiller sa base peut perdre ~20 % de sa base par heure. À décider : on y va ? et faut-il
-   adoucir pour les prudents (par exemple un bouclier plus long) ?
+1. **Verrou à cycle fixe, bouclier sur 1 h, plafond +2, vol utile** : décidé par Chouaib le 25 oct., appliqué (5.5).
 2. **Rebirth (règles 15 et 16)** : une capsule de plus par Rebirth et le nouveau prix. C'est le plus gros chantier
    (plusieurs capsules sur la carte et dans l'interface).
 3. **Couronne du plus riche (9)**, **pile « prochain objectif » (12)**, **jeu entre amis (17 à 19)**.
 4. **Au choix** : gros butin signalé à tous (10), ruée des voleurs après l'effondrement (14).
+
+## 5.5 Appliqué dans le jeu le 25 oct. (deuxième lot)
+
+| Règle | Où | Ce qui change |
+| --- | --- | --- |
+| Verrou à cycle (étape 2) | `Config.Lock` (`Duration` 45, `LongBonus` 10, `Cycle` 105, `MinOpen` 30), `Config.GetLockDuration`, `server/LockController`, `client/ShopMenu`, description du Verrou renforcé | un passage sur le bouton ferme la base 45 s (55 s avec le Verrou renforcé, 65 s avec le VIP en plus), puis le bouton reste gris (« RECHARGE : Xs ») jusqu'à 105 s après le passage ; rester sur le bouton ne prolonge plus rien |
+| 8. Bouclier | `Config.StealShield`, `server/StealController` (`recordLoss`, `IsShielded`), `client/Newcomer`, `client/BasePets`, `client/LoosePets` | 10 % de la valeur de la base perdus en 1 h (vols et familiers jetés au trou) -> 30 min sans pouvoir être volé ; compte à rebours « BOUCLIER » dans le HUD, bulles [E] cachées chez les autres |
+| 2. Plafond +2 | `Config.PowerCap`, nouveau `shared/PowerCap`, `server/SessionData` (champ sauvegardé `selfBest`, attribut `SelfBest`), `server/EconomyController` (revenu, base, attribut `BaseMin`), `server/StealController` (sacrifice), récompense d'Index (`Config.GetIndexReward`), `client/BasePets` (étiquette « (BRIDÉ) » chez soi), `client/IndexMenu`, `client/CarryControls` | un familier rapporte au plus le revenu de base de la rareté juste 2 crans au-dessus de la meilleure que tu as fait éclore toi-même ; l'Index dit « BRIDÉ : 4,11M/s avec un Divin à toi » |
+| 7. Vol utile | `shared/PowerCap.IsUseful`, `server/StealController` (`tryStart`, `tryPickLoose`), `client/BasePets`, `client/LoosePets` | on ne peut prendre chez un autre que ce qui ferait monter son revenu ; la bulle [E] n'apparaît que sur ces familiers ; la quête « Vole N familiers » ne compte donc plus que ceux-là |
+
+Sauvegardes : les profils d'avant ce lot reçoivent `selfBest` = la meilleure rareté qu'ils possèdent déjà (ils ne sont
+pas bridés). Les nouveaux profils partent de 0 (le Chien-Saucisse offert, une fois éclos, compte comme un Commun à soi).
+
+Vérifié : analyse Luau sans erreur, `rojo build` réussi, les 10 tests Lune passent, dont le nouveau
+`tools/check-steal-rules.luau` (plafond, rareté à obtenir, vol utile, durée du verrou). Trois tests existants ont reçu
+les nouveaux modules dans leurs remplaçants (`PowerCap`, `SessionData.GetSelfBest`, `EconomyController`).
+
+**Pas vérifié (Studio)** : les contrôleurs eux-mêmes (cycle du verrou, déclenchement du bouclier) ne sont pas joués
+hors ligne. À regarder :
+- seul : bouton du verrou (vert 45 s, puis gris « RECHARGE », puis rouge), Verrou renforcé, étiquettes « (BRIDÉ) » et
+  Index avec un familier donné par un script, aperçu du familier jeté au trou ;
+- à 2 joueurs : bulles [E] seulement sur les familiers utiles, bouclier après une grosse perte (compte à rebours, bulles
+  cachées chez le voleur), vol pendant la recharge du verrou.
