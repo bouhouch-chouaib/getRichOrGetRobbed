@@ -200,7 +200,9 @@ saturées pour enfants, **jamais d'aura**.
 3. **Relire** : `python dataset_and_pipeline/tools/make_lot_sheet.py <Lot> <Id>...` (4 familiers par planche, 4 vues).
 4. **Exporter le lot** : `export_lot.py -- --lot <Lot> --pets Id1,Id2,...` → `baked_assets/lots/<Lot>.fbx` (objets `<Id>__<Pièce>`, 6 studs de haut,
    espacés de 9). Chouaib l'importe dans Studio (Fichier > Importer 3D).
-5. **Lueur** : servir `baked_assets` (`python -m http.server 48901 --bind 127.0.0.1`), envoyer les `_Emissive.png` avec
+5. **Lueur** (⚠️ 25 oct. : le masque du Requin-Torpille envoyé ainsi a valu un **avertissement de modération** au
+   compte de Chouaib, faux positif « liens hors site » ; **ne plus rien envoyer sans son accord**, préférer une lueur
+   sans image) : servir `baked_assets` (`python -m http.server 48901 --bind 127.0.0.1`), envoyer les `_Emissive.png` avec
    `upload_image`, noter les Id dans `baked_assets/pets/<Id>/<Id>_roblox.json` (`{"emissive": {"Corps": "rbxassetid://…"}}`).
 6. **Brancher** : `python dataset_and_pipeline/tools/make_wire_script.py <Id>...` génère le Luau à lancer dans Studio
    (Edit) : attributs de mouvement, lueur, rangement dans `ReplicatedStorage.ArtModels.<Id>` (puis sauvegarder le jeu).

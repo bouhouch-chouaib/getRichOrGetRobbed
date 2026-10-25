@@ -1,5 +1,6 @@
 {
-  "emissive": {
-    "Corps": "rbxassetid://88940702716487"
+  "emissive": {},
+  "moderated": {
+    "rbxassetid://88940702716487": "retiré par la modération Roblox le 25 oct. 2026 (faux positif « liens hors site ») : ne plus envoyer ce masque"
   }
 }
