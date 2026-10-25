@@ -84,7 +84,9 @@ les arbres en cubes. Vérifié en Play (solo) : 29 pièces par base, bascules, e
 `qa_renders/map_roblox_entree_base.jpg`. Déjà vrai avant : le personnage enjambe la clôture (rail bas à 1,9 stud),
 donc on traverse aussi les palissades à côté de l'entrée.
 
-Reste à faire : décider si les bases deviennent fermées (mur invisible à la hauteur des palissades) ; regarder la performance sur téléphone.
+Décision de Chouaib (25 oct.) : les bases restent ouvertes comme avant (on enjambe la clôture), pas de mur invisible.
+
+Reste à faire : regarder la performance sur téléphone.
 
 ## Règles de jeu respectées par le placement
 
