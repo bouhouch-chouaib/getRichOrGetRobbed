@@ -166,8 +166,15 @@ rendus `qa_renders/map_hero_volcan.png`, `map_aesthetic_board_volcan.png`, `map_
 - Scène : `run_map_scene.py -- --world Volcan` -> `baked_assets/map/volcan/map_layout.json` (889 décors + mare de lave) ;
   au loin, cônes de volcan géants (cheminées x30) ; un module de la couronne extérieure sur trois remplacé par des
   éclats d'obsidienne (casse l'effet « ville »). `export_map_lot.py -- --world Volcan` -> `Decors_Volcan.fbx` (33 Mo).
-- Branchement prévu (après validation, import Studio en mode Édition) : `apply_map_look_volcan.lua`, `MapDecor.Volcan`,
-  dossiers `VolcanLook` (déjà dans `MapGenerator.DRESSINGS`).
+- **Branché dans Studio (25 oct., style validé par Chouaib)** : import de `Decors_Volcan.fbx` (Édition),
+  `apply_map_look_volcan.lua` -> 17 décors dans `ArtModels.Map` (57 en tout), 593 posés dans `MapDecor.Volcan` + mare de
+  lave ; 98 / 98 portes et orgues tournées vers le trou ; bases `VolcanLook`. Lumières : 37 PointLight (16 braseros du
+  sanctuaire, 20 cheminées, la mare) ; celles des cônes lointains et de la périphérie sont retirées (inutiles, coûteuses).
+- Vérifié en Play (solo, monde changé côté client) : au Volcan, VolcanLook visible (autres habillages cachés), 37 lumières
+  allumées, vieilles roches de lave retirées ; de nuit, mare et cheminées éclairent le sol en rouge. Photos
+  `qa_renders/map_roblox_volcan_jour.jpg`, `map_roblox_volcan_nuit_lave.jpg`. En Prairie : lumières du Volcan éteintes.
+- Différence avec les rendus : en jeu le ciel reste bleu le jour (le jeu ne change pas le ciel selon le monde, seulement
+  l'air) ; piste : un Sky par monde dans `client/WorldSkin`.
 
 ## Eau et lave en jeu (25 oct.)
 
@@ -176,5 +183,7 @@ les modèles (le pont de la Prairie ne franchissait rien). Désormais `run_map_s
 (disques et bandes) et les scripts Studio les créent en pièces Roblox simples (eau : Glass bleu transparent ; lave : Neon
 orange + PointLight), sans collision, dans `MapDecor.<Monde>.surfaces`. Mares rendues rondes (un cylindre Roblox ne
 peut pas être ovale). Prairie : 24 surfaces, Désert : 1, Volcan : 1. Les arbres posés sur les falaises de la Prairie sont
-aussi remontés de ~1,6 stud (hauteur réelle de la falaise au lieu de 28,2) : relancer `apply_map_look.lua` et
-`apply_map_look_desert.lua` dans Studio pour en profiter.
+aussi remontés de ~1,6 stud (hauteur réelle de la falaise au lieu de 28,2). Relancé dans Studio le 25 oct. et vérifié en
+Play : ruisseau sous le pont de la Prairie (`map_roblox_prairie_ruisseau.jpg`), oasis du Désert
+(`map_roblox_desert_oasis.jpg`). Au changement de monde, les textures du nouveau monde mettent quelques secondes à
+s'afficher (gris le temps du chargement).

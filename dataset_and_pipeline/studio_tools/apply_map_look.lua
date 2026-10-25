@@ -1231,7 +1231,7 @@ local function placeDecor()
 			group.Parent = holder
 			groups[key] = group
 		end
-		if LIGHTS[asset] then
+		if LIGHTS[asset] and zone ~= "lointain" and zone ~= "peripherie" then -- au loin : inutile et coûteux
 			addLight(copy, LIGHTS[asset])
 		end
 		copy.Parent = group
