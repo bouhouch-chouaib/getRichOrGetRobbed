@@ -208,7 +208,11 @@ l'écran et la bulle restent faits par le jeu), et **10 tapis + 10 bancs** réal
 GDD « Station »). `server/MapGenerator` (`addArt` + volumes invisibles pour collisions, bulles et panneaux ; plus de
 cercles lumineux devant les kiosques), `server/StationLooks` (sans néon), `client/CapsuleDecor` (sans néon), `Config`
 (10 modèles, `GetStationTier` -> modèle, rang, nombre de niveaux). Branchement : `tools/make_props_wire.py` ->
-`ArtModels.<Id>`. Analyse + 10 tests OK ; **pas encore importés ni vus en jeu**.
+`ArtModels.<Id>` (fichier du jeu : Ctrl+S). Analyse + 10 tests OK. Vérifié le 26 oct. : aperçu des 23 objets dans
+Studio (tailles en studs, textures) ; en Play (solo) : boutique et fusion en briques avec volumes invisibles et bulles,
+0 néon, 0 cercle lumineux ; capsule (vitre, écran, socle invisible) ; tapis niveaux 1 / 7 / 25 -> Bois / Sport / Céleste,
+banc 2 / 13 / 25 -> Bois / Cristal / Céleste, voyants et étoile justes, blocs du banc cachés. Pas vu : photo en Play
+(la caméra du jeu ignore la position demandée), les décors de capsule par monde, sur téléphone.
 
 **15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, en argent du jeu seulement) :
 les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`, mêmes règles que [E]). Vérifié en jeu (solo) :
