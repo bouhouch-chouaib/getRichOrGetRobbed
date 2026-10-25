@@ -4,8 +4,13 @@ local CollectionService = game:GetService("CollectionService")
 local S = require(script.Parent.PetSculpt)
 local Catalog = require(script.Parent.PetCatalog)
 local Config = require(script.Parent.Config)
-local Signature = require(script.Parent.PetSignatureAuras)
 local FX = {}
+
+-- Familiers sans aura (ni particules ni pièces d'aura) : leur modèle fait à la main se suffit à lui-même.
+-- 25 oct. : Chouaib a refusé les auras du Cerbère Infernal (modélisée, puis en particules).
+local NO_AURA: { [string]: boolean } = {
+	CerbereInfernal = true,
+}
 local V, CF, A = Vector3.new, CFrame.new, CFrame.Angles
 local SPARK = "rbxasset://textures/particles/sparkles_main.dds"
 local SMOKE = "rbxasset://textures/particles/smoke_main.dds"
@@ -60,8 +65,7 @@ function FX.Add(m: Model, e: Catalog.Pet, box: CFrame, size: Vector3)
 	if not root then
 		return
 	end
-	-- Aura signature (shared/PetSignatureAuras) : elle remplace les auras de rareté ci-dessous.
-	if Signature.Add(m, e.BaseId or e.Id, box, size) then
+	if NO_AURA[e.BaseId or e.Id] then
 		CollectionService:AddTag(m, "SculptedPetVisual")
 		return
 	end

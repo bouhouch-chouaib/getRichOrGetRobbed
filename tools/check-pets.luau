@@ -108,7 +108,6 @@ local config = loadModule("Config")
 local builder = loadModule("PetModelBuilder")
 local sizes = loadModule("PetSizes")
 local motion = loadModule("PetMotion")
-local signature = loadModule("PetSignatureAuras")
 local motionReport, previews = {}, {}
 local previewIds = {
 	ChienSaucisse = true,
@@ -182,8 +181,7 @@ for _, e in catalog.List do
 		end
 	end
 	assert(count <= 220, e.Id .. ": geometry budget " .. count)
-	-- Aura signature (Cerbère Infernal) : 3 émetteurs aussi, mais plus denses que les auras de rareté.
-	assert(emitters <= 3 and rate <= (if signature.Has(e.Id) then signature.MaxRate else 28), e.Id .. ": FX budget")
+	assert(emitters <= 3 and rate <= 28, e.Id .. ": FX budget")
 	if e.Rarity == "Commun" then
 		assert(emitters == 0, e.Id .. ": common FX")
 	end

@@ -18,7 +18,6 @@ Preuve de concept : un piédestal de base et un œuf Mythique (`qa_renders/hero.
 | `blender_tools/block_creatures.py` | Créatures en blocs biseautés (essai 1.5) : `block`, `stepped_plate`, `staircase_spike`, `tooth`, `claw`, `spike_band`, `blocky_wolf_head`, `build_blocky_cerberus`. |
 | `blender_tools/run_cerberus_blocks.py` | Fabrique, cuit et contrôle le Cerbère (`source/cerberus_blocs.blend`, planche + héros). |
 | `blender_tools/export_studio_mesh.py` | `.mesh` natif Roblox pour voir un asset dans Studio sans import (aperçu local). |
-| `src/shared/PetSignatureAuras.lua` | Aura du Cerbère (flammes noires et rouges + éclairs) faite avec des effets du Creator Store. |
 | `baked_assets/` | Sorties prêtes pour Roblox (`<Asset>_Color/Roughness/Metalness/Normal/Emissive/AO.png`, `.fbx`, `.glb`, `_manifest.json`). |
 | `qa_renders/` | `preview.png` (contrôle), `materials.png` (les 4 matériaux), `hero.png`, rapports JSON. |
 | `source/poc_phase1.blend` | La scène de la preuve de concept (high, low cuits, matériaux). |
@@ -140,21 +139,18 @@ par la barre MCP. Les cartes PNG passent par l'outil MCP `upload_image` (envoyé
 112772134269437, Normal 73370126848372, Roughness 116668183918093, Metalness 120152447623403, Emissive
 137420531509006, EmissiveStrength 3,47). Aperçu local seulement : ne pas publier le jeu avec ce MeshPart.
 
-**Aura = effets tout faits, jamais modélisée** (Chouaib : anneau modélisé puis aura de particules maison refusés) :
-1. `search_asset` (Creator Store, gratuit) puis `insert_asset` dans `ServerStorage` (scripts mis en bac à sable,
-   jamais lancés). Lire la liste des scripts avant tout : les écrans « CoreValidation » / TextBox « Check » cachés dans
-   des effets gratuits sont un piège connu, on jette le modèle.
-2. Ne garder que les **images** (Texture des ParticleEmitter), recréer les émetteurs par code, régler taille / couleur.
-   Le Cerbère : `rbxassetid://935947741` (flammes noires) + `rbxassetid://9135310747` (éclair, planche 4x4), voir
-   `src/shared/PetSignatureAuras.lua`. Flammes avec ZOffset négatif : elles passent derrière le corps et dessinent la
-   silhouette (effet haki d'anime) sans cacher la tête. Orientation `FacingCameraWorldUp` (sinon couchées au sol).
-3. Contrôle en Play : les particules ne s'affichent que près de la caméra du joueur. Téléporter le personnage (serveur),
-   mettre la caméra en `Scriptable` devant le familier, masquer les ScreenGui (client), puis `screen_capture`. Studio en
-   arrière-plan tourne à ~15 images/s en qualité auto : il y a moins de particules (comme sur téléphone), d'où des
-   flammes grandes. Photos : `qa_renders/cerberus_aura_nuit.jpg`, `cerberus_aura_nuit_34.jpg`, `cerberus_aura_jour.jpg`.
+**Auras : toutes refusées pour le Cerbère** (25 oct.) : anneau modélisé, aura de particules maison, puis flammes noires +
+éclairs faits d'effets du Creator Store (« très mal fait, je n'aime pas du tout le rendu »). Le Cerbère n'a plus aucune
+aura (`PetSculptedEffects.NO_AURA`). Ne pas en reproposer sans demande de Chouaib. Si un jour on reprend des effets du
+Creator Store : `insert_asset` dans `ServerStorage`, lire les scripts d'abord (les écrans « CoreValidation » / TextBox
+« Check » cachés dans des effets gratuits sont un piège connu), ne garder que les images.
 
-Pas vérifié : import du `.fbx` dans le vrai jeu, aura sur un familier qui marche dans la base (`PetMotion`), sur
-téléphone, avec la qualité graphique au maximum.
+**Contrôle en Play** (particules, familiers qui bougent) : les particules ne s'affichent que près de la caméra du joueur.
+Téléporter le personnage (serveur), mettre la caméra en `Scriptable` (client, qui suit le familier par RenderStepped),
+masquer les ScreenGui, puis `screen_capture` SANS position de caméra. Studio en arrière-plan tourne à ~15 images/s.
+
+**Import Studio du `.fbx`** (25 oct.) : l'importateur arrive ~34 fois trop grand (unités) et regarde déjà vers -Z
+(`FacingYaw` 0, contrairement au `.mesh` exporté à la main) ; il envoie le maillage et les textures sur le compte.
 
 ## Pistes pour la suite
 

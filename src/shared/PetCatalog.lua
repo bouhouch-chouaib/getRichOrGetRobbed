@@ -154,7 +154,7 @@ local list: { Pet } = {
 	worldPet("GolemCendre", "Golem de Cendre", "Legendaire", "Volcan", "Bloc de roche volcanique qui fume en permanence.", { Shape = "Humanoid", Body = rgb(70, 60, 60), Detail = rgb(255, 90, 20), Effect = "Smoke" }),
 	worldPet("DragonBarbecue", "Dragon Barbecue", "Mythique", "Volcan", "Dragon cuisinier : sa grille est toujours chaude.", { Shape = "Dragon", Body = rgb(180, 40, 30), Detail = rgb(255, 170, 40), Effect = "Fire" }),
 	worldPet("TitanLave", "Titan de Lave", "Divin", "Volcan", "Géant de magma dont chaque pas fait trembler le volcan.", { Shape = "Humanoid", Body = rgb(50, 30, 30), Detail = rgb(255, 100, 0), Neon = true, Effect = "Fire", EffectColor = rgb(255, 120, 20) }),
-	-- 25 oct. : 6e exclusif du Volcan, modèle Blender (ArtModels.CerbereInfernal) + aura signature (PetSignatureAuras)
+	-- 25 oct. : 6e exclusif du Volcan, modèle Blender (ArtModels.CerbereInfernal), sans aura (PetSculptedEffects.NO_AURA)
 	worldPet("CerbereInfernal", "Cerbère Infernal", "Sigma", "Volcan", "Gardien des enfers à trois têtes, fissuré de lave, enveloppé de flammes noires.", { Shape = "Quadruped", Body = rgb(47, 42, 41), Detail = rgb(255, 120, 20), Extra = "ThreeHeads" }),
 	-- Glace
 	worldPet("PingouinPatineur", "Pingouin Patineur", "Rare", "Glace", "Champion de patinage artistique, triple axel sur la banquise.", { Shape = "Bird", Body = rgb(30, 40, 60), Detail = rgb(150, 220, 255), Effect = "Snow" }),
