@@ -238,7 +238,10 @@ Index (onglets ★ / ★★ / ★★★, équiper, récompenses, compteur), stat
 **25 oct. : évolutions sans néon** (`PetModelBuilder.addCrown`) : plus d'étincelles ni de couronne d'éclats en néon ;
 Évolué = plus grand + petite couronne d'argent (4 pointes, gemme saphir), Ultime = plus grand + grande couronne d'or
 (8 pointes, 4 rubis, flèche), en briques, posée sur la plus haute pièce « Head » (sinon le haut du corps) et dont elle
-copie les attributs de mouvement : elle suit la tête. Une mutation ne recolore pas la couronne.
+copie les attributs de mouvement : elle suit la tête. Une mutation ne recolore pas la couronne. Couronne Évolué en
+matière Metal (le Foil argent se fondait dans le ciel). Vérifié : aperçu de 4 familiers (tigre, pigeon, Cerbère, trou
+noir) x Évolué / Ultime / Ultime Doré ; en Play, couronne collée à la tête qui tourne (écart 0), 0 néon, 0 particule.
+Familiers de test retirés de la sauvegarde.
 
 **19 oct. : remise à zéro + places de la base** (GDD « Places de la base et réserve ») : sauvegardes v3 (tout le monde
 repart de zéro), 15 places, le joueur choisit qui va dans la base (Index), étiquettes BASE / RÉSERVE ; corrigés : étiquette

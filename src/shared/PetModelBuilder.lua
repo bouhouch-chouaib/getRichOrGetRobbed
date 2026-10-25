@@ -648,49 +648,122 @@ if RunService:IsClient() and Config.Pets.ModelStyle == "Legacy" then
 end
 
 -- Construit le modèle du familier petId (nil si l'Id est inconnu).
--- Familier évolué (Config.Evolution) : le modèle de son espèce, plus grand, avec des étincelles ; au stade Ultime, une
--- couronne d'éclats dorés qui flotte au-dessus de la tête et plus d'étincelles. Pas d'anneau de lumière au sol
--- (Chouaib, 25 oct. : « cercle lumineux au sol bizarre et moche »).
-local EVOLUTION_GOLD = Color3.fromRGB(255, 214, 70)
+-- Familier évolué (Config.Evolution) : le modèle de son espèce, plus grand, coiffé d'une couronne en briques posée sur
+-- la tête, qui suit ses mouvements. Évolué : petite couronne d'acier argenté à 4 pointes et une gemme saphir ; Ultime : grande
+-- couronne d'or à 8 pointes, 4 gemmes rubis et une flèche centrale. Sans néon ni étincelles (Chouaib, 25 oct.), et pas
+-- d'anneau de lumière au sol (« cercle lumineux au sol bizarre et moche »).
+type CrownLook = { metal: Color3, material: Enum.Material, gem: Color3, spikes: number, width: number, gems: number, spire: boolean }
+local CROWNS: { [number]: CrownLook } = {
+	[2] = { metal = Color3.fromRGB(190, 198, 212), material = Enum.Material.Metal, gem = Color3.fromRGB(60, 140, 255), spikes = 4, width = 0.5, gems = 1, spire = false },
+	[3] = { metal = Color3.fromRGB(255, 200, 50), material = Enum.Material.Foil, gem = Color3.fromRGB(235, 40, 60), spikes = 8, width = 0.62, gems = 4, spire = true },
+}
+
+-- Où poser la couronne : sur la plus haute pièce de genre « Head » (shared/PetMotion), sinon sur le haut du corps.
+-- Renvoie la pièce dont la couronne prend les attributs de mouvement (nil : couronne fixe), le centre du dessus et la
+-- largeur disponible.
+local function crownSeat(model: Model): (BasePart?, Vector3, number)
+	local head: BasePart? = nil
+	local headTop = Vector3.zero
+	for _, q in ipairs(model:GetChildren()) do
+		if q:IsA("BasePart") and q.Transparency < 1 and q:GetAttribute("MotionKind") == "Head" then
+			local top = q.CFrame:PointToWorldSpace(Vector3.new(0, q.Size.Y / 2, 0))
+			if not head or top.Y > headTop.Y then
+				head, headTop = q, top
+			end
+		end
+	end
+	if head then
+		return head, headTop, math.min(head.Size.X, head.Size.Z)
+	end
+	local body: BasePart? = nil
+	for _, q in ipairs(model:GetChildren()) do
+		if q:IsA("BasePart") and q.Transparency < 1 and q:GetAttribute("MotionGroup") == "Body" then
+			if not body or q.Size.Magnitude > body.Size.Magnitude then
+				body = q
+			end
+		end
+	end
+	local box, size = PetModelBuilder.BodyBounds(model)
+	return body, box.Position + Vector3.new(0, size.Y / 2, 0), math.min(size.X, size.Z) * 0.6
+end
+
+local function addCrown(model: Model, stage: number)
+	local look = CROWNS[stage]
+	local root = model.PrimaryPart
+	if not look or not root then
+		return
+	end
+	local seat, top, span = crownSeat(model)
+	local w = math.clamp(span * look.width, 0.5, 4)
+	local h, t = w * 0.3, w * 0.13
+	-- un peu enfoncée dans la tête, face avant vers -Z comme le familier
+	local frame = root.CFrame * CFrame.new(root.CFrame:PointToObjectSpace(top) - Vector3.new(0, h * 0.35, 0))
+	local pieces: { BasePart } = {}
+	local function piece(size: Vector3, cf: CFrame, color: Color3, material: Enum.Material)
+		local p = Instance.new("Part")
+		p.Name = "EvolutionCrown"
+		p.Size = size
+		p.CFrame = frame * cf
+		p.Color = color
+		p.Material = material
+		p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+		p.CastShadow = false
+		p:SetAttribute("EvolutionCrown", true)
+		p.Parent = model
+		table.insert(pieces, p)
+	end
+	local edge = (w - t) / 2
+	piece(Vector3.new(w, h, t), CFrame.new(0, h / 2, -edge), look.metal, look.material)
+	piece(Vector3.new(w, h, t), CFrame.new(0, h / 2, edge), look.metal, look.material)
+	piece(Vector3.new(t, h, w - 2 * t), CFrame.new(-edge, h / 2, 0), look.metal, look.material)
+	piece(Vector3.new(t, h, w - 2 * t), CFrame.new(edge, h / 2, 0), look.metal, look.material)
+	-- pointes : aux coins, et au milieu des côtés pour l'Ultime
+	local spike = h * (if look.spire then 1.4 else 1.1)
+	local spots = { Vector2.new(-1, -1), Vector2.new(1, -1), Vector2.new(-1, 1), Vector2.new(1, 1) }
+	if look.spikes >= 8 then
+		for _, s in ipairs({ Vector2.new(0, -1), Vector2.new(0, 1), Vector2.new(-1, 0), Vector2.new(1, 0) }) do
+			table.insert(spots, s)
+		end
+	end
+	for _, s in ipairs(spots) do
+		local base = CFrame.new(s.X * edge, h, s.Y * edge)
+		piece(Vector3.new(t, spike, t), base * CFrame.new(0, spike / 2, 0), look.metal, look.material)
+		piece(Vector3.one * t * 0.9, base * CFrame.new(0, spike, 0) * CFrame.Angles(math.rad(45), 0, math.rad(45)), look.metal,
+			look.material)
+	end
+	-- gemmes serties : devant (Évolué), sur les 4 côtés (Ultime)
+	local faces = { CFrame.new(0, h / 2, -edge - t * 0.45) }
+	if look.gems >= 4 then
+		table.insert(faces, CFrame.new(0, h / 2, edge + t * 0.45) * CFrame.Angles(0, math.pi, 0))
+		table.insert(faces, CFrame.new(-edge - t * 0.45, h / 2, 0) * CFrame.Angles(0, math.pi / 2, 0))
+		table.insert(faces, CFrame.new(edge + t * 0.45, h / 2, 0) * CFrame.Angles(0, -math.pi / 2, 0))
+	end
+	for _, face in ipairs(faces) do
+		piece(Vector3.new(t * 1.5, t * 1.5, t * 0.5), face * CFrame.Angles(0, 0, math.rad(45)), look.gem, Enum.Material.Glass)
+	end
+	if look.spire then
+		piece(Vector3.new(t * 1.2, h * 1.2, t * 1.2), CFrame.new(0, h * 0.9, 0), look.metal, look.material)
+		piece(Vector3.one * t * 1.4, CFrame.new(0, h * 1.6, 0) * CFrame.Angles(math.rad(45), 0, math.rad(45)), look.gem,
+			Enum.Material.Glass)
+	end
+	-- elle suit la tête (ou le corps) : mêmes attributs de mouvement, et sa propre position de repos (shared/PetMotion)
+	if seat and typeof(seat:GetAttribute("MotionRest")) == "CFrame" then
+		local scale = model:GetScale()
+		for _, p in ipairs(pieces) do
+			for _, name in ipairs({ "MotionGroup", "MotionKind", "MotionPhase", "MotionPivot", "MotionHinge" }) do
+				p:SetAttribute(name, seat:GetAttribute(name))
+			end
+			local rest = root.CFrame:ToObjectSpace(p.CFrame)
+			p:SetAttribute("MotionRest", CFrame.new(rest.Position / scale) * rest.Rotation)
+		end
+	end
+end
+
 local function applyEvolution(model: Model, entry: PetCatalog.Pet)
 	local stage = entry.Stage or 1
 	model.Name = entry.Id
 	model:ScaleTo(model:GetScale() * (Config.Evolution.SizeMultiplier[stage] or 1))
-	local box, size = PetModelBuilder.BodyBounds(model)
-	local pivot = model:GetPivot()
-	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity] or 1]
-	local color = if stage >= 3 then EVOLUTION_GOLD else rarity.Color
-	local root = model.PrimaryPart
-	if root then
-		local sparkles = Instance.new("ParticleEmitter")
-		sparkles.Name = "EvolutionSparkles"
-		sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-		sparkles.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
-		sparkles.Rate = if stage >= 3 then 10 else 4
-		sparkles.Lifetime = NumberRange.new(0.8, 1.5)
-		sparkles.Speed = NumberRange.new(0.5, 1.5)
-		sparkles.SpreadAngle = Vector2.new(180, 180)
-		sparkles.LightEmission = 0.8
-		sparkles.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25 + stage * 0.05), NumberSequenceKeypoint.new(1, 0) })
-		sparkles:SetAttribute("Aura", true)
-		sparkles.Parent = root
-	end
-	if stage >= 3 then
-		-- Couronne : 8 éclats dorés en cercle au-dessus de la tête.
-		local top = pivot:PointToObjectSpace(box.Position).Y + size.Y / 2 + 0.8
-		local radius = math.clamp(math.min(size.X, size.Z) * 0.35, 0.6, 2.4)
-		for index = 1, 8 do
-			local angle = index * math.pi / 4
-			local shard = Instance.new("Part")
-			shard.Name = "EvolutionCrown"
-			shard.Size = Vector3.new(0.35, 0.6, 0.35) * math.max(1, radius / 1.2)
-			shard.CFrame = pivot * CFrame.new(math.cos(angle) * radius, top, math.sin(angle) * radius) * CFrame.Angles(0, -angle, 0)
-			shard.Color = EVOLUTION_GOLD
-			shard.Material = Enum.Material.Neon
-			shard:SetAttribute("Aura", true)
-			shard.Parent = model
-		end
-	end
+	addCrown(model, stage)
 	finalize(model)
 	model:SetAttribute("EvolutionStage", stage)
 end
@@ -761,6 +834,9 @@ local function applyMutation(model: Model, entry: PetCatalog.Pet)
 	for _, part in ipairs(model:GetDescendants()) do
 		if not part:IsA("BasePart") or part.Transparency >= 1 or part:GetAttribute("Aura") then
 			continue
+		end
+		if part:GetAttribute("EvolutionCrown") then
+			continue -- la couronne d'évolution garde son argent / son or
 		end
 		if isFacePart(part) then
 			continue -- yeux, pupilles, reflets, bouche : le visage reste reconnaissable

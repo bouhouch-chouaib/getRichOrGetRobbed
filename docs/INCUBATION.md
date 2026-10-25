@@ -28,7 +28,9 @@ Avant éclosion, aucun revenu, équipement, fusion, échange ou vol n’est poss
 Chaque base a une **capsule d’évolution** dehors, derrière la clôture du fond (côté droit) : un cylindre de stase de science-fiction (socle de métal, cylindre de verre avec brume froide, anneaux lumineux qui pulsent, tuyaux, émetteur, console « ÉVOLUTION »). Réglages : `Config.Evolution`.
 
 - Le propriétaire choisit un de ses œufs en couveuse (bulle [E] « Mettre un œuf », fenêtre de choix) : l’œuf vole jusqu’à la capsule. Il **n’éclot plus tout seul** : le joueur se prive de son familier pour tenter d’en avoir un meilleur.
-- **3 stades** : Normal → Évolué (revenu x3, plus grand, anneau lumineux) → Ultime (revenu x8, plus grand, anneau et couronne d’éclats dorés). Les formes évoluées sont des familiers à part entière (`<Id>__E2`, `<Id>__E3` dans `PetCatalog.ById`, pas dans les tirages ni dans l’Index) : base, échanges, vols, duels, revenu.
+- **3 stades** : Normal → Évolué (revenu x3, plus grand, petite couronne d’acier argenté à 4 pointes et gemme saphir) → Ultime
+  (revenu x8, plus grand, grande couronne d’or à 8 pointes, 4 gemmes rubis et flèche). Depuis le 25 oct. : couronnes en
+  briques posées sur la tête, qui suivent ses mouvements, sans néon ni étincelles ni anneau (`PetModelBuilder.addCrown`). Les formes évoluées sont des familiers à part entière (`<Id>__E2`, `<Id>__E3` dans `PetCatalog.ById`, pas dans les tirages ni dans l’Index) : base, échanges, vols, duels, revenu.
 - **20 oct. (retour d'un joueur) : la capsule ne fait plus éclore un œuf avant l'heure.** Avant, on mettait un œuf de
   20 min dans la capsule et on l'ouvrait tout de suite. Maintenant, 2 étapes affichées sur le panneau :
   1. **Incubation** : l'œuf finit son temps normal dans la capsule (« 1. INCUBATION : 12:34 ») ; [E] refusé avant.
