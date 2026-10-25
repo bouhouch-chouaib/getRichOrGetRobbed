@@ -130,6 +130,19 @@ COSMOS_LOOKS = {
              "exposure": 0.95},
 }
 
+DIVIN_LOOKS = {
+    # au-dessus des nuages : soleil éclatant, horizon doré, air léger ; scène très claire, exposition retenue
+    # (map_art_bible_divin.json)
+    "jour": {"sun": 3.2, "sun_color": (1.0, 0.95, 0.84), "sun_elev": 46, "sun_az": 200, "sky_top": "#3A8AE0",
+             "sky_horizon": "#FFE0A0", "sky_strength": 1.0, "fog": "#F2EEE6", "fog_density": 0.0007,
+             "fog_start": 140, "fog_max": 0.3, "bloom": (0.9, 0.7, 24), "saturation": 0.24, "contrast": 0.22,
+             "exposure": -0.45},
+    "nuit": {"sun": 1.0, "sun_color": (0.72, 0.76, 1.0), "sun_elev": 50, "sun_az": 120, "sky_top": "#0A1430",
+             "sky_horizon": "#3A4A7A", "sky_strength": 1.2, "fog": "#2A3458", "fog_density": 0.0012,
+             "fog_start": 80, "fog_max": 0.6, "bloom": (1.2, 0.7, 28), "saturation": 0.18, "contrast": 0.12,
+             "exposure": 0.8},
+}
+
 # Rôle -> décor, couleurs du sol et lumière de chaque monde. Le code de placement ne connaît que les rôles.
 WORLD_CFG = {
     "Prairie": {
@@ -274,6 +287,32 @@ WORLD_CFG = {
                    "base_sol": ("#3E2A6A", "#2E1E58"), "paille": ("#9A94BC", "#8A84AC"), "dalle": ("#6E62A0", "#5E5290"),
                    "mur": ("#462878", "#361E64"), "mur_haut": ("#FF78F0", "#F060E0"), "loin": "#241446"},
         "glow": {"chemin": 2.0, "mur_haut": 2.0},
+    },
+    "Divin": {
+        "lib": [("Divin", None), ("Prairie", ["Pancarte"])], "suffix": "_divin", "looks": DIVIN_LOOKS,
+        "clouds": 10, "cloud": "#FFFFFF", "water": "spring",
+        "slab": "Divin_Dalle", "gate": "Divin_PorteCeleste", "flank": "Divin_Vasque",
+        "between": ("Divin_Colonne", "Divin_Statue"), "between_z": -0.2,
+        "tuft": "Divin_Touffe", "path_small": ("Divin_Buisson", 0.35, 0.5), "sign": "Pancarte",
+        "fence": "Divin_Balustrade", "stairs": "Divin_Escalier", "base_gate": "Divin_PorteCeleste",
+        "prop_a": "Divin_Harpe", "prop_b": "Divin_Buisson", "hill": "Divin_Falaise",
+        "hill_trees": ("Divin_Statue", ("Divin_ArbreDore", "Divin_Buisson")),
+        "gap_trees": ("Divin_ArbreDore", "Divin_Nuage", "Divin_ArbreDore", "Divin_Buisson"),
+        "rocks": ("Divin_Rocher", "Divin_Nuage", "Divin_Rocher"), "ruin": "Divin_Colonne",
+        "landmark": ("Divin_Temple", "Divin_Fontaine", "Divin_Harpe", "Divin_Temple"),
+        "bank_rock": "Divin_Rocher", "bridge": None,
+        "cliff": "Divin_Falaise", "cliff_trees": ("Divin_Statue", ("Divin_ArbreDore", "Divin_Nuage")),
+        "cliff_tree_scale": 1.3,
+        # mer de nuages et tours géantes de la cité céleste au loin
+        "far": ("Divin_Nuage", "Divin_Nuage"), "far_spire": "Divin_Tour",
+        "far_scale": ((7.0, 11.0), (7.0, 11.0), (5.0, 8.0)),
+        "cliff_alt": ("Divin_Tour", (2.6, 2.6, 4.4)),  # tours à coupole d'or (~90 studs) : la ligne des falaises devient une cité
+        "pets": (("CherubinHamster", -14, -2, 5.5), ("LicorneCeleste", 10, 6, 7.5), ("GriffonDore", -2, 12, 8.0),
+                 ("TitanAureole", 18, -12, 9.0), ("GardienTrouNoir", -24, 8, 9.0)),
+        "colors": {"sol": ("#FFFCF0", "#F4ECD6", "#FAF4E2", "#EEE4CC"), "chemin": ("#FFD65A", "#F0BE3C"),
+                   "base_sol": ("#FAF2DC", "#EEE2C4"), "paille": ("#E8D8A8", "#D8C890"), "dalle": ("#F2E8D0", "#E2D6BA"),
+                   "mur": ("#FAF4E6", "#ECE2CC"), "mur_haut": ("#FFCD3C", "#F0BE30"), "loin": "#FFF4DC"},
+        "glow": {"mur_haut": 1.6},
     },
 }
 W: dict = WORLD_CFG["Prairie"]
@@ -737,6 +776,22 @@ def add_stardust_crater(M, k: int, rnd):
             collide=asset in ("Cosmos_Rocher", "Cosmos_Meteorite"))
 
 
+def add_celestial_spring(M, k: int, rnd):
+    """Source céleste du Divin entre la base 1 et la base 8 (où le Chérubin Hamster joue de la harpe) : bassin d'eau
+    bleu pâle (Glass dans Roblox), margelle de dalles de marbre, arbres d'or, nuages et une harpe."""
+    phi = -(k + 0.5) * 45.0
+    cx, cy = polar(272, phi)
+    pool = disc("SourceCeleste", 13.0, 0.08, M["source"], segs=48)  # ronde : un cylindre Roblox ne peut pas être ovale
+    G.transform(pool, Matrix.Translation((cx, cy, 0)))
+    surface("spring", "disc", cx, cy, 26.0, 26.0)
+    for j in range(8):
+        a = j * 2 * math.pi / 8 + rnd.uniform(-0.2, 0.2)
+        x, y = cx + math.cos(a) * 17.0, cy + math.sin(a) * 17.0
+        asset = ("Divin_ArbreDore", "Divin_Nuage", "Divin_Buisson", "Divin_Harpe")[j % 4]
+        put(asset, x, y, -0.2, math.degrees(a) + 90 + rnd.uniform(-15, 15), rnd.uniform(0.7, 0.95), "colline",
+            collide=asset in ("Divin_ArbreDore", "Divin_Harpe"))
+
+
 def add_frozen_lake(M, k: int, rnd):
     """Lac gelé de la Glace entre la base 1 et la base 8 (où patine le Pingouin) : glace lisse, congères, sapins,
     rochers enneigés autour."""
@@ -1137,6 +1192,7 @@ def main() -> None:
         "glace_lac": flat_mat("M_GlaceLac", "#BEE6FF", 0.05, emission=0.1),
         "fosse": flat_mat("M_Fosse", "#0A2A4A", 0.1, emission=0.15),
         "poussiere": flat_mat("M_PoussiereEtoiles", "#B482FF", 0.3, emission=1.8),
+        "source": flat_mat("M_SourceCeleste", "#9AD8FF", 0.05, emission=0.2),
         "avatar_haut": flat_mat("M_AvatarHaut", "#1E7BFF", 0.6),
         "avatar_bas": flat_mat("M_AvatarBas", "#2B2F45", 0.6),
         "avatar_peau": flat_mat("M_AvatarPeau", "#F5CD30", 0.5),
@@ -1159,6 +1215,8 @@ def main() -> None:
         add_trench(M, 7, rnd)
     elif W["water"] == "stardust":
         add_stardust_crater(M, 7, rnd)
+    elif W["water"] == "spring":
+        add_celestial_spring(M, 7, rnd)
     else:
         add_lava_pool(M, 7, rnd)
     build_periphery(rnd)

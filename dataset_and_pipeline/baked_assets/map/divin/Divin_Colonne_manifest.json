@@ -1,0 +1,59 @@
+{
+  "asset": "Divin_Colonne",
+  "triangles": 2412,
+  "vertices": 1238,
+  "size_studs": [
+    8.435,
+    6.274,
+    8.898
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 44.9,
+  "source_materials": [
+    "M_Laurier",
+    "M_MarbreA",
+    "M_MarbreB",
+    "M_MarbreTaille",
+    "M_OrDecor"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0356,
+    "max_ray": 0.089,
+    "ao_distance": 1.0678,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Divin_Colonne_Color.png",
+    "Roughness": "Divin_Colonne_Roughness.png",
+    "Metalness": "Divin_Colonne_Metalness.png",
+    "Normal": "Divin_Colonne_Normal.png",
+    "AO": "Divin_Colonne_AO.png"
+  },
+  "exports": [
+    "Divin_Colonne.fbx",
+    "Divin_Colonne.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Divin_Colonne (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Divin_Colonne_Color.png",
+      "NormalMap": "Divin_Colonne_Normal.png",
+      "RoughnessMap": "Divin_Colonne_Roughness.png",
+      "MetalnessMap": "Divin_Colonne_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 59.0
+}

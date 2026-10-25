@@ -1,0 +1,57 @@
+{
+  "asset": "Divin_Buisson",
+  "triangles": 540,
+  "vertices": 280,
+  "size_studs": [
+    4.299,
+    4.299,
+    7.299
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 57.0,
+  "source_materials": [
+    "M_Laurier",
+    "M_MarbreTaille",
+    "M_OrDecor"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0292,
+    "max_ray": 0.073,
+    "ao_distance": 0.8759,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Divin_Buisson_Color.png",
+    "Roughness": "Divin_Buisson_Roughness.png",
+    "Metalness": "Divin_Buisson_Metalness.png",
+    "Normal": "Divin_Buisson_Normal.png",
+    "AO": "Divin_Buisson_AO.png"
+  },
+  "exports": [
+    "Divin_Buisson.fbx",
+    "Divin_Buisson.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Divin_Buisson (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Divin_Buisson_Color.png",
+      "NormalMap": "Divin_Buisson_Normal.png",
+      "RoughnessMap": "Divin_Buisson_Roughness.png",
+      "MetalnessMap": "Divin_Buisson_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 25.0
+}

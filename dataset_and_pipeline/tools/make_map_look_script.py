@@ -27,6 +27,8 @@ LIGHTS = {
                 "Abysses_Coquillage": (0.1, 16, 1.2, (150, 240, 255))},
     "Cosmos": {"Cosmos_Pylone": (0.45, 20, 1.4, (120, 220, 255)),
                "Cosmos_Cristaux": (0.15, 12, 1.0, (255, 150, 240))},
+    "Divin": {"Divin_Vasque": (0.42, 20, 1.3, (255, 214, 140)),
+              "Divin_Fontaine": (0.3, 16, 1.0, (200, 235, 255))},
 }
 
 
@@ -224,6 +226,9 @@ local SURFACE_LOOK = {
 	-- cratère de poussière d'étoiles du Cosmos : Neon violet (pièce du jeu, rien à envoyer) + sa lumière
 	stardust = { name = "PoussiereEtoiles", color = Color3.fromRGB(180, 130, 255), material = Enum.Material.Neon,
 		transparency = 0, light = Color3.fromRGB(190, 140, 255) },
+	-- source céleste du Divin : eau claire bleu pâle (sur un sol blanc, un bleu trop clair disparaît)
+	spring = { name = "SourceCeleste", color = Color3.fromRGB(110, 190, 245), material = Enum.Material.Glass,
+		transparency = 0.2, light = Color3.fromRGB(210, 240, 255) },
 }
 
 local function addLight(part: BasePart, spec)

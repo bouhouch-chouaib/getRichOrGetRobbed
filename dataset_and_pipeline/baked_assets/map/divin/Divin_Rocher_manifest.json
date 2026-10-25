@@ -1,0 +1,56 @@
+{
+  "asset": "Divin_Rocher",
+  "triangles": 872,
+  "vertices": 442,
+  "size_studs": [
+    10.83,
+    6.834,
+    5.193
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 56.5,
+  "source_materials": [
+    "M_MarbreA",
+    "M_MarbreC",
+    "M_Nuage"
+  ],
+  "presets": [
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0433,
+    "max_ray": 0.1083,
+    "ao_distance": 1.2996,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Divin_Rocher_Color.png",
+    "Roughness": "Divin_Rocher_Roughness.png",
+    "Metalness": "Divin_Rocher_Metalness.png",
+    "Normal": "Divin_Rocher_Normal.png",
+    "AO": "Divin_Rocher_AO.png"
+  },
+  "exports": [
+    "Divin_Rocher.fbx",
+    "Divin_Rocher.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Divin_Rocher (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Divin_Rocher_Color.png",
+      "NormalMap": "Divin_Rocher_Normal.png",
+      "RoughnessMap": "Divin_Rocher_Roughness.png",
+      "MetalnessMap": "Divin_Rocher_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 70.0
+}

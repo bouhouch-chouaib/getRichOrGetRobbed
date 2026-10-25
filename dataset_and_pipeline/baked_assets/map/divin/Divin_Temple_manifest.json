@@ -1,0 +1,58 @@
+{
+  "asset": "Divin_Temple",
+  "triangles": 3532,
+  "vertices": 1787,
+  "size_studs": [
+    14.0,
+    14.0,
+    17.2
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 33.4,
+  "source_materials": [
+    "M_MarbreA",
+    "M_MarbreB",
+    "M_MarbreTaille",
+    "M_OrDecor"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0688,
+    "max_ray": 0.172,
+    "ao_distance": 2.064,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Divin_Temple_Color.png",
+    "Roughness": "Divin_Temple_Roughness.png",
+    "Metalness": "Divin_Temple_Metalness.png",
+    "Normal": "Divin_Temple_Normal.png",
+    "AO": "Divin_Temple_AO.png"
+  },
+  "exports": [
+    "Divin_Temple.fbx",
+    "Divin_Temple.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Divin_Temple (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Divin_Temple_Color.png",
+      "NormalMap": "Divin_Temple_Normal.png",
+      "RoughnessMap": "Divin_Temple_Roughness.png",
+      "MetalnessMap": "Divin_Temple_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 18.5
+}

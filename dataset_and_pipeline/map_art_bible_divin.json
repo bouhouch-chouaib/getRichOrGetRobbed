@@ -1,0 +1,59 @@
+{
+  "title": "Bible artistique de la carte - monde Divin (7e palier)",
+  "date": "2026-10-26",
+  "status": "proposition, a valider par Chouaib sur qa_renders/map_hero_divin.png et map_aesthetic_board_divin.png",
+  "method": "Meme methode que les mondes precedents : carte ronde inchangee, decors en blocs biseautes cuits, relief autour de l'arene, eclairage dans le code, surfaces en pieces Roblox. Chaque monde a sa charte.",
+  "story": "Le Sanctuaire Celeste du Titan Aureole : une cite de marbre blanc et d'or posee au-dessus des nuages. Le Titan Aureole veille depuis son temple, le Griffon Dore garde les portes, la Licorne Celeste galope sur les nuages, le Cherubin Hamster joue de la harpe pres de la source celeste, et le Gardien du Trou Noir surveille le vortex au centre.",
+
+  "sources": {
+    "local_reference": "src/shared/Worlds.lua (Divin : sol blanc creme, chemins dores, mur blanc au sommet or en Neon, arbres blancs a feuilles dorees, plumes), src/shared/PetCatalog.lua (familiers du Divin)",
+    "web": [
+      {"what": "Palette celeste habituelle : base blanc et or, ciel bleu froid, accents rose ou lavande, lumiere doree sur les points focaux", "url": "https://www.pakutaso.com/en/20230410107post-28947.html"},
+      {"what": "Pack low poly 'Heaven' : marbre et elements dores", "url": "https://superhivemarket.com/products/platformer-9-heaven/docs"},
+      {"what": "Roblox : Color + Haze elargit la teinte du ciel, Decay (avec Glare et Haze > 0) la fait varier loin du soleil", "url": "https://create.roblox.com/docs/en-us/environment/atmosphere"}
+    ]
+  },
+
+  "palette": {
+    "rule": "Tres clair et chaud : marbre blanc creme, or, nuages blancs ; les ombres sont bleu-gris (jamais grises sales) pour garder du volume. Accents : feuillages dores, laurier vert, eau celeste bleu pale, cristaux de lumiere blanc-or. L'or reste en touches (chapiteaux, domes, rayons) : trop d'or ecrase tout.",
+    "gradient_center_to_edge": [
+      {"zone": "coeur du trou noir", "hex": "#2E1B5C", "note": "inchange : vortex violet (le Gardien du Trou Noir y veille)"},
+      {"zone": "dalles du sanctuaire", "hex": "#F2E8D0", "accent": "#FFC830", "note": "marbre, soleil d'or incruste"},
+      {"zone": "arene", "hex": "#FFFCF0", "alt": "#F4ECD6", "note": "damier blanc creme du jeu (Worlds.Divin.GrassA/B)"},
+      {"zone": "chemins", "hex": "#FFD65A", "alt": "#F0BE3C", "note": "or du jeu (Worlds.Divin.PathA/B)"},
+      {"zone": "mur d'enceinte", "hex": "#FAF4E6", "top": "#FFCD3C", "note": "inchange (haut en Neon)"},
+      {"zone": "falaises de marbre", "hex": "#F4EEE0", "caps": ["#FFFFFF", "#E8D27A"], "note": "marbre en strates veine d'or, terrasses de nuages et de mousse doree"}
+    ],
+    "materials": {
+      "marbre": {"tones": ["#F4EEE0", "#EAE2CE", "#FAF6EC"], "cavity": "#C8A050"},
+      "nuage": {"base": "#FFFFFF", "ombre": "#C8D4EA"},
+      "flore": {"ecorce": "#F2EAD8", "feuilles": ["#FFD24A", "#FFFBF0"], "laurier": "#7AB050"},
+      "or": {"base": "#FFC830"},
+      "eau_celeste": {"mid": "#9AD8FF"},
+      "cristal_lumiere": {"mid": "#FFE08A"}
+    }
+  },
+
+  "atmosphere": {
+    "tone": "Au-dessus des nuages : ciel lumineux a l'horizon dore, soleil eclatant, air leger ; la nuit est bleu nuit et les vasques deviennent les reperes.",
+    "Worlds.Divin.Ambience": {"AirColor": "#FFF5DC", "AirDecay": "#FFDCA0", "AirDensity": 0.28, "Tint": "#FFF8E6", "Saturation": 0.1, "note": "deja dans le jeu ; ciel du monde regle le 26 oct. (Worlds.Looks.Divin.Sky)"},
+    "no_glow": "Aucun masque de lueur. Cristaux de lumiere des vasques et des fontaines : PointLight chaudes posees par le script (rien a envoyer), eteintes pour les autres mondes."
+  },
+
+  "zones": {
+    "arene_centrale": {"story": "Le parvis du sanctuaire : anneau de dalles de marbre au soleil d'or, 8 portes celestes (colonnes de marbre, arche blanche et or, soleil rayonnant au sommet) sur les chemins, vasques de lumiere de part et d'autre, colonnes brisees et statues entre les chemins."},
+    "chemins": {"story": "Allees dorees bordees d'herbe celeste et de petits buissons tailles."},
+    "bases": {"story": "Balustrades de marbre a balustres, porte celeste, escalier de marbre, harpes d'or et buissons tailles."},
+    "entre_les_bases": {"story": "Falaises de marbre en gradins couronnees de nuages, arbres d'or, bancs de nuages, temple rond a coupole d'or, fontaine a etages, harpe geante du Cherubin Hamster, source celeste."},
+    "peripherie": {"story": "Deux couronnes de falaises de marbre (55-75 puis 85-110 studs) d'ou montent des tours a coupole d'or ; au loin, mer de nuages et tours geantes de la cite celeste."}
+  },
+
+  "assets": {
+    "budget_triangles": 6000,
+    "prefix": "Divin_",
+    "list": ["Divin_Falaise", "Divin_Nuage", "Divin_ArbreDore", "Divin_Buisson", "Divin_Rocher", "Divin_Touffe", "Divin_Colonne", "Divin_Tour", "Divin_PorteCeleste", "Divin_Vasque", "Divin_Dalle", "Divin_Balustrade", "Divin_Escalier", "Divin_Harpe", "Divin_Fontaine", "Divin_Statue", "Divin_Temple"]
+  },
+
+  "gameplay_constraints": "Identiques aux autres mondes : chemins et cercle du trou degages, rien de solide dans l'anneau des objets sauvages (r 70-160), gros decors entre les bases, kiosques degages.",
+  "roblox_integration": "Apres validation : import de Decors_Divin.fbx (Studio en mode Edition), MapDecor.Divin, habillage DivinLook dans MapGenerator.DRESSINGS ; PointLight chaudes sur les vasques et fontaines ; source celeste en Glass bleu pale + PointLight douce."
+}

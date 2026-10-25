@@ -308,3 +308,30 @@ chaque monde a son ciel (`shared/Worlds`, champ `Sky` de chaque monde), appliqu�
 - Vérifié en Play (solo, monde changé côté client), jour et nuit : planche `qa_renders/ciels_par_monde.jpg`. Réglés
   après les premières photos : la nuit des Abysses (brume 3,4 : eau cyan qui délavait les récifs -> 1,4), le Divin
   (trop de nuages : ciel gris -> 0,4 et brume 2), le Désert (encore bleu -> brume 2,3).
+
+---
+
+# Monde 7 : Divin (26 oct. 2026) — proposition à valider
+
+« Le Sanctuaire Céleste du Titan Auréole » (charte `map_art_bible_divin.json`, d'après Chérubin Hamster, Licorne
+Céleste, Griffon Doré, Titan Auréole, Gardien du Trou Noir) : une cité de marbre blanc et d'or au-dessus des nuages.
+17 décors dans `blender_tools/environment_divin.py`, rendus `qa_renders/map_hero_divin.png`,
+`map_aesthetic_board_divin.png`, `map_assets_board_divin.png`.
+
+- **Aucune lueur** : marbre aux fissures dorées (couleur des creux), cristaux de lumière blanc-or et eau céleste en
+  matériau cristal sans émission (attributs par `gem()`) ; PointLight chaudes sur les vasques du sanctuaire (16) et
+  bleu pâle sur les fontaines (2). Rien à envoyer.
+- Décors (< 6 000 triangles) : Falaise (marbre en strates, terrasses de nuages et de mousse dorée), Nuage, ArbreDore
+  (écorce blanche, houppier or et blanc, clochettes), Buisson (laurier taillé), Rocher, Touffe, Colonne (brisée,
+  couronne de laurier), Tour (coupole d'or), PorteCeleste (colonnes cannelées, arche blanche et or, soleil rayonnant),
+  Vasque (cristal de lumière), Dalle (soleil d'or), Balustrade (balustres en vase), Escalier, Harpe (du Chérubin
+  Hamster), Fontaine (à étages), Statue (orbe d'or ailé), Temple (rond, six colonnes, coupole d'or). Pancarte reprise.
+- Scène : `run_map_scene.py -- --world Divin` -> `baked_assets/map/divin/map_layout.json` (891 décors + source céleste :
+  surface « spring », Glass bleu clair + PointLight douce) ; au loin, mer de nuages et tours géantes ; un module de
+  falaise sur trois remplacé par une tour à coupole d'or (~90 studs : la couronne devient une cité céleste). Scène très
+  claire : exposition -0,45, contraste 0,22, bloom réduit (sinon le marbre blanc se confond avec le sol blanc).
+  `export_map_lot.py -- --world Divin` -> `Decors_Divin.fbx` (34,3 Mo).
+- Pièges vus : un lathe à 12 côtés (30° entre faces) dépasse le seuil de biseau de 25° et se fait biseauter sur tout
+  son tour (+3 800 triangles pour la fontaine) : seuil passé à 35° pour elle.
+- Pas encore dans Studio : attend la validation du style par Chouaib puis l'import de `Decors_Divin.fbx` (mode
+  Édition) ; ensuite `apply_map_look_divin.lua` et les bases `DivinLook` (déjà déclarées dans `MapGenerator`).

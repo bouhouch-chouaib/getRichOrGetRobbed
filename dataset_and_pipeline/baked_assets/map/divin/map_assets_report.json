@@ -1,0 +1,189 @@
+{
+  "Divin_Falaise": {
+    "triangles": 5832,
+    "within_6000": true,
+    "size_studs": [
+      36.078,
+      15.032,
+      29.623
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 9.6
+  },
+  "Divin_Nuage": {
+    "triangles": 2624,
+    "within_6000": true,
+    "size_studs": [
+      12.846,
+      11.051,
+      4.902
+    ],
+    "uv_overlap_pct": 0.01,
+    "seconds": 65.0
+  },
+  "Divin_ArbreDore": {
+    "triangles": 4906,
+    "within_6000": true,
+    "size_studs": [
+      13.535,
+      8.248,
+      15.687
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 58.7
+  },
+  "Divin_Buisson": {
+    "triangles": 540,
+    "within_6000": true,
+    "size_studs": [
+      4.299,
+      4.299,
+      7.299
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 25.0
+  },
+  "Divin_Rocher": {
+    "triangles": 872,
+    "within_6000": true,
+    "size_studs": [
+      10.83,
+      6.834,
+      5.193
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 70.0
+  },
+  "Divin_Touffe": {
+    "triangles": 440,
+    "within_6000": true,
+    "size_studs": [
+      2.177,
+      2.131,
+      2.945
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 19.9
+  },
+  "Divin_Colonne": {
+    "triangles": 2412,
+    "within_6000": true,
+    "size_studs": [
+      8.435,
+      6.274,
+      8.898
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 59.0
+  },
+  "Divin_Tour": {
+    "triangles": 2664,
+    "within_6000": true,
+    "size_studs": [
+      5.993,
+      5.993,
+      20.4
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 54.9
+  },
+  "Divin_PorteCeleste": {
+    "triangles": 3780,
+    "within_6000": true,
+    "size_studs": [
+      25.6,
+      4.73,
+      30.7
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 38.0
+  },
+  "Divin_Vasque": {
+    "triangles": 1062,
+    "within_6000": true,
+    "size_studs": [
+      4.4,
+      4.4,
+      14.446
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 57.5
+  },
+  "Divin_Dalle": {
+    "triangles": 1076,
+    "within_6000": true,
+    "size_studs": [
+      8.084,
+      5.984,
+      1.4
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 17.3
+  },
+  "Divin_Balustrade": {
+    "triangles": 4612,
+    "within_6000": true,
+    "size_studs": [
+      12.0,
+      1.5,
+      3.7
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 38.1
+  },
+  "Divin_Escalier": {
+    "triangles": 1620,
+    "within_6000": true,
+    "size_studs": [
+      19.2,
+      5.805,
+      2.3
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 31.3
+  },
+  "Divin_Harpe": {
+    "triangles": 1836,
+    "within_6000": true,
+    "size_studs": [
+      4.6,
+      2.6,
+      9.7
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 23.1
+  },
+  "Divin_Fontaine": {
+    "triangles": 2642,
+    "within_6000": true,
+    "size_studs": [
+      10.7,
+      10.7,
+      10.037
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 26.8
+  },
+  "Divin_Statue": {
+    "triangles": 1792,
+    "within_6000": true,
+    "size_studs": [
+      8.938,
+      4.6,
+      12.045
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 28.2
+  },
+  "Divin_Temple": {
+    "triangles": 3532,
+    "within_6000": true,
+    "size_studs": [
+      14.0,
+      14.0,
+      17.2
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 18.5
+  }
+}
