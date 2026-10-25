@@ -38,6 +38,7 @@ local baseVisuals: { BaseVisual } = {}
 local baseLooks: { [number]: { [string]: boolean } } = {}
 local arenaDecor: { { part: BasePart, collide: boolean, world: string } } = {}
 local arenaWorlds: { [string]: boolean } = {}
+local arenaLights: { { light: Light, world: string } } = {}
 
 -- Monde où se trouve le joueur (attribut "World" : il peut être retourné dans un monde déjà visité), sinon son palier.
 local function tierOf(target: Player?): number
@@ -90,6 +91,7 @@ local function collect(map: Instance)
 	table.clear(baseLooks)
 	table.clear(arenaDecor)
 	table.clear(arenaWorlds)
+	table.clear(arenaLights)
 	local function addParts(folder: Instance, index: number, look: string?)
 		for _, part in ipairs(folder:GetDescendants()) do
 			if part:IsA("BasePart") then
@@ -124,6 +126,8 @@ local function collect(map: Instance)
 				if part:IsA("BasePart") then
 					table.insert(arenaDecor, { part = part, collide = part.CanCollide, world = worldId })
 					arenaWorlds[worldId] = true
+				elseif part:IsA("Light") then
+					table.insert(arenaLights, { light = part, world = worldId })
 				end
 			end
 		end
@@ -406,6 +410,10 @@ local function refresh()
 		local mine = item.world == myWorld
 		item.part.LocalTransparencyModifier = if mine then 0 else 1
 		item.part.CanCollide = item.collide and mine
+	end
+	for _, item in ipairs(arenaLights) do
+		-- les braseros / la lave d'un autre monde ne doivent pas éclairer le mien
+		item.light.Enabled = item.world == myWorld
 	end
 	for _, item in ipairs(baseVisuals) do
 		local ownerWorld = Config.GetWorld(tierOf(baseOwners[item.baseIndex] or player)).Id

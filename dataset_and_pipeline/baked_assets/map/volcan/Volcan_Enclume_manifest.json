@@ -1,0 +1,59 @@
+{
+  "asset": "Volcan_Enclume",
+  "triangles": 1024,
+  "vertices": 528,
+  "size_studs": [
+    9.137,
+    4.1,
+    7.203
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 46.6,
+  "source_materials": [
+    "M_Basalte",
+    "M_BoisCharbon",
+    "M_Bronze",
+    "M_FerForge",
+    "M_Lave"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0365,
+    "max_ray": 0.0914,
+    "ao_distance": 1.0964,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Volcan_Enclume_Color.png",
+    "Roughness": "Volcan_Enclume_Roughness.png",
+    "Metalness": "Volcan_Enclume_Metalness.png",
+    "Normal": "Volcan_Enclume_Normal.png",
+    "AO": "Volcan_Enclume_AO.png"
+  },
+  "exports": [
+    "Volcan_Enclume.fbx",
+    "Volcan_Enclume.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Volcan_Enclume (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Volcan_Enclume_Color.png",
+      "NormalMap": "Volcan_Enclume_Normal.png",
+      "RoughnessMap": "Volcan_Enclume_Roughness.png",
+      "MetalnessMap": "Volcan_Enclume_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 75.4
+}

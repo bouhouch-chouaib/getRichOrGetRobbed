@@ -1,0 +1,56 @@
+{
+  "asset": "Volcan_Cristaux",
+  "triangles": 2316,
+  "vertices": 1180,
+  "size_studs": [
+    4.9,
+    3.9,
+    5.846
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 512,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 36.2,
+  "source_materials": [
+    "M_Basalte",
+    "M_CristalFeu"
+  ],
+  "presets": [
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0234,
+    "max_ray": 0.0585,
+    "ao_distance": 0.7016,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Volcan_Cristaux_Color.png",
+    "Roughness": "Volcan_Cristaux_Roughness.png",
+    "Metalness": "Volcan_Cristaux_Metalness.png",
+    "Normal": "Volcan_Cristaux_Normal.png",
+    "AO": "Volcan_Cristaux_AO.png"
+  },
+  "exports": [
+    "Volcan_Cristaux.fbx",
+    "Volcan_Cristaux.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Volcan_Cristaux (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Volcan_Cristaux_Color.png",
+      "NormalMap": "Volcan_Cristaux_Normal.png",
+      "RoughnessMap": "Volcan_Cristaux_Roughness.png",
+      "MetalnessMap": "Volcan_Cristaux_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 15.4
+}

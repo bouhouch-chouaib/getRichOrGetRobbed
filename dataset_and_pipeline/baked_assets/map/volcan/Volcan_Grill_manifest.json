@@ -1,0 +1,59 @@
+{
+  "asset": "Volcan_Grill",
+  "triangles": 4504,
+  "vertices": 2316,
+  "size_studs": [
+    12.567,
+    4.904,
+    9.2
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 22.2,
+  "source_materials": [
+    "M_BoisCharbon",
+    "M_Bronze",
+    "M_FerForge",
+    "M_Lave",
+    "M_Saucisse"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.0503,
+    "max_ray": 0.1257,
+    "ao_distance": 1.508,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Volcan_Grill_Color.png",
+    "Roughness": "Volcan_Grill_Roughness.png",
+    "Metalness": "Volcan_Grill_Metalness.png",
+    "Normal": "Volcan_Grill_Normal.png",
+    "AO": "Volcan_Grill_AO.png"
+  },
+  "exports": [
+    "Volcan_Grill.fbx",
+    "Volcan_Grill.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Volcan_Grill (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Volcan_Grill_Color.png",
+      "NormalMap": "Volcan_Grill_Normal.png",
+      "RoughnessMap": "Volcan_Grill_Roughness.png",
+      "MetalnessMap": "Volcan_Grill_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 29.2
+}

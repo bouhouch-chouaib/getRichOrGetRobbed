@@ -148,3 +148,33 @@ rendus `qa_renders/map_hero_desert.png`, `map_aesthetic_board_desert.png`, `map_
 - Pas vu : deux joueurs de mondes différents en même temps, téléphone, braseros (pas posés : à allumer plus tard avec
   PointLight + feu de particules Roblox). Pour tester un monde sans l'acheter : côté client,
   `LocalPlayer:SetAttribute("World", 2)` et `SetAttribute("Tier", 2)` (le serveur les remet à la prochaine sauvegarde).
+
+---
+
+# Monde 3 : Volcan (25 oct. 2026) — proposition à valider
+
+« La Forge du Titan » (charte `map_art_bible_volcan.json`, d'après les familiers du Volcan : Salamandre, Taupe Magma,
+Golem de Cendre, Dragon Barbecue, Titan de Lave, Cerbère Infernal). 17 décors dans `blender_tools/environment_volcan.py`,
+rendus `qa_renders/map_hero_volcan.png`, `map_aesthetic_board_volcan.png`, `map_assets_board_volcan.png`.
+
+- **Aucune lueur** : la lave est une couleur (orange-jaune) et apparaît dans les creux du basalte (couleur des creux =
+  orange) ; la vraie lumière vient du Neon déjà en jeu (chemins, haut du mur) et de PointLight posées par le script
+  (piliers-braseros, cheminées, chaudrons, mare de lave), éteintes par `WorldSkin` pour les autres mondes. Rien à envoyer.
+- Décors (< 6 000 triangles) : Orgues (basalte en colonnes hexagonales), Roche, Eclats (obsidienne), Cheminee,
+  ArbreCalcine, Cristaux (cristaux de feu), Touffe (cendre), PorteForge, PilierBrasier, Enclume, Dalle, Rempart (piques de
+  fer), Escalier, Chariot, Chaudron, Grill (du Dragon Barbecue), TeteGolem. Pancarte reprise de la Prairie.
+- Scène : `run_map_scene.py -- --world Volcan` -> `baked_assets/map/volcan/map_layout.json` (889 décors + mare de lave) ;
+  au loin, cônes de volcan géants (cheminées x30) ; un module de la couronne extérieure sur trois remplacé par des
+  éclats d'obsidienne (casse l'effet « ville »). `export_map_lot.py -- --world Volcan` -> `Decors_Volcan.fbx` (33 Mo).
+- Branchement prévu (après validation, import Studio en mode Édition) : `apply_map_look_volcan.lua`, `MapDecor.Volcan`,
+  dossiers `VolcanLook` (déjà dans `MapGenerator.DRESSINGS`).
+
+## Eau et lave en jeu (25 oct.)
+
+Jusqu'ici l'eau (ruisseau et mare de la Prairie, oasis du Désert) n'existait que dans les rendus : le script ne posait que
+les modèles (le pont de la Prairie ne franchissait rien). Désormais `run_map_scene.py` exporte aussi des `surfaces`
+(disques et bandes) et les scripts Studio les créent en pièces Roblox simples (eau : Glass bleu transparent ; lave : Neon
+orange + PointLight), sans collision, dans `MapDecor.<Monde>.surfaces`. Mares rendues rondes (un cylindre Roblox ne
+peut pas être ovale). Prairie : 24 surfaces, Désert : 1, Volcan : 1. Les arbres posés sur les falaises de la Prairie sont
+aussi remontés de ~1,6 stud (hauteur réelle de la falaise au lieu de 28,2) : relancer `apply_map_look.lua` et
+`apply_map_look_desert.lua` dans Studio pour en profiter.

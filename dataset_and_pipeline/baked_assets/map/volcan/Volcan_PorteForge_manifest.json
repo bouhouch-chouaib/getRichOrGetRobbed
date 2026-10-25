@@ -1,0 +1,59 @@
+{
+  "asset": "Volcan_PorteForge",
+  "triangles": 3572,
+  "vertices": 1850,
+  "size_studs": [
+    28.4,
+    5.3,
+    22.799
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 25.0,
+  "source_materials": [
+    "M_Basalte",
+    "M_BasalteTaille",
+    "M_Bronze",
+    "M_FerForge",
+    "M_Lave"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 48,
+    "cage": 0.1136,
+    "max_ray": 0.284,
+    "ao_distance": 2.5,
+    "ao_strength": 0.55,
+    "from_high": false
+  },
+  "maps": {
+    "Color": "Volcan_PorteForge_Color.png",
+    "Roughness": "Volcan_PorteForge_Roughness.png",
+    "Metalness": "Volcan_PorteForge_Metalness.png",
+    "Normal": "Volcan_PorteForge_Normal.png",
+    "AO": "Volcan_PorteForge_AO.png"
+  },
+  "exports": [
+    "Volcan_PorteForge.fbx",
+    "Volcan_PorteForge.glb"
+  ],
+  "roblox": {
+    "MeshPart": "Volcan_PorteForge (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Volcan_PorteForge_Color.png",
+      "NormalMap": "Volcan_PorteForge_Normal.png",
+      "RoughnessMap": "Volcan_PorteForge_Roughness.png",
+      "MetalnessMap": "Volcan_PorteForge_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 41.4
+}

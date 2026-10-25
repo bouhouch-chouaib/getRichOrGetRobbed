@@ -389,6 +389,7 @@ local DRESSING_SECTION = 12 -- longueur d'une section de clôture (studs)
 local DRESSINGS: { [string]: { Fence: string, Gate: string, Stairs: string } } = {
 	Prairie = { Fence = "Palissade", Gate = "ArcheAncienne", Stairs = "EscalierPierre" },
 	Desert = { Fence = "Desert_Muret", Gate = "Desert_PorteTemple", Stairs = "Desert_Escalier" },
+	Volcan = { Fence = "Volcan_Rempart", Gate = "Volcan_PorteForge", Stairs = "Volcan_Escalier" },
 }
 
 local function createDressing(origin: CFrame, top: number, base: Model, worldId: string, library: Instance)

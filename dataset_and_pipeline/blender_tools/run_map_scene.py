@@ -83,6 +83,17 @@ DESERT_LOOKS = {
              "exposure": 0.9},
 }
 
+VOLCAN_LOOKS = {
+    "jour": {"sun": 3.6, "sun_color": (1.0, 0.72, 0.52), "sun_elev": 32, "sun_az": 230, "sky_top": "#5A6E9E",
+             "sky_horizon": "#FF9A64", "sky_strength": 0.9, "fog": "#C8704E", "fog_density": 0.0008,
+             "fog_start": 110, "fog_max": 0.45, "bloom": (1.4, 0.55, 24), "saturation": 0.25, "contrast": 0.12,
+             "exposure": 0.1},
+    "nuit": {"sun": 0.9, "sun_color": (0.9, 0.55, 0.5), "sun_elev": 30, "sun_az": 120, "sky_top": "#140A16",
+             "sky_horizon": "#6A2420", "sky_strength": 1.4, "fog": "#3A1A1E", "fog_density": 0.0012,
+             "fog_start": 80, "fog_max": 0.6, "bloom": (1.2, 0.7, 28), "saturation": 0.25, "contrast": 0.12,
+             "exposure": 0.8},
+}
+
 # Rôle -> décor, couleurs du sol et lumière de chaque monde. Le code de placement ne connaît que les rôles.
 WORLD_CFG = {
     "Prairie": {
@@ -128,6 +139,31 @@ WORLD_CFG = {
                    "base_sol": ("#F4D07E", "#E8BE66"), "paille": ("#F2CF6B", "#E4BC52"), "dalle": ("#E6CFA4", "#D8BE90"),
                    "mur": ("#E2A05C", "#CE8C4E"), "mur_haut": ("#FADC8C", "#F0CC78"), "loin": "#E8B670"},
     },
+    "Volcan": {
+        # Pancarte reprise de la Prairie ; chemins et haut du mur en Neon dans le jeu (glow ici)
+        "lib": [("Volcan", None), ("Prairie", ["Pancarte"])], "suffix": "_volcan", "looks": VOLCAN_LOOKS,
+        "clouds": 4, "cloud": "#8A7A7E", "water": "lava",
+        "slab": "Volcan_Dalle", "gate": "Volcan_PorteForge", "flank": "Volcan_PilierBrasier",
+        "between": ("Volcan_Enclume", "Volcan_Eclats"), "between_z": -0.2,
+        "tuft": "Volcan_Touffe", "path_small": ("Volcan_Cristaux", 0.5, 0.75), "sign": "Pancarte",
+        "fence": "Volcan_Rempart", "stairs": "Volcan_Escalier", "base_gate": "Volcan_PorteForge",
+        "prop_a": "Volcan_Chariot", "prop_b": "Volcan_Chaudron", "hill": "Volcan_Orgues",
+        "hill_trees": ("Volcan_Cristaux", ("Volcan_ArbreCalcine", "Volcan_ArbreCalcine")),
+        "gap_trees": ("Volcan_ArbreCalcine", "Volcan_Cheminee", "Volcan_Cristaux", "Volcan_Eclats"),
+        "rocks": ("Volcan_Roche", "Volcan_Eclats", "Volcan_Roche"), "ruin": "Volcan_Cheminee",
+        "landmark": ("Volcan_TeteGolem", "Volcan_Grill", "Volcan_Cheminee", "Volcan_Eclats"),
+        "bank_rock": "Volcan_Roche", "bridge": None,
+        "cliff": "Volcan_Orgues", "cliff_trees": ("Volcan_Cheminee", ("Volcan_ArbreCalcine", "Volcan_ArbreCalcine")),
+        "far": ("Volcan_Cheminee", "Volcan_Cheminee"), "far_spire": "Volcan_Eclats",
+        "far_scale": ((18.0, 26.0), (18.0, 26.0), (30.0, 40.0)),
+        "cliff_alt": ("Volcan_Eclats", (3.6, 3.6, 5.2)),  # cheminées géantes = cônes de volcan de 140-180 studs
+        "pets": (("DragonnetObsidienne", -14, -2, 7.0), ("PhenixCendres", 10, 6, 7.5), ("CerbereChiot", -2, 12, 6.5),
+                 ("TRexPoche", 18, -12, 7.0), ("RenardFurtif", -24, 8, 6.0)),
+        "colors": {"sol": ("#463C40", "#362E32", "#4E4044", "#3E3236"), "chemin": ("#FF781E", "#F0501E"),
+                   "base_sol": ("#4E4448", "#3E3438"), "paille": ("#6A5040", "#5A4434"), "dalle": ("#5A5256", "#4A4246"),
+                   "mur": ("#3C3238", "#2E262A"), "mur_haut": ("#FF641E", "#F0501E"), "loin": "#2A2226"},
+        "glow": {"chemin": 2.2, "mur_haut": 2.2},
+    },
 }
 W: dict = WORLD_CFG["Prairie"]
 LOOKS = PRAIRIE_LOOKS
@@ -156,6 +192,13 @@ def _args():
 
 LIB: dict[str, bpy.types.Object] = {}
 PLACED: list[dict] = []
+# Eau et lave : pas des modèles, des pièces Roblox simples (créées par le script Studio), à la même place que la scène.
+SURFACES: list[dict] = []
+
+
+def surface(kind: str, shape: str, x: float, y: float, size_x: float, size_y: float, yaw: float = 0.0) -> None:
+    """kind = "water" | "lava" ; shape = "disc" (diamètre size_x) | "block" (size_x le long de son axe, size_y large)."""
+    SURFACES.append({"kind": kind, "shape": shape, "blender": [x, y], "size": [size_x, size_y], "yaw": yaw})
 SCENE_COLL: bpy.types.Collection | None = None
 
 
@@ -220,8 +263,9 @@ def _kit(name):
 
 
 def checker_mat(name: str, a: str, b: str, tile: float, studs: bool = True, sides: bool = False,
-                warm: tuple | None = None, rough: float = 0.55):
-    """Damier de dalles (2 tons) + tenons ; warm = (couleur A, couleur B, r0, r1) : réchauffe au-delà de r0."""
+                warm: tuple | None = None, rough: float = 0.55, glow: float = 0.0):
+    """Damier de dalles (2 tons) + tenons ; warm = (couleur A, couleur B, r0, r1) : réchauffe au-delà de r0.
+    glow > 0 : la dalle brille de sa couleur (pièces en Neon dans le jeu, ex. lave des chemins du Volcan)."""
     mat, kit, bsdf = _kit(name)
     obj = kit.texcoord("Object")
     sx, sy, sz = kit.separate(obj)
@@ -243,7 +287,7 @@ def checker_mat(name: str, a: str, b: str, tile: float, studs: bool = True, side
         h, ring = S.stud_pattern(kit, 1.0, sides=sides)
         col = kit.mix(kit.math("MULTIPLY", ring, 0.4), col, S.shade(S.color(b), -0.3))
         normal = kit.bump(h, strength=1.0, distance=0.1)
-    S._finish(mat, kit, bsdf, col, rough, normal)
+    S._finish(mat, kit, bsdf, col, rough, normal, emission_color=col, emission_strength=glow)
     return mat
 
 
@@ -518,10 +562,16 @@ def add_stream(M, k: int):
              for r, w in pts]
     for i in range(len(pts) - 1):
         bm.faces.new((left[i], left[i + 1], right[i + 1], right[i]))
+        c0 = (Vector(left[i].co) + Vector(right[i].co)) / 2
+        c1 = (Vector(left[i + 1].co) + Vector(right[i + 1].co)) / 2
+        d = c1 - c0
+        mid = (c0 + c1) / 2
+        surface("water", "block", mid.x, mid.y, d.length + 1.0, 8.0, math.degrees(math.atan2(d.y, d.x)))
     mesh_obj("Ruisseau", bm, M["eau"])
     px, py = polar(312 - 23 * 4.8 - 4, phi)
     disc_obj = disc("Mare", 9.5, 0.08, M["eau"], segs=40)
     G.transform(disc_obj, Matrix.Translation((px, py, 0)))
+    surface("water", "disc", px, py, 19.0, 19.0)
     r_b = 312 - 12 * 4.8
     bx_, by_ = polar(r_b, phi)
     wig = math.sin(12 * 0.55) * 5
@@ -537,12 +587,34 @@ def add_stream(M, k: int):
         put(W["bank_rock"], x - t * math.sin(a), y + t * math.cos(a), -0.6, j * 47.0, 0.45, "colline")
 
 
+def add_lava_pool(M, k: int, rnd):
+    """Mare de lave du Volcan entre la base 1 et la base 8 : cheminées fumantes, cristaux de feu, rochers de basalte."""
+    phi = -(k + 0.5) * 45.0
+    cx, cy = polar(272, phi)
+    pool = disc("MareDeLave", 12.5, 0.08, M["lave"], segs=40)  # ronde : un cylindre Roblox ne peut pas être ovale
+    G.transform(pool, Matrix.Translation((cx, cy, 0)))
+    surface("lava", "disc", cx, cy, 25.0, 25.0)
+    light = bpy.data.lights.new("LaveLumiere", "POINT")
+    light.energy = 18000
+    light.color = (1.0, 0.45, 0.15)
+    light.shadow_soft_size = 8
+    lo = bpy.data.objects.new("LaveLumiere", light)
+    lo.location = (cx, cy, 6)
+    SCENE_COLL.objects.link(lo)
+    for j in range(6):
+        a = j * 2 * math.pi / 6 + rnd.uniform(-0.2, 0.2)
+        x, y = cx + math.cos(a) * 16.5, cy + math.sin(a) * 12.0
+        asset = ("Volcan_Cheminee", "Volcan_Roche", "Volcan_Cristaux")[j % 3]
+        put(asset, x, y, -0.3, rnd.uniform(0, 360), rnd.uniform(0.7, 1.0), "colline", collide=j % 3 != 2)
+
+
 def add_oasis(M, k: int, rnd):
     """Oasis du Désert entre la base 1 et la base 8 : mare turquoise, palmiers penchés, figuiers, rochers de grès."""
     phi = -(k + 0.5) * 45.0
     cx, cy = polar(272, phi)
-    pond = disc("Oasis", 15.0, 0.08, M["eau"], segs=48)
-    G.transform(pond, Matrix.Translation((cx, cy, 0)) @ Matrix.Diagonal((1.0, 0.7, 1.0, 1.0)))
+    pond = disc("Oasis", 13.0, 0.08, M["eau"], segs=48)  # ronde : un cylindre Roblox ne peut pas être ovale
+    G.transform(pond, Matrix.Translation((cx, cy, 0)))
+    surface("water", "disc", cx, cy, 26.0, 26.0)
     for j in range(7):
         a = j * 2 * math.pi / 7 + rnd.uniform(-0.2, 0.2)
         x, y = cx + math.cos(a) * 17.5, cy + math.sin(a) * 12.5
@@ -637,7 +709,12 @@ def build_periphery(rnd):
             r = r0 + rnd.uniform(0, 8)
             x, y = polar(r, phi)
             sz = rnd.uniform(*sz_range)
-            put(W["cliff"], x, y, -1, facing_center(phi) + rnd.uniform(-5, 5), (sxy[0], sxy[1], sz), "peripherie")
+            yaw = facing_center(phi) + rnd.uniform(-5, 5)
+            alt = W.get("cliff_alt")
+            if alt and k % 3 == 1:  # un module sur trois remplacé (casse la répétition des orgues du Volcan)
+                put(alt[0], x, y, -1, yaw, (alt[1][0], alt[1][1], alt[1][2] * sz / sz_range[1]), "peripherie")
+                continue  # pas d'arbres sur des pointes : ils flotteraient
+            put(W["cliff"], x, y, -1, yaw, (sxy[0], sxy[1], sz), "peripherie")
             for j in range(2):
                 tx, ty = polar(r + rnd.uniform(3, 7) * sxy[1], phi + rnd.uniform(-3.5, 3.5))
                 asset = W["cliff_trees"][0] if rnd.random() < 0.12 else rnd.choice(W["cliff_trees"][1])
@@ -840,6 +917,12 @@ def export_layout(path: Path) -> None:
         "counts": dict(sorted(counts.items())),
         "total": len(items),
         "items": items,
+        "surfaces_note": "Eau / lave en pièces Roblox : position = centre du dessus au sol, size = (X, épaisseur, Z) "
+                         "dans le repère de la pièce, yaw autour de +Y (sans demi-tour : ce ne sont pas des .fbx).",
+        "surfaces": [{"kind": s["kind"], "shape": s["shape"],
+                      "position": [round(s["blender"][0], 3), 0.13, round(-s["blender"][1], 3)],
+                      "size": [round(s["size"][0], 3), 0.26, round(s["size"][1], 3)],
+                      "yaw_deg": round(s["yaw"] % 360, 2)} for s in SURFACES],
     }
     path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"[scene] placement : {path} ({len(items)} décors)")
@@ -865,12 +948,12 @@ def main() -> None:
     rnd = random.Random(2026)
     M = {
         "sol": checker_mat("M_SolArene", C["sol"][0], C["sol"][1], 12, warm=(C["sol"][2], C["sol"][3], 150, 205)),
-        "chemin": checker_mat("M_Chemin", *C["chemin"], 8),
+        "chemin": checker_mat("M_Chemin", *C["chemin"], 8, glow=W.get("glow", {}).get("chemin", 0.0)),
         "base_sol": checker_mat("M_SolBase", *C["base_sol"], 7),
         "paille": checker_mat("M_Paille", *C["paille"], 4),
         "dalle": checker_mat("M_DalleKiosque", *C["dalle"], 6),
         "mur": checker_mat("M_Mur", *C["mur"], 12, sides=True),
-        "mur_herbe": checker_mat("M_MurHerbe", *C["mur_haut"], 6),
+        "mur_herbe": checker_mat("M_MurHerbe", *C["mur_haut"], 6, glow=W.get("glow", {}).get("mur_haut", 0.0)),
         "herbe_loin": flat_mat("M_HerbeLoin", C["loin"], 0.8),
         "eau": water_mat(),
         "vortex": vortex_mat(),
@@ -882,7 +965,8 @@ def main() -> None:
         "auvent_jaune": stripe_mat("M_AuventJaune", "#FFC21A", "#FFFFFF"),
         "bois_kiosque": E.mats()["bois_clair"],
         "ecran": flat_mat("M_Ecran", "#22263A", 0.3, emission=0.2),
-        "nuage": flat_mat("M_Nuage", "#FFFFFF", 0.95, emission=0.25),
+        "nuage": flat_mat("M_Nuage", W.get("cloud", "#FFFFFF"), 0.95, emission=0.25),
+        "lave": flat_mat("M_LaveScene", "#FF7A1A", 0.3, emission=2.4),
         "avatar_haut": flat_mat("M_AvatarHaut", "#1E7BFF", 0.6),
         "avatar_bas": flat_mat("M_AvatarBas", "#2B2F45", 0.6),
         "avatar_peau": flat_mat("M_AvatarPeau", "#F5CD30", 0.5),
@@ -897,8 +981,10 @@ def main() -> None:
         build_gap(M, k, rnd)
     if W["water"] == "stream":
         add_stream(M, 7)
-    else:
+    elif W["water"] == "oasis":
         add_oasis(M, 7, rnd)
+    else:
+        add_lava_pool(M, 7, rnd)
     build_periphery(rnd)
     build_clouds(M, rnd)
     print(f"[scene] construite en {time.time() - t0:.0f} s : {len(PLACED)} décors posés")

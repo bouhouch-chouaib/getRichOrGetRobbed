@@ -1,0 +1,189 @@
+{
+  "Volcan_Orgues": {
+    "triangles": 3456,
+    "within_6000": true,
+    "size_studs": [
+      36.377,
+      15.648,
+      31.38
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 5.6
+  },
+  "Volcan_Roche": {
+    "triangles": 552,
+    "within_6000": true,
+    "size_studs": [
+      9.147,
+      6.075,
+      5.322
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 41.8
+  },
+  "Volcan_Eclats": {
+    "triangles": 2432,
+    "within_6000": true,
+    "size_studs": [
+      8.274,
+      7.557,
+      8.233
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 57.8
+  },
+  "Volcan_Cheminee": {
+    "triangles": 2654,
+    "within_6000": true,
+    "size_studs": [
+      11.436,
+      11.214,
+      6.75
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 58.4
+  },
+  "Volcan_ArbreCalcine": {
+    "triangles": 2792,
+    "within_6000": true,
+    "size_studs": [
+      8.739,
+      9.666,
+      13.67
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 35.7
+  },
+  "Volcan_Cristaux": {
+    "triangles": 2316,
+    "within_6000": true,
+    "size_studs": [
+      4.9,
+      3.9,
+      5.846
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 15.4
+  },
+  "Volcan_Touffe": {
+    "triangles": 440,
+    "within_6000": true,
+    "size_studs": [
+      2.11,
+      2.079,
+      2.741
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 23.1
+  },
+  "Volcan_PorteForge": {
+    "triangles": 3572,
+    "within_6000": true,
+    "size_studs": [
+      28.4,
+      5.3,
+      22.799
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 41.4
+  },
+  "Volcan_PilierBrasier": {
+    "triangles": 1980,
+    "within_6000": true,
+    "size_studs": [
+      4.93,
+      4.93,
+      15.9
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 56.6
+  },
+  "Volcan_Enclume": {
+    "triangles": 1024,
+    "within_6000": true,
+    "size_studs": [
+      9.137,
+      4.1,
+      7.203
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 75.4
+  },
+  "Volcan_Dalle": {
+    "triangles": 1296,
+    "within_6000": true,
+    "size_studs": [
+      8.063,
+      5.957,
+      1.415
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 26.3
+  },
+  "Volcan_Rempart": {
+    "triangles": 1362,
+    "within_6000": true,
+    "size_studs": [
+      12.0,
+      2.375,
+      4.8
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 47.0
+  },
+  "Volcan_Escalier": {
+    "triangles": 1512,
+    "within_6000": true,
+    "size_studs": [
+      19.2,
+      5.836,
+      2.3
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 55.3
+  },
+  "Volcan_Chariot": {
+    "triangles": 3314,
+    "within_6000": true,
+    "size_studs": [
+      4.516,
+      3.6,
+      4.272
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 29.3
+  },
+  "Volcan_Chaudron": {
+    "triangles": 2316,
+    "within_6000": true,
+    "size_studs": [
+      4.176,
+      4.176,
+      3.65
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 18.1
+  },
+  "Volcan_Grill": {
+    "triangles": 4504,
+    "within_6000": true,
+    "size_studs": [
+      12.567,
+      4.904,
+      9.2
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 29.2
+  },
+  "Volcan_TeteGolem": {
+    "triangles": 1620,
+    "within_6000": true,
+    "size_studs": [
+      14.384,
+      7.401,
+      7.554
+    ],
+    "uv_overlap_pct": 0.0,
+    "seconds": 64.8
+  }
+}

@@ -17,6 +17,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MAP = ROOT / "baked_assets" / "map"
+# Décors qui éclairent, par monde : asset -> (hauteur relative de la lumière -0,5..0,5, portée, luminosité)
+LIGHTS = {
+    "Volcan": {"Volcan_PilierBrasier": (0.45, 22, 1.6), "Volcan_Cheminee": (0.3, 18, 1.4),
+               "Volcan_Chaudron": (0.35, 12, 1.0)},
+}
 
 
 def lua_value(v) -> str:
@@ -89,6 +94,21 @@ def main() -> None:
         x, y, z = it["position"]
         sx, sy, sz = it["scale_xyz"]
         w(f'\t{{ "{it["asset"]}", {x}, {y}, {z}, {it["yaw_deg"]}, {sx}, {sy}, {sz}, {lua_value(it["collide"])}, "{it["zone"]}" }},')
+    w("}")
+    w("")
+    w("-- Eau / lave (pièces Roblox, rien à envoyer) : kind, forme, x, y, z (centre), taille X, épaisseur, Z, yaw")
+    w("local SURFACES = {")
+    for s in layout.get("surfaces", []):
+        x, y, z = s["position"]
+        sx, sy, sz = s["size"]
+        w(f'\t{{ "{s["kind"]}", "{s["shape"]}", {x}, {y}, {z}, {sx}, {sy}, {sz}, {s["yaw_deg"]} }},')
+    w("}")
+    w("")
+    w("-- Décors qui éclairent (PointLight sans ombre, à une hauteur relative de la pièce) : seulement dans leur monde,")
+    w("-- client/WorldSkin les éteint pour les joueurs des autres mondes.")
+    w("local LIGHTS = {")
+    for asset, (rel, rng, bright) in sorted(LIGHTS.get(world, {}).items()):
+        w(f"\t{asset} = {{ rel = {rel}, range = {rng}, brightness = {bright} }},")
     w("}")
     w("")
     w('''local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -185,6 +205,59 @@ local function sectorOf(x: number, z: number): number
 	return math.floor(((math.deg(math.atan2(z, x)) + 360) % 360) / 45) + 1
 end
 
+local LAVA_LIGHT = Color3.fromRGB(255, 110, 40)
+local SURFACE_LOOK = {
+	water = { name = "Eau", color = Color3.fromRGB(47, 168, 255), material = Enum.Material.Glass, transparency = 0.35 },
+	lava = { name = "Lave", color = Color3.fromRGB(255, 122, 26), material = Enum.Material.Neon, transparency = 0 },
+}
+
+local function addLight(part: BasePart, spec)
+	local attachment = Instance.new("Attachment")
+	attachment.Name = "Lumiere"
+	attachment.Position = Vector3.new(0, part.Size.Y * spec.rel, 0)
+	local light = Instance.new("PointLight")
+	light.Color = LAVA_LIGHT
+	light.Range = spec.range
+	light.Brightness = spec.brightness
+	light.Shadows = false
+	light.Parent = attachment
+	attachment.Parent = part
+end
+
+local function makeSurface(parent: Instance, s)
+	local kind, shape, x, y, z, sx, sy, sz, yaw = table.unpack(s)
+	local look = SURFACE_LOOK[kind]
+	local part = Instance.new("Part")
+	part.Name = look.name
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.CastShadow = false
+	part.Material = look.material
+	part.Color = look.color
+	part.Transparency = look.transparency
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.BottomSurface = Enum.SurfaceType.Smooth
+	if shape == "disc" then
+		part.Shape = Enum.PartType.Cylinder -- axe X : couché pour faire un disque
+		part.Size = Vector3.new(sy, sx, sx)
+		part.CFrame = CFrame.new(x, y, z) * CFrame.Angles(0, 0, math.pi / 2)
+	else
+		part.Size = Vector3.new(sx, sy, sz)
+		part.CFrame = CFrame.new(x, y, z) * CFrame.Angles(0, math.rad(yaw), 0)
+	end
+	if kind == "lava" then
+		local light = Instance.new("PointLight")
+		light.Color = LAVA_LIGHT
+		light.Range = 40
+		light.Brightness = 2
+		light.Shadows = false
+		light.Parent = part
+	end
+	part.Parent = parent
+end
+
 local function placeDecor()
 	local library = ReplicatedStorage:FindFirstChild("ArtModels")
 	library = library and library:FindFirstChild("Map")
@@ -239,16 +312,27 @@ local function placeDecor()
 			group.Parent = holder
 			groups[key] = group
 		end
+		if LIGHTS[asset] then
+			addLight(copy, LIGHTS[asset])
+		end
 		copy.Parent = group
 		placed += 1
+	end
+	if #SURFACES > 0 then
+		local water = Instance.new("Model")
+		water.Name = "surfaces"
+		for _, s in ipairs(SURFACES) do
+			makeSurface(water, s)
+		end
+		water.Parent = holder
 	end
 	holder.Parent = root
 	local names = {}
 	for asset in pairs(missing) do
 		table.insert(names, asset)
 	end
-	return string.format("%d décors posés dans MapDecor.%s, %d de base ignorés, manquants : %s", placed, WORLD, skipped,
-		#names > 0 and table.concat(names, ", ") or "aucun")
+	return string.format("%d décors posés dans MapDecor.%s (+ %d surfaces d'eau / lave), %d de base ignorés, manquants : %s",
+		placed, WORLD, #SURFACES, skipped, #names > 0 and table.concat(names, ", ") or "aucun")
 end
 
 local report = {}

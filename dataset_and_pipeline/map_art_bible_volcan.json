@@ -1,0 +1,62 @@
+{
+  "title": "Bible artistique de la carte - monde Volcan (3e palier)",
+  "date": "2026-10-25",
+  "status": "proposition, a valider par Chouaib sur qa_renders/map_hero_volcan.png et map_aesthetic_board_volcan.png",
+  "method": "Meme methode que la Prairie et le Desert (map_art_bible.json, map_art_bible_desert.json) : carte ronde inchangee, decors en blocs biseautes cuits, relief autour de l'arene, eclairage dans le code. Chaque monde a sa charte.",
+  "story": "La Forge du Titan : le Titan de Lave a bati sa forge au bord du trou noir. Orgues de basalte, rivieres de lave, enclumes geantes, chaudrons et braseros ; le Golem de Cendre monte la garde, la Salamandre et la Taupe Magma vivent dans les fissures, le Dragon Barbecue tient le grill. Le Cerbere Infernal (Sigma du Volcan) en est le gardien.",
+
+  "sources": {
+    "local_reference": "src/shared/Worlds.lua (Volcan : sol gris fonce, chemins et haut du mur en Neon orange, braises), src/shared/PetCatalog.lua (familiers du Volcan), dataset_and_pipeline/PIPELINE.md (Cerbere Infernal)",
+    "web": [
+      {"what": "Base sombre et peu saturee, un seul accent chaud (orange braise) pour garder l'oeil sur la lave", "url": "https://www.summerengine.com/asset-store/emberfall-volcano-7e3e72f8"},
+      {"what": "Lave lisible : sol jouable propre et plat, croute refroidie et cendre fine seulement", "url": "https://www.summerengine.com/asset-store/volcanic-lava-battle-arena-c6fada90"},
+      {"what": "Forge de volcan : ponts et parapets de basalte trapus contre la riviere de lave", "url": "https://www.summerengine.com/asset-store/volcanic-forge-crater-b12b76fa"},
+      {"what": "Colonnes hexagonales de basalte : forme ordonnee, agreable a lire", "url": "https://blog.blog.wordpress.arktimes.com/?p=34721"},
+      {"what": "Tutoriel officiel Roblox : volcans, eclairage local par PointLight (caldeira 15 / 255,85,0 / 60), Bloom", "url": "https://create.roblox.com/docs/tutorials/use-case-tutorials/vfx/create-volcanoes"}
+    ]
+  },
+
+  "palette": {
+    "rule": "Basalte presque noir et cendre gris-violet (base froide et sombre) contre un seul accent chaud : la lave orange-jaune (#FF7A1A -> #FFC23A). La lave se voit aussi DANS les creux du basalte (couleur des creux = orange), comme des fissures. Le bronze et le fer sont les metaux de la forge ; aucun vert.",
+    "gradient_center_to_edge": [
+      {"zone": "coeur du trou noir", "hex": "#2E1B5C", "note": "inchange : vortex violet"},
+      {"zone": "dalles du sanctuaire", "hex": "#3A3438", "accent": "#FF7A1A", "note": "basalte taille, glyphes de bronze"},
+      {"zone": "arene", "hex": "#463C40", "alt": "#362E32", "note": "damier gris fonce du jeu (Worlds.Volcan.GrassA/B)"},
+      {"zone": "chemins", "hex": "#FF781E", "alt": "#F0501E", "note": "lave en Neon dans le jeu (Worlds.Volcan.PathA/B)"},
+      {"zone": "mur d'enceinte", "hex": "#3C3238", "top": "#FF641E", "note": "inchange (haut du mur en Neon)"},
+      {"zone": "falaises exterieures", "hex": "#2E282C", "note": "orgues de basalte, plaques de cendre, lave dans les creux"}
+    ],
+    "materials": {
+      "basalte": {"base": "#3A3438", "edge": "#7A6E74", "cavity": "#FF5A14"},
+      "cendre": {"base": "#5A5256", "edge": "#9A9096"},
+      "lave": {"base": "#FF7A1A", "edge": "#FFE07A", "cavity": "#C8320A", "note": "couleur seulement (pas d'emission)"},
+      "charbon": {"base": "#2E2624", "cavity": "#FF5A14"},
+      "bronze": {"tint": "#C8783A"},
+      "fer": {"tint": "#5A5E68"},
+      "cristal_feu": {"core": "#5A0A0A", "mid": "#FF4A1A", "rim": "#FFD27A"}
+    }
+  },
+
+  "atmosphere": {
+    "tone": "Jour enfume et orange (soleil bas et rouge, brume de fumee), nuit rouge sombre ou la lave des chemins devient la lumiere principale.",
+    "Worlds.Volcan.Ambience": {"AirColor": "#FF9664", "AirDecay": "#78281E", "AirDensity": 0.38, "Tint": "#FFD7C3", "Saturation": 0.25, "CloudCover": 0.6, "note": "deja dans le jeu, garde tel quel"},
+    "no_glow": "Aucun masque de lueur dans les decors (avertissement de moderation du 25 oct.). La lueur vient du Neon deja en jeu (chemins, haut du mur) et, au branchement, de PointLight sur les braseros, chaudrons et cheminees (comme le tutoriel Roblox), sans rien envoyer."
+  },
+
+  "zones": {
+    "arene_centrale": {"story": "La forge engloutie : anneau de dalles de basalte a glyphes de bronze, 8 portes de forge (piliers cercles de fer, linteau en enclume) sur les chemins, piliers-braseros de part et d'autre, enclumes geantes entre les chemins."},
+    "chemins": {"story": "Rivieres de lave (Neon du jeu) bordees de touffes de cendre et de petits cristaux de feu."},
+    "bases": {"story": "Remparts de basalte a piques de fer, porte de forge, escalier de basalte, chariots de minerai et chaudrons de lave."},
+    "entre_les_bases": {"story": "Orgues de basalte en gradins adossees au mur, arbres calcines, cheminees fumantes, mare de lave, tete de golem a demi enterree, grill geant du Dragon Barbecue."},
+    "peripherie": {"story": "Deux couronnes d'orgues de basalte (55-75 puis 85-110 studs), cones de volcan au loin dans la fumee."}
+  },
+
+  "assets": {
+    "budget_triangles": 6000,
+    "prefix": "Volcan_",
+    "list": ["Volcan_Orgues", "Volcan_Roche", "Volcan_Eclats", "Volcan_Cheminee", "Volcan_ArbreCalcine", "Volcan_Cristaux", "Volcan_Touffe", "Volcan_PorteForge", "Volcan_PilierBrasier", "Volcan_Enclume", "Volcan_Dalle", "Volcan_Rempart", "Volcan_Escalier", "Volcan_Chariot", "Volcan_Chaudron", "Volcan_Grill", "Volcan_TeteGolem"]
+  },
+
+  "gameplay_constraints": "Identiques aux autres mondes : chemins et cercle du trou degages, rien de solide dans l'anneau des objets sauvages (r 70-160), gros decors entre les bases, kiosques degages.",
+  "roblox_integration": "Apres validation : import de Decors_Volcan.fbx (Studio en mode Edition), MapDecor.Volcan, habillage VolcanLook dans MapGenerator.DRESSINGS ; PointLight sur braseros / chaudrons / cheminees a ajouter (aucune image)."
+}

@@ -15116,5 +15116,23 @@
    "zone": "lointain",
    "collide": false
   }
+ ],
+ "surfaces_note": "Eau / lave en pièces Roblox : position = centre du dessus au sol, size = (X, épaisseur, Z) dans le repère de la pièce, yaw autour de +Y (sans demi-tour : ce ne sont pas des .fbx).",
+ "surfaces": [
+  {
+   "kind": "water",
+   "shape": "disc",
+   "position": [
+    251.295,
+    0.13,
+    -104.09
+   ],
+   "size": [
+    26.0,
+    0.26,
+    26.0
+   ],
+   "yaw_deg": 0.0
+  }
  ]
 }
