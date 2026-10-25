@@ -37,6 +37,13 @@ familiers en blocs biseautés superposés, **sans tenons**, pas trop épais, en 
 voxels « Minecraft »). **Une aura ne se modélise jamais** : effets tout faits du Creator Store (on garde les images, jamais
 les scripts), recréés et réglés par code (`src/shared/PetSignatureAuras.lua`). Aperçu dans Studio sans import par un `.mesh` dans
 le dossier content (`export_studio_mesh.py`). Méthode, pièges et photos : `PIPELINE.md` « Essai 1.5 ».
+**Mis en jeu le 25 oct. : Cerbère Infernal**, Sigma exclusif du Volcan (106e familier, GDD « Familiers exclusifs des mondes »),
+modèle `ArtModels.CerbereInfernal` (une MeshPart « Body » + SurfaceAppearance, `FacingYaw` 180) + aura signature. Donné à
+Chouaib dans sa sauvegarde Studio et placé dans sa base (script temporaire qui appelle `SessionData.AddPets` / `SetInBase`).
+Vérifié en jeu (solo) : le Cerbère se balade dans la base, tête en avant, avec son aura (`qa_renders/cerberus_base_*.jpg`).
+⚠️ **Maillage local** (`rbxasset://claude/CerbereInfernal.mesh`, dossier content de Studio de CE PC) : avant de publier,
+importer `dataset_and_pipeline/baked_assets/CerbereInfernal.fbx` et remplacer la MeshPart. Pas d'animation des pattes (une
+seule pièce). Tests Lune : 4 échecs déjà présents avant (magnet-roster, newcomer-steal, onboarding, typography).
 
 ## L'utilisateur et la façon de travailler
 

@@ -421,6 +421,11 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - 30 familiers en plus des 75 de base : **5 par monde** du Désert au Divin (`PetCatalog`, champ `World` ; liste dans
   `PetCatalog.ByWorld`). Raretés de plus en plus hautes d'un monde à l'autre (Désert : Inhabituel à Mythique ; Divin :
   Légendaire à 2 Sigma).
+- 25 oct. : **Cerbère Infernal**, 6e exclusif du Volcan (Sigma, 2,6 J). Premier familier du pipeline Blender
+  (`dataset_and_pipeline/`) : vrai modèle `ReplicatedStorage.ArtModels.CerbereInfernal` (sinon forme de secours à 3 têtes)
+  et **aura signature** (`shared/PetSignatureAuras` : flammes noires et rouges + éclairs, faites d'effets du Creator Store)
+  à la place des auras de rareté. ⚠️ Son maillage est pour l'instant un aperçu local (`rbxasset://claude/...`, seulement
+  sur le PC de Chouaib) : importer `baked_assets/CerbereInfernal.fbx` (Fichier > Importer 3D) avant de publier.
 - Ils ne sortent des tirages (trou noir, duels, tirages Robux) **que si le joueur se trouve dans leur monde** (monde actuel,
   `SessionData.GetWorld`, `LootEngine` paramètre worldId, `PetCatalog.Pool`) : de quoi revenir dans les mondes déjà débloqués.
   Les chances de chaque rareté ne changent pas ; dans sa rareté, un exclusif a le même poids qu'un familier de base
