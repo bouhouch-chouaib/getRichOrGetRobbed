@@ -21,7 +21,9 @@ local SessionData = require(script.Parent.SessionData)
 local SETTINGS = Config.Leaderboard
 local IS_STUDIO = RunService:IsStudio()
 -- Même règle de nom que SessionData : version + magasin séparé dans Studio.
-local STORE_NAME = "RichestBoard_v" .. Config.Save.Version .. (if IS_STUDIO then "_studio" else "")
+local STORE_NAME = if IS_STUDIO
+	then "RichestBoard_v" .. Config.Save.StudioVersion .. "_studio"
+	else "RichestBoard_v" .. Config.Save.Version
 -- Un OrderedDataStore ne range que des entiers (max 2^63) : on range log10(argent + 1) × SCALE.
 -- L'ordre est conservé et ça tient jusqu'aux plus grands nombres du jeu (précision largement suffisante pour l'affichage abrégé).
 local SCALE = 1e12

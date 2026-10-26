@@ -308,6 +308,9 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   « DANS TA BASE » ou « EN RÉSERVE (INDEX) ».
 - **19 oct. : remise à zéro de toutes les sauvegardes** (`Config.Save.Version` = 3 : `PlayerData_v3`, tableau des plus riches
   `RichestBoard_v3`). Les sauvegardes v2 restent intactes dans leur DataStore.
+- **26 oct. : remise à zéro des testeurs avant l'ouverture au public** (`Config.Save.Version` = 4 : `PlayerData_v4`,
+  `RichestBoard_v4`). Les sauvegardes v3 restent intactes. Studio garde `Config.Save.StudioVersion` = 3
+  (`PlayerData_v3_studio`) : la sauvegarde de test n'est pas touchée.
 
 ## Badges, groupe Roblox, mutations par la fusion (19 oct.)
 

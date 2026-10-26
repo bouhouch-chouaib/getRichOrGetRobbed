@@ -91,8 +91,10 @@ local LOCK_MAX_WAIT = LOCK_STALE + 30 -- au-delà, le joueur est expulsé avec u
 local IS_STUDIO = RunService:IsStudio()
 -- game.JobId est vide dans Studio : on se donne notre propre identifiant de serveur.
 local SESSION_ID = HttpService:GenerateGUID(false)
--- "PlayerData_v2" en ligne, "PlayerData_v2_studio" dans Studio (voir Config.Save).
-local STORE_NAME = "PlayerData_v" .. Config.Save.Version .. (if IS_STUDIO then "_studio" else "")
+-- "PlayerData_v4" en ligne, "PlayerData_v3_studio" dans Studio (voir Config.Save).
+local STORE_NAME = if IS_STUDIO
+	then "PlayerData_v" .. Config.Save.StudioVersion .. "_studio"
+	else "PlayerData_v" .. Config.Save.Version
 
 type SessionLock = {
 	id: string, -- SESSION_ID du serveur qui a ouvert la sauvegarde

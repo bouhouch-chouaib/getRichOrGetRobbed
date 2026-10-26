@@ -547,7 +547,11 @@ Config.StudioTestPets = {} :: { string }
 Config.Save = {
 	-- v1 = développement (abandonnées le 10 oct. 2026) ; v2 = tests jusqu'au 19 oct. 2026 ; v3 : tout le monde repart à zéro
 	-- le 19 oct. 2026 (demande de Chouaib). Les anciennes sauvegardes restent dans PlayerData_v2 (rien n'est effacé).
-	Version = 3,
+	-- v4 : tous les testeurs repartent à zéro le 26 oct. 2026, juste avant l'ouverture au public (demande de Chouaib) ;
+	-- leurs sauvegardes restent dans PlayerData_v3 et le tableau des plus riches dans RichestBoard_v3.
+	Version = 4,
+	-- Studio garde sa propre version : la sauvegarde de test de Chouaib (tous les familiers) n'est pas remise à zéro.
+	StudioVersion = 3,
 }
 
 -- Tableau des plus riches, planté dans l'arène (tous serveurs confondus, OrderedDataStore).

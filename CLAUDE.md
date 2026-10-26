@@ -142,7 +142,7 @@ rojo build -o test.rbxlx
 - RemoteEvents : déclarés dans `default.project.json` **et** créés par le serveur s'ils manquent (`Remotes.lua`) —
   `rojo serve` ne recharge pas les nouveaux remotes du project.json en cours de session.
 - État des joueurs : `SessionData` → attributs Player (lus par le HUD) + leaderstats, **sauvegardé en DataStore**
-  (`PlayerData_v2`, `PlayerData_v2_studio` dans Studio ; version dans `Config.Save`). Ne jamais sauvegarder si le chargement a échoué (`data.loaded`). Dans Studio il faut que le jeu
+  (`PlayerData_v4` en ligne depuis le 26 oct., `PlayerData_v3_studio` dans Studio ; versions dans `Config.Save`). Ne jamais sauvegarder si le chargement a échoué (`data.loaded`). Dans Studio il faut que le jeu
   soit publié et que "Enable Studio Access to API Services" soit coché (Game Settings > Security).
 - **Verrou de session (anti-duplication)** : toute lecture/écriture de la sauvegarde passe par `UpdateAsync` et le champ
   `session` (jamais `SetAsync`/`GetAsync`) ; un serveur n'écrit que s'il tient le verrou, le libère au départ du joueur.
