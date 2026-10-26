@@ -4,14 +4,19 @@
 --   - en-tête : l'argent du joueur (compteur qui défile) ;
 --   - PROCHAIN MONDE : grande carte du monde à débloquer (paysage, ce qu'on y gagne, jauge argent / prix, « IL TE
 --     MANQUE ... », gros bouton VOYAGER) ; cachée quand tous les mondes sont débloqués ;
---   - LES 7 MONDES : une large carte par monde (paysage aux couleurs du monde, numéro, revenu, tirages, ses familiers
+--   - LES 7 MONDES : une large carte par monde (aperçu du monde, numéro, revenu, tirages, ses familiers
 --     exclusifs en aperçu 3D, en silhouette tant qu'ils ne sont pas découverts) et son bouton : ACTUEL (tu es ici),
 --     Y ALLER (déjà visité : retour gratuit, Remotes.GoToWorld), VOYAGER $prix (le suivant), VERROUILLÉ (après, voilé
 --     avec un cadenas). Le bonus de revenu reste celui du monde le plus loin atteint.
+-- Aperçu du monde : petite scène 3D faite de ses décors (Worlds.Looks.*.Preview, ReplicatedStorage.ArtModels.Map) et de
+--   son familier le plus rare, devant son ciel. Déjà visité : en couleurs, bien éclairé. Inconnu : silhouettes noires
+--   sur un horizon qui rougeoie à la couleur du monde, brume, « ? » qui pulse (le cadenas du voile le remplace pour les
+--   mondes après le suivant). Sans les décors (pas encore importés) : le petit paysage en aplats.
 -- Le voyage est validé par le serveur (Remotes.BuyTier / GoToWorld -> server/TierController) ; pas assez d'argent :
 -- secousse, éclair rouge, « IL TE MANQUE ... ».
 -- Arrivée (Remotes.TierReached) : flash, grand titre du monde, son ; annonce chez les autres joueurs.
 
+local ContentProvider = game:GetService("ContentProvider")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -20,6 +25,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
+local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local Worlds = require(ReplicatedStorage.Shared.Worlds)
@@ -84,12 +90,10 @@ local function luckText(world: Config.WorldDef): string
 	return "Tirages +" .. math.floor((boost - 1) * 100 + 0.5) .. " %"
 end
 
--- Petit paysage du monde dans `holder` (vidé d'abord) : ciel (couleur de l'air), mur avec sa crête, sol en damier.
-local function landscape(holder: Frame, look: Worlds.Look)
-	holder:ClearAllChildren()
+-- Petit paysage en aplats (si les décors du monde ne sont pas dans le jeu) : ciel (couleur de l'air), mur avec sa
+-- crête, sol en damier.
+local function flatLandscape(holder: Frame, look: Worlds.Look)
 	holder.BackgroundColor3 = look.Ambience.AirColor
-	UiStyle.corner(holder, 8)
-	UiStyle.stroke(holder, 3, BLACK, true)
 	local wall = Instance.new("Frame")
 	wall.BorderSizePixel = 0
 	wall.BackgroundColor3 = swatch(look, "WallA")
@@ -112,6 +116,190 @@ local function landscape(holder: Frame, look: Worlds.Look)
 		tile.Size = UDim2.fromScale(1 / 6 + 0.002, 0.35)
 		tile.ZIndex = holder.ZIndex
 		tile.Parent = holder
+	end
+end
+
+-- Familier vedette : l'exclusif le plus rare du monde (la Prairie n'en a pas : le chien saucisse).
+local function showcasePet(worldId: string): string
+	local best, bestRank = "ChienSaucisse", 0
+	for _, entry in ipairs(PetCatalog.ByWorld[worldId] or {}) do
+		local rank = Config.RarityIndex[entry.Rarity] or 0
+		if rank > bestRank then
+			best, bestRank = entry.Id, rank
+		end
+	end
+	return best
+end
+
+-- Copie d'un décor de ArtModels.Map posée au sol (pivot au centre de la pièce, devant vers -Z).
+local function placeDecor(scene: Model, library: Instance, name: string, x: number, z: number, scale: number, yaw: number): boolean
+	local source = library:FindFirstChild(name)
+	if not (source and source:IsA("BasePart")) then
+		return false
+	end
+	local part = source:Clone()
+	part.Anchored = true
+	part.Size *= scale
+	part.CFrame = CFrame.new(x, part.Size.Y / 2, z) * CFrame.Angles(0, math.rad(yaw), 0)
+	part.Parent = scene
+	return true
+end
+
+local function slab(scene: Model, size: Vector3, position: Vector3, color: Color3)
+	local part = Instance.new("Part")
+	part.Anchored = true
+	part.Size = size
+	part.Position = position
+	part.Color = color
+	part.Material = Enum.Material.SmoothPlastic
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.Parent = scene
+end
+
+-- Ciel : `top` en haut, `horizon` à la hauteur de l'horizon de la scène (~60 % de l'image), `low` dessous.
+local function skyGradient(frame: Frame, top: Color3, horizon: Color3, low: Color3)
+	frame.BackgroundColor3 = WHITE
+	local gradient = Instance.new("UIGradient")
+	gradient.Rotation = 90
+	gradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, top),
+		ColorSequenceKeypoint.new(0.6, horizon),
+		ColorSequenceKeypoint.new(1, low),
+	})
+	gradient.Parent = frame
+end
+
+-- Aperçu du monde `index` dans `holder` (vidé d'abord) ; known = le joueur y est déjà allé ; mark = « ? » qui pulse
+-- sur un monde inconnu (pas quand le voile et son cadenas le couvrent).
+local function landscape(holder: Frame, index: number, known: boolean, mark: boolean)
+	holder:ClearAllChildren()
+	holder.BackgroundColor3 = BLACK
+	UiStyle.corner(holder, 8)
+	UiStyle.stroke(holder, 3, BLACK, true)
+	local look = lookOf(index)
+	local preview = look.Preview
+	local accent = look.Accent
+	local z = holder.ZIndex
+
+	local sky = Instance.new("Frame")
+	sky.Name = "Sky"
+	sky.BorderSizePixel = 0
+	sky.Size = UDim2.fromScale(1, 1)
+	sky.ZIndex = z
+	sky.Parent = holder
+
+	local artModels = ReplicatedStorage:FindFirstChild("ArtModels")
+	local library = artModels and artModels:FindFirstChild("Map")
+	local scene = Instance.new("Model")
+	local built = false
+	if preview and library then
+		built = placeDecor(scene, library, preview.Gate, 0, 6, 1, 0)
+		placeDecor(scene, library, preview.Back, -20, 36, 0.85, 4)
+		placeDecor(scene, library, preview.Back, 20, 38, 0.85, -6)
+		if preview.Sides[1] then
+			placeDecor(scene, library, preview.Sides[1], -17, 1, 1, 20)
+		end
+		if preview.Sides[2] then
+			placeDecor(scene, library, preview.Sides[2], 17, 1, 1, -25)
+		end
+		slab(scene, Vector3.new(110, 1, 70), Vector3.new(0, -0.5, 12), swatch(look, "GrassA"))
+		slab(scene, Vector3.new(9, 0.2, 34), Vector3.new(0, 0.1, -12), swatch(look, "PathA"))
+		local pet = PetModelBuilder.Build(showcasePet(Config.Worlds[index].Id))
+		if pet then
+			MenuKit.cleanPetModel(pet)
+			local _, bodySize = PetModelBuilder.BodyBounds(pet)
+			pet:ScaleTo(pet:GetScale() * (8 / math.max(bodySize.Y, bodySize.X * 0.6, 0.5)))
+			pet:PivotTo(CFrame.new(7, 0, -10) * CFrame.Angles(0, math.rad(-25), 0))
+			local box, size = pet:GetBoundingBox()
+			pet:PivotTo(pet:GetPivot() + Vector3.new(0, size.Y / 2 - box.Position.Y, 0))
+			pet.Parent = scene
+		end
+	end
+
+	if built and preview then
+		local viewport = Instance.new("ViewportFrame")
+		viewport.Name = "Scene"
+		viewport.BackgroundTransparency = 1
+		viewport.Size = UDim2.fromScale(1, 1)
+		viewport.ZIndex = z
+		local camera = Instance.new("Camera")
+		camera.FieldOfView = 40
+		camera.CFrame = CFrame.lookAt(Vector3.new(0, 15, -66), Vector3.new(0, 11, 8))
+		camera.Parent = viewport
+		viewport.CurrentCamera = camera
+		scene.Parent = viewport
+		viewport.Parent = holder
+		task.spawn(function()
+			-- Un ViewportFrame ne se redessine pas quand un maillage finit de charger (vu en jeu : la Prairie restait
+			-- vide) : on attend les décors puis on bouge la caméra d'un cheveu.
+			pcall(function()
+				ContentProvider:PreloadAsync({ scene })
+			end)
+			if camera.Parent then
+				camera.CFrame *= CFrame.new(0.001, 0, 0)
+			end
+		end)
+		if known then
+			skyGradient(sky, preview.SkyTop, preview.SkyHorizon, preview.SkyHorizon)
+			viewport.Ambient = Color3.fromRGB(175, 175, 180)
+			viewport.LightColor = Color3.fromRGB(255, 250, 240)
+			viewport.LightDirection = Vector3.new(0.35, -1, 0.6)
+		else
+			-- L'horizon rougeoie à la couleur du monde : les silhouettes se découpent dessus.
+			MenuKit.silhouette(scene)
+			skyGradient(sky, Color3.fromRGB(8, 6, 16), accent:Lerp(BLACK, 0.05), accent:Lerp(BLACK, 0.55))
+			viewport.Ambient = accent:Lerp(BLACK, 0.85)
+			viewport.LightColor = accent:Lerp(WHITE, 0.3)
+			viewport.LightDirection = Vector3.new(0.3, -0.35, -1)
+		end
+	else
+		scene:Destroy()
+		flatLandscape(sky, look)
+	end
+
+	if preview and preview.Stars then
+		local random = Random.new(index * 97)
+		for _ = 1, 16 do
+			local star = Instance.new("Frame")
+			star.BorderSizePixel = 0
+			star.BackgroundColor3 = WHITE
+			star.BackgroundTransparency = random:NextNumber(0.1, 0.5)
+			local size = random:NextInteger(2, 3)
+			star.Size = UDim2.fromOffset(size, size)
+			star.Position = UDim2.fromScale(random:NextNumber(0.02, 0.96), random:NextNumber(0.03, 0.4))
+			star.ZIndex = z
+			star.Parent = sky
+		end
+	end
+
+	if not known then
+		-- Brume sombre en bas et grand « ? » qui pulse.
+		local fog = Instance.new("Frame")
+		fog.Name = "Fog"
+		fog.BorderSizePixel = 0
+		fog.BackgroundColor3 = BLACK
+		fog.Size = UDim2.fromScale(1, 1)
+		fog.ZIndex = z
+		local fade = Instance.new("UIGradient")
+		fade.Rotation = 90
+		fade.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.55, 0.85),
+			NumberSequenceKeypoint.new(1, 0.25),
+		})
+		fade.Parent = fog
+		fog.Parent = holder
+		if mark then
+			local question = UiStyle.text(holder, "?", 64, accent:Lerp(WHITE, 0.35), UiStyle.NUMBER_FONT)
+			question.Name = "Mystery"
+			question.AnchorPoint = Vector2.new(0.5, 0.5)
+			question.Position = UDim2.fromScale(0.5, 0.42)
+			question.Size = UDim2.fromOffset(80, 80)
+			question.ZIndex = z + 1
+			local pulse = Instance.new("UIScale")
+			pulse.Parent = question
+			TweenService:Create(pulse, TweenInfo.new(1.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.18 }):Play()
+		end
 	end
 end
 
@@ -140,6 +328,8 @@ type Cell = { petId: string, holder: Frame, viewport: ViewportFrame?, known: boo
 type Row = {
 	index: number,
 	body: Frame,
+	land: Frame, -- aperçu du monde
+	shown: string?, -- état de l'aperçu affiché (« connu », « mystère », « verrouillé »)
 	status: TextLabel,
 	button: TextButton,
 	here: Frame, -- ruban « TU ES ICI »
@@ -254,7 +444,7 @@ function WorldMenu.create(gui: Instance): Menu
 		local look = lookOf(index)
 		local card = ShopKit.card(listSection.grid, look.Accent, index)
 		local body = card.body
-		landscape(landscapeHolder(body, LAND_WIDTH), look)
+		local land = landscapeHolder(body, LAND_WIDTH)
 		-- Numéro du monde en pastille ronde sur le paysage.
 		local number = ShopKit.label(body, tostring(index), 24)
 		number.BackgroundTransparency = 0
@@ -373,6 +563,7 @@ function WorldMenu.create(gui: Instance): Menu
 		table.insert(rows, {
 			index = index,
 			body = body,
+			land = land,
 			status = status,
 			button = button,
 			here = here,
@@ -425,6 +616,11 @@ function WorldMenu.create(gui: Instance): Menu
 			local world = Config.Worlds[row.index]
 			row.here.Visible = row.index == here
 			row.veil.Visible = row.index > current + 1
+			local state = if row.index <= current then "known" elseif row.index == current + 1 then "mystery" else "locked"
+			if row.shown ~= state then
+				row.shown = state
+				landscape(row.land, row.index, state == "known", state == "mystery")
+			end
 			if row.index == here then
 				row.status.Text = "TU ES ICI"
 				ShopKit.setButton(row.button, "ACTUEL", UiStyle.Colors.Cyan)
@@ -448,7 +644,7 @@ function WorldMenu.create(gui: Instance): Menu
 			if featuredIndex ~= nextIndex then
 				featuredIndex = nextIndex
 				local look = lookOf(nextIndex)
-				landscape(featuredLand, look)
+				landscape(featuredLand, nextIndex, false, true)
 				recolor(featuredBody, look.Accent)
 				featuredRibbon.Text = "MONDE " .. nextIndex
 				featuredName.Text = nextWorld.Name

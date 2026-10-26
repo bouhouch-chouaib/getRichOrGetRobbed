@@ -9,6 +9,9 @@
 --         données remplacent celles de Worlds.DayNight (brume et halo de l'air, nuages ; l'heure et la lumière pour
 --         l'espace) ; une valeur absente garde celle de la phase. Pas d'image de ciel : la couleur vient de l'air
 --         (Atmosphere Color / Decay, rendue visible par Haze), les étoiles, le soleil et la lune du Sky de Roblox.
+--   Preview : aperçu du monde dans la fenêtre Mondes (client/WorldMenu) : petite scène 3D faite des décors du monde
+--         (ReplicatedStorage.ArtModels.Map, posés par dataset_and_pipeline/studio_tools/apply_map_look*.lua) devant
+--         son ciel ; en couleurs si le joueur y est déjà allé, en silhouettes mystérieuses sinon.
 
 local Worlds = {}
 
@@ -43,6 +46,15 @@ export type Sky = {
 	Celestial: boolean?, -- false : ni soleil ni lune (sous l'eau)
 }
 
+export type Preview = {
+	Back: string, -- falaise du fond (doublée de chaque côté)
+	Gate: string, -- porte du monde, au centre
+	Sides: { string }, -- un décor de chaque côté de la porte
+	SkyTop: Color3,
+	SkyHorizon: Color3,
+	Stars: boolean?, -- petites étoiles dans le ciel (espace)
+}
+
 export type Look = {
 	Accent: Color3, -- couleur de la carte du monde (fenêtre Mondes, titre d'arrivée)
 	Palette: { [string]: Color3 },
@@ -50,6 +62,7 @@ export type Look = {
 	Ambience: Ambience,
 	Decor: string,
 	Sky: Sky?,
+	Preview: Preview?,
 }
 
 -- Lumière d'une phase, la même pour tous les mondes (server/DayNightController) ; le ciel de chaque monde en
@@ -109,6 +122,8 @@ Worlds.Looks = {
 		-- air et teinte du préréglage « jour » de dataset_and_pipeline/map_art_bible.json (25 oct.)
 		Ambience = { AirColor = rgb(207, 226, 255), AirDecay = rgb(122, 150, 208), AirDensity = 0.3, Tint = rgb(255, 250, 240), Saturation = 0.18, CloudColor = rgb(255, 255, 255), CloudCover = 0.55 },
 		Decor = "Trees",
+		Preview = { Back = "FalaiseGradins", Gate = "ArcheAncienne", Sides = { "ArbreCerisier", "ChampignonGeant" },
+			SkyTop = rgb(90, 160, 235), SkyHorizon = rgb(205, 232, 255) },
 		Sky = { Day = {}, Night = {}, Stars = 3000 }, -- ciel bleu à cumulus, celui des préréglages
 	},
 	Desert = {
@@ -124,6 +139,8 @@ Worlds.Looks = {
 		-- air et teinte de dataset_and_pipeline/map_art_bible_desert.json (25 oct.)
 		Ambience = { AirColor = rgb(255, 224, 176), AirDecay = rgb(232, 154, 90), AirDensity = 0.32, Tint = rgb(255, 240, 220), Saturation = 0.2, CloudColor = rgb(255, 240, 220), CloudCover = 0.2, Particles = "Sand" },
 		Decor = "Cactus",
+		Preview = { Back = "Desert_Mesa", Gate = "Desert_PorteTemple", Sides = { "Desert_Palmier", "Desert_Saguaro" },
+			SkyTop = rgb(110, 170, 220), SkyHorizon = rgb(255, 215, 160) },
 		-- ciel chaud et voilé, presque sans nuages, gros soleil ; nuits très étoilées
 		Sky = {
 			Day = { Haze = 2.3, Glare = 0.7, CloudCover = 0.08 },
@@ -146,6 +163,8 @@ Worlds.Looks = {
 		Neon = { PathA = true, PathB = true, WallTop = true, WoodPost = true, WoodCap = true, LeavesC = true },
 		Ambience = { AirColor = rgb(255, 150, 100), AirDecay = rgb(120, 40, 30), AirDensity = 0.38, Tint = rgb(255, 215, 195), Saturation = 0.25, CloudColor = rgb(90, 70, 70), CloudCover = 0.6, Particles = "Embers" },
 		Decor = "LavaRock",
+		Preview = { Back = "Volcan_Orgues", Gate = "Volcan_PorteForge", Sides = { "Volcan_ArbreCalcine", "Volcan_PilierBrasier" },
+			SkyTop = rgb(60, 30, 30), SkyHorizon = rgb(255, 120, 60) },
 		-- ciel de fumée rouge (l'air orangé couvre tout le ciel), nuages sombres, presque pas d'étoiles
 		Sky = {
 			Day = { Haze = 2.8, Glare = 0.2, CloudCover = 0.7 },
@@ -166,6 +185,8 @@ Worlds.Looks = {
 		-- saturation 0,12 (avant 0,05 : la neige paraissait terne ; map_art_bible_glace.json, 25 oct.)
 		Ambience = { AirColor = rgb(220, 240, 255), AirDecay = rgb(150, 190, 230), AirDensity = 0.32, Tint = rgb(225, 240, 255), Saturation = 0.12, CloudColor = rgb(240, 248, 255), CloudCover = 0.7, Particles = "Snow" },
 		Decor = "IceCrystal",
+		Preview = { Back = "Glace_Glacier", Gate = "Glace_PorteGlace", Sides = { "Glace_Sapin", "Glace_Lanterne" },
+			SkyTop = rgb(110, 170, 230), SkyHorizon = rgb(228, 242, 255) },
 		-- ciel pâle et givré, nuages de neige ; nuits polaires très étoilées
 		Sky = {
 			Day = { Haze = 1.2, Glare = 0.5, CloudCover = 0.7 },
@@ -188,6 +209,8 @@ Worlds.Looks = {
 		-- bleu (vu en jeu le 25 oct., map_art_bible_abysses.json)
 		Ambience = { AirColor = rgb(80, 180, 210), AirDecay = rgb(20, 70, 120), AirDensity = 0.34, Tint = rgb(215, 242, 250), Saturation = 0.26, CloudColor = rgb(100, 180, 210), CloudCover = 0.2, Particles = "Bubbles" },
 		Decor = "Coral",
+		Preview = { Back = "Abysses_Recif", Gate = "Abysses_PorteAtlante", Sides = { "Abysses_Corail", "Abysses_Algue" },
+			SkyTop = rgb(10, 50, 90), SkyHorizon = rgb(60, 180, 210) },
 		-- sous l'eau : le « ciel » est la couleur de l'eau, ni nuages, ni étoiles, ni soleil ; la nuit, eau sombre (une
 		-- brume forte la rallume en cyan et délave les récifs : vu en jeu le 26 oct.)
 		Sky = {
@@ -211,6 +234,8 @@ Worlds.Looks = {
 		Neon = { PathA = true, PathB = true, WallTop = true, WoodCap = true },
 		Ambience = { AirColor = rgb(150, 110, 255), AirDecay = rgb(40, 20, 90), AirDensity = 0.3, Tint = rgb(225, 210, 255), Saturation = 0.25, CloudColor = rgb(170, 130, 255), CloudCover = 0.15, Particles = "Stars" },
 		Decor = "Asteroid",
+		Preview = { Back = "Cosmos_Falaise", Gate = "Cosmos_PorteStellaire", Sides = { "Cosmos_ArbreAlien", "Cosmos_Pylone" },
+			SkyTop = rgb(12, 6, 30), SkyHorizon = rgb(110, 60, 170), Stars = true },
 		-- espace : toujours de nuit pour garder les étoiles et une grosse lune, horizon violet (l'air) ; le jour, la
 		-- scène reste éclairée par la lumière ambiante et l'exposition (map_art_bible_cosmos.json)
 		Sky = {
@@ -245,6 +270,8 @@ Worlds.Looks = {
 		-- le 26 oct., map_art_bible_divin.json)
 		Ambience = { AirColor = rgb(255, 245, 220), AirDecay = rgb(255, 220, 160), AirDensity = 0.28, Tint = rgb(255, 242, 220), Saturation = 0.26, CloudColor = rgb(255, 255, 255), CloudCover = 0.8, Particles = "Feathers" },
 		Decor = "Pillar",
+		Preview = { Back = "Divin_Falaise", Gate = "Divin_PorteCeleste", Sides = { "Divin_ArbreDore", "Divin_Tour" },
+			SkyTop = rgb(70, 140, 230), SkyHorizon = rgb(255, 225, 160) },
 		-- ciel doré lumineux, nuages légers, soleil éclatant (trop de nuages : ciel gris couvert, vu en jeu le 26 oct.) ;
 		-- le jour, exposition retenue et brume plus légère (sinon tout le marbre tire au blanc)
 		Sky = {

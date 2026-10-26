@@ -137,6 +137,42 @@ function MenuKit.eggViewport(parent: Instance, rarityId: string): ViewportFrame
 	return viewport
 end
 
+-- Silhouette sombre : les familiers et décors en briques portent une texture cuite (SurfaceAppearance / TextureID)
+-- qui recouvre la couleur de la pièce ; on la retire, sinon l'objet reste visible en entier.
+function MenuKit.silhouette(root: Instance)
+	for _, descendant in ipairs(root:GetDescendants()) do
+		if descendant:IsA("SurfaceAppearance") or descendant:IsA("Decal") or descendant:IsA("Texture") then
+			descendant:Destroy()
+		elseif descendant:IsA("SpecialMesh") then
+			descendant.TextureId = ""
+		elseif descendant:IsA("BasePart") then
+			descendant.Color = Color3.fromRGB(20, 20, 30)
+			descendant.Material = Enum.Material.SmoothPlastic
+			if descendant:IsA("MeshPart") then
+				descendant.TextureID = ""
+			elseif descendant:IsA("UnionOperation") then
+				descendant.UsePartColor = true
+			end
+		end
+	end
+	if root:IsA("BasePart") then
+		root.Color = Color3.fromRGB(20, 20, 30)
+		root.Material = Enum.Material.SmoothPlastic
+		if root:IsA("MeshPart") then
+			root.TextureID = ""
+		end
+	end
+end
+
+-- Familier prêt pour un ViewportFrame : sans particules, bulles ni aura.
+function MenuKit.cleanPetModel(model: Model)
+	for _, descendant in ipairs(model:GetDescendants()) do
+		if descendant:IsA("ParticleEmitter") or descendant:IsA("BillboardGui") or descendant:GetAttribute("Aura") then
+			descendant:Destroy()
+		end
+	end
+end
+
 function MenuKit.petViewport(parent: Instance, petId: string, silhouette: boolean): ViewportFrame
 	local viewport = Instance.new("ViewportFrame")
 	viewport.BackgroundTransparency = 1
@@ -145,28 +181,9 @@ function MenuKit.petViewport(parent: Instance, petId: string, silhouette: boolea
 	viewport.Parent = parent
 	local model = PetModelBuilder.Build(petId)
 	if model then
-		for _, descendant in ipairs(model:GetDescendants()) do
-			if descendant:IsA("ParticleEmitter") or descendant:IsA("BillboardGui") or descendant:GetAttribute("Aura") then
-				descendant:Destroy()
-			elseif silhouette then
-				-- Silhouette : les familiers en briques portent une texture cuite (SurfaceAppearance / TextureID) qui
-				-- recouvre la couleur de la pièce ; on la retire, sinon le familier reste visible en entier.
-				if descendant:IsA("SurfaceAppearance") or descendant:IsA("Decal") or descendant:IsA("Texture") then
-					descendant:Destroy()
-				elseif descendant:IsA("SpecialMesh") then
-					descendant.TextureId = ""
-				elseif descendant:IsA("BasePart") then
-					descendant.Color = Color3.fromRGB(20, 20, 30)
-					descendant.Material = Enum.Material.SmoothPlastic
-					if descendant:IsA("MeshPart") then
-						descendant.TextureID = ""
-					elseif descendant:IsA("UnionOperation") then
-						descendant.UsePartColor = true
-					end
-				end
-			end
-		end
+		MenuKit.cleanPetModel(model)
 		if silhouette then
+			MenuKit.silhouette(model)
 			viewport.ImageColor3 = Color3.fromRGB(70, 70, 90) -- assombrit ce qui resterait (reflets, lueurs)
 		end
 		model:PivotTo(CFrame.new())
