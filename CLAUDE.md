@@ -259,8 +259,8 @@ Rebirth 8,4 h au lieu de 8,7 h. Les objets tombent dans **2 bacs dehors** contre
 base), le moins rempli d'abord, à une place libre (`ItemSpawner`) ; plus de palettes. Lot `Lot10_ObjetsMondes`,
 branchement `tools/make_props_wire.py BacObjets` puis `tools/make_items_wire.py Objets_...`. Vérifié en Play (solo) :
 bacs en place et teints, objets des 7 mondes (monde simulé, sauvegarde intacte) aux bons points et tous dans les bacs,
-ramassage d'un objet en briques. Pas vu : lancer dans le trou avec ces modèles, objets sauvages, à 2 joueurs, téléphone.
-**ArtModels.Items et BacObjets sont dans le fichier du jeu : Ctrl+S.**
+ramassage d'un objet en briques, lancer d'une pomme avalée par le trou (+0,25 point, pas d'alerte anti-triche) ;
+Chouaib a fait Ctrl+S. Pas vu : objets sauvages et roches du trou noir avec ces modèles, à 2 joueurs, téléphone.
 
 **15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, en argent du jeu seulement) :
 les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`, mêmes règles que [E]). Vérifié en jeu (solo) :
