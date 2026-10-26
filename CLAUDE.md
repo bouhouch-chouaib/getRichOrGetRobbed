@@ -221,6 +221,11 @@ avec aura de flammes, paliers par niveau de Vitesse / Force, particules et textu
 Cerbère, ne pas reproposer d'aura sans demande, et partir d'une capture de la référence avant de dessiner un effet.
 Restent au choix de Chouaib : gros butin signalé à tous (règle 10), ruée des voleurs (règle 14). Pour l'analyse Luau : luau-lsp 1.70.1 (page des versions) dans un dossier temporaire, projet copié sans accents.
 
+**26 oct. : vidéo de la page du jeu** (`assets/store/video/video_page_jeu.mp4`, hors git ; 46 s, 1920 x 1080, sans son,
+version solo : trou noir, lancer, éclosion Divine, base, familier porté, 4 mondes, explosion du trou, nom du jeu).
+Filmée dans Studio par Claude (`tools/video/rec.sh`), montée par `tools/video/edit.sh` ; détails et envoi :
+`docs/PAGE_DU_JEU.md` « Vidéo de jeu ». Pas encore envoyée sur Roblox (3 envois par mois : c'est Chouaib qui envoie).
+
 **15 oct. : œufs (Codex) puis corrections Claude** (`server/EggController`, `client/Eggs`, `shared/EggIncubation`,
 `docs/INCUBATION.md`) : toutes les récompenses arrivent en œufs qui incubent (15 s à 30 min). Claude : un nid par œuf
 (12 nids dans la couveuse, file d'attente au-delà), montée en tension puis éclosion de plus en plus spectaculaire selon la
