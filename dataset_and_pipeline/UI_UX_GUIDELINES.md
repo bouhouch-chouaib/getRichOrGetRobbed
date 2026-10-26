@@ -145,6 +145,22 @@ support : la grille place le support, l'effet bouge la carte dedans.
 - Pas de « packs d'argent » contre des Robux : le jeu n'en a pas. En ajouter demande de créer les produits sur Roblox
   et de mesurer l'effet sur l'économie (`dataset_and_pipeline/ECONOMY_REPORT.md`) : décision de Chouaib.
 
+## 5 bis. Menu Mondes (refait le 26 oct. avec ces règles)
+
+`client/WorldMenu` : une page qui défile de haut en bas, sans pastilles (2 sections seulement : les pastilles servent
+aux pages de 4 sections ou plus).
+- **Prochain monde** : grande carte aux couleurs du monde à débloquer (paysage, « MONDE 2 », revenu, tirages, nombre
+  de familiers exclusifs), jauge argent / prix, « IL TE MANQUE ... » ou « TU PEUX Y ALLER ! », gros bouton de prix.
+  Cachée quand tous les mondes sont débloqués.
+- **Les 7 mondes** : une large carte par monde (paysage + numéro, revenu, tirages, ses familiers exclusifs en aperçu 3D,
+  en silhouette tant qu'ils ne sont pas découverts, « 2 / 5 »), ruban « TU ES ICI », bouton ACTUEL / Y ALLER / prix /
+  VERROUILLÉ ; les mondes pas encore accessibles sont voilés avec un cadenas.
+- Mêmes effets que la Boutique (`UIJuiceController`) : boutons qui grossissent et s'écrasent, secousse + éclair rouge et
+  « IL TE MANQUE ... » / « DÉBLOQUE D'ABORD ... ». L'argent de l'en-tête vient de `ShopKit.moneyChip` (partagé).
+- Les aperçus 3D sont créés à la première ouverture, un par image (pas d'à-coup), et refaits quand un familier est
+  découvert.
+- Au doigt, les sous-titres des bandeaux sont cachés (ils chevauchaient le titre).
+
 ## 6. Vérifié dans Studio (26 oct., en solo, sans rien acheter)
 
 - PC (fenêtre de Studio de 1303 x 410, donc très réduite) : la Boutique s'ouvre, 7 pastilles avec leurs mots entiers,
@@ -157,7 +173,13 @@ support : la grille place le support, l'effet bouge la carte dedans.
   croix visible, rien sous le joystick ni le bouton de saut.
 - Croix rouge qui chevauche le coin : vue sur Boutique et Mondes.
 
-À voir encore : un vrai achat (amélioration et Robux), le zoom de caméra à l'ouverture, un vrai téléphone, les autres
-fenêtres avec la nouvelle croix (Index, Fusion, Duel, Échange, Capsule). Dans l'aperçu téléphone de Studio, `NextGoals`,
+- Mondes (PC et aperçu téléphone) : Prochain monde (Désert, jauge pleine, « TU PEUX Y ALLER ! », $200K), les 7 cartes
+  (TU ES ICI sur la Prairie, Glace / Abysses voilées avec cadenas, VERROUILLÉ + prix), les 6 cases du Volcan tiennent,
+  molette ; 31 aperçus 3D créés. Pendant ce test Studio ne dessinait plus la 3D (décor noir, Index vide aussi) : les
+  familiers dans les cases n'ont pas pu être photographiés.
+- Nouvelle croix vue aussi sur l'Index.
+
+À voir encore : un vrai achat (amélioration et Robux), un vrai voyage, les familiers dans les cases du menu Mondes, le
+zoom de caméra à l'ouverture, un vrai téléphone, la croix sur Fusion, Duel, Échange, Capsule. Dans l'aperçu téléphone de Studio, `NextGoals`,
 `Magnet` et `Newcomer` attendent `HUD.Root` qui est alors rangé dans `PhonePreview` (avertissement « Infinite yield »,
 déjà là avant, sans effet dans le vrai jeu).

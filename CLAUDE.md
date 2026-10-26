@@ -188,6 +188,9 @@ effets `client/UIJuiceController` (survol 1,06, appui 0,92, pièces à l'achat, 
 caméra quand une fenêtre est ouverte). `UiStyle.button(..., true)` = sans l'ancien rebond ; croix rouge de TOUTES les
 fenêtres agrandie et posée à cheval sur le coin. `UITextSizeConstraint` compte en vrais pixels d'écran (minimum = plancher
 de lisibilité seulement). Vu dans Studio (PC et aperçu téléphone, sans achat) ; pas vu : vrai achat, vrai téléphone.
+**Menu Mondes refait de même** (`client/WorldMenu`, 26 oct.) : Prochain monde (jauge argent / prix, gros bouton) puis une
+large carte par monde avec ses familiers exclusifs en aperçu 3D (silhouettes si pas découverts), voile + cadenas après le
+suivant. Vu dans Studio (PC et téléphone) ; les aperçus 3D n'ont pas pu être photographiés (Studio ne dessinait plus la 3D).
 **Rebirth** : +1 chambre de capsule d'évolution par Rebirth (6 au plus, `Config.GetCapsuleSlots`, plusieurs œufs évoluent en même temps), doublons de sa meilleure rareté vers une chambre libre, prix 4T x (n+1) x 1,62^n.
 **Couronne du plus riche** (`Config.Crown`, `server/CrownController`, `shared/CrownRules`, `client/Crown`) : plus gros revenu du serveur, prime pour qui le vole, récompense limitée pour chaque voleur arrêté.
 **Pile « prochain objectif »** (`shared/NextGoals`, `client/NextGoals`) : deux objectifs entamés avec barre sous l'horloge, résumé d'absence au retour (attribut `AwaySummary`).

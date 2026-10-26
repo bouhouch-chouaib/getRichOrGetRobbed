@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Icons = require(ReplicatedStorage.Shared.Icons)
+local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local ScreenScale = require(script.Parent.ScreenScale)
 local UIJuice = require(script.Parent.UIJuiceController)
 local UiStyle = require(script.Parent.UiStyle)
@@ -111,6 +112,7 @@ function ShopKit.section(scroll: ScrollingFrame, order: number, title: string, s
 	subtitleLabel.Position = UDim2.new(1, -14, 0.5, 0)
 	subtitleLabel.Size = UDim2.new(0.5, -14, 0, math.floor(26 * K))
 	subtitleLabel.ZIndex = 3
+	subtitleLabel.Visible = not TOUCH -- au doigt, le bandeau est trop court : il chevaucherait le titre
 
 	local grid = Instance.new("Frame")
 	grid.Name = "Grid"
@@ -326,6 +328,74 @@ function ShopKit.info(body: Frame, getText: () -> string): Frame
 		UIJuice.pop(body, 0.04)
 	end)
 	return overlay
+end
+
+----------------------------------------------------------------------
+-- Argent dans l'en-tête
+----------------------------------------------------------------------
+
+export type MoneyChip = {
+	frame: Frame,
+	update: (open: boolean) -> (), -- à appeler quand l'argent a pu changer
+	reset: () -> (), -- à l'ouverture : affiche le montant exact, sans défilement
+}
+
+local function formatMoney(value: number): string
+	return NumberFormat.money(math.floor(value + 0.5))
+end
+
+-- Argent du joueur dans l'en-tête d'une fenêtre, à gauche de la croix. Fenêtre ouverte, il défile jusqu'au nouveau
+-- montant (UIJuiceController.countTo) et saute un peu quand il baisse (achat, voyage).
+function ShopKit.moneyChip(header: Frame, getMoney: () -> number): MoneyChip
+	local chip = Instance.new("Frame")
+	chip.Name = "Money"
+	chip.AnchorPoint = Vector2.new(1, 0.5)
+	chip.Position = UDim2.new(1, -66, 0.5, 0)
+	chip.Size = UDim2.fromOffset(math.floor(230 * K), 44)
+	chip.BackgroundColor3 = CHIP
+	chip.BackgroundTransparency = 0.15
+	chip.BorderSizePixel = 0
+	chip.ZIndex = 4
+	UiStyle.corner(chip, 10)
+	UiStyle.stroke(chip, 3, BLACK, true)
+	chip.Parent = header
+	local icon = Icons.image(chip, "Money", UDim2.fromOffset(52, 52))
+	icon.AnchorPoint = Vector2.new(0.5, 0.5)
+	icon.Position = UDim2.new(0, 14, 0.5, 0)
+	icon.Rotation = -10
+	icon.ZIndex = 6
+	local shown = getMoney()
+	local label = UiStyle.number(chip, formatMoney(shown), 30, UiStyle.Colors.Money)
+	label.Position = UDim2.fromOffset(44, 4)
+	label.Size = UDim2.new(1, -54, 1, -8)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextScaled = true
+	label.ZIndex = 5
+	local limit = Instance.new("UITextSizeConstraint")
+	limit.MaxTextSize = 30
+	limit.Parent = label
+	return {
+		frame = chip,
+		update = function(open: boolean)
+			local money = getMoney()
+			if money == shown then
+				return
+			end
+			if open then
+				UIJuice.countTo(label, shown, money, formatMoney, 0.5)
+				if money < shown then
+					UIJuice.pop(chip, 0.08)
+				end
+			else
+				label.Text = formatMoney(money)
+			end
+			shown = money
+		end,
+		reset = function()
+			shown = getMoney()
+			label.Text = formatMoney(shown)
+		end,
+	}
 end
 
 ----------------------------------------------------------------------

@@ -29,7 +29,6 @@ local UiStyle = require(script.Parent.UiStyle)
 local ShopMenu = {}
 
 local WHITE = Color3.new(1, 1, 1)
-local BLACK = Color3.new(0, 0, 0)
 local GREY = Color3.fromRGB(150, 150, 160)
 local K = ShopKit.K
 
@@ -144,33 +143,10 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 	fxLayer.ZIndex = 20
 	fxLayer.Parent = window.frame
 
-	-- Argent du joueur dans l'en-tête, à gauche de la croix.
-	local moneyChip = Instance.new("Frame")
-	moneyChip.Name = "Money"
-	moneyChip.AnchorPoint = Vector2.new(1, 0.5)
-	moneyChip.Position = UDim2.new(1, -66, 0.5, 0)
-	moneyChip.Size = UDim2.fromOffset(math.floor(230 * K), 44)
-	moneyChip.BackgroundColor3 = Color3.fromRGB(28, 28, 42)
-	moneyChip.BackgroundTransparency = 0.15
-	moneyChip.BorderSizePixel = 0
-	moneyChip.ZIndex = 4
-	UiStyle.corner(moneyChip, 10)
-	UiStyle.stroke(moneyChip, 3, BLACK, true)
-	moneyChip.Parent = window.header
-	local moneyIcon = Icons.image(moneyChip, "Money", UDim2.fromOffset(52, 52))
-	moneyIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-	moneyIcon.Position = UDim2.new(0, 14, 0.5, 0)
-	moneyIcon.Rotation = -10
-	moneyIcon.ZIndex = 6
-	local moneyLabel = UiStyle.number(moneyChip, NumberFormat.money(MenuKit.number("Money")), 30, UiStyle.Colors.Money)
-	moneyLabel.Position = UDim2.fromOffset(44, 4)
-	moneyLabel.Size = UDim2.new(1, -54, 1, -8)
-	moneyLabel.TextXAlignment = Enum.TextXAlignment.Left
-	moneyLabel.TextScaled = true
-	moneyLabel.ZIndex = 5
-	local moneyLimit = Instance.new("UITextSizeConstraint")
-	moneyLimit.MaxTextSize = 30
-	moneyLimit.Parent = moneyLabel
+	-- Argent du joueur dans l'en-tête, à gauche de la croix (il défile après un achat).
+	local moneyChip = ShopKit.moneyChip(window.header, function()
+		return MenuKit.number("Money")
+	end)
 
 	-- La page qui défile, sous les pastilles.
 	local scroll = Instance.new("ScrollingFrame")
@@ -442,30 +418,9 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 		return count
 	end
 
-	-- L'argent de l'en-tête défile jusqu'au nouveau montant (fenêtre ouverte) ; il saute un peu quand il baisse (achat).
-	local moneyShown = MenuKit.number("Money")
-	local function formatMoney(value: number): string
-		return NumberFormat.money(math.floor(value + 0.5))
-	end
-	local function updateMoney()
-		local money = MenuKit.number("Money")
-		if money == moneyShown then
-			return
-		end
-		if window.isOpen() then
-			UIJuice.countTo(moneyLabel, moneyShown, money, formatMoney, 0.5)
-			if money < moneyShown then
-				UIJuice.pop(moneyChip, 0.08)
-			end
-		else
-			moneyLabel.Text = formatMoney(money)
-		end
-		moneyShown = money
-	end
-
 	local function refresh()
 		local money = MenuKit.number("Money")
-		updateMoney()
+		moneyChip.update(window.isOpen())
 		show(featuredCard, recommended(money), money)
 		for _, ui in ipairs(cards) do
 			local item = ui.item
@@ -498,8 +453,7 @@ function ShopMenu.create(gui: Instance, topStack: Frame): Shop
 	end
 
 	window.onOpen(function()
-		moneyShown = MenuKit.number("Money")
-		moneyLabel.Text = formatMoney(moneyShown)
+		moneyChip.reset()
 		refresh()
 		robux.refresh()
 		if MenuKit.player:GetAttribute("StarterBonusPaid") == true and MenuKit.player:GetAttribute("Onboarding_Upgraded") ~= true then

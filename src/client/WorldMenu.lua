@@ -1,9 +1,15 @@
 --!strict
--- WorldMenu : fenêtre MONDES. Les 7 mondes (Config.Worlds) en grandes cartes qui défilent, comme la boutique :
--- nom, numéro, aperçu du paysage (sol, mur, crête aux couleurs du monde, shared/Worlds), bonus de revenu, et
---   « TU ES ICI » (monde actuel), « Y ALLER » (déjà visité : retour gratuit, Remotes.GoToWorld), bouton
---   « VOYAGER $prix » (monde suivant), « VERROUILLÉ » (après). Le bonus de revenu reste celui du monde le plus loin.
--- Le voyage est validé par le serveur (Remotes.BuyTier / GoToWorld -> server/TierController).
+-- WorldMenu : fenêtre MONDES en une page qui défile de haut en bas (refaite le 26 oct. 2026 avec les règles de
+-- dataset_and_pipeline/UI_UX_GUIDELINES.md ; briques client/ShopKit, effets client/UIJuiceController) :
+--   - en-tête : l'argent du joueur (compteur qui défile) ;
+--   - PROCHAIN MONDE : grande carte du monde à débloquer (paysage, ce qu'on y gagne, jauge argent / prix, « IL TE
+--     MANQUE ... », gros bouton VOYAGER) ; cachée quand tous les mondes sont débloqués ;
+--   - LES 7 MONDES : une large carte par monde (paysage aux couleurs du monde, numéro, revenu, tirages, ses familiers
+--     exclusifs en aperçu 3D, en silhouette tant qu'ils ne sont pas découverts) et son bouton : ACTUEL (tu es ici),
+--     Y ALLER (déjà visité : retour gratuit, Remotes.GoToWorld), VOYAGER $prix (le suivant), VERROUILLÉ (après, voilé
+--     avec un cadenas). Le bonus de revenu reste celui du monde le plus loin atteint.
+-- Le voyage est validé par le serveur (Remotes.BuyTier / GoToWorld -> server/TierController) ; pas assez d'argent :
+-- secousse, éclair rouge, « IL TE MANQUE ... ».
 -- Arrivée (Remotes.TierReached) : flash, grand titre du monde, son ; annonce chez les autres joueurs.
 
 local Players = game:GetService("Players")
@@ -11,21 +17,33 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
+local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local Worlds = require(ReplicatedStorage.Shared.Worlds)
 local MenuKit = require(script.Parent.MenuKit)
+local ShopKit = require(script.Parent.ShopKit)
 local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
+local UIJuice = require(script.Parent.UIJuiceController)
 local UiStyle = require(script.Parent.UiStyle)
 
 local WorldMenu = {}
 
 local WHITE = Color3.new(1, 1, 1)
+local BLACK = Color3.new(0, 0, 0)
 local GREY = Color3.fromRGB(150, 150, 160)
-local CARD_WIDTH = 214
+local ORANGE = Color3.fromRGB(255, 150, 40)
 local PRAIRIE = Worlds.Looks.Prairie
+local K = ShopKit.K
+local TOUCH = ShopKit.TOUCH
+-- Une large carte par monde (une seule colonne) ; au doigt, plus haute et avec un paysage plus étroit.
+local ROW_HEIGHT = if TOUCH then 236 else 178
+local FEATURED_HEIGHT = if TOUCH then 280 else 222
+local LAND_WIDTH = if TOUCH then 170 else 230
+local BUTTON_WIDTH = math.floor(210 * K)
 
 local player = Players.LocalPlayer
 
@@ -57,151 +75,409 @@ local function swatch(look: Worlds.Look, role: string): Color3
 	return look.Palette[role] or PRAIRIE_COLORS[role] or WHITE
 end
 
-type Card = { index: number, status: TextLabel, button: TextButton }
+-- Ce que donnent les tirages du monde (Config.Worlds[].RarityBoost).
+local function luckText(world: Config.WorldDef): string
+	local boost = world.RarityBoost or 1
+	if boost <= 1 then
+		return "Tirages normaux"
+	end
+	return "Tirages +" .. math.floor((boost - 1) * 100 + 0.5) .. " %"
+end
 
-export type Menu = { window: MenuKit.Window, refresh: () -> (), canTravel: () -> boolean }
-
--- Petit paysage du monde : ciel (couleur de l'air), mur avec sa crête, sol en damier.
-local function landscape(parent: Instance, look: Worlds.Look)
-	local frame = Instance.new("Frame")
-	frame.Name = "Landscape"
-	frame.Position = UDim2.fromOffset(12, 70)
-	frame.Size = UDim2.new(1, -24, 0, 104)
-	frame.BackgroundColor3 = look.Ambience.AirColor
-	frame.BorderSizePixel = 0
-	frame.ClipsDescendants = true
-	UiStyle.corner(frame, 6)
-	UiStyle.stroke(frame, 3, Color3.new(0, 0, 0), true)
-	frame.Parent = parent
+-- Petit paysage du monde dans `holder` (vidé d'abord) : ciel (couleur de l'air), mur avec sa crête, sol en damier.
+local function landscape(holder: Frame, look: Worlds.Look)
+	holder:ClearAllChildren()
+	holder.BackgroundColor3 = look.Ambience.AirColor
+	UiStyle.corner(holder, 8)
+	UiStyle.stroke(holder, 3, BLACK, true)
 	local wall = Instance.new("Frame")
 	wall.BorderSizePixel = 0
 	wall.BackgroundColor3 = swatch(look, "WallA")
 	wall.Position = UDim2.fromScale(0, 0.35)
 	wall.Size = UDim2.fromScale(1, 0.3)
-	wall.Parent = frame
+	wall.ZIndex = holder.ZIndex
+	wall.Parent = holder
 	local top = Instance.new("Frame")
 	top.BorderSizePixel = 0
 	top.BackgroundColor3 = swatch(look, "WallTop")
 	top.Position = UDim2.fromScale(0, 0.3)
 	top.Size = UDim2.fromScale(1, 0.07)
-	top.Parent = frame
+	top.ZIndex = holder.ZIndex
+	top.Parent = holder
 	for index = 0, 5 do
 		local tile = Instance.new("Frame")
 		tile.BorderSizePixel = 0
 		tile.BackgroundColor3 = if index % 2 == 0 then swatch(look, "GrassA") else swatch(look, "PathA")
 		tile.Position = UDim2.fromScale(index / 6, 0.65)
 		tile.Size = UDim2.fromScale(1 / 6 + 0.002, 0.35)
-		tile.Parent = frame
+		tile.ZIndex = holder.ZIndex
+		tile.Parent = holder
 	end
 end
 
+local function landscapeHolder(parent: Instance, width: number): Frame
+	local holder = Instance.new("Frame")
+	holder.Name = "Landscape"
+	holder.BorderSizePixel = 0
+	holder.ClipsDescendants = true
+	holder.Position = UDim2.fromOffset(12, 12)
+	holder.Size = UDim2.new(0, width, 1, -24)
+	holder.ZIndex = 2
+	holder.Parent = parent
+	return holder
+end
+
+-- Recolore une carte vive (UiStyle.brightCard) : son dégradé est son UIGradient direct.
+local function recolor(body: Frame, color: Color3)
+	local shade = body:FindFirstChildOfClass("UIGradient")
+	if shade then
+		shade.Color = ColorSequence.new(UiStyle.lighter(color, 0.4), UiStyle.darker(color, 0.08))
+	end
+end
+
+type Cell = { petId: string, holder: Frame, viewport: ViewportFrame?, known: boolean? }
+
+type Row = {
+	index: number,
+	body: Frame,
+	status: TextLabel,
+	button: TextButton,
+	here: Frame, -- ruban « TU ES ICI »
+	veil: Frame, -- voile + cadenas des mondes pas encore accessibles
+	count: TextLabel, -- « FAMILIERS EXCLUSIFS 2 / 5 »
+	cells: { Cell },
+}
+
+export type Menu = { window: MenuKit.Window, refresh: () -> (), canTravel: () -> boolean }
+
 function WorldMenu.create(gui: Instance): Menu
-	local window = MenuKit.window(gui, "Mondes", Vector2.new(800, 480), Color3.fromRGB(255, 150, 40), "Planet")
+	local window = MenuKit.window(gui, "Mondes", ShopKit.WINDOW, ORANGE, "Planet")
+	local moneyChip = ShopKit.moneyChip(window.header, function()
+		return MenuKit.number("Money")
+	end)
 
-	local row = Instance.new("ScrollingFrame")
-	row.BackgroundTransparency = 1
-	row.BorderSizePixel = 0
-	row.Size = UDim2.fromScale(1, 1)
-	row.ScrollingDirection = Enum.ScrollingDirection.X
-	row.AutomaticCanvasSize = Enum.AutomaticSize.X
-	row.CanvasSize = UDim2.new()
-	row.ScrollBarThickness = 8
-	row.ScrollBarImageColor3 = WHITE
-	row.ZIndex = 2
-	row.Parent = window.content
-	local layout = Instance.new("UIListLayout")
-	layout.FillDirection = Enum.FillDirection.Horizontal
-	layout.Padding = UDim.new(0, 12)
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Parent = row
-	UiStyle.scrollPadding(row)
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Name = "Page"
+	scroll.BackgroundTransparency = 1
+	scroll.BorderSizePixel = 0
+	scroll.Size = UDim2.fromScale(1, 1)
+	scroll.ScrollingDirection = Enum.ScrollingDirection.Y
+	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scroll.CanvasSize = UDim2.new()
+	scroll.ScrollBarThickness = if TOUCH then 12 else 10
+	scroll.ScrollBarImageColor3 = WHITE
+	scroll.ZIndex = 2
+	scroll.Parent = window.content
+	local pageLayout = Instance.new("UIListLayout")
+	pageLayout.Padding = UDim.new(0, 22)
+	pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	pageLayout.Parent = scroll
+	UiStyle.scrollPadding(scroll)
+	local pagePadding = scroll:FindFirstChildOfClass("UIPadding")
+	if pagePadding then
+		pagePadding.PaddingLeft = UDim.new(0, 14) -- les rubans dépassent un peu à gauche des cartes
+		pagePadding.PaddingTop = UDim.new(0, 12)
+		pagePadding.PaddingBottom = UDim.new(0, 16)
+	end
 
-	local cardHeight = window.frame.Size.Y.Offset + window.content.Size.Y.Offset - 28
-	local cards: { Card } = {}
+	-- Voyage vers le monde suivant (le serveur revérifie le prix).
+	local function travel(body: GuiObject)
+		local nextWorld = Config.Worlds[tier() + 1]
+		if not nextWorld then
+			return
+		end
+		local money = MenuKit.number("Money")
+		if money < nextWorld.Price then
+			UIJuice.denied(body)
+			Toast.show("IL TE MANQUE " .. NumberFormat.money(nextWorld.Price - money) .. " !", UiStyle.Colors.Red)
+			return
+		end
+		Remotes.BuyTier:FireServer()
+	end
+
+	-- Prochain monde ----------------------------------------------------------
+
+	local featuredSection = ShopKit.section(scroll, 1, "Prochain monde", "Plus de revenu, de nouveaux familiers", "Planet", ORANGE, "", 1, FEATURED_HEIGHT)
+	local featuredCard = ShopKit.card(featuredSection.grid, PRAIRIE.Accent, 1)
+	local featuredBody = featuredCard.body
+	local featuredLand = landscapeHolder(featuredBody, math.floor(LAND_WIDTH * 1.15))
+	local _, featuredRibbon = ShopKit.ribbon(featuredBody, "", UiStyle.Colors.Gold)
+	local fLeft = 12 + featuredLand.Size.X.Offset + 16
+	local fy = 10
+	local featuredName = ShopKit.label(featuredBody, "", 36)
+	featuredName.TextXAlignment = Enum.TextXAlignment.Left
+	featuredName.Position = UDim2.fromOffset(fLeft, fy)
+	featuredName.Size = UDim2.new(1, -fLeft - 14, 0, math.floor(36 * K))
+	featuredName.ZIndex = 3
+	fy += math.floor(36 * K) + 6
+	local gains = Instance.new("Frame")
+	gains.BackgroundTransparency = 1
+	gains.Position = UDim2.fromOffset(fLeft, fy)
+	gains.Size = UDim2.new(1, -fLeft - 14, 0, math.floor(32 * K))
+	gains.Parent = featuredBody
+	local gainTexts: { TextLabel } = {}
+	for slot = 0, 2 do
+		local chip, text = ShopKit.chip(gains, 18)
+		chip.Position = UDim2.new(slot / 3, if slot > 0 then 4 else 0, 0, 0)
+		chip.Size = UDim2.new(1 / 3, -6, 1, 0)
+		table.insert(gainTexts, text)
+	end
+	gainTexts[1].TextColor3 = UiStyle.Colors.Money
+	fy += math.floor(32 * K) + 8
+	local featuredGauge = ShopKit.gauge(featuredBody, UiStyle.Colors.Money)
+	featuredGauge.frame.Position = UDim2.fromOffset(fLeft, fy)
+	featuredGauge.frame.Size = UDim2.new(1, -fLeft - 14, 0, math.floor(30 * K))
+	local featuredMissing = ShopKit.label(featuredBody, "", 22)
+	featuredMissing.TextXAlignment = Enum.TextXAlignment.Left
+	featuredMissing.AnchorPoint = Vector2.new(0, 1)
+	featuredMissing.Position = UDim2.new(0, fLeft, 1, -16)
+	featuredMissing.Size = UDim2.new(1, -fLeft - BUTTON_WIDTH - 28, 0, ShopKit.BUTTON_HEIGHT - 8)
+	featuredMissing.TextWrapped = true
+	featuredMissing.ZIndex = 3
+	local featuredButton = ShopKit.buyButton(featuredBody, UiStyle.Colors.Green, "Planet")
+	featuredButton.AnchorPoint = Vector2.new(1, 1)
+	featuredButton.Position = UDim2.new(1, -12, 1, -12)
+	featuredButton.Size = UDim2.fromOffset(BUTTON_WIDTH, ShopKit.BUTTON_HEIGHT)
+	featuredButton.Activated:Connect(function()
+		travel(featuredBody)
+	end)
+	local featuredIndex = 0
+
+	-- Les 7 mondes ----------------------------------------------------------
+
+	local listSection = ShopKit.section(scroll, 2, "Les " .. #Config.Worlds .. " mondes", "Le revenu suit le monde le plus loin", "Planet", ORANGE, "", 1, ROW_HEIGHT)
+	local rows: { Row } = {}
+	local left = 12 + LAND_WIDTH + 14
+	local middle = -(left + BUTTON_WIDTH + 24) -- largeur de la colonne du milieu (en plus de 100 %)
 
 	for index, world in ipairs(Config.Worlds) do
 		local look = lookOf(index)
-		local card = UiStyle.brightCard(row, UDim2.fromOffset(CARD_WIDTH, cardHeight), look.Accent)
-		card.LayoutOrder = index
-		local name = UiStyle.text(card, world.Name, 30, WHITE, UiStyle.BODY_FONT)
-		name.Position = UDim2.fromOffset(12, 8)
-		name.Size = UDim2.new(1, -24, 0, 30)
-		local number = UiStyle.text(card, "Monde " .. index, 18, WHITE, UiStyle.BODY_FONT)
-		number.Position = UDim2.fromOffset(12, 42)
-		number.Size = UDim2.new(1, -24, 0, 20)
-		landscape(card, look)
-		local bonusBox = Instance.new("Frame")
-		bonusBox.BackgroundColor3 = Color3.new(0, 0, 0)
-		bonusBox.BackgroundTransparency = 0.55
-		bonusBox.BorderSizePixel = 0
-		bonusBox.Position = UDim2.new(0, 10, 1, -160)
-		bonusBox.Size = UDim2.new(1, -20, 0, 56)
-		UiStyle.corner(bonusBox, 6)
-		bonusBox.Parent = card
-		local bonus = UiStyle.number(bonusBox, "Revenu x" .. tostring(world.IncomeMultiplier), 26, UiStyle.Colors.Money)
-		bonus.Position = UDim2.fromOffset(8, 6)
-		bonus.Size = UDim2.new(1, -16, 1, -12)
-		local status = UiStyle.text(card, "", 20, WHITE, UiStyle.BODY_FONT)
-		status.Position = UDim2.new(0, 10, 1, -96)
-		status.Size = UDim2.new(1, -20, 0, 30)
-		local button = UiStyle.button(card, "", UDim2.new(1, -20, 0, 52), UiStyle.Colors.Green, 26)
-		button.Position = UDim2.new(0, 10, 1, -60)
-		local caption = button:FindFirstChild("Caption")
-		if caption and caption:IsA("TextLabel") then
-			caption.FontFace = UiStyle.NUMBER_FONT
+		local card = ShopKit.card(listSection.grid, look.Accent, index)
+		local body = card.body
+		landscape(landscapeHolder(body, LAND_WIDTH), look)
+		-- Numéro du monde en pastille ronde sur le paysage.
+		local number = ShopKit.label(body, tostring(index), 24)
+		number.BackgroundTransparency = 0
+		number.BackgroundColor3 = UiStyle.Colors.Panel
+		number.Position = UDim2.fromOffset(20, 20)
+		number.Size = UDim2.fromOffset(math.floor(38 * K), math.floor(38 * K))
+		number.ZIndex = 4
+		local round = Instance.new("UICorner")
+		round.CornerRadius = UDim.new(0.5, 0)
+		round.Parent = number
+		UiStyle.stroke(number, 3, BLACK, true)
+
+		local name = ShopKit.label(body, world.Name, 32)
+		name.TextXAlignment = Enum.TextXAlignment.Left
+		name.Position = UDim2.fromOffset(left, 8)
+		name.Size = UDim2.new(1, middle, 0, math.floor(36 * K))
+		name.ZIndex = 3
+		local y = 8 + math.floor(36 * K) + 4
+		local chips = Instance.new("Frame")
+		chips.BackgroundTransparency = 1
+		chips.Position = UDim2.fromOffset(left, y)
+		chips.Size = UDim2.new(1, middle, 0, math.floor(30 * K))
+		chips.Parent = body
+		local income, incomeText = ShopKit.chip(chips, 18)
+		income.Size = UDim2.new(0.5, -4, 1, 0)
+		incomeText.Text = "Revenu x" .. tostring(world.IncomeMultiplier)
+		incomeText.TextColor3 = UiStyle.Colors.Money
+		local luck, luckLabel = ShopKit.chip(chips, 18)
+		luck.Position = UDim2.new(0.5, 4, 0, 0)
+		luck.Size = UDim2.new(0.5, -4, 1, 0)
+		luckLabel.Text = luckText(world)
+		y += math.floor(30 * K) + 6
+		local count = ShopKit.label(body, "FAMILIERS DE BASE", 16)
+		count.TextXAlignment = Enum.TextXAlignment.Left
+		count.Position = UDim2.fromOffset(left, y)
+		count.Size = UDim2.new(1, middle, 0, math.floor(20 * K))
+		count.ZIndex = 3
+		y += math.floor(20 * K) + 2
+
+		-- Familiers exclusifs : une case carrée par familier (aperçu 3D créé à la première ouverture).
+		local strip = Instance.new("Frame")
+		strip.Name = "Pets"
+		strip.BackgroundTransparency = 1
+		strip.Position = UDim2.fromOffset(left, y)
+		strip.Size = UDim2.new(1, middle, 1, -y - 12)
+		strip.Parent = body
+		local stripLayout = Instance.new("UIListLayout")
+		stripLayout.FillDirection = Enum.FillDirection.Horizontal
+		stripLayout.Padding = UDim.new(0, 5)
+		stripLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		stripLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+		stripLayout.Parent = strip
+		local cells: { Cell } = {}
+		local exclusives = PetCatalog.ByWorld[world.Id] or {}
+		local share = 1 / math.max(5, #exclusives) -- le Volcan en a 6 (Cerbère Infernal)
+		for order, entry in ipairs(exclusives) do
+			local holder = Instance.new("Frame")
+			holder.Name = "Pet" .. order
+			holder.LayoutOrder = order
+			holder.BackgroundColor3 = UiStyle.Colors.Panel
+			holder.BackgroundTransparency = 0.25
+			holder.BorderSizePixel = 0
+			holder.Size = UDim2.new(share, -4, 1, 0)
+			holder.ZIndex = 3
+			UiStyle.corner(holder, 8)
+			UiStyle.stroke(holder, 2, BLACK, true)
+			local square = Instance.new("UIAspectRatioConstraint")
+			square.AspectRatio = 1
+			square.Parent = holder
+			holder.Parent = strip
+			table.insert(cells, { petId = entry.Id, holder = holder })
 		end
+
+		local status = ShopKit.label(body, "", 20)
+		status.AnchorPoint = Vector2.new(1, 1)
+		status.Position = UDim2.new(1, -12, 1, -(ShopKit.BUTTON_HEIGHT + 18))
+		status.Size = UDim2.fromOffset(BUTTON_WIDTH, math.floor(26 * K))
+		status.ZIndex = 3
+		local button = ShopKit.buyButton(body, UiStyle.Colors.Green, "Planet")
+		button.AnchorPoint = Vector2.new(1, 1)
+		button.Position = UDim2.new(1, -12, 1, -12)
+		button.Size = UDim2.fromOffset(BUTTON_WIDTH, ShopKit.BUTTON_HEIGHT)
+		local here = ShopKit.ribbon(body, "TU ES ICI", UiStyle.Colors.Cyan)
+		here.Visible = false
+
+		-- Monde pas encore accessible : voile sombre et cadenas (le bouton gris reste lisible à droite).
+		local veil = Instance.new("Frame")
+		veil.Name = "Locked"
+		veil.BackgroundColor3 = BLACK
+		veil.BackgroundTransparency = 0.45
+		veil.BorderSizePixel = 0
+		veil.Size = UDim2.new(1, -(BUTTON_WIDTH + 20), 1, 0)
+		veil.ZIndex = 7
+		veil.Visible = false
+		UiStyle.corner(veil, 8)
+		veil.Parent = body
+		local lockIcon = Icons.image(veil, "Lock", UDim2.fromOffset(math.floor(64 * K), math.floor(64 * K)))
+		lockIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+		lockIcon.Position = UDim2.new(0, 12 + LAND_WIDTH / 2, 0.5, 0)
+		lockIcon.ZIndex = 8
+
 		button.Activated:Connect(function()
-			if index <= tier() and index ~= currentWorld() then
-				Sounds.play("UiClick")
+			local current = tier()
+			if index == currentWorld() then
+				UIJuice.pop(body, 0.04)
+			elseif index <= current then
 				Remotes.GoToWorld:FireServer(index)
-				return
+			elseif index == current + 1 then
+				travel(body)
+			else
+				UIJuice.denied(body)
+				Toast.show("DÉBLOQUE D'ABORD : " .. TextFormat.upper(Config.Worlds[current + 1].Name), UiStyle.Colors.Red)
 			end
-			if index ~= tier() + 1 then
-				return
-			end
-			if MenuKit.number("Money") < world.Price then
-				Sounds.play("Error")
-				Toast.show("PAS ASSEZ D'ARGENT : " .. NumberFormat.money(world.Price), UiStyle.Colors.Red)
-				return
-			end
-			Remotes.BuyTier:FireServer()
 		end)
-		table.insert(cards, { index = index, status = status, button = button })
+
+		table.insert(rows, {
+			index = index,
+			body = body,
+			status = status,
+			button = button,
+			here = here,
+			veil = veil,
+			count = count,
+			cells = cells,
+		})
+	end
+
+	-- Aperçus 3D des familiers exclusifs : créés à la première ouverture (petit à petit), refaits quand un familier
+	-- est découvert (la silhouette laisse place au familier).
+	local built = false
+	local building = false
+	local function updatePets(build: boolean, spread: boolean)
+		local claimed = MenuKit.claimed()
+		for _, row in ipairs(rows) do
+			local found = 0
+			for _, cell in ipairs(row.cells) do
+				local known = MenuKit.discovered(cell.petId, claimed)
+				if known then
+					found += 1
+				end
+				if build and (cell.viewport == nil or cell.known ~= known) then
+					local old = cell.viewport
+					if old then
+						old:Destroy()
+					end
+					local viewport = MenuKit.petViewport(cell.holder, cell.petId, not known)
+					viewport.Size = UDim2.fromScale(1, 1)
+					viewport.ZIndex = 4
+					cell.viewport = viewport
+					cell.known = known
+					if spread then
+						task.wait()
+					end
+				end
+			end
+			if #row.cells > 0 then
+				row.count.Text = string.format("FAMILIERS EXCLUSIFS  %d / %d", found, #row.cells)
+			end
+		end
 	end
 
 	local function refresh()
+		moneyChip.update(window.isOpen())
 		local current = tier()
 		local here = currentWorld()
 		local money = MenuKit.number("Money")
-		for _, card in ipairs(cards) do
-			local world = Config.Worlds[card.index]
-			local caption = card.button:FindFirstChild("Caption") :: TextLabel
-			card.button.Visible = true
-			if card.index == here then
-				card.status.Text = "TU ES ICI"
-				caption.Text = "ACTUEL"
-				UiStyle.setButtonColor(card.button, UiStyle.Colors.Cyan)
-			elseif card.index <= current then
-				card.status.Text = "DÉJÀ VISITÉ"
-				caption.Text = "Y ALLER"
-				UiStyle.setButtonColor(card.button, UiStyle.Colors.Green)
-			elseif card.index == current + 1 then
-				card.status.Text = "VOYAGER POUR"
-				caption.Text = NumberFormat.money(world.Price)
-				UiStyle.setButtonColor(card.button, if money >= world.Price then UiStyle.Colors.Green else UiStyle.Colors.Red)
+		for _, row in ipairs(rows) do
+			local world = Config.Worlds[row.index]
+			row.here.Visible = row.index == here
+			row.veil.Visible = row.index > current + 1
+			if row.index == here then
+				row.status.Text = "TU ES ICI"
+				ShopKit.setButton(row.button, "ACTUEL", UiStyle.Colors.Cyan)
+			elseif row.index <= current then
+				row.status.Text = "DÉJÀ VISITÉ"
+				ShopKit.setButton(row.button, "Y ALLER", UiStyle.Colors.Green)
+			elseif row.index == current + 1 then
+				row.status.Text = "VOYAGER POUR"
+				ShopKit.setButton(row.button, NumberFormat.money(world.Price), if money >= world.Price then UiStyle.Colors.Green else UiStyle.Colors.Red)
 			else
-				card.status.Text = "VERROUILLÉ"
-				caption.Text = NumberFormat.money(world.Price)
-				UiStyle.setButtonColor(card.button, GREY)
+				row.status.Text = "VERROUILLÉ"
+				ShopKit.setButton(row.button, NumberFormat.money(world.Price), GREY)
 			end
 		end
+
+		-- Prochain monde : rien au-delà du dernier.
+		local nextIndex = current + 1
+		local nextWorld = Config.Worlds[nextIndex]
+		featuredSection.frame.Visible = nextWorld ~= nil
+		if nextWorld then
+			if featuredIndex ~= nextIndex then
+				featuredIndex = nextIndex
+				local look = lookOf(nextIndex)
+				landscape(featuredLand, look)
+				recolor(featuredBody, look.Accent)
+				featuredRibbon.Text = "MONDE " .. nextIndex
+				featuredName.Text = nextWorld.Name
+				gainTexts[1].Text = "Revenu x" .. tostring(nextWorld.IncomeMultiplier)
+				gainTexts[2].Text = luckText(nextWorld)
+				local exclusives = #(PetCatalog.ByWorld[nextWorld.Id] or {})
+				gainTexts[3].Text = if exclusives > 0 then exclusives .. " exclusifs" else "Familiers de base"
+			end
+			ShopKit.setGauge(featuredGauge, money / nextWorld.Price, NumberFormat.money(money) .. " / " .. NumberFormat.money(nextWorld.Price))
+			local affordable = money >= nextWorld.Price
+			featuredMissing.Text = if affordable then "TU PEUX Y ALLER !" else "IL TE MANQUE " .. NumberFormat.money(nextWorld.Price - money)
+			featuredMissing.TextColor3 = if affordable then UiStyle.Colors.Money else WHITE
+			ShopKit.setButton(featuredButton, NumberFormat.money(nextWorld.Price), if affordable then UiStyle.Colors.Green else UiStyle.Colors.Red)
+		end
+
+		updatePets(built and not building, false)
 	end
 
 	window.onOpen(function()
+		moneyChip.reset()
 		refresh()
-		-- Montre directement le monde actuel et le suivant.
-		row.CanvasPosition = Vector2.new(math.max(0, (currentWorld() - 1) * (CARD_WIDTH + 12) - 20), 0)
+		scroll.CanvasPosition = Vector2.zero
+		if not built then
+			built, building = true, true
+			updatePets(true, true)
+			building = false
+		end
 	end)
+	refresh()
 
 	return {
 		window = window,
