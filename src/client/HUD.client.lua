@@ -37,6 +37,7 @@ local ScreenScale = require(script.Parent.ScreenScale)
 local ShopMenu = require(script.Parent.ShopMenu)
 local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
+local UIJuice = require(script.Parent.UIJuiceController)
 local UiStyle = require(script.Parent.UiStyle)
 
 local player = Players.LocalPlayer
@@ -336,6 +337,8 @@ if offers then
 end
 local rebirth = RebirthMenu.create(gui)
 local market = MarketMenu.create(gui)
+-- Tant qu'une fenêtre est ouverte, la caméra zoome un peu derrière le flou (UI_UX_GUIDELINES.md §4).
+UIJuice.followMenus(MenuKit.anyOpen)
 
 shopButton.Activated:Connect(shop.window.toggle)
 indexButton.Activated:Connect(index.window.toggle)

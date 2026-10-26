@@ -18,6 +18,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Icons = require(ReplicatedStorage.Shared.Icons)
+local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
 
 local UiStyle = {}
@@ -349,7 +350,8 @@ end
 ----------------------------------------------------------------------
 
 -- Bouton épais en relief avec contour noir (le texte est l'enfant "Caption", le contour l'enfant UIStroke).
-function UiStyle.button(parent: Instance, label: string, size: UDim2, color: Color3, textSize: number): TextButton
+-- plain = true : sans l'effet de UiStyle.bounce (l'appelant branche client/UIJuiceController.button à la place).
+function UiStyle.button(parent: Instance, label: string, size: UDim2, color: Color3, textSize: number, plain: boolean?): TextButton
 	local button = Instance.new("TextButton")
 	button.Size = size
 	button.BackgroundColor3 = WHITE
@@ -392,7 +394,9 @@ function UiStyle.button(parent: Instance, label: string, size: UDim2, color: Col
 	caption.Size = UDim2.new(1, -2 * insetX, 1, -2 * insetY)
 	caption.ZIndex = 2
 
-	UiStyle.bounce(button)
+	if not plain then
+		UiStyle.bounce(button)
+	end
 	return button
 end
 
@@ -593,11 +597,13 @@ function UiStyle.window(parent: Instance, title: string, size: Vector2, headerCo
 		limit.Parent = label
 	end
 
-	local closeButton = UiStyle.button(header, "X", UDim2.fromOffset(52, 52), UiStyle.Colors.Red, 34)
+	-- Grosse croix rouge qui chevauche le coin haut droit (UI_UX_GUIDELINES.md §3), plus grande au doigt.
+	local closeSide = if ScreenScale.isTouch() then 76 else 64
+	local closeButton = UiStyle.button(header, "X", UDim2.fromOffset(closeSide, closeSide), UiStyle.Colors.Red, 40)
 	closeButton.Name = "Close"
-	closeButton.AnchorPoint = Vector2.new(1, 0.5)
-	closeButton.Position = UDim2.new(1, -8, 0.5, 0)
-	closeButton.ZIndex = 3
+	closeButton.AnchorPoint = Vector2.new(0.5, 0.5)
+	closeButton.Position = UDim2.new(1, -12, 0, 8)
+	closeButton.ZIndex = 6
 
 	local iconImage: ImageLabel? = nil
 	if icon then

@@ -180,6 +180,14 @@ la Force ne compte plus pour porter), grappin 8° / 9 s, batte 2 coups en 10 s, 
 en 1 h -> 30 min sans vol, `Config.StealShield`), **plafond** (`Config.PowerCap`, `shared/PowerCap`, champ sauvegardé `selfBest`)
 et **vol utile** (bulle [E] seulement sur ce qui ferait monter son revenu). Vérifié : analyse Luau, build, 10 tests Lune
 (`check-pity`, `check-steal-rules` nouveaux). **Rien n'a été joué dans Studio** (liste à vérifier : ECONOMY_REPORT.md 5.3 et 5.5).
+**26 oct. : Boutique en une page (phase 1.8)** — audit des menus et règles dans `dataset_and_pipeline/UI_UX_GUIDELINES.md`
+(à suivre pour refaire les autres menus). `client/ShopMenu` + `client/RobuxShop` : une seule page qui défile (À la une :
+amélioration CONSEILLÉE + offre Robux EXCLUSIVE ; Entraînement, Bonus, Combat, Passes R$, Produits R$, Chances), pastilles
+qui font glisser la page, jauges de niveau, gros boutons de prix, « ? » pour la description. Briques `client/ShopKit`,
+effets `client/UIJuiceController` (survol 1,06, appui 0,92, pièces à l'achat, secousse rouge s'il manque de l'argent, zoom
+caméra quand une fenêtre est ouverte). `UiStyle.button(..., true)` = sans l'ancien rebond ; croix rouge de TOUTES les
+fenêtres agrandie et posée à cheval sur le coin. `UITextSizeConstraint` compte en vrais pixels d'écran (minimum = plancher
+de lisibilité seulement). Vu dans Studio (PC et aperçu téléphone, sans achat) ; pas vu : vrai achat, vrai téléphone.
 **Rebirth** : +1 chambre de capsule d'évolution par Rebirth (6 au plus, `Config.GetCapsuleSlots`, plusieurs œufs évoluent en même temps), doublons de sa meilleure rareté vers une chambre libre, prix 4T x (n+1) x 1,62^n.
 **Couronne du plus riche** (`Config.Crown`, `server/CrownController`, `shared/CrownRules`, `client/Crown`) : plus gros revenu du serveur, prime pour qui le vole, récompense limitée pour chaque voleur arrêté.
 **Pile « prochain objectif »** (`shared/NextGoals`, `client/NextGoals`) : deux objectifs entamés avec barre sous l'horloge, résumé d'absence au retour (attribut `AwaySummary`).
