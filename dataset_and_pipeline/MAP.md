@@ -341,6 +341,10 @@ Céleste, Griffon Doré, Titan Auréole, Gardien du Trou Noir) : une cité de ma
 - Vérifié en Play (solo, monde changé côté client) : au Divin, seuls les décors du Divin visibles (596 pièces, les 6
   autres mondes cachés), 19 lumières allumées (aucune des autres mondes), DivinLook visible et les 6 autres habillages
   cachés ; retour en Prairie : tout s'éteint et se cache. Photos `qa_renders/map_roblox_divin_jour.jpg`,
-  `map_roblox_divin_nuit.jpg`, `map_roblox_divin_source.jpg`. En jeu le jour est très blanc (air du monde : saturation
-  0,1 dans `shared/Worlds`) : lisible, mais peu de contraste entre le marbre et le sol.
+  `map_roblox_divin_nuit.jpg`, `map_roblox_divin_source.jpg` (reprises après le réglage de l'air ci-dessous).
+- Air du Divin réglé (`shared/Worlds`, accord de Chouaib) : le jour était très blanc, le marbre se confondait avec le
+  sol. Saturation 0,1 -> 0,26, teinte un peu plus dorée (255, 242, 220) ; le jour, exposition -0,2 et brume 2 -> 1,6
+  (`Sky.Day`). Vérifié en Play : au Divin saturation 0,26, exposition -0,2 et brume 1,6 le jour ; falaises de marbre
+  qui retrouvent leur volume, damier lisible, ciel plus bleu, or plus vif ; retour en Prairie : exposition 0,05,
+  saturation 0,18 et brume 0,6 reprises.
 - **Les 7 mondes ont maintenant leur habillage « niveau studio » dans le jeu.**

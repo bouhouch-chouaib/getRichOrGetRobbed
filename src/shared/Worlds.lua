@@ -241,11 +241,14 @@ Worlds.Looks = {
 			Trunk = rgb(250, 248, 240), LeavesA = rgb(255, 255, 255), LeavesB = rgb(245, 240, 225), LeavesC = rgb(255, 215, 80),
 		},
 		Neon = { WallTop = true, LeavesC = true },
-		Ambience = { AirColor = rgb(255, 245, 220), AirDecay = rgb(255, 220, 160), AirDensity = 0.28, Tint = rgb(255, 248, 230), Saturation = 0.1, CloudColor = rgb(255, 255, 255), CloudCover = 0.8, Particles = "Feathers" },
+		-- saturation 0,1 -> 0,26 et teinte un peu plus dorée : le marbre blanc se confondait avec le sol blanc (vu en jeu
+		-- le 26 oct., map_art_bible_divin.json)
+		Ambience = { AirColor = rgb(255, 245, 220), AirDecay = rgb(255, 220, 160), AirDensity = 0.28, Tint = rgb(255, 242, 220), Saturation = 0.26, CloudColor = rgb(255, 255, 255), CloudCover = 0.8, Particles = "Feathers" },
 		Decor = "Pillar",
-		-- ciel doré lumineux, nuages légers, soleil éclatant (trop de nuages : ciel gris couvert, vu en jeu le 26 oct.)
+		-- ciel doré lumineux, nuages légers, soleil éclatant (trop de nuages : ciel gris couvert, vu en jeu le 26 oct.) ;
+		-- le jour, exposition retenue et brume plus légère (sinon tout le marbre tire au blanc)
 		Sky = {
-			Day = { Haze = 2, Glare = 0.9, CloudCover = 0.4 },
+			Day = { Exposure = -0.2, Haze = 1.6, Glare = 0.9, CloudCover = 0.4 },
 			Night = { Haze = 1.2, Glare = 0.25, CloudCover = 0.25 },
 			Stars = 2500,
 			SunSize = 30,
