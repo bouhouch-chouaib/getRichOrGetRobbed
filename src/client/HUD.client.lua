@@ -15,6 +15,7 @@ local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local BonusMenu = require(script.Parent.BonusMenu)
@@ -317,6 +318,51 @@ do
 	end
 end
 
+-- Ranger les tuiles de menu pour dégager la vue (26 oct.) : une poignée collée à droite des tuiles, « « » les fait
+-- glisser hors de l'écran (les offres Robux de droite se cachent aussi), « » » les ramène. Touche M sur PC. Tuiles
+-- rangées : la poignée garde la pastille « ! » si une tuile en avait une. Rien n'est sauvegardé (ouvertes à chaque partie).
+local menusHidden = false
+local MENU_OPEN = menuColumn.Position
+local MENU_WIDTH = menuColumn.Size.X.Offset
+local MENU_CLOSED = MENU_OPEN - UDim2.fromOffset(MENU_WIDTH + 40, 0)
+local HANDLE_SIZE = if isTouch then Vector2.new(48, 92) else Vector2.new(42, 96)
+-- En haut à droite des tuiles (PC : la colonne est centrée sur sa hauteur, d'où le décalage d'une demi-hauteur).
+local handleTop = if isTouch then MENU_OPEN else MENU_OPEN - UDim2.fromOffset(0, menuColumn.Size.Y.Offset / 2)
+local HANDLE_OPEN = handleTop + UDim2.fromOffset(MENU_WIDTH + 6, 0)
+local HANDLE_CLOSED = UDim2.new(0, 6, handleTop.Y.Scale, handleTop.Y.Offset)
+local menuHandle = UiStyle.button(gui, "«", UDim2.fromOffset(HANDLE_SIZE.X, HANDLE_SIZE.Y), Color3.fromRGB(80, 80, 110), 34, true)
+menuHandle.Name = "MenuHandle"
+menuHandle.Position = HANDLE_OPEN
+UIJuice.button(menuHandle)
+local handleCaption = menuHandle:FindFirstChild("Caption") :: TextLabel
+local handleBadge = UiStyle.badge(menuHandle)
+local function setMenusHidden(hidden: boolean)
+	menusHidden = hidden
+	local info = TweenInfo.new(0.3, Enum.EasingStyle.Back, if hidden then Enum.EasingDirection.In else Enum.EasingDirection.Out)
+	TweenService:Create(menuColumn, info, { Position = if hidden then MENU_CLOSED else MENU_OPEN }):Play()
+	TweenService:Create(menuHandle, info, { Position = if hidden then HANDLE_CLOSED else HANDLE_OPEN }):Play()
+	handleCaption.Text = if hidden then "»" else "«"
+end
+menuHandle.Activated:Connect(function()
+	setMenusHidden(not menusHidden)
+end)
+UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
+	if not processed and input.KeyCode == Enum.KeyCode.M then
+		setMenusHidden(not menusHidden)
+	end
+end)
+-- Pastille de la poignée : seulement tuiles rangées, si une tuile a quelque chose à montrer.
+task.spawn(function()
+	while menuHandle.Parent do
+		local waiting = false
+		for _, badge in ipairs({ shopBadge, indexBadge, worldsBadge, bonusBadge, rebirthBadge }) do
+			waiting = waiting or badge.Visible
+		end
+		UiStyle.setBadge(handleBadge, if menusHidden and waiting then "!" else nil)
+		task.wait(0.3)
+	end
+end)
+
 ----------------------------------------------------------------------
 -- Fenêtres
 ----------------------------------------------------------------------
@@ -332,7 +378,7 @@ if offers then
 	task.spawn(function()
 		while true do
 			task.wait(0.2)
-			offers.setHidden(MenuKit.anyOpen())
+			offers.setHidden(MenuKit.anyOpen() or menusHidden)
 		end
 	end)
 end
