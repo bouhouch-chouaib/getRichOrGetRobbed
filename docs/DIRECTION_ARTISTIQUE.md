@@ -108,6 +108,11 @@ Règle : couleurs **pures et saturées**, peu de pastel, pas de marron terne. Le
 - Lumière de plein jour, forte, ombres légères. Bloom modéré (les néons « bavent » un peu). Saturation
   légèrement poussée. La nuit reste claire (bleu nuit, jamais noir).
 - Traînée lumineuse derrière le joueur quand il court (achetable : grise, verte, bleue…).
+  **Fait le 26 oct. autrement : gagnée par l'entraînement** (`shared/PowerFx`, `Config.PowerFx`) : traînée de
+  Vitesse aux pieds (couleurs froides, 6 paliers : BRISE -> LUMIÈRE arc-en-ciel) et aura de Force autour du corps
+  (flammes de dessin animé à deux tons, couleurs chaudes, 6 paliers : ÉTINCELLE -> DIVIN, rayons dorés au sol).
+  Règles vérifiées en Play : en plein jour sur l'herbe claire, peu de lueur ajoutée (LightEmission 0,1 à 0,3),
+  sinon tout pâlit jusqu'au blanc ; flammes nées autour du corps (dedans, il les cache) et accrochées à lui.
 - Chiffres qui s'envolent (« +30/pas », « +$28K ») en couleur vive à contour noir.
 - Éclosion : flash blanc, rayons, nuages de particules, apparition du familier en grand.
 

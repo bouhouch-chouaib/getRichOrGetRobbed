@@ -195,6 +195,13 @@ suivant. Vu dans Studio (PC et téléphone) ; les aperçus 3D n'ont pas pu être
 **Couronne du plus riche** (`Config.Crown`, `server/CrownController`, `shared/CrownRules`, `client/Crown`) : plus gros revenu du serveur, prime pour qui le vole, récompense limitée pour chaque voleur arrêté.
 **Pile « prochain objectif »** (`shared/NextGoals`, `client/NextGoals`) : deux objectifs entamés avec barre sous l'horloge, résumé d'absence au retour (attribut `AwaySummary`).
 **Jeu entre amis** (`server/Friends`, attribut `FriendIds`) : base voisine d'un ami, refuge chez un ami, escorte (+14 % de vitesse), « Reprendre » pour un ami ; à vérifier avec 2 vrais comptes amis dans le jeu publié.
+**26 oct. : traînée et aura d'entraînement** (`shared/PowerFx`, `client/PowerFx`, `Config.PowerFx`, test `tools/check-power-fx.luau`) :
+traînée aux pieds selon la Vitesse, aura de flammes selon la Force, 6 paliers chacune (niveaux 10, 20, 30, 45, 60, 75,
+familiers équipés compris), message + jaillissement quand on gagne un palier, cachées si invisible, mort, loin ou à la 1re
+personne ; l'Aura astrale achetée les remplace. Textures dessinées par code (`tools/icons/make_power_fx_textures.py`,
+`assets/fx`) **pas encore envoyées sur Roblox** (accord de Chouaib à demander) : en attendant, textures de Roblox, et dans
+Studio `workspace:SetAttribute("PowerFxLocalTextures", true)` lit les PNG copiés dans `content/claude_powerfx`.
+Vérifié en Play (solo, PC, de jour) : paliers 1, 3, 5, 6 à l'arrêt et en course, message de palier. Pas vu : téléphone, à 2 joueurs.
 Restent au choix de Chouaib : gros butin signalé à tous (règle 10), ruée des voleurs (règle 14). Pour l'analyse Luau : luau-lsp 1.70.1 (page des versions) dans un dossier temporaire, projet copié sans accents.
 
 **15 oct. : œufs (Codex) puis corrections Claude** (`server/EggController`, `client/Eggs`, `shared/EggIncubation`,
