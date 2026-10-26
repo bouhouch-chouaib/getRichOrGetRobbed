@@ -80,7 +80,29 @@ function EggController.Init(bases: { Model })
 		machine:SetAttribute("Done", if evolve then evolve.done else nil)
 		-- Chambres (+1 par Rebirth, Config.GetCapsuleSlots) : combien d'œufs y sont, combien il en tient.
 		machine:SetAttribute("Chambers", if player then SessionData.GetCapsuleSlots(player) else nil)
-		machine:SetAttribute("ChambersUsed", if player then #SessionData.GetEvolvingList(player) else nil)
+		local list = if player then SessionData.GetEvolvingList(player) else {}
+		machine:SetAttribute("ChambersUsed", if player then #list else nil)
+		-- Une ligne par chambre occupée, pour le menu de la capsule (client/CapsuleMenu) :
+		-- « id|rareté|stade|début|fin d'incubation|prochaine tentative|fini », séparées par « ; » (le stade maximum reste secret).
+		local rows = {}
+		for _, evolving in ipairs(list) do
+			local state = evolving.evolve
+			if state then
+				table.insert(rows, table.concat({
+					evolving.id,
+					Catalog.ById[evolving.petId].Rarity,
+					tostring(state.stage),
+					tostring(evolving.startedAt),
+					tostring(evolving.readyAt),
+					if state.done then "" else tostring(state.nextAt),
+					if state.done then "1" else "0",
+				}, "|"))
+			end
+		end
+		local text = table.concat(rows, ";")
+		if machine:GetAttribute("ChamberList") ~= (if text ~= "" then text else nil) then
+			machine:SetAttribute("ChamberList", if text ~= "" then text else nil)
+		end
 	end
 
 	local function tickBase(base: Model)
@@ -275,7 +297,8 @@ function EggController.Init(bases: { Model })
 				publishMachine(base, player)
 			end
 		elseif action == "Hatch" then
-			local petId = SessionData.HatchEvolving(player, os.time())
+			-- key : l'œuf d'une chambre précise (menu de la capsule) ; sans key, l'œuf montré par la capsule.
+			local petId = SessionData.HatchEvolving(player, os.time(), if type(key) == "string" then key else nil)
 			if petId then
 				BadgeController.Award(player, "FirstHatch")
 				-- L'éclosion part de la capsule ; le familier (s'il est affiché) arrive dans la prairie, près d'elle.

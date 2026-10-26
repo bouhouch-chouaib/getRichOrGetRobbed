@@ -1199,13 +1199,14 @@ end
 
 -- Ouvre l'œuf de la machine : le familier, à son stade, rejoint le joueur (sans attente). Renvoie son Id.
 -- Refusé tant que son incubation normale n'est pas finie (sinon la capsule ferait éclore un œuf de 20 min tout de suite).
-function SessionData.HatchEvolving(player: Player, time: number): string?
+-- eggId : l'œuf d'une chambre précise (menu de la capsule, client/CapsuleMenu) ; sinon l'œuf montré par la capsule.
+function SessionData.HatchEvolving(player: Player, time: number, eggId: string?): string?
 	local data = storage[player]
 	if not data or not data.loaded then return nil end
-	local shown = SessionData.GetEvolving(player) -- l'œuf montré par la capsule (plusieurs chambres)
+	local shown = if eggId == nil then SessionData.GetEvolving(player) else nil -- l'œuf montré par la capsule
 	for index, egg in ipairs(data.eggs) do
 		local evolve = egg.evolve
-		if evolve and egg == shown then
+		if evolve and (egg == shown or (eggId ~= nil and egg.id == eggId)) then
 			if not EggIncubation.CanOpen(egg, time) then
 				return nil
 			end

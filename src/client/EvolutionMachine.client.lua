@@ -3,11 +3,11 @@
 -- par server/EggController sur la pièce Base_N.EvolutionCapsule.EvolutionMachine, règles dans Config.Evolution).
 --   - Dans le cylindre : l'œuf en stase qui flotte et tourne dans une brume froide, plus gros et plus lumineux à
 --     chaque stade ; les anneaux lumineux pulsent quand la capsule est occupée.
---   - Panneau au-dessus, en 2 étapes (20 oct.) : 1. INCUBATION (le temps normal de l'œuf, on ne peut pas l'ouvrir
---     avant), 2. TENTATIVES D'ÉVOLUTION (temps avant la suivante + chance de réussite affichée, tirage au sort
---     montré « TENTATIVE... » puis RÉUSSIE / RATÉE). Stade : ★☆☆ NORMAL / ★★☆ ÉVOLUÉ / ★★★ ULTIME.
---   - Bulle [E] pour le propriétaire : « Mettre un œuf » (fenêtre de choix parmi ses œufs en couveuse) ou
---     « Faire éclore » (à maintenir, seulement après l'incubation). Le serveur revérifie tout (Remotes.Evolution).
+--   - Panneau au-dessus, en mots simples (26 oct., UI_UX_GUIDELINES.md §7) : « PRÊT DANS 1:23 » (le temps normal de
+--     l'œuf, on ne peut pas l'ouvrir avant), puis « ESSAI ★★ DANS 4:10 » + « CHANCE 60 % » (tirage au sort montré
+--     « ESSAI... » puis BRAVO / RATÉ). Stade : ★☆☆ NORMAL / ★★☆ ÉVOLUÉ / ★★★ ULTIME.
+--   - Bulle [E] « Ouvrir » pour le propriétaire : toujours le menu de la capsule (client/CapsuleMenu : comment ça
+--     marche, ses cases, ses œufs, METTRE / OUVRIR). Le serveur revérifie tout (Remotes.Evolution).
 --   - La capsule suit le niveau du propriétaire (monde le plus loin, attribut CapsuleTier) : de plus en plus grande et
 --     épique, au thème de son monde (client/CapsuleDecor), avec son bonus (Config.Evolution.SpeedPerTier...).
 --   - Effets : l'œuf choisi vole de son nid à la machine ; gerbe et message à chaque évolution ; nuage gris quand
@@ -25,11 +25,10 @@ local Builder = require(ReplicatedStorage.Shared.EggModelBuilder)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local CapsuleDecor = require(script.Parent.CapsuleDecor)
-local MenuKit = require(script.Parent.MenuKit)
+local CapsuleMenu = require(script.Parent.CapsuleMenu)
 local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
 local Toast = require(script.Parent.Toast)
-local UiStyle = require(script.Parent.UiStyle)
 
 local EVOLUTION = Config.Evolution
 local player = Players.LocalPlayer
@@ -39,7 +38,7 @@ local GOLD = Color3.fromRGB(255, 214, 70)
 local PURPLE = Color3.fromRGB(170, 90, 240)
 local SPARK = "rbxasset://textures/particles/sparkles_main.dds"
 local SMOKE = "rbxasset://textures/particles/smoke_main.dds"
-local STAGE_NAMES = { "NORMAL", "ÉVOLUÉ", "ULTIME" }
+local STAGE_NAMES = { "NORMAL", "ÉVOLUÉ", "ULTIME" } -- (mots simples des panneaux : UI_UX_GUIDELINES.md §7)
 
 local visuals = Instance.new("Folder")
 visuals.Name, visuals.Parent = "EvolutionVisuals", Workspace
@@ -66,18 +65,13 @@ local function tierBonus(tier: number): (number, number)
 	return ultime, faster
 end
 
-local function myTier(): number
-	local tier = player:GetAttribute("Tier")
-	return if type(tier) == "number" then tier else 1
-end
-
 local function stageColor(rarityId: string, stage: number): Color3
 	local rarity = Config.Rarities[Config.RarityIndex[rarityId] or 1]
 	return if stage >= 3 then GOLD elseif stage == 2 then rarity.Color:Lerp(WHITE, 0.45) else rarity.Color
 end
 
 ----------------------------------------------------------------------
--- Fenêtre : choisir l'œuf à mettre dans la machine
+-- Menu de la capsule (client/CapsuleMenu) : [E] devant sa capsule l'ouvre
 ----------------------------------------------------------------------
 
 local screen = Instance.new("ScreenGui")
@@ -87,127 +81,7 @@ screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screen.DisplayOrder = 4
 screen.Parent = player:WaitForChild("PlayerGui")
 local root = ScreenScale.attach(screen)
-local window = MenuKit.window(root, "Capsule d'évolution", Vector2.new(780, 510), PURPLE, "Egg")
-local explain = UiStyle.text(window.content, "", 16, WHITE, UiStyle.BODY_FONT)
-explain.Size = UDim2.new(1, 0, 0, 86)
-explain.TextWrapped = true
-explain.TextYAlignment = Enum.TextYAlignment.Top
-explain.ZIndex = 3
-explain.Text = "1. L'œuf finit d'abord son incubation normale dans la capsule.\n"
-	.. "2. Ensuite, il tente d'évoluer : ★★ ÉVOLUÉ (revenu x" .. EVOLUTION.IncomeMultiplier[2] .. "), puis ★★★ ULTIME (x"
-	.. EVOLUTION.IncomeMultiplier[3] .. "). Chaque tentative est un tirage au sort : si elle rate, il garde son stade.\n"
-	.. "3. Tu l'ouvres quand tu veux après l'incubation. Plus tu attends, plus il a de chances d'évoluer !"
-local row = Instance.new("ScrollingFrame")
-row.BackgroundTransparency = 1
-row.BorderSizePixel = 0
-row.Position = UDim2.fromOffset(0, 90)
-row.Size = UDim2.new(1, 0, 1, -90)
-row.ScrollingDirection = Enum.ScrollingDirection.X
-row.AutomaticCanvasSize = Enum.AutomaticSize.X
-row.CanvasSize = UDim2.new()
-row.ScrollBarThickness = 8
-row.ZIndex = 3
-row.Parent = window.content
-UiStyle.scrollPadding(row)
-do
-	local layout = Instance.new("UIListLayout")
-	layout.FillDirection = Enum.FillDirection.Horizontal
-	layout.Padding = UDim.new(0, 10)
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Parent = row
-end
-local empty = UiStyle.text(window.content, "Tu n'as aucun œuf en couveuse. Nourris le trou noir pour en gagner !", 22, WHITE, UiStyle.BODY_FONT)
-empty.Position = UDim2.fromOffset(0, 140)
-empty.Size = UDim2.new(1, 0, 0, 60)
-empty.TextWrapped = true
-empty.ZIndex = 3
-
-local function myBase(): Model?
-	local map = Workspace:FindFirstChild("Map")
-	if not map then
-		return nil
-	end
-	for _, base in ipairs(map:GetChildren()) do
-		local capsule = base:FindFirstChild("EvolutionCapsule")
-		local machine = capsule and capsule:FindFirstChild("EvolutionMachine")
-		if base:IsA("Model") and machine and machine:GetAttribute("OwnerUserId") == player.UserId then
-			return base
-		end
-	end
-	return nil
-end
-
-local BASE_EXPLAIN = explain.Text
-
-local function openPicker()
-	local tier = myTier()
-	local _, faster = tierBonus(tier)
-	local worldName = TextFormat.upper(Config.Worlds[math.clamp(tier, 1, #Config.Worlds)].Name)
-	explain.Text = BASE_EXPLAIN .. string.format("  (Capsule %s : %d %% puis %d %% de réussite%s)", worldName,
-		math.floor(Eggs.StageChance(1, tier) * 100 + 0.5), math.floor(Eggs.StageChance(2, tier) * 100 + 0.5),
-		if faster > 0 then string.format(", %d %% plus rapide", faster) else "")
-	for _, child in ipairs(row:GetChildren()) do
-		if child:IsA("GuiObject") then
-			child:Destroy()
-		end
-	end
-	local base = myBase()
-	local folder = base and base:FindFirstChild("Eggs")
-	local anchors: { BasePart } = {}
-	if folder then
-		for _, anchor in ipairs(folder:GetChildren()) do
-			if anchor:IsA("BasePart") and type(anchor:GetAttribute("ReadyAt")) == "number" then
-				table.insert(anchors, anchor)
-			end
-		end
-	end
-	-- Les plus rares d'abord (ce sont eux qu'on a envie de faire évoluer).
-	table.sort(anchors, function(a, b)
-		local ra = Config.RarityIndex[a:GetAttribute("Rarity") :: string] or 0
-		local rb = Config.RarityIndex[b:GetAttribute("Rarity") :: string] or 0
-		if ra ~= rb then
-			return ra > rb
-		end
-		return (a:GetAttribute("ReadyAt") :: number) < (b:GetAttribute("ReadyAt") :: number)
-	end)
-	empty.Visible = #anchors == 0
-	for order, anchor in ipairs(anchors) do
-		local rarityId = anchor:GetAttribute("Rarity") :: string
-		local rarity = Config.Rarities[Config.RarityIndex[rarityId] or 1]
-		local card = UiStyle.brightCard(row, UDim2.fromOffset(180, 316), rarity.Color)
-		card.LayoutOrder = order
-		card.ZIndex = 3
-		local viewport = MenuKit.eggViewport(card, rarityId)
-		viewport.Position = UDim2.fromOffset(20, 8)
-		viewport.Size = UDim2.fromOffset(140, 140)
-		viewport.ZIndex = 4
-		local name = UiStyle.text(card, "ŒUF " .. TextFormat.upper(rarity.Name), 20, WHITE, UiStyle.BODY_FONT)
-		name.Position = UDim2.fromOffset(10, 154)
-		name.Size = UDim2.new(1, -20, 0, 26)
-		name.TextScaled = true
-		name.ZIndex = 4
-		local left = math.max(0, (anchor:GetAttribute("ReadyAt") :: number) - Workspace:GetServerTimeNow())
-		local time = UiStyle.text(card, "incubation : " .. Eggs.Time(left), 16, WHITE, UiStyle.BODY_FONT)
-		time.Position = UDim2.fromOffset(10, 184)
-		time.Size = UDim2.new(1, -20, 0, 22)
-		time.ZIndex = 4
-		local firstWait = Eggs.Duration(rarityId) * EVOLUTION.StageTimeFactor[1] * math.max(0.2, 1 - EVOLUTION.SpeedPerTier * (tier - 1))
-		local chance = UiStyle.text(card, string.format("puis 1re tentative %s plus tard (%d %%)", Eggs.Time(firstWait),
-			math.floor(Eggs.StageChance(1, tier) * 100 + 0.5)), 14, GOLD, UiStyle.BODY_FONT)
-		chance.Position = UDim2.fromOffset(10, 212)
-		chance.Size = UDim2.new(1, -20, 0, 36)
-		chance.TextWrapped = true
-		chance.ZIndex = 4
-		local put = UiStyle.button(card, "METTRE", UDim2.new(1, -20, 0, 48), UiStyle.Colors.Green, 26)
-		put.Position = UDim2.new(0, 10, 1, -56)
-		put.ZIndex = 4
-		put.Activated:Connect(function()
-			Remotes.Evolution:FireServer("Insert", anchor.Name)
-			window.close()
-		end)
-	end
-	window.open()
-end
+local menu = CapsuleMenu.create(root)
 
 ----------------------------------------------------------------------
 -- Les machines : œuf sous la cloche, panneau, bulle [E]
@@ -268,30 +142,21 @@ local function refreshPrompt(machine: Machine)
 	else
 		local created = Instance.new("ProximityPrompt")
 		created.Name = "EvolutionPrompt"
-		created.ObjectText = "Capsule d'évolution"
+		created.ActionText = "Ouvrir"
 		created.KeyboardKeyCode = Enum.KeyCode.E
 		created.MaxActivationDistance = EVOLUTION.UseDistance
 		created.RequiresLineOfSight = false
+		created.HoldDuration = 0
 		created.Parent = machine.part
+		-- Une seule action, toujours la même : le menu de la capsule (client/CapsuleMenu) montre tout et explique.
 		created.Triggered:Connect(function()
-			local action = machineAction(machine)
-			if action == "Hatch" then
-				Remotes.Evolution:FireServer("Hatch")
-			elseif action == "Insert" then
-				openPicker()
-			else
-				local readyAt = machine.part:GetAttribute("ReadyAt")
-				local left = if type(readyAt) == "number" then readyAt - Workspace:GetServerTimeNow() else 0
-				Sounds.play("Error")
-				Toast.show("PAS ENCORE : L'ŒUF FINIT SON INCUBATION (" .. Eggs.Time(left) .. ")", Color3.fromRGB(255, 140, 140))
-			end
+			menu.open(machine.part)
 		end)
 		machine.prompt = created
 		prompt = created
 	end
 	local action = machineAction(machine)
-	prompt.ActionText = if action == "Hatch" then "Faire éclore" elseif action == "Insert" then "Mettre un œuf" else "En incubation"
-	prompt.HoldDuration = if action == "Hatch" then 1.2 else 0 -- ouvrir l'œuf se confirme en maintenant la touche
+	prompt.ObjectText = if action == "Hatch" then "Capsule : œuf prêt !" elseif action == "Insert" then "Capsule : mets un œuf" else "Capsule"
 end
 
 -- Niveau de la capsule (monde le plus loin de son propriétaire) : taille, couleur et décor.
@@ -448,9 +313,9 @@ RunService.Heartbeat:Connect(function(dt)
 			machine.stageLabel.Text = string.format("★★ %d %%  •  ★★★ %d %%", math.floor(Eggs.StageChance(1, tier) * 100 + 0.5), ultime)
 				.. (if faster > 0 then string.format("  •  %d %% PLUS RAPIDE", faster) else "")
 			machine.stageLabel.TextColor3 = GOLD
-			machine.status.Text = if mine then "[E] METS UN ŒUF POUR LE FAIRE ÉVOLUER" else ""
+			machine.status.Text = if mine then "[E] METS UN ŒUF ICI" else ""
 			machine.status.TextColor3 = WHITE
-			machine.hint.Text = "1. L'ŒUF ÉCLOT NORMALEMENT  •  2. PUIS IL TENTE D'ÉVOLUER"
+			machine.hint.Text = "IL DEVIENT PLUS FORT : ★★ PUIS ★★★"
 			machine.gui.Enabled = part:GetAttribute("OwnerUserId") ~= nil
 			continue
 		end
@@ -506,29 +371,29 @@ RunService.Heartbeat:Connect(function(dt)
 		local chance = math.floor(Eggs.StageChance(stage, tier) * 100 + 0.5)
 		if type(ownerId) == "number" and (rolling[ownerId] or 0) > clock then
 			-- Tirage au sort en cours (le résultat s'affiche ensuite) : le panneau clignote.
-			machine.status.Text = "TENTATIVE EN COURS..."
+			machine.status.Text = "ESSAI..."
 			machine.status.TextColor3 = if math.floor(clock * 8) % 2 == 0 then GOLD else WHITE
-			machine.hint.Text = string.format("%d %% DE CHANCES DE PASSER %s", chance, stars(math.min(stage + 1, #EVOLUTION.Names)))
+			machine.hint.Text = string.format("%s ?  CHANCE %d %%", stars(math.min(stage + 1, #EVOLUTION.Names)), chance)
 		elseif type(readyAt) == "number" and readyAt > now then
-			machine.status.Text = "1. INCUBATION : " .. Eggs.Time(readyAt - now)
+			machine.status.Text = "PRÊT DANS " .. Eggs.Time(readyAt - now)
 			machine.status.TextColor3 = WHITE
-			machine.hint.Text = string.format("ENSUITE : TENTATIVE %s (%d %%)", stars(stage + 1), chance)
+			machine.hint.Text = string.format("PUIS ESSAI %s  •  CHANCE %d %%", stars(stage + 1), chance)
 		elseif part:GetAttribute("Done") == true then
 			machine.status.Text = if stage >= #EVOLUTION.Names
-				then "ÉVOLUTION MAXIMALE !  [E] FAIRE ÉCLORE"
-				else "TENTATIVE RATÉE  •  [E] FAIRE ÉCLORE"
+				then "AU MAXIMUM !  [E] OUVRIR"
+				else "IL NE GRANDIRA PLUS  •  [E] OUVRIR"
 			machine.status.TextColor3 = if stage >= #EVOLUTION.Names then GOLD else Color3.fromRGB(255, 120, 120)
-			machine.hint.Text = if stage >= #EVOLUTION.Names then "LE MEILLEUR STADE POSSIBLE !"
-				else "IL GARDE SON STADE : " .. STAGE_NAMES[stage]
+			machine.hint.Text = if stage >= #EVOLUTION.Names then "LE PLUS FORT POSSIBLE !"
+				else "IL RESTE " .. stars(stage)
 		elseif type(nextAt) == "number" then
-			machine.status.Text = string.format("2. TENTATIVE %s DANS %s", stars(stage + 1), Eggs.Time(nextAt - now))
+			machine.status.Text = string.format("ESSAI %s DANS %s", stars(stage + 1), Eggs.Time(nextAt - now))
 			machine.status.TextColor3 = WHITE
-			machine.hint.Text = string.format("%d %% DE CHANCES  •  [E] OUVRIR MAINTENANT (%s)", chance, STAGE_NAMES[stage])
+			machine.hint.Text = string.format("CHANCE %d %%  •  [E] POUR L'OUVRIR", chance)
 		end
 		-- Chambres (+1 par Rebirth) : plusieurs œufs évoluent en même temps ; la capsule montre le plus avancé.
 		local chambers, used = part:GetAttribute("Chambers"), part:GetAttribute("ChambersUsed")
 		if type(chambers) == "number" and chambers > 1 and type(used) == "number" then
-			machine.title.Text ..= string.format("  •  CHAMBRES %d/%d", used, chambers)
+			machine.title.Text ..= string.format("  •  CASES %d/%d", used, chambers)
 		end
 		if machine.prompt then
 			refreshPrompt(machine)
@@ -582,7 +447,7 @@ local function showResult(ownerId: number, kind: string, stage: number, cf: CFra
 		ring(cf * CF(0, 0.2, 0), WHITE, 6 + stage * 3)
 		if mine then
 			Sounds.play("RareDrop")
-			Toast.show(string.format("TENTATIVE RÉUSSIE : TON ŒUF EST %s %s !", stars(stage), STAGE_NAMES[stage]), color)
+			Toast.show(string.format("BRAVO ! TON ŒUF EST %s %s !", stars(stage), STAGE_NAMES[stage]), color)
 		else
 			Sounds.playAt("HoleBonus", eggSpot.Position)
 		end
@@ -590,7 +455,7 @@ local function showResult(ownerId: number, kind: string, stage: number, cf: CFra
 		burst(eggSpot.Position, Color3.fromRGB(150, 150, 160), 20, SMOKE, 5)
 		if mine then
 			Sounds.play("Error")
-			Toast.show(string.format("TENTATIVE RATÉE : IL RESTE %s %s. OUVRE-LE QUAND TU VEUX !", stars(stage), STAGE_NAMES[stage]),
+			Toast.show(string.format("RATÉ ! IL RESTE %s. OUVRE-LE QUAND TU VEUX", stars(stage)),
 				Color3.fromRGB(255, 140, 140))
 		end
 	end
@@ -636,7 +501,7 @@ Remotes.Evolution.OnClientEvent:Connect(function(ownerId: number, kind: string, 
 		end
 		if mine then
 			Sounds.play("Purchase")
-			Toast.show("ŒUF DANS LA CAPSULE : IL FINIT SON INCUBATION, PUIS IL TENTERA D'ÉVOLUER !", PURPLE)
+			Toast.show("ŒUF DANS LA CAPSULE ! ATTENDS, IL VA GRANDIR", PURPLE)
 		end
 	elseif kind == "Evolved" or kind == "Maxed" then
 		-- Suspense : le panneau montre le tirage au sort (« TENTATIVE EN COURS... »), puis le résultat.

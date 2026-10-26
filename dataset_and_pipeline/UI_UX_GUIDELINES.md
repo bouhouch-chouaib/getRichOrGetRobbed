@@ -183,3 +183,66 @@ aux pages de 4 sections ou plus).
 zoom de caméra à l'ouverture, un vrai téléphone, la croix sur Fusion, Duel, Échange, Capsule. Dans l'aperçu téléphone de Studio, `NextGoals`,
 `Magnet` et `Newcomer` attendent `HUD.Root` qui est alors rangé dans `PhonePreview` (avertissement « Infinite yield »,
 déjà là avant, sans effet dans le vrai jeu).
+
+---
+
+## 7. Pour les enfants qui lisent mal (26 oct.)
+
+Une grande partie des joueurs Roblox a moins de 10 ans : beaucoup lisent lentement, ou pas encore. Un enfant qui ne
+comprend pas ce qu'il doit faire quitte le jeu. Règle de base : **on doit pouvoir jouer sans lire** ; le texte confirme
+ce que l'image montre déjà.
+
+### 7.1 Règles
+
+1. **L'image d'abord** : chaque étape, bouton et carte a une image (icône dessinée, œuf en 3D, ★, flèche).
+2. **Phrases très courtes** : 6 mots au plus par ligne, une seule idée, en **MAJUSCULES d'imprimerie** (ce sont les
+   premières lettres qu'on apprend à l'école maternelle).
+3. **Mots de tous les jours** (tableau ci-dessous). Pas de mot technique dans ce qui s'affiche en jouant.
+4. **Montrer où aller** : flèche et rayon doré du tutoriel, ruban « TU ES ICI », bouton qui saute quand il faut cliquer.
+5. **Une touche = une chose** : [E] devant un objet ouvre toujours « la chose qui est là » (la capsule ouvre son menu,
+   qui montre tout ; plus de choix caché entre « mettre » et « ouvrir »).
+6. **Les chiffres et les couleurs parlent** : chrono « 1:23 », barres qui se remplissent, ★★★, vert = oui, rouge = non,
+   gris = pas encore.
+7. **Réagir sans texte** : son, carte qui tremble et éclair rouge quand c'est impossible, pièces qui jaillissent quand
+   ça marche (`UIJuiceController`).
+8. **Les explications restent là pour ceux qui lisent** (parents, grands frères) : bouton « ? » des cartes.
+
+### 7.2 Mots remplacés
+
+| Avant                          | Maintenant                               | Où                                   |
+|--------------------------------|------------------------------------------|--------------------------------------|
+| Digestion / LE TROU NOIR DIGÈRE| Sieste / LE TROU NOIR FAIT LA SIESTE     | horloge et bandeau du HUD, trou noir |
+| Tirage(s)                      | Œuf(s) (chaque tirage donne un œuf)      | HUD, carte de fin de manche, objectifs |
+| Incubation : 1:23              | PRÊT DANS 1:23 / ÉCLOT DANS 1:23         | capsule, menu de la capsule          |
+| Tentative d'évolution          | ESSAI ★★                                 | capsule, objectifs, absence          |
+| Faire éclore                   | OUVRIR                                   | capsule                              |
+| Garanti                        | SÛR                                      | objectifs, carte de fin de manche    |
+| Bridé : obtiens un…            | EST BLOQUÉ : TROUVE UN…                  | objectifs                            |
+| Évolution maximale / stade     | AU MAXIMUM ! / IL RESTE ★★               | capsule                              |
+| Pendant ton absence            | PENDANT QUE TU N'ÉTAIS PAS LÀ            | résumé au retour                     |
+| Effondrement                   | IL VA EXPLOSER                           | trou noir                            |
+| Chambres                       | CASES                                    | capsule                              |
+
+Mots gardés : « Rebirth », « Index », les noms de raretés et de mondes (ce sont des noms, avec leur couleur et leur
+icône ; les enfants de Roblox les connaissent).
+
+### 7.3 Fait le 26 oct.
+
+- **Menu de la capsule** (`client/CapsuleMenu`, [E] devant la capsule) : 3 images « METS UN ŒUF » » « ATTENDS » »
+  « IL DEVIENT PLUS FORT ! » ; les cases de la capsule (œuf en 3D, ★, « PRÊT DANS », barre, « ESSAI ★★ DANS »,
+  chance, gros bouton OUVRIR) ; les œufs de la couveuse avec un gros bouton METTRE ; « ? » pour l'explication complète.
+  Serveur : chaque case est publiée (`ChamberList` sur la capsule) et OUVRIR ouvre l'œuf de CETTE case
+  (`SessionData.HatchEvolving(..., eggId)`).
+- **Tutoriel** : une grosse image par étape (objet, trou noir, œuf, patte) avec « 1/4 », titres et consignes courts.
+- **HUD** : « Sieste » au lieu de « Digestion », consignes de phase en 3 morceaux courts, « 0 ŒUF » au lieu de
+  « 0 TIRAGE ».
+
+### 7.4 À faire ensuite (même méthode)
+
+- Textes longs restants : bouclier du nouveau venu (`Newcomer`), carte de fin de manche (« RANG ... »), Index, Fusion,
+  Rebirth, Bonus, Marché, Échange, Duel.
+- Noms des produits Robux dans `Config.Monetization` (« TIRAGE INSTANTANÉ » -> « 1 ŒUF », « 10 TIRAGES » -> « 10 ŒUFS ») :
+  à faire quand plus personne ne modifie `Config.lua`.
+- Montrer le chemin plus souvent : une flèche vers la capsule la première fois qu'on a 2 œufs, vers la Boutique quand on
+  peut acheter le premier tapis.
+- Tester avec un vrai enfant de 6-8 ans : noter où il s'arrête, sans l'aider.

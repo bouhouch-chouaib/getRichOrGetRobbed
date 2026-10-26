@@ -5,7 +5,8 @@
 --   2. Le lancer dans le trou  -> flèche sur le trou noir (ou sur un objet si on n'en tient plus)
 --   3. Recevoir un œuf         -> retour vers la base
 --   4. Voir son éclosion       -> flèche sur son œuf, jusqu’au vrai familier
--- Guidage : panneau en bas de l'écran, gros "⬇" au-dessus de la cible, rayon doré entre le joueur et la cible.
+-- Guidage : panneau en bas de l'écran (grosse image de l'étape + phrase courte), gros "⬇" au-dessus de la cible,
+-- rayon doré entre le joueur et la cible.
 -- Bouton PASSER pour ceux qui connaissent déjà le jeu.
 
 local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
@@ -16,6 +17,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local BaseLayout = require(ReplicatedStorage.Shared.BaseLayout)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local MenuKit = require(script.Parent.MenuKit)
 local ScreenScale = require(script.Parent.ScreenScale)
@@ -26,27 +28,29 @@ local player = Players.LocalPlayer
 local GOLD = Color3.fromRGB(255, 220, 60)
 local TOUCH = ScreenScale.isTouch()
 
-type Step = { title: string, hint: string }
+-- 26 oct. (UI_UX_GUIDELINES.md §7) : une grosse image par étape et des phrases courtes en MAJUSCULES (les premières
+-- lettres qu'apprennent les enfants) ; la flèche et le rayon doré montrent où aller, sans avoir à lire.
+type Step = { title: string, hint: string, icon: string }
 local STEPS: { Step } = {
 	{
-		title = "ÉTAPE 1/4 : RAMASSE UN OBJET",
-		hint = if TOUCH
-			then "Approche-toi d'un objet et touche RAMASSER"
-			else "Approche-toi d'un objet et appuie sur [E]",
+		title = "RAMASSE UN OBJET",
+		hint = if TOUCH then "VA PRÈS D'UN OBJET ET TOUCHE RAMASSER" else "VA PRÈS D'UN OBJET ET APPUIE SUR E",
+		icon = "Gem",
 	},
 	{
-		title = "ÉTAPE 2/4 : LANCE-LE DANS LE TROU NOIR !",
-		hint = if TOUCH
-			then "Sors de ta base, approche-toi du trou, maintiens LANCER pour viser puis relâche"
-			else "Sors de ta base, approche-toi du trou, maintiens CLIC GAUCHE pour viser puis relâche",
+		title = "JETTE-LE DANS LE TROU NOIR !",
+		hint = if TOUCH then "SUIS LA FLÈCHE. MAINTIENS LANCER, PUIS LÂCHE" else "SUIS LA FLÈCHE. MAINTIENS LE CLIC, PUIS LÂCHE",
+		icon = "Vortex",
 	},
 	{
-		title = "ÉTAPE 3/4 : TON PREMIER ŒUF !",
-		hint = "Reviens dans ta base : tes points te donnent des œufs quand le trou noir commence à digérer.",
+		title = "TU VAS GAGNER UN ŒUF !",
+		hint = "RETOURNE DANS TA BASE",
+		icon = "Egg",
 	},
 	{
-		title = "ÉTAPE 4/4 : FAIS ÉCLORE TON ŒUF",
-		hint = "Retrouve ton œuf dans la couveuse au fond de ta base. Il éclot tout seul à la fin du compte à rebours !",
+		title = "TON ŒUF VA ÉCLORE",
+		hint = "SUIS LA FLÈCHE ET ATTENDS",
+		icon = "Paw",
 	},
 }
 
@@ -67,7 +71,7 @@ panel.Name = "Panel"
 panel.AnchorPoint = Vector2.new(0.5, 1)
 -- Au-dessus des boutons d'action et des capsules de tirage (client/PullReveal).
 panel.Position = UDim2.new(0.5, 0, 1, -(ScreenScale.BOTTOM_RESERVED + 140))
-panel.Size = UDim2.fromOffset(660, 78)
+panel.Size = UDim2.fromOffset(720, 100)
 panel.BackgroundColor3 = Color3.new(1, 1, 1)
 panel.Parent = root
 do
@@ -86,11 +90,40 @@ end
 local panelScale = Instance.new("UIScale")
 panelScale.Parent = panel
 
+-- Grosse image de l'étape à gauche (ce qu'il faut faire, sans lire), avec son numéro « 1/4 » dans un rond.
+local ICON_SIZE = 84
+local stepIcon = Icons.image(panel, "Gem", UDim2.fromOffset(ICON_SIZE, ICON_SIZE))
+stepIcon.AnchorPoint = Vector2.new(0, 0.5)
+stepIcon.Position = UDim2.new(0, 10, 0.5, -4)
+stepIcon.Rotation = -8
+stepIcon.ZIndex = 3
+local stepNumber = Instance.new("TextLabel")
+stepNumber.Name = "StepNumber"
+stepNumber.AnchorPoint = Vector2.new(0.5, 0.5)
+stepNumber.Position = UDim2.fromOffset(16, 12)
+stepNumber.Size = UDim2.fromOffset(40, 28)
+stepNumber.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+stepNumber.FontFace = Typography.Face
+stepNumber.TextColor3 = Color3.new(1, 1, 1)
+stepNumber.TextScaled = true
+stepNumber.ZIndex = 4
+stepNumber.Parent = panel
+do
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0.5, 0)
+	round.Parent = stepNumber
+	local border = Instance.new("UIStroke")
+	border.Thickness = 2
+	border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	border.Parent = stepNumber
+end
+local TEXT_LEFT = ICON_SIZE + 22
+
 local function label(font: Font, size: number, y: number, height: number): TextLabel
 	local text = Instance.new("TextLabel")
 	text.BackgroundTransparency = 1
-	text.Position = UDim2.fromOffset(16, y)
-	text.Size = UDim2.new(1, -130, 0, height)
+	text.Position = UDim2.fromOffset(TEXT_LEFT, y)
+	text.Size = UDim2.new(1, -TEXT_LEFT - 124, 0, height)
 	text.FontFace = font
 	text.TextSize = size
 	Typography.Fit(text, size, 14)
@@ -103,8 +136,12 @@ local function label(font: Font, size: number, y: number, height: number): TextL
 	text.Parent = panel
 	return text
 end
-local titleLabel = label(Typography.Face, 26, 8, 30)
-local hintLabel = label(Typography.Face, 16, 40, 32)
+local titleLabel = label(Typography.Face, 30, 8, 36)
+local hintLabel = label(Typography.Face, 20, 48, 34)
+
+local function setIcon(name: string)
+	stepIcon.Image = Icons.id(name) or ""
+end
 
 local skipButton = Instance.new("TextButton")
 skipButton.Name = "Skip"
@@ -250,6 +287,8 @@ local function showStep(index: number)
 	local info = STEPS[index]
 	titleLabel.Text = info.title
 	hintLabel.Text = info.hint
+	stepNumber.Text = index .. "/" .. #STEPS
+	setIcon(info.icon)
 	gui.Enabled = true
 	panelScale.Scale = 0.7
 	TweenService:Create(panelScale, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Scale = 1 }):Play()
@@ -279,7 +318,7 @@ local function finish(skipped: boolean)
 		Toast.show("TUTORIEL PASSÉ", Color3.fromRGB(200, 200, 200))
 	else
 		Sounds.play("LevelUp")
-		Toast.show("TON FAMILIER RAPPORTE DE L’ARGENT ! OUVRE L’INDEX POUR RÉCLAMER SA RÉCOMPENSE.", GOLD)
+		Toast.show("BRAVO ! OUVRE L’INDEX : UN CADEAU T’ATTEND !", GOLD)
 	end
 end
 
@@ -403,15 +442,18 @@ RunService.RenderStepped:Connect(function()
 
 	-- Étape 2 pendant la digestion : le trou ne mange pas, on prévient.
 	if step == 2 then
-		titleLabel.Text = if digesting and starterPending then "TON ŒUF DE DÉPART T’ATTEND !" else STEPS[2].title
-		hintLabel.Text = if digesting and starterPending
-			then "Rejoins ta couveuse : ton œuf offert éclot bientôt et finance ta première amélioration !"
-			elseif digesting and player:GetAttribute("StarterBonusPaid") == true and player:GetAttribute(
-				"Onboarding_Upgraded"
-			) ~= true then "Ouvre BOUTIQUE : utilise ta prime pour acheter un tapis de course ou un banc de muscu."
-			elseif digesting then "Entraîne-toi ou prépare ton prochain lancer pendant la digestion (chrono en haut)."
+		local buyFirst = digesting and player:GetAttribute("StarterBonusPaid") == true
+			and player:GetAttribute("Onboarding_Upgraded") ~= true
+		titleLabel.Text = if digesting and starterPending then "TON ŒUF CADEAU T’ATTEND !"
+			elseif buyFirst then "ACHÈTE UN TAPIS DE COURSE !"
+			elseif digesting then "LE TROU NOIR FAIT LA SIESTE"
+			else STEPS[2].title
+		hintLabel.Text = if digesting and starterPending then "SUIS LA FLÈCHE JUSQU’À TON ŒUF"
+			elseif buyFirst then "OUVRE LA BOUTIQUE : LE PANIER À GAUCHE"
+			elseif digesting then "ENTRAÎNE-TOI EN ATTENDANT LE REPAS"
 			elseif isHolding() then STEPS[2].hint
-			else STEPS[1].hint .. ", puis lance-le dans le trou noir !"
+			else "RAMASSE UN OBJET, PUIS JETTE-LE DANS LE TROU"
+		setIcon(if digesting and starterPending then "Egg" elseif buyFirst then "Shop" elseif digesting then "Sun" else STEPS[2].icon)
 	end
 
 	if step == 4 then
@@ -420,13 +462,8 @@ RunService.RenderStepped:Connect(function()
 			then math.max(0, math.ceil(hatchAt - Workspace:GetServerTimeNow()))
 			else 0
 		hintLabel.Text = if countdown > 0
-			then string.format(
-				"Ton œuf éclot dans %d s ! Rejoins la couveuse ; tu peux continuer à jouer pendant l’attente.",
-				countdown
-			)
-			elseif
-				hatchAt == math.huge
-			then "Ton œuf est dans la capsule d’évolution : il finit son incubation, puis tu pourras l’ouvrir pour découvrir ton familier !"
+			then string.format("IL ÉCLOT DANS %d S ! SUIS LA FLÈCHE", countdown)
+			elseif hatchAt == math.huge then "IL EST DANS LA CAPSULE : OUVRE-LA QUAND IL EST PRÊT"
 			else STEPS[4].hint
 	end
 

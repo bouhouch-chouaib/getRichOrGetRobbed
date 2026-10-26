@@ -191,6 +191,13 @@ de lisibilité seulement). Vu dans Studio (PC et aperçu téléphone, sans achat
 **Menu Mondes refait de même** (`client/WorldMenu`, 26 oct.) : Prochain monde (jauge argent / prix, gros bouton) puis une
 large carte par monde avec ses familiers exclusifs en aperçu 3D (silhouettes si pas découverts), voile + cadenas après le
 suivant. Vu dans Studio (PC et téléphone) ; les aperçus 3D n'ont pas pu être photographiés (Studio ne dessinait plus la 3D).
+**26 oct. : capsule et enfants qui lisent mal** (`dataset_and_pipeline/UI_UX_GUIDELINES.md` §7 : on doit pouvoir jouer
+sans lire ; images d'abord, phrases de 6 mots au plus en MAJUSCULES, mots de tous les jours, tableau des mots remplacés).
+Menu de la capsule `client/CapsuleMenu` ([E] devant la capsule) : comment ça marche en 3 images, une carte par case
+(œuf 3D, étoiles dorées, PRÊT DANS / ESSAI ★★ / CHANCE, OUVRIR), les œufs de la couveuse avec METTRE ; serveur : attribut
+`ChamberList` + `HatchEvolving(..., eggId)`. Tutoriel avec une grosse image par étape ; HUD « Sieste » au lieu de
+« Digestion », « ŒUF » au lieu de « TIRAGE » ; objectifs « SÛR », « BLOQUÉ », « ESSAI ». Vu dans Studio (menu avec de
+faux œufs côté client seulement, tutoriel rejoué en local) ; pas vu : un vrai METTRE / OUVRIR, sur téléphone.
 **Rebirth** : +1 chambre de capsule d'évolution par Rebirth (6 au plus, `Config.GetCapsuleSlots`, plusieurs œufs évoluent en même temps), doublons de sa meilleure rareté vers une chambre libre, prix 4T x (n+1) x 1,62^n.
 **Couronne du plus riche** (`Config.Crown`, `server/CrownController`, `shared/CrownRules`, `client/Crown`) : plus gros revenu du serveur, prime pour qui le vole, récompense limitée pour chaque voleur arrêté.
 **Pile « prochain objectif »** (`shared/NextGoals`, `client/NextGoals`) : deux objectifs entamés avec barre sous l'horloge, résumé d'absence au retour (attribut `AwaySummary`).

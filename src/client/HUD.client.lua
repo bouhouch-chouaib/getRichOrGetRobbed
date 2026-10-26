@@ -53,19 +53,20 @@ local PHASES = {
 	Feeding = {
 		Title = "NOURRIS LE TROU NOIR !",
 		Clock = "Moon",
-		Next = "Digestion",
+		Next = "Sieste",
+		-- Consignes courtes, en mots simples (UI_UX_GUIDELINES.md §7 : beaucoup de joueurs lisent à peine).
 		Hint = if ScreenScale.isTouch()
-			then "Touche RAMASSER sur un objet  •  maintiens LANCER pour viser  •  VOLE les familiers des bases ouvertes !"
-			else "[E] ramasser  •  maintiens CLIC GAUCHE pour viser, relâche pour lancer  •  [E] sur un familier adverse pour le VOLER",
+			then "RAMASSE  •  MAINTIENS LANCER, PUIS LÂCHE  •  VOLE LES FAMILIERS !"
+			else "[E] RAMASSER  •  CLIC : LANCER  •  [E] SUR UN FAMILIER : LE VOLER",
 		Color = Color3.fromRGB(200, 120, 255),
 	},
 	Digesting = {
-		Title = "LE TROU NOIR DIGÈRE...",
+		Title = "LE TROU NOIR FAIT LA SIESTE",
 		Clock = "Sun",
 		Next = "Repas",
 		Hint = if ScreenScale.isTouch()
-			then "Touche VOLER sur un familier d'une base ouverte  •  ferme ta base pour protéger les tiens !"
-			else "Maintiens [E] sur un familier d'une base ouverte pour le VOLER  •  frappe les voleurs avec une arme (BOUTIQUE) !",
+			then "VOLE LES FAMILIERS DES AUTRES  •  FERME TA BASE !"
+			else "[E] SUR UN FAMILIER : LE VOLER  •  FRAPPE LES VOLEURS !",
 		Color = Color3.fromRGB(255, 90, 70),
 	},
 }
@@ -167,7 +168,7 @@ pullFill.Parent = pullBar
 
 -- « +1 TIRAGE ! » qui s'envole sous la pastille quand la barre se remplit.
 local function popPull(count: number)
-	local pop = UiStyle.number(gui, string.format("+%d TIRAGE%s !", count, if count > 1 then "S" else ""), 28, UiStyle.Colors.Gold)
+	local pop = UiStyle.number(gui, string.format("+%d ŒUF%s !", count, if count > 1 then "S" else ""), 28, UiStyle.Colors.Gold)
 	pop.AnchorPoint = Vector2.new(0.5, 0)
 	pop.Position = UDim2.new(0.5, PULLS_WIDTH, 0, 66)
 	pop.Size = UDim2.fromOffset(260, 34)
@@ -479,7 +480,7 @@ local function updateStats()
 	-- Tirages déjà gagnés cette manche et avancement vers le suivant.
 	local score = numberAttribute("RoundScore")
 	local pulls, progress = LootEngine.progress(score)
-	pointsLabel.Text = string.format("%d TIRAGE%s", pulls, if pulls > 1 then "S" else "")
+	pointsLabel.Text = string.format("%d ŒUF%s", pulls, if pulls > 1 then "S" else "")
 	TweenService:Create(pullFill, TweenInfo.new(0.2), { Size = UDim2.fromScale(math.clamp(progress, 0, 1), 1) }):Play()
 	if pulls > shownPulls and dataReady() and ReplicatedStorage:GetAttribute("GameState") == "Feeding" then
 		popPull(pulls - shownPulls)
@@ -633,8 +634,8 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 	else
 		local plural = if pulls > 1 then "S" else ""
 		rewardHeadline.Text = if score == 0
-			then string.format("%d TIRAGE%s !", pulls, plural) -- tirages achetés en Robux ou gagnés en duel
-			else string.format("%d TIRAGE%s  •  %s POINTS", pulls, plural, (string.gsub(string.format("%.1f", score), "%.", ",")))
+			then string.format("%d ŒUF%s !", pulls, plural) -- tirages achetés en Robux ou gagnés en duel (un œuf par tirage)
+			else string.format("%d ŒUF%s  •  %s POINTS", pulls, plural, (string.gsub(string.format("%.1f", score), "%.", ",")))
 		local newIds: { [string]: boolean } = {}
 		local soldCount, soldMoney = 0, 0
 		local drops = if type(details) == "table" and type(details.drops) == "table" then details.drops else {}
@@ -659,7 +660,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 		end
 		local parts = {}
 		if type(details) == "table" and details.eggs and keptCount > 0 then
-			table.insert(parts, string.format("%d ŒUF%s EN INCUBATION DANS TA BASE", keptCount, if keptCount > 1 then "S" else ""))
+			table.insert(parts, string.format("%d ŒUF%s DANS TA BASE", keptCount, if keptCount > 1 then "S" else ""))
 		elseif newCount > 0 then
 			table.insert(parts, string.format('<font color="#FFD23C">%d NOUVEAU%s !</font>', newCount, if newCount > 1 then "X" else ""))
 		end
@@ -681,7 +682,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 		local rankLine = "RANG " .. Config.Loot.Ranks[rankIndex].Name
 		local floorIndex = if type(details) == "table" and type(details.floor) == "number" then details.floor else 1
 		if floorIndex > 1 then
-			rankLine ..= " : TIRAGES À PARTIR DE " .. TextFormat.upper(Config.Rarities[floorIndex].Name)
+			rankLine ..= " : ŒUFS " .. TextFormat.upper(Config.Rarities[floorIndex].Name) .. " ET PLUS"
 		end
 		if nextRank then
 			rankLine ..= string.format("  •  %d/%d → %s", total, nextRank.Pulls, nextRank.Name)
@@ -692,7 +693,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 		local pityAt = numberAttribute("PityAt")
 		if pityRarity and pityAt > 0 then
 			local pityLeft = math.max(1, pityAt - numberAttribute("Pity"))
-			table.insert(lines, string.format('<font color="#%s">%s OU MIEUX GARANTI DANS %d TIRAGE%s</font>', pityRarity.Color:ToHex(),
+			table.insert(lines, string.format('<font color="#%s">%s SÛR DANS %d ŒUF%s</font>', pityRarity.Color:ToHex(),
 				TextFormat.upper(pityRarity.Name), pityLeft, if pityLeft > 1 then "S" else ""))
 		end
 		rewardBody.Text = table.concat(lines, "\n")
@@ -734,7 +735,7 @@ Remotes.FusionResult.OnClientEvent:Connect(function(petId: string, egg: boolean?
 	end
 	local rarity = Config.Rarities[Config.RarityIndex[entry.Rarity]]
 	fusion.showResult(petId, egg)
-	Toast.show(if egg then "FUSION : ŒUF " .. TextFormat.upper(rarity.Name) .. " EN INCUBATION DANS TA BASE !" else string.format("FUSION : %s (%s) !", TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
+	Toast.show(if egg then "FUSION : ŒUF " .. TextFormat.upper(rarity.Name) .. " DANS TA BASE !" else string.format("FUSION : %s (%s) !", TextFormat.upper(entry.Name), TextFormat.upper(rarity.Name)), rarity.Color)
 end)
 
 -- Un joueur arrive dans un nouveau monde : grande célébration pour lui, annonce pour les autres.
@@ -758,7 +759,7 @@ local function rewardSummary(money: number?, pulls: number?): string
 		table.insert(parts, "+" .. NumberFormat.money(money))
 	end
 	if pulls and pulls > 0 then
-		table.insert(parts, string.format("+%d TIRAGE%s", pulls, if pulls > 1 then "S" else ""))
+		table.insert(parts, string.format("+%d ŒUF%s", pulls, if pulls > 1 then "S" else ""))
 	end
 	return table.concat(parts, "  •  ")
 end

@@ -218,6 +218,16 @@ local modules = {
 	},
 	Sounds = { play = function() end },
 	Toast = { show = function() end },
+	Icons = {
+		id = function()
+			return ""
+		end,
+		image = function(parentInstance)
+			local image = r.Instance.new("ImageLabel")
+			image.Parent = parentInstance
+			return image
+		end,
+	},
 }
 local parent = setmetatable({}, {
 	__index = function(_, name)
@@ -312,7 +322,7 @@ advance(2)
 gui = assert(playerGui:FindFirstChild("Tutorial"))
 local found = false
 for _, child in gui:GetDescendants() do
-	if child:IsA("TextLabel") and child.Text:find("ÉTAPE 4/4", 1, true) then
+	if child:IsA("TextLabel") and child.Text:find("ŒUF VA ÉCLORE", 1, true) then
 		found = true
 	end
 end
@@ -371,7 +381,7 @@ render:Fire()
 gui = playerGui:FindFirstChild("Tutorial")
 local upgradeHint = false
 for _, item in gui:GetDescendants() do
-	if item:IsA("TextLabel") and item.Text:find("utilise ta prime", 1, true) then
+	if item:IsA("TextLabel") and item.Text:find("BOUTIQUE", 1, true) then
 		upgradeHint = true
 	end
 end

@@ -166,10 +166,10 @@ local function showAway()
 		table.insert(parts, eggs .. (if eggs > 1 then " ŒUFS ONT ÉCLOS" else " ŒUF A ÉCLOS"))
 	end
 	if tries > 0 then
-		table.insert(parts, "TA CAPSULE A " .. tries .. (if tries > 1 then " TENTATIVES" else " TENTATIVE") .. " D'ÉVOLUTION")
+		table.insert(parts, "TA CAPSULE A FAIT " .. tries .. (if tries > 1 then " ESSAIS" else " ESSAI"))
 	end
 	if #parts > 0 then
-		Toast.show("PENDANT TON ABSENCE : " .. table.concat(parts, "  •  "), UiStyle.Colors.Cyan)
+		Toast.show("PENDANT QUE TU N'ÉTAIS PAS LÀ : " .. table.concat(parts, "  •  "), UiStyle.Colors.Cyan)
 	end
 end
 player:GetAttributeChangedSignal("AwaySummary"):Connect(showAway)

@@ -55,14 +55,14 @@ function NextGoals.List(state: State): { Goal }
 		local left = math.max(1, state.pityAt - state.pity)
 		table.insert(goals, {
 			id = "pity",
-			label = TextFormat.upper(rarity.Name) .. " GARANTI DANS " .. left .. " TIRAGE" .. (if left > 1 then "S" else ""),
+			label = TextFormat.upper(rarity.Name) .. " SÛR DANS " .. left .. " ŒUF" .. (if left > 1 then "S" else ""),
 			progress = math.clamp(state.pity / state.pityAt, 0, 1),
 			eta = if state.pullsPerRound > 0 then math.ceil(left / state.pullsPerRound) * ROUND else nil,
 		})
 	end
 	-- Capsule d'évolution : la prochaine tentative.
 	if state.capsuleWait and state.capsuleWait > 0 then
-		table.insert(goals, { id = "capsule", label = "TENTATIVE DE LA CAPSULE", eta = state.capsuleWait })
+		table.insert(goals, { id = "capsule", label = "CAPSULE : PROCHAIN ESSAI", eta = state.capsuleWait })
 	end
 	-- Index.
 	if state.totalPets > 0 and state.discovered < state.totalPets then
@@ -77,7 +77,7 @@ function NextGoals.List(state: State): { Goal }
 	if state.cappedName and unlock then
 		table.insert(goals, {
 			id = "capped",
-			label = TextFormat.upper(state.cappedName) .. " BRIDÉ : OBTIENS UN " .. TextFormat.upper(unlock.Name),
+			label = TextFormat.upper(state.cappedName) .. " EST BLOQUÉ : TROUVE UN " .. TextFormat.upper(unlock.Name),
 			progress = math.clamp((state.cappedSelfBest or 0) / (state.cappedUnlock or 1), 0, 1),
 		})
 	end

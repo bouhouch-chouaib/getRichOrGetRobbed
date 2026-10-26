@@ -753,7 +753,16 @@ assert(pair, "a lot of two eggs for the chambers")
 assert(rejoined.StartEvolution(player, pair.id .. "#2", now) and rejoined.StartEvolution(player, pair.id .. "#1", now), "two chambers")
 assert(#rejoined.GetEvolvingList(player) == 2 and not rejoined.AddCapsuleEgg(player, byRank[4], now), "all chambers taken")
 assert(#rejoined.TickEvolutions(player, now + 10 ^ 7) == 2, "every chamber tries to evolve")
-assert(rejoined.HatchEvolving(player, now + 10 ^ 8) and rejoined.HatchEvolving(player, now + 10 ^ 8), "both open")
+-- Menu de la capsule (client/CapsuleMenu) : OUVRIR ouvre l'œuf de CETTE case (id), pas celui que montre la capsule.
+local chamberIds = {}
+for _, egg in ipairs(rejoined.GetEvolvingList(player)) do
+	table.insert(chamberIds, egg.id)
+end
+assert(not rejoined.HatchEvolving(player, now + 10 ^ 8, "pas-un-oeuf"), "an unknown chamber opens nothing")
+assert(rejoined.HatchEvolving(player, now + 10 ^ 8, chamberIds[2]), "the chosen chamber opens")
+local left = rejoined.GetEvolvingList(player)
+assert(#left == 1 and left[1].id == chamberIds[1], "only the chosen chamber was emptied")
+assert(rejoined.HatchEvolving(player, now + 10 ^ 8), "the other one still opens")
 assert(rejoined.GetEvolving(player) == nil and rejoined.AddCapsuleEgg(player, byRank[4], now), "a duplicate takes a free chamber")
 assert(rejoined.GetEvolving(player).evolve ~= nil, "it evolves like any capsule egg")
 assert(rejoined.HatchEvolving(player, now + 10 ^ 8), "and opens like one")

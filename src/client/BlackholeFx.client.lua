@@ -630,7 +630,7 @@ local function refreshGauge()
 	local left = jackpotUntil - Workspace:GetServerTimeNow()
 	if collapse then
 		amount.Text = "PLEIN !"
-		hint.Text = "EFFONDREMENT À LA PROCHAINE DIGESTION !"
+		hint.Text = "IL VA EXPLOSER À LA PROCHAINE SIESTE !"
 		hint.TextColor3 = Color3.fromRGB(255, 90, 90)
 	elseif left > 0 then
 		amount.Text = string.format("%d / %d", math.floor(gauge), need)
@@ -896,7 +896,7 @@ Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		Sounds.play("HoleRumble")
 		shake(0.5, 0.8)
 		showBanner("LA JAUGE EST PLEINE !", "EFFONDREMENT IMMINENT", string.format(
-			"À la prochaine digestion : score x%d et familiers offerts aux 3 meilleurs !", HOLE.Collapse.ScoreMultiplier),
+			"À LA PROCHAINE SIESTE : POINTS x%d ET FAMILIERS OFFERTS AUX 3 MEILLEURS !", HOLE.Collapse.ScoreMultiplier),
 			Color3.fromRGB(255, 80, 80), 3.6)
 	elseif kind == "Sacrifice" and typeof(a) == "Vector3" and type(b) == "string" then
 		local carrier = if typeof(c) == "Instance" and c:IsA("Player") then c else nil
