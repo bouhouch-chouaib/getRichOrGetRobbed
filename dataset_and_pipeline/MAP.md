@@ -333,5 +333,14 @@ Céleste, Griffon Doré, Titan Auréole, Gardien du Trou Noir) : une cité de ma
   `export_map_lot.py -- --world Divin` -> `Decors_Divin.fbx` (34,3 Mo).
 - Pièges vus : un lathe à 12 côtés (30° entre faces) dépasse le seuil de biseau de 25° et se fait biseauter sur tout
   son tour (+3 800 triangles pour la fontaine) : seuil passé à 35° pour elle.
-- Pas encore dans Studio : attend la validation du style par Chouaib puis l'import de `Decors_Divin.fbx` (mode
-  Édition) ; ensuite `apply_map_look_divin.lua` et les bases `DivinLook` (déjà déclarées dans `MapGenerator`).
+- **Branché dans Studio (26 oct., style validé par Chouaib)** : import de `Decors_Divin.fbx` (Édition),
+  `apply_map_look_divin.lua` -> 17 décors dans `ArtModels.Map` (125 pour les 7 mondes), 595 posés dans `MapDecor.Divin`
+  + source céleste (Glass bleu clair + PointLight), 18 PointLight (16 vasques chaudes, 2 fontaines bleu pâle) ; 8 / 8
+  portes et 90 / 90 falaises tournées vers le trou ; bases `DivinLook` (8 bases, 29 pièces chacune). La ligne `Divin` de
+  `MapGenerator` était déjà dans Studio et dans le dossier OneDrive.
+- Vérifié en Play (solo, monde changé côté client) : au Divin, seuls les décors du Divin visibles (596 pièces, les 6
+  autres mondes cachés), 19 lumières allumées (aucune des autres mondes), DivinLook visible et les 6 autres habillages
+  cachés ; retour en Prairie : tout s'éteint et se cache. Photos `qa_renders/map_roblox_divin_jour.jpg`,
+  `map_roblox_divin_nuit.jpg`, `map_roblox_divin_source.jpg`. En jeu le jour est très blanc (air du monde : saturation
+  0,1 dans `shared/Worlds`) : lisible, mais peu de contraste entre le marbre et le sol.
+- **Les 7 mondes ont maintenant leur habillage « niveau studio » dans le jeu.**
