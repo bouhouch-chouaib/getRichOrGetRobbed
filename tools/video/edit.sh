@@ -1,6 +1,7 @@
 #!/bin/bash
 # Montage de la vidéo de la page du jeu (docs/PAGE_DU_JEU.md, « Vidéo de jeu ») : plans de assets/store/video/rushes
-# (filmés avec tools/video/rec.sh), 1920 x 1080, 30 i/s, piste son muette, légendes et titre à la police du jeu.
+# (filmés avec tools/video/rec.sh), 1920 x 1080, 30 i/s, légendes et titre à la police du jeu.
+# Sans argument : piste son muette. Avec A ou B : la musique A (8 bits) ou B (moderne) de make_music.py.
 # Résultat : assets/store/video/video_page_jeu.mp4 (moins de 60 s et de 100 Mo, limites de Roblox).
 set -e
 TOOLS="$(cd "$(dirname "$0")" && pwd)"
@@ -60,4 +61,16 @@ D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 seg/assemble.mp4)
 ffmpeg -hide_banner -loglevel error -y -i seg/assemble.mp4 -vf "fade=out:st=$(awk "BEGIN{print $D - 0.6}"):d=0.6" \
   -c:v libx264 -preset slow -crf 17 -maxrate 15M -bufsize 30M -profile:v high -level 4.2 -pix_fmt yuv420p \
   -c:a copy -movflags +faststart video_page_jeu.mp4
+
+# Musique (bash tools/video/edit.sh A, ou B) : composée par tools/video/make_music.py, mise à -14 LUFS, sous la vidéo.
+if [ -n "$1" ]; then
+  mkdir -p music
+  python -I "$(cygpath -w "$TOOLS/make_music.py")" "$(cygpath -w "$PWD/music")"
+  I=$(ffmpeg -hide_banner -nostats -i "music/music_$1.wav" -af ebur128 -f null - 2>&1 | grep "I:" | tail -1 | awk '{print $2}')
+  ffmpeg -hide_banner -loglevel error -y -i "music/music_$1.wav" -af "volume=$(awk "BEGIN{print -14 - ($I)}")dB" \
+    -c:a pcm_s16le "music/music_$1_14.wav"
+  mv video_page_jeu.mp4 seg/muette.mp4
+  ffmpeg -hide_banner -loglevel error -y -i seg/muette.mp4 -i "music/music_$1_14.wav" -map 0:v -map 1:a -c:v copy \
+    -c:a aac -b:a 192k -ar 48000 -shortest -movflags +faststart video_page_jeu.mp4
+fi
 ffprobe -v error -show_entries format=duration,size,bit_rate:stream=codec_name,width,height,r_frame_rate -of default=nw=1 video_page_jeu.mp4

@@ -112,8 +112,14 @@ Règles officielles (https://create.roblox.com/docs/production/promotion/thumbna
 - formats (page d'envoi, 26 oct.) : `.mp4` ou `.mov`, **60 s au plus**, 100 Mo au plus, 16:9, de 640 × 360 à
   1920 × 1080, débit conseillé 15 Mbit/s.
 
-**Vidéo faite le 26 oct. (version solo, sans son, choix de Chouaib)** : `assets/store/video/video_page_jeu.mp4`
-(hors git : trop lourd). 46 s, 1920 × 1080, 30 i/s, H.264, 71 Mo, 12 Mbit/s, piste son muette. Filmée dans Studio
+**Vidéo faite le 26 oct. (version solo)** : `assets/store/video/video_page_jeu.mp4` (hors git : trop lourd).
+46 s, 1920 × 1080, 30 i/s, H.264, 72 Mo, 12,5 Mbit/s, son AAC 192 kbit/s à -14 LUFS. **Musique de fond** (demande
+de Chouaib : « une vibe Pokémon ») composée et jouée par le code, `tools/video/make_music.py` : mélodies originales,
+aucun son externe, sans paroles ni voix (la génération de musique ForgeGUI est réservée aux offres payantes).
+2 versions : **A** 8 bits (ondes carrées, do majeur, 136 BPM) et **B** moderne (cuivres, pizzicati, cordes, ré majeur,
+130 BPM) ; les deux tombent sur l'accord final quand le titre apparaît. **Chouaib a choisi B** (26 oct.) :
+`video_page_jeu.mp4` = version B (se refait par `bash tools/video/edit.sh B`). Vidéos de comparaison :
+`video_page_jeu_musiqueA.mp4`, `video_page_jeu_musiqueB.mp4` ; `video_page_jeu_muette.mp4` sans musique. Filmée dans Studio
 (Play solo, sauvegarde de test remise comme avant à la fin), caméra de cinéma par script, interface du jeu laissée
 dans les plans de jeu, barre Roblox et chat cachés.
 
@@ -136,8 +142,10 @@ mondes et familiers donnés pour la prise) : tout ce qu'on voit existe dans le j
 `video_page_jeu.mp4`. Regarder la vidéo en entier avant : un envoi refusé compte dans les 3 du mois.
 
 **Refaire ou modifier le montage** : les plans filmés sont dans `assets/store/video/rushes/`. Changer la liste des
-plans en bas de `tools/video/edit.sh` (fichier, début, durée, légende), puis lancer `bash tools/video/edit.sh` (ffmpeg,
-Python avec Pillow ; police LuckiestGuy prise dans l'installation de Roblox). Légendes et titre : `tools/video/make_titles.py`.
+plans en bas de `tools/video/edit.sh` (fichier, début, durée, légende), puis lancer `bash tools/video/edit.sh B` (la
+musique choisie ; `A` pour l'autre, rien pour une vidéo muette ; ffmpeg, Python avec Pillow, numpy et scipy ; police LuckiestGuy prise
+dans l'installation de Roblox). Légendes et titre : `tools/video/make_titles.py`. Si on change la durée de la vidéo,
+caler la musique (tempo et nombre de mesures avant l'accord final) dans `make_music.py`.
 
 **Filmer de nouveaux plans** (Claude, avec Studio ouvert) : `bash tools/video/rec.sh NOM SECONDES` filme la vue du jeu
 même si Studio est derrière une autre fenêtre (pas réduit). Avant : en Play, fenêtre de Studio redimensionnée en
