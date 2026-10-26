@@ -148,16 +148,7 @@ local function treadmill(origin: CFrame, tier: Tier, rank: number, count: number
 	lit(block("Screen", Vector3.new(5, 0.9, 0.2), origin * CFrame.new(0, 6.05, -8.45), tier.Accent, look))
 	lamps(origin * CFrame.new(0, 6.95, -8.4), 1.3, rank, count, tier, look)
 	lamps(origin * CFrame.new(0, 6.95, -10.8), 1.3, rank, count, tier, look) -- visibles aussi du côté du trou noir
-	-- Chevrons lumineux sur le tapis (Cristal et au-delà).
-	if tierIndex >= 4 then
-		for index = 0, 3 do
-			local z = -6 + index * 4.5
-			for _, side in ipairs({ -1, 1 }) do
-				local chevron = block("Chevron", Vector3.new(3.2, 0.1, 0.6), origin * CFrame.new(side * 1.4, 0.64, z) * CFrame.Angles(0, side * math.rad(35), 0), tier.Accent, look)
-				lit(chevron)
-			end
-		end
-	end
+	-- (plus de chevrons fixes sur la bande : seules les flèches qui défilent restent, BeltArrows — Chouaib, 26 oct.)
 	if tierIndex >= 3 and not authored then
 		arch(origin * CFrame.new(0, 0, 9.6), 11.4, 9, tier, look)
 	end
