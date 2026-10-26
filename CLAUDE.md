@@ -197,7 +197,8 @@ suivant. Vu dans Studio (PC et téléphone) ; les aperçus 3D n'ont pas pu être
 **Jeu entre amis** (`server/Friends`, attribut `FriendIds`) : base voisine d'un ami, refuge chez un ami, escorte (+14 % de vitesse), « Reprendre » pour un ami ; à vérifier avec 2 vrais comptes amis dans le jeu publié.
 **26 oct. : traînée quand on court, comme Steal an Egg** (`client/RunTrail`, `Config.RunTrail`) : une bande unie
 accrochée à la taille, large comme les hanches, longue (forme relevée sur `references/video_chouaib`, leur « Sentier bleu »),
-**en blanc** (choix de Chouaib, pas leur cyan) + 5 petits traits de vent fins qui ondulent autour du corps quand on court ;
+**en blanc** (choix de Chouaib, pas leur cyan), courte (0,7 s), pointue au bout, trajet grossier (`MinLength` 2 studs : elle ne
+recopie pas chaque petit écart), + 5 petits traits de vent fins qui ondulent autour du corps quand on court ;
 cachée pendant l'invisibilité et pour l'Aura astrale achetée. Vérifié en Play (solo, PC, de dos et de côté). **Refusé par Chouaib (« vraiment moche »)** : la 1re version
 avec aura de flammes, paliers par niveau de Vitesse / Force, particules et textures dessinées (retirée) ; comme pour le
 Cerbère, ne pas reproposer d'aura sans demande, et partir d'une capture de la référence avant de dessiner un effet.

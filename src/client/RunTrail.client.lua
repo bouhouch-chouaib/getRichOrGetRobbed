@@ -57,12 +57,19 @@ local function create(character: Model): Rig?
 		ColorSequenceKeypoint.new(0.06, C.Color),
 		ColorSequenceKeypoint.new(1, C.Color),
 	})
+	-- Fin pointue : pleine largeur près du corps, rien au bout ; le bout reste assez opaque pour voir la pointe.
+	trail.WidthScale = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.4, 0.9),
+		NumberSequenceKeypoint.new(1, 0),
+	})
 	trail.Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0),
-		NumberSequenceKeypoint.new(0.8, 0.1),
-		NumberSequenceKeypoint.new(1, 1),
+		NumberSequenceKeypoint.new(0.7, 0.05),
+		NumberSequenceKeypoint.new(1, 0.4),
 	})
 	trail.Lifetime = C.Lifetime
+	trail.MinLength = C.MinLength
 	local wind = {}
 	for index, point in ipairs(W.Points) do
 		local half = Vector3.new(0, W.Width / 2, 0)
