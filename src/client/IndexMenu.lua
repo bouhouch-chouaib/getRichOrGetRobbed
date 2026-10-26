@@ -161,6 +161,17 @@ function IndexMenu.create(gui: Instance): Index
 	local function formOf(petId: string, stage: number, mutation: string?): string
 		return PetCatalog.Compose(petId, stage, mutation)
 	end
+	-- Meilleure forme possédée de l'espèce (hors mutations, secrètes), nil si on n'en a aucune. Retour d'un joueur
+	-- (26 oct.) : son ★★ sorti de la capsule semblait « Plus à toi » car la fiche s'ouvrait sur la forme ★, partie dans
+	-- la capsule.
+	local function bestOwnedStage(petId: string): number?
+		for stage = STAGES, 1, -1 do
+			if MenuKit.number("Pet_" .. formOf(petId, stage, nil)) > 0 then
+				return stage
+			end
+		end
+		return nil
+	end
 	local formButtons: { TextButton } = {}
 	local refreshDetail: () -> ()
 	for stage = 1, STAGES do
@@ -328,8 +339,10 @@ function IndexMenu.create(gui: Instance): Index
 		local owned = MenuKit.number("Pet_" .. petId)
 		local caption = equipButton:FindFirstChild("Caption") :: TextLabel
 		if owned <= 0 then
-			caption.Text = if known then "Plus à toi" else "Pas découvert"
-			UiStyle.setButtonColor(equipButton, GREY)
+			-- Pas cette forme, mais une autre : le bouton y mène au lieu de dire « Plus à toi ».
+			local mine = bestOwnedStage(speciesId)
+			caption.Text = if mine then "Voir " .. string.rep("★", mine) elseif known then "Plus à toi" else "Pas découvert"
+			UiStyle.setButtonColor(equipButton, if mine then UiStyle.Colors.Cyan else GREY)
 		elseif equippedCount(petId) > 0 then
 			caption.Text = "Déséquiper"
 			UiStyle.setButtonColor(equipButton, UiStyle.Colors.Red)
@@ -381,6 +394,12 @@ function IndexMenu.create(gui: Instance): Index
 			return
 		end
 		local owned = MenuKit.number("Pet_" .. petId)
+		local mine = if selectedId then bestOwnedStage(selectedId) else nil
+		if owned <= 0 and mine then
+			selectedStage = mine
+			refreshDetail()
+			return
+		end
 		if owned <= 0 then
 			Toast.show("PAS ENCORE À TOI !", UiStyle.Colors.Red)
 			Sounds.play("Error")
@@ -477,14 +496,10 @@ function IndexMenu.create(gui: Instance): Index
 			end
 			local tag = cell.button:FindFirstChild("Equipped")
 			local anyEquipped = false
-			local best = 1
+			local best = bestOwnedStage(entry.Id) or 1
 			for _, formId in ipairs(PetCatalog.FormsOf[entry.Id] or { entry.Id }) do
 				if table.find(equipped, formId) then
 					anyEquipped = true
-				end
-				local form = PetCatalog.ById[formId]
-				if not form.Mutation and MenuKit.number("Pet_" .. formId) > 0 then
-					best = math.max(best, form.Stage or 1)
 				end
 			end
 			-- Où sont les familiers de cette espèce : ÉQUIPÉ (te suit), BASE (rapporte) ou RÉSERVE (ne rapporte pas).
@@ -522,7 +537,7 @@ function IndexMenu.create(gui: Instance): Index
 
 	local function select(petId: string)
 		selectedId = petId
-		selectedStage = 1
+		selectedStage = bestOwnedStage(petId) or 1 -- la fiche s'ouvre sur la forme qu'on a
 		selectedMutation = nil
 		refreshCells()
 		refreshDetail()
