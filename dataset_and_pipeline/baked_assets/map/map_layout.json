@@ -433,7 +433,7 @@
    "asset": "TotemEnergie",
    "position": [
     62.232,
-    0,
+    -0.9,
     14.941
    ],
    "yaw_deg": 45.0,
@@ -449,7 +449,7 @@
    "asset": "TotemEnergie",
    "position": [
     62.232,
-    0,
+    -0.9,
     -14.941
    ],
    "yaw_deg": 45.0,
@@ -497,7 +497,7 @@
    "asset": "TotemEnergie",
    "position": [
     33.44,
-    0,
+    -0.9,
     54.569
    ],
    "yaw_deg": 0.0,
@@ -561,7 +561,7 @@
    "asset": "TotemEnergie",
    "position": [
     -14.941,
-    0,
+    -0.9,
     62.232
    ],
    "yaw_deg": 315.0,
@@ -577,7 +577,7 @@
    "asset": "TotemEnergie",
    "position": [
     14.941,
-    0,
+    -0.9,
     62.232
    ],
    "yaw_deg": 315.0,
@@ -689,7 +689,7 @@
    "asset": "TotemEnergie",
    "position": [
     -62.232,
-    0,
+    -0.9,
     -14.941
    ],
    "yaw_deg": 225.0,
@@ -705,7 +705,7 @@
    "asset": "TotemEnergie",
    "position": [
     -62.232,
-    0,
+    -0.9,
     14.941
    ],
    "yaw_deg": 225.0,
@@ -1105,7 +1105,7 @@
    "asset": "ChampignonGeant",
    "position": [
     124.967,
-    0,
+    -0.9,
     -9.832
    ],
    "yaw_deg": 253.68,
@@ -1153,7 +1153,7 @@
    "asset": "Pancarte",
    "position": [
     164.0,
-    0,
+    -0.9,
     11.0
    ],
    "yaw_deg": 70.0,
@@ -1313,7 +1313,7 @@
    "asset": "ChampignonGeant",
    "position": [
     80.424,
-    0,
+    -0.9,
     64.475
    ],
    "yaw_deg": 285.76,
@@ -1361,7 +1361,7 @@
    "asset": "ChampignonGeant",
    "position": [
     106.418,
-    0,
+    -0.9,
     91.008
    ],
    "yaw_deg": 80.25,
@@ -1393,7 +1393,7 @@
    "asset": "Pancarte",
    "position": [
     108.187,
-    0,
+    -0.9,
     123.744
    ],
    "yaw_deg": 25.0,
@@ -1425,7 +1425,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -9.954,
-    0,
+    -0.9,
     89.428
    ],
    "yaw_deg": 38.21,
@@ -1665,7 +1665,7 @@
    "asset": "Pancarte",
    "position": [
     -11.0,
-    0,
+    -0.9,
     164.0
    ],
    "yaw_deg": 340.0,
@@ -1761,7 +1761,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -104.972,
-    0,
+    -0.9,
     91.356
    ],
    "yaw_deg": 8.27,
@@ -1841,7 +1841,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -75.581,
-    0,
+    -0.9,
     90.269
    ],
    "yaw_deg": 250.31,
@@ -1857,7 +1857,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -86.903,
-    0,
+    -0.9,
     102.516
    ],
    "yaw_deg": 276.44,
@@ -1889,7 +1889,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -105.606,
-    0,
+    -0.9,
     120.758
    ],
    "yaw_deg": 45.25,
@@ -1905,7 +1905,7 @@
    "asset": "Pancarte",
    "position": [
     -123.744,
-    0,
+    -0.9,
     108.187
    ],
    "yaw_deg": 295.0,
@@ -2177,7 +2177,7 @@
    "asset": "Pancarte",
    "position": [
     -164.0,
-    0,
+    -0.9,
     -11.0
    ],
    "yaw_deg": 250.0,
@@ -2305,7 +2305,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -108.866,
-    0,
+    -0.9,
     -123.995
    ],
    "yaw_deg": 354.61,
@@ -2353,7 +2353,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -81.593,
-    0,
+    -0.9,
     -66.527
    ],
    "yaw_deg": 280.46,
@@ -2449,7 +2449,7 @@
    "asset": "Pancarte",
    "position": [
     -108.187,
-    0,
+    -0.9,
     -123.744
    ],
    "yaw_deg": 205.0,
@@ -2497,7 +2497,7 @@
    "asset": "ChampignonGeant",
    "position": [
     10.322,
-    0,
+    -0.9,
     -96.099
    ],
    "yaw_deg": 257.93,
@@ -2593,7 +2593,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -10.084,
-    0,
+    -0.9,
     -76.815
    ],
    "yaw_deg": 75.32,
@@ -2609,7 +2609,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -10.734,
-    0,
+    -0.9,
     -88.03
    ],
    "yaw_deg": 249.28,
@@ -2657,7 +2657,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -10.606,
-    0,
+    -0.9,
     -125.419
    ],
    "yaw_deg": 97.51,
@@ -2705,7 +2705,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -11.11,
-    0,
+    -0.9,
     -166.231
    ],
    "yaw_deg": 176.4,
@@ -2721,7 +2721,7 @@
    "asset": "Pancarte",
    "position": [
     11.0,
-    0,
+    -0.9,
     -164.0
    ],
    "yaw_deg": 160.0,
@@ -2753,7 +2753,7 @@
    "asset": "ChampignonGeant",
    "position": [
     66.626,
-    0,
+    -0.9,
     -52.494
    ],
    "yaw_deg": 147.91,
@@ -2945,7 +2945,7 @@
    "asset": "ChampignonGeant",
    "position": [
     99.62,
-    0,
+    -0.9,
     -113.672
    ],
    "yaw_deg": 66.83,
@@ -2977,7 +2977,7 @@
    "asset": "Pancarte",
    "position": [
     123.744,
-    0,
+    -0.9,
     -108.187
    ],
    "yaw_deg": 115.0,
@@ -8305,7 +8305,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     262.535,
-    27.379,
+    26.264,
     148.248
    ],
    "yaw_deg": 41.61,
@@ -8320,9 +8320,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    267.822,
-    27.379,
-    138.469
+    266.322,
+    11.528,
+    141.067
    ],
    "yaw_deg": 110.48,
    "scale_xyz": [
@@ -8416,9 +8416,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    294.568,
-    25.885,
-    64.278
+    293.068,
+    10.879,
+    66.876
    ],
    "yaw_deg": 159.87,
    "scale_xyz": [
@@ -8481,8 +8481,8 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     272.71,
-    12.443,
-    77.471
+    2.164,
+    80.471
    ],
    "yaw_deg": 266.27,
    "scale_xyz": [
@@ -8513,7 +8513,7 @@
    "asset": "ChampignonGeant",
    "position": [
     238.204,
-    0,
+    -0.9,
     55.978
    ],
    "yaw_deg": 80.95,
@@ -8609,7 +8609,7 @@
    "asset": "ChampignonGeant",
    "position": [
     233.852,
-    0,
+    -0.9,
     101.676
    ],
    "yaw_deg": 178.88,
@@ -8640,8 +8640,8 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    63.802,
-    27.379,
+    66.802,
+    10.729,
     294.672
    ],
    "yaw_deg": 202.24,
@@ -8657,7 +8657,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     69.642,
-    27.379,
+    26.401,
     293.347
    ],
    "yaw_deg": 288.38,
@@ -8784,9 +8784,9 @@
   {
    "asset": "ArbreCerisier",
    "position": [
-    78.179,
-    13.936,
-    272.507
+    80.777,
+    7.163,
+    271.007
    ],
    "yaw_deg": 78.25,
    "scale_xyz": [
@@ -8945,7 +8945,7 @@
    "asset": "ChampignonGeant",
    "position": [
     95.216,
-    0,
+    -0.9,
     236.556
    ],
    "yaw_deg": 24.73,
@@ -8993,7 +8993,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -147.832,
-    27.379,
+    26.264,
     262.77
    ],
    "yaw_deg": 282.92,
@@ -9120,9 +9120,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -135.371,
-    13.936,
-    249.092
+    -132.773,
+    13.516,
+    250.592
    ],
    "yaw_deg": 342.96,
    "scale_xyz": [
@@ -9169,7 +9169,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -136.304,
-    0,
+    -0.9,
     222.723
    ],
    "yaw_deg": 232.9,
@@ -9185,7 +9185,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -139.318,
-    0,
+    -0.9,
     211.655
    ],
    "yaw_deg": 272.04,
@@ -9281,7 +9281,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -106.773,
-    0,
+    -0.9,
     231.57
    ],
    "yaw_deg": 28.05,
@@ -9313,8 +9313,8 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -287.37,
-    27.379,
-    91.219
+    11.528,
+    88.219
    ],
    "yaw_deg": 37.13,
    "scale_xyz": [
@@ -9376,9 +9376,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -275.755,
-    28.873,
-    131.488
+    -277.255,
+    5.788,
+    128.89
    ],
    "yaw_deg": 13.25,
    "scale_xyz": [
@@ -9425,7 +9425,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -258.277,
-    25.885,
+    24.84,
     155.548
    ],
    "yaw_deg": 335.08,
@@ -9488,9 +9488,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -247.246,
-    12.443,
-    138.714
+    -250.246,
+    12.309,
+    133.518
    ],
    "yaw_deg": 158.79,
    "scale_xyz": [
@@ -9617,7 +9617,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -230.245,
-    0,
+    -0.9,
     109.601
    ],
    "yaw_deg": 61.49,
@@ -9648,9 +9648,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -254.897,
-    27.379,
-    -161.027
+    -256.397,
+    26.401,
+    -158.428
    ],
    "yaw_deg": 130.73,
    "scale_xyz": [
@@ -9664,9 +9664,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    -255.876,
-    27.379,
-    -159.468
+    -257.376,
+    26.809,
+    -156.869
    ],
    "yaw_deg": 327.41,
    "scale_xyz": [
@@ -9712,9 +9712,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -287.282,
-    28.873,
-    -103.92
+    -285.782,
+    26.979,
+    -106.519
    ],
    "yaw_deg": 228.65,
    "scale_xyz": [
@@ -9760,9 +9760,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    -294.697,
-    25.885,
-    -63.685
+    -293.197,
+    5.129,
+    -66.283
    ],
    "yaw_deg": 172.36,
    "scale_xyz": [
@@ -9793,8 +9793,8 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -259.292,
-    13.936,
-    -114.63
+    2.494,
+    -117.63
    ],
    "yaw_deg": 333.35,
    "scale_xyz": [
@@ -9825,8 +9825,8 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -272.183,
-    12.443,
-    -79.299
+    12.309,
+    -82.299
    ],
    "yaw_deg": 10.82,
    "scale_xyz": [
@@ -9841,7 +9841,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -230.173,
-    0,
+    -0.9,
     -70.096
    ],
    "yaw_deg": 352.33,
@@ -9857,7 +9857,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -225.682,
-    0,
+    -0.9,
     -118.769
    ],
    "yaw_deg": 337.14,
@@ -9953,7 +9953,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -240.85,
-    0,
+    -0.9,
     -83.764
    ],
    "yaw_deg": 310.36,
@@ -9985,7 +9985,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -70.167,
-    27.379,
+    26.401,
     -293.221
    ],
    "yaw_deg": 100.17,
@@ -10000,9 +10000,9 @@
   {
    "asset": "ArbreCerisier",
    "position": [
-    -91.819,
-    27.379,
-    -287.179
+    -89.221,
+    11.528,
+    -288.679
    ],
    "yaw_deg": 13.82,
    "scale_xyz": [
@@ -10032,8 +10032,8 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    -107.168,
-    28.873,
+    -110.168,
+    28.262,
     -286.086
    ],
    "yaw_deg": 293.23,
@@ -10081,7 +10081,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -142.5,
-    25.885,
+    19.977,
     -265.699
    ],
    "yaw_deg": 314.69,
@@ -10160,8 +10160,8 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    -118.105,
-    12.443,
+    -121.105,
+    12.085,
     -257.728
    ],
    "yaw_deg": 259.84,
@@ -10177,7 +10177,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -124.51,
-    0,
+    -0.9,
     -213.082
    ],
    "yaw_deg": 15.45,
@@ -10209,7 +10209,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -56.01,
-    0,
+    -0.9,
     -243.867
    ],
    "yaw_deg": 268.11,
@@ -10289,7 +10289,7 @@
    "asset": "ChampignonGeant",
    "position": [
     -90.251,
-    0,
+    -0.9,
     -238.495
    ],
    "yaw_deg": 354.21,
@@ -10320,9 +10320,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    162.235,
-    27.379,
-    -254.13
+    159.636,
+    16.07,
+    -255.63
    ],
    "yaw_deg": 289.43,
    "scale_xyz": [
@@ -10337,8 +10337,8 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     159.431,
-    27.379,
-    -255.899
+    26.401,
+    -258.899
    ],
    "yaw_deg": 145.39,
    "scale_xyz": [
@@ -10369,7 +10369,7 @@
    "asset": "ArbreCerisier",
    "position": [
     115.16,
-    28.873,
+    27.689,
     -282.964
    ],
    "yaw_deg": 318.2,
@@ -10384,9 +10384,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    130.28,
-    28.873,
-    -276.328
+    127.682,
+    16.813,
+    -277.828
    ],
    "yaw_deg": 6.71,
    "scale_xyz": [
@@ -10417,7 +10417,7 @@
    "asset": "ArbreCerisier",
    "position": [
     75.183,
-    25.885,
+    24.84,
     -291.976
    ],
    "yaw_deg": 276.42,
@@ -10464,9 +10464,9 @@
   {
    "asset": "ArbreCerisier",
    "position": [
-    138.752,
-    13.936,
-    -247.225
+    133.556,
+    13.516,
+    -250.225
    ],
    "yaw_deg": 189.09,
    "scale_xyz": [
@@ -10625,7 +10625,7 @@
    "asset": "ChampignonGeant",
    "position": [
     85.548,
-    0,
+    -0.9,
     -240.222
    ],
    "yaw_deg": 161.73,
@@ -10672,9 +10672,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    294.461,
-    27.379,
-    -64.77
+    292.961,
+    15.854,
+    -67.368
    ],
    "yaw_deg": 70.79,
    "scale_xyz": [
@@ -10720,9 +10720,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    286.673,
-    28.873,
-    -105.587
+    285.173,
+    27.833,
+    -108.185
    ],
    "yaw_deg": 329.4,
    "scale_xyz": [
@@ -10753,7 +10753,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     258.46,
-    25.885,
+    24.84,
     -155.244
    ],
    "yaw_deg": 113.05,
@@ -10769,7 +10769,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     263.992,
-    25.885,
+    24.651,
     -145.638
    ],
    "yaw_deg": 293.68,
@@ -10832,9 +10832,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    258.896,
-    12.443,
-    -115.52
+    257.396,
+    7.013,
+    -118.119
    ],
    "yaw_deg": 321.9,
    "scale_xyz": [
@@ -11169,7 +11169,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     346.562,
-    72.898,
+    71.448,
     -48.217
    ],
    "yaw_deg": 144.55,
@@ -11265,7 +11265,7 @@
    "asset": "ArbreCerisier",
    "position": [
     301.686,
-    54.851,
+    53.871,
     -178.566
    ],
    "yaw_deg": 232.09,
@@ -11313,7 +11313,7 @@
    "asset": "ArbreCerisier",
    "position": [
     289.469,
-    58.681,
+    57.821,
     -197.027
    ],
    "yaw_deg": 91.34,
@@ -11345,7 +11345,7 @@
    "asset": "ArbreCerisier",
    "position": [
     265.28,
-    66.879,
+    65.678,
     -221.158
    ],
    "yaw_deg": 303.21,
@@ -11360,9 +11360,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    265.278,
-    66.879,
-    -227.609
+    262.68,
+    66.683,
+    -229.109
    ],
    "yaw_deg": 216.42,
    "scale_xyz": [
@@ -11441,7 +11441,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     143.301,
-    72.283,
+    70.496,
     -319.741
    ],
    "yaw_deg": 174.79,
@@ -11505,7 +11505,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     107.932,
-    59.11,
+    57.933,
     -336.099
    ],
    "yaw_deg": 263.5,
@@ -11537,7 +11537,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     51.694,
-    74.578,
+    72.684,
     -341.677
    ],
    "yaw_deg": 238.22,
@@ -11601,7 +11601,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -3.506,
-    58.531,
+    57.381,
     -349.018
    ],
    "yaw_deg": 101.28,
@@ -11633,7 +11633,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -42.386,
-    70.816,
+    69.452,
     -345.138
    ],
    "yaw_deg": 295.0,
@@ -11728,9 +11728,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -174.67,
-    66.65,
-    -304.339
+    -177.268,
+    66.622,
+    -305.839
    ],
    "yaw_deg": 146.74,
    "scale_xyz": [
@@ -11776,9 +11776,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -201.302,
-    62.631,
-    -292.903
+    -198.703,
+    51.653,
+    -294.403
    ],
    "yaw_deg": 185.93,
    "scale_xyz": [
@@ -11825,7 +11825,7 @@
    "asset": "ArbreCerisier",
    "position": [
     -253.183,
-    73.302,
+    71.468,
     -236.087
    ],
    "yaw_deg": 251.63,
@@ -11873,7 +11873,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -297.165,
-    60.02,
+    58.801,
     -192.378
    ],
    "yaw_deg": 310.28,
@@ -11888,9 +11888,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    -296.59,
-    60.02,
-    -196.262
+    -298.09,
+    58.801,
+    -193.663
    ],
    "yaw_deg": 60.59,
    "scale_xyz": [
@@ -11921,7 +11921,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -305.302,
-    62.472,
+    61.13,
     -173.485
    ],
    "yaw_deg": 189.45,
@@ -11969,7 +11969,7 @@
    "asset": "ArbreCerisier",
    "position": [
     -337.28,
-    67.105,
+    65.558,
     -94.265
    ],
    "yaw_deg": 105.88,
@@ -11984,9 +11984,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -338.771,
-    67.105,
-    -100.055
+    -335.771,
+    66.904,
+    -105.252
    ],
    "yaw_deg": 35.11,
    "scale_xyz": [
@@ -12209,7 +12209,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -315.675,
-    57.35,
+    56.545,
     145.881
    ],
    "yaw_deg": 341.09,
@@ -12304,9 +12304,9 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    -254.17,
-    54.0,
-    246.069
+    -257.17,
+    54.154,
+    240.873
    ],
    "yaw_deg": 131.54,
    "scale_xyz": [
@@ -12321,7 +12321,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -246.353,
-    54.0,
+    53.06,
     253.388
    ],
    "yaw_deg": 65.25,
@@ -12369,7 +12369,7 @@
    "asset": "ArbreCerisier",
    "position": [
     -184.741,
-    74.547,
+    72.655,
     295.28
    ],
    "yaw_deg": 210.84,
@@ -12401,7 +12401,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -154.493,
-    66.751,
+    65.22,
     313.331
    ],
    "yaw_deg": 220.34,
@@ -12592,8 +12592,8 @@
   {
    "asset": "ArbreMajestueux_B",
    "position": [
-    40.686,
-    74.34,
+    43.686,
+    73.942,
     341.627
    ],
    "yaw_deg": 274.76,
@@ -12609,7 +12609,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     37.013,
-    74.34,
+    72.829,
     344.251
    ],
    "yaw_deg": 184.2,
@@ -12689,7 +12689,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     173.503,
-    68.413,
+    66.806,
     308.399
    ],
    "yaw_deg": 180.8,
@@ -12753,7 +12753,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     191.027,
-    62.272,
+    61.263,
     294.545
    ],
    "yaw_deg": 122.67,
@@ -12785,7 +12785,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     247.943,
-    63.522,
+    62.141,
     252.069
    ],
    "yaw_deg": 10.56,
@@ -12800,9 +12800,9 @@
   {
    "asset": "ArbreMajestueux_A",
    "position": [
-    244.715,
-    63.522,
-    255.663
+    247.313,
+    62.141,
+    254.163
    ],
    "yaw_deg": 266.29,
    "scale_xyz": [
@@ -12833,7 +12833,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     283.737,
-    73.712,
+    71.859,
     201.361
    ],
    "yaw_deg": 76.18,
@@ -13025,7 +13025,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     384.726,
-    91.17,
+    90.316,
     -21.67
    ],
    "yaw_deg": 8.56,
@@ -13041,7 +13041,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     386.136,
-    91.17,
+    90.316,
     -22.057
    ],
    "yaw_deg": 28.13,
@@ -13089,7 +13089,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     382.559,
-    91.455,
+    90.593,
     -91.719
    ],
    "yaw_deg": 358.57,
@@ -13121,7 +13121,7 @@
    "asset": "ArbreCerisier",
    "position": [
     356.696,
-    96.134,
+    95.145,
     -159.538
    ],
    "yaw_deg": 294.52,
@@ -13137,7 +13137,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     340.677,
-    96.134,
+    95.375,
     -186.377
    ],
    "yaw_deg": 24.58,
@@ -13169,7 +13169,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     326.383,
-    95.44,
+    94.47,
     -212.038
    ],
    "yaw_deg": 17.34,
@@ -13185,7 +13185,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     309.643,
-    95.44,
+    92.58,
     -229.924
    ],
    "yaw_deg": 187.0,
@@ -13217,7 +13217,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     264.201,
-    93.81,
+    93.108,
     -289.821
    ],
    "yaw_deg": 249.7,
@@ -13233,7 +13233,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     286.298,
-    93.81,
+    92.884,
     -264.488
    ],
    "yaw_deg": 84.02,
@@ -13281,7 +13281,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     206.158,
-    93.702,
+    90.922,
     -330.228
    ],
    "yaw_deg": 214.8,
@@ -13313,7 +13313,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     141.516,
-    107.008,
+    103.613,
     -361.396
    ],
    "yaw_deg": 76.19,
@@ -13329,7 +13329,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     162.955,
-    107.008,
+    105.724,
     -352.537
    ],
    "yaw_deg": 113.73,
@@ -13377,7 +13377,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     67.734,
-    106.932,
+    103.54,
     -379.96
    ],
    "yaw_deg": 287.04,
@@ -13409,7 +13409,7 @@
    "asset": "ArbreCerisier",
    "position": [
     26.719,
-    106.173,
+    103.293,
     -384.676
    ],
    "yaw_deg": 138.27,
@@ -13425,7 +13425,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     21.059,
-    106.173,
+    104.912,
     -387.851
    ],
    "yaw_deg": 117.78,
@@ -13457,7 +13457,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -53.834,
-    101.445,
+    100.312,
     -382.719
    ],
    "yaw_deg": 176.33,
@@ -13473,7 +13473,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -83.382,
-    101.445,
+    98.307,
     -377.842
    ],
    "yaw_deg": 346.87,
@@ -13521,7 +13521,7 @@
    "asset": "ArbreCerisier",
    "position": [
     -141.581,
-    95.718,
+    94.969,
     -366.964
    ],
    "yaw_deg": 336.66,
@@ -13569,7 +13569,7 @@
    "asset": "ArbreCerisier",
    "position": [
     -187.386,
-    91.843,
+    90.971,
     -342.338
    ],
    "yaw_deg": 123.35,
@@ -13617,7 +13617,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -257.348,
-    89.824,
+    89.006,
     -294.258
    ],
    "yaw_deg": 167.84,
@@ -13649,7 +13649,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -294.108,
-    111.034,
+    109.641,
     -246.152
    ],
    "yaw_deg": 345.06,
@@ -13665,7 +13665,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -304.551,
-    111.034,
+    107.452,
     -232.995
    ],
    "yaw_deg": 120.3,
@@ -13697,7 +13697,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -341.366,
-    94.203,
+    91.401,
     -179.399
    ],
    "yaw_deg": 151.94,
@@ -13713,7 +13713,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -333.882,
-    94.203,
+    93.267,
     -199.266
    ],
    "yaw_deg": 92.5,
@@ -13761,7 +13761,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -375.214,
-    100.226,
+    97.145,
     -96.896
    ],
    "yaw_deg": 78.08,
@@ -13793,7 +13793,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -386.264,
-    99.175,
+    96.142,
     -30.795
    ],
    "yaw_deg": 163.55,
@@ -13809,7 +13809,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -384.155,
-    99.175,
+    98.103,
     -59.41
    ],
    "yaw_deg": 246.71,
@@ -13841,7 +13841,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -388.076,
-    104.891,
+    101.593,
     42.732
    ],
    "yaw_deg": 301.01,
@@ -13857,7 +13857,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -388.031,
-    104.891,
+    103.665,
     9.684
    ],
    "yaw_deg": 140.27,
@@ -13889,7 +13889,7 @@
    "asset": "ArbreCerisier",
    "position": [
     -374.615,
-    98.628,
+    95.621,
     105.667
    ],
    "yaw_deg": 135.99,
@@ -13905,7 +13905,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -379.911,
-    98.628,
+    97.572,
     80.537
    ],
    "yaw_deg": 204.18,
@@ -13937,7 +13937,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -338.055,
-    109.241,
+    105.742,
     188.012
    ],
    "yaw_deg": 104.2,
@@ -13953,7 +13953,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -344.961,
-    109.241,
+    107.897,
     166.587
    ],
    "yaw_deg": 16.19,
@@ -14001,7 +14001,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -296.461,
-    103.953,
+    103.0,
     256.833
    ],
    "yaw_deg": 356.02,
@@ -14049,7 +14049,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -262.659,
-    96.026,
+    95.27,
     293.515
    ],
    "yaw_deg": 190.13,
@@ -14081,7 +14081,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -182.187,
-    106.1,
+    105.076,
     343.313
    ],
    "yaw_deg": 249.55,
@@ -14097,7 +14097,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     -183.376,
-    106.1,
+    105.094,
     345.238
    ],
    "yaw_deg": 252.31,
@@ -14177,7 +14177,7 @@
    "asset": "ArbreCerisier",
    "position": [
     -78.168,
-    111.819,
+    108.201,
     385.356
    ],
    "yaw_deg": 318.61,
@@ -14193,7 +14193,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     -100.357,
-    111.819,
+    110.405,
     379.123
    ],
    "yaw_deg": 292.47,
@@ -14273,7 +14273,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     41.972,
-    96.467,
+    95.469,
     385.883
    ],
    "yaw_deg": 296.96,
@@ -14289,7 +14289,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     77.089,
-    96.467,
+    95.699,
     382.899
    ],
    "yaw_deg": 182.4,
@@ -14321,7 +14321,7 @@
    "asset": "ArbreCerisier",
    "position": [
     107.714,
-    86.962,
+    86.222,
     372.955
    ],
    "yaw_deg": 338.97,
@@ -14337,7 +14337,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     135.063,
-    86.962,
+    84.495,
     365.965
    ],
    "yaw_deg": 314.95,
@@ -14385,7 +14385,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     177.983,
-    107.609,
+    106.309,
     346.085
    ],
    "yaw_deg": 144.39,
@@ -14417,7 +14417,7 @@
    "asset": "ArbreCerisier",
    "position": [
     259.509,
-    95.012,
+    92.172,
     292.292
    ],
    "yaw_deg": 354.5,
@@ -14432,8 +14432,8 @@
   {
    "asset": "ArbreCerisier",
    "position": [
-    262.968,
-    95.012,
+    265.968,
+    94.28,
     286.053
    ],
    "yaw_deg": 136.53,
@@ -14465,7 +14465,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     306.642,
-    104.026,
+    100.769,
     247.981
    ],
    "yaw_deg": 196.98,
@@ -14513,7 +14513,7 @@
    "asset": "ArbreCerisier",
    "position": [
     335.88,
-    112.408,
+    110.978,
     191.804
    ],
    "yaw_deg": 239.53,
@@ -14529,7 +14529,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     342.984,
-    112.408,
+    108.762,
     170.651
    ],
    "yaw_deg": 15.87,
@@ -14561,7 +14561,7 @@
    "asset": "ArbreCerisier",
    "position": [
     370.345,
-    112.716,
+    111.277,
     120.658
    ],
    "yaw_deg": 355.42,
@@ -14577,7 +14577,7 @@
    "asset": "ArbreMajestueux_B",
    "position": [
     379.147,
-    112.716,
+    111.546,
     87.643
    ],
    "yaw_deg": 39.16,
@@ -14609,7 +14609,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     384.906,
-    103.009,
+    102.079,
     30.105
    ],
    "yaw_deg": 43.47,
@@ -14625,7 +14625,7 @@
    "asset": "ArbreMajestueux_A",
    "position": [
     387.814,
-    103.009,
+    99.799,
     42.823
    ],
    "yaw_deg": 339.48,

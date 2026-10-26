@@ -1102,7 +1102,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     124.967,
-    0,
+    -0.9,
     -9.832
    ],
    "yaw_deg": 253.68,
@@ -1150,7 +1150,7 @@
    "asset": "Pancarte",
    "position": [
     164.0,
-    0,
+    -0.9,
     11.0
    ],
    "yaw_deg": 70.0,
@@ -1310,7 +1310,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     80.424,
-    0,
+    -0.9,
     64.475
    ],
    "yaw_deg": 285.76,
@@ -1358,7 +1358,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     106.418,
-    0,
+    -0.9,
     91.008
    ],
    "yaw_deg": 80.25,
@@ -1390,7 +1390,7 @@
    "asset": "Pancarte",
    "position": [
     108.187,
-    0,
+    -0.9,
     123.744
    ],
    "yaw_deg": 25.0,
@@ -1662,7 +1662,7 @@
    "asset": "Pancarte",
    "position": [
     -11.0,
-    0,
+    -0.9,
     164.0
    ],
    "yaw_deg": 340.0,
@@ -1758,7 +1758,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     -104.972,
-    0,
+    -0.9,
     91.356
    ],
    "yaw_deg": 8.27,
@@ -1902,7 +1902,7 @@
    "asset": "Pancarte",
    "position": [
     -123.744,
-    0,
+    -0.9,
     108.187
    ],
    "yaw_deg": 295.0,
@@ -2174,7 +2174,7 @@
    "asset": "Pancarte",
    "position": [
     -164.0,
-    0,
+    -0.9,
     -11.0
    ],
    "yaw_deg": 250.0,
@@ -2302,7 +2302,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     -108.866,
-    0,
+    -0.9,
     -123.995
    ],
    "yaw_deg": 354.61,
@@ -2446,7 +2446,7 @@
    "asset": "Pancarte",
    "position": [
     -108.187,
-    0,
+    -0.9,
     -123.744
    ],
    "yaw_deg": 205.0,
@@ -2494,7 +2494,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     10.322,
-    0,
+    -0.9,
     -96.099
    ],
    "yaw_deg": 257.93,
@@ -2606,7 +2606,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     -10.734,
-    0,
+    -0.9,
     -88.03
    ],
    "yaw_deg": 249.28,
@@ -2654,7 +2654,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     -10.606,
-    0,
+    -0.9,
     -125.419
    ],
    "yaw_deg": 97.51,
@@ -2718,7 +2718,7 @@
    "asset": "Pancarte",
    "position": [
     11.0,
-    0,
+    -0.9,
     -164.0
    ],
    "yaw_deg": 160.0,
@@ -2942,7 +2942,7 @@
    "asset": "Abysses_Anemone",
    "position": [
     99.62,
-    0,
+    -0.9,
     -113.672
    ],
    "yaw_deg": 66.83,
@@ -2974,7 +2974,7 @@
    "asset": "Pancarte",
    "position": [
     123.744,
-    0,
+    -0.9,
     -108.187
    ],
    "yaw_deg": 115.0,
@@ -8317,9 +8317,9 @@
   {
    "asset": "Abysses_Corail",
    "position": [
-    267.822,
-    27.142,
-    138.469
+    266.322,
+    16.756,
+    141.067
    ],
    "yaw_deg": 110.48,
    "scale_xyz": [
@@ -8366,7 +8366,7 @@
    "asset": "Abysses_Algue",
    "position": [
     281.895,
-    28.623,
+    27.888,
     117.753
    ],
    "yaw_deg": 40.73,
@@ -8414,8 +8414,8 @@
    "asset": "Abysses_Corail",
    "position": [
     294.568,
-    25.661,
-    64.278
+    5.139,
+    67.278
    ],
    "yaw_deg": 159.87,
    "scale_xyz": [
@@ -8477,9 +8477,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    272.71,
-    12.331,
-    77.471
+    271.21,
+    2.17,
+    80.069
    ],
    "yaw_deg": 266.27,
    "scale_xyz": [
@@ -8637,9 +8637,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    63.802,
-    27.142,
-    294.672
+    66.4,
+    10.293,
+    293.172
    ],
    "yaw_deg": 202.24,
    "scale_xyz": [
@@ -8781,9 +8781,9 @@
   {
    "asset": "Abysses_CorailEventail",
    "position": [
-    78.179,
-    13.812,
-    272.507
+    80.777,
+    8.054,
+    271.007
    ],
    "yaw_deg": 78.25,
    "scale_xyz": [
@@ -9117,9 +9117,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    -135.371,
-    13.812,
-    249.092
+    -132.773,
+    13.634,
+    250.592
    ],
    "yaw_deg": 342.96,
    "scale_xyz": [
@@ -9278,7 +9278,7 @@
    "asset": "Abysses_Corail",
    "position": [
     -106.773,
-    0,
+    -0.9,
     231.57
    ],
    "yaw_deg": 28.05,
@@ -9309,9 +9309,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    -287.37,
-    27.142,
-    91.219
+    -288.87,
+    16.756,
+    88.621
    ],
    "yaw_deg": 37.13,
    "scale_xyz": [
@@ -9373,9 +9373,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    -275.755,
-    28.623,
-    131.488
+    -277.255,
+    5.799,
+    128.89
    ],
    "yaw_deg": 13.25,
    "scale_xyz": [
@@ -9485,9 +9485,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    -247.246,
-    12.331,
-    138.714
+    -250.246,
+    12.523,
+    133.518
    ],
    "yaw_deg": 158.79,
    "scale_xyz": [
@@ -9502,7 +9502,7 @@
    "asset": "Abysses_Algue",
    "position": [
     -217.762,
-    0,
+    -0.9,
     136.971
    ],
    "yaw_deg": 286.65,
@@ -9518,7 +9518,7 @@
    "asset": "Abysses_Corail",
    "position": [
     -211.592,
-    0,
+    -0.9,
     125.35
    ],
    "yaw_deg": 74.0,
@@ -9645,9 +9645,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    -254.897,
-    27.142,
-    -161.027
+    -256.397,
+    26.625,
+    -158.428
    ],
    "yaw_deg": 130.73,
    "scale_xyz": [
@@ -9662,7 +9662,7 @@
    "asset": "Abysses_Corail",
    "position": [
     -255.876,
-    27.142,
+    21.048,
     -159.468
    ],
    "yaw_deg": 327.41,
@@ -9709,9 +9709,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    -287.282,
-    28.623,
-    -103.92
+    -285.782,
+    23.371,
+    -106.519
    ],
    "yaw_deg": 228.65,
    "scale_xyz": [
@@ -9758,8 +9758,8 @@
    "asset": "Abysses_Corail",
    "position": [
     -294.697,
-    25.661,
-    -63.685
+    5.139,
+    -66.685
    ],
    "yaw_deg": 172.36,
    "scale_xyz": [
@@ -9789,9 +9789,9 @@
   {
    "asset": "Abysses_Corail",
    "position": [
-    -259.292,
-    13.812,
-    -114.63
+    -257.792,
+    2.5,
+    -117.228
    ],
    "yaw_deg": 333.35,
    "scale_xyz": [
@@ -9821,9 +9821,9 @@
   {
    "asset": "Abysses_Corail",
    "position": [
-    -272.183,
-    12.331,
-    -79.299
+    -270.683,
+    12.523,
+    -81.898
    ],
    "yaw_deg": 10.82,
    "scale_xyz": [
@@ -9870,7 +9870,7 @@
    "asset": "Abysses_Corail",
    "position": [
     -243.751,
-    0,
+    -0.9,
     -52.955
    ],
    "yaw_deg": 194.99,
@@ -9997,8 +9997,8 @@
   {
    "asset": "Abysses_CorailEventail",
    "position": [
-    -91.819,
-    27.142,
+    -88.819,
+    5.469,
     -287.179
    ],
    "yaw_deg": 13.82,
@@ -10029,8 +10029,8 @@
   {
    "asset": "Abysses_Corail",
    "position": [
-    -107.168,
-    28.623,
+    -110.168,
+    28.681,
     -286.086
    ],
    "yaw_deg": 293.23,
@@ -10078,7 +10078,7 @@
    "asset": "Abysses_Algue",
    "position": [
     -142.5,
-    25.661,
+    19.9,
     -265.699
    ],
    "yaw_deg": 314.69,
@@ -10157,9 +10157,9 @@
   {
    "asset": "Abysses_Corail",
    "position": [
-    -118.105,
-    12.331,
-    -257.728
+    -120.703,
+    12.467,
+    -256.228
    ],
    "yaw_deg": 259.84,
    "scale_xyz": [
@@ -10317,9 +10317,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    162.235,
-    27.142,
-    -254.13
+    159.636,
+    15.926,
+    -255.63
    ],
    "yaw_deg": 289.43,
    "scale_xyz": [
@@ -10333,9 +10333,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    159.431,
-    27.142,
-    -255.899
+    157.931,
+    27.207,
+    -258.497
    ],
    "yaw_deg": 145.39,
    "scale_xyz": [
@@ -10381,9 +10381,9 @@
   {
    "asset": "Abysses_Corail",
    "position": [
-    130.28,
-    28.623,
-    -276.328
+    127.682,
+    16.943,
+    -277.828
    ],
    "yaw_deg": 6.71,
    "scale_xyz": [
@@ -10461,9 +10461,9 @@
   {
    "asset": "Abysses_CorailEventail",
    "position": [
-    138.752,
-    13.812,
-    -247.225
+    133.556,
+    13.634,
+    -250.225
    ],
    "yaw_deg": 189.09,
    "scale_xyz": [
@@ -10670,8 +10670,8 @@
    "asset": "Abysses_Corail",
    "position": [
     294.461,
-    27.142,
-    -64.77
+    16.033,
+    -67.77
    ],
    "yaw_deg": 70.79,
    "scale_xyz": [
@@ -10702,7 +10702,7 @@
    "asset": "Abysses_Algue",
    "position": [
     282.408,
-    28.623,
+    27.888,
     -116.516
    ],
    "yaw_deg": 44.28,
@@ -10718,8 +10718,8 @@
    "asset": "Abysses_Corail",
    "position": [
     286.673,
-    28.623,
-    -105.587
+    28.068,
+    -108.587
    ],
    "yaw_deg": 329.4,
    "scale_xyz": [
@@ -10798,7 +10798,7 @@
    "asset": "Abysses_Algue",
    "position": [
     266.032,
-    13.812,
+    11.29,
     -97.975
    ],
    "yaw_deg": 209.44,
@@ -10829,9 +10829,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    258.896,
-    12.331,
-    -115.52
+    257.396,
+    7.152,
+    -118.119
    ],
    "yaw_deg": 321.9,
    "scale_xyz": [
@@ -10846,7 +10846,7 @@
    "asset": "Abysses_Corail",
    "position": [
     252.577,
-    0,
+    -0.9,
     -68.83
    ],
    "yaw_deg": 293.17,
@@ -10862,7 +10862,7 @@
    "asset": "Abysses_Corail",
    "position": [
     241.128,
-    0,
+    -0.9,
     -61.904
    ],
    "yaw_deg": 206.12,
@@ -11134,8 +11134,8 @@
    "asset": "Abysses_Corail",
    "position": [
     349.296,
-    57.232,
-    -11.237
+    47.493,
+    -8.237
    ],
    "yaw_deg": 73.66,
    "scale_xyz": [
@@ -11341,8 +11341,8 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    215.408,
-    64.248,
+    212.408,
+    63.825,
     -273.567
    ],
    "yaw_deg": 134.98,
@@ -11469,8 +11469,8 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    47.733,
-    66.02,
+    44.733,
+    65.791,
     -349.615
    ],
    "yaw_deg": 220.74,
@@ -11806,8 +11806,8 @@
    "asset": "Abysses_Corail",
    "position": [
     -338.096,
-    55.628,
-    -101.099
+    35.274,
+    -92.099
    ],
    "yaw_deg": 107.81,
    "scale_xyz": [
@@ -11981,9 +11981,9 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    -316.35,
-    55.307,
-    139.546
+    -313.752,
+    43.969,
+    138.046
    ],
    "yaw_deg": 105.42,
    "scale_xyz": [
@@ -12461,9 +12461,9 @@
   {
    "asset": "Abysses_Corail",
    "position": [
-    288.301,
-    66.789,
-    203.441
+    289.801,
+    66.286,
+    200.843
    ],
    "yaw_deg": 339.73,
    "scale_xyz": [
@@ -12638,7 +12638,7 @@
    "asset": "Abysses_Corail",
    "position": [
     384.395,
-    103.644,
+    101.978,
     -23.191
    ],
    "yaw_deg": 230.81,
@@ -12686,7 +12686,7 @@
    "asset": "Abysses_Corail",
    "position": [
     351.481,
-    98.889,
+    97.373,
     -172.556
    ],
    "yaw_deg": 321.36,
@@ -12702,7 +12702,7 @@
    "asset": "Abysses_CorailEventail",
    "position": [
     348.726,
-    98.889,
+    97.373,
     -172.073
    ],
    "yaw_deg": 162.99,
@@ -12862,7 +12862,7 @@
    "asset": "Abysses_Corail",
    "position": [
     158.384,
-    112.141,
+    110.206,
     -355.462
    ],
    "yaw_deg": 173.87,
@@ -13022,7 +13022,7 @@
    "asset": "Abysses_Corail",
    "position": [
     -204.281,
-    87.824,
+    86.657,
     -338.184
    ],
    "yaw_deg": 26.86,
@@ -13085,9 +13085,9 @@
   {
    "asset": "Abysses_CorailEventail",
    "position": [
-    -266.861,
-    103.952,
-    -282.179
+    -265.361,
+    75.366,
+    -284.777
    ],
    "yaw_deg": 170.06,
    "scale_xyz": [
@@ -13182,7 +13182,7 @@
    "asset": "Abysses_Algue",
    "position": [
     -369.238,
-    90.391,
+    89.143,
     -114.443
    ],
    "yaw_deg": 53.72,
@@ -13469,8 +13469,8 @@
   {
    "asset": "Abysses_Algue",
    "position": [
-    -156.318,
-    94.593,
+    -153.318,
+    93.212,
     362.306
    ],
    "yaw_deg": 96.02,
@@ -13646,7 +13646,7 @@
    "asset": "Abysses_Algue",
    "position": [
     133.671,
-    89.049,
+    87.844,
     367.353
    ],
    "yaw_deg": 167.84,
@@ -13710,7 +13710,7 @@
    "asset": "Abysses_Corail",
    "position": [
     240.978,
-    104.691,
+    102.992,
     305.473
    ],
    "yaw_deg": 177.31,
@@ -13758,7 +13758,7 @@
    "asset": "Abysses_Algue",
    "position": [
     294.169,
-    93.42,
+    92.076,
     248.77
    ],
    "yaw_deg": 43.39,
@@ -13822,7 +13822,7 @@
    "asset": "Abysses_Corail",
    "position": [
     363.581,
-    103.656,
+    101.99,
     124.859
    ],
    "yaw_deg": 250.02,
@@ -13854,7 +13854,7 @@
    "asset": "Abysses_Corail",
    "position": [
     389.878,
-    88.114,
+    86.938,
     38.816
    ],
    "yaw_deg": 246.71,

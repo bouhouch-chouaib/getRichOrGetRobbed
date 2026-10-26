@@ -348,3 +348,27 @@ Céleste, Griffon Doré, Titan Auréole, Gardien du Trou Noir) : une cité de ma
   qui retrouvent leur volume, damier lisible, ciel plus bleu, or plus vif ; retour en Prairie : exposition 0,05,
   saturation 0,18 et brume 0,6 reprises.
 - **Les 7 mondes ont maintenant leur habillage « niveau studio » dans le jeu.**
+
+---
+
+# Décors qui flottaient (26 oct. 2026)
+
+Bug vu en jeu par Chouaib : des arbres (et quelques décors) flottaient en l'air au lieu d'être sur un rocher ou au sol.
+Cause : `run_map_scene.py` posait les arbres des collines et des falaises à la hauteur MAX du module (`top_of`), mais une
+falaise en gradins recule en montant : à l'aplomb du tronc il y avait souvent un gradin plus bas, ou le vide derrière la
+falaise (jusqu'à 110 studs de vide pour les arbres calcinés du Volcan).
+
+- `settle_decor()` (appelé avant l'export du placement) : pour chaque décor posé (sauf bases et lointain), rayon vertical
+  lancé d'au-dessus de lui à l'aplomb de son point d'ancrage ; seuls les supports comptent (pièces de la scène, et les
+  décors posés avec `role="support"` : collines, falaises, rochers ; `role="spike"` : modules de falaise remplacés par
+  une pointe). On suit les entrées / sorties du rayon dans chaque forme : un décor dont le pied est DANS un support (arbre
+  qui sort du mur) n'est pas touché. Flotte de plus de 0,4 stud : il descend sur le support, enfoncé de 0,3. Il
+  tomberait sur une pointe ou de plus de 6 studs : on cherche autour de lui (jusqu'à 12 studs) le plus haut sommet de
+  colline / falaise et on l'y pose ; sinon il serait retiré (aucun ne l'a été).
+- Résultat : Prairie 164 décors reposés, Désert 95, Volcan 132, Glace 78, Abysses 71, Cosmos 160, Divin 152 (dont 31 à
+  76 par monde déplacés de quelques studs vers le sommet de leur falaise) ; 0 retiré. Mesuré dans Blender après coup :
+  plus aucun décor de l'arène ne flotte (restent seulement les décors des bases dans les rendus, que le jeu ne pose pas :
+  les bases sont habillées par `MapGenerator`).
+- Placements (`map_layout.json`) et scripts Studio des 7 mondes refaits, relancés dans Studio en mode « decor » (mêmes
+  nombres de décors et de lumières). Vérifié en Play (solo) : collines et falaises du Volcan, de la Prairie et du Cosmos,
+  `qa_renders/decors_reposes.jpg`. Pas encore re-rendu les images `map_hero_*.png` (seuls les placements ont changé).

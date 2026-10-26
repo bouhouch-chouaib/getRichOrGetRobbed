@@ -342,6 +342,7 @@ def _args():
 
 LIB: dict[str, bpy.types.Object] = {}
 PLACED: list[dict] = []
+PLACED_OBJS: list[bpy.types.Object] = []  # l'objet Blender de chaque entrée de PLACED (même ordre)
 # Eau et lave : pas des modèles, des pièces Roblox simples (créées par le script Studio), à la même place que la scène.
 SURFACES: list[dict] = []
 
@@ -378,8 +379,10 @@ def load_library() -> None:
 
 
 def put(asset: str, x: float, y: float, z: float = 0.0, yaw: float = 0.0, scale=1.0, zone: str = "",
-        collide: bool = False) -> bpy.types.Object:
-    """Pose une copie liée (même maillage) ; yaw en degrés autour de Z ; scale = nombre ou (sx, sy, sz)."""
+        collide: bool = False, role: str = "") -> bpy.types.Object:
+    """Pose une copie liée (même maillage) ; yaw en degrés autour de Z ; scale = nombre ou (sx, sy, sz).
+    role : "support" (colline, falaise, rocher : on peut poser des choses dessus, settle_decor ne le bouge pas),
+    "spike" (module de falaise remplacé par une pointe : support, mais rien ne doit tomber dessus), "" (décor posé)."""
     src = LIB[asset]
     obj = src.copy()
     obj.hide_render = False
@@ -389,7 +392,8 @@ def put(asset: str, x: float, y: float, z: float = 0.0, yaw: float = 0.0, scale=
     obj.matrix_world = (Matrix.Translation((x, y, z)) @ Matrix.Rotation(math.radians(yaw), 4, "Z")
                         @ Matrix.Diagonal((s[0], s[1], s[2], 1.0)))
     PLACED.append({"asset": asset, "blender": [x, y, z], "yaw": yaw, "scale": list(s), "zone": zone,
-                   "collide": collide})
+                   "collide": collide, "role": role})
+    PLACED_OBJS.append(obj)
     return obj
 
 
@@ -675,7 +679,7 @@ def build_gap(M, k: int, rnd):
                            (-4.0, 281, (0.6, 0.6, 0.5)), (4.0, 281, (0.6, 0.6, 0.45))):
         x, y = polar(r, phi + dphi)
         put(W["hill"], x, y, -0.5, facing_center(phi + dphi) + rnd.uniform(-6, 6), scale, "colline",
-            collide=True)
+            collide=True, role="support")
         top = top_of(W["hill"], scale[2]) - 1.0
         for j in range(2 if scale[2] > 0.8 else 1):
             tx, ty = polar(r + 2.5, phi + dphi + rnd.uniform(-3.0, 3.0))
@@ -688,7 +692,7 @@ def build_gap(M, k: int, rnd):
     for j in range(3):
         x, y = polar(rnd.uniform(228, 270), phi + rnd.uniform(-10, 10))
         put(rnd.choice(W["rocks"]), x, y, -0.4,
-            rnd.uniform(0, 360), rnd.uniform(0.8, 1.3), "colline", collide=True)
+            rnd.uniform(0, 360), rnd.uniform(0.8, 1.3), "colline", collide=True, role="support")
     x, y = polar(232, phi + rnd.choice((-1, 1)) * 8)
     put(W["ruin"], x, y, 0, facing_center(phi) + rnd.uniform(-30, 30), 1.0, "colline", collide=True)
     mx, my = polar(255, phi + rnd.uniform(-4, 4))
@@ -734,7 +738,7 @@ def add_stream(M, k: int):
         side = 1 if j % 2 else -1
         x, y = polar(r, phi)
         t = side * 7.5
-        put(W["bank_rock"], x - t * math.sin(a), y + t * math.cos(a), -0.6, j * 47.0, 0.45, "colline")
+        put(W["bank_rock"], x - t * math.sin(a), y + t * math.cos(a), -0.6, j * 47.0, 0.45, "colline", role="support")
 
 
 def add_trench(M, k: int, rnd):
@@ -933,9 +937,10 @@ def build_periphery(rnd):
             yaw = facing_center(phi) + rnd.uniform(-5, 5)
             alt = W.get("cliff_alt")
             if alt and k % 3 == 1:  # un module sur trois remplacé (casse la répétition des orgues du Volcan)
-                put(alt[0], x, y, -1, yaw, (alt[1][0], alt[1][1], alt[1][2] * sz / sz_range[1]), "peripherie")
+                put(alt[0], x, y, -1, yaw, (alt[1][0], alt[1][1], alt[1][2] * sz / sz_range[1]), "peripherie",
+                    role="spike")
                 continue  # pas d'arbres sur des pointes : ils flotteraient
-            put(W["cliff"], x, y, -1, yaw, (sxy[0], sxy[1], sz), "peripherie")
+            put(W["cliff"], x, y, -1, yaw, (sxy[0], sxy[1], sz), "peripherie", role="support")
             for j in range(2):
                 tx, ty = polar(r + rnd.uniform(3, 7) * sxy[1], phi + rnd.uniform(-3.5, 3.5))
                 asset = W["cliff_trees"][0] if rnd.random() < 0.12 else rnd.choice(W["cliff_trees"][1])
@@ -1119,6 +1124,101 @@ def render_view(name: str, w: int, h: int, samples: int) -> np.ndarray:
 # Export du placement pour Roblox
 # =====================================================================================================================
 
+def settle_decor() -> None:
+    """Pose sur ce qu'il y a vraiment dessous les décors qui flottent (bug vu en jeu le 26 oct.). Les arbres des collines
+    et des falaises sont posés à la hauteur MAX du module (top_of), mais une falaise en gradins recule en montant : à
+    l'aplomb du tronc il y a souvent un gradin plus bas, ou rien. Pour chaque décor (sauf bases, lointain et supports) :
+    rayon vertical lancé d'au-dessus de lui, à l'aplomb de son point d'ancrage ; on ne tient compte que des supports
+    (sol, mur, collines, falaises, rochers, toute pièce de la scène qui n'est pas un décor posé). S'il flotte de plus de
+    0,4 stud : il descend sur le support (enfoncé de 0,3). S'il tomberait sur une pointe (cliff_alt) ou de plus de
+    6 studs depuis une colline / falaise : on cherche autour de lui (jusqu'à 12 studs) le sommet de colline ou de falaise
+    le plus haut et on l'y pose ; s'il n'y en a pas, il est retiré. Un décor dont le pied est dans un support (arbre qui
+    sort du mur) n'est pas touché."""
+    role_of = {obj: entry["role"] for entry, obj in zip(PLACED, PLACED_OBJS)}
+    hills = {W["hill"], W["cliff"]}
+    deps = bpy.context.evaluated_depsgraph_get()
+    scene = bpy.context.scene
+    down = Vector((0, 0, -1))
+
+    def cast(obj, x: float, y: float, top: float, bottom: float):
+        """Premier support sous le pied à l'aplomb de (x, y) : (hauteur, décor), ou None ; "covered" si le pied est À
+        L'INTÉRIEUR d'un support (on suit les entrées / sorties du rayon dans chaque forme : un support qui passe
+        au-dessus sans contenir le pied, comme le surplomb d'une pointe, ne compte pas)."""
+        origin = Vector((x, y, top + 1.0))
+        inside: dict = {}
+        for _ in range(80):
+            hit, loc, normal, _i, hit_obj, _m = scene.ray_cast(deps, origin, down, distance=800)
+            if not hit:
+                return None
+            src = hit_obj.original
+            role = role_of.get(src, "scene")  # pièce de la scène (sol, mur, kiosque...) : support
+            if src is not obj and role != "":
+                if loc.z > bottom + 0.5:
+                    inside[src] = inside.get(src, 0) + (1 if normal.z > 0 else -1)
+                else:
+                    if any(v > 0 for v in inside.values()):
+                        return "covered"
+                    return loc.z, src.name.split(".")[0], role
+            origin = loc + down * 0.01
+        return None
+
+    moved: dict[str, int] = {}
+    shifted: dict[str, int] = {}
+    removed: dict[str, int] = {}
+    worst = 0.0
+    keep = [True] * len(PLACED)
+    for index, (entry, obj) in enumerate(zip(PLACED, PLACED_OBJS)):
+        if entry["zone"] in ("base", "lointain") or entry["role"]:
+            continue
+        corners = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
+        bottom = min(c.z for c in corners)
+        top = max(c.z for c in corners)
+        x, y = obj.matrix_world.translation.x, obj.matrix_world.translation.y
+        found = cast(obj, x, y, top, bottom)
+        if found is None or found == "covered":
+            continue
+        surface, _support_asset, support_role = found
+        gap = bottom - surface
+        if gap <= 0.4:
+            continue
+        worst = max(worst, gap)
+        if support_role == "spike" or gap > 6.0:
+            # Il devait être sur une colline / falaise : sommet le plus haut tout autour.
+            best = None
+            for radius in (3.0, 6.0, 9.0, 12.0):
+                for k in range(12):
+                    a = k * math.pi / 6
+                    cx, cy = x + math.cos(a) * radius, y + math.sin(a) * radius
+                    probe = cast(obj, cx, cy, top, bottom)
+                    if probe is None or probe == "covered" or probe[1] not in hills or probe[2] != "support":
+                        continue
+                    if best is None or probe[0] > best[0]:
+                        best = (probe[0], cx, cy)
+                if best is not None:
+                    break
+            if best is None:
+                keep[index] = False
+                removed[entry["asset"]] = removed.get(entry["asset"], 0) + 1
+                bpy.data.objects.remove(obj, do_unlink=True)
+                continue
+            surface, nx, ny = best
+            obj.location.x += nx - x
+            obj.location.y += ny - y
+            entry["blender"][0] += nx - x
+            entry["blender"][1] += ny - y
+            shifted[entry["asset"]] = shifted.get(entry["asset"], 0) + 1
+            gap = bottom - surface
+        shift = gap + 0.3
+        obj.location.z -= shift
+        entry["blender"][2] -= shift
+        moved[entry["asset"]] = moved.get(entry["asset"], 0) + 1
+    PLACED[:] = [e for e, k in zip(PLACED, keep) if k]
+    PLACED_OBJS[:] = [o for o, k in zip(PLACED_OBJS, keep) if k]
+    print(f"[scene] décors reposés : {sum(moved.values())} descendus {dict(sorted(moved.items()))} (dont "
+          f"{sum(shifted.values())} déplacés vers un sommet), {sum(removed.values())} retirés {dict(sorted(removed.items()))}, "
+          f"plus gros écart {worst:.1f} studs")
+
+
 def export_layout(path: Path) -> None:
     items = []
     for p in PLACED:
@@ -1221,6 +1321,7 @@ def main() -> None:
         add_lava_pool(M, 7, rnd)
     build_periphery(rnd)
     build_clouds(M, rnd)
+    settle_decor()
     print(f"[scene] construite en {time.time() - t0:.0f} s : {len(PLACED)} décors posés")
     if not a.no_layout:
         folder = ROOT / "baked_assets" / "map" / ("" if a.world == "Prairie" else a.world.lower())

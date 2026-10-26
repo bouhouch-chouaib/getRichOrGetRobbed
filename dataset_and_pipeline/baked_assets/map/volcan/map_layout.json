@@ -1150,7 +1150,7 @@
    "asset": "Pancarte",
    "position": [
     164.0,
-    0,
+    -0.9,
     11.0
    ],
    "yaw_deg": 70.0,
@@ -1310,7 +1310,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     80.424,
-    0,
+    -0.9,
     64.475
    ],
    "yaw_deg": 285.76,
@@ -1358,7 +1358,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     106.418,
-    0,
+    -0.9,
     91.008
    ],
    "yaw_deg": 80.25,
@@ -1390,7 +1390,7 @@
    "asset": "Pancarte",
    "position": [
     108.187,
-    0,
+    -0.9,
     123.744
    ],
    "yaw_deg": 25.0,
@@ -1422,7 +1422,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     -9.954,
-    0,
+    -0.9,
     89.428
    ],
    "yaw_deg": 38.21,
@@ -1662,7 +1662,7 @@
    "asset": "Pancarte",
    "position": [
     -11.0,
-    0,
+    -0.9,
     164.0
    ],
    "yaw_deg": 340.0,
@@ -1838,7 +1838,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     -75.581,
-    0,
+    -0.9,
     90.269
    ],
    "yaw_deg": 250.31,
@@ -1854,7 +1854,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     -86.903,
-    0,
+    -0.9,
     102.516
    ],
    "yaw_deg": 276.44,
@@ -1902,7 +1902,7 @@
    "asset": "Pancarte",
    "position": [
     -123.744,
-    0,
+    -0.9,
     108.187
    ],
    "yaw_deg": 295.0,
@@ -2030,7 +2030,7 @@
    "asset": "Volcan_Touffe",
    "position": [
     -164.155,
-    0,
+    -0.9,
     -11.346
    ],
    "yaw_deg": 310.36,
@@ -2174,7 +2174,7 @@
    "asset": "Pancarte",
    "position": [
     -164.0,
-    0,
+    -0.9,
     -11.0
    ],
    "yaw_deg": 250.0,
@@ -2350,7 +2350,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     -81.593,
-    0,
+    -0.9,
     -66.527
    ],
    "yaw_deg": 280.46,
@@ -2446,7 +2446,7 @@
    "asset": "Pancarte",
    "position": [
     -108.187,
-    0,
+    -0.9,
     -123.744
    ],
    "yaw_deg": 205.0,
@@ -2494,7 +2494,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     10.322,
-    0,
+    -0.9,
     -96.099
    ],
    "yaw_deg": 257.93,
@@ -2702,7 +2702,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     -11.11,
-    0,
+    -0.9,
     -166.231
    ],
    "yaw_deg": 176.4,
@@ -2718,7 +2718,7 @@
    "asset": "Pancarte",
    "position": [
     11.0,
-    0,
+    -0.9,
     -164.0
    ],
    "yaw_deg": 160.0,
@@ -2942,7 +2942,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     99.62,
-    0,
+    -0.9,
     -113.672
    ],
    "yaw_deg": 66.83,
@@ -2974,7 +2974,7 @@
    "asset": "Pancarte",
    "position": [
     123.744,
-    0,
+    -0.9,
     -108.187
    ],
    "yaw_deg": 115.0,
@@ -8302,8 +8302,8 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     262.535,
-    28.811,
-    148.248
+    28.567,
+    151.248
    ],
    "yaw_deg": 41.61,
    "scale_xyz": [
@@ -8317,9 +8317,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    267.822,
-    28.811,
-    138.469
+    266.322,
+    28.22,
+    141.067
    ],
    "yaw_deg": 110.48,
    "scale_xyz": [
@@ -8349,9 +8349,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    280.279,
-    30.38,
-    121.547
+    281.779,
+    30.386,
+    124.145
    ],
    "yaw_deg": 212.37,
    "scale_xyz": [
@@ -8413,9 +8413,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    294.568,
-    27.242,
-    64.278
+    291.97,
+    18.412,
+    65.778
    ],
    "yaw_deg": 159.87,
    "scale_xyz": [
@@ -8477,9 +8477,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    272.71,
-    13.121,
-    77.471
+    271.21,
+    8.806,
+    80.069
    ],
    "yaw_deg": 266.27,
    "scale_xyz": [
@@ -8494,7 +8494,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     240.593,
-    0,
+    -0.9,
     53.742
    ],
    "yaw_deg": 220.47,
@@ -8637,9 +8637,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    63.802,
-    28.811,
-    294.672
+    66.4,
+    22.862,
+    293.172
    ],
    "yaw_deg": 202.24,
    "scale_xyz": [
@@ -8653,9 +8653,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    69.642,
-    28.811,
-    293.347
+    72.24,
+    28.809,
+    294.847
    ],
    "yaw_deg": 288.38,
    "scale_xyz": [
@@ -8685,9 +8685,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    112.467,
-    30.38,
-    284.045
+    110.967,
+    30.384,
+    286.643
    ],
    "yaw_deg": 189.27,
    "scale_xyz": [
@@ -8701,9 +8701,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    117.668,
-    30.38,
-    281.93
+    115.07,
+    30.342,
+    283.43
    ],
    "yaw_deg": 307.49,
    "scale_xyz": [
@@ -8733,9 +8733,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    147.399,
-    27.242,
-    263.013
+    144.801,
+    27.259,
+    264.513
    ],
    "yaw_deg": 38.52,
    "scale_xyz": [
@@ -8781,9 +8781,9 @@
   {
    "asset": "Volcan_Cristaux",
    "position": [
-    78.179,
-    14.69,
-    272.507
+    80.777,
+    12.721,
+    271.007
    ],
    "yaw_deg": 78.25,
    "scale_xyz": [
@@ -8814,7 +8814,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     130.095,
-    13.121,
+    11.989,
     251.888
    ],
    "yaw_deg": 149.89,
@@ -8973,9 +8973,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -152.807,
-    28.811,
-    259.908
+    -151.307,
+    28.827,
+    262.506
    ],
    "yaw_deg": 3.95,
    "scale_xyz": [
@@ -8989,8 +8989,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -147.832,
-    28.811,
+    -150.832,
+    29.011,
     262.77
    ],
    "yaw_deg": 282.92,
@@ -9022,7 +9022,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -109.409,
-    30.38,
+    27.144,
     285.237
    ],
    "yaw_deg": 208.03,
@@ -9086,7 +9086,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -70.738,
-    27.242,
+    24.795,
     293.084
    ],
    "yaw_deg": 254.78,
@@ -9118,7 +9118,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -135.371,
-    14.69,
+    11.405,
     249.092
    ],
    "yaw_deg": 342.96,
@@ -9150,7 +9150,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -97.052,
-    13.121,
+    10.071,
     266.37
    ],
    "yaw_deg": 250.98,
@@ -9309,9 +9309,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -287.37,
-    28.811,
-    91.219
+    -288.87,
+    28.379,
+    88.621
    ],
    "yaw_deg": 37.13,
    "scale_xyz": [
@@ -9358,8 +9358,8 @@
    "asset": "Volcan_Cristaux",
    "position": [
     -279.802,
-    30.38,
-    122.641
+    29.874,
+    125.641
    ],
    "yaw_deg": 37.76,
    "scale_xyz": [
@@ -9373,9 +9373,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -275.755,
-    30.38,
-    131.488
+    -277.255,
+    20.547,
+    128.89
    ],
    "yaw_deg": 13.25,
    "scale_xyz": [
@@ -9406,7 +9406,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -257.306,
-    27.242,
+    24.795,
     157.15
    ],
    "yaw_deg": 147.22,
@@ -9422,7 +9422,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -258.277,
-    27.242,
+    22.335,
     155.548
    ],
    "yaw_deg": 335.08,
@@ -9454,7 +9454,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -267.506,
-    14.69,
+    9.444,
     93.876
    ],
    "yaw_deg": 218.37,
@@ -9485,9 +9485,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -247.246,
-    13.121,
-    138.714
+    -250.246,
+    12.998,
+    133.518
    ],
    "yaw_deg": 158.79,
    "scale_xyz": [
@@ -9645,9 +9645,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -254.897,
-    28.811,
-    -161.027
+    -257.496,
+    24.88,
+    -159.527
    ],
    "yaw_deg": 130.73,
    "scale_xyz": [
@@ -9662,7 +9662,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -255.876,
-    28.811,
+    24.884,
     -159.468
    ],
    "yaw_deg": 327.41,
@@ -9710,8 +9710,8 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -287.282,
-    30.38,
-    -103.92
+    29.914,
+    -106.92
    ],
    "yaw_deg": 228.65,
    "scale_xyz": [
@@ -9757,9 +9757,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -294.697,
-    27.242,
-    -63.685
+    -293.197,
+    18.412,
+    -66.283
    ],
    "yaw_deg": 172.36,
    "scale_xyz": [
@@ -9789,9 +9789,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -259.292,
-    14.69,
-    -114.63
+    -257.792,
+    9.874,
+    -117.228
    ],
    "yaw_deg": 333.35,
    "scale_xyz": [
@@ -9822,8 +9822,8 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -272.183,
-    13.121,
-    -79.299
+    13.021,
+    -82.299
    ],
    "yaw_deg": 10.82,
    "scale_xyz": [
@@ -9870,7 +9870,7 @@
    "asset": "Volcan_Cheminee",
    "position": [
     -243.751,
-    0,
+    -0.9,
     -52.955
    ],
    "yaw_deg": 194.99,
@@ -9981,9 +9981,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -70.167,
-    28.811,
-    -293.221
+    -72.765,
+    28.782,
+    -294.721
    ],
    "yaw_deg": 100.17,
    "scale_xyz": [
@@ -9997,8 +9997,8 @@
   {
    "asset": "Volcan_Cristaux",
    "position": [
-    -91.819,
-    28.811,
+    -88.819,
+    19.48,
     -287.179
    ],
    "yaw_deg": 13.82,
@@ -10030,7 +10030,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -107.168,
-    30.38,
+    26.233,
     -286.086
    ],
    "yaw_deg": 293.23,
@@ -10077,8 +10077,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -142.5,
-    27.242,
+    -145.5,
+    27.268,
     -265.699
    ],
    "yaw_deg": 314.69,
@@ -10094,7 +10094,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -157.222,
-    27.242,
+    24.795,
     -257.261
    ],
    "yaw_deg": 94.25,
@@ -10126,7 +10126,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -96.448,
-    14.69,
+    13.42,
     -266.59
    ],
    "yaw_deg": 197.97,
@@ -10158,7 +10158,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -118.105,
-    13.121,
+    10.408,
     -257.728
    ],
    "yaw_deg": 259.84,
@@ -10317,9 +10317,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    162.235,
-    28.811,
-    -254.13
+    159.636,
+    22.862,
+    -255.63
    ],
    "yaw_deg": 289.43,
    "scale_xyz": [
@@ -10334,7 +10334,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     159.431,
-    28.811,
+    22.862,
     -255.899
    ],
    "yaw_deg": 145.39,
@@ -10381,9 +10381,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    130.28,
-    30.38,
-    -276.328
+    127.682,
+    26.243,
+    -277.828
    ],
    "yaw_deg": 6.71,
    "scale_xyz": [
@@ -10413,9 +10413,9 @@
   {
    "asset": "Volcan_Cristaux",
    "position": [
-    75.183,
-    27.242,
-    -291.976
+    77.781,
+    27.442,
+    -293.476
    ],
    "yaw_deg": 276.42,
    "scale_xyz": [
@@ -10461,9 +10461,9 @@
   {
    "asset": "Volcan_Cristaux",
    "position": [
-    138.752,
-    14.69,
-    -247.225
+    133.556,
+    12.715,
+    -250.225
    ],
    "yaw_deg": 189.09,
    "scale_xyz": [
@@ -10526,7 +10526,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     124.141,
-    0,
+    -0.9,
     -210.16
    ],
    "yaw_deg": 17.92,
@@ -10542,7 +10542,7 @@
    "asset": "Volcan_Cristaux",
    "position": [
     138.998,
-    0,
+    -0.9,
     -212.422
    ],
    "yaw_deg": 60.0,
@@ -10622,7 +10622,7 @@
    "asset": "Volcan_Cheminee",
    "position": [
     85.548,
-    0,
+    -0.9,
     -240.222
    ],
    "yaw_deg": 161.73,
@@ -10653,9 +10653,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    291.236,
-    28.811,
-    -78.0
+    292.736,
+    29.011,
+    -80.598
    ],
    "yaw_deg": 73.36,
    "scale_xyz": [
@@ -10670,8 +10670,8 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     294.461,
-    28.811,
-    -64.77
+    24.89,
+    -67.77
    ],
    "yaw_deg": 70.79,
    "scale_xyz": [
@@ -10718,8 +10718,8 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     286.673,
-    30.38,
-    -105.587
+    26.226,
+    -108.587
    ],
    "yaw_deg": 329.4,
    "scale_xyz": [
@@ -10750,7 +10750,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     258.46,
-    27.242,
+    24.656,
     -155.244
    ],
    "yaw_deg": 113.05,
@@ -10765,9 +10765,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    263.992,
+    266.59,
     27.242,
-    -145.638
+    -147.138
    ],
    "yaw_deg": 293.68,
    "scale_xyz": [
@@ -10829,9 +10829,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    258.896,
-    13.121,
-    -115.52
+    257.396,
+    10.408,
+    -118.119
    ],
    "yaw_deg": 321.9,
    "scale_xyz": [
@@ -10846,7 +10846,7 @@
    "asset": "Volcan_Cheminee",
    "position": [
     252.577,
-    0,
+    -0.9,
     -68.83
    ],
    "yaw_deg": 293.17,
@@ -11086,7 +11086,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     352.026,
-    70.745,
+    69.594,
     -2.999
    ],
    "yaw_deg": 33.77,
@@ -11101,9 +11101,9 @@
   {
    "asset": "Volcan_Cheminee",
    "position": [
-    349.709,
-    70.745,
-    19.569
+    351.209,
+    62.228,
+    22.167
    ],
    "yaw_deg": 59.92,
    "scale_xyz": [
@@ -11149,9 +11149,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    333.482,
-    59.4,
-    -96.047
+    334.982,
+    59.54,
+    -98.645
    ],
    "yaw_deg": 72.49,
    "scale_xyz": [
@@ -11165,9 +11165,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    336.26,
-    59.4,
-    -85.108
+    337.76,
+    52.457,
+    -82.51
    ],
    "yaw_deg": 156.91,
    "scale_xyz": [
@@ -11197,9 +11197,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    321.678,
-    72.539,
-    -149.218
+    324.276,
+    63.778,
+    -147.718
    ],
    "yaw_deg": 274.48,
    "scale_xyz": [
@@ -11214,7 +11214,7 @@
    "asset": "Volcan_Cheminee",
    "position": [
     308.331,
-    72.539,
+    66.689,
     -169.41
    ],
    "yaw_deg": 121.96,
@@ -11262,7 +11262,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     226.734,
-    61.404,
+    56.467,
     -260.981
    ],
    "yaw_deg": 63.7,
@@ -11277,9 +11277,9 @@
   {
    "asset": "Volcan_Cheminee",
    "position": [
-    229.377,
-    61.404,
-    -259.126
+    231.975,
+    57.069,
+    -260.626
    ],
    "yaw_deg": 352.01,
    "scale_xyz": [
@@ -11389,9 +11389,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    104.253,
-    74.25,
-    -336.441
+    106.851,
+    70.98,
+    -334.941
    ],
    "yaw_deg": 303.51,
    "scale_xyz": [
@@ -11422,7 +11422,7 @@
    "asset": "Volcan_Cheminee",
    "position": [
     44.899,
-    62.244,
+    57.83,
     -347.686
    ],
    "yaw_deg": 253.9,
@@ -11437,9 +11437,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    54.026,
-    62.244,
-    -348.846
+    51.428,
+    40.313,
+    -347.346
    ],
    "yaw_deg": 263.5,
    "scale_xyz": [
@@ -11485,9 +11485,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -24.399,
-    65.217,
-    -348.833
+    -21.801,
+    57.48,
+    -350.333
    ],
    "yaw_deg": 341.46,
    "scale_xyz": [
@@ -11501,8 +11501,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -37.899,
-    65.217,
+    -34.899,
+    62.519,
     -347.895
    ],
    "yaw_deg": 82.18,
@@ -11549,9 +11549,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -109.732,
-    69.837,
-    -333.551
+    -111.232,
+    66.768,
+    -336.149
    ],
    "yaw_deg": 290.4,
    "scale_xyz": [
@@ -11597,9 +11597,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -196.835,
-    74.775,
-    -293.955
+    -194.237,
+    65.728,
+    -295.455
    ],
    "yaw_deg": 127.41,
    "scale_xyz": [
@@ -11613,9 +11613,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -197.672,
-    74.775,
-    -291.033
+    -196.172,
+    65.702,
+    -293.631
    ],
    "yaw_deg": 16.01,
    "scale_xyz": [
@@ -11646,7 +11646,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -254.413,
-    74.326,
+    68.779,
     -239.781
    ],
    "yaw_deg": 89.38,
@@ -11709,9 +11709,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -324.281,
-    60.293,
-    -136.82
+    -322.781,
+    56.061,
+    -139.418
    ],
    "yaw_deg": 345.31,
    "scale_xyz": [
@@ -11726,7 +11726,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -312.36,
-    60.293,
+    57.833,
     -163.6
    ],
    "yaw_deg": 185.93,
@@ -11758,7 +11758,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -338.121,
-    59.989,
+    55.786,
     -97.271
    ],
    "yaw_deg": 153.0,
@@ -11822,8 +11822,8 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -345.897,
-    78.467,
-    14.097
+    71.584,
+    17.097
    ],
    "yaw_deg": 158.12,
    "scale_xyz": [
@@ -11837,9 +11837,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -348.951,
-    78.467,
-    -10.483
+    -350.451,
+    78.001,
+    -7.885
    ],
    "yaw_deg": 287.15,
    "scale_xyz": [
@@ -11885,9 +11885,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -345.237,
-    72.119,
-    55.788
+    -346.737,
+    66.779,
+    58.386
    ],
    "yaw_deg": 267.62,
    "scale_xyz": [
@@ -11981,8 +11981,8 @@
   {
    "asset": "Volcan_Cheminee",
    "position": [
-    -268.229,
-    76.265,
+    -271.229,
+    70.537,
     222.629
    ],
    "yaw_deg": 134.93,
@@ -11998,8 +11998,8 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -290.496,
-    76.265,
-    195.322
+    69.514,
+    198.322
    ],
    "yaw_deg": 345.21,
    "scale_xyz": [
@@ -12093,9 +12093,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -158.339,
-    66.82,
-    306.359
+    -160.937,
+    64.037,
+    307.859
    ],
    "yaw_deg": 23.21,
    "scale_xyz": [
@@ -12109,9 +12109,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -166.398,
-    66.82,
-    302.05
+    -167.898,
+    52.52,
+    299.452
    ],
    "yaw_deg": 256.39,
    "scale_xyz": [
@@ -12174,7 +12174,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -47.828,
-    72.93,
+    67.428,
     346.491
    ],
    "yaw_deg": 341.09,
@@ -12270,7 +12270,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     92.422,
-    76.41,
+    72.588,
     334.529
    ],
    "yaw_deg": 263.77,
@@ -12381,9 +12381,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    239.265,
-    62.029,
-    259.679
+    236.667,
+    54.719,
+    261.179
    ],
    "yaw_deg": 177.07,
    "scale_xyz": [
@@ -12430,7 +12430,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     285.573,
-    75.492,
+    69.836,
     204.994
    ],
    "yaw_deg": 234.45,
@@ -12445,8 +12445,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    285.693,
-    75.492,
+    288.693,
+    75.425,
     200.568
    ],
    "yaw_deg": 152.36,
@@ -12494,7 +12494,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     332.659,
-    65.478,
+    60.722,
     101.38
    ],
    "yaw_deg": 137.62,
@@ -12542,7 +12542,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     348.946,
-    76.313,
+    72.85,
     56.235
    ],
    "yaw_deg": 295.88,
@@ -12606,8 +12606,8 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     391.322,
-    105.59,
-    -16.607
+    100.19,
+    -13.607
    ],
    "yaw_deg": 154.41,
    "scale_xyz": [
@@ -12766,7 +12766,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     185.097,
-    101.099,
+    95.509,
     -340.479
    ],
    "yaw_deg": 331.03,
@@ -12877,9 +12877,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -4.442,
-    118.993,
-    -386.385
+    -7.04,
+    109.26,
+    -387.885
    ],
    "yaw_deg": 62.5,
    "scale_xyz": [
@@ -12893,9 +12893,9 @@
   {
    "asset": "Volcan_Cheminee",
    "position": [
-    -2.277,
-    118.993,
-    -384.492
+    -3.777,
+    109.26,
+    -387.09
    ],
    "yaw_deg": 80.21,
    "scale_xyz": [
@@ -12925,8 +12925,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -85.761,
-    105.824,
+    -88.761,
+    97.325,
     -380.443
    ],
    "yaw_deg": 298.67,
@@ -12941,9 +12941,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -87.741,
-    105.824,
-    -377.661
+    -89.241,
+    97.325,
+    -380.259
    ],
    "yaw_deg": 330.84,
    "scale_xyz": [
@@ -13101,8 +13101,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -347.507,
-    103.27,
+    -350.507,
+    95.011,
     -170.409
    ],
    "yaw_deg": 6.35,
@@ -13165,9 +13165,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -371.32,
-    95.928,
-    -101.212
+    -372.82,
+    88.357,
+    -98.614
    ],
    "yaw_deg": 79.16,
    "scale_xyz": [
@@ -13230,7 +13230,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     -391.26,
-    110.729,
+    105.006,
     17.339
    ],
    "yaw_deg": 96.78,
@@ -13261,8 +13261,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -380.241,
-    107.086,
+    -377.241,
+    98.469,
     105.595
    ],
    "yaw_deg": 264.89,
@@ -13277,8 +13277,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -378.006,
-    107.086,
+    -375.006,
+    98.469,
     108.604
    ],
    "yaw_deg": 16.34,
@@ -13325,9 +13325,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -323.059,
-    103.783,
-    223.571
+    -317.863,
+    103.683,
+    220.571
    ],
    "yaw_deg": 18.85,
    "scale_xyz": [
@@ -13341,9 +13341,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -314.151,
-    103.783,
-    227.31
+    -315.651,
+    103.707,
+    224.712
    ],
    "yaw_deg": 278.97,
    "scale_xyz": [
@@ -13373,8 +13373,8 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -251.835,
-    100.787,
+    -248.835,
+    92.761,
     292.902
    ],
    "yaw_deg": 170.32,
@@ -13389,9 +13389,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -258.84,
-    100.787,
-    285.839
+    -256.242,
+    92.674,
+    287.339
    ],
    "yaw_deg": 180.26,
    "scale_xyz": [
@@ -13453,9 +13453,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -142.647,
-    100.38,
-    363.211
+    -140.048,
+    92.39,
+    364.711
    ],
    "yaw_deg": 32.08,
    "scale_xyz": [
@@ -13485,9 +13485,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -108.227,
-    118.931,
-    369.94
+    -109.727,
+    92.69,
+    367.342
    ],
    "yaw_deg": 174.32,
    "scale_xyz": [
@@ -13501,9 +13501,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    -82.394,
-    118.931,
-    380.75
+    -79.796,
+    64.381,
+    379.25
    ],
    "yaw_deg": 7.58,
    "scale_xyz": [
@@ -13566,7 +13566,7 @@
    "asset": "Volcan_Cheminee",
    "position": [
     51.066,
-    96.629,
+    91.786,
     386.913
    ],
    "yaw_deg": 123.35,
@@ -13597,9 +13597,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    165.718,
-    94.508,
-    353.648
+    167.218,
+    93.731,
+    351.05
    ],
    "yaw_deg": 333.74,
    "scale_xyz": [
@@ -13614,7 +13614,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     133.671,
-    94.508,
+    89.73,
     367.353
    ],
    "yaw_deg": 167.84,
@@ -13661,9 +13661,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    231.961,
-    111.077,
-    312.037
+    229.363,
+    96.95,
+    313.537
    ],
    "yaw_deg": 337.46,
    "scale_xyz": [
@@ -13678,7 +13678,7 @@
    "asset": "Volcan_ArbreCalcine",
    "position": [
     240.978,
-    111.077,
+    105.368,
     305.473
    ],
    "yaw_deg": 177.31,
@@ -13709,9 +13709,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    310.111,
-    99.137,
-    227.811
+    312.709,
+    98.223,
+    226.311
    ],
    "yaw_deg": 4.96,
    "scale_xyz": [
@@ -13837,9 +13837,9 @@
   {
    "asset": "Volcan_ArbreCalcine",
    "position": [
-    390.432,
-    93.517,
-    20.89
+    388.932,
+    86.095,
+    18.292
    ],
    "yaw_deg": 40.09,
    "scale_xyz": [
