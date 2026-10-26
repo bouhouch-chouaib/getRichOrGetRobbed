@@ -56,18 +56,25 @@ local function attachHead(king: Player)
 	if not head or not head:IsA("BasePart") then
 		return
 	end
+	-- Taille en pixels (pas en studs) : la même à l'écran de près comme de loin (26 oct. : en studs, la couronne du
+	-- joueur lui-même cachait le jeu, caméra derrière lui). Sur sa propre tête : la couronne seule, sans texte.
+	local mine = king == Players.LocalPlayer
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "CrownTag"
 	tag.Adornee = head
-	tag.Size = UDim2.fromScale(5, 2.6)
+	tag.Size = if mine then UDim2.fromOffset(44, 44) else UDim2.fromOffset(190, 62)
 	tag.StudsOffsetWorldSpace = Vector3.new(0, 3.4, 0)
 	tag.LightInfluence = 0
 	tag.MaxDistance = 220
-	Icons.image(tag, "Crown", UDim2.fromScale(0.36, 0.62), UDim2.fromScale(0.32, 0))
-	local title = label(tag, defensesText(king), 0.62, 0.38, GOLD)
-	king:GetAttributeChangedSignal("CrownDefenses"):Connect(function()
-		title.Text = defensesText(king)
-	end)
+	if mine then
+		Icons.image(tag, "Crown", UDim2.fromScale(1, 1))
+	else
+		Icons.image(tag, "Crown", UDim2.fromScale(0.2, 0.6), UDim2.fromScale(0.4, 0))
+		local title = label(tag, defensesText(king), 0.6, 0.4, GOLD)
+		king:GetAttributeChangedSignal("CrownDefenses"):Connect(function()
+			title.Text = defensesText(king)
+		end)
+	end
 	tag.Parent = head
 	headTag = tag
 end

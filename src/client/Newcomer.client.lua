@@ -9,13 +9,25 @@ local Toast = require(script.Parent.Toast)
 local UiStyle = require(script.Parent.UiStyle)
 local player = Players.LocalPlayer
 
--- La pile du HUD réserve la place : aucun chevauchement avec le chrono ou ses consignes.
+-- La pile du HUD réserve la place : aucun chevauchement avec le chrono ou ses consignes. Une courte pastille, montrée
+-- seulement si la ligne sous l'horloge est libre (attribut "Wanted", client/HUD) ; l'explication passe une fois en Toast.
 local hud = player:WaitForChild("PlayerGui"):WaitForChild("HUD")
-local stack = hud:WaitForChild("Root"):WaitForChild("TopStack")
+-- Cherchée partout : dans l'aperçu téléphone de Studio, la pile est sous HUD.PhonePreview.Root.
+local function findStack(): Instance
+	while true do
+		local found = hud:FindFirstChild("TopStack", true)
+		if found then
+			return found
+		end
+		hud.DescendantAdded:Wait()
+	end
+end
+local stack = findStack()
 local shield = UiStyle.text(stack, "", 18, UiStyle.Colors.Cyan)
 shield.Name = "TheftProtection"
 shield.LayoutOrder = 4
-shield.Size = UDim2.fromOffset(460, 34)
+shield.Size = UDim2.fromOffset(0, 34)
+shield.AutomaticSize = Enum.AutomaticSize.X
 shield.BackgroundColor3 = UiStyle.Colors.Panel
 shield.BackgroundTransparency = 0.25
 shield.Visible = false
@@ -60,12 +72,14 @@ task.spawn(function()
 				.. math.ceil(shieldSeconds / 60) .. " MIN !", UiStyle.Colors.Cyan)
 		end
 		wasShielded = shielded
-		shield.Visible = protected or shielded
+		if protected and not wasProtected then
+			Toast.show("PERSONNE NE PEUT TE VOLER AU DÉBUT  •  SI TU VOLES, ÇA S’ARRÊTE", UiStyle.Colors.Cyan)
+		end
+		shield:SetAttribute("Wanted", protected or shielded)
 		if shielded then
-			shield.Text = string.format("BOUCLIER %d:%02d • PERSONNE NE PEUT TE VOLER", shieldSeconds // 60, shieldSeconds % 60)
+			shield.Text = string.format("BOUCLIER  %d:%02d", shieldSeconds // 60, shieldSeconds % 60)
 		elseif protected then
-			shield.Text =
-				string.format("PROTÉGÉ %d:%02d • SI TU VOLES, ÇA S’ARRÊTE", seconds // 60, seconds % 60)
+			shield.Text = string.format("PROTÉGÉ  %d:%02d", seconds // 60, seconds % 60)
 		elseif wasProtected then
 			Toast.show(
 				"PROTECTION FINIE ! FERME TA BASE AVEC SON BOUTON POUR TE PROTÉGER",

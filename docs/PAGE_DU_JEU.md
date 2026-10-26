@@ -161,3 +161,22 @@ mémoire Claude « Filmer le jeu dans Studio ».
 4. Questionnaire de maturité.
 5. Avant de passer le jeu en **public** : une partie test dans le jeu publié avec 2 comptes et un téléphone (vol, batte,
    grappin, échange : jamais testés à 2 vrais joueurs). On peut filmer la vidéo pendant ce test.
+6. Remise à zéro des testeurs (fait dans le code le 26 oct. : sauvegardes v4) : **Studio → Fichier → Publier sur Roblox**,
+   sinon le jeu en ligne garde l'ancienne version et les anciennes sauvegardes.
+7. Passer le jeu en public, puis seulement après, les publicités (section 7).
+
+## 7. Publicités (Ads Manager, après le passage en public)
+
+Règles relues le 26 oct. (https://create.roblox.com/docs/production/promotion/ads-manager) :
+- il faut avoir 13 ans ou plus et un e-mail vérifié sur le compte ; paiement par carte (18 ans et plus) ou en
+  **crédits pub achetés en Robux** (à partir de 1 crédit ; les Robux convertis ne reviennent jamais en Robux) ;
+- les publicités envoient des joueurs dans le jeu : il doit être **public**, avec sa miniature, son icône et ses
+  vignettes en place (une campagne accepte jusqu'à 10 vignettes 16:9) ; modération de la campagne en 24 h environ ;
+- un jeu qui ressemble trop à un autre (nom, page, place) est moins montré : ne jamais copier un autre jeu ;
+- un jeu interdit aux moins de 17 ans ne touche pas les 13-17 ans (pas notre cas : Mild).
+
+Première campagne conseillée pour un jeu neuf : objectif **Plays** (parties), public **New Players** (les publics
+« Recent » et « Lapsed » demandent 10 000 et 20 000 joueurs), petit budget par jour sur 3 à 5 jours, puis regarder dans
+le Creator Hub combien de joueurs reviennent le lendemain et à quel moment ils partent (tutoriel, premier œuf) avant
+de mettre plus. Les publicités ne changent pas la place du jeu dans « Recommandé pour toi » : c'est la rétention qui
+compte.

@@ -56,18 +56,14 @@ local PHASES = {
 		Clock = "Moon",
 		Next = "Sieste",
 		-- Consignes courtes, en mots simples (UI_UX_GUIDELINES.md §7 : beaucoup de joueurs lisent à peine).
-		Hint = if ScreenScale.isTouch()
-			then "RAMASSE  •  MAINTIENS LANCER, PUIS LÂCHE  •  VOLE LES FAMILIERS !"
-			else "[E] RAMASSER  •  CLIC : LANCER  •  [E] SUR UN FAMILIER : LE VOLER",
+		Hint = if ScreenScale.isTouch() then "RAMASSE  •  MAINTIENS LANCER, PUIS LÂCHE" else "[E] RAMASSER  •  CLIC : LANCER",
 		Color = Color3.fromRGB(200, 120, 255),
 	},
 	Digesting = {
 		Title = "LE TROU NOIR FAIT LA SIESTE",
 		Clock = "Sun",
 		Next = "Repas",
-		Hint = if ScreenScale.isTouch()
-			then "VOLE LES FAMILIERS DES AUTRES  •  FERME TA BASE !"
-			else "[E] SUR UN FAMILIER : LE VOLER  •  FRAPPE LES VOLEURS !",
+		Hint = if ScreenScale.isTouch() then "VOLE LES FAMILIERS DES AUTRES !" else "[E] SUR UN FAMILIER : LE VOLER",
 		Color = Color3.fromRGB(255, 90, 70),
 	},
 }
@@ -88,7 +84,7 @@ local isTouch = ScreenScale.isTouch()
 --   - tactile : argent et stats en haut à gauche, menus en tuiles juste dessous (le joystick de Roblox occupe le
 --     bas gauche, le bouton de saut le bas droit) ;
 --   - le bas du centre (ScreenScale.BOTTOM_RESERVED) reste libre pour la barre d'objets de Roblox.
-local HINT_TIME = 8 -- secondes d'affichage de la consigne après chaque changement de phase
+local HINT_TIME = 6 -- secondes d'affichage de la consigne après chaque changement de phase
 
 ----------------------------------------------------------------------
 -- Haut : bandeau de phase (seulement au changement de phase)
@@ -190,6 +186,9 @@ end
 local shownPulls = 0
 
 -- Pile sous la pastille : chaque élément n'apparaît que lorsqu'il sert (pas de blocs vides empilés).
+-- 26 oct. (retour des testeurs : « on ne voit plus rien ») : UNE seule ligne d'information sous l'horloge à la fois.
+-- Ordre : consigne du familier porté, carte des tirages, consigne de phase, protection (client/Newcomer), objectif
+-- (client/NextGoals). Ces deux derniers demandent leur place par l'attribut "Wanted" ; le HUD décide de Visible.
 local topStack = Instance.new("Frame")
 topStack.Name = "TopStack"
 topStack.BackgroundTransparency = 1
@@ -497,6 +496,15 @@ local function updatePhase()
 		hintLabel.TextColor3 = WHITE
 		-- La consigne ne reste que quelques secondes (et laisse la place à la carte des tirages).
 		hintLabel.Visible = os.clock() - phaseChangedAt < HINT_TIME and not rewardCard.Visible
+	end
+	-- Une seule ligne sous l'horloge : la protection puis l'objectif, seulement si la place est libre.
+	local taken = hintLabel.Visible or rewardCard.Visible
+	for _, name in ipairs({ "TheftProtection", "NextGoals" }) do
+		local line = topStack:FindFirstChild(name)
+		if line and line:IsA("GuiObject") then
+			line.Visible = line:GetAttribute("Wanted") == true and not taken
+			taken = taken or line.Visible
+		end
 	end
 	-- Les tirages de la manche ne comptent que pendant le Feeding : la pastille rétrécit pendant la digestion.
 	local feeding = stateName == "Feeding"

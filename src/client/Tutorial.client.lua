@@ -1,6 +1,7 @@
 --!strict
 -- Tutoriel : 4 étapes guidées pour un nouveau joueur (affiché une seule fois : attribut "TutorialDone",
--- enregistré dans la sauvegarde via Remotes.TutorialDone).
+-- enregistré dans la sauvegarde via Remotes.TutorialDone). Avant la 1re étape, un écran « DEVIENS LE PLUS RICHE ! »
+-- montre le but du jeu en 4 images (bouton JOUER).
 --   1. Ramasser un objet       -> flèche sur l'objet le plus proche
 --   2. Le lancer dans le trou  -> flèche sur le trou noir (ou sur un objet si on n'en tient plus)
 --   3. Recevoir un œuf         -> retour vers la base
@@ -10,10 +11,12 @@
 -- Bouton PASSER pour ceux qui connaissent déjà le jeu.
 
 local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local BaseLayout = require(ReplicatedStorage.Shared.BaseLayout)
@@ -477,6 +480,194 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+----------------------------------------------------------------------
+-- But du jeu : un écran avant la 1re étape (26 oct., retour des testeurs : « on ne comprend pas le but »).
+-- 4 grosses images dans l'ordre de la boucle, une phrase courte sous chacune, un seul bouton JOUER.
+----------------------------------------------------------------------
+
+type GoalStep = { icon: string, text: string }
+local GOAL_STEPS: { GoalStep } = {
+	{ icon = "Vortex", text = "JETTE DES OBJETS DANS LE TROU NOIR" },
+	{ icon = "Egg", text = "TU GAGNES DES ŒUFS" },
+	{ icon = "Money", text = "TES FAMILIERS RAPPORTENT DE L'ARGENT" },
+	{ icon = "Glove", text = "VOLE CEUX DES AUTRES\u{00A0}!" }, -- espace insécable : le « ! » ne part pas seul à la ligne
+}
+
+local function outlined(parent: Instance, value: string, size: number, minSize: number): TextLabel
+	local item = Instance.new("TextLabel")
+	item.BackgroundTransparency = 1
+	item.FontFace = Typography.Face
+	item.TextSize = size
+	Typography.Fit(item, size, minSize)
+	item.TextColor3 = Color3.new(1, 1, 1)
+	item.TextWrapped = true
+	item.Text = value
+	local outline = Instance.new("UIStroke")
+	outline.Thickness = math.max(1.5, size / 12)
+	outline.Parent = item
+	item.Parent = parent
+	return item
+end
+
+local goalGui = Instance.new("ScreenGui")
+goalGui.Name = "GameGoal"
+goalGui.ResetOnSpawn = false
+goalGui.DisplayOrder = 6
+goalGui.Enabled = false
+goalGui.Parent = player:WaitForChild("PlayerGui")
+local goalRoot = ScreenScale.attach(goalGui)
+
+local dim = Instance.new("Frame")
+dim.Name = "Dim"
+-- Déborde vers le haut : couvre aussi la bande de la barre Roblox (les ScreenGui commencent en dessous).
+dim.Position = UDim2.fromOffset(0, -200)
+dim.Size = UDim2.new(1, 0, 1, 200)
+dim.BackgroundColor3 = Color3.new(0, 0, 0)
+dim.BackgroundTransparency = 0.4
+dim.BorderSizePixel = 0
+dim.Parent = goalRoot
+
+local goalCard = Instance.new("Frame")
+goalCard.Name = "Card"
+goalCard.AnchorPoint = Vector2.new(0.5, 0.5)
+goalCard.Position = UDim2.fromScale(0.5, 0.5)
+goalCard.Size = UDim2.fromOffset(920, 440)
+goalCard.BackgroundColor3 = Color3.new(1, 1, 1)
+goalCard.Parent = goalRoot
+do
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0, 20)
+	round.Parent = goalCard
+	local border = Instance.new("UIStroke")
+	border.Thickness = 5
+	border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	border.Parent = goalCard
+	local shade = Instance.new("UIGradient")
+	shade.Color = ColorSequence.new(Color3.fromRGB(255, 190, 60), Color3.fromRGB(240, 110, 20))
+	shade.Rotation = 90
+	shade.Parent = goalCard
+end
+local goalScale = Instance.new("UIScale")
+goalScale.Parent = goalCard
+
+local goalTitle = outlined(goalCard, "DEVIENS LE PLUS RICHE\u{00A0}!", 48, 28)
+goalTitle.AnchorPoint = Vector2.new(0.5, 0)
+goalTitle.Position = UDim2.new(0.5, 0, 0, 16)
+goalTitle.Size = UDim2.new(1, -40, 0, 60)
+
+local goalRow = Instance.new("Frame")
+goalRow.Name = "Steps"
+goalRow.BackgroundTransparency = 1
+goalRow.AnchorPoint = Vector2.new(0.5, 0)
+goalRow.Position = UDim2.new(0.5, 0, 0, 88)
+goalRow.Size = UDim2.new(1, -36, 0, 236)
+goalRow.Parent = goalCard
+do
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 4)
+	layout.Parent = goalRow
+end
+
+local goalScales: { UIScale } = {}
+for index, info in ipairs(GOAL_STEPS) do
+	if index > 1 then
+		local arrowLabel = outlined(goalRow, ">", 44, 30)
+		arrowLabel.LayoutOrder = index * 2 - 1
+		arrowLabel.Size = UDim2.fromOffset(30, 60)
+	end
+	local cell = Instance.new("Frame")
+	cell.Name = "Step" .. index
+	cell.LayoutOrder = index * 2
+	cell.Size = UDim2.fromOffset(196, 232)
+	cell.BackgroundColor3 = Color3.fromRGB(45, 35, 70)
+	cell.BackgroundTransparency = 0.15
+	cell.Parent = goalRow
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0, 14)
+	round.Parent = cell
+	local border = Instance.new("UIStroke")
+	border.Thickness = 3
+	border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	border.Parent = cell
+	local cellScale = Instance.new("UIScale")
+	cellScale.Parent = cell
+	table.insert(goalScales, cellScale)
+	local image = Icons.image(cell, info.icon, UDim2.fromOffset(112, 112))
+	image.AnchorPoint = Vector2.new(0.5, 0)
+	image.Position = UDim2.new(0.5, 0, 0, 14)
+	local number = outlined(cell, tostring(index), 26, 20)
+	number.Position = UDim2.fromOffset(8, 4)
+	number.Size = UDim2.fromOffset(30, 32)
+	number.TextColor3 = GOLD
+	local caption = outlined(cell, info.text, 21, 14)
+	caption.AnchorPoint = Vector2.new(0.5, 0)
+	caption.Position = UDim2.new(0.5, 0, 0, 132)
+	caption.Size = UDim2.new(1, -16, 0, 90)
+	caption.TextYAlignment = Enum.TextYAlignment.Top
+end
+
+local playButton = Instance.new("TextButton")
+playButton.Name = "Play"
+playButton.AnchorPoint = Vector2.new(0.5, 1)
+playButton.Position = UDim2.new(0.5, 0, 1, -18)
+playButton.Size = UDim2.fromOffset(260, 70)
+playButton.BackgroundColor3 = Color3.fromRGB(80, 210, 70)
+playButton.AutoButtonColor = true
+playButton.FontFace = Typography.Face
+playButton.TextSize = 38
+Typography.Fit(playButton, 38, 24)
+playButton.TextColor3 = Color3.new(1, 1, 1)
+playButton.Text = "JOUER !"
+playButton.Parent = goalCard
+do
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0, 16)
+	round.Parent = playButton
+	local border = Instance.new("UIStroke")
+	border.Thickness = 4
+	border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	border.Parent = playButton
+	local textOutline = Instance.new("UIStroke")
+	textOutline.Thickness = 3
+	textOutline.Parent = playButton
+end
+
+-- Montre le but du jeu, puis appelle onPlay quand le joueur appuie sur JOUER.
+local goalOpen = false
+local function showGoal(onPlay: () -> ())
+	goalOpen = true
+	goalGui.Enabled = true
+	goalScale.Scale = 0.7
+	TweenService:Create(goalScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	for index, cellScale in ipairs(goalScales) do
+		cellScale.Scale = 0
+		task.delay(0.25 + index * 0.18, function()
+			if goalOpen then -- les images apparaissent l'une après l'autre (sauf si JOUER a déjà été pressé)
+				TweenService:Create(cellScale, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+			end
+		end)
+	end
+	if UserInputService.GamepadEnabled then
+		GuiService.SelectedObject = playButton
+	end
+	local connection: RBXScriptConnection? = nil
+	connection = playButton.Activated:Connect(function()
+		if connection then
+			connection:Disconnect()
+		end
+		goalOpen = false
+		goalGui.Enabled = false
+		if GuiService.SelectedObject == playButton then
+			GuiService.SelectedObject = nil
+		end
+		onPlay()
+	end)
+end
+
 -- Démarrage : seulement quand la sauvegarde est connue (sinon un ancien joueur le verrait une seconde).
 task.spawn(function()
 	while player.Parent and player:GetAttribute("DataLoaded") ~= true do
@@ -487,7 +678,11 @@ task.spawn(function()
 	end
 	task.wait(1.5) -- laisse le joueur apparaître et le HUD se mettre en place
 	if player:GetAttribute("TutorialDone") ~= true then
-		showStep(1)
-		updateProgress()
+		showGoal(function()
+			if player:GetAttribute("TutorialDone") ~= true then
+				showStep(1)
+				updateProgress()
+			end
+		end)
 	end
 end)

@@ -242,6 +242,8 @@ services.ReplicatedStorage = {
 	end,
 }
 services.RunService.RenderStepped = render
+services.GuiService = { SelectedObject = nil }
+services.UserInputService = { GamepadEnabled = false }
 services.Workspace = {
 	Terrain = terrain,
 	FindFirstChild = function()
@@ -287,12 +289,22 @@ r.implementProperty("GuiButton", "Activated", function(instance)
 	activated[instance] = activated[instance] or signal()
 	return activated[instance]
 end)
+-- Écran « but du jeu » (26 oct.) : il passe avant la 1re étape, et le tutoriel ne démarre qu'après JOUER.
+local function pressPlay()
+	local goal = assert(playerGui:FindFirstChild("GameGoal"), "goal screen missing")
+	assert(goal.Enabled, "goal screen not shown before the tutorial")
+	assert(goal:FindFirstChild("Play", true)).Activated:Fire()
+	assert(not goal.Enabled, "goal screen stayed open after JOUER")
+end
 luau.load(fs.readFile(project .. "/src/client/Tutorial.client.lua"), { environment = env })()
 advance(10)
 local gui = assert(playerGui:FindFirstChild("Tutorial"))
 assert(not gui.Enabled, "tutorial appeared before profile loaded")
+assert(not playerGui:FindFirstChild("GameGoal").Enabled, "goal screen appeared before profile loaded")
 localPlayer:SetAttribute("DataLoaded", true)
 advance(2)
+assert(not gui.Enabled, "tutorial panel shown over the goal screen")
+pressPlay()
 assert(gui.Enabled)
 localPlayer:SetAttribute("Onboarding_Pickup", true)
 localPlayer:SetAttribute("Onboarding_Scored", true)
@@ -319,6 +331,7 @@ localPlayer:SetAttribute("Onboarding_Scored", true)
 localPlayer:SetAttribute("Onboarding_EggReceived", true)
 luau.load(fs.readFile(project .. "/src/client/Tutorial.client.lua"), { environment = env })()
 advance(2)
+pressPlay()
 gui = assert(playerGui:FindFirstChild("Tutorial"))
 local found = false
 for _, child in gui:GetDescendants() do
@@ -367,6 +380,7 @@ services.Workspace.FindFirstChild = function(_, name)
 end
 luau.load(fs.readFile(project .. "/src/client/Tutorial.client.lua"), { environment = env })()
 advance(2)
+pressPlay()
 render:Fire()
 local newestTarget = nil
 for _, item in terrain:GetChildren() do

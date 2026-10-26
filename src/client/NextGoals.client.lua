@@ -18,13 +18,26 @@ local UiStyle = require(script.Parent.UiStyle)
 
 local player = Players.LocalPlayer
 local hud = player:WaitForChild("PlayerGui"):WaitForChild("HUD")
-local stack = hud:WaitForChild("Root"):WaitForChild("TopStack")
+-- Pile du haut du HUD, cherchée partout : dans l'aperçu téléphone de Studio elle est sous HUD.PhonePreview.Root.
+local function findStack(): Instance
+	while true do
+		local found = hud:FindFirstChild("TopStack", true)
+		if found then
+			return found
+		end
+		hud.DescendantAdded:Wait()
+	end
+end
+local stack = findStack()
 
+-- 26 oct. : un seul objectif (le plus utile), montré seulement si la ligne sous l'horloge est libre (attribut
+-- "Wanted", client/HUD) : avec la protection et les consignes, les deux barres cachaient le jeu.
 local ROW_HEIGHT = 30
+local ROW_COUNT = 1
 local frame = Instance.new("Frame")
 frame.Name = "NextGoals"
 frame.LayoutOrder = 5
-frame.Size = UDim2.fromOffset(420, ROW_HEIGHT * 2 + 4)
+frame.Size = UDim2.fromOffset(420, ROW_HEIGHT * ROW_COUNT)
 frame.BackgroundTransparency = 1
 frame.Visible = false
 frame.Parent = stack
@@ -35,7 +48,7 @@ list.Parent = frame
 
 type Row = { panel: Frame, fill: Frame, text: TextLabel }
 local rows: { Row } = {}
-for index = 1, 2 do
+for index = 1, ROW_COUNT do
 	local panel = Instance.new("Frame")
 	panel.LayoutOrder = index
 	panel.Size = UDim2.new(1, 0, 0, ROW_HEIGHT)
@@ -112,7 +125,7 @@ end
 
 local function update()
 	if player:GetAttribute("DataLoaded") ~= true then
-		frame.Visible = false
+		frame:SetAttribute("Wanted", false)
 		return
 	end
 	local now = Workspace:GetServerTimeNow()
@@ -138,7 +151,7 @@ local function update()
 		cappedUnlock = capped.unlock,
 	}
 	local picked = NextGoals.Pick(NextGoals.List(state))
-	frame.Visible = #picked > 0
+	frame:SetAttribute("Wanted", #picked > 0)
 	for index, row in ipairs(rows) do
 		local goal = picked[index]
 		row.panel.Visible = goal ~= nil

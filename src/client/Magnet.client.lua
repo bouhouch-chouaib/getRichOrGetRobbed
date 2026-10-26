@@ -12,7 +12,17 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local UiStyle = require(script.Parent.UiStyle)
 local player = Players.LocalPlayer
 local hud = player:WaitForChild("PlayerGui"):WaitForChild("HUD")
-local stack = hud:WaitForChild("Root"):WaitForChild("TopStack")
+-- Pile du haut du HUD, cherchée partout : dans l'aperçu téléphone de Studio elle est sous HUD.PhonePreview.Root.
+local function findStack(): Instance
+	while true do
+		local found = hud:FindFirstChild("TopStack", true)
+		if found then
+			return found
+		end
+		hud.DescendantAdded:Wait()
+	end
+end
+local stack = findStack()
 local button = UiStyle.button(stack, "", UDim2.fromOffset(250, 34), UiStyle.Colors.Cyan, 15)
 button.Name, button.LayoutOrder = "MagnetToggle", 5
 button.Visible = false

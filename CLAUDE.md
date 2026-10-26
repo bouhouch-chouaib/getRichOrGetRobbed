@@ -228,6 +228,12 @@ moderne : `bash tools/video/edit.sh B`).
 Filmée dans Studio par Claude (`tools/video/rec.sh`), montée par `tools/video/edit.sh` ; détails et envoi :
 `docs/PAGE_DU_JEU.md` « Vidéo de jeu ». Pas encore envoyée sur Roblox (3 envois par mois : c'est Chouaib qui envoie).
 
+**26 oct. : retours des testeurs avant l'ouverture** (« on ne voit plus rien », « on ne comprend pas le but ») :
+sous l'horloge, **une seule ligne à la fois** (`client/HUD` décide ; `Newcomer` et `NextGoals` demandent leur place par
+l'attribut `Wanted`), protection en courte pastille, un seul objectif ; couronne du roi en pixels (sur sa propre tête :
+la couronne seule) ; écran « DEVIENS LE PLUS RICHE ! » (4 images + JOUER) avant la 1re étape du tutoriel. Vérifié dans
+Studio (PC et aperçu téléphone) ; testeurs remis à zéro (sauvegardes v4). Reste : Publier, puis passer en public.
+
 **15 oct. : œufs (Codex) puis corrections Claude** (`server/EggController`, `client/Eggs`, `shared/EggIncubation`,
 `docs/INCUBATION.md`) : toutes les récompenses arrivent en œufs qui incubent (15 s à 30 min). Claude : un nid par œuf
 (12 nids dans la couveuse, file d'attente au-delà), montée en tension puis éclosion de plus en plus spectaculaire selon la
