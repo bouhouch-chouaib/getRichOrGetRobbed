@@ -1,0 +1,85 @@
+{
+  "asset": "Objets_Glace_Corps",
+  "triangles": 8590,
+  "vertices": 4609,
+  "size_studs": [
+    21.591,
+    1.98,
+    2.81
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 21.3,
+  "source_materials": [
+    "M_Objets_Glace_high_botte",
+    "M_Objets_Glace_high_boutons_glace",
+    "M_Objets_Glace_high_bras",
+    "M_Objets_Glace_high_cerise",
+    "M_Objets_Glace_high_charbon_bonhomme",
+    "M_Objets_Glace_high_cristal_glace",
+    "M_Objets_Glace_high_cristaux_couronne",
+    "M_Objets_Glace_high_echarpe",
+    "M_Objets_Glace_high_echarpe_rayure",
+    "M_Objets_Glace_high_fourrure",
+    "M_Objets_Glace_high_fraise",
+    "M_Objets_Glace_high_gaufre",
+    "M_Objets_Glace_high_gaufre_fonce",
+    "M_Objets_Glace_high_lacets",
+    "M_Objets_Glace_high_neige",
+    "M_Objets_Glace_high_neige_bonhomme",
+    "M_Objets_Glace_high_neige_bonhomme_ombre",
+    "M_Objets_Glace_high_neige_ombre",
+    "M_Objets_Glace_high_nez",
+    "M_Objets_Glace_high_or_couronne",
+    "M_Objets_Glace_high_or_couronne_fonce",
+    "M_Objets_Glace_high_or_flocon",
+    "M_Objets_Glace_high_or_patin",
+    "M_Objets_Glace_high_or_patin_fonce",
+    "M_Objets_Glace_high_queue_cerise",
+    "M_Objets_Glace_high_saphir_couronne",
+    "M_Objets_Glace_high_socle_flocon",
+    "M_Objets_Glace_high_vanille",
+    "M_Objets_Glace_high_velours",
+    "M_Objets_Glace_high_vermicelle_#2E9BFF",
+    "M_Objets_Glace_high_vermicelle_#3CD03C",
+    "M_Objets_Glace_high_vermicelle_#FFD21E",
+    "M_Objets_Glace_high_vermicelle_#FFFFFF"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 64,
+    "cage": 0.3239,
+    "max_ray": 0.8097,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "Objets_Glace_Corps_Color.png",
+    "Roughness": "Objets_Glace_Corps_Roughness.png",
+    "Metalness": "Objets_Glace_Corps_Metalness.png",
+    "Normal": "Objets_Glace_Corps_Normal.png",
+    "AO": "Objets_Glace_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "Objets_Glace_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Objets_Glace_Corps_Color.png",
+      "NormalMap": "Objets_Glace_Corps_Normal.png",
+      "RoughnessMap": "Objets_Glace_Corps_Roughness.png",
+      "MetalnessMap": "Objets_Glace_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": false,
+  "seconds": 11.1
+}

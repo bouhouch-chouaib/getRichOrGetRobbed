@@ -13,7 +13,7 @@
 --   │                         │
 --   │   PRAIRIE DES FAMILIERS │   z -22 .. 16 (ils s'y promènent)
 --   │          (spawn)        │
---   │ [palette]  ◉   [palette]│   z -32 : 2 palettes à objets, bouton de verrouillage
+--  [bac]       ◉           [bac]   z -34 : bouton de verrouillage ; dehors, un bac à objets contre chaque côté
 --   └──────────┐ entrée ┌─────┘
 --            AVANT (-Z, trou noir)
 
@@ -26,9 +26,16 @@ local BaseLayout = {}
 local HALF = Config.Arena.BaseSize.X / 2
 BaseLayout.HALF = HALF
 
--- Avant : bouton de verrouillage au milieu, une palette à objets de chaque côté.
+-- Avant : bouton de verrouillage au milieu.
 BaseLayout.Lock = Vector2.new(0, -HALF + 11)
-BaseLayout.Pallets = { Vector2.new(-HALF + 10, -HALF + 10), Vector2.new(HALF - 10, -HALF + 10) }
+
+-- Bacs à objets (26 oct., avant : 2 palettes dans la base) : DEHORS, au sol de l'arène, contre les côtés gauche et droit
+-- près de l'entrée (le tapis et le banc sont plus loin vers le fond, à z = -4). Les objets à jeter y tombent et le
+-- joueur les prend en revenant du trou noir, sans entrer chez lui. Taille du bac (X, hauteur du rebord, Z) et hauteur
+-- de son fond intérieur, en studs : le modèle ArtModels.BacObjets (Blender, props/BacObjets.py) a les mêmes mesures.
+BaseLayout.Bins = { Vector2.new(-HALF - 9, -HALF + 8), Vector2.new(HALF + 9, -HALF + 8) }
+BaseLayout.BIN_SIZE = Vector3.new(7, 2.7, 10)
+BaseLayout.BIN_FLOOR = 0.86
 
 -- Point d'apparition du propriétaire (et zone sûre), au milieu de la prairie.
 BaseLayout.Spawn = Vector2.new(0, 6)

@@ -137,8 +137,11 @@ end
 
 -- Un objet lancé par `owner` vient d'être avalé (lancer valable). Remplit la jauge et renvoie le bonus de points.
 function BlackholeTiers.OnScored(owner: Player, item: BasePart, value: number): number
-	-- En « objets ordinaires » (Config.MeanGaugePerItem) : le tour des paliers ne s'accélère pas avec la Chance.
-	addGauge(owner, math.max(1, value) / Config.MeanGaugePerItem(SessionData.GetUpgradeLevel(owner, "ItemQuality")))
+	-- En « objets ordinaires » (Config.MeanGaugePerItem) : le tour des paliers ne s'accélère pas avec la Chance, ni avec
+	-- les points en plus des objets des mondes lointains (attribut PointsBoost, server/ItemSpawner).
+	local boost = item:GetAttribute("PointsBoost")
+	local base = value / (if type(boost) == "number" and boost > 0 then boost else 1)
+	addGauge(owner, math.max(1, base) / Config.MeanGaugePerItem(SessionData.GetUpgradeLevel(owner, "ItemQuality")))
 	local bonus = 1
 	if tier == 3 then
 		local landing = landingPoint(item)

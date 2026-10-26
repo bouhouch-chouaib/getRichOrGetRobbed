@@ -1,0 +1,121 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Objets_Divin_board.png",
+  "layout": {
+    "rows": [
+      "Objets_Divin cuit, 6 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Objets_Divin cuit, 6 pièces (repos)",
+      "kind": "baked",
+      "triangles": 6016,
+      "views": {
+        "face": {
+          "coverage": 0.021,
+          "lum_mean": 0.751,
+          "lum_std": 0.208,
+          "detail": 0.1352,
+          "saturation": 0.229,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.021,
+          "lum_mean": 0.759,
+          "lum_std": 0.183,
+          "detail": 0.1487,
+          "saturation": 0.279,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "profil": {
+          "coverage": 0.007,
+          "lum_mean": 0.676,
+          "lum_std": 0.188,
+          "detail": 0.1458,
+          "saturation": 0.369,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "detail": {
+          "coverage": 0.04,
+          "lum_mean": 0.764,
+          "lum_std": 0.203,
+          "detail": 0.1397,
+          "saturation": 0.283,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 6016,
+      "views": {
+        "face": {
+          "coverage": 0.021,
+          "lum_mean": 0.751,
+          "lum_std": 0.208,
+          "detail": 0.1352,
+          "saturation": 0.229,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.021,
+          "lum_mean": 0.759,
+          "lum_std": 0.183,
+          "detail": 0.1487,
+          "saturation": 0.279,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "profil": {
+          "coverage": 0.007,
+          "lum_mean": 0.676,
+          "lum_std": 0.188,
+          "detail": 0.1458,
+          "saturation": 0.369,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "detail": {
+          "coverage": 0.04,
+          "lum_mean": 0.764,
+          "lum_std": 0.203,
+          "detail": 0.1397,
+          "saturation": 0.283,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 30.7
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

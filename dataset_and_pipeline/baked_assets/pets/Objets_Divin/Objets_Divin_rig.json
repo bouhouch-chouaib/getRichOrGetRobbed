@@ -1,0 +1,122 @@
+{
+  "pet": "Objets_Divin",
+  "model_height_blender": 2.3202,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Plume": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1016,
+      "center": [
+        -9.95194,
+        0.0,
+        1.1651
+      ],
+      "size": [
+        1.17611,
+        0.7,
+        2.31021
+      ],
+      "pivot": null
+    },
+    "Nuage": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 308,
+      "center": [
+        -6.005,
+        0.0,
+        0.735
+      ],
+      "size": [
+        2.17,
+        0.9,
+        1.43
+      ],
+      "pivot": null
+    },
+    "Lyre": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 928,
+      "center": [
+        -2.0,
+        -0.02,
+        1.07617
+      ],
+      "size": [
+        1.46469,
+        0.46,
+        2.15235
+      ],
+      "pivot": null
+    },
+    "Calice": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1472,
+      "center": [
+        2.0,
+        0.0,
+        0.91
+      ],
+      "size": [
+        1.21866,
+        1.21866,
+        1.82
+      ],
+      "pivot": null
+    },
+    "Ailes": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1380,
+      "center": [
+        6.0,
+        0.0,
+        0.90112
+      ],
+      "size": [
+        2.24151,
+        0.6,
+        1.80225
+      ],
+      "pivot": null
+    },
+    "Soleil": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 912,
+      "center": [
+        10.0,
+        0.0,
+        1.17
+      ],
+      "size": [
+        2.04,
+        0.86,
+        2.3
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.02586
+}

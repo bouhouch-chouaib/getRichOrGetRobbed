@@ -1,0 +1,76 @@
+{
+  "asset": "Objets_Divin_Corps",
+  "triangles": 6016,
+  "vertices": 3264,
+  "size_studs": [
+    21.56,
+    1.219,
+    2.32
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 24.8,
+  "source_materials": [
+    "M_Objets_Divin_high_argent_lyre",
+    "M_Objets_Divin_high_cordes",
+    "M_Objets_Divin_high_dedans",
+    "M_Objets_Divin_high_nuage",
+    "M_Objets_Divin_high_nuage_ailes",
+    "M_Objets_Divin_high_nuage_ombre",
+    "M_Objets_Divin_high_nuage_plume",
+    "M_Objets_Divin_high_nuage_plume_ombre",
+    "M_Objets_Divin_high_nuage_soleil",
+    "M_Objets_Divin_high_nuage_soleil_ombre",
+    "M_Objets_Divin_high_or_ailes",
+    "M_Objets_Divin_high_or_calice",
+    "M_Objets_Divin_high_or_calice_fonce",
+    "M_Objets_Divin_high_or_soleil",
+    "M_Objets_Divin_high_or_soleil_fonce",
+    "M_Objets_Divin_high_pierre_lyre",
+    "M_Objets_Divin_high_plume",
+    "M_Objets_Divin_high_plume_bout",
+    "M_Objets_Divin_high_plumes_ailes",
+    "M_Objets_Divin_high_plumes_ailes_bout",
+    "M_Objets_Divin_high_rubis_calice",
+    "M_Objets_Divin_high_saphir_calice",
+    "M_Objets_Divin_high_topaze",
+    "M_Objets_Divin_high_tuyau"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 64,
+    "cage": 0.3234,
+    "max_ray": 0.8085,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "Objets_Divin_Corps_Color.png",
+    "Roughness": "Objets_Divin_Corps_Roughness.png",
+    "Metalness": "Objets_Divin_Corps_Metalness.png",
+    "Normal": "Objets_Divin_Corps_Normal.png",
+    "AO": "Objets_Divin_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "Objets_Divin_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Objets_Divin_Corps_Color.png",
+      "NormalMap": "Objets_Divin_Corps_Normal.png",
+      "RoughnessMap": "Objets_Divin_Corps_Roughness.png",
+      "MetalnessMap": "Objets_Divin_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 15.8
+}

@@ -1,0 +1,216 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Objets_Divin_items.png",
+  "layout": {
+    "rows": [
+      "Plume",
+      "Nuage",
+      "Lyre",
+      "Calice",
+      "Ailes",
+      "Soleil"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Plume",
+      "kind": "baked",
+      "triangles": 1016,
+      "views": {
+        "face": {
+          "coverage": 0.202,
+          "lum_mean": 0.785,
+          "lum_std": 0.161,
+          "detail": 0.0476,
+          "saturation": 0.1,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.179,
+          "lum_mean": 0.774,
+          "lum_std": 0.18,
+          "detail": 0.0598,
+          "saturation": 0.105,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.078,
+          "lum_mean": 0.762,
+          "lum_std": 0.194,
+          "detail": 0.0475,
+          "saturation": 0.112,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Nuage",
+      "kind": "baked",
+      "triangles": 308,
+      "views": {
+        "face": {
+          "coverage": 0.245,
+          "lum_mean": 0.835,
+          "lum_std": 0.182,
+          "detail": 0.0243,
+          "saturation": 0.041,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.234,
+          "lum_mean": 0.833,
+          "lum_std": 0.201,
+          "detail": 0.0253,
+          "saturation": 0.043,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.16,
+          "lum_mean": 0.808,
+          "lum_std": 0.212,
+          "detail": 0.0227,
+          "saturation": 0.071,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Lyre",
+      "kind": "baked",
+      "triangles": 928,
+      "views": {
+        "face": {
+          "coverage": 0.16,
+          "lum_mean": 0.563,
+          "lum_std": 0.176,
+          "detail": 0.0973,
+          "saturation": 0.15,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.17,
+          "lum_mean": 0.622,
+          "lum_std": 0.202,
+          "detail": 0.1229,
+          "saturation": 0.139,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.078,
+          "lum_mean": 0.642,
+          "lum_std": 0.197,
+          "detail": 0.07,
+          "saturation": 0.135,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Calice",
+      "kind": "baked",
+      "triangles": 1472,
+      "views": {
+        "face": {
+          "coverage": 0.208,
+          "lum_mean": 0.464,
+          "lum_std": 0.141,
+          "detail": 0.0651,
+          "saturation": 0.765,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.223,
+          "lum_mean": 0.497,
+          "lum_std": 0.149,
+          "detail": 0.0775,
+          "saturation": 0.726,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.207,
+          "lum_mean": 0.479,
+          "lum_std": 0.146,
+          "detail": 0.0722,
+          "saturation": 0.752,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Ailes",
+      "kind": "baked",
+      "triangles": 1380,
+      "views": {
+        "face": {
+          "coverage": 0.178,
+          "lum_mean": 0.727,
+          "lum_std": 0.188,
+          "detail": 0.0557,
+          "saturation": 0.191,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.159,
+          "lum_mean": 0.744,
+          "lum_std": 0.204,
+          "detail": 0.0647,
+          "saturation": 0.196,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.067,
+          "lum_mean": 0.742,
+          "lum_std": 0.221,
+          "detail": 0.0537,
+          "saturation": 0.152,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Soleil",
+      "kind": "baked",
+      "triangles": 912,
+      "views": {
+        "face": {
+          "coverage": 0.234,
+          "lum_mean": 0.597,
+          "lum_std": 0.203,
+          "detail": 0.0414,
+          "saturation": 0.365,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.209,
+          "lum_mean": 0.633,
+          "lum_std": 0.204,
+          "detail": 0.0647,
+          "saturation": 0.382,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.113,
+          "lum_mean": 0.637,
+          "lum_std": 0.24,
+          "detail": 0.0541,
+          "saturation": 0.315,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 32,
+    "resolution": 360,
+    "view_transform": "Standard",
+    "seconds": 49.6
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

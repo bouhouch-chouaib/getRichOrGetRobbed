@@ -1,0 +1,122 @@
+{
+  "pet": "Objets_Abysses",
+  "model_height_blender": 2.66,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Coquillage": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 396,
+      "center": [
+        -10.0,
+        0.125,
+        0.21
+      ],
+      "size": [
+        1.94477,
+        1.41,
+        0.42
+      ],
+      "pivot": null
+    },
+    "EtoileDeMer": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 828,
+      "center": [
+        -6.0,
+        -0.09924,
+        0.195
+      ],
+      "size": [
+        2.04144,
+        1.94153,
+        0.39
+      ],
+      "pivot": null
+    },
+    "Ancre": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1108,
+      "center": [
+        -2.0,
+        0.0,
+        1.25
+      ],
+      "size": [
+        1.8128,
+        0.35898,
+        2.32
+      ],
+      "pivot": null
+    },
+    "Coffre": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1596,
+      "center": [
+        2.0,
+        0.02503,
+        0.85957
+      ],
+      "size": [
+        1.66,
+        1.30006,
+        1.71914
+      ],
+      "pivot": null
+    },
+    "Huitre": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1264,
+      "center": [
+        6.0,
+        0.10287,
+        0.90939
+      ],
+      "size": [
+        1.72939,
+        1.90568,
+        1.81879
+      ],
+      "pivot": null
+    },
+    "Trident": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 880,
+      "center": [
+        10.0,
+        0.0,
+        1.33
+      ],
+      "size": [
+        1.10866,
+        1.10866,
+        2.66
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.022556
+}

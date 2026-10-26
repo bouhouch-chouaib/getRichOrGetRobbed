@@ -1,0 +1,216 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Objets_Prairie_items.png",
+  "layout": {
+    "rows": [
+      "Pomme",
+      "Carotte",
+      "Fromage",
+      "PotDeMiel",
+      "Trefle",
+      "RucheDOr"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Pomme",
+      "kind": "baked",
+      "triangles": 820,
+      "views": {
+        "face": {
+          "coverage": 0.23,
+          "lum_mean": 0.34,
+          "lum_std": 0.141,
+          "detail": 0.0232,
+          "saturation": 0.556,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.233,
+          "lum_mean": 0.357,
+          "lum_std": 0.15,
+          "detail": 0.0416,
+          "saturation": 0.545,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.22,
+          "lum_mean": 0.351,
+          "lum_std": 0.135,
+          "detail": 0.0268,
+          "saturation": 0.564,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Carotte",
+      "kind": "baked",
+      "triangles": 1004,
+      "views": {
+        "face": {
+          "coverage": 0.067,
+          "lum_mean": 0.422,
+          "lum_std": 0.198,
+          "detail": 0.0478,
+          "saturation": 0.493,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.122,
+          "lum_mean": 0.476,
+          "lum_std": 0.223,
+          "detail": 0.0397,
+          "saturation": 0.449,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.132,
+          "lum_mean": 0.474,
+          "lum_std": 0.162,
+          "detail": 0.0279,
+          "saturation": 0.506,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Fromage",
+      "kind": "baked",
+      "triangles": 440,
+      "views": {
+        "face": {
+          "coverage": 0.159,
+          "lum_mean": 0.64,
+          "lum_std": 0.2,
+          "detail": 0.0237,
+          "saturation": 0.513,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.249,
+          "lum_mean": 0.615,
+          "lum_std": 0.2,
+          "detail": 0.0209,
+          "saturation": 0.568,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.237,
+          "lum_mean": 0.61,
+          "lum_std": 0.16,
+          "detail": 0.0188,
+          "saturation": 0.583,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "PotDeMiel",
+      "kind": "baked",
+      "triangles": 2100,
+      "views": {
+        "face": {
+          "coverage": 0.194,
+          "lum_mean": 0.413,
+          "lum_std": 0.214,
+          "detail": 0.0468,
+          "saturation": 0.508,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.197,
+          "lum_mean": 0.444,
+          "lum_std": 0.225,
+          "detail": 0.0621,
+          "saturation": 0.504,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.193,
+          "lum_mean": 0.38,
+          "lum_std": 0.172,
+          "detail": 0.0519,
+          "saturation": 0.552,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Trefle",
+      "kind": "baked",
+      "triangles": 984,
+      "views": {
+        "face": {
+          "coverage": 0.19,
+          "lum_mean": 0.608,
+          "lum_std": 0.165,
+          "detail": 0.0448,
+          "saturation": 0.468,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.181,
+          "lum_mean": 0.631,
+          "lum_std": 0.179,
+          "detail": 0.0646,
+          "saturation": 0.434,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.107,
+          "lum_mean": 0.654,
+          "lum_std": 0.166,
+          "detail": 0.0511,
+          "saturation": 0.361,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "RucheDOr",
+      "kind": "baked",
+      "triangles": 1352,
+      "views": {
+        "face": {
+          "coverage": 0.231,
+          "lum_mean": 0.449,
+          "lum_std": 0.145,
+          "detail": 0.0462,
+          "saturation": 0.754,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.242,
+          "lum_mean": 0.536,
+          "lum_std": 0.185,
+          "detail": 0.101,
+          "saturation": 0.712,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.236,
+          "lum_mean": 0.484,
+          "lum_std": 0.16,
+          "detail": 0.0605,
+          "saturation": 0.754,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 32,
+    "resolution": 360,
+    "view_transform": "Standard",
+    "seconds": 35.7
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

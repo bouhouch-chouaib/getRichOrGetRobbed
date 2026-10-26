@@ -1,0 +1,122 @@
+{
+  "pet": "Objets_Cosmos",
+  "model_height_blender": 2.4938,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "RocheLunaire": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1208,
+      "center": [
+        -10.0,
+        0.0,
+        0.825
+      ],
+      "size": [
+        1.58856,
+        1.58856,
+        1.65
+      ],
+      "pivot": null
+    },
+    "Casque": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 840,
+      "center": [
+        -6.0,
+        -0.06393,
+        1.03
+      ],
+      "size": [
+        1.64,
+        1.53215,
+        2.06
+      ],
+      "pivot": null
+    },
+    "Fusee": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1024,
+      "center": [
+        -2.0,
+        0.0,
+        1.21
+      ],
+      "size": [
+        1.20657,
+        1.20657,
+        2.42
+      ],
+      "pivot": null
+    },
+    "Planete": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 2080,
+      "center": [
+        2.0,
+        0.0,
+        0.78
+      ],
+      "size": [
+        2.24,
+        2.13964,
+        1.32
+      ],
+      "pivot": null
+    },
+    "Soucoupe": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1380,
+      "center": [
+        6.0,
+        0.0,
+        0.69
+      ],
+      "size": [
+        2.2334,
+        2.2334,
+        1.38
+      ],
+      "pivot": null
+    },
+    "Meteorite": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 304,
+      "center": [
+        10.05023,
+        0.09127,
+        0.88809
+      ],
+      "size": [
+        2.20809,
+        1.41377,
+        1.92382
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.024059
+}

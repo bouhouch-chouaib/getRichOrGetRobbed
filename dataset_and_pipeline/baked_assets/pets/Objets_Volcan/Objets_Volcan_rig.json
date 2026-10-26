@@ -1,0 +1,122 @@
+{
+  "pet": "Objets_Volcan",
+  "model_height_blender": 2.3475,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Charbon": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 300,
+      "center": [
+        -9.94835,
+        0.0463,
+        0.49566
+      ],
+      "size": [
+        1.65286,
+        1.22805,
+        1.1446
+      ],
+      "pivot": null
+    },
+    "RocheDeLave": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 432,
+      "center": [
+        -5.98503,
+        0.04076,
+        0.6933
+      ],
+      "size": [
+        1.57385,
+        1.33411,
+        1.45156
+      ],
+      "pivot": null
+    },
+    "Piment": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 756,
+      "center": [
+        -2.0,
+        0.26676,
+        0.43497
+      ],
+      "size": [
+        0.65704,
+        2.22648,
+        0.88698
+      ],
+      "pivot": null
+    },
+    "Enclume": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 376,
+      "center": [
+        1.9025,
+        0.0,
+        0.675
+      ],
+      "size": [
+        2.395,
+        0.9,
+        1.35
+      ],
+      "pivot": null
+    },
+    "DentDeDragon": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1184,
+      "center": [
+        6.0,
+        -0.25391,
+        1.13541
+      ],
+      "size": [
+        0.96083,
+        1.46865,
+        2.27083
+      ],
+      "pivot": null
+    },
+    "CoeurDeMagma": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 936,
+      "center": [
+        10.0,
+        0.0,
+        0.96401
+      ],
+      "size": [
+        1.37392,
+        1.21952,
+        1.92803
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.025559
+}

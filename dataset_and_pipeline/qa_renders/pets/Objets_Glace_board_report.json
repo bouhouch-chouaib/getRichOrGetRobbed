@@ -1,0 +1,121 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Objets_Glace_board.png",
+  "layout": {
+    "rows": [
+      "Objets_Glace cuit, 6 pièces (repos)",
+      "Pose animée"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil",
+      "detail"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Objets_Glace cuit, 6 pièces (repos)",
+      "kind": "baked",
+      "triangles": 8590,
+      "views": {
+        "face": {
+          "coverage": 0.017,
+          "lum_mean": 0.667,
+          "lum_std": 0.22,
+          "detail": 0.1554,
+          "saturation": 0.269,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.02,
+          "lum_mean": 0.636,
+          "lum_std": 0.24,
+          "detail": 0.1726,
+          "saturation": 0.317,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "profil": {
+          "coverage": 0.013,
+          "lum_mean": 0.633,
+          "lum_std": 0.212,
+          "detail": 0.1465,
+          "saturation": 0.4,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "detail": {
+          "coverage": 0.038,
+          "lum_mean": 0.642,
+          "lum_std": 0.259,
+          "detail": 0.1368,
+          "saturation": 0.23,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        }
+      }
+    },
+    {
+      "label": "Pose animée",
+      "kind": "baked",
+      "triangles": 8590,
+      "views": {
+        "face": {
+          "coverage": 0.017,
+          "lum_mean": 0.667,
+          "lum_std": 0.22,
+          "detail": 0.1554,
+          "saturation": 0.269,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.02,
+          "lum_mean": 0.635,
+          "lum_std": 0.241,
+          "detail": 0.1725,
+          "saturation": 0.317,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "profil": {
+          "coverage": 0.013,
+          "lum_mean": 0.633,
+          "lum_std": 0.212,
+          "detail": 0.1465,
+          "saturation": 0.4,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "detail": {
+          "coverage": 0.038,
+          "lum_mean": 0.642,
+          "lum_std": 0.259,
+          "detail": 0.1368,
+          "saturation": 0.23,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 40,
+    "resolution": 420,
+    "view_transform": "Standard",
+    "seconds": 20.2
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

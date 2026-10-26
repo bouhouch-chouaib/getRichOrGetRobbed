@@ -161,7 +161,7 @@ HUD style cartoon (LuckiestGuy, contours noirs, fenêtres, Toast, barres d'XP) �
 multiplicateur additif + suit le joueur (`PetFollow`) • revenu = 10 meilleurs familiers • fenêtre collection 3D •
 annonces serveur Légendaire+ • familiers qui se baladent dans la base, **trajets décidés par le serveur** (`BasePetsController` + `shared/PetWander` +
 `client/BasePets`, plus de socles ; un familier équipé ne rapporte pas et n'est pas dans la base) • verrou de session anti-duplication •
-palettes à objets + objets sauvages dans l'arène + amélioration Chance • plaque d'apparition invisible •
+bacs à objets dehors (26 oct., avant : palettes) + objets sauvages dans l'arène + amélioration Chance • plaque d'apparition invisible •
 verrouillage 5 s relancé à chaque passage • consigne de phase sous l'horloge (8 s) •
 **mobile** : `client/ScreenScale` (UI à l'échelle), bouton LANCER tactile, gâchette R2 manette •
 économie rééquilibrée (revenus bas, prix hauts) • objets non roulants (frottement max) • map agrandie (bases à 215) •
@@ -248,6 +248,19 @@ Studio (tailles en studs, textures) ; en Play (solo) : boutique et fusion en bri
 0 néon, 0 cercle lumineux ; capsule (vitre, écran, socle invisible) ; tapis niveaux 1 / 7 / 25 -> Bois / Sport / Céleste,
 banc 2 / 13 / 25 -> Bois / Cristal / Céleste, voyants et étoile justes, blocs du banc cachés. Pas vu : photo en Play
 (la caméra du jeu ignore la position demandée), les décors de capsule par monde, sur téléphone.
+
+**26 oct. : objets à jeter propres à chaque monde + bacs à objets** (Chouaib : « pour chaque monde, pas les mêmes
+objets » ; « deux bacs de chaque côté de la base ») : 42 objets en briques sans néon, 6 par monde (`Config.WorldItems`,
+Blender `props/Objets_<Monde>.py`, `ArtModels.Items.<Monde>.<Id>`, collisions en boîte), un par rang de
+`Config.ItemTiers` ; points = rang x Points du monde (1 à 2,4) ; ce bonus ne compte ni pour l'argent des points
+(`BlackholeController.pointsMoney`) ni pour la jauge (`BlackholeTiers`, attribut `PointsBoost`) : simulateur, 1er
+Rebirth 8,4 h au lieu de 8,7 h. Les objets tombent dans **2 bacs dehors** contre les côtés de la base près de l'entrée
+(`BaseLayout.Bins`, `MapGenerator.createBin`, `ArtModels.BacObjets` dont le rebord `Trim` est teint à la couleur de la
+base), le moins rempli d'abord, à une place libre (`ItemSpawner`) ; plus de palettes. Lot `Lot10_ObjetsMondes`,
+branchement `tools/make_props_wire.py BacObjets` puis `tools/make_items_wire.py Objets_...`. Vérifié en Play (solo) :
+bacs en place et teints, objets des 7 mondes (monde simulé, sauvegarde intacte) aux bons points et tous dans les bacs,
+ramassage d'un objet en briques. Pas vu : lancer dans le trou avec ces modèles, objets sauvages, à 2 joueurs, téléphone.
+**ArtModels.Items et BacObjets sont dans le fichier du jeu : Ctrl+S.**
 
 **15 oct. : aimant à objets** (`Config.Magnet`, amélioration `Magnet` de la Boutique 5 niveaux, en argent du jeu seulement) :
 les objets proches sautent tout seuls dans les mains / le sac (`ItemInteraction`, mêmes règles que [E]). Vérifié en jeu (solo) :

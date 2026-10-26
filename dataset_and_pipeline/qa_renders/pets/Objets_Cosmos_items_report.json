@@ -1,0 +1,216 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Objets_Cosmos_items.png",
+  "layout": {
+    "rows": [
+      "RocheLunaire",
+      "Casque",
+      "Fusee",
+      "Planete",
+      "Soucoupe",
+      "Meteorite"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "RocheLunaire",
+      "kind": "baked",
+      "triangles": 1208,
+      "views": {
+        "face": {
+          "coverage": 0.232,
+          "lum_mean": 0.507,
+          "lum_std": 0.165,
+          "detail": 0.0256,
+          "saturation": 0.09,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.236,
+          "lum_mean": 0.498,
+          "lum_std": 0.161,
+          "detail": 0.027,
+          "saturation": 0.117,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.229,
+          "lum_mean": 0.523,
+          "lum_std": 0.156,
+          "detail": 0.0239,
+          "saturation": 0.141,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Casque",
+      "kind": "baked",
+      "triangles": 840,
+      "views": {
+        "face": {
+          "coverage": 0.196,
+          "lum_mean": 0.579,
+          "lum_std": 0.225,
+          "detail": 0.0341,
+          "saturation": 0.151,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.205,
+          "lum_mean": 0.638,
+          "lum_std": 0.223,
+          "detail": 0.0378,
+          "saturation": 0.138,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.204,
+          "lum_mean": 0.702,
+          "lum_std": 0.218,
+          "detail": 0.0293,
+          "saturation": 0.122,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Fusee",
+      "kind": "baked",
+      "triangles": 1024,
+      "views": {
+        "face": {
+          "coverage": 0.186,
+          "lum_mean": 0.594,
+          "lum_std": 0.213,
+          "detail": 0.0446,
+          "saturation": 0.235,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.187,
+          "lum_mean": 0.63,
+          "lum_std": 0.227,
+          "detail": 0.0513,
+          "saturation": 0.217,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.19,
+          "lum_mean": 0.624,
+          "lum_std": 0.23,
+          "detail": 0.0467,
+          "saturation": 0.238,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Planete",
+      "kind": "baked",
+      "triangles": 2080,
+      "views": {
+        "face": {
+          "coverage": 0.176,
+          "lum_mean": 0.43,
+          "lum_std": 0.283,
+          "detail": 0.0631,
+          "saturation": 0.428,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.194,
+          "lum_mean": 0.405,
+          "lum_std": 0.207,
+          "detail": 0.0757,
+          "saturation": 0.52,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.132,
+          "lum_mean": 0.417,
+          "lum_std": 0.217,
+          "detail": 0.0701,
+          "saturation": 0.43,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Soucoupe",
+      "kind": "baked",
+      "triangles": 1380,
+      "views": {
+        "face": {
+          "coverage": 0.146,
+          "lum_mean": 0.423,
+          "lum_std": 0.286,
+          "detail": 0.0584,
+          "saturation": 0.332,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.174,
+          "lum_mean": 0.482,
+          "lum_std": 0.309,
+          "detail": 0.0821,
+          "saturation": 0.324,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.139,
+          "lum_mean": 0.453,
+          "lum_std": 0.286,
+          "detail": 0.0679,
+          "saturation": 0.338,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Meteorite",
+      "kind": "baked",
+      "triangles": 304,
+      "views": {
+        "face": {
+          "coverage": 0.176,
+          "lum_mean": 0.505,
+          "lum_std": 0.215,
+          "detail": 0.046,
+          "saturation": 0.652,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.159,
+          "lum_mean": 0.496,
+          "lum_std": 0.205,
+          "detail": 0.0607,
+          "saturation": 0.64,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.126,
+          "lum_mean": 0.503,
+          "lum_std": 0.191,
+          "detail": 0.0641,
+          "saturation": 0.628,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 32,
+    "resolution": 360,
+    "view_transform": "Standard",
+    "seconds": 48.5
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

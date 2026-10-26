@@ -37,7 +37,7 @@
 ### Carte (générée par code)
 - Arène prairie ronde (rayon 315), chemins de terre vers chaque base, 12 arbres.
 - Trou noir central (disque de 80) : anneau violet (rouge en digestion), sphère noire + halo, particules, lumière, dôme rouge en digestion.
-- 8 bases en cercle à 215 du centre : clôture bois + portail, nom du propriétaire, plaque d'apparition invisible, bouton de verrouillage devant la porte, 4 palettes à objets, tapis de course (gauche) et banc (droite) visibles une fois achetés.
+- 8 bases en cercle à 215 du centre : clôture bois + portail, nom du propriétaire, plaque d'apparition invisible, bouton de verrouillage devant la porte, 2 bacs à objets dehors contre les côtés (26 oct.), tapis de course (gauche) et banc (droite) visibles une fois achetés.
 - 4 kiosques entre les bases : BOUTIQUE + machine de FUSION, ouverts avec [E].
 - Transition nuit/jour (4 s), ciel étoilé, atmosphère.
 
@@ -52,7 +52,7 @@
 | Météorite | 15 |
 
 - Les plus rares brillent. 5 objets offerts à l'arrivée.
-- Feeding : 1 objet / 2 s sur les palettes, 12 max par base ; objets « sauvages » dans l'arène (un peu plus précieux), 1 / 4 s, 25 max.
+- Feeding : 1 objet / 2 s dans les bacs, 12 max par base, objets propres à chaque monde (`Config.WorldItems`) ; objets « sauvages » dans l'arène (un peu plus précieux), 1 / 4 s, 25 max.
 - Pas de glisse ni rebond ; bulle « [E] Ramasser (nom +valeur) » ; nettoyage auto du surplus.
 
 ### Ramasser et lancer

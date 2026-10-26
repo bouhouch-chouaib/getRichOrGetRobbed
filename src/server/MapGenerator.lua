@@ -15,12 +15,12 @@
 --   Kiosks (Folder : boutique + machine de fusion entre deux bases)
 --   Leaderboard (Model) : tableau des plus riches (Screen rempli par LeaderboardController)
 --   LooseItems (Folder) : objets ramassés / lancés
---   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Pallets,
---                              SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
+--   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Bins
+--                              (2 bacs à objets dehors), SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
 --                              SpawnPoints (Folder), ItemSpawns (Folder), Incubator (Folder : couveuse, nids Nest_1..12),
 --                              <Monde>Look (Folders PrairieLook, DesertLook... : clôture, porte, escalier du monde ;
 --                              client/WorldSkin montre celui du monde du propriétaire, sinon l'ancienne clôture).
---                              Plan de la base (entrée, palettes, prairie, couveuse) : shared/BaseLayout.
+--                              Plan de la base (entrée, bacs, prairie, couveuse) : shared/BaseLayout.
 
 local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Lighting = game:GetService("Lighting")
@@ -869,30 +869,38 @@ local function createLeaderboard(map: Folder)
 	model.Parent = map
 end
 
--- Palette en bois basse : plateau de lattes sur 3 chevrons, avec un petit rebord pour que les objets
--- ne roulent pas par terre. Les objets restent bien accessibles (pas de parois hautes).
-local PALLET_SIZE = 9
-local function createPallet(cframe: CFrame, parent: Instance)
+-- Bac à objets (shared/BaseLayout.Bins), dehors contre un côté de la base : le modèle en briques ArtModels.BacObjets
+-- (Blender, props/BacObjets.py) dont le rebord « Trim » prend la couleur de la base, ou s'il manque une caisse en blocs de
+-- bois. Le fond et les parois sont des volumes (invisibles sous le modèle) qui retiennent les objets.
+local function createBin(cframe: CFrame, color: Color3, parent: Instance): Model
 	local model = Instance.new("Model")
-	model.Name = "Pallet"
-	local light = COLORS.WoodRail
-	local dark = COLORS.WoodPost
-	local half = PALLET_SIZE / 2
-	for _, x in ipairs({ -half + 0.5, 0, half - 0.5 }) do
-		makePart("Runner", Vector3.new(1, 0.5, PALLET_SIZE), cframe * CFrame.new(x, 0.25, 0), dark, model)
+	model.Name = "Bin"
+	local size = BaseLayout.BIN_SIZE
+	local floor = BaseLayout.BIN_FLOOR
+	local wall = 0.5
+	local hasArt = addArt("BacObjets", cframe, model)
+	local function block(name: string, partSize: Vector3, offset: Vector3, partColor: Color3)
+		local at = cframe * CFrame.new(offset)
+		if hasArt then
+			invisible(name, partSize, at, model)
+		else
+			makePart(name, partSize, at, partColor, model)
+		end
 	end
-	for index = 0, 4 do
-		local z = -half + 0.8 + index * (PALLET_SIZE - 1.6) / 4
-		makePart("Board", Vector3.new(PALLET_SIZE, 0.3, 1.4), cframe * CFrame.new(0, 0.65, z), light, model)
-	end
-	-- Plateau plein (sous les lattes) pour que les petits objets ne passent pas entre elles.
-	makePart("Deck", Vector3.new(PALLET_SIZE - 0.2, 0.2, PALLET_SIZE - 0.2), cframe * CFrame.new(0, 0.55, 0), dark, model)
-	-- Petit rebord.
+	local height = size.Y - floor
+	block("Floor", Vector3.new(size.X, floor, size.Z), Vector3.new(0, floor / 2, 0), COLORS.WoodPost)
 	for _, side in ipairs({ -1, 1 }) do
-		makePart("Lip", Vector3.new(PALLET_SIZE, 0.45, 0.3), cframe * CFrame.new(0, 1, side * (half - 0.15)), dark, model)
-		makePart("Lip", Vector3.new(0.3, 0.45, PALLET_SIZE), cframe * CFrame.new(side * (half - 0.15), 1, 0), dark, model)
+		block("Wall", Vector3.new(wall, height, size.Z), Vector3.new(side * (size.X - wall) / 2, floor + height / 2, 0), COLORS.WoodRail)
+		block("Wall", Vector3.new(size.X - 2 * wall, height, wall), Vector3.new(0, floor + height / 2, side * (size.Z - wall) / 2), COLORS.WoodRail)
+	end
+	for _, part in ipairs(model:GetChildren()) do
+		local look = if part.Name == "Trim" then part:FindFirstChildOfClass("SurfaceAppearance") else nil
+		if look then
+			look.Color = color
+		end
 	end
 	model.Parent = parent
+	return model
 end
 
 -- Couveuse au fond de la base (shared/BaseLayout) : sol de paille, rebord en bois ouvert au milieu, 12 nids et un
@@ -1196,15 +1204,15 @@ local function createBase(index: number, map: Folder): Model
 	local spawnPoints = Instance.new("Folder")
 	spawnPoints.Name = "SpawnPoints"
 	spawnPoints.Parent = base
-	local pallets = Instance.new("Folder")
-	pallets.Name = "Pallets"
-	pallets.Parent = base
-	-- 2 palettes à objets, à l'avant de la base de chaque côté du bouton de verrouillage (shared/BaseLayout).
-	for _, offset in ipairs(BaseLayout.Pallets) do
-		local palletCFrame = origin * CFrame.new(offset.X, top, offset.Y)
-		createPallet(palletCFrame, pallets)
-		-- Point d'apparition au-dessus du centre de la palette : l'objet tombe dessus.
-		local point = makePart("SpawnPoint", Vector3.new(1, 1, 1), palletCFrame * CFrame.new(0, 3.5, 0), color, spawnPoints)
+	local bins = Instance.new("Folder")
+	bins.Name = "Bins"
+	bins.Parent = base
+	-- 2 bacs à objets dehors, contre les côtés près de l'entrée (shared/BaseLayout), au sol de l'arène.
+	for _, offset in ipairs(BaseLayout.Bins) do
+		local binCFrame = origin * CFrame.new(offset.X, 0, offset.Y)
+		createBin(binCFrame, color, bins)
+		-- Point d'apparition au-dessus du milieu du bac : l'objet tombe dedans (server/ItemSpawner l'écarte un peu).
+		local point = makePart("SpawnPoint", Vector3.new(1, 1, 1), binCFrame * CFrame.new(0, BaseLayout.BIN_SIZE.Y + 1.5, 0), color, spawnPoints)
 		point.Transparency = 1
 		makeGhost(point)
 	end

@@ -83,12 +83,29 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 ## Objets à jeter
 
-- Kit de départ : 5 objets au hasard dans la base à l'arrivée du joueur.
+- Kit de départ : 5 objets au hasard dans les bacs à l'arrivée du joueur.
 - Pendant le Feeding : 1 objet toutes les 2 s dans chaque base occupée (max 12).
-- 6 types (`Config.ItemTiers`) : Caillou 0,25 • Brique 0,5 • Cristal 1 • Lingot 2,5 • Diamant 6 • Météorite 15 points.
-- Points marqués = valeur de l'objet × multiplicateur des familiers équipés.
-- Physique : frottement maximal, aucun rebond, aucune forme ronde : un objet s'arrête où il tombe (la Force compte).
-- Les objets apparaissent sur **4 palettes en bois** (basses, petit rebord) aux coins de la base.
+- 6 rangs (`Config.ItemTiers`, chance d'apparition et points de base) : 0,25 • 0,5 • 1 • 2,5 • 6 • 15 points.
+- **Des objets différents dans chaque monde** (26 oct., Chouaib) : `Config.WorldItems`, 6 par monde, un par rang, en
+  briques sans néon (Blender, `blender_tools/props/Objets_<Monde>.py`, rangés dans `ArtModels.Items.<Monde>.<Id>`) ;
+  la rareté se lit à la matière comme pour les familiers (plastique -> émail / chrome -> or martelé -> nacre -> or massif) :
+  - Prairie : pomme, carotte, fromage, pot de miel, trèfle d'émeraude, ruche d'or ;
+  - Désert : cactus, cruche, scarabée, lampe magique, chat sacré, pyramide d'or ;
+  - Volcan : charbon, roche de lave, piment, enclume d'or, dent de dragon, cœur de magma ;
+  - Glace : boule de neige, cornet, bonhomme de neige, patin d'or, flocon de cristal, couronne de glace ;
+  - Abysses : coquillage, étoile de mer, ancre, coffre, huître perlière, trident d'or ;
+  - Cosmos : roche lunaire, casque d'astronaute, fusée, planète à anneaux, soucoupe, météorite d'or ;
+  - Divin : plume d'ange, nuage, lyre, calice d'or, ailes d'ange, soleil d'or.
+- Points marqués = points de base du rang × **Points du monde** (Prairie 1, Désert 1,2, Volcan 1,4, Glace 1,6, Abysses
+  1,8, Cosmos 2, Divin 2,4) × multiplicateur des familiers équipés. La jauge du trou noir ne compte pas ce bonus du monde
+  (attribut `PointsBoost`). Les objets d'une base viennent du monde où est son propriétaire ; un objet sauvage, du monde
+  d'un joueur du serveur tiré au hasard ; les roches crachées par le trou noir sont la roche de lave du Volcan et la
+  météorite d'or du Cosmos.
+- Physique : frottement maximal, aucun rebond, collisions en boîte : un objet s'arrête où il tombe (la Force compte).
+- Les objets tombent dans **2 bacs** (26 oct., avant : des palettes dans la base) : grandes caisses en bois posées
+  DEHORS contre les côtés gauche et droit de la base, près de l'entrée (`shared/BaseLayout.Bins`), rebord aux couleurs de
+  la base (`ArtModels.BacObjets`, Blender `props/BacObjets.py`). Le joueur les prend en revenant du trou noir sans
+  entrer chez lui ; seul le propriétaire peut les prendre (même règle qu'avant).
 - **Objets sauvages** : 1 toutes les 4 s pendant le Feeding dans l'arène (entre le dôme et les bases, max 25),
   ramassables par tout le monde, qualité équivalente à Chance niveau 2.
 - Amélioration "🍀 Chance" (Id `ItemQuality`) : poids des objets précieux ×(1 + 0,5 × niveau)^rang.
@@ -668,7 +685,7 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 ## Bases (15 oct.)
 
 - 84 x 84 (avant 56), plan dans `shared/BaseLayout` (une seule source pour la carte, les familiers et les œufs) :
-  entrée côté trou noir avec « ZONE SÛRE », **2 palettes à objets à l'avant** (de chaque côté du bouton de verrouillage),
+  entrée côté trou noir avec « ZONE SÛRE », bouton de verrouillage, **2 bacs à objets dehors contre les côtés** (26 oct.),
   la **prairie** au milieu où se promènent les familiers (`PetWander`), la **couveuse** au fond (sol de paille, rebord
   ouvert au milieu, 12 nids, panneau « COUVEUSE » avec le nom du propriétaire au-dessus). Dehors, derrière la clôture
   du fond : la capsule d'évolution (cylindre de stase).

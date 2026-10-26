@@ -135,11 +135,12 @@ Config.Arena = {
 	BaseSize = Vector3.new(84, 1, 84), -- 15 oct. : agrandie (avant 56) ; plan dans shared/BaseLayout
 }
 
--- Apparition des objets (par base occupée).
+-- Apparition des objets (par base occupée). Depuis le 26 oct., ils tombent dans les 2 bacs posés dehors contre les côtés
+-- de la base, près de l'entrée (shared/BaseLayout.Bins) : le joueur les prend sans entrer chez lui.
 Config.Items = {
-	StarterCount = 5, -- objets offerts dans la base à l'arrivée d'un joueur
+	StarterCount = 5, -- objets offerts dans les bacs à l'arrivée d'un joueur
 	SpawnInterval = 2, -- pendant le Feeding, un objet apparaît toutes les 2 s dans chaque base occupée
-	MaxPerBase = 12, -- 2 palettes à l'avant de la base : ~6 objets par palette
+	MaxPerBase = 12, -- 2 bacs : ~6 objets par bac
 	-- Objets "sauvages" dans l'arène (hors des bases), ramassables par tout le monde pendant le Feeding.
 	WildInterval = 4, -- un objet sauvage toutes les 4 s
 	WildMax = 25,
@@ -159,18 +160,62 @@ export type ItemTier = {
 	Shape: Enum.PartType,
 	Size: number,
 	Material: Enum.Material,
-	Glow: boolean?, -- particules brillantes
 }
 
--- Du moins au plus précieux.
+-- Les 6 rangs d'objets, du moins au plus précieux : chance d'apparition (Weight) et points de base (Value). Chaque monde
+-- a ses propres objets pour ces rangs (Config.WorldItems) ; Shape / Size / Color / Material ne servent plus qu'à
+-- l'objet de secours en blocs quand le modèle du monde manque dans ArtModels.Items. Sans néon ni étincelles (26 oct.).
 Config.ItemTiers = {
 	{ Id = "Caillou", Name = "Caillou", Value = 0.25, Weight = 1000, Color = Color3.fromRGB(150, 150, 155), Shape = Enum.PartType.Block, Size = 1.8, Material = Enum.Material.Slate },
 	{ Id = "Brique", Name = "Brique", Value = 0.5, Weight = 350, Color = Color3.fromRGB(200, 85, 60), Shape = Enum.PartType.Block, Size = 2.1, Material = Enum.Material.Brick },
-	{ Id = "Cristal", Name = "Cristal", Value = 1, Weight = 100, Color = Color3.fromRGB(80, 220, 255), Shape = Enum.PartType.Block, Size = 2, Material = Enum.Material.Neon },
-	{ Id = "Lingot", Name = "Lingot d'or", Value = 2.5, Weight = 25, Color = Color3.fromRGB(255, 200, 40), Shape = Enum.PartType.Block, Size = 2.2, Material = Enum.Material.Foil, Glow = true },
-	{ Id = "Diamant", Name = "Diamant", Value = 6, Weight = 6, Color = Color3.fromRGB(200, 250, 255), Shape = Enum.PartType.Block, Size = 2, Material = Enum.Material.Neon, Glow = true },
-	{ Id = "Meteorite", Name = "Météorite", Value = 15, Weight = 1, Color = Color3.fromRGB(170, 60, 255), Shape = Enum.PartType.Block, Size = 2.6, Material = Enum.Material.Neon, Glow = true },
+	{ Id = "Cristal", Name = "Cristal", Value = 1, Weight = 100, Color = Color3.fromRGB(80, 220, 255), Shape = Enum.PartType.Block, Size = 2, Material = Enum.Material.Glass },
+	{ Id = "Lingot", Name = "Lingot d'or", Value = 2.5, Weight = 25, Color = Color3.fromRGB(255, 200, 40), Shape = Enum.PartType.Block, Size = 2.2, Material = Enum.Material.Foil },
+	{ Id = "Diamant", Name = "Diamant", Value = 6, Weight = 6, Color = Color3.fromRGB(200, 250, 255), Shape = Enum.PartType.Block, Size = 2, Material = Enum.Material.Glass },
+	{ Id = "Meteorite", Name = "Météorite", Value = 15, Weight = 1, Color = Color3.fromRGB(170, 60, 255), Shape = Enum.PartType.Block, Size = 2.6, Material = Enum.Material.Glass },
 } :: { ItemTier }
+
+-- Objets à jeter de chaque monde (26 oct., Chouaib : « pour chaque monde, pas les mêmes objets ») : 6 par monde, un par
+-- rang de Config.ItemTiers (même chance d'apparition). Modèles en briques sans néon, faits dans Blender
+-- (dataset_and_pipeline/blender_tools/props/Objets_<Monde>.py), rangés dans ArtModels.Items.<Monde>.<Id> (fichier du jeu).
+-- Points d'un objet = Value de son rang x Points du monde : plus on avance, plus chaque objet rapporte et plus on a de
+-- tirages par manche (jusqu'à ln(Points) / ln(1 + Loot.PullCostGrowth) en plus : +4 au Divin). Ce bonus ne donne ni
+-- argent (server/BlackholeController : le revenu suit déjà le monde) ni jauge du trou noir (server/BlackholeTiers).
+-- Simulateur (economy_simulator.py solo, 120 parties) : 1er Rebirth à 8,4 h au lieu de 8,7 h, 2 à 4 tirages de plus
+-- par manche à partir du Volcan.
+-- Les objets d'une base sont ceux du monde où est son propriétaire ; un objet sauvage, ceux du monde d'un joueur du
+-- serveur tiré au hasard (server/ItemSpawner).
+export type WorldItem = { Id: string, Name: string }
+export type WorldItemSet = { Points: number, Items: { WorldItem } }
+Config.WorldItems = {
+	Prairie = { Points = 1, Items = {
+		{ Id = "Pomme", Name = "Pomme" }, { Id = "Carotte", Name = "Carotte" }, { Id = "Fromage", Name = "Fromage" },
+		{ Id = "PotDeMiel", Name = "Pot de miel" }, { Id = "Trefle", Name = "Trèfle" }, { Id = "RucheDOr", Name = "Ruche d'or" },
+	} },
+	Desert = { Points = 1.2, Items = {
+		{ Id = "Cactus", Name = "Cactus" }, { Id = "Cruche", Name = "Cruche" }, { Id = "Scarabee", Name = "Scarabée" },
+		{ Id = "Lampe", Name = "Lampe magique" }, { Id = "ChatSacre", Name = "Chat sacré" }, { Id = "Pyramide", Name = "Pyramide d'or" },
+	} },
+	Volcan = { Points = 1.4, Items = {
+		{ Id = "Charbon", Name = "Charbon" }, { Id = "RocheDeLave", Name = "Roche de lave" }, { Id = "Piment", Name = "Piment" },
+		{ Id = "Enclume", Name = "Enclume d'or" }, { Id = "DentDeDragon", Name = "Dent de dragon" }, { Id = "CoeurDeMagma", Name = "Cœur de magma" },
+	} },
+	Glace = { Points = 1.6, Items = {
+		{ Id = "BouleDeNeige", Name = "Boule de neige" }, { Id = "Cornet", Name = "Cornet" }, { Id = "Bonhomme", Name = "Bonhomme de neige" },
+		{ Id = "Patin", Name = "Patin d'or" }, { Id = "Flocon", Name = "Flocon" }, { Id = "Couronne", Name = "Couronne" },
+	} },
+	Abysses = { Points = 1.8, Items = {
+		{ Id = "Coquillage", Name = "Coquillage" }, { Id = "EtoileDeMer", Name = "Étoile de mer" }, { Id = "Ancre", Name = "Ancre" },
+		{ Id = "Coffre", Name = "Coffre" }, { Id = "Huitre", Name = "Huître perlière" }, { Id = "Trident", Name = "Trident d'or" },
+	} },
+	Cosmos = { Points = 2, Items = {
+		{ Id = "RocheLunaire", Name = "Roche lunaire" }, { Id = "Casque", Name = "Casque" }, { Id = "Fusee", Name = "Fusée" },
+		{ Id = "Planete", Name = "Planète" }, { Id = "Soucoupe", Name = "Soucoupe" }, { Id = "Meteorite", Name = "Météorite d'or" },
+	} },
+	Divin = { Points = 2.4, Items = {
+		{ Id = "Plume", Name = "Plume d'ange" }, { Id = "Nuage", Name = "Nuage" }, { Id = "Lyre", Name = "Lyre" },
+		{ Id = "Calice", Name = "Calice d'or" }, { Id = "Ailes", Name = "Ailes d'ange" }, { Id = "Soleil", Name = "Soleil d'or" },
+	} },
+} :: { [string]: WorldItemSet }
 
 -- Jauge du trou noir apportée en moyenne par un objet avalé (server/BlackholeTiers : max(1, valeur)) avec ce niveau de
 -- Chance, mêmes poids que server/ItemSpawner. La jauge compte en « objets ordinaires » : valeur / cette moyenne.

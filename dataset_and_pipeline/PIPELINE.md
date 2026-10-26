@@ -228,6 +228,20 @@ Branchement Studio : `studio_tools/wire_brick_eggs.lua` (barre MCP, mode Éditio
 `shared/EggModelBuilder` prend à la place de l'œuf généré. Piège : une flamme ou un détail en or miroir sort sombre
 (il reflète le fond) : or plus mat (`rough=0.5`) pour les petits détails.
 
+**Objets à jeter, un jeu par monde, et bac à objets (26 oct., `Lot10_ObjetsMondes`)** : `props/_items.py` (aides :
+étages octogonaux `stack`, boule `ball`, tuile ou pastille plaquée sur une face `on_face` / `disc_on_face`, anneau
+`ring`) et un fichier par monde `props/Objets_<Monde>.py` qui construit ses 6 objets côte à côte dans UNE cuisson (une
+partie par objet, une seule texture par monde : 45 s), en studs, posés au sol. Planche de contrôle d'un objet par ligne :
+`blender.exe -b --factory-startup --python dataset_and_pipeline/tools/render_items_sheet.py -- Objets_<Monde>` ->
+`qa_renders/pets/Objets_<Monde>_items.png` (la planche « board » montre les 6 trop petits). Une seule cuisson ou planche
+à la fois (dossier `_tiles` partagé). Branchement : `tools/make_items_wire.py Objets_Prairie ...` -> Luau qui range chaque
+pièce dans `ArtModels.Items.<Monde>.<Objet>` (MeshPart seule, taille du rig.json, non ancrée, collisions en boîte).
+Bac : `props/BacObjets.py` (pièces Bin + Trim, le jeu teint Trim à la couleur de la base), branché par
+`tools/make_props_wire.py BacObjets` AVANT les objets (le script des objets supprime tout l'import à la fin). Pièges vus : une tuile plaquée sur un octogone doit viser une face (angles
+multiples de 45°) et rester dans la hauteur d'un seul étage, sinon elle dépasse en languette ; les couleurs sombres
+sortent bien plus claires une fois cuites (charbon à `#141218`, pas `#2C2832`) ; un cristal d'ambre sort brun ; une
+boule en étages paraît un tonneau sans `power=1` et 7 étages ; deux rangées de plumes qui se touchent cuisent en noir.
+
 ## Pistes pour la suite
 
 - Cuisson par pièce pour garder Leg / Ear animables.

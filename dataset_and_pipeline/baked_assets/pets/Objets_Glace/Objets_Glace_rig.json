@@ -1,0 +1,122 @@
+{
+  "pet": "Objets_Glace",
+  "model_height_blender": 2.8096,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "BouleDeNeige": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 760,
+      "center": [
+        -9.97565,
+        0.0,
+        0.82
+      ],
+      "size": [
+        1.56386,
+        1.51516,
+        1.64
+      ],
+      "pivot": null
+    },
+    "Cornet": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1528,
+      "center": [
+        -6.0,
+        0.0,
+        1.4048
+      ],
+      "size": [
+        1.1717,
+        1.1717,
+        2.8096
+      ],
+      "pivot": null
+    },
+    "Bonhomme": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1816,
+      "center": [
+        -2.0,
+        -0.03403,
+        1.15
+      ],
+      "size": [
+        1.56301,
+        0.99194,
+        2.3
+      ],
+      "pivot": null
+    },
+    "Patin": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 584,
+      "center": [
+        2.0,
+        -0.09,
+        0.92
+      ],
+      "size": [
+        0.62,
+        1.98,
+        1.84
+      ],
+      "pivot": null
+    },
+    "Flocon": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1650,
+      "center": [
+        6.0,
+        0.0,
+        1.11
+      ],
+      "size": [
+        1.60849,
+        1.10866,
+        2.22
+      ],
+      "pivot": null
+    },
+    "Couronne": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 2252,
+      "center": [
+        10.0,
+        0.0,
+        0.695
+      ],
+      "size": [
+        1.66628,
+        1.66627,
+        1.29
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.021355
+}

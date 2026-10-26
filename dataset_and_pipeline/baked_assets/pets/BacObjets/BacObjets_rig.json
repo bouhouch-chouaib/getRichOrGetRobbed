@@ -1,0 +1,46 @@
+{
+  "pet": "BacObjets",
+  "model_height_blender": 3.12,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Bin": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 2164,
+      "center": [
+        0.0,
+        0.0,
+        1.45
+      ],
+      "size": [
+        7.4,
+        10.84,
+        2.9
+      ],
+      "pivot": null
+    },
+    "Trim": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 440,
+      "center": [
+        0.0,
+        0.0,
+        1.93705
+      ],
+      "size": [
+        7.54,
+        10.54,
+        2.36589
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.019231
+}

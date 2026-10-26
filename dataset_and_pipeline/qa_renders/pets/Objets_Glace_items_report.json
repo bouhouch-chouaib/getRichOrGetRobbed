@@ -1,0 +1,216 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Objets_Glace_items.png",
+  "layout": {
+    "rows": [
+      "BouleDeNeige",
+      "Cornet",
+      "Bonhomme",
+      "Patin",
+      "Flocon",
+      "Couronne"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "BouleDeNeige",
+      "kind": "baked",
+      "triangles": 760,
+      "views": {
+        "face": {
+          "coverage": 0.248,
+          "lum_mean": 0.752,
+          "lum_std": 0.211,
+          "detail": 0.0286,
+          "saturation": 0.072,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.249,
+          "lum_mean": 0.747,
+          "lum_std": 0.208,
+          "detail": 0.0303,
+          "saturation": 0.088,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.24,
+          "lum_mean": 0.77,
+          "lum_std": 0.196,
+          "detail": 0.0255,
+          "saturation": 0.112,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Cornet",
+      "kind": "baked",
+      "triangles": 1528,
+      "views": {
+        "face": {
+          "coverage": 0.134,
+          "lum_mean": 0.573,
+          "lum_std": 0.172,
+          "detail": 0.0442,
+          "saturation": 0.396,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.13,
+          "lum_mean": 0.569,
+          "lum_std": 0.183,
+          "detail": 0.0603,
+          "saturation": 0.363,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.133,
+          "lum_mean": 0.581,
+          "lum_std": 0.174,
+          "detail": 0.0445,
+          "saturation": 0.373,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Bonhomme",
+      "kind": "baked",
+      "triangles": 1816,
+      "views": {
+        "face": {
+          "coverage": 0.149,
+          "lum_mean": 0.61,
+          "lum_std": 0.229,
+          "detail": 0.0533,
+          "saturation": 0.133,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.147,
+          "lum_mean": 0.583,
+          "lum_std": 0.237,
+          "detail": 0.0674,
+          "saturation": 0.156,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.147,
+          "lum_mean": 0.665,
+          "lum_std": 0.239,
+          "detail": 0.0528,
+          "saturation": 0.141,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Patin",
+      "kind": "baked",
+      "triangles": 584,
+      "views": {
+        "face": {
+          "coverage": 0.101,
+          "lum_mean": 0.658,
+          "lum_std": 0.276,
+          "detail": 0.0514,
+          "saturation": 0.179,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.168,
+          "lum_mean": 0.686,
+          "lum_std": 0.268,
+          "detail": 0.0579,
+          "saturation": 0.228,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.192,
+          "lum_mean": 0.702,
+          "lum_std": 0.237,
+          "detail": 0.0385,
+          "saturation": 0.291,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Flocon",
+      "kind": "baked",
+      "triangles": 1650,
+      "views": {
+        "face": {
+          "coverage": 0.14,
+          "lum_mean": 0.548,
+          "lum_std": 0.186,
+          "detail": 0.0627,
+          "saturation": 0.388,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.14,
+          "lum_mean": 0.556,
+          "lum_std": 0.202,
+          "detail": 0.0834,
+          "saturation": 0.377,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.079,
+          "lum_mean": 0.62,
+          "lum_std": 0.198,
+          "detail": 0.0719,
+          "saturation": 0.33,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Couronne",
+      "kind": "baked",
+      "triangles": 2252,
+      "views": {
+        "face": {
+          "coverage": 0.211,
+          "lum_mean": 0.486,
+          "lum_std": 0.184,
+          "detail": 0.0628,
+          "saturation": 0.624,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.229,
+          "lum_mean": 0.475,
+          "lum_std": 0.204,
+          "detail": 0.0755,
+          "saturation": 0.613,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.209,
+          "lum_mean": 0.515,
+          "lum_std": 0.193,
+          "detail": 0.0642,
+          "saturation": 0.642,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 32,
+    "resolution": 360,
+    "view_transform": "Standard",
+    "seconds": 34.0
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

@@ -239,10 +239,15 @@ end
 -- Récompenses
 ----------------------------------------------------------------------
 
--- Argent des points de la manche : MoneyPerPoint par point, ou une fraction du revenu du joueur si c'est plus.
+-- Argent des points de la manche : MoneyPerPoint par point, ou une fraction du revenu du joueur si c'est plus. Les
+-- points en plus des objets de son monde (Config.WorldItems.Points) n'en donnent pas : le revenu suit déjà le monde,
+-- ce bonus ne sert qu'aux tirages (simulateur : 1er Rebirth 8,4 h au lieu de 8,7 h, 7,7 h s'il comptait ici aussi).
 local function pointsMoney(player: Player, score: number): number
+	local world = Config.Worlds[SessionData.GetWorld(player)]
+	local set = world and Config.WorldItems[world.Id]
+	local points = score / (if set then set.Points else 1)
 	local perPoint = math.max(Config.Economy.MoneyPerPoint, EconomyController.GetIncome(player) * Config.Economy.IncomeSecondsPerPoint)
-	return math.floor(score * perPoint * Perks.MoneyMultiplier(player))
+	return math.floor(points * perPoint * Perks.MoneyMultiplier(player))
 end
 
 local function distributeRewards()

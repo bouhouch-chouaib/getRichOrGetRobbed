@@ -1,0 +1,78 @@
+{
+  "asset": "Objets_Abysses_Corps",
+  "triangles": 6072,
+  "vertices": 3260,
+  "size_studs": [
+    21.527,
+    2.126,
+    2.66
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 34.3,
+  "source_materials": [
+    "M_Objets_Abysses_high_acier_ancre",
+    "M_Objets_Abysses_high_aigue_marine",
+    "M_Objets_Abysses_high_bois_coffre",
+    "M_Objets_Abysses_high_bois_coffre_fonce",
+    "M_Objets_Abysses_high_charniere",
+    "M_Objets_Abysses_high_coquille_huitre",
+    "M_Objets_Abysses_high_coquille_huitre_clair",
+    "M_Objets_Abysses_high_coquille_peche",
+    "M_Objets_Abysses_high_coquille_rose",
+    "M_Objets_Abysses_high_corail",
+    "M_Objets_Abysses_high_corde",
+    "M_Objets_Abysses_high_corde_fonce",
+    "M_Objets_Abysses_high_etoile",
+    "M_Objets_Abysses_high_etoile_centre",
+    "M_Objets_Abysses_high_etoile_points",
+    "M_Objets_Abysses_high_grosse_perle",
+    "M_Objets_Abysses_high_nacre_huitre",
+    "M_Objets_Abysses_high_or_coffre",
+    "M_Objets_Abysses_high_or_huitre",
+    "M_Objets_Abysses_high_or_trident",
+    "M_Objets_Abysses_high_or_trident_fonce",
+    "M_Objets_Abysses_high_perle_coffre",
+    "M_Objets_Abysses_high_pieces",
+    "M_Objets_Abysses_high_rocher",
+    "M_Objets_Abysses_high_rubis_coffre",
+    "M_Objets_Abysses_high_serrure"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 16,
+    "ao_samples": 64,
+    "cage": 0.3229,
+    "max_ray": 0.8073,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "Objets_Abysses_Corps_Color.png",
+    "Roughness": "Objets_Abysses_Corps_Roughness.png",
+    "Metalness": "Objets_Abysses_Corps_Metalness.png",
+    "Normal": "Objets_Abysses_Corps_Normal.png",
+    "AO": "Objets_Abysses_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "Objets_Abysses_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "Objets_Abysses_Corps_Color.png",
+      "NormalMap": "Objets_Abysses_Corps_Normal.png",
+      "RoughnessMap": "Objets_Abysses_Corps_Roughness.png",
+      "MetalnessMap": "Objets_Abysses_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 28.4
+}

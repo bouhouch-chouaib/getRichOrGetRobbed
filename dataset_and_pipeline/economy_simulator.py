@@ -55,6 +55,7 @@ class Game:
         self.rarities = cfg["Rarities"]
         self.rarity_index = {r["Id"]: i + 1 for i, r in enumerate(self.rarities)}
         self.worlds = cfg["Worlds"]
+        self.world_points_on = True  # --sans-points-monde : comme avant le 26 oct. (mêmes points dans tous les mondes)
         self.pets = {p["id"]: p for p in data["pets"]}
         self.incomes: dict[str, float] = data["incomes"]  # toutes les formes (évoluées, mutées) : PetCatalog.GetIncome
         # Calculés par le jeu (Config.GetRebirthPrice, Config.GetCapsuleSlots), si l'export les contient.
@@ -137,6 +138,12 @@ class Game:
             total += weight
             value += weight * tier["Value"]
         return value / total
+
+    def world_points(self, tier: int) -> float:
+        """Points du monde (Config.WorldItems.<Monde>.Points, 26 oct.) : ses objets rapportent plus que ceux de la Prairie.
+        La jauge du trou noir ne les compte pas (server/BlackholeTiers)."""
+        items = self.cfg.get("WorldItems", {}).get(self.world(tier)["Id"]) if self.world_points_on else None
+        return float(items["Points"]) if items else 1.0
 
     def gauge_per_item(self, quality: int) -> float:
         """Jauge du trou noir apportée par un objet en moyenne : BlackholeTiers.OnScored ajoute max(1, valeur)."""
@@ -489,7 +496,8 @@ class SoloRun:
         items = min(HOLE["Items"] + HOLE["PerBackpack"] * up.get("Backpack", 0) + HOLE["PerMagnet"] * up.get("Magnet", 0)
                     + HOLE["PerTraining"] * (up.get("Treadmill", 0) + up.get("Bench", 0)), HOLE["MaxItems"])
         mult = g.rarities[g.rarity_of(equipped) - 1]["Multiplier"] if equipped else 1
-        score = math.floor(items * g.item_value(up.get("ItemQuality", 0)) * mult * HOLE["Bonus"] * 10) / 10
+        score = math.floor(items * g.item_value(up.get("ItemQuality", 0)) * g.world_points(self.tier) * mult * HOLE["Bonus"]
+                           * 10) / 10
         pulls = g.count_pulls(score)
         if checkpoint:
             self.round_stats[checkpoint] = (score, pulls)
@@ -531,7 +539,8 @@ class SoloRun:
             self.mark("Index : les 75 de base")
         if len(self.discovered) >= len(g.pets):
             self.mark("Index complet (106)")
-        self.earn("Points du trou", score * max(cfg["Economy"]["MoneyPerPoint"], income * cfg["Economy"]["IncomeSecondsPerPoint"]))
+        self.earn("Points du trou", score / g.world_points(self.tier)
+                  * max(cfg["Economy"]["MoneyPerPoint"], income * cfg["Economy"]["IncomeSecondsPerPoint"]))
         self.earn("Revenu des familiers", income * g.round)
         self.t += g.round
         return next_check
@@ -796,11 +805,14 @@ def main():
     parser.add_argument("--pitie-palier", action="store_true", help="règle proposée : pitié par palier (étape 4)")
     parser.add_argument("--capsules-rebirth", action="store_true", help="règle proposée : une capsule de plus par Rebirth")
     parser.add_argument("--doublons-capsule", action="store_true", help="règle proposée : un doublon va dans une capsule libre")
+    parser.add_argument("--sans-points-monde", action="store_true",
+                        help="mêmes points d'objets dans tous les mondes (comme avant le 26 oct.)")
     parser.add_argument("--rebirth-croissance", type=float, default=None,
                         help="règle proposée : prix du Rebirth n+1 = base x (n + 1) x valeur^n (étape 4 : 1,62)")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     game = Game(load_data(refresh=not args.no_refresh))
+    game.world_points_on = not args.sans_points_monde
     if args.mode == "retention":
         report_retention(game, args.runs, args.hours)
         return

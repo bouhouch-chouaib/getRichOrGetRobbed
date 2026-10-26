@@ -1,0 +1,92 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\BacObjets_items.png",
+  "layout": {
+    "rows": [
+      "Bin",
+      "Trim"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Bin",
+      "kind": "baked",
+      "triangles": 2164,
+      "views": {
+        "face": {
+          "coverage": 0.188,
+          "lum_mean": 0.382,
+          "lum_std": 0.222,
+          "detail": 0.0485,
+          "saturation": 0.378,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.249,
+          "lum_mean": 0.44,
+          "lum_std": 0.222,
+          "detail": 0.0658,
+          "saturation": 0.382,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.196,
+          "lum_mean": 0.42,
+          "lum_std": 0.224,
+          "detail": 0.0524,
+          "saturation": 0.351,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Trim",
+      "kind": "baked",
+      "triangles": 440,
+      "views": {
+        "face": {
+          "coverage": 0.044,
+          "lum_mean": 0.681,
+          "lum_std": 0.37,
+          "detail": 0.0642,
+          "saturation": 0.022,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        },
+        "trois_quarts": {
+          "coverage": 0.073,
+          "lum_mean": 0.841,
+          "lum_std": 0.315,
+          "detail": 0.0387,
+          "saturation": 0.019,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.049,
+          "lum_mean": 0.795,
+          "lum_std": 0.282,
+          "detail": 0.0725,
+          "saturation": 0.048,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 32,
+    "resolution": 360,
+    "view_transform": "Standard",
+    "seconds": 12.3
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

@@ -1,0 +1,218 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Objets_Abysses_items.png",
+  "layout": {
+    "rows": [
+      "Coquillage",
+      "EtoileDeMer",
+      "Ancre",
+      "Coffre",
+      "Huitre",
+      "Trident"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Coquillage",
+      "kind": "baked",
+      "triangles": 396,
+      "views": {
+        "face": {
+          "coverage": 0.115,
+          "lum_mean": 0.554,
+          "lum_std": 0.226,
+          "detail": 0.0269,
+          "saturation": 0.416,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.146,
+          "lum_mean": 0.58,
+          "lum_std": 0.203,
+          "detail": 0.0324,
+          "saturation": 0.413,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.108,
+          "lum_mean": 0.58,
+          "lum_std": 0.181,
+          "detail": 0.0369,
+          "saturation": 0.428,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "EtoileDeMer",
+      "kind": "baked",
+      "triangles": 828,
+      "views": {
+        "face": {
+          "coverage": 0.072,
+          "lum_mean": 0.46,
+          "lum_std": 0.211,
+          "detail": 0.0361,
+          "saturation": 0.518,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.094,
+          "lum_mean": 0.481,
+          "lum_std": 0.2,
+          "detail": 0.0388,
+          "saturation": 0.512,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.072,
+          "lum_mean": 0.497,
+          "lum_std": 0.177,
+          "detail": 0.0286,
+          "saturation": 0.511,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Ancre",
+      "kind": "baked",
+      "triangles": 1108,
+      "views": {
+        "face": {
+          "coverage": 0.137,
+          "lum_mean": 0.575,
+          "lum_std": 0.178,
+          "detail": 0.087,
+          "saturation": 0.178,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.13,
+          "lum_mean": 0.635,
+          "lum_std": 0.195,
+          "detail": 0.1034,
+          "saturation": 0.158,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.06,
+          "lum_mean": 0.543,
+          "lum_std": 0.169,
+          "detail": 0.0713,
+          "saturation": 0.218,
+          "flags": [
+            "objet trop petit dans le cadre"
+          ]
+        }
+      }
+    },
+    {
+      "label": "Coffre",
+      "kind": "baked",
+      "triangles": 1596,
+      "views": {
+        "face": {
+          "coverage": 0.35,
+          "lum_mean": 0.397,
+          "lum_std": 0.152,
+          "detail": 0.0468,
+          "saturation": 0.521,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.349,
+          "lum_mean": 0.448,
+          "lum_std": 0.192,
+          "detail": 0.0581,
+          "saturation": 0.437,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.254,
+          "lum_mean": 0.404,
+          "lum_std": 0.123,
+          "detail": 0.0334,
+          "saturation": 0.401,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Huitre",
+      "kind": "baked",
+      "triangles": 1264,
+      "views": {
+        "face": {
+          "coverage": 0.226,
+          "lum_mean": 0.589,
+          "lum_std": 0.217,
+          "detail": 0.0403,
+          "saturation": 0.137,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.23,
+          "lum_mean": 0.558,
+          "lum_std": 0.23,
+          "detail": 0.0456,
+          "saturation": 0.145,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.184,
+          "lum_mean": 0.509,
+          "lum_std": 0.207,
+          "detail": 0.0519,
+          "saturation": 0.202,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Trident",
+      "kind": "baked",
+      "triangles": 880,
+      "views": {
+        "face": {
+          "coverage": 0.109,
+          "lum_mean": 0.437,
+          "lum_std": 0.158,
+          "detail": 0.071,
+          "saturation": 0.593,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.108,
+          "lum_mean": 0.434,
+          "lum_std": 0.184,
+          "detail": 0.071,
+          "saturation": 0.623,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.083,
+          "lum_mean": 0.419,
+          "lum_std": 0.137,
+          "detail": 0.0557,
+          "saturation": 0.573,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 32,
+    "resolution": 360,
+    "view_transform": "Standard",
+    "seconds": 48.5
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

@@ -1,0 +1,122 @@
+{
+  "pet": "Objets_Prairie",
+  "model_height_blender": 2.4362,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Pomme": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 820,
+      "center": [
+        -10.0,
+        -0.0,
+        0.92665
+      ],
+      "size": [
+        1.62603,
+        1.62603,
+        1.85329
+      ],
+      "pivot": null
+    },
+    "Carotte": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1004,
+      "center": [
+        -6.0,
+        0.21915,
+        0.56589
+      ],
+      "size": [
+        0.83149,
+        2.8583,
+        1.13177
+      ],
+      "pivot": null
+    },
+    "Fromage": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 440,
+      "center": [
+        -2.0,
+        0.0475,
+        0.49
+      ],
+      "size": [
+        1.92,
+        2.095,
+        0.98
+      ],
+      "pivot": null
+    },
+    "PotDeMiel": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 2100,
+      "center": [
+        2.0,
+        -0.0425,
+        1.21808
+      ],
+      "size": [
+        1.51516,
+        1.60016,
+        2.43616
+      ],
+      "pivot": null
+    },
+    "Trefle": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 984,
+      "center": [
+        6.0,
+        0.0,
+        1.13238
+      ],
+      "size": [
+        1.21952,
+        1.21952,
+        2.26477
+      ],
+      "pivot": null
+    },
+    "RucheDOr": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1352,
+      "center": [
+        9.93585,
+        -0.01356,
+        1.03
+      ],
+      "size": [
+        1.82824,
+        1.75288,
+        2.06
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.024629
+}
