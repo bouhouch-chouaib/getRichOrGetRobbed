@@ -374,10 +374,10 @@ Config.Monetization = {
 	Products = {
 		{ Key = "AstralAura", Id = 3718429232, Icon = "Sparkle", Name = "AURA ASTRALE", Description = "Cristaux lumineux, étoiles cyan et violettes, et une traînée quand tu cours. Activée automatiquement, pour toujours.", Price = 19 },
 
-		{ Key = "ServerLuck", Id = 3717917081, Icon = "Sparkle", Name = "BOOST DE CHANCE SERVEUR", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
-		{ Key = "Pull1", Id = 3717917143, Icon = "Dice", Name = "TIRAGE INSTANTANÉ", Description = "1 œuf de familier. Délai d’éclosion selon sa rareté.", Price = 49, Pulls = 1 },
+		{ Key = "ServerLuck", Id = 3717917081, Icon = "Sparkle", Name = "CHANCE x2 POUR TOUS", Description = "10 minutes de chance x2 pour TOUT le serveur !", Price = 149 },
+		{ Key = "Pull1", Id = 3717917143, Icon = "Dice", Name = "1 ŒUF", Description = "1 œuf de familier. Il éclot plus ou moins vite selon sa rareté.", Price = 49, Pulls = 1 },
 		{ Key = "Key1", Id = 3718327246, Icon = "Key", Name = "CLÉ", Description = "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.", Price = 49, Keys = 1 },
-		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 TIRAGES", Description = "10 œufs de familiers. Éclosion en parallèle selon leur rareté.", Price = 399, Pulls = 10 },
+		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 ŒUFS", Description = "10 œufs de familiers. Ils éclosent tous en même temps, plus ou moins vite selon leur rareté.", Price = 399, Pulls = 10 },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,
 	VipMoneyMultiplier = 1.25,
@@ -1062,12 +1062,12 @@ export type QuestDef = { Id: string, Text: string, Goals: { number } }
 Config.Quests = {
 	PerDay = 3,
 	Pool = {
-		{ Id = "Feed", Text = "Fais avaler %d objets au trou noir", Goals = { 25, 60, 150 } },
-		{ Id = "Pulls", Text = "Gagne %d tirages", Goals = { 3, 8, 20 } },
-		{ Id = "Hatch", Text = "Fais éclore %d œufs", Goals = { 3, 8, 20 } },
-		{ Id = "Train", Text = "Gagne %d niveaux de Vitesse ou de Force", Goals = { 2, 5, 10 } },
-		{ Id = "Upgrade", Text = "Achète %d améliorations dans la Boutique", Goals = { 1, 3, 6 } },
-		{ Id = "Steal", Text = "Vole %d familiers dans les bases adverses", Goals = { 1, 2, 4 } },
+		{ Id = "Feed", Text = "JETTE %d OBJETS DANS LE TROU NOIR", Goals = { 25, 60, 150 } },
+		{ Id = "Pulls", Text = "GAGNE %d ŒUFS", Goals = { 3, 8, 20 } },
+		{ Id = "Hatch", Text = "FAIS ÉCLORE %d ŒUFS", Goals = { 3, 8, 20 } },
+		{ Id = "Train", Text = "GAGNE %d NIVEAUX DE VITESSE OU DE FORCE", Goals = { 2, 5, 10 } },
+		{ Id = "Upgrade", Text = "ACHÈTE %d FOIS DANS LA BOUTIQUE", Goals = { 1, 3, 6 } },
+		{ Id = "Steal", Text = "VOLE %d FAMILIERS AUX AUTRES", Goals = { 1, 2, 4 } },
 	} :: { QuestDef },
 	Rewards = {
 		{ Seconds = 600 }, -- facile : 10 min de revenu

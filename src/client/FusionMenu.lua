@@ -82,10 +82,10 @@ function FusionMenu.create(gui: Instance): Fusion
 	----------------------------------------------------------------------
 	-- Textes du haut
 	----------------------------------------------------------------------
-	local line1 = UiStyle.text(content, string.format("Mets %d familiers de la même rareté dans la machine", COUNT), 22, WHITE, UiStyle.BODY_FONT)
+	local line1 = UiStyle.text(content, string.format("METS %d FAMILIERS DE LA MÊME COULEUR", COUNT), 22, WHITE, UiStyle.BODY_FONT)
 	line1.Size = UDim2.new(1, 0, 0, 26)
 	line1.ZIndex = 3
-	local line2 = UiStyle.text(content, "Tu obtiens un familier de la rareté au-dessus !", 20, WHITE)
+	local line2 = UiStyle.text(content, "TU GAGNES UN ŒUF PLUS RARE !", 20, WHITE)
 	line2.FontFace = UiStyle.NUMBER_FONT
 	line2.Position = UDim2.fromOffset(0, 26)
 	line2.Size = UDim2.new(1, 0, 0, 24)
@@ -191,10 +191,10 @@ function FusionMenu.create(gui: Instance): Fusion
 	local fuseCaption = fuseButton:FindFirstChild("Caption") :: TextLabel
 	fuseCaption.FontFace = UiStyle.BODY_FONT
 
-	local autoButton = UiStyle.button(content, "Auto", UDim2.fromOffset(110, 46), UiStyle.Colors.Cyan, 24)
+	local autoButton = UiStyle.button(content, "AUTO", UDim2.fromOffset(110, 46), UiStyle.Colors.Cyan, 24)
 	autoButton.Position = UDim2.fromOffset(rowLeft, CHAMBER_TOP + CHAMBER_SIZE.Y + 18)
 	autoButton.ZIndex = 3
-	local clearButton = UiStyle.button(content, "Vider", UDim2.fromOffset(110, 46), UiStyle.Colors.Red, 24)
+	local clearButton = UiStyle.button(content, "VIDER", UDim2.fromOffset(110, 46), UiStyle.Colors.Red, 24)
 	clearButton.Position = UDim2.fromOffset(rowLeft + rowWidth - 110, CHAMBER_TOP + CHAMBER_SIZE.Y + 18)
 	clearButton.ZIndex = 3
 
@@ -205,7 +205,7 @@ function FusionMenu.create(gui: Instance): Fusion
 	picker.Name = "Picker"
 	picker.ZIndex = 10
 	picker.Visible = false
-	local pickerTitle = UiStyle.text(picker, "Choisis un familier", 26, WHITE, UiStyle.BODY_FONT)
+	local pickerTitle = UiStyle.text(picker, "CHOISIS UN FAMILIER", 26, WHITE, UiStyle.BODY_FONT)
 	pickerTitle.Position = UDim2.fromOffset(12, 6)
 	pickerTitle.Size = UDim2.new(1, -80, 0, 34)
 	pickerTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -235,7 +235,7 @@ function FusionMenu.create(gui: Instance): Fusion
 	pickerLayout.CellPadding = UDim2.fromOffset(12, 12)
 	pickerLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	pickerLayout.Parent = pickerGrid
-	local pickerEmpty = UiStyle.text(picker, "Aucun familier libre à fusionner ici.\nLes familiers équipés ne comptent pas.", 22, WHITE, UiStyle.BODY_FONT)
+	local pickerEmpty = UiStyle.text(picker, "PAS DE FAMILIER LIBRE ICI.\nCEUX QUI TE SUIVENT NE COMPTENT PAS.", 22, WHITE, UiStyle.BODY_FONT)
 	pickerEmpty.Position = UDim2.fromOffset(16, 56)
 	pickerEmpty.Size = UDim2.new(1, -32, 1, -72)
 	pickerEmpty.TextWrapped = true
@@ -300,7 +300,7 @@ function FusionMenu.create(gui: Instance): Fusion
 				name.Size = UDim2.new(1, -16, 0, 30)
 				name.TextWrapped = true
 				name.ZIndex = 13
-				local count = UiStyle.text(button, string.format("x%d libre%s", left, if left > 1 then "s" else ""), 14, WHITE)
+				local count = UiStyle.text(button, string.format("x%d LIBRE%s", left, if left > 1 then "S" else ""), 14, WHITE)
 				count.AnchorPoint = Vector2.new(0, 1)
 				count.Position = UDim2.new(0, 8, 1, -8)
 				count.Size = UDim2.new(1, -16, 0, 18)
@@ -345,11 +345,11 @@ function FusionMenu.create(gui: Instance): Fusion
 	helpEquals.Position = UDim2.fromOffset(142, 18)
 	helpEquals.Size = UDim2.fromOffset(30, 64)
 	Icons.image(help, "Sparkle", UDim2.fromOffset(70, 70), UDim2.fromOffset(172, 14))
-	local helpSub = UiStyle.text(help, "5 de la même rareté = 1 plus rare !", 18, WHITE, UiStyle.BODY_FONT)
+	local helpSub = UiStyle.text(help, string.format("%d DE LA MÊME COULEUR = 1 ŒUF PLUS RARE !", COUNT), 18, WHITE, UiStyle.BODY_FONT)
 	helpSub.Position = UDim2.fromOffset(8, 84)
 	helpSub.Size = UDim2.new(1, -16, 0, 44)
 	helpSub.TextWrapped = true
-	local helpOk = UiStyle.button(help, "D'accord !", UDim2.new(1, -60, 0, 46), UiStyle.Colors.Green, 26)
+	local helpOk = UiStyle.button(help, "OK !", UDim2.new(1, -60, 0, 46), UiStyle.Colors.Green, 26)
 	helpOk.Position = UDim2.new(0, 30, 1, -58)
 	helpOk.Activated:Connect(function()
 		help.Visible = false
@@ -398,7 +398,7 @@ function FusionMenu.create(gui: Instance): Fusion
 			chamberMark.TextColor3 = target.Color
 			chamberGlow.Color = target.Color
 		else
-			chamberLabel.Text = "Résultat"
+			chamberLabel.Text = "RÉSULTAT"
 			chamberLabel.TextColor3 = WHITE
 			chamberMark.TextColor3 = WHITE
 			chamberGlow.Color = UiStyle.Colors.Green
@@ -406,7 +406,7 @@ function FusionMenu.create(gui: Instance): Fusion
 
 		if filled < COUNT then
 			local missing = COUNT - filled
-			fuseCaption.Text = string.format("%d familier%s restant%s", missing, if missing > 1 then "s" else "", if missing > 1 then "s" else "")
+			fuseCaption.Text = string.format("IL EN MANQUE %d", missing)
 			UiStyle.setButtonColor(fuseButton, UiStyle.darker(UiStyle.Colors.Green, 0.25))
 		else
 			local cost = Config.Fusion.Costs[rarityIndex or 1] or 0
@@ -429,7 +429,7 @@ function FusionMenu.create(gui: Instance): Fusion
 		end
 		local cost = Config.Fusion.Costs[rarityIndex] or 0
 		if MenuKit.number("Money") < cost then
-			Toast.show("PAS ASSEZ D'ARGENT : " .. NumberFormat.money(cost), UiStyle.Colors.Red)
+			Toast.show("IL TE MANQUE " .. NumberFormat.money(cost - MenuKit.number("Money")) .. " !", UiStyle.Colors.Red)
 			Sounds.play("Error")
 			return
 		end
@@ -461,7 +461,7 @@ function FusionMenu.create(gui: Instance): Fusion
 			end
 		end
 		if not lock then
-			Toast.show(string.format("IL TE FAUT %d FAMILIERS LIBRES D'UNE MÊME RARETÉ !", COUNT), UiStyle.Colors.Red)
+			Toast.show(string.format("IL TE FAUT %d FAMILIERS DE LA MÊME COULEUR !", COUNT), UiStyle.Colors.Red)
 			Sounds.play("Error")
 			return
 		end
@@ -476,7 +476,7 @@ function FusionMenu.create(gui: Instance): Fusion
 				end
 			end
 			if not best then
-				Toast.show("PAS ASSEZ DE FAMILIERS LIBRES DE CETTE RARETÉ !", UiStyle.Colors.Red)
+				Toast.show("PAS ASSEZ DE FAMILIERS DE CETTE COULEUR !", UiStyle.Colors.Red)
 				break
 			end
 			addToSlot(best)

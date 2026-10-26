@@ -67,15 +67,15 @@ function IndexMenu.create(gui: Instance): Index
 		name.TextWrapped = true
 		-- Emblème de la rareté (shared/Icons : pousse, trèfle, goutte, orbe, flamme, fleur, étoile, couronne).
 		Icons.image(card, rarity.Id, UDim2.new(1, -30, 0, 120), UDim2.fromOffset(15, 56))
-		local bonus = UiStyle.text(card, string.format("Points x%s", tostring(rarity.Multiplier)), 18, WHITE, UiStyle.BODY_FONT)
+		local bonus = UiStyle.text(card, string.format("POINTS x%s", tostring(rarity.Multiplier)), 18, WHITE, UiStyle.BODY_FONT)
 		bonus.Position = UDim2.fromOffset(4, 196)
 		bonus.Size = UDim2.new(1, -8, 0, 24)
 		local income = UiStyle.number(card, NumberFormat.perSecond(rarity.Income), 22, UiStyle.Colors.Money)
 		income.Position = UDim2.fromOffset(4, 222)
 		income.Size = UDim2.new(1, -8, 0, 28)
 		local total = UiStyle.text(card, "", 16, WHITE, UiStyle.BODY_FONT)
-		total.Position = UDim2.new(0, 10, 1, -76)
-		total.Size = UDim2.new(1, -20, 0, 64)
+		total.Position = UDim2.new(0, 10, 1, -86)
+		total.Size = UDim2.new(1, -20, 0, 80)
 		total.TextWrapped = true
 		collectionLabel = total
 		rarityCard = card
@@ -135,7 +135,7 @@ function IndexMenu.create(gui: Instance): Index
 		if MenuKit.claimableCount() > 0 then
 			Remotes.ClaimIndex:FireServer()
 		else
-			Toast.show("RIEN À RÉCLAMER : DÉCOUVRE DE NOUVEAUX FAMILIERS !", UiStyle.Colors.Red)
+			Toast.show("RIEN À PRENDRE : TROUVE DE NOUVEAUX FAMILIERS !", UiStyle.Colors.Red)
 			Sounds.play("Error")
 		end
 	end)
@@ -238,7 +238,7 @@ function IndexMenu.create(gui: Instance): Index
 	if rewardStroke then
 		rewardStroke.Color = Color3.fromRGB(60, 220, 80)
 	end
-	local rewardTitle = UiStyle.text(rewardBox, "Récompense :", 22, WHITE, UiStyle.BODY_FONT)
+	local rewardTitle = UiStyle.text(rewardBox, "CADEAU :", 22, WHITE, UiStyle.BODY_FONT)
 	rewardTitle.Position = UDim2.fromOffset(10, 8)
 	rewardTitle.Size = UDim2.new(1, -20, 0, 26)
 	rewardTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -328,9 +328,8 @@ function IndexMenu.create(gui: Instance): Index
 		local selfBest = PowerCap.SelfBestOf(player)
 		local unlock = PowerCap.UnlockRarity(petId, selfBest)
 		detailIncome.Text = if not known then "???"
-			elseif unlock then NumberFormat.perSecond(PowerCap.Income(petId, selfBest)) .. " (BRIDÉ : "
-				.. NumberFormat.perSecond(PetCatalog.GetIncome(petId)) .. " avec un " .. Config.Rarities[unlock].Name
-				.. " à toi)"
+			elseif unlock then NumberFormat.perSecond(PowerCap.Income(petId, selfBest)) .. "  (BLOQUÉ : TROUVE UN "
+				.. TextFormat.upper(Config.Rarities[unlock].Name) .. ")"
 			else NumberFormat.perSecond(PetCatalog.GetIncome(petId))
 		local stats = PetStats.Of(petId)
 		detailSpeed.Text = if known then "+" .. stats.Speed else "?"
@@ -341,13 +340,13 @@ function IndexMenu.create(gui: Instance): Index
 		if owned <= 0 then
 			-- Pas cette forme, mais une autre : le bouton y mène au lieu de dire « Plus à toi ».
 			local mine = bestOwnedStage(speciesId)
-			caption.Text = if mine then "Voir " .. string.rep("★", mine) elseif known then "Plus à toi" else "Pas découvert"
+			caption.Text = if mine then "VOIR " .. string.rep("★", mine) elseif known then "PLUS À TOI" else "PAS TROUVÉ"
 			UiStyle.setButtonColor(equipButton, if mine then UiStyle.Colors.Cyan else GREY)
 		elseif equippedCount(petId) > 0 then
-			caption.Text = "Déséquiper"
+			caption.Text = "ENLEVER"
 			UiStyle.setButtonColor(equipButton, UiStyle.Colors.Red)
 		else
-			caption.Text = string.format("Équiper (x%d)", owned)
+			caption.Text = string.format("ÉQUIPER (x%d)", owned)
 			UiStyle.setButtonColor(equipButton, UiStyle.Colors.Cyan)
 		end
 		local baseCaption = baseButton:FindFirstChild("Caption") :: TextLabel
@@ -358,17 +357,17 @@ function IndexMenu.create(gui: Instance): Index
 			baseButton.Visible = false
 		elseif onlyEquipped then
 			baseButton.Visible = false
-			whereChip.Text = "ÉQUIPÉ (TE SUIT)"
+			whereChip.Text = "IL TE SUIT"
 			whereChip.BackgroundColor3 = UiStyle.Colors.Cyan
 		elseif inBase then
 			baseButton.Visible = true
-			baseCaption.Text = "Retirer"
+			baseCaption.Text = "RETIRER"
 			UiStyle.setButtonColor(baseButton, UiStyle.Colors.Orange)
 			whereChip.Text = "DANS TA BASE"
 			whereChip.BackgroundColor3 = UiStyle.Colors.Green
 		else
 			baseButton.Visible = true
-			baseCaption.Text = "Dans la base"
+			baseCaption.Text = "DANS LA BASE"
 			UiStyle.setButtonColor(baseButton, UiStyle.Colors.Green)
 			whereChip.Text = "EN RÉSERVE"
 			whereChip.BackgroundColor3 = UiStyle.Colors.Orange
@@ -377,13 +376,13 @@ function IndexMenu.create(gui: Instance): Index
 		rewardAmount.Text = if known then NumberFormat.money(Config.GetIndexReward(petId, PowerCap.Max(selfBest))) else "???"
 		local claimCaption = claimButton:FindFirstChild("Caption") :: TextLabel
 		if canClaim(petId, claimed) then
-			claimCaption.Text = "RÉCLAMER !"
+			claimCaption.Text = "PRENDRE !"
 			UiStyle.setButtonColor(claimButton, UiStyle.Colors.Green)
 		elseif claimed[petId] then
-			claimCaption.Text = "RÉCLAMÉ"
+			claimCaption.Text = "PRIS"
 			UiStyle.setButtonColor(claimButton, GREY)
 		else
-			claimCaption.Text = "À DÉCOUVRIR"
+			claimCaption.Text = "À TROUVER"
 			UiStyle.setButtonColor(claimButton, GREY)
 		end
 	end
@@ -413,11 +412,11 @@ function IndexMenu.create(gui: Instance): Index
 			-- Seuls les familiers de la base rapportent : on le rappelle au joueur.
 			local stats = PetStats.Of(petId)
 			Toast.show(
-				string.format("ÉQUIPÉ ! +%d VITESSE, +%d FORCE, MAIS IL NE RAPPORTE PLUS D'ARGENT", stats.Speed, stats.Strength),
+				string.format("IL TE SUIT ! +%d VITESSE, +%d FORCE. IL NE DONNE PLUS D'ARGENT", stats.Speed, stats.Strength),
 				UiStyle.Colors.Gold
 			)
 		else
-			Toast.show("PLUS DE PLACE ! DÉSÉQUIPE UN FAMILIER", UiStyle.Colors.Red)
+			Toast.show("PLUS DE PLACE ! ENLÈVE UN FAMILIER QUI TE SUIT", UiStyle.Colors.Red)
 			Sounds.play("Error")
 		end
 	end)
@@ -439,7 +438,7 @@ function IndexMenu.create(gui: Instance): Index
 				else name .. " ARRIVE DANS TA BASE !", UiStyle.Colors.Gold)
 		elseif reason == "Full" then
 			Sounds.play("Error")
-			Toast.show("BASE PLEINE : RETIRE D'ABORD UN FAMILIER QUE TU AS PLACÉ", UiStyle.Colors.Red)
+			Toast.show("TA BASE EST PLEINE ! RETIRES-EN UN D'ABORD", UiStyle.Colors.Red)
 		end
 	end)
 
@@ -659,19 +658,18 @@ function IndexMenu.create(gui: Instance): Index
 			tabs.setBadge(index, if waiting > 0 then tostring(waiting) else nil)
 		end
 		local claimable = MenuKit.claimableCount()
-		claimAllText.Text = if claimable > 0 then string.format("RÉCLAMER TOUT (%d) !", claimable) else "TOUT EST RÉCLAMÉ"
+		claimAllText.Text = if claimable > 0 then string.format("TOUT PRENDRE (%d) !", claimable) else "TOUT EST PRIS"
 		UiStyle.setButtonColor(claimAll, if claimable > 0 then UiStyle.Colors.Cyan else GREY)
 		if collectionLabel then
-			local multiplier = MenuKit.player:GetAttribute("Multiplier")
+			-- Lignes très courtes (la case est étroite) : ce qu'un enfant regarde, combien il en a trouvé.
 			collectionLabel.Text = string.format(
-				"Collection %d/%d\nÉvolutions %d/%d\nÉquipés %d/%d • x%.2f",
+				"TROUVÉS\n%d/%d\n★★★ %d/%d\nSUIVENT %d/%d",
 				discoveredTotal,
 				#PetCatalog.List,
 				evolvedTotal,
 				#PetCatalog.List * (STAGES - 1),
 				#MenuKit.equipped(),
-				MenuKit.number("EquipSlots"),
-				if type(multiplier) == "number" then multiplier else 1
+				MenuKit.number("EquipSlots")
 			)
 		end
 		if window.isOpen() then

@@ -122,7 +122,7 @@ function RobuxShop.create(options: Options): Panel
 
 	local passes = ShopKit.section(scroll, options.order, "Passes R$", "Pour toujours", "Crown", GOLD, "PASSES", ShopKit.COLUMNS)
 	local products = ShopKit.section(scroll, options.order + 1, "Produits R$", "Tirages, clés, boosts", "Gift", PRODUCT_PURPLE, "EXTRAS", ShopKit.COLUMNS)
-	local odds = ShopKit.section(scroll, options.order + 2, "Chances", "Pour un tirage acheté", "Dice", Color3.fromRGB(120, 120, 150), "CHANCES")
+	local odds = ShopKit.section(scroll, options.order + 2, "Chances", "Pour un œuf acheté", "Dice", Color3.fromRGB(120, 120, 150), "CHANCES")
 
 	-- Tout ce qui concerne les objets aléatoires payants (tirages Robux et leurs chances) : caché par défaut.
 	local randomItemParts: { GuiObject } = { odds.frame }

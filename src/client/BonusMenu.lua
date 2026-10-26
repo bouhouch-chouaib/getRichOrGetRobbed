@@ -82,14 +82,15 @@ local function questText(quest: Quest): string
 end
 
 -- « +$12.5K  •  3 TIRAGES » : l'argent est estimé avec le revenu actuel (le serveur recalcule au moment du clic).
-local function rewardText(reward: Config.BonusReward, minimum: number): string
+-- short = petite carte du cadeau du jour : « x3 » sous une image d'œuf (« 3 ŒUFS » ne tenait pas).
+local function rewardText(reward: Config.BonusReward, minimum: number, short: boolean?): string
 	local parts = {}
 	if reward.Seconds then
 		local money = math.max(MenuKit.number("Income") * reward.Seconds, minimum)
 		table.insert(parts, "+" .. NumberFormat.money(money))
 	end
 	if reward.Pulls then
-		table.insert(parts, string.format("%d TIRAGE%s", reward.Pulls, if reward.Pulls > 1 then "S" else ""))
+		table.insert(parts, if short then "x" .. reward.Pulls else string.format("%d ŒUF%s", reward.Pulls, if reward.Pulls > 1 then "S" else ""))
 	end
 	return table.concat(parts, "\n")
 end
@@ -124,7 +125,7 @@ function BonusMenu.create(gui: Instance): Menu
 	-- Cadeau du jour
 	------------------------------------------------------------------
 	local dailyPage = pages[1]
-	label(dailyPage, "Reviens chaque jour : le cadeau grossit !", 24, WHITE, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 30))
+	label(dailyPage, "REVIENS CHAQUE JOUR : LE CADEAU GROSSIT !", 24, WHITE, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 30))
 	local cardRow = Instance.new("Frame")
 	cardRow.BackgroundTransparency = 1
 	cardRow.Position = UDim2.fromOffset(0, 40)
@@ -158,7 +159,7 @@ function BonusMenu.create(gui: Instance): Menu
 			end
 		end
 		label(card, "JOUR " .. day, if big then 28 else 22, WHITE, UDim2.fromOffset(8, 6), UDim2.new(1, -16, 0, 28))
-		local iconSize = if big then 92 else 62
+		local iconSize = if big then 84 else 62
 		local iconHolder = Instance.new("Frame")
 		iconHolder.BackgroundTransparency = 1
 		iconHolder.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -167,12 +168,12 @@ function BonusMenu.create(gui: Instance): Menu
 		iconHolder.Parent = card
 		local rays = UiStyle.rays(iconHolder, GOLD, iconSize * 1.7, 40)
 		rays.Visible = false
-		local icon = Icons.image(iconHolder, if big then "Crown" elseif reward.Pulls then "Gift" else "Money", UDim2.fromScale(1, 1))
+		local icon = Icons.image(iconHolder, if big then "Crown" elseif reward.Pulls then "Egg" else "Money", UDim2.fromScale(1, 1))
 		icon.ZIndex = 3
 		UiStyle.sway(icon, 6)
 		local rewardLabel = UiStyle.number(card, "", if big then 20 else 16, WHITE)
 		rewardLabel.Position = UDim2.fromOffset(8, 46 + iconSize)
-		rewardLabel.Size = UDim2.new(1, -16, 0, 40)
+		rewardLabel.Size = UDim2.new(1, -16, 0, if big then 54 else 40) -- jour 7 : l'argent ET les œufs, sur 2 lignes
 		rewardLabel.TextWrapped = true
 		local chip = UiStyle.text(card, "", 15, WHITE, UiStyle.TITLE_FONT)
 		chip.AnchorPoint = Vector2.new(0.5, 1)
@@ -203,7 +204,7 @@ function BonusMenu.create(gui: Instance): Menu
 			shade.Color = UiStyle.buttonColors(color)
 		end
 	end
-	local dailyButton = UiStyle.button(dailyPage, "RÉCLAMER !", UDim2.fromOffset(440, 64), UiStyle.Colors.Green, 32)
+	local dailyButton = UiStyle.button(dailyPage, "PRENDRE !", UDim2.fromOffset(440, 64), UiStyle.Colors.Green, 32)
 	dailyButton.AnchorPoint = Vector2.new(0.5, 1)
 	dailyButton.Position = UDim2.new(0.5, 0, 1, -4)
 	dailyButton.Activated:Connect(function()
@@ -271,7 +272,7 @@ function BonusMenu.create(gui: Instance): Menu
 	-- Codes cadeaux
 	------------------------------------------------------------------
 	local codePage = pages[3]
-	label(codePage, "Un code cadeau ? Tape-le ici !", 30, WHITE, UDim2.fromOffset(0, 30), UDim2.new(1, 0, 0, 40))
+	label(codePage, "UN CODE CADEAU ? ÉCRIS-LE ICI !", 30, WHITE, UDim2.fromOffset(0, 30), UDim2.new(1, 0, 0, 40))
 	local box = Instance.new("TextBox")
 	box.AnchorPoint = Vector2.new(0.5, 0)
 	box.Position = UDim2.new(0.5, 0, 0, 100)
@@ -292,7 +293,7 @@ function BonusMenu.create(gui: Instance): Menu
 	codeButton.AnchorPoint = Vector2.new(0.5, 0)
 	codeButton.Position = UDim2.new(0.5, 0, 0, 184)
 	local codeMessage = label(codePage, "", 24, WHITE, UDim2.fromOffset(0, 262), UDim2.new(1, 0, 0, 30))
-	label(codePage, "Les codes sont donnés sur la page du jeu et pendant les événements.", 18, GREY,
+	label(codePage, "LES CODES SONT SUR LA PAGE DU JEU", 18, GREY,
 		UDim2.fromOffset(0, 310), UDim2.new(1, 0, 0, 24))
 	-- Groupe Roblox (Config.Group) : invitation à le rejoindre, ou confirmation du bonus.
 	local groupLine = label(codePage, "", 20, GOLD, UDim2.fromOffset(0, 344), UDim2.new(1, 0, 0, 26))
@@ -326,15 +327,15 @@ function BonusMenu.create(gui: Instance): Menu
 	local function refresh()
 		local percent = math.floor(Config.Group.IncomeBonus * 100 + 0.5)
 		groupLine.Text = if player:GetAttribute("InGroup") == true
-			then string.format("MEMBRE DU GROUPE : +%d %% DE REVENU !", percent)
-			else string.format("Rejoins notre groupe Roblox : +%d %% de revenu pour toujours !", percent)
+			then string.format("TU ES DANS LE GROUPE : +%d %% D'ARGENT !", percent)
+			else string.format("REJOINS NOTRE GROUPE : +%d %% D'ARGENT POUR TOUJOURS !", percent)
 		groupLine.TextColor3 = if player:GetAttribute("InGroup") == true then MONEY else GOLD
 		-- Cadeau du jour
 		local claimDay = dailyDay()
 		local streak = MenuKit.number("DailyStreak")
 		local nextDay = claimDay or (streak % #Config.Daily.Rewards + 1)
 		for day, ui in ipairs(dayCards) do
-			ui.reward.Text = rewardText(Config.Daily.Rewards[day], Config.Daily.MinMoney)
+			ui.reward.Text = rewardText(Config.Daily.Rewards[day], Config.Daily.MinMoney, day < #Config.Daily.Rewards)
 			local done = if claimDay then day < claimDay else day <= streak
 			local isToday = claimDay == day
 			if done then
@@ -356,7 +357,7 @@ function BonusMenu.create(gui: Instance): Menu
 		end
 		local caption = dailyButton:FindFirstChild("Caption") :: TextLabel
 		if claimDay then
-			caption.Text = string.format("RÉCLAMER LE JOUR %d !", claimDay)
+			caption.Text = string.format("PRENDRE LE JOUR %d !", claimDay)
 			UiStyle.setButtonColor(dailyButton, UiStyle.Colors.Green)
 		else
 			caption.Text = "PROCHAIN DANS " .. untilMidnight()
@@ -364,7 +365,7 @@ function BonusMenu.create(gui: Instance): Menu
 		end
 
 		-- Quêtes
-		questTimer.Text = "Nouvelles quêtes dans " .. untilMidnight()
+		questTimer.Text = "NOUVEAUX DÉFIS DANS " .. untilMidnight()
 		local list = quests()
 		for index, row in ipairs(rows) do
 			local quest = list[index]
@@ -385,7 +386,7 @@ function BonusMenu.create(gui: Instance): Menu
 				buttonCaption.Text = "FAIT !"
 				UiStyle.setButtonColor(row.button, UiStyle.Colors.Cyan)
 			elseif quest.progress >= quest.goal then
-				buttonCaption.Text = "RÉCLAMER !"
+				buttonCaption.Text = "PRENDRE !"
 				UiStyle.setButtonColor(row.button, UiStyle.Colors.Green)
 			else
 				buttonCaption.Text = "EN COURS"
@@ -400,7 +401,7 @@ function BonusMenu.create(gui: Instance): Menu
 
 	tabs = MenuKit.sideTabs(window, {
 		{ label = "Cadeau du jour", color = GOLD, icon = "Gift" },
-		{ label = "Quêtes", color = Color3.fromRGB(110, 200, 90), icon = "Trophy" },
+		{ label = "Défis", color = Color3.fromRGB(110, 200, 90), icon = "Trophy" },
 		{ label = "Codes", color = Color3.fromRGB(90, 170, 255), icon = "Key" },
 	}, function(index: number)
 		for pageIndex, page in ipairs(pages) do

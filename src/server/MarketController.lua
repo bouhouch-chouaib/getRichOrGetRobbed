@@ -80,15 +80,15 @@ function MarketController.List(player: Player, petId: unknown, price: unknown): 
 		return false, "VENTE IMPOSSIBLE"
 	end
 	if price ~= price or price < Config.Market.MinPrice or price > Config.Market.MaxPrice then
-		return false, "PRIX INVALIDE"
+		return false, "CE PRIX NE MARCHE PAS"
 	end
 	-- Au plus 1 h du revenu du familier (Config.Market.MaxPriceSeconds) : pas de cadeau d'argent déguisé.
 	local maxPrice = Config.GetMarketMaxPrice(PetCatalog.GetIncome(petId))
 	if price > maxPrice then
-		return false, "PRIX TROP HAUT : " .. MarketController.FormatMoney(maxPrice) .. " AU PLUS"
+		return false, "TROP CHER ! " .. MarketController.FormatMoney(maxPrice) .. " AU PLUS"
 	end
 	if not SessionData.IsLoaded(player) then
-		return false, "SAUVEGARDE EN CHARGEMENT"
+		return false, "ATTENDS UN PEU..."
 	end
 	local mine = 0
 	for _, listing in ipairs(listings) do
@@ -100,7 +100,7 @@ function MarketController.List(player: Player, petId: unknown, price: unknown): 
 		return false, string.format("%d VENTES AU PLUS : RETIRES-EN UNE", Config.Market.MaxListings)
 	end
 	if freeCount(player, petId) <= MarketController.CountListed(player, petId) then
-		return false, "CE FAMILIER N'EST PAS LIBRE (ÉQUIPÉ OU DÉJÀ EN VENTE)"
+		return false, "CE FAMILIER EST DÉJÀ PRIS"
 	end
 	table.insert(listings, { id = HttpService:GenerateGUID(false), seller = player, petId = petId, price = math.floor(price) })
 	publish()
@@ -110,7 +110,7 @@ end
 function MarketController.Cancel(player: Player, id: unknown): (boolean, string)
 	local listing, index = find(id)
 	if not listing or not index or listing.seller ~= player then
-		return false, "VENTE INTROUVABLE"
+		return false, "CETTE VENTE N'EXISTE PLUS"
 	end
 	table.remove(listings, index)
 	publish()
@@ -120,14 +120,14 @@ end
 function MarketController.Buy(buyer: Player, id: unknown): (boolean, string)
 	local listing, index = find(id)
 	if not listing or not index then
-		return false, "DÉJÀ VENDU OU RETIRÉ"
+		return false, "DÉJÀ VENDU"
 	end
 	local seller = listing.seller
 	if seller == buyer then
 		return false, "C'EST TA PROPRE VENTE"
 	end
 	if not seller.Parent or not SessionData.IsLoaded(seller) or not SessionData.IsLoaded(buyer) then
-		return false, "VENTE IMPOSSIBLE POUR LE MOMENT"
+		return false, "PAS POSSIBLE POUR L'INSTANT"
 	end
 	local data = SessionData.Get(buyer)
 	if not data or data.money < listing.price then

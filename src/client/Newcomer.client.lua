@@ -12,10 +12,10 @@ local player = Players.LocalPlayer
 -- La pile du HUD réserve la place : aucun chevauchement avec le chrono ou ses consignes.
 local hud = player:WaitForChild("PlayerGui"):WaitForChild("HUD")
 local stack = hud:WaitForChild("Root"):WaitForChild("TopStack")
-local shield = UiStyle.text(stack, "", 14, UiStyle.Colors.Cyan)
+local shield = UiStyle.text(stack, "", 18, UiStyle.Colors.Cyan)
 shield.Name = "TheftProtection"
 shield.LayoutOrder = 4
-shield.Size = UDim2.fromOffset(420, 32)
+shield.Size = UDim2.fromOffset(460, 34)
 shield.BackgroundColor3 = UiStyle.Colors.Panel
 shield.BackgroundTransparency = 0.25
 shield.Visible = false
@@ -27,14 +27,14 @@ padding.Parent = shield
 
 player:GetAttributeChangedSignal("StarterEggGiven"):Connect(function()
 	if player:GetAttribute("DataLoaded") == true and player:GetAttribute("StarterEggGiven") == true then
-		Toast.show("PREMIER OBJET ! UN ŒUF OFFERT T’ATTEND DANS TA COUVEUSE.", UiStyle.Colors.Cyan)
+		Toast.show("BRAVO ! UN ŒUF CADEAU T’ATTEND DANS TA BASE !", UiStyle.Colors.Cyan)
 	end
 end)
 player:GetAttributeChangedSignal("StarterBonusPaid"):Connect(function()
 	if player:GetAttribute("DataLoaded") == true and player:GetAttribute("StarterBonusPaid") == true then
 		Toast.show(
 			NumberFormat.money(Config.Newcomer.BonusMoney)
-				.. " OFFERTS ! ACHÈTE TON PREMIER TAPIS OU BANC EN BOUTIQUE.",
+				.. " POUR TOI ! ACHÈTE UN TAPIS DANS LA BOUTIQUE !",
 			UiStyle.Colors.Money
 		)
 	end
@@ -56,19 +56,19 @@ task.spawn(function()
 			else 0
 		local shielded = not protected and shieldSeconds > 0
 		if shielded and not wasShielded then
-			Toast.show("TU AS BEAUCOUP PERDU : TA BASE EST PROTÉGÉE DES VOLS PENDANT "
-				.. math.ceil(shieldSeconds / 60) .. " MIN.", UiStyle.Colors.Cyan)
+			Toast.show("ON T’A BEAUCOUP VOLÉ : PERSONNE NE PEUT TE VOLER PENDANT "
+				.. math.ceil(shieldSeconds / 60) .. " MIN !", UiStyle.Colors.Cyan)
 		end
 		wasShielded = shielded
 		shield.Visible = protected or shielded
 		if shielded then
-			shield.Text = string.format("BOUCLIER %d:%02d • Personne ne peut te voler", shieldSeconds // 60, shieldSeconds % 60)
+			shield.Text = string.format("BOUCLIER %d:%02d • PERSONNE NE PEUT TE VOLER", shieldSeconds // 60, shieldSeconds % 60)
 		elseif protected then
 			shield.Text =
-				string.format("ANTI-VOL %d:%02d • Voler met fin à ta protection", seconds // 60, seconds % 60)
+				string.format("PROTÉGÉ %d:%02d • SI TU VOLES, ÇA S’ARRÊTE", seconds // 60, seconds % 60)
 		elseif wasProtected then
 			Toast.show(
-				"PROTECTION TERMINÉE : UTILISE LE VERROU DE TA BASE POUR PROTÉGER TES FAMILIERS !",
+				"PROTECTION FINIE ! FERME TA BASE AVEC SON BOUTON POUR TE PROTÉGER",
 				UiStyle.Colors.Gold
 			)
 		end

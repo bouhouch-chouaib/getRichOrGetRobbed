@@ -630,7 +630,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 
 	if pulls == 0 then
 		rewardHeadline.Text = "IL A ENCORE FAIM..."
-		rewardBody.Text = "AUCUN OBJET AVALÉ CETTE MANCHE : LANCE-LUI DES OBJETS !"
+		rewardBody.Text = "JETTE-LUI DES OBJETS POUR GAGNER DES ŒUFS !"
 	else
 		local plural = if pulls > 1 then "S" else ""
 		rewardHeadline.Text = if score == 0
@@ -668,7 +668,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 			table.insert(parts, string.format("%d DÉJÀ EU%s", keptCount - newCount, if keptCount - newCount > 1 then "S" else ""))
 		end
 		if soldCount > 0 then
-			table.insert(parts, string.format('%d VENDU%s <font color="#%s">+%s</font>', soldCount, if soldCount > 1 then "S" else "",
+			table.insert(parts, string.format('%d EN TROP VENDU%s <font color="#%s">+%s</font>', soldCount, if soldCount > 1 then "S" else "",
 				MONEY:ToHex(), NumberFormat.money(soldMoney)))
 		end
 		if money and money > soldMoney then
@@ -685,7 +685,7 @@ local function showRewards(score: number, pulls: number, results: { [string]: nu
 			rankLine ..= " : ŒUFS " .. TextFormat.upper(Config.Rarities[floorIndex].Name) .. " ET PLUS"
 		end
 		if nextRank then
-			rankLine ..= string.format("  •  %d/%d → %s", total, nextRank.Pulls, nextRank.Name)
+			rankLine ..= string.format("  •  %d/%d ŒUFS → %s", total, nextRank.Pulls, nextRank.Name)
 		end
 		table.insert(lines, '<font color="#9BDCFF">' .. rankLine .. "</font>")
 		-- Pitié par palier (Config.Loot.PityPercentile) : la rareté juste au-dessus de ta meilleure (attributs de PullRewards).

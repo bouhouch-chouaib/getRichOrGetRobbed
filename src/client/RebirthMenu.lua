@@ -50,19 +50,20 @@ function RebirthMenu.create(gui: Instance): Menu
 	-- À gauche : le gain.
 	local gain = UiStyle.brightCard(window.content, UDim2.new(0.44, -6, 1, -80), PURPLE)
 	local title = text(gain, "", 40, WHITE, 8, 46)
-	Icons.image(gain, "Rebirth", UDim2.fromOffset(70, 70), UDim2.new(0.5, -35, 0, 56))
-	text(gain, "REVENU À VIE", 22, WHITE, 132, 26)
+	-- (26 oct.) Resserré : la ligne des cases de la capsule sortait de la carte (300 px de haut).
+	Icons.image(gain, "Rebirth", UDim2.fromOffset(56, 56), UDim2.new(0.5, -28, 0, 54))
+	text(gain, "TON ARGENT", 22, WHITE, 114, 24)
 	local incomeLine = UiStyle.number(gain, "", 34, MONEY)
-	incomeLine.Position = UDim2.fromOffset(10, 158)
-	incomeLine.Size = UDim2.new(1, -20, 0, 40)
-	text(gain, "FAMILIERS QUI RAPPORTENT", 20, WHITE, 208, 24)
+	incomeLine.Position = UDim2.fromOffset(10, 136)
+	incomeLine.Size = UDim2.new(1, -20, 0, 36)
+	text(gain, "FAMILIERS DANS TA BASE", 20, WHITE, 176, 22)
 	local petsLine = UiStyle.number(gain, "", 30, UiStyle.Colors.Gold)
-	petsLine.Position = UDim2.fromOffset(10, 232)
-	petsLine.Size = UDim2.new(1, -20, 0, 36)
-	text(gain, "CHAMBRES DE LA CAPSULE", 20, WHITE, 276, 24)
+	petsLine.Position = UDim2.fromOffset(10, 198)
+	petsLine.Size = UDim2.new(1, -20, 0, 32)
+	text(gain, "CASES DE LA CAPSULE", 20, WHITE, 234, 22)
 	local capsuleLine = UiStyle.number(gain, "", 30, UiStyle.Colors.Cyan)
-	capsuleLine.Position = UDim2.fromOffset(10, 300)
-	capsuleLine.Size = UDim2.new(1, -20, 0, 36)
+	capsuleLine.Position = UDim2.fromOffset(10, 256)
+	capsuleLine.Size = UDim2.new(1, -20, 0, 32)
 
 	-- À droite : conditions, ce qu'on garde et ce qu'on perd.
 	local side = UiStyle.panel(window.content, UDim2.new(0.56, -6, 1, -80))
@@ -86,10 +87,10 @@ function RebirthMenu.create(gui: Instance): Menu
 	local percent = UiStyle.number(bar, "", 18, WHITE)
 	percent.Size = UDim2.fromScale(1, 1)
 	percent.ZIndex = 3
-	local keep = text(side, "TU GARDES : familiers, œufs, mutations, entraînement, armes, clés et achats Robux", 19, MONEY, 112, 60)
+	local keep = text(side, "TU GARDES : FAMILIERS, ŒUFS, VITESSE, FORCE, ARMES ET ACHATS ROBUX", 20, MONEY, 110, 80)
 	keep.TextXAlignment = Enum.TextXAlignment.Left
-	local lose = text(side, "TU PERDS : ton argent, tes mondes (retour en Prairie) et les améliorations de la Boutique", 19,
-		Color3.fromRGB(255, 120, 120), 178, 60)
+	local lose = text(side, "TU PERDS : TON ARGENT, TES MONDES ET LA BOUTIQUE", 20,
+		Color3.fromRGB(255, 120, 120), 196, 70)
 	lose.TextXAlignment = Enum.TextXAlignment.Left
 
 	local button = UiStyle.button(window.content, "REBIRTH !", UDim2.new(1, 0, 0, 66), GREY, 36)
@@ -112,21 +113,21 @@ function RebirthMenu.create(gui: Instance): Menu
 		local chambers, nextChambers = Config.GetCapsuleSlots(count), Config.GetCapsuleSlots(count + 1)
 		capsuleLine.Text = if nextChambers > chambers then string.format("%d  →  %d", chambers, nextChambers)
 			else string.format("%d (MAX)", chambers)
-		worldLine.Text = (if tierOk then "OK  " else "") .. "Atteindre le monde " .. worldName
+		worldLine.Text = (if tierOk then "OK  " else "") .. "VA DANS LE MONDE " .. worldName
 		worldLine.TextColor3 = if tierOk then MONEY else WHITE
-		moneyLine.Text = string.format("Avoir %s  (tu as %s)", NumberFormat.money(price), NumberFormat.money(money))
+		moneyLine.Text = string.format("IL TE FAUT %s  (TU AS %s)", NumberFormat.money(price), NumberFormat.money(money))
 		moneyLine.TextColor3 = if money >= price then MONEY else WHITE
 		local progress = math.clamp(money / price, 0, 1)
 		TweenService:Create(fill, TweenInfo.new(0.2), { Size = UDim2.fromScale(progress, 1) }):Play()
 		percent.Text = string.format("%d %%", math.floor(progress * 100))
 		if not canRebirth() then
-			caption.Text = if tierOk then "PAS ENCORE ASSEZ D'ARGENT" else "ATTEINS D'ABORD LE MONDE " .. worldName
+			caption.Text = if tierOk then "PAS ENCORE ASSEZ D'ARGENT" else "VA D'ABORD DANS LE MONDE " .. worldName
 			UiStyle.setButtonColor(button, GREY)
 		elseif os.clock() < confirmUntil then
-			caption.Text = "SÛR ? APPUIE ENCORE POUR CONFIRMER"
+			caption.Text = "SÛR ? APPUIE ENCORE !"
 			UiStyle.setButtonColor(button, RED)
 		else
-			caption.Text = string.format("REBIRTH ! (REVENU x%d)", Config.GetRebirthMultiplier(count + 1))
+			caption.Text = string.format("REBIRTH ! (ARGENT x%d)", Config.GetRebirthMultiplier(count + 1))
 			UiStyle.setButtonColor(button, UiStyle.Colors.Green)
 		end
 	end
@@ -168,7 +169,7 @@ function RebirthMenu.celebrate(gui: Instance, count: number)
 	gradient.Color = ColorSequence.new(Color3.fromRGB(255, 220, 90), PURPLE)
 	gradient.Rotation = 90
 	gradient.Parent = titleLabel
-	local subtitle = UiStyle.number(gui, string.format("REVENU x%d À VIE !", Config.GetRebirthMultiplier(count)), 44, MONEY)
+	local subtitle = UiStyle.number(gui, string.format("ARGENT x%d POUR TOUJOURS !", Config.GetRebirthMultiplier(count)), 44, MONEY)
 	subtitle.AnchorPoint = Vector2.new(0.5, 0.5)
 	subtitle.Position = UDim2.fromScale(0.5, 0.48)
 	subtitle.Size = UDim2.fromOffset(800, 54)
@@ -179,7 +180,7 @@ function RebirthMenu.celebrate(gui: Instance, count: number)
 	TweenService:Create(scale, TweenInfo.new(0.6, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	Sounds.play("HoleTierUp")
 	Sounds.play("LevelUp")
-	Toast.show("TU REPARS EN PRAIRIE... AVEC UN REVENU MULTIPLIÉ À VIE !", UiStyle.Colors.Gold)
+	Toast.show("TU REPARS EN PRAIRIE... MAIS TU GAGNES PLUS D'ARGENT POUR TOUJOURS !", UiStyle.Colors.Gold)
 	task.delay(3.6, function()
 		local fade = TweenInfo.new(0.6)
 		for _, label in ipairs({ titleLabel, subtitle }) do

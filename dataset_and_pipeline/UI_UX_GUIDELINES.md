@@ -222,6 +222,14 @@ ce que l'image montre déjà.
 | Pendant ton absence            | PENDANT QUE TU N'ÉTAIS PAS LÀ            | résumé au retour                     |
 | Effondrement                   | IL VA EXPLOSER                           | trou noir                            |
 | Chambres                       | CASES                                    | capsule                              |
+| Réclamer                       | PRENDRE                                  | Index, Bonus                         |
+| Équipé / Déséquiper            | IL TE SUIT / ENLEVER                     | Index, Fusion, Marché                |
+| Quêtes                         | DÉFIS (et leurs textes : « JETTE 60 OBJETS DANS LE TROU NOIR ») | Bonus, `Config.Quests` |
+| Même rareté                    | MÊME COULEUR (chaque rareté a sa couleur) | Fusion                              |
+| Revenu (à vie)                 | ARGENT (POUR TOUJOURS)                   | Rebirth, groupe                      |
+| Tirage instantané / 10 tirages | 1 ŒUF / 10 ŒUFS                          | produits Robux (`Config.Monetization`) |
+| Indisponible / Prix conseillé  | DÉJÀ PRIS / BON PRIX                     | Marché                               |
+| Anti-vol / Protection terminée | PROTÉGÉ / PROTECTION FINIE               | bouclier du nouveau venu             |
 
 Mots gardés : « Rebirth », « Index », les noms de raretés et de mondes (ce sont des noms, avec leur couleur et leur
 icône ; les enfants de Roblox les connaissent).
@@ -239,10 +247,21 @@ icône ; les enfants de Roblox les connaissent).
 
 ### 7.4 À faire ensuite (même méthode)
 
-- Textes longs restants : bouclier du nouveau venu (`Newcomer`), carte de fin de manche (« RANG ... »), Index, Fusion,
-  Rebirth, Bonus, Marché, Échange, Duel.
-- Noms des produits Robux dans `Config.Monetization` (« TIRAGE INSTANTANÉ » -> « 1 ŒUF », « 10 TIRAGES » -> « 10 ŒUFS ») :
-  à faire quand plus personne ne modifie `Config.lua`.
+- Duel, Échange, Capsule (les autres fenêtres), messages du trou noir et de la couronne.
 - Montrer le chemin plus souvent : une flèche vers la capsule la première fois qu'on a 2 œufs, vers la Boutique quand on
   peut acheter le premier tapis.
+- Onglets des menus (`MenuKit.sideTabs`) : sur une toute petite fenêtre, « Acheter » se coupe en « Achete / r ».
 - Tester avec un vrai enfant de 6-8 ans : noter où il s'arrête, sans l'aider.
+
+### 7.5 Deuxième passe (26 oct.)
+
+Index, Fusion, Rebirth, Bonus (cadeau du jour, défis, codes), Marché (et ses messages serveur), carte de fin de manche,
+bouclier du nouveau venu, défis du jour et noms des produits Robux réécrits avec les règles du §7.1. Corrigé en même
+temps, vu sur les photos de Studio :
+- Rebirth : la ligne des cases de la capsule sortait de sa carte (mise en page resserrée) ; « mutations » retiré de « TU
+  GARDES » (elles sont secrètes).
+- Bonus : « 3 ŒUFS » ne tenait pas dans les petites cartes : image d'œuf + « x3 » ; le jour 7 montre l'argent ET les
+  10 œufs.
+- Index : le résumé de collection en 4 lignes très courtes (« TROUVÉS », « 106/106 », « ★★★ 1/212 », « SUIVENT 1/3 »).
+- Marché : la phrase sous le prix raccourcie et agrandie.
+- « PAS ASSEZ D'ARGENT » devient « IL TE MANQUE $X ! » (Fusion, Marché), comme dans la Boutique.

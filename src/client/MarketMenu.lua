@@ -136,9 +136,9 @@ function MarketMenu.create(gui: Instance): Menu
 	-- Acheter
 	------------------------------------------------------------------
 	local buyPage = pages[1]
-	label(buyPage, "Les familiers à vendre sur ce serveur", 24, WHITE, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 30))
+	label(buyPage, "FAMILIERS À ACHETER", 24, WHITE, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 30))
 	local buyGrid = scroller(buyPage, UDim2.fromOffset(0, 36), UDim2.new(1, 0, 1, -36), Vector2.new(180, 250))
-	local buyEmpty = label(buyPage, "Personne ne vend de familier pour le moment.\nMets les tiens en vente dans l'onglet « Vendre » !",
+	local buyEmpty = label(buyPage, "PERSONNE NE VEND RIEN POUR L'INSTANT.\nVENDS LES TIENS DANS « VENDRE » !",
 		22, GREY, UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 60))
 	buyEmpty.TextWrapped = true
 	local buySignature = ""
@@ -184,7 +184,7 @@ function MarketMenu.create(gui: Instance): Menu
 			price.Size = UDim2.new(1, -12, 0, 26)
 			price.ZIndex = 4
 			local canPay = MenuKit.number("Money") >= listing.price
-			local button = UiStyle.button(card, if listing.available then "ACHETER" else "INDISPONIBLE",
+			local button = UiStyle.button(card, if listing.available then "ACHETER" else "DÉJÀ PRIS",
 				UDim2.new(1, -16, 0, 36), if listing.available and canPay then UiStyle.Colors.Green else GREY,
 				if listing.available then 20 else 15)
 			button.Name = "Buy"
@@ -193,10 +193,10 @@ function MarketMenu.create(gui: Instance): Menu
 			button.Activated:Connect(function()
 				if not listing.available then
 					Sounds.play("Error")
-					Toast.show("CE FAMILIER N'EST PLUS LIBRE CHEZ LE VENDEUR", UiStyle.Colors.Red)
+					Toast.show("IL N'EST PLUS À VENDRE", UiStyle.Colors.Red)
 				elseif MenuKit.number("Money") < listing.price then
 					Sounds.play("Error")
-					Toast.show("PAS ASSEZ D'ARGENT", UiStyle.Colors.Red)
+					Toast.show("IL TE MANQUE " .. NumberFormat.money(listing.price - MenuKit.number("Money")) .. " !", UiStyle.Colors.Red)
 				else
 					Remotes.Market:FireServer("Buy", listing.id)
 				end
@@ -208,9 +208,9 @@ function MarketMenu.create(gui: Instance): Menu
 	-- Vendre
 	------------------------------------------------------------------
 	local sellPage = pages[2]
-	label(sellPage, "Choisis un familier à vendre", 24, WHITE, UDim2.fromOffset(0, 0), UDim2.new(0, 470, 0, 30))
+	label(sellPage, "CHOISIS UN FAMILIER À VENDRE", 24, WHITE, UDim2.fromOffset(0, 0), UDim2.new(0, 470, 0, 30))
 	local sellGrid = scroller(sellPage, UDim2.fromOffset(0, 36), UDim2.new(1, -290, 1, -36), Vector2.new(140, 168))
-	local sellEmpty = label(sellPage, "Aucun familier libre à vendre.\n(Un familier équipé ne peut pas être vendu.)", 20, GREY,
+	local sellEmpty = label(sellPage, "PAS DE FAMILIER À VENDRE.\nCEUX QUI TE SUIVENT NE SE VENDENT PAS.", 20, GREY,
 		UDim2.fromOffset(0, 150), UDim2.new(1, -290, 0, 60))
 	sellEmpty.TextWrapped = true
 
@@ -224,7 +224,7 @@ function MarketMenu.create(gui: Instance): Menu
 	preview.Size = UDim2.new(1, -24, 0, 92)
 	preview.ZIndex = 3
 	preview.Parent = side
-	local sideName = label(side, "Choisis un familier", 22, WHITE, UDim2.fromOffset(10, 98), UDim2.new(1, -20, 0, 24))
+	local sideName = label(side, "CHOISIS UN FAMILIER", 22, WHITE, UDim2.fromOffset(10, 98), UDim2.new(1, -20, 0, 24))
 	sideName.TextScaled = true
 	sideName.ZIndex = 3
 	local sideIncome = UiStyle.number(side, "", 18, MONEY)
@@ -248,10 +248,10 @@ function MarketMenu.create(gui: Instance): Menu
 	UiStyle.corner(box, 8)
 	UiStyle.stroke(box, 4, BLACK, true)
 	box.Parent = side
-	local priceHint = label(side, "", 16, GREY, UDim2.fromOffset(10, 214), UDim2.new(1, -20, 0, 40))
+	local priceHint = label(side, "", 16, GREY, UDim2.fromOffset(10, 214), UDim2.new(1, -20, 0, 50))
 	priceHint.TextWrapped = true
 	priceHint.ZIndex = 3
-	local sellButton = UiStyle.button(side, "METTRE EN VENTE", UDim2.new(1, -24, 0, 50), GREY, 22)
+	local sellButton = UiStyle.button(side, "VENDRE", UDim2.new(1, -24, 0, 50), GREY, 26)
 	sellButton.Position = UDim2.new(0, 12, 1, -94)
 	sellButton.ZIndex = 4
 	local slotsText = label(side, "", 16, WHITE, UDim2.new(0, 10, 1, -40), UDim2.new(1, -20, 0, 30))
@@ -284,13 +284,13 @@ function MarketMenu.create(gui: Instance): Menu
 
 	local function refreshSide()
 		local mine = #myListings()
-		slotsText.Text = string.format("Ventes en cours : %d / %d", mine, Config.Market.MaxListings)
+		slotsText.Text = string.format("EN VENTE : %d / %d", mine, Config.Market.MaxListings)
 		clear(preview)
 		if not selected or sellable(selected) <= 0 then
 			selected = nil
-			sideName.Text = "Choisis un familier"
+			sideName.Text = "CHOISIS UN FAMILIER"
 			sideIncome.Text = ""
-			priceHint.Text = "Tu le gardes tant que personne ne l'achète."
+			priceHint.Text = "TU LE GARDES JUSQU'À LA VENTE"
 			UiStyle.setButtonColor(sellButton, GREY)
 			return
 		end
@@ -301,7 +301,7 @@ function MarketMenu.create(gui: Instance): Menu
 		viewport.ZIndex = 3
 		sideName.Text = if entry then entry.Name else petId
 		sideIncome.Text = NumberFormat.perSecond(PetCatalog.GetIncome(petId))
-		priceHint.Text = "Prix conseillé : " .. NumberFormat.money(suggestedPrice(petId)) .. "  •  au plus "
+		priceHint.Text = "BON PRIX : " .. NumberFormat.money(suggestedPrice(petId)) .. "  •  MAX "
 			.. NumberFormat.money(Config.GetMarketMaxPrice(PetCatalog.GetIncome(petId)))
 		UiStyle.setButtonColor(sellButton, if mine < Config.Market.MaxListings then UiStyle.Colors.Green else GREY)
 	end
@@ -363,7 +363,7 @@ function MarketMenu.create(gui: Instance): Menu
 		local price = parsePrice(box.Text)
 		if not price or price < Config.Market.MinPrice or price > Config.Market.MaxPrice then
 			Sounds.play("Error")
-			Toast.show("PRIX INVALIDE (ex : 25K, 3M, 1.5B)", UiStyle.Colors.Red)
+			Toast.show("CE PRIX NE MARCHE PAS (EX : 25K, 3M)", UiStyle.Colors.Red)
 			return
 		end
 		Remotes.Market:FireServer("List", selected, math.floor(price))
@@ -373,7 +373,7 @@ function MarketMenu.create(gui: Instance): Menu
 	-- Mes ventes
 	------------------------------------------------------------------
 	local minePage = pages[3]
-	label(minePage, "Tes familiers en vente", 24, WHITE, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 30))
+	label(minePage, "TES FAMILIERS EN VENTE", 24, WHITE, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 30))
 	local mineList = Instance.new("Frame")
 	mineList.BackgroundTransparency = 1
 	mineList.Position = UDim2.fromOffset(0, 40)
@@ -384,8 +384,8 @@ function MarketMenu.create(gui: Instance): Menu
 	mineLayout.Padding = UDim.new(0, 10)
 	mineLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	mineLayout.Parent = mineList
-	local mineEmpty = label(minePage, "Tu n'as rien en vente.", 22, GREY, UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 30))
-	label(minePage, "Les ventes s'arrêtent si tu quittes le serveur. L'argent arrive dès qu'un joueur achète.", 16, GREY,
+	local mineEmpty = label(minePage, "TU NE VENDS RIEN", 22, GREY, UDim2.fromOffset(0, 150), UDim2.new(1, 0, 0, 30))
+	label(minePage, "SI TU QUITTES LE JEU, TES VENTES S'ARRÊTENT", 16, GREY,
 		UDim2.new(0, 0, 1, -30), UDim2.new(1, 0, 0, 24))
 	local mineSignature = ""
 
@@ -423,7 +423,7 @@ function MarketMenu.create(gui: Instance): Menu
 			price.Size = UDim2.fromOffset(200, 30)
 			price.TextXAlignment = Enum.TextXAlignment.Left
 			price.ZIndex = 3
-			local state = label(row, if listing.available then "EN VENTE" else "BLOQUÉE (équipé ou plus à toi)", 16,
+			local state = label(row, if listing.available then "EN VENTE" else "BLOQUÉE", 16,
 				if listing.available then MONEY else UiStyle.Colors.Orange, UDim2.fromOffset(112, 76), UDim2.new(1, -330, 0, 20))
 			state.TextXAlignment = Enum.TextXAlignment.Left
 			state.ZIndex = 3

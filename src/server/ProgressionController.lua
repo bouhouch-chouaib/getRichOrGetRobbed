@@ -115,7 +115,7 @@ local function redeem(player: Player, text: unknown)
 	local code = ProgressionController.NormalizeCode(text)
 	local def = Config.Codes[code]
 	if not def or (def.Until and os.time() > def.Until) then
-		Remotes.BonusResult:FireClient(player, "Code", false, "CODE INCONNU OU EXPIRÉ")
+		Remotes.BonusResult:FireClient(player, "Code", false, "CE CODE NE MARCHE PAS")
 		return
 	end
 	if table.find(data.codes, code) then
