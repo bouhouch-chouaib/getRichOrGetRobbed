@@ -408,61 +408,34 @@ Config.PlayerAura = {
 	TeleportDistance = 14,
 }
 
--- Traînée (Vitesse) et aura (Force) gagnées par l'entraînement (shared/PowerFx, client/PowerFx).
--- Palier = niveau d'entraînement + niveaux des familiers équipés (SpeedLevel + SpeedBonus), comme la vraie
--- vitesse. Deux familles de couleurs pour ne pas se mélanger : froides aux pieds (Vitesse), chaudes autour du
--- corps (Force). Pas de pièce Néon : rubans et particules seulement. Rien avant le niveau 10.
-export type PowerSpeedTier = {
-	Level: number,
-	Name: string,
-	Color0: Color3, -- couleur au départ du ruban (près du joueur)
-	Color1: Color3, -- couleur au bout du ruban
-	Width: number, -- largeur des rubans des pieds, en studs
-	Lifetime: number, -- longueur de la traînée, en secondes
-	Body: boolean, -- ruban vertical derrière le corps (épaules -> hanches)
-	Lines: number, -- traits de vitesse par seconde
-	Sparks: number, -- étincelles par seconde
-	Rainbow: boolean, -- couleurs qui défilent
-}
-export type PowerStrengthTier = {
-	Level: number,
-	Name: string,
-	Core: Color3, -- cœur des flammes
-	Edge: Color3, -- bord des flammes
-	Wisps: number, -- flammes qui montent autour du corps, par seconde
-	WispSize: number,
-	Ground: number, -- vagues de lueur au sol par seconde (0 = aucune)
-	Embers: number, -- braises par seconde
-	Rays: boolean, -- rayons dorés qui tournent sous les pieds
-}
-Config.PowerFx = {
-	ViewDistance = 120, -- au-delà, rien n'est affiché (téléphones)
+-- Traînée quand on court, de la même forme que le « Sentier bleu » de Steal an Egg (relevé sur
+-- references/video_chouaib) : une bande unie, large comme les hanches, presque opaque et très longue (client/RunTrail).
+-- Pas de texture ni de particules. En blanc (choix de Chouaib), pas leur cyan. L'Aura astrale achetée a sa propre
+-- traînée : pas les deux.
+Config.RunTrail = {
+	Color = Color3.fromRGB(255, 255, 255),
+	Start = Color3.fromRGB(255, 255, 255), -- juste derrière le corps
+	Width = 1.6, -- studs
+	Lifetime = 1.4, -- secondes : longueur de la traînée
+	Height = -0.2, -- hauteur sous le centre du HumanoidRootPart (la taille)
+	LightEmission = 0, -- vérifié en Play : plus haut, l'herbe claire se mélange à la couleur et la pâlit
+	TeleportDistance = 14, -- un saut plus grand efface la traînée (sinon un trait à travers la carte)
 	UpdateInterval = 1 / 20,
-	RunSpeed = 9, -- studs/s à l'horizontale pour laisser une traînée
-	TeleportDistance = 14, -- un saut plus grand d'une mise à jour à l'autre efface la traînée
-	TouchRateScale = 0.6, -- moins de particules sur écran tactile
-	LightEmission = 0.2, -- vérifié en Play : plus haut, couleurs pâlies jusqu'au blanc sur l'herbe en plein jour
-	YieldToAstralAura = true, -- l'Aura astrale achetée remplace ces effets (pas d'effet sur effet)
-	-- Textures dessinées par tools/icons/make_power_fx_textures.py (assets/fx), à remplir après leur envoi sur
-	-- Roblox. Vides : textures de rechange de Roblox. Dans Studio, workspace:SetAttribute("PowerFxLocalTextures",
-	-- true) prend les PNG copiés dans content/claude_powerfx (essai sans envoi).
-	Textures = { Flame = "", Ring = "", Streak = "", Spark = "", Trail = "" },
-	Speed = {
-		{ Level = 10, Name = "BRISE", Color0 = Color3.fromRGB(235, 250, 255), Color1 = Color3.fromRGB(150, 215, 255), Width = 0.5, Lifetime = 0.22, Body = false, Lines = 0, Sparks = 0, Rainbow = false },
-		{ Level = 20, Name = "RAPIDE", Color0 = Color3.fromRGB(120, 235, 255), Color1 = Color3.fromRGB(40, 170, 255), Width = 0.65, Lifetime = 0.3, Body = false, Lines = 0, Sparks = 0, Rainbow = false },
-		{ Level = 30, Name = "ÉCLAIR", Color0 = Color3.fromRGB(255, 255, 255), Color1 = Color3.fromRGB(40, 120, 255), Width = 0.8, Lifetime = 0.35, Body = true, Lines = 8, Sparks = 0, Rainbow = false },
-		{ Level = 45, Name = "TURBO", Color0 = Color3.fromRGB(200, 140, 255), Color1 = Color3.fromRGB(255, 70, 210), Width = 0.9, Lifetime = 0.42, Body = true, Lines = 12, Sparks = 0, Rainbow = false },
-		{ Level = 60, Name = "SUPERSONIQUE", Color0 = Color3.fromRGB(255, 225, 60), Color1 = Color3.fromRGB(255, 120, 0), Width = 1, Lifetime = 0.5, Body = true, Lines = 16, Sparks = 10, Rainbow = false },
-		{ Level = 75, Name = "LUMIÈRE", Color0 = Color3.fromRGB(255, 255, 255), Color1 = Color3.fromRGB(255, 255, 255), Width = 1.1, Lifetime = 0.6, Body = true, Lines = 20, Sparks = 14, Rainbow = true },
-	} :: { PowerSpeedTier },
-	Strength = {
-		{ Level = 10, Name = "ÉTINCELLE", Core = Color3.fromRGB(255, 240, 120), Edge = Color3.fromRGB(255, 190, 30), Wisps = 5, WispSize = 0.45, Ground = 0, Embers = 0, Rays = false },
-		{ Level = 20, Name = "BRASIER", Core = Color3.fromRGB(255, 220, 140), Edge = Color3.fromRGB(255, 140, 40), Wisps = 8, WispSize = 0.55, Ground = 0, Embers = 3, Rays = false },
-		{ Level = 30, Name = "FURIE", Core = Color3.fromRGB(255, 170, 90), Edge = Color3.fromRGB(255, 60, 40), Wisps = 11, WispSize = 0.65, Ground = 0.8, Embers = 5, Rays = false },
-		{ Level = 45, Name = "COLOSSE", Core = Color3.fromRGB(255, 120, 120), Edge = Color3.fromRGB(220, 20, 70), Wisps = 14, WispSize = 0.75, Ground = 1, Embers = 8, Rays = false },
-		{ Level = 60, Name = "TITAN", Core = Color3.fromRGB(255, 150, 230), Edge = Color3.fromRGB(150, 50, 255), Wisps = 17, WispSize = 0.85, Ground = 1.2, Embers = 10, Rays = false },
-		{ Level = 75, Name = "DIVIN", Core = Color3.fromRGB(255, 240, 150), Edge = Color3.fromRGB(255, 150, 0), Wisps = 20, WispSize = 0.95, Ground = 1.2, Embers = 12, Rays = true },
-	} :: { PowerStrengthTier },
+	-- Petits traits de vent autour du coureur : rubans très fins et courts, qui ondulent un peu.
+	Wind = {
+		Points = { -- départ de chaque trait, autour du HumanoidRootPart (x = côté, y = hauteur, z = vers l'arrière)
+			Vector3.new(-1.5, 1.3, 0),
+			Vector3.new(1.6, 0.7, 0.2),
+			Vector3.new(-1.7, -0.4, 0.3),
+			Vector3.new(1.4, -1.2, 0.1),
+			Vector3.new(-0.8, 2.1, 0.2),
+		},
+		Width = 0.16,
+		Lifetime = 0.42,
+		Transparency = 0, -- au départ du trait (vérifié en Play : plus fin ou plus transparent, on ne le voit pas)
+		Wobble = 0.25, -- studs d'ondulation verticale
+		MinSpeed = 12, -- studs/s à l'horizontale pour voir le vent (pas en marchant lentement en portant)
+	},
 }
 
 -- Machine de fusion : Count familiers -> un œuf de la rareté supérieure.

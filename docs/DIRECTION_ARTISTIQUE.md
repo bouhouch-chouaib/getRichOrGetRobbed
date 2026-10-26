@@ -108,11 +108,11 @@ Règle : couleurs **pures et saturées**, peu de pastel, pas de marron terne. Le
 - Lumière de plein jour, forte, ombres légères. Bloom modéré (les néons « bavent » un peu). Saturation
   légèrement poussée. La nuit reste claire (bleu nuit, jamais noir).
 - Traînée lumineuse derrière le joueur quand il court (achetable : grise, verte, bleue…).
-  **Fait le 26 oct. autrement : gagnée par l'entraînement** (`shared/PowerFx`, `Config.PowerFx`) : traînée de
-  Vitesse aux pieds (couleurs froides, 6 paliers : BRISE -> LUMIÈRE arc-en-ciel) et aura de Force autour du corps
-  (flammes de dessin animé à deux tons, couleurs chaudes, 6 paliers : ÉTINCELLE -> DIVIN, rayons dorés au sol).
-  Règles vérifiées en Play : en plein jour sur l'herbe claire, peu de lueur ajoutée (LightEmission 0,1 à 0,3),
-  sinon tout pâlit jusqu'au blanc ; flammes nées autour du corps (dedans, il les cache) et accrochées à lui.
+  Relevé le 26 oct. sur `references/video_chouaib` (« Sentier bleu ») : une bande cyan unie (RGB 90, 238, 240) à
+  bords nets, accrochée à la taille, large comme les hanches, presque opaque et très longue, plus blanche juste
+  derrière le corps ; pas de texture ni de particules. Même forme dans `client/RunTrail` (`Config.RunTrail`), mais en
+  blanc (choix de Chouaib), avec 5 petits traits de vent fins qui ondulent autour du corps.
+  Une aura de flammes à paliers essayée avant a été jugée « vraiment moche » : rester sur la bande simple.
 - Chiffres qui s'envolent (« +30/pas », « +$28K ») en couleur vive à contour noir.
 - Éclosion : flash blanc, rayons, nuages de particules, apparition du familier en grand.
 
