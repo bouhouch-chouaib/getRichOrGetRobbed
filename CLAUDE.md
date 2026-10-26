@@ -206,6 +206,8 @@ indices de `Config.Blackhole.Tiers`), couronne (BONUS, VOLEUR ARRÊTÉ). Fenêtr
 d'ouverture (affichage seulement) ; pas vu : vrai duel / échange / couronne à 2 joueurs.
 Dernière passe (§7.7) : messages de vol / armes / verrou, **flèches guides** `client/GuideArrows` (tapis à acheter,
 capsule pour un débutant ; rien de sauvegardé) et onglets des menus mesurés par TextService (plus de mot coupé).
+**Tuiles de menu rangeables** (`client/HUD`, poignée « / » à droite des tuiles, touche M) : cache aussi les offres Robux,
+pastille « ! » sur la poignée si une tuile en avait une, rien de sauvegardé. Vérifié par Chouaib dans Studio (26 oct.).
 **Rebirth** : +1 chambre de capsule d'évolution par Rebirth (6 au plus, `Config.GetCapsuleSlots`, plusieurs œufs évoluent en même temps), doublons de sa meilleure rareté vers une chambre libre, prix 4T x (n+1) x 1,62^n.
 **Couronne du plus riche** (`Config.Crown`, `server/CrownController`, `shared/CrownRules`, `client/Crown`) : plus gros revenu du serveur, prime pour qui le vole, récompense limitée pour chaque voleur arrêté.
 **Pile « prochain objectif »** (`shared/NextGoals`, `client/NextGoals`) : deux objectifs entamés avec barre sous l'horloge, résumé d'absence au retour (attribut `AwaySummary`).
