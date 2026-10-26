@@ -148,10 +148,26 @@ function MenuKit.petViewport(parent: Instance, petId: string, silhouette: boolea
 		for _, descendant in ipairs(model:GetDescendants()) do
 			if descendant:IsA("ParticleEmitter") or descendant:IsA("BillboardGui") or descendant:GetAttribute("Aura") then
 				descendant:Destroy()
-			elseif silhouette and descendant:IsA("BasePart") then
-				descendant.Color = Color3.fromRGB(20, 20, 30)
-				descendant.Material = Enum.Material.SmoothPlastic
+			elseif silhouette then
+				-- Silhouette : les familiers en briques portent une texture cuite (SurfaceAppearance / TextureID) qui
+				-- recouvre la couleur de la pièce ; on la retire, sinon le familier reste visible en entier.
+				if descendant:IsA("SurfaceAppearance") or descendant:IsA("Decal") or descendant:IsA("Texture") then
+					descendant:Destroy()
+				elseif descendant:IsA("SpecialMesh") then
+					descendant.TextureId = ""
+				elseif descendant:IsA("BasePart") then
+					descendant.Color = Color3.fromRGB(20, 20, 30)
+					descendant.Material = Enum.Material.SmoothPlastic
+					if descendant:IsA("MeshPart") then
+						descendant.TextureID = ""
+					elseif descendant:IsA("UnionOperation") then
+						descendant.UsePartColor = true
+					end
+				end
 			end
+		end
+		if silhouette then
+			viewport.ImageColor3 = Color3.fromRGB(70, 70, 90) -- assombrit ce qui resterait (reflets, lueurs)
 		end
 		model:PivotTo(CFrame.new())
 		model.Parent = viewport
