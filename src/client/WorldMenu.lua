@@ -6,11 +6,11 @@
 --     MANQUE ... », gros bouton VOYAGER) ; cachée quand tous les mondes sont débloqués ;
 --   - LES 7 MONDES : une large carte par monde (aperçu du monde, numéro, revenu, tirages, ses familiers
 --     exclusifs en aperçu 3D, en silhouette tant qu'ils ne sont pas découverts) et son bouton : ACTUEL (tu es ici),
---     Y ALLER (déjà visité : retour gratuit, Remotes.GoToWorld), VOYAGER $prix (le suivant), VERROUILLÉ (après, voilé
+--     Y ALLER (déjà visité : retour gratuit, Remotes.GoToWorld), VOYAGER $prix (le suivant), VERROUILLÉ (après,
 --     avec un cadenas). Le bonus de revenu reste celui du monde le plus loin atteint.
 -- Aperçu du monde : petite scène 3D faite de ses décors (Worlds.Looks.*.Preview, ReplicatedStorage.ArtModels.Map) et de
 --   son familier le plus rare, devant son ciel. Déjà visité : en couleurs, bien éclairé. Inconnu : silhouettes noires
---   sur un horizon qui rougeoie à la couleur du monde, brume, « ? » qui pulse (le cadenas du voile le remplace pour les
+--   sur un horizon qui rougeoie à la couleur du monde, brume, « ? » qui pulse (un cadenas le remplace pour les
 --   mondes après le suivant). Sans les décors (pas encore importés) : le petit paysage en aplats.
 -- Le voyage est validé par le serveur (Remotes.BuyTier / GoToWorld -> server/TierController) ; pas assez d'argent :
 -- secousse, éclair rouge, « IL TE MANQUE ... ».
@@ -170,7 +170,7 @@ local function skyGradient(frame: Frame, top: Color3, horizon: Color3, low: Colo
 end
 
 -- Aperçu du monde `index` dans `holder` (vidé d'abord) ; known = le joueur y est déjà allé ; mark = « ? » qui pulse
--- sur un monde inconnu (pas quand le voile et son cadenas le couvrent).
+-- sur un monde inconnu (pas quand le cadenas des mondes verrouillés est dessus).
 local function landscape(holder: Frame, index: number, known: boolean, mark: boolean)
 	holder:ClearAllChildren()
 	holder.BackgroundColor3 = BLACK
@@ -333,7 +333,7 @@ type Row = {
 	status: TextLabel,
 	button: TextButton,
 	here: Frame, -- ruban « TU ES ICI »
-	veil: Frame, -- voile + cadenas des mondes pas encore accessibles
+	veil: Frame, -- cadenas des mondes pas encore accessibles
 	count: TextLabel, -- « FAMILIERS EXCLUSIFS 2 / 5 »
 	cells: { Cell },
 }
@@ -530,16 +530,15 @@ function WorldMenu.create(gui: Instance): Menu
 		local here = ShopKit.ribbon(body, "TU ES ICI", UiStyle.Colors.Cyan)
 		here.Visible = false
 
-		-- Monde pas encore accessible : voile sombre et cadenas (le bouton gris reste lisible à droite).
+		-- Monde pas encore accessible : cadenas sur l'aperçu (déjà en silhouettes). Pas de voile sombre : il s'arrêtait
+		-- avant le bouton et faisait une ombre bizarre sur la carte (retour de Chouaib, 26 oct.).
 		local veil = Instance.new("Frame")
 		veil.Name = "Locked"
-		veil.BackgroundColor3 = BLACK
-		veil.BackgroundTransparency = 0.45
+		veil.BackgroundTransparency = 1
 		veil.BorderSizePixel = 0
 		veil.Size = UDim2.new(1, -(BUTTON_WIDTH + 20), 1, 0)
 		veil.ZIndex = 7
 		veil.Visible = false
-		UiStyle.corner(veil, 8)
 		veil.Parent = body
 		local lockIcon = Icons.image(veil, "Lock", UDim2.fromOffset(math.floor(64 * K), math.floor(64 * K)))
 		lockIcon.AnchorPoint = Vector2.new(0.5, 0.5)
