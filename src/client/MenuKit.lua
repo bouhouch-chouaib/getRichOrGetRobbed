@@ -9,6 +9,7 @@
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService")
 
 local Icons = require(ReplicatedStorage.Shared.Icons)
@@ -514,17 +515,63 @@ function MenuKit.sideTabs(window: Window, tabs: { Tab }, onSelect: (index: numbe
 			icon = image
 			textLeft = math.floor(tabHeight * 0.92)
 		end
-		local caption = UiStyle.text(button, tab.label, 26, WHITE, UiStyle.TITLE_FONT)
+		-- Taille du texte calculée ici, pas de TextScaled : sur un petit écran (téléphone), Roblox coupait les mots
+		-- (« Achete / r », « Mes » sans « ventes »). Le mot le plus long tient sur sa ligne ; au plus 2 lignes.
+		local captionWidth = TAB_WIDTH - textLeft - 40 -- marge avant la pastille rouge à droite
+		local captionHeight = tabHeight - 12
+		local longest, letters = 1, utf8.len(tab.label) or #tab.label
+		for word in string.gmatch(tab.label, "%S+") do
+			longest = math.max(longest, utf8.len(word) or #word)
+		end
+		local CHAR = 0.64 -- largeur moyenne d'une lettre (Montserrat Heavy), en part de la taille du texte
+		local textSize = math.min(26, math.floor(tabHeight * 0.48), math.floor(captionWidth / (longest * CHAR)))
+		while textSize > 10 and math.ceil(letters * CHAR * textSize / captionWidth) * textSize * 1.15 > captionHeight do
+			textSize -= 1
+		end
+		local caption = Instance.new("TextLabel")
 		caption.Name = "Caption"
-		caption.Position = UDim2.fromOffset(textLeft, 6)
-		caption.Size = UDim2.new(1, -textLeft - 40, 1, -12) -- marge avant la pastille rouge à droite
+		caption.BackgroundTransparency = 1
+		caption.FontFace = UiStyle.TITLE_FONT
+		caption.Text = tab.label
+		caption.TextColor3 = WHITE
+		caption.TextSize = textSize
+		caption.TextWrapped = true
+		caption.LineHeight = 0.95
+		caption.AnchorPoint = Vector2.new(0, 0.5)
+		caption.Position = UDim2.new(0, textLeft, 0.5, 0)
+		caption.Size = UDim2.fromOffset(captionWidth, captionHeight)
 		caption.TextXAlignment = if tab.icon then Enum.TextXAlignment.Left else Enum.TextXAlignment.Center
-		caption.TextScaled = true
-		caption.TextWrapped = false -- une seule ligne : le texte rétrécit pour tenir
 		caption.ZIndex = 4
-		local limit = Instance.new("UITextSizeConstraint")
-		limit.MaxTextSize = math.min(26, math.floor(tabHeight * 0.48))
-		limit.Parent = caption
+		local captionStroke = UiStyle.stroke(caption, math.clamp(textSize / 12, 1, 3))
+		caption.Parent = button
+		-- Puis la vraie mesure (TextService) : la plus grande taille où le mot le plus long tient sur sa ligne et le
+		-- tout dans la case (l'estimation ci-dessus reste si la mesure échoue).
+		local longestWord = ""
+		for word in string.gmatch(tab.label, "%S+") do
+			if (utf8.len(word) or #word) > (utf8.len(longestWord) or #longestWord) then
+				longestWord = word
+			end
+		end
+		task.spawn(function()
+			pcall(function()
+				local function bounds(text: string, size: number, width: number): Vector2
+					local params = Instance.new("GetTextBoundsParams")
+					params.Text = text
+					params.Font = UiStyle.TITLE_FONT
+					params.Size = size
+					params.Width = width
+					return TextService:GetTextBoundsAsync(params)
+				end
+				for size = math.min(26, math.floor(tabHeight * 0.48)), 10, -1 do
+					if bounds(longestWord, size, 10000).X <= captionWidth - 4
+						and bounds(tab.label, size, captionWidth).Y <= captionHeight then
+						caption.TextSize = size
+						captionStroke.Thickness = math.clamp(size / 12, 1, 3)
+						break
+					end
+				end
+			end)
+		end)
 
 		-- Flèche blanche à contour noir qui pointe vers la fenêtre.
 		local arrow = Instance.new("Frame")

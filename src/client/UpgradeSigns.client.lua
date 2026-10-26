@@ -78,7 +78,7 @@ local function attachPrompts()
 				local price = item and Config.GetUpgradePrice(item, levelOf(id))
 				local money = player:GetAttribute("Money")
 				if price and type(money) == "number" and money < price then
-					Toast.show("Pas assez d'argent : " .. NumberFormat.money(price), Color3.fromRGB(255, 90, 90))
+					Toast.show("IL TE MANQUE " .. NumberFormat.money(price - money) .. " !", Color3.fromRGB(255, 90, 90))
 					Sounds.play("Error")
 					return
 				end

@@ -234,6 +234,8 @@ ce que l'image montre déjà.
 | Confirmer / Revenu             | VALIDER / ARGENT                         | Échange                              |
 | Palier / Effondrement / Jauge  | NIVEAU / IL EXPLOSE / BARRE              | trou noir (`Config.Blackhole.Tiers`) |
 | Prime / Défense                | BONUS / VOLEUR ARRÊTÉ                    | couronne                             |
+| Recharge / Bridé               | PRÊT DANS / BLOQUÉ                       | invisibilité, verrou, base           |
+| Propriétaire / Vol en cours    | MAÎTRE / ON TE VOLE…                     | messages de vol                      |
 
 Mots gardés : « Rebirth », « Index », les noms de raretés et de mondes (ce sont des noms, avec leur couleur et leur
 icône ; les enfants de Roblox les connaissent).
@@ -251,11 +253,9 @@ icône ; les enfants de Roblox les connaissent).
 
 ### 7.4 À faire ensuite (même méthode)
 
-- Messages de vol (« VOL EN COURS… », « LÂCHÉ !… ») et des armes ; panneaux dans le monde (stations, kiosques).
-- Montrer le chemin plus souvent : une flèche vers la capsule la première fois qu'on a 2 œufs, vers la Boutique quand on
-  peut acheter le premier tapis.
-- Onglets des menus (`MenuKit.sideTabs`) : sur une toute petite fenêtre, « Acheter » se coupe en « Achete / r ».
 - Tester avec un vrai enfant de 6-8 ans : noter où il s'arrête, sans l'aider.
+- Sur un vrai téléphone : relire chaque fenêtre (les tailles minimales comptent en vrais pixels).
+- Si un enfant se perd ailleurs : ajouter une flèche dans `client/GuideArrows` (même modèle).
 
 ### 7.5 Deuxième passe (26 oct.)
 
@@ -281,3 +281,17 @@ et messages) réécrits. Corrigé en même temps, vu sur les photos de Studio :
 - Échange : « TOI / LUI » sur deux lignes ; titre « TES FAMILIERS À DONNER ».
 Vu en ouvrant les fenêtres par un message envoyé à soi-même (affichage seulement) ; pas vu : un vrai duel, un vrai
 échange, la couronne (il faut 2 joueurs).
+
+### 7.7 Dernière passe (26 oct.)
+
+- Messages de vol et d'armes, bouton du verrou (« PRÊT DANS 30 S », « FERMÉE : 20 S »), panneau « BASE LIBRE »,
+  invisibilité, clés, achat au panneau du tapis (« IL TE MANQUE $X ! »).
+- **Flèches guides** (`client/GuideArrows`, après le tutoriel, même flèche dorée et même rayon) : « ACHÈTE TON TAPIS DE
+  COURSE » tant qu'on peut le payer et qu'on ne l'a pas (flèche sur son panneau d'achat) ; « METS UN ŒUF DANS LA
+  CAPSULE » pour un débutant (moins de 100 tirages) qui a un œuf et une capsule vide, 25 s au plus par partie. Rien
+  n'est sauvegardé : les conditions suffisent. Cachées pendant le tutoriel, une fenêtre ouverte, ou une fois arrivé.
+- **Onglets des menus** (`MenuKit.sideTabs`) : plus de TextScaled (sur petit écran, Roblox coupait « Acheter » en
+  « Achete / r ») ; la taille est mesurée par `TextService:GetTextBoundsAsync` (le mot le plus long tient sur sa ligne,
+  2 lignes au plus), avec une estimation tant que la mesure n'est pas revenue.
+Vu dans Studio : bandeau et flèche du tapis (sur son panneau), onglets du Bonus et du Marché entiers.
+Pas vu : la flèche de la capsule (la sauvegarde de test n'a pas d'œuf), sur téléphone.

@@ -1226,7 +1226,7 @@ local function createBase(index: number, map: Folder): Model
 	label.Size = UDim2.fromScale(1, 1)
 	label.BackgroundTransparency = 1
 	styleSignText(label, color)
-	label.Text = "Base libre"
+	label.Text = "BASE LIBRE"
 	label.Parent = sign
 	sign.Parent = base
 

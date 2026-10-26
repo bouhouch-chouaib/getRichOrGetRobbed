@@ -541,9 +541,9 @@ local STEAL_MESSAGES: { [string]: { text: string, color: Color3 } } = {
 	Home = { text = "%s EST DE RETOUR DANS TA BASE", color = MONEY },
 	Dropped = { text = "LÂCHÉ ! %s RENTRE À SA BASE : RATTRAPE-LE !", color = Color3.fromRGB(255, 90, 90) },
 	Timeout = { text = "TROP LENT ! %s T'ÉCHAPPE ET RENTRE À SA BASE", color = Color3.fromRGB(255, 90, 90) },
-	VictimLeft = { text = "SON PROPRIÉTAIRE A FUI : %s EST À TOI !", color = MONEY },
+	VictimLeft = { text = "SON MAÎTRE EST PARTI : %s EST À TOI !", color = MONEY },
 	Gone = { text = "PLUS LÀ : %s !", color = Color3.fromRGB(255, 90, 90) },
-	Recovered = { text = "RATTRAPÉ ! SON PROPRIÉTAIRE A REPRIS : %s", color = Color3.fromRGB(255, 90, 90) },
+	Recovered = { text = "RATTRAPÉ ! IL A REPRIS %s", color = Color3.fromRGB(255, 90, 90) },
 }
 
 Remotes.StealResult.OnClientEvent:Connect(function(outcome: string, petId: string, money: number?, points: number?)
@@ -568,7 +568,7 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 	local pet = petName(petId)
 	-- Les noms de familiers ont parfois un article ("Le Capybara Zen"), parfois non ("Chat") : tournures neutres.
 	if kind == "Started" then
-		Toast.show(string.format("VOL EN COURS : %s ! RATTRAPE %s ET %s !", pet, thief, RECOVER_KEY), Color3.fromRGB(255, 90, 90))
+		Toast.show(string.format("ON TE VOLE %s ! RATTRAPE %s ET %s !", pet, thief, RECOVER_KEY), Color3.fromRGB(255, 90, 90))
 	elseif kind == "Stolen" then
 		Toast.show(string.format("VOLÉ PAR %s : %s !", thief, pet), Color3.fromRGB(255, 90, 90))
 	elseif kind == "Recovered" then

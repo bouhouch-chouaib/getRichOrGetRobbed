@@ -459,7 +459,7 @@ RunService.RenderStepped:Connect(updateTrajectory)
 local function watchTools(character: Model)
 	character.ChildAdded:Connect(function(child)
 		if child:IsA("Tool") and (#stack > 0 or player:GetAttribute("CarryingPet") ~= nil) then
-			Toast.show("TES MAINS SONT PRISES : LÂCHE TES OBJETS POUR SORTIR UNE ARME !", Color3.fromRGB(255, 90, 90))
+			Toast.show("LÂCHE TES OBJETS POUR PRENDRE UNE ARME !", Color3.fromRGB(255, 90, 90))
 			task.defer(function()
 				local humanoid = character:FindFirstChildOfClass("Humanoid")
 				if humanoid and child.Parent == character then

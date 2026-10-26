@@ -5,7 +5,7 @@
 --     fantomatique apparaît quand ils sont tout près, et de petites étincelles trahissent ses pas.
 --   - Son nom, ses étiquettes et ses familiers équipés disparaissent avec lui.
 --   - Nuage de fumée + son à la disparition et à la réapparition (vu et entendu par les joueurs proches).
---   - Pour le joueur local : pastille « INVISIBLE 4 s » puis « RECHARGE 23 s », message quand c'est prêt.
+--   - Pour le joueur local : pastille « INVISIBLE 4 s » puis « PRÊT DANS 23 S », message quand c'est prêt.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -241,7 +241,7 @@ RunService.RenderStepped:Connect(function()
 		pillText.TextColor3 = GHOST
 	elseif cooling and holdsPower() then
 		pill.Visible = true
-		pillText.Text = string.format("RECHARGE  %d s", math.ceil((readyAt :: number) - now))
+		pillText.Text = string.format("PRÊT DANS  %d S", math.ceil((readyAt :: number) - now))
 		pillText.TextColor3 = Color3.fromRGB(200, 200, 210)
 	else
 		pill.Visible = false
@@ -264,10 +264,10 @@ local function watchTool(tool: Instance)
 		local now = Workspace:GetServerTimeNow()
 		if player:GetAttribute("CarryingPet") ~= nil then
 			Sounds.play("Error")
-			Toast.show("IMPOSSIBLE EN PORTANT UN FAMILIER VOLÉ !", Color3.fromRGB(255, 90, 90))
+			Toast.show("PAS AVEC UN FAMILIER DANS LES BRAS !", Color3.fromRGB(255, 90, 90))
 		elseif type(readyAt) == "number" and readyAt > now then
 			Sounds.play("Error")
-			Toast.show(string.format("RECHARGE : %d S", math.ceil(readyAt - now)), Color3.fromRGB(255, 90, 90))
+			Toast.show(string.format("PAS ENCORE ! ATTENDS %d S", math.ceil(readyAt - now)), Color3.fromRGB(255, 90, 90))
 		end
 	end)
 end

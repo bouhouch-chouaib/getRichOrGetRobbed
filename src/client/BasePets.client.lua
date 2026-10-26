@@ -95,7 +95,7 @@ local function setLabel(shown: Shown)
 	local selfBest = if shown.own then PowerCap.SelfBestOf(player) else nil
 	local capped = shown.own and PowerCap.IsCapped(petId, selfBest)
 	local incomeText = NumberFormat.perSecond(if shown.own then PowerCap.Income(petId, selfBest) else PetCatalog.GetIncome(petId))
-		.. (if capped then " (BRIDÉ)" else "")
+		.. (if capped then " (BLOQUÉ)" else "")
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "PetLabel"
 	sign.Adornee = root

@@ -97,7 +97,7 @@ player:GetAttributeChangedSignal("Keys"):Connect(function()
 			and (root.Position - gate.Position).Magnitude <= Config.Keys.UseDistance then
 			Remotes.UseKey:FireServer(base)
 		else
-			Toast.show(string.format("CLÉ OBTENUE ! (x%d)  [E] DEVANT UNE BASE FERMÉE", keys), GOLD)
+			Toast.show(string.format("TU AS UNE CLÉ ! (x%d)  VA DEVANT UNE BASE FERMÉE", keys), GOLD)
 		end
 	end
 	lastKeys = keys

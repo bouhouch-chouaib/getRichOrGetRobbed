@@ -116,7 +116,7 @@ local function onPlayerAdded(player: Player)
 	-- Si un 9e joueur arrive quand même, il ne pourrait pas jouer : on le renvoie avec un message clair.
 	if not BaseManager.GetBase(player) then
 		warn("[BaseManager] Aucune base libre pour " .. player.Name .. " : régler la taille des serveurs à " .. #bases .. ".")
-		player:Kick("Ce serveur est plein (" .. #bases .. " bases). Relance le jeu pour rejoindre un autre serveur !")
+		player:Kick("CE SERVEUR EST PLEIN ! RELANCE LE JEU POUR EN TROUVER UN AUTRE.")
 		return
 	end
 
@@ -133,7 +133,7 @@ local function onPlayerRemoving(player: Player)
 	if base then
 		owners[base] = nil
 		base:SetAttribute("OwnerName", nil)
-		setSign(base, "Base libre")
+		setSign(base, "BASE LIBRE")
 		-- Les objets restés dans une base vide disparaissent.
 		local itemSpawns = base:FindFirstChild("ItemSpawns")
 		if itemSpawns then

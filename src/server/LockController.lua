@@ -130,19 +130,19 @@ local function update(entry: BaseParts, now: number)
 		local cooling = now < ready
 		entry.button.Color = if cooling then COLOR_COOLDOWN else COLOR_OPEN
 		if entry.label then
-			entry.label.Text = if cooling then string.format("RECHARGE : %ds", math.ceil(ready - now)) else "FERMER LA BASE"
+			entry.label.Text = if cooling then string.format("PRÊT DANS %d S", math.ceil(ready - now)) else "FERMER LA BASE"
 		end
 		return
 	end
 
 	if forced then
 		if entry.label then
-			entry.label.Text = string.format("OUVERTE PAR UNE CLÉ : %ds", math.ceil(forced - now))
+			entry.label.Text = string.format("OUVERTE (CLÉ) : %d S", math.ceil(forced - now))
 		end
 		return -- ouverte par une clé : personne n'est expulsé
 	end
 	if entry.label and untilTime then
-		entry.label.Text = string.format("FERMÉE : %ds", math.ceil(untilTime - now))
+		entry.label.Text = string.format("FERMÉE : %d S", math.ceil(untilTime - now))
 	end
 
 	-- Expulse les intrus devant l'entrée.
