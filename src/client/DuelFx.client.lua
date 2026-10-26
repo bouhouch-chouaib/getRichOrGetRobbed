@@ -427,7 +427,7 @@ Remotes.DuelEvent.OnClientEvent:Connect(function(kind: string, duel: any, a: any
 				local position = target.model:GetPivot().Position + V(0, 3, 0)
 				local damage = if type(b) == "number" then b else 0
 				if c == true then
-					popDamage(position, string.format("-%d  CRITIQUE !", damage), rgb(255, 205, 50), true)
+					popDamage(position, string.format("-%d  GROS COUP !", damage), rgb(255, 205, 50), true)
 					burst(position, rgb(255, 205, 50), 30)
 					Sounds.playAt("Knockback", position)
 				else

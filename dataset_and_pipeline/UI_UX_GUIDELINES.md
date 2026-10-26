@@ -230,6 +230,10 @@ ce que l'image montre déjà.
 | Tirage instantané / 10 tirages | 1 ŒUF / 10 ŒUFS                          | produits Robux (`Config.Monetization`) |
 | Indisponible / Prix conseillé  | DÉJÀ PRIS / BON PRIX                     | Marché                               |
 | Anti-vol / Protection terminée | PROTÉGÉ / PROTECTION FINIE               | bouclier du nouveau venu             |
+| PV / ATT / Critique            | VIE / COUP / GROS COUP                   | Duel                                 |
+| Confirmer / Revenu             | VALIDER / ARGENT                         | Échange                              |
+| Palier / Effondrement / Jauge  | NIVEAU / IL EXPLOSE / BARRE              | trou noir (`Config.Blackhole.Tiers`) |
+| Prime / Défense                | BONUS / VOLEUR ARRÊTÉ                    | couronne                             |
 
 Mots gardés : « Rebirth », « Index », les noms de raretés et de mondes (ce sont des noms, avec leur couleur et leur
 icône ; les enfants de Roblox les connaissent).
@@ -247,7 +251,7 @@ icône ; les enfants de Roblox les connaissent).
 
 ### 7.4 À faire ensuite (même méthode)
 
-- Duel, Échange, Capsule (les autres fenêtres), messages du trou noir et de la couronne.
+- Messages de vol (« VOL EN COURS… », « LÂCHÉ !… ») et des armes ; panneaux dans le monde (stations, kiosques).
 - Montrer le chemin plus souvent : une flèche vers la capsule la première fois qu'on a 2 œufs, vers la Boutique quand on
   peut acheter le premier tapis.
 - Onglets des menus (`MenuKit.sideTabs`) : sur une toute petite fenêtre, « Acheter » se coupe en « Achete / r ».
@@ -265,3 +269,15 @@ temps, vu sur les photos de Studio :
 - Index : le résumé de collection en 4 lignes très courtes (« TROUVÉS », « 106/106 », « ★★★ 1/212 », « SUIVENT 1/3 »).
 - Marché : la phrase sous le prix raccourcie et agrandie.
 - « PAS ASSEZ D'ARGENT » devient « IL TE MANQUE $X ! » (Fusion, Marché), comme dans la Boutique.
+
+### 7.6 Troisième passe (26 oct.)
+
+Duel, Échange, trou noir (panneau, bandeaux, indices des 7 niveaux dans `Config.Blackhole.Tiers`) et couronne (étiquettes
+et messages) réécrits. Corrigé en même temps, vu sur les photos de Studio :
+- Duel et Échange : les noms des familiers ne montraient que leur premier mot (« LA », « LE ») ; ils passent sur deux
+  lignes et rétrécissent. « VIE / COUP » tient sur une ligne.
+- Duel : la règle en bas ne garde que l'essentiel, « ATTENTION : LE GAGNANT PEUT GAGNER TON FAMILIER ! » (la règle
+  « presque aussi rare » est dite par un message quand on choisit un familier trop fort ou trop faible).
+- Échange : « TOI / LUI » sur deux lignes ; titre « TES FAMILIERS À DONNER ».
+Vu en ouvrant les fenêtres par un message envoyé à soi-même (affichage seulement) ; pas vu : un vrai duel, un vrai
+échange, la couronne (il faut 2 joueurs).

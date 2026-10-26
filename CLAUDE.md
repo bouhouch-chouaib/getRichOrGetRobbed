@@ -201,6 +201,9 @@ faux œufs côté client seulement, tutoriel rejoué en local) ; pas vu : un vra
 2e passe (26 oct., §7.5) : Index (PRENDRE, IL TE SUIT), Fusion (MÊME COULEUR), Rebirth (mise en page resserrée, plus de
 « mutations »), Bonus (DÉFIS, œuf + « x3 »), Marché (+ messages serveur), fin de manche, bouclier, `Config.Quests` et
 produits Robux « 1 ŒUF » / « 10 ŒUFS ». Vu dans Studio (PC) : Rebirth, Bonus, défis, Marché, Index.
+3e passe (§7.6) : Duel (VIE / COUP, noms entiers), Échange (VALIDER, TOI / LUI), trou noir (NIVEAU, IL EXPLOSE,
+indices de `Config.Blackhole.Tiers`), couronne (BONUS, VOLEUR ARRÊTÉ). Fenêtres vues en s'envoyant leur message
+d'ouverture (affichage seulement) ; pas vu : vrai duel / échange / couronne à 2 joueurs.
 **Rebirth** : +1 chambre de capsule d'évolution par Rebirth (6 au plus, `Config.GetCapsuleSlots`, plusieurs œufs évoluent en même temps), doublons de sa meilleure rareté vers une chambre libre, prix 4T x (n+1) x 1,62^n.
 **Couronne du plus riche** (`Config.Crown`, `server/CrownController`, `shared/CrownRules`, `client/Crown`) : plus gros revenu du serveur, prime pour qui le vole, récompense limitée pour chaque voleur arrêté.
 **Pile « prochain objectif »** (`shared/NextGoals`, `client/NextGoals`) : deux objectifs entamés avec barre sous l'horloge, résumé d'absence au retour (attribut `AwaySummary`).

@@ -555,7 +555,7 @@ Remotes.StealResult.OnClientEvent:Connect(function(outcome: string, petId: strin
 		Toast.show(string.format(message.text, petName(petId)), message.color)
 		if outcome == "Success" and (money or 0) > 0 then
 			-- Couronne (Config.Crown) : tu as volé le roi du serveur.
-			Toast.show("PRIME DU ROI : +" .. NumberFormat.money(money or 0) .. " !", UiStyle.Colors.Gold)
+			Toast.show("BONUS DU ROI : +" .. NumberFormat.money(money or 0) .. " !", UiStyle.Colors.Gold)
 		end
 	end
 end)
@@ -594,12 +594,12 @@ Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: stri
 	elseif kind == "Crowned" then
 		-- Couronne du plus riche (Config.Crown, server/CrownController).
 		if thiefName == player.DisplayName then
-			Toast.show("TU ES LE ROI DU SERVEUR ! DÉFENDS TA COURONNE : CHAQUE VOLEUR ARRÊTÉ RAPPORTE.", UiStyle.Colors.Gold)
+			Toast.show("TU ES LE ROI ! ARRÊTE LES VOLEURS : ÇA RAPPORTE !", UiStyle.Colors.Gold)
 		else
-			Toast.show(string.format("%s EST LE ROI DU SERVEUR : VOLE-LE POUR UNE PRIME !", thief), UiStyle.Colors.Gold)
+			Toast.show(string.format("%s EST LE ROI : VOLE-LE POUR UN BONUS !", thief), UiStyle.Colors.Gold)
 		end
 	elseif kind == "CrownDefended" then
-		Toast.show(string.format("%s A DÉFENDU SA COURONNE CONTRE %s !", TextFormat.upper(victimName), thief), UiStyle.Colors.Gold)
+		Toast.show(string.format("%s A ARRÊTÉ %s : IL GARDE SA COURONNE !", TextFormat.upper(victimName), thief), UiStyle.Colors.Gold)
 	elseif kind == "AnnounceSacrifice" then
 		local entry = PetCatalog.ById[petId]
 		local rarity = entry and Config.Rarities[Config.RarityIndex[entry.Rarity]]

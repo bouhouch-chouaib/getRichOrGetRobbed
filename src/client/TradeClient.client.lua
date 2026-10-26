@@ -267,7 +267,7 @@ otherValue.Size = UDim2.fromOffset(COLUMN, 22)
 otherValue.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Tes familiers (clic = ajouter à l'offre).
-local inventoryTitle = heading("TES FAMILIERS (clique pour en ajouter)", 0, 304)
+local inventoryTitle = heading("TES FAMILIERS À DONNER", 0, 304)
 inventoryTitle.TextSize = 16
 local grid = Instance.new("ScrollingFrame")
 grid.Position = UDim2.fromOffset(0, 330)
@@ -326,10 +326,15 @@ local function refreshGrid()
 			local viewport = MenuKit.petViewport(card, petId, false)
 			viewport.Size = UDim2.new(1, -16, 0, 64)
 			viewport.Position = UDim2.fromOffset(8, 6)
+			-- Nom entier sur 2 lignes, qui rétrécit au lieu d'être coupé (« LA BALEINE GALAXIE » ne montrait que « LA »).
 			local name = UiStyle.text(card, petName(petId), 11, rarityColor(petId))
-			name.Position = UDim2.fromOffset(8, 76)
-			name.Size = UDim2.new(1, -16, 0, 28)
+			name.Position = UDim2.fromOffset(6, 76)
+			name.Size = UDim2.new(1, -12, 0, 28)
 			name.TextWrapped = true
+			name.TextScaled = true
+			local nameLimit = Instance.new("UITextSizeConstraint")
+			nameLimit.MaxTextSize, nameLimit.MinTextSize = 11, 7
+			nameLimit.Parent = name
 			local countLabel = UiStyle.text(card, "", 16, UiStyle.Colors.Gold)
 			countLabel.AnchorPoint = Vector2.new(1, 0)
 			countLabel.Position = UDim2.new(1, -3, 0, 0)
@@ -359,7 +364,7 @@ warning.Size = UDim2.fromOffset(COLUMN, 44)
 warning.TextWrapped = true
 local status = UiStyle.text(content, "", 20, WHITE)
 status.Position = UDim2.fromOffset(COLUMN + 28, 352)
-status.Size = UDim2.fromOffset(COLUMN, 42)
+status.Size = UDim2.fromOffset(COLUMN, 48)
 status.TextWrapped = true
 local mainButton = UiStyle.button(content, "PRÊT !", UDim2.fromOffset(250, 58), UiStyle.Colors.Green, 26)
 mainButton.Position = UDim2.new(0, COLUMN + 28, 1, -64)
@@ -375,20 +380,20 @@ local function refreshWindow()
 	fillSlots(mySlots, myOffer)
 	fillSlots(otherSlots, otherOffer)
 	local given, received = value(myOffer), value(otherOffer)
-	myValue.Text = "Revenu : " .. NumberFormat.perSecond(given)
-	otherValue.Text = "Revenu : " .. NumberFormat.perSecond(received)
+	myValue.Text = "ARGENT : " .. NumberFormat.perSecond(given)
+	otherValue.Text = "ARGENT : " .. NumberFormat.perSecond(received)
 	warning.Text = if given > 0 and received < given / 3
-		then "ATTENTION : tu donnes beaucoup plus que tu ne reçois !"
+		then "ATTENTION : TU DONNES PLUS QUE TU NE REÇOIS !"
 		else ""
 	if phase == "Confirm" then
-		status.Text = string.format("OFFRES BLOQUÉES : VÉRIFIE BIEN !\nToi : %s  •  %s : %s",
-			if myConfirmed then "CONFIRMÉ" else "à confirmer", name, if otherConfirmed then "CONFIRMÉ" else "à confirmer")
+		status.Text = string.format("REGARDE BIEN, PUIS VALIDE !\nTOI : %s  •  LUI : %s",
+			if myConfirmed then "VALIDÉ" else "PAS ENCORE", if otherConfirmed then "VALIDÉ" else "PAS ENCORE")
 		status.TextColor3 = UiStyle.Colors.Gold
 		secondCaption.Text = "MODIFIER"
 		UiStyle.setButtonColor(secondButton, UiStyle.Colors.Orange)
 	else
-		status.Text = string.format("Toi : %s  •  %s : %s", if myReady then "PRÊT" else "pas prêt", name,
-			if otherReady then "PRÊT" else "pas prêt")
+		status.Text = string.format("TOI : %s\n%s : %s", if myReady then "PRÊT" else "PAS PRÊT", name,
+			if otherReady then "PRÊT" else "PAS PRÊT")
 		status.TextColor3 = WHITE
 		mainCaption.Text = if myReady then "PAS PRÊT" else "PRÊT !"
 		UiStyle.setButtonColor(mainButton, if myReady then UiStyle.Colors.Orange else UiStyle.Colors.Green)
@@ -448,19 +453,19 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 	if invite.Visible then
-		inviteTimer.Text = string.format("%d s pour répondre", math.max(0, math.ceil(deadline - Workspace:GetServerTimeNow())))
+		inviteTimer.Text = string.format("%d S POUR RÉPONDRE", math.max(0, math.ceil(deadline - Workspace:GetServerTimeNow())))
 	end
 	-- Compte à rebours de la deuxième confirmation.
 	if phase == "Confirm" then
 		local left = math.ceil(confirmAt - Workspace:GetServerTimeNow())
 		if myConfirmed then
-			mainCaption.Text = "CONFIRMÉ"
+			mainCaption.Text = "VALIDÉ"
 			UiStyle.setButtonColor(mainButton, UiStyle.Colors.Cyan)
 		elseif left > 0 then
-			mainCaption.Text = string.format("CONFIRMER (%d)", left)
+			mainCaption.Text = string.format("VALIDER (%d)", left)
 			UiStyle.setButtonColor(mainButton, Color3.fromRGB(150, 150, 160))
 		else
-			mainCaption.Text = "CONFIRMER !"
+			mainCaption.Text = "VALIDER !"
 			UiStyle.setButtonColor(mainButton, UiStyle.Colors.Green)
 		end
 	end
@@ -472,17 +477,17 @@ end)
 
 local CANCEL_MESSAGES: { [string]: string } = {
 	Declined = "ÉCHANGE REFUSÉ",
-	Timeout = "ÉCHANGE ANNULÉ : TEMPS ÉCOULÉ",
+	Timeout = "ÉCHANGE ANNULÉ : TROP TARD",
 	Busy = "CE JOUEUR EST OCCUPÉ",
-	Cooldown = "ATTENDS UN PEU AVANT DE PROPOSER UN AUTRE ÉCHANGE",
+	Cooldown = "ATTENDS UN PEU AVANT UN AUTRE ÉCHANGE",
 	Cancelled = "ÉCHANGE ANNULÉ",
 	Left = "L'AUTRE JOUEUR EST PARTI : ÉCHANGE ANNULÉ",
-	PetGone = "UN FAMILIER DE L'ÉCHANGE N'EST PLUS DISPONIBLE : ÉCHANGE ANNULÉ",
+	PetGone = "UN FAMILIER N'EST PLUS LÀ : ÉCHANGE ANNULÉ",
 }
 local SOFT_MESSAGES: { [string]: string } = {
-	Full = string.format("%d FAMILIERS AU MAXIMUM PAR OFFRE", TRADE.MaxPets),
-	NoMore = "TU N'AS PAS D'AUTRE EXEMPLAIRE LIBRE DE CE FAMILIER",
-	Empty = "AJOUTE AU MOINS UN FAMILIER À L'ÉCHANGE",
+	Full = string.format("%d FAMILIERS MAX !", TRADE.MaxPets),
+	NoMore = "TU N'EN AS PAS D'AUTRE",
+	Empty = "AJOUTE AU MOINS UN FAMILIER",
 }
 
 local function offerOf(value: any): Offer

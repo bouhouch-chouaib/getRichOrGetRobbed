@@ -46,7 +46,7 @@ end
 local function defensesText(king: Player): string
 	local defenses = king:GetAttribute("CrownDefenses")
 	local count = if type(defenses) == "number" then defenses else 0
-	return if count > 0 then string.format("ROI DU SERVEUR  •  %d DÉFENSE%s", count, if count > 1 then "S" else "")
+	return if count > 0 then string.format("ROI DU SERVEUR  •  %d VOLEUR%s ARRÊTÉ%s", count, if count > 1 then "S" else "", if count > 1 then "S" else "")
 		else "ROI DU SERVEUR"
 end
 
@@ -84,7 +84,7 @@ local function attachBase()
 			tag.LightInfluence = 0
 			tag.MaxDistance = 400
 			Icons.image(tag, "Crown", UDim2.fromScale(0.16, 0.6), UDim2.fromScale(0.42, 0))
-			label(tag, "BASE DU ROI  •  PRIME SUR SES FAMILIERS", 0.6, 0.4, GOLD)
+			label(tag, "BASE DU ROI  •  VOLE-LE : TU GAGNES PLUS !", 0.6, 0.4, GOLD)
 			tag.Parent = platform
 			baseTag = tag
 			return

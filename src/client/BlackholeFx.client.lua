@@ -622,7 +622,7 @@ local function refreshGauge()
 	local collapse = ReplicatedStorage:GetAttribute("HoleCollapse") == true
 	local jackpotUntil = (ReplicatedStorage:GetAttribute("HoleJackpotUntil") or 0) :: number
 	local def = HOLE.Tiers[math.clamp(tier, 1, #HOLE.Tiers)]
-	title.Text = string.format("TROU NOIR · PALIER %d · %s", tier, def.Name)
+	title.Text = string.format("TROU NOIR · NIVEAU %d · %s", tier, def.Name)
 	title.TextColor3 = def.Color
 	fillGradient.Color = ColorSequence.new(def.Color, def.Color2)
 	local f = math.clamp(gauge / math.max(need, 1), 0, 1)
@@ -638,14 +638,14 @@ local function refreshGauge()
 		hint.TextColor3 = def.Color
 	else
 		amount.Text = string.format("%d / %d", math.floor(gauge), need)
-		hint.Text = if tier < #HOLE.Tiers then def.Hint else def.Hint .. " Remplis la jauge : effondrement !"
+		hint.Text = if tier < #HOLE.Tiers then def.Hint else def.Hint .. "  •  REMPLIS LA BARRE : IL VA EXPLOSER !"
 		hint.TextColor3 = Color3.new(1, 1, 1)
 	end
 	local entries = {}
 	for name, value in string.gmatch((ReplicatedStorage:GetAttribute("HoleTop") or "") :: string, "([^=|]+)=(%d+)") do
 		table.insert(entries, string.format("%d. %s %s", #entries + 1, tostring(name), tostring(value)))
 	end
-	top.Text = if #entries > 0 then "TOP 3 (CADEAUX À L'EFFONDREMENT) : " .. table.concat(entries, "  ") else ""
+	top.Text = if #entries > 0 then "TOP 3 (CADEAUX QUAND IL EXPLOSE) : " .. table.concat(entries, "  ") else ""
 end
 
 for _, name in ipairs({ "HoleTier", "HoleGauge", "HoleNeed", "HoleCollapse", "HoleJackpotUntil", "HoleTop" }) do
@@ -867,7 +867,7 @@ Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		Sounds.play("HoleTierUp")
 		Sounds.play("HoleRumble")
 		Sounds.duck(4)
-		showBanner("LE TROU NOIR ÉVOLUE !", string.format("PALIER %d : %s", a, newDef.Name), newDef.Hint, newDef.Color, 3.6)
+		showBanner("LE TROU NOIR GRANDIT !", string.format("NIVEAU %d : %s", a, newDef.Name), newDef.Hint, newDef.Color, 3.6)
 	elseif kind == "Spit" then
 		Sounds.playAt("HoleRumble", V(0, CORE_Y, 0))
 		shake(0.3, 0.4)
@@ -881,7 +881,7 @@ Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		Sounds.playAt("HoleCatch", a)
 	elseif kind == "Meteors" then
 		Sounds.play("HoleMeteors")
-		showBanner("", "PLUIE DE MÉTÉORITES !", "Ramasse-les : +" .. HOLE.Gravity.MeteorValue .. " points chacune", def.Color, 2.2)
+		showBanner("", "PLUIE DE MÉTÉORITES !", "RAMASSE-LES : +" .. HOLE.Gravity.MeteorValue .. " POINTS CHACUNE", def.Color, 2.2)
 	elseif kind == "Combo" and typeof(a) == "Vector3" and type(c) == "number" then
 		popText(a, "COMBO x" .. tostring(math.floor(c * 100 + 0.5) / 100), if c >= HOLE.Combo.Max then def.Color2 else def.Color)
 		if b == localPlayer then
@@ -891,11 +891,11 @@ Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		Sounds.play("HoleJackpot")
 		screenFlash(def.Color, 0.35)
 		showBanner("", string.format("JACKPOT x%d !", HOLE.Jackpot.Multiplier),
-			string.format("Pendant %d s, chaque objet avalé vaut %d fois plus !", HOLE.Jackpot.Duration, HOLE.Jackpot.Multiplier), def.Color, 3)
+			string.format("PENDANT %d S, CHAQUE OBJET VAUT x%d !", HOLE.Jackpot.Duration, HOLE.Jackpot.Multiplier), def.Color, 3)
 	elseif kind == "CollapseSoon" then
 		Sounds.play("HoleRumble")
 		shake(0.5, 0.8)
-		showBanner("LA JAUGE EST PLEINE !", "EFFONDREMENT IMMINENT", string.format(
+		showBanner("LA BARRE EST PLEINE !", "IL VA EXPLOSER !", string.format(
 			"À LA PROCHAINE SIESTE : POINTS x%d ET FAMILIERS OFFERTS AUX 3 MEILLEURS !", HOLE.Collapse.ScoreMultiplier),
 			Color3.fromRGB(255, 80, 80), 3.6)
 	elseif kind == "Sacrifice" and typeof(a) == "Vector3" and type(b) == "string" then
@@ -910,8 +910,8 @@ Remotes.HoleEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		Sounds.play("HoleCollapse")
 		Sounds.play("HoleRumble")
 		Sounds.duck(4)
-		local sub = if #names > 0 then "Cadeaux : " .. table.concat(names, ", ") else "Le trou noir renaît au palier 1."
-		showBanner(string.format("SCORE DU TOUR x%d !", HOLE.Collapse.ScoreMultiplier), "EFFONDREMENT !", sub,
+		local sub = if #names > 0 then "CADEAUX : " .. table.concat(names, ", ") else "LE TROU NOIR REPART AU NIVEAU 1"
+		showBanner(string.format("POINTS x%d !", HOLE.Collapse.ScoreMultiplier), "IL A EXPLOSÉ !", sub,
 			Color3.fromRGB(255, 80, 80), 4)
 	end
 	if current and current.event then

@@ -78,7 +78,7 @@ local function attachPrompt(other: Player, character: Model)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "DuelPrompt"
-	prompt.ActionText = "Défier en duel"
+	prompt.ActionText = "Faire un duel"
 	prompt.ObjectText = other.DisplayName
 	prompt.KeyboardKeyCode = Enum.KeyCode.F
 	prompt.GamepadKeyCode = Enum.KeyCode.ButtonY
@@ -170,9 +170,11 @@ layout.CellPadding = UDim2.fromOffset(12, 12)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.Parent = grid
 
-local rules = UiStyle.text(content, "Une rareté d'écart au maximum. Le gagnant tourne la roue : 1 case sur 8 = il repart avec ton familier !", 16, UiStyle.Colors.Gold)
-rules.Position = UDim2.new(0, 0, 1, -64)
-rules.Size = UDim2.new(0, 470, 0, 40)
+-- L'essentiel en mots simples (UI_UX_GUIDELINES.md §7) ; la règle « presque aussi rare » est dite par un message
+-- quand on choisit un familier trop fort ou trop faible.
+local rules = UiStyle.text(content, "ATTENTION : LE GAGNANT PEUT GAGNER TON FAMILIER !", 18, UiStyle.Colors.Gold)
+rules.Position = UDim2.new(0, 0, 1, -68)
+rules.Size = UDim2.new(0, 470, 0, 52)
 rules.TextWrapped = true
 
 -- Colonne de droite : les deux familiers choisis.
@@ -230,7 +232,7 @@ local function showPet(card: Card, petId: string?, ready: boolean, mine: boolean
 		local hp, attack = DuelStats.of(petId)
 		card.name.Text = petName(petId)
 		card.name.TextColor3 = rarityColor(petId)
-		card.stats.Text = string.format("PV %d  •  ATT %d", hp, attack)
+		card.stats.Text = string.format("VIE %d  •  COUP %d", hp, attack)
 	else
 		card.name.Text = if mine then "CHOISIS UN FAMILIER" else "IL CHOISIT..."
 		card.name.TextColor3 = WHITE
@@ -284,7 +286,7 @@ local function refreshGrid()
 		end
 	end
 	if #list == 0 then
-		local empty = UiStyle.text(grid, "Tu n'as aucun familier dans ta base (un familier équipé ne peut pas combattre).", 20, WHITE)
+		local empty = UiStyle.text(grid, "PAS DE FAMILIER DANS TA BASE. CEUX QUI TE SUIVENT NE SE BATTENT PAS.", 20, WHITE)
 		empty.Size = UDim2.fromOffset(440, 80)
 		empty.TextWrapped = true
 		return
@@ -300,21 +302,31 @@ local function refreshGrid()
 		local viewport = MenuKit.petViewport(card, petId, false)
 		viewport.Size = UDim2.new(1, -16, 0, 80)
 		viewport.Position = UDim2.fromOffset(8, 6)
+		-- Le nom entier sur 2 lignes et « VIE / COUP » sur une ligne : ils rétrécissent au lieu d'être coupés
+		-- (« LA BALEINE GALAXIE » ne montrait que « LA »).
 		local name = UiStyle.text(card, petName(petId), 13, rarityColor(petId))
-		name.Position = UDim2.fromOffset(8, 92)
-		name.Size = UDim2.new(1, -16, 0, 22)
+		name.Position = UDim2.fromOffset(6, 88)
+		name.Size = UDim2.new(1, -12, 0, 28)
 		name.TextWrapped = true
+		name.TextScaled = true
+		local nameLimit = Instance.new("UITextSizeConstraint")
+		nameLimit.MaxTextSize, nameLimit.MinTextSize = 13, 7
+		nameLimit.Parent = name
 		local hp, attack = DuelStats.of(petId)
-		local stats = UiStyle.text(card, string.format("PV %d  ATT %d", hp, attack), 12, WHITE)
-		stats.Position = UDim2.fromOffset(8, 120)
-		stats.Size = UDim2.new(1, -16, 0, 20)
+		local stats = UiStyle.text(card, string.format("VIE %d  COUP %d", hp, attack), 12, WHITE)
+		stats.Position = UDim2.fromOffset(6, 120)
+		stats.Size = UDim2.new(1, -12, 0, 20)
+		stats.TextScaled = true
+		local statsLimit = Instance.new("UITextSizeConstraint")
+		statsLimit.MaxTextSize, statsLimit.MinTextSize = 12, 7
+		statsLimit.Parent = stats
 		gridCards[petId] = { card = card, viewport = viewport, name = name }
 		card.Activated:Connect(function()
 			if otherPick == nil or DuelStats.compatible(petId, otherPick) then
 				Sounds.play("UiClick")
 				action("Pick", petId)
 			else
-				Toast.show("RARETÉ TROP ÉLOIGNÉE DE SON FAMILIER (1 RARETÉ D'ÉCART MAX)", RED)
+				Toast.show("TROP FORT OU TROP FAIBLE CONTRE LE SIEN : CHOISIS-EN UN AUTRE", RED)
 			end
 		end)
 	end
@@ -326,13 +338,13 @@ local function refreshWindow()
 	showPet(otherCard, otherPick, otherReady, false)
 	local other = opponent
 	otherCard.head.Text = if other then TextFormat.upper(other.DisplayName) else "ADVERSAIRE"
-	readyCaption.Text = if myReady then "ANNULER PRÊT" else "PRÊT !"
+	readyCaption.Text = if myReady then "PAS PRÊT" else "PRÊT !"
 	refreshGrid()
 end
 
 readyButton.Activated:Connect(function()
 	if not myPick or not otherPick then
-		Toast.show(if myPick then "ATTENDS LE CHOIX DE TON ADVERSAIRE" else "CHOISIS D'ABORD UN FAMILIER", UiStyle.Colors.Gold)
+		Toast.show(if myPick then "ATTENDS QU'IL CHOISISSE" else "CHOISIS D'ABORD UN FAMILIER", UiStyle.Colors.Gold)
 		return
 	end
 	action("Ready", not myReady)
@@ -362,7 +374,7 @@ local cheerButton = UiStyle.button(gui, "ENCOURAGE TON FAMILIER !", UDim2.fromOf
 cheerButton.AnchorPoint = Vector2.new(0.5, 1)
 cheerButton.Position = UDim2.new(0.5, 0, 1, -ScreenScale.BOTTOM_RESERVED)
 cheerButton.Visible = false
-local cheerHint = UiStyle.text(cheerButton, "Clique vite : chaque clic augmente ses dégâts !", 16, UiStyle.Colors.Gold)
+local cheerHint = UiStyle.text(cheerButton, "APPUIE VITE : IL TAPE PLUS FORT !", 18, UiStyle.Colors.Gold)
 cheerHint.AnchorPoint = Vector2.new(0.5, 0)
 cheerHint.Position = UDim2.new(0.5, 0, 1, 4)
 cheerHint.Size = UDim2.new(1.4, 0, 0, 22)
@@ -437,10 +449,10 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 	if invite.Visible then
-		inviteTimer.Text = string.format("%d s pour répondre", math.max(0, math.ceil(deadline - Workspace:GetServerTimeNow())))
+		inviteTimer.Text = string.format("%d S POUR RÉPONDRE", math.max(0, math.ceil(deadline - Workspace:GetServerTimeNow())))
 	end
 	if window.isOpen() then
-		timerLabel.Text = string.format("Temps pour choisir : %d s", math.max(0, math.ceil(deadline - Workspace:GetServerTimeNow())))
+		timerLabel.Text = string.format("CHOISIS VITE : %d S", math.max(0, math.ceil(deadline - Workspace:GetServerTimeNow())))
 	end
 end)
 
@@ -492,13 +504,13 @@ end)
 
 local CANCEL_MESSAGES: { [string]: string } = {
 	Declined = "DUEL REFUSÉ",
-	Timeout = "DUEL ANNULÉ : TEMPS ÉCOULÉ",
+	Timeout = "DUEL ANNULÉ : TROP TARD",
 	Busy = "CE JOUEUR EST OCCUPÉ",
-	Cooldown = "ATTENDS UN PEU AVANT DE DÉFIER À NOUVEAU",
-	ArenaFull = "TOUTES LES ARÈNES SONT PRISES, RÉESSAIE DANS UN INSTANT",
-	PetGone = "UN DES FAMILIERS N'EST PLUS DISPONIBLE",
+	Cooldown = "ATTENDS UN PEU AVANT UN AUTRE DUEL",
+	ArenaFull = "PAS DE PLACE POUR L'INSTANT : RÉESSAIE !",
+	PetGone = "UN DES FAMILIERS N'EST PLUS LÀ",
 	Cancelled = "DUEL ANNULÉ",
-	Left = "L'ADVERSAIRE EST PARTI",
+	Left = "L'AUTRE JOUEUR EST PARTI",
 }
 
 Remotes.DuelEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c: any, d: any, e: any)
@@ -515,7 +527,7 @@ Remotes.DuelEvent.OnClientEvent:Connect(function(kind: string, a: any, b: any, c
 		Toast.show(string.format("DÉFI ENVOYÉ À %s...", TextFormat.upper(a.DisplayName)), UiStyle.Colors.Gold)
 	elseif kind == "Cancelled" and type(a) == "string" then
 		if a == "RarityGap" then
-			Toast.show("RARETÉ TROP ÉLOIGNÉE DE SON FAMILIER (1 RARETÉ D'ÉCART MAX)", RED)
+			Toast.show("TROP FORT OU TROP FAIBLE CONTRE LE SIEN : CHOISIS-EN UN AUTRE", RED)
 			return
 		end
 		Toast.show(CANCEL_MESSAGES[a] or "DUEL ANNULÉ", RED)
