@@ -13,6 +13,10 @@ français, un seul des deux). Tester côté serveur : un Script créé à la vol
 **Notifications Roblox (29 oct.)** : `server/Notifications` (MemoryStore `Notify_v1` + Open Cloud par HttpService, clé
 dans le Secret `NotifyKey` que Chouaib range lui-même), `shared/NotifyPlan`. Les 4 textes sont créés et leurs Asset ID
 sont dans `Config.Notifications.Strings` ; une vraie notification reçue n'a pas encore été vue (STRATEGIE_JOUEURS.md B2).
+**Console / manette (29 oct.)** : `client/Gamepad` (croix gauche = menus, B ferme, cadre doré), `ScreenScale.isConsole()`
+pour les consignes ; « Console » doit être cochée dans le Creator Hub (Paramètres > Accès / Appareils). Vu dans Studio
+(mode `DebugConsole`) ; pas encore vu sur une vraie Xbox / PlayStation. Tout nouveau menu passe par `MenuKit.window` (la
+manette y entre seule) ; toute nouvelle consigne « [E] » / « CLIC » a sa version console.
 **Trou noir doré (29 oct.)** : 5 premières minutes de chaque heure UTC, points x2 (`Config.GoldenHour`, `shared/GoldenHour`,
 `client/GoldenHour`, ligne « GoldenHour » de la pile sous l'horloge). Studio : attribut `DebugGoldenShift` (secondes).
 **Panneau des nouveautés (29 oct.)** : `Config.Updates` (Number + lignes), `server/UpdateBoard`, champ sauvegardé

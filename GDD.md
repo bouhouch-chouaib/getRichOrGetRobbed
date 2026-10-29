@@ -605,6 +605,13 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   (jauge de charge dans le bouton). Gâchette droite (ButtonR2) à la manette.
 - Consigne de phase adaptée à l'appareil ; colonne de gauche remontée sur tactile (joystick) ; familiers de base animés
   jusqu'à 150 studs sur téléphone (260 sur PC).
+- **Console / manette (29 oct.)** : `client/Gamepad` : croix gauche = tuiles de menu (cadre doré de sélection), A ouvre,
+  une fenêtre ouverte prend la sélection (contenu avant les onglets de côté), B la ferme et revient sur sa tuile. Bulles
+  avec l'image du vrai bouton (X / carré, `client/PromptStyle`), aimant sur la croix droite, grappin visé devant la caméra
+  avec visée aidée (`Config.Weapons.Grapple.GamepadAssistCone`), armes par la barre d'objets de Roblox (L1 / R1, R2).
+  `ScreenScale.isConsole()` (télé : `GuiService:IsTenFootInterface`) : consignes, tutoriel et capsule sans « [E] » ni
+  « CLIC ». Studio : `workspace:SetAttribute("DebugConsole", true)` avant Play ; l'outil clavier du MCP envoie DPadLeft /
+  ButtonB (A ne sélectionne pas dans Studio : Entrée le remplace).
 
 ## Architecture (Rojo)
 

@@ -63,11 +63,14 @@ local function isShown(object: GuiObject, stop: Instance): boolean
 	return true
 end
 
--- Le bouton le plus en haut à gauche (hors croix de fermeture) : c'est là que la sélection commence.
-local function firstButton(container: Instance): GuiObject?
+-- Le bouton le plus en haut à gauche (hors croix de fermeture) : c'est là que la sélection commence. Les onglets
+-- de côté (MenuKit.sideTabs) passent après le contenu : on tombe sur « PRENDRE », pas sur un onglet.
+local function firstButton(container: Instance, withTabs: boolean?): GuiObject?
 	local best: GuiObject? = nil
+	local tabs = container:FindFirstChild("SideTabs", true)
 	for _, descendant in ipairs(container:GetDescendants()) do
 		if descendant:IsA("GuiButton") and descendant.Selectable and descendant.Name ~= "Close"
+			and (withTabs or not tabs or not descendant:IsDescendantOf(tabs))
 			and descendant.AbsoluteSize.X > 0 and isShown(descendant, container) then
 			local current = best
 			if not current or descendant.AbsolutePosition.Y < current.AbsolutePosition.Y - 4
@@ -76,6 +79,9 @@ local function firstButton(container: Instance): GuiObject?
 				best = descendant
 			end
 		end
+	end
+	if not best and not withTabs then
+		return firstButton(container, true)
 	end
 	return best
 end
