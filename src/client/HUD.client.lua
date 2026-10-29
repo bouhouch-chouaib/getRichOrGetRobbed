@@ -390,13 +390,14 @@ do
 	candyCount = UiStyle.number(candyButton, "0", if isTouch then 18 else 20, WHITE)
 	candyCount.AnchorPoint = Vector2.new(1, 0.5)
 	candyCount.Position = UDim2.new(1, -(height - 4), 0.5, 0)
-	candyCount.Size = UDim2.fromOffset(60, height - 12)
+	candyCount.Size = UDim2.fromOffset(46, height - 12)
 	candyCount.TextXAlignment = Enum.TextXAlignment.Right
 	candyCount.ZIndex = 3
 	Icons.image(candyButton, "Ghost", UDim2.fromOffset(height - 14, height - 14), UDim2.new(1, -(height - 8), 0, 5)).ZIndex = 3
 	local caption = candyButton:FindFirstChild("Caption") :: TextLabel
 	caption.Position = UDim2.fromOffset(8, 6)
-	caption.Size = UDim2.new(1, -height - 74, 1, -12)
+	caption.Size = UDim2.new(1, -height - 58, 1, -12)
+	caption.TextScaled = true -- « BONBONS » (« CANDY » en anglais) tient à côté du nombre
 	UIJuice.button(candyButton)
 end
 

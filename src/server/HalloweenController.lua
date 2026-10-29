@@ -243,9 +243,9 @@ local function cauldron(): Model
 	prompt.Parent = hitbox
 	local sign = Instance.new("BillboardGui")
 	sign.Name = "Sign"
-	sign.Size = UDim2.fromOffset(260, 60)
+	sign.Size = UDim2.fromScale(16, 3.5) -- en studs : plus petit de loin, comme un vrai panneau
 	sign.StudsOffsetWorldSpace = Vector3.new(0, size.Y / 2 + 3, 0)
-	sign.MaxDistance = 140
+	sign.MaxDistance = 220
 	sign.AlwaysOnTop = false
 	local text = Instance.new("TextLabel")
 	text.BackgroundTransparency = 1
@@ -273,11 +273,12 @@ local function buildDecor(): Folder
 		place(model, at, facing)
 		model.Parent = folder
 	end
-	-- Le trou noir devient un chaudron de citrouilles : 12 lanternes sur son bord, le visage vers l'arène.
-	for index = 0, 11 do
-		local angle = (index + 0.5) * math.pi * 2 / 12
-		local at = polar(angle, ARENA.HoleRadius + 7)
-		add(lantern(1), at, at * 2)
+	-- Le trou noir entouré de grosses citrouilles : 8, juste derrière ses décors (anneau de 50 à 70 studs, un groupe
+	-- tous les 45° à partir de 12°), dans les trous entre eux, le visage vers l'arène.
+	for index = 0, 7 do
+		local angle = math.rad(34.5 + index * 45)
+		local at = polar(angle, 80)
+		add(lantern(1.8), at, at * 2)
 	end
 	-- Une citrouille de chaque côté de l'entrée des 8 bases, visage vers le trou noir.
 	local step = math.pi * 2 / ARENA.BaseCount
@@ -291,7 +292,7 @@ local function buildDecor(): Folder
 		-- Dans l'arène, entre deux chemins : une tombe et une petite citrouille.
 		local between = angle + step / 2
 		add(tombstone(), polar(between - 0.05, 112), Vector3.zero)
-		add(lantern(0.6), polar(between + 0.06, 126), Vector3.zero)
+		add(lantern(1), polar(between + 0.06, 126), Vector3.zero)
 	end
 	local spot = polar(math.rad(SETTINGS.Cauldron.Angle), SETTINGS.Cauldron.Radius)
 	add(cauldron(), spot, Vector3.zero)
