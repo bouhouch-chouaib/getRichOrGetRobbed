@@ -555,7 +555,7 @@ Config.Badges = {
 	{ Key = "Index75", Id = 0, Name = "Index complet", Description = "Découvrir les 75 familiers." },
 	{ Key = "Ultime", Id = 0, Name = "Évolution ultime", Description = "Obtenir un familier Ultime dans la capsule d'évolution." },
 	{ Key = "Sigma", Id = 0, Name = "Légende Sigma", Description = "Obtenir un familier Sigma." },
-	{ Key = "Halloween2026", Id = 0, Name = "Halloween 2026", Description = "Ouvrir un œuf Citrouille pendant Halloween 2026." },
+	{ Key = "Halloween2026", Id = 769970263702372, Name = "Halloween 2026", Description = "Ouvrir un œuf Citrouille pendant Halloween 2026." },
 } :: { BadgeDef }
 
 -- Groupe Roblox : les membres gagnent IncomeBonus de revenu en plus (server/ProgressionController, attribut "InGroup").

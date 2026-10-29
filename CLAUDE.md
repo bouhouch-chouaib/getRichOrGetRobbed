@@ -27,7 +27,7 @@ manette y entre seule) ; toute nouvelle consigne « [E] » / « CLIC » a sa ver
 de l'arène, décor `Workspace.HalloweenDecor`), `client/HalloweenMenu` (bouton BONBONS sous INVITER ou [E] au chaudron),
 `client/Halloween` (heure hantée, nuits violettes). 100 bonbons = 1 œuf Citrouille (orange dans la couveuse) -> un des 5
 familiers limités (`PetCatalog` champ `Event = "Halloween"`, hors tirages ordinaires). Codes HALLOWEEN / BOO, badge
-`Halloween2026` (Id à créer), nouveautés n° 2. Studio : `workspace:SetAttribute("DebugHalloween", true)` avant Play.
+`Halloween2026` (créé le 29 oct., Id 769970263702372), nouveautés n° 2. Studio : `workspace:SetAttribute("DebugHalloween", true)` avant Play.
 Vérifié en Play (solo) : décor, menu, 2 achats + refus, œufs Citrouille dans la couveuse, sauvegarde des bonbons.
 Modèles Blender faits (`Lot11_Halloween.fbx` : 5 familiers + citrouille à jeter, citrouille sculptée, tombe) mais **pas
 encore importés** : Chouaib importe, puis `studio_tools/wire_halloween_pets.lua` et `wire_halloween_items.lua` (dans cet
