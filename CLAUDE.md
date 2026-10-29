@@ -3,6 +3,10 @@
 Contexte de passation pour toute nouvelle session Claude. Lire aussi `GDD.md` (design + architecture à jour).
 **Le jeu est public depuis le 29 oct. 2026 : la priorité est d'avoir des joueurs qui reviennent. Lire
 `docs/STRATEGIE_JOUEURS.md`** (étapes A à D, calendrier des mises à jour du samedi, qui fait quoi).
+**Jeu en anglais (29 oct.)** : le code écrit toujours en français ; `client/Translate` remplace chaque texte affiché par
+`shared/Lang` pour qui n'a pas Roblox en français. **Tout nouveau texte affiché va aussi dans `shared/LangEn`**
+(`lune run tools/check-lang.luau .` liste les oubliés). Studio : `workspace:SetAttribute("DebugLang", "en")` avant Play.
+Ne jamais comparer un `.Text` / `.ActionText` affiché à une phrase française (il peut être traduit).
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
 **Pour tout travail visuel, lire `docs/DIRECTION_ARTISTIQUE.md`** (style Steal an Egg relevé sur captures :

@@ -389,15 +389,18 @@ banner.Visible = false
 local bannerScale = Instance.new("UIScale")
 bannerScale.Parent = banner
 
+local bannerCount = 0 -- pas le texte : client/Translate peut l'avoir traduit entre-temps
+
 local function showBanner(text: string, color: Color3, hold: number)
 	banner.Text = text
 	banner.TextColor3 = color
 	banner.Visible = true
 	bannerScale.Scale = 0.3
 	TweenService:Create(bannerScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	local shown = text
+	bannerCount += 1
+	local shown = bannerCount
 	task.delay(hold, function()
-		if banner.Text == shown then
+		if bannerCount == shown then
 			banner.Visible = false
 		end
 	end)

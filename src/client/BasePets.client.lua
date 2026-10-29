@@ -22,6 +22,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
+local Lang = require(ReplicatedStorage.Shared.Lang)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local PetCatalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetGaits = require(ReplicatedStorage.Shared.PetGaits)
@@ -548,7 +549,7 @@ RunService:BindToRenderStep("BasePetsPlacement", Enum.RenderPriority.Last.Value 
 			if prompt and prompt.Enabled ~= enabled then
 				prompt.Enabled = enabled
 			end
-			if prompt and prompt.ActionText ~= action then
+			if prompt and prompt.ActionText ~= action and prompt.ActionText ~= Lang.translate(action) then
 				prompt.ActionText = action
 			end
 		end
