@@ -431,11 +431,11 @@ Config.Monetization = {
 		{ Key = "Key1", Id = 3718327246, Icon = "Key", Name = "CLÉ", Description = "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.", Price = 49, Keys = 1 },
 		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 ŒUFS", Description = "10 œufs de familiers. Ils éclosent tous en même temps, plus ou moins vite selon leur rareté.", Price = 399, Pulls = 10 },
 		-- Accélérer un œuf (Config.SpeedUp) : un produit par palier de temps qui reste, du moins cher au plus cher.
-		-- Id = 0 tant qu'il n'est pas créé sur Roblox : le bouton ACCÉLÉRER n'apparaît pas.
-		{ Key = "Speed1", Id = 0, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 2 min au plus : tout de suite !", Price = 9, SpeedUp = 120, Hidden = true },
-		{ Key = "Speed2", Id = 0, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 10 min au plus : tout de suite !", Price = 19, SpeedUp = 600, Hidden = true },
-		{ Key = "Speed3", Id = 0, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 30 min au plus : tout de suite !", Price = 39, SpeedUp = 1800, Hidden = true },
-		{ Key = "Speed4", Id = 0, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore plus de 30 min : tout de suite !", Price = 79, SpeedUp = math.huge, Hidden = true },
+		-- Produits créés sur Roblox le 29 oct. (Id = 0 : le bouton ACCÉLÉRER n'apparaît pas).
+		{ Key = "Speed1", Id = 3723675855, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 2 min au plus : tout de suite !", Price = 9, SpeedUp = 120, Hidden = true },
+		{ Key = "Speed2", Id = 3723675931, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 10 min au plus : tout de suite !", Price = 19, SpeedUp = 600, Hidden = true },
+		{ Key = "Speed3", Id = 3723676043, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 30 min au plus : tout de suite !", Price = 39, SpeedUp = 1800, Hidden = true },
+		{ Key = "Speed4", Id = 3723676141, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore plus de 30 min : tout de suite !", Price = 79, SpeedUp = math.huge, Hidden = true },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,
 	VipMoneyMultiplier = 1.25,

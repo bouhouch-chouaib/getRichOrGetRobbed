@@ -268,8 +268,8 @@ caché derrière les murs) ; pile du sac à la hauteur de chaque objet (`Interac
 (`client/CapsuleMenu`) ; un œuf de la couveuse éclot tout de suite, une case de la capsule finit son attente et tente sa
 prochaine évolution tout de suite (chance inchangée et affichée ; pas proposé là où `PolicyService` interdit les objets
 aléatoires payants). 4 produits « ACCÉLÉRER » selon le temps qui reste (`Config.Monetization.Products` Speed1 à Speed4 :
-2 min 9 R$, 10 min 19 R$, 30 min 39 R$, plus 79 R$ ; `Config.SpeedUp`, `Config.GetSpeedUpProduct`), **Id = 0 tant
-que Chouaib ne les a pas créés sur le Creator Hub** (le bouton n'apparaît pas). `server/SpeedUpController` : l'œuf
+2 min 9 R$, 10 min 19 R$, 30 min 39 R$, plus 79 R$ ; `Config.SpeedUp`, `Config.GetSpeedUpProduct`), créés par
+Chouaib sur le Creator Hub le 29 oct. (Id dans `Config.Monetization.Products` ; Id = 0 : le bouton n'apparaît pas). `server/SpeedUpController` : l'œuf
 demandé, sinon celui qui attend le plus ; rien à accélérer : gardé (champ sauvegardé `speedUps`, attribut `SpeedUps`),
 sert à la prochaine demande, affiché GRATUIT. Vérifié en Play (solo, avec une accélération gardée) : bulle « ACCÉLÉRER /
 GRATUIT », œuf Mythique éclos en 3 s, case de la capsule : essai tout de suite ; test `check-eggs`. Pas vu : un vrai
