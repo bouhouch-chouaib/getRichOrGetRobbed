@@ -14,7 +14,8 @@ français, un seul des deux). Tester côté serveur : un Script créé à la vol
 dans le Secret `NotifyKey` que Chouaib range lui-même), `shared/NotifyPlan`. Les 4 textes sont créés et leurs Asset ID
 sont dans `Config.Notifications.Strings` ; une vraie notification reçue n'a pas encore été vue (STRATEGIE_JOUEURS.md B2).
 **Console / manette (29 oct.)** : `client/Gamepad` (croix gauche = menus, B ferme, cadre doré), `ScreenScale.isConsole()`
-pour les consignes ; « Console » doit être cochée dans le Creator Hub (Paramètres > Accès / Appareils). Vu dans Studio
+pour les consignes ; « Console » cochée le 29 oct. (Creator Hub, « Type d'appareil » : la case s'appelle « 4000 », erreur de
+traduction de Roblox). Vu dans Studio
 (mode `DebugConsole`) ; pas encore vu sur une vraie Xbox / PlayStation. Tout nouveau menu passe par `MenuKit.window` (la
 manette y entre seule) ; toute nouvelle consigne « [E] » / « CLIC » a sa version console.
 **Trou noir doré (29 oct.)** : 5 premières minutes de chaque heure UTC, points x2 (`Config.GoldenHour`, `shared/GoldenHour`,
