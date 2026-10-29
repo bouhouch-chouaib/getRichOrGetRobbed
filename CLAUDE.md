@@ -255,6 +255,9 @@ sous l'horloge, **une seule ligne à la fois** (`client/HUD` décide ; `Newcomer
 l'attribut `Wanted`), protection en courte pastille, un seul objectif ; couronne du roi en pixels (sur sa propre tête :
 la couronne seule) ; écran « DEVIENS LE PLUS RICHE ! » (4 images + JOUER) avant la 1re étape du tutoriel. Vérifié dans
 Studio (PC et aperçu téléphone) ; testeurs remis à zéro (sauvegardes v4). Reste : Publier, puis passer en public.
+**29 oct. : pastille du haut sur téléphone** (Chouaib : au milieu, elle « dérange ») : sur tactile, l'horloge + œufs et la
+ligne du dessous (objectif, aimant, consigne) sont en haut à DROITE, à 80 % (`client/HUD` : `TOP_ANCHOR`,
+`TOUCH_TOP_SCALE`) ; PC inchangé. Vu dans l'aperçu téléphone de Studio ; pas vu sur un vrai téléphone.
 
 **15 oct. : œufs (Codex) puis corrections Claude** (`server/EggController`, `client/Eggs`, `shared/EggIncubation`,
 `docs/INCUBATION.md`) : toutes les récompenses arrivent en œufs qui incubent (15 s à 30 min). Claude : un nid par œuf

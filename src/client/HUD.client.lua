@@ -112,15 +112,30 @@ end
 
 ----------------------------------------------------------------------
 -- En haut au centre : la pastille (horloge de la manche + tirages gagnés pendant le Feeding)
+-- Tactile (29 oct., Chouaib sur téléphone : au milieu, elle « dérange ») : en haut à DROITE et un peu plus petite, le
+-- milieu de l'écran reste libre. Rien d'autre n'est en haut à droite sur téléphone (les offres Robux sont sur PC).
 ----------------------------------------------------------------------
 
 local CLOCK_WIDTH = 300
 local PULLS_WIDTH = 160
+local TOUCH_TOP_SCALE = 0.8
+local TOP_ANCHOR = if isTouch then Vector2.new(1, 0) else Vector2.new(0.5, 0)
+local function topPosition(y: number): UDim2
+	return if isTouch then UDim2.new(1, -12, 0, y) else UDim2.new(0.5, 0, 0, y)
+end
+local function shrinkOnTouch(object: GuiObject)
+	if isTouch then
+		local scale = Instance.new("UIScale")
+		scale.Scale = TOUCH_TOP_SCALE
+		scale.Parent = object
+	end
+end
 local clock = UiStyle.panel(gui, UDim2.fromOffset(CLOCK_WIDTH + PULLS_WIDTH, 56))
 clock.Name = "Clock"
-clock.AnchorPoint = Vector2.new(0.5, 0)
-clock.Position = UDim2.new(0.5, 0, 0, 6)
+clock.AnchorPoint = TOP_ANCHOR
+clock.Position = topPosition(6)
 clock.BackgroundColor3 = UiStyle.Colors.WindowBody
+shrinkOnTouch(clock)
 local clockIcon = Icons.image(clock, "Moon", UDim2.fromOffset(46, 46), UDim2.fromOffset(6, 5))
 local clockNext = text(clock, "", 20, WHITE, BODY_FONT)
 clockNext.Position = UDim2.fromOffset(56, 0)
@@ -172,14 +187,20 @@ pullFill.Parent = pullBar
 local function popPull(count: number)
 	local pop = UiStyle.number(gui, string.format("+%d ŒUF%s !", count, if count > 1 then "S" else ""), 28, UiStyle.Colors.Gold)
 	pop.AnchorPoint = Vector2.new(0.5, 0)
-	pop.Position = UDim2.new(0.5, PULLS_WIDTH, 0, 66)
+	-- sous la case des œufs de la pastille (à droite de l'écran sur tactile)
+	local function at(y: number): UDim2
+		return if isTouch
+			then UDim2.new(1, -12 - PULLS_WIDTH * TOUCH_TOP_SCALE / 2, 0, y * TOUCH_TOP_SCALE)
+			else UDim2.new(0.5, PULLS_WIDTH, 0, y)
+	end
+	pop.Position = at(66)
 	pop.Size = UDim2.fromOffset(260, 34)
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0.4
 	scale.Parent = pop
-	TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = if isTouch then TOUCH_TOP_SCALE else 1 }):Play()
 	local rise = TweenService:Create(pop, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-		{ Position = UDim2.new(0.5, PULLS_WIDTH, 0, 40), TextTransparency = 1 })
+		{ Position = at(40), TextTransparency = 1 })
 	task.delay(0.35, function()
 		rise:Play()
 	end)
@@ -198,14 +219,16 @@ local shownPulls = 0
 local topStack = Instance.new("Frame")
 topStack.Name = "TopStack"
 topStack.BackgroundTransparency = 1
-topStack.AnchorPoint = Vector2.new(0.5, 0)
-topStack.Position = UDim2.new(0.5, 0, 0, 68)
-topStack.Size = UDim2.fromOffset(620, 0)
+topStack.AnchorPoint = TOP_ANCHOR
+topStack.Position = topPosition(if isTouch then math.floor(6 + 56 * TOUCH_TOP_SCALE + 6) else 68)
+-- sur tactile, aussi large que la plus large des lignes (objectif, carte des tirages : 420), collée au bord droit
+topStack.Size = UDim2.fromOffset(if isTouch then 420 else 620, 0)
 topStack.AutomaticSize = Enum.AutomaticSize.Y
 topStack.Parent = gui
+shrinkOnTouch(topStack)
 do
 	local layout = Instance.new("UIListLayout")
-	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.HorizontalAlignment = if isTouch then Enum.HorizontalAlignment.Right else Enum.HorizontalAlignment.Center
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Padding = UDim.new(0, 4)
 	layout.Parent = topStack
@@ -218,6 +241,9 @@ hintLabel.LayoutOrder = 2
 hintLabel.Size = UDim2.new(1, 0, 0, 0)
 hintLabel.AutomaticSize = Enum.AutomaticSize.Y
 hintLabel.TextWrapped = true
+if isTouch then
+	hintLabel.TextXAlignment = Enum.TextXAlignment.Right
+end
 hintLabel.Visible = false
 local phaseChangedAt = 0
 
