@@ -1162,8 +1162,10 @@ Config.Notifications = {
 	Secret = "NotifyKey",
 	-- Asset ID des textes (Engagement → Notifications → ⋯ → Copy Asset ID), un par langue ; "" = pas encore créé.
 	Strings = {
-		EggReady = { fr = "", en = "" }, -- « 🥚 Tes œufs sont prêts à éclore ! Viens voir ce qui en sort. »
-		Daily = { fr = "", en = "" }, -- « 🎁 Ton cadeau du jour t'attend : jour {day} ! »
+		-- « 🥚 Tes œufs sont prêts à éclore ! Viens voir ce qui en sort. » (créés le 29 oct.)
+		EggReady = { fr = "b52782b0-4426-154e-b077-80d2a79c19db", en = "5286a1d8-b0bc-c74b-9b95-f3ca536b2353" },
+		-- « 🎁 Ton cadeau du jour t'attend : jour {day} ! »
+		Daily = { fr = "76c974ea-32ee-a541-b1d4-07a4a043fb42", en = "5e1b01f2-51a7-694a-b8d0-d15fd09c311c" },
 	} :: { [string]: { fr: string, en: string } },
 	EggWindow = 8 * 3600, -- un œuf qui finit au plus 8 h après le départ : notification quand il est prêt
 	DailyDelay = 22 * 3600, -- sinon le cadeau du jour, 22 h après le départ (à peu près la même heure le lendemain)
