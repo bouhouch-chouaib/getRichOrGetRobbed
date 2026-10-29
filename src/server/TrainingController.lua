@@ -9,7 +9,8 @@
 -- Pour descendre : sauter ou bouton ARRÊTER (Remotes.StopTraining) ; il faut quitter la station avant d'y remonter.
 -- La station est cachée tant que le propriétaire de la base ne l'a pas achetée. Son niveau (1 à 25) choisit son modèle
 -- (server/StationLooks : bois, acier, or, cristal, cosmique) et multiplie l'XP gagnée (Config.GetStationRate).
--- À côté, un panneau « Amélioration » montre le niveau suivant et son prix (bulle d'achat : client/UpgradeSigns).
+-- Achat et amélioration : Boutique, ou bulle [E] sur la station elle-même (client/UpgradeSigns ; plus de panneau
+-- « Amélioration » à côté depuis le 29 oct.).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -45,7 +46,6 @@ type Station = {
 	sign: BillboardGui?,
 	shownLevel: number, -- niveau actuellement affiché (0 = caché)
 	shownOwned: boolean, -- la base avait un propriétaire au dernier affichage (panneau d'amélioration visible)
-	upgradeSign: Model?,
 }
 
 type Session = {
@@ -56,10 +56,6 @@ type Session = {
 }
 
 local stations: { Station } = {}
-local shopItem: { [string]: Config.ShopItem } = {}
-for _, item in ipairs(Config.Shop) do
-	shopItem[item.Id] = item
-end
 local sessions: { [Player]: Session } = {}
 local mustLeave: { [Player]: Station } = {} -- descendu de cette station : il doit en sortir avant de remonter
 
@@ -141,46 +137,6 @@ local function start(player: Player, station: Station)
 	player:SetAttribute("Training", station.kind.model)
 end
 
--- Panneau « Amélioration » : niveau actuel > suivant et prix (caché si la base n'a pas de propriétaire).
-local function renderUpgradeSign(station: Station, level: number, owned: boolean)
-	local sign = station.upgradeSign
-	if not sign then
-		return
-	end
-	for _, part in ipairs(sign:GetChildren()) do
-		if part:IsA("BasePart") then
-			part.Transparency = if owned then 0 else 1
-			part.CanCollide = owned
-			part.CanQuery = owned
-		end
-	end
-	local board = sign:FindFirstChild("Board")
-	local gui = board and board:FindFirstChild("Gui")
-	if not gui or not gui:IsA("SurfaceGui") then
-		return
-	end
-	gui.Enabled = owned
-	local item = shopItem[station.kind.upgrade]
-	local title = gui:FindFirstChild("Title")
-	local levels = gui:FindFirstChild("Levels")
-	local price = gui:FindFirstChild("Price")
-	if not item or not title or not levels or not price or not title:IsA("TextLabel") or not levels:IsA("TextLabel") or not price:IsA("TextLabel") then
-		return
-	end
-	local cost = Config.GetUpgradePrice(item, level)
-	if level <= 0 then
-		title.Text = station.kind.title
-		levels.Text = "À ACHETER"
-	elseif cost then
-		title.Text = "AMÉLIORATION"
-		levels.Text = string.format("NIVEAU %d > %d", level, level + 1)
-	else
-		title.Text = "AMÉLIORATION"
-		levels.Text = "NIVEAU MAX !"
-	end
-	price.Text = if cost then NumberFormat.money(cost) else "★ " .. level .. " ★"
-end
-
 -- Affiche / cache la station et applique le modèle de son niveau (server/StationLooks).
 local function render(station: Station, level: number, owned: boolean)
 	if station.shownLevel == level and station.shownOwned == owned then
@@ -207,7 +163,6 @@ local function render(station: Station, level: number, owned: boolean)
 		end
 	end
 	station.shownOwned = owned
-	renderUpgradeSign(station, level, owned)
 end
 
 local function update()
@@ -259,7 +214,6 @@ function TrainingController.Init(bases: { Model })
 			if model and model:IsA("Model") and zone and zone:IsA("BasePart") then
 				local sign = model:FindFirstChild("StationSign")
 				local label = sign and sign:FindFirstChild("Label")
-				local upgradeSign = model:FindFirstChild("UpgradeSign")
 				table.insert(stations, {
 					base = base,
 					kind = kind,
@@ -269,7 +223,6 @@ function TrainingController.Init(bases: { Model })
 					label = if label and label:IsA("TextLabel") then label else nil,
 					shownLevel = -1, -- force le premier affichage
 					shownOwned = false,
-					upgradeSign = if upgradeSign and upgradeSign:IsA("Model") then upgradeSign else nil,
 				})
 			else
 				warn("[TrainingController] Station " .. kind.model .. " introuvable dans " .. base.Name)

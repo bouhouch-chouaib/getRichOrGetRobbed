@@ -13,9 +13,10 @@
 --   │                         │
 --   │   PRAIRIE DES FAMILIERS │   z -22 .. 16 (ils s'y promènent)
 --   │          (spawn)        │
---  [bac]       ◉           [bac]   z -34 : bouton de verrouillage ; dehors, un bac à objets contre chaque côté
+--   │          ◉              │   z -31 : bouton de verrouillage
 --   └──────────┐ entrée ┌─────┘
---            AVANT (-Z, trou noir)
+-- [tapis]  [bac]          [bac]  [banc]   dehors, devant : un bac au milieu de chaque moitié de l'avant ; le tapis et
+--            AVANT (-Z, trou noir)        le banc aux coins avant, un peu en diagonale
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -29,13 +30,22 @@ BaseLayout.HALF = HALF
 -- Avant : bouton de verrouillage au milieu.
 BaseLayout.Lock = Vector2.new(0, -HALF + 11)
 
--- Bacs à objets (26 oct., avant : 2 palettes dans la base) : DEHORS, au sol de l'arène, contre les côtés gauche et droit
--- près de l'entrée (le tapis et le banc sont plus loin vers le fond, à z = -4). Les objets à jeter y tombent et le
--- joueur les prend en revenant du trou noir, sans entrer chez lui. Taille du bac (X, hauteur du rebord, Z) et hauteur
--- de son fond intérieur, en studs : le modèle ArtModels.BacObjets (Blender, props/BacObjets.py) a les mêmes mesures.
-BaseLayout.Bins = { Vector2.new(-HALF - 9, -HALF + 8), Vector2.new(HALF + 9, -HALF + 8) }
+-- Bacs à objets (26 oct., avant : 2 palettes dans la base) : DEHORS, au sol de l'arène, DEVANT la base (29 oct., avant :
+-- contre les côtés), au milieu de chaque moitié de l'avant, de part et d'autre de l'entrée, en long le long de la
+-- clôture (BIN_YAW). Les objets à jeter y tombent et le joueur les prend en revenant du trou noir, sans entrer chez lui.
+-- Taille du bac (X, hauteur du rebord, Z) et hauteur de son fond intérieur, en studs : le modèle ArtModels.BacObjets
+-- (Blender, props/BacObjets.py) a les mêmes mesures.
+BaseLayout.Bins = { Vector2.new(-(HALF + 7) / 2, -HALF - 5.5), Vector2.new((HALF + 7) / 2, -HALF - 5.5) }
+BaseLayout.BIN_YAW = 90 -- degrés : le long côté du bac (Z du modèle) suit la clôture avant
 BaseLayout.BIN_SIZE = Vector3.new(7, 2.7, 10)
 BaseLayout.BIN_FLOOR = 0.86
+
+-- Stations d'entraînement (29 oct., avant : contre les côtés à z = -4) : DEHORS, aux coins avant, un peu plus en avant
+-- que l'ancienne place des bacs ; tapis de course à gauche, banc à droite, tournés en diagonale (la console du tapis
+-- regarde l'avant, vers l'extérieur). Position du centre et rotation (degrés autour de Y).
+BaseLayout.Treadmill = Vector2.new(-HALF - 10, -HALF + 1)
+BaseLayout.Bench = Vector2.new(HALF + 10, -HALF + 1)
+BaseLayout.STATION_YAW = 30 -- vers l'extérieur : +30° pour le tapis (gauche), -30° pour le banc (droite)
 
 -- Point d'apparition du propriétaire (et zone sûre), au milieu de la prairie.
 BaseLayout.Spawn = Vector2.new(0, 6)

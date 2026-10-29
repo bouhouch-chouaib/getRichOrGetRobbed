@@ -135,8 +135,8 @@ Config.Arena = {
 	BaseSize = Vector3.new(84, 1, 84), -- 15 oct. : agrandie (avant 56) ; plan dans shared/BaseLayout
 }
 
--- Apparition des objets (par base occupée). Depuis le 26 oct., ils tombent dans les 2 bacs posés dehors contre les côtés
--- de la base, près de l'entrée (shared/BaseLayout.Bins) : le joueur les prend sans entrer chez lui.
+-- Apparition des objets (par base occupée). Depuis le 26 oct., ils tombent dans les 2 bacs posés dehors devant la base,
+-- de part et d'autre de l'entrée (shared/BaseLayout.Bins) : le joueur les prend sans entrer chez lui.
 Config.Items = {
 	StarterCount = 5, -- objets offerts dans les bacs à l'arrivée d'un joueur
 	SpawnInterval = 2, -- pendant le Feeding, un objet apparaît toutes les 2 s dans chaque base occupée

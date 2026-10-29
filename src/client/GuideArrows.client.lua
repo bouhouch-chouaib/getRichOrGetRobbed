@@ -1,8 +1,8 @@
 --!strict
 -- GuideArrows : après le tutoriel, la même flèche dorée (et son rayon) montre où aller quand un nouveau joueur pourrait
 -- rater quelque chose d'important, sans qu'il ait à lire (dataset_and_pipeline/UI_UX_GUIDELINES.md §7) :
---   1. ACHÈTE TON TAPIS DE COURSE : il peut payer le premier tapis et ne l'a pas -> flèche sur le panneau d'achat du tapis
---      de sa base (client/UpgradeSigns) ;
+--   1. ACHÈTE TON TAPIS DE COURSE : il peut payer le premier tapis et ne l'a pas -> flèche sur la place du tapis de sa
+--      base (bulle [E] d'achat : client/UpgradeSigns) ;
 --   2. LA CAPSULE : il débute (moins de MAX_PULLS tirages), il a un œuf dans la couveuse et sa capsule est vide -> flèche
 --      sur la capsule, CAPSULE_TIME secondes au plus par partie (certains préfèrent laisser éclore leurs œufs).
 -- Rien n'est sauvegardé : ce sont les conditions (tapis acheté, capsule utilisée, expérience) qui arrêtent les flèches.
@@ -158,13 +158,12 @@ local function treadmillGuide(base: Instance): Guide?
 		return nil
 	end
 	local model = base:FindFirstChild("Treadmill")
-	local sign = model and model:FindFirstChild("UpgradeSign")
-	local board = sign and sign:FindFirstChild("Board")
-	if not (board and board:IsA("BasePart")) then
+	local zone = model and model:FindFirstChild("Zone")
+	if not (zone and zone:IsA("BasePart")) then
 		return nil
 	end
 	return { id = "Treadmill", text = "ACHÈTE TON TAPIS DE COURSE : TU IRAS PLUS VITE !", icon = "Treadmill",
-		position = board.Position + Vector3.new(0, 4, 0) }
+		position = zone.Position + Vector3.new(0, 7, 0) }
 end
 
 local capsuleShown = 0 -- secondes déjà montrées pendant cette partie

@@ -572,64 +572,17 @@ local function hideStation(model: Model)
 	end
 end
 
--- Texte d'un panneau d'amélioration (police cartoon, contour noir).
-local function signLine(name: string, text: string, height: number, color: Color3, parent: Instance): TextLabel
-	local label = Instance.new("TextLabel")
-	label.Name = name
-	label.Size = UDim2.fromScale(1, height)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	styleSignText(label, color)
-	label.Parent = parent
-	return label
-end
-
--- Panneau « Amélioration » planté à côté d'une station (comme dans la référence) : niveau actuel > suivant et prix.
--- Textes écrits par TrainingController ; la bulle [E] « Améliorer » est créée par le client du propriétaire
--- (client/UpgradeSigns). Face avant tournée vers le trou noir.
-local function createUpgradeSign(cframe: CFrame, upgradeId: string, model: Model)
-	local sign = Instance.new("Model")
-	sign.Name = "UpgradeSign"
-	sign:SetAttribute("UpgradeId", upgradeId)
-	makePart("Post", Vector3.new(0.8, 4.4, 0.8), cframe * CFrame.new(0, 2.2, 0.3), COLORS.WoodPost, sign)
-	local board = makePart("Board", Vector3.new(6.4, 3.6, 0.6), cframe * CFrame.new(0, 5.6, 0), Color3.fromRGB(30, 36, 64), sign)
-	makePart("Frame", Vector3.new(6.8, 4, 0.4), cframe * CFrame.new(0, 5.6, 0.3), Color3.fromRGB(16, 18, 34), sign)
-	board.FrontSurface = Enum.SurfaceType.Smooth
-	local gui = Instance.new("SurfaceGui")
-	gui.Name = "Gui"
-	gui.Face = Enum.NormalId.Front
-	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	gui.PixelsPerStud = 40
-	gui.LightInfluence = 0
-	gui.MaxDistance = 120
-	local layout = Instance.new("UIListLayout")
-	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	layout.VerticalAlignment = Enum.VerticalAlignment.Center
-	layout.Parent = gui
-	local padding = Instance.new("UIPadding")
-	padding.PaddingLeft = UDim.new(0.05, 0)
-	padding.PaddingRight = UDim.new(0.05, 0)
-	padding.Parent = gui
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	signLine("Title", "AMÉLIORATION", 0.28, Color3.new(1, 1, 1), gui).LayoutOrder = 1
-	signLine("Levels", "", 0.26, Color3.fromRGB(255, 220, 70), gui).LayoutOrder = 2
-	signLine("Price", "", 0.32, Color3.fromRGB(120, 255, 90), gui).LayoutOrder = 3
-	gui.Parent = board
-	sign.Parent = model
-end
-
-local function createTreadmill(cframe: CFrame, outward: number, base: Model)
+local function createTreadmill(cframe: CFrame, base: Model)
 	local model = Instance.new("Model")
 	model.Name = "Treadmill"
 	local s = Config.Training.TreadmillScale -- tout le tapis est réduit (server/StationLooks fait pareil pour le décor)
 	local belt = makePart("Zone", Vector3.new(10 * s, 0.6 * s, 20 * s), cframe * CFrame.new(0, 0.3 * s, 0), Color3.fromRGB(45, 45, 50), model)
 	createStationSign(model, belt, "TAPIS DE COURSE")
-	createUpgradeSign(cframe * CFrame.new(outward * (5 * s + 4.5), 0, -(10 * s + 2)), "Treadmill", model)
 	hideStation(model)
 	model.Parent = base
 end
 
-local function createBench(cframe: CFrame, outward: number, base: Model)
+local function createBench(cframe: CFrame, base: Model)
 	local model = Instance.new("Model")
 	model.Name = "Bench"
 	local mat = makePart("Zone", Vector3.new(12, 0.3, 16), cframe * CFrame.new(0, 0.15, 0), Color3.fromRGB(45, 45, 50), model)
@@ -647,7 +600,6 @@ local function createBench(cframe: CFrame, outward: number, base: Model)
 		plate.Shape = Enum.PartType.Cylinder
 	end
 	createStationSign(model, mat, "BANC DE MUSCU")
-	createUpgradeSign(cframe * CFrame.new(outward * 9, 0, -9), "Bench", model)
 	hideStation(model)
 	model.Parent = base
 end
@@ -869,7 +821,7 @@ local function createLeaderboard(map: Folder)
 	model.Parent = map
 end
 
--- Bac à objets (shared/BaseLayout.Bins), dehors contre un côté de la base : le modèle en briques ArtModels.BacObjets
+-- Bac à objets (shared/BaseLayout.Bins), dehors devant la base : le modèle en briques ArtModels.BacObjets
 -- (Blender, props/BacObjets.py) dont le rebord « Trim » prend la couleur de la base, ou s'il manque une caisse en blocs de
 -- bois. Le fond et les parois sont des volumes (invisibles sous le modèle) qui retiennent les objets.
 local function createBin(cframe: CFrame, color: Color3, parent: Instance): Model
@@ -1194,12 +1146,14 @@ local function createBase(index: number, map: Folder): Model
 	gate.Transparency = 1
 	makeGhost(gate)
 
-	-- Stations d'entraînement à l'extérieur de la base (cachées tant qu'elles ne sont pas achetées) :
-	-- tapis de course à gauche (Vitesse), banc de développé couché à droite (Force).
-	-- TrainingController gère l'affichage, la matière selon le niveau et l'XP.
+	-- Stations d'entraînement dehors, aux coins avant, en diagonale (shared/BaseLayout ; cachées tant qu'elles ne sont
+	-- pas achetées) : tapis de course à gauche (Vitesse), banc de développé couché à droite (Force).
+	-- TrainingController gère l'affichage, la matière selon le niveau et l'XP ; achat / amélioration : Boutique ou
+	-- bulle [E] sur la station (client/UpgradeSigns).
 	createEvolutionCapsule(origin, base)
-	createTreadmill(origin * CFrame.new(-half - 10, 0, -4), -1, base)
-	createBench(origin * CFrame.new(half + 10, 0, -4), 1, base)
+	local yaw = math.rad(BaseLayout.STATION_YAW)
+	createTreadmill(origin * CFrame.new(BaseLayout.Treadmill.X, 0, BaseLayout.Treadmill.Y) * CFrame.Angles(0, yaw, 0), base)
+	createBench(origin * CFrame.new(BaseLayout.Bench.X, 0, BaseLayout.Bench.Y) * CFrame.Angles(0, -yaw, 0), base)
 
 	local spawnPoints = Instance.new("Folder")
 	spawnPoints.Name = "SpawnPoints"
@@ -1207,9 +1161,9 @@ local function createBase(index: number, map: Folder): Model
 	local bins = Instance.new("Folder")
 	bins.Name = "Bins"
 	bins.Parent = base
-	-- 2 bacs à objets dehors, contre les côtés près de l'entrée (shared/BaseLayout), au sol de l'arène.
+	-- 2 bacs à objets dehors, devant la base de part et d'autre de l'entrée (shared/BaseLayout), au sol de l'arène.
 	for _, offset in ipairs(BaseLayout.Bins) do
-		local binCFrame = origin * CFrame.new(offset.X, 0, offset.Y)
+		local binCFrame = origin * CFrame.new(offset.X, 0, offset.Y) * CFrame.Angles(0, math.rad(BaseLayout.BIN_YAW), 0)
 		createBin(binCFrame, color, bins)
 		-- Point d'apparition au-dessus du milieu du bac : l'objet tombe dedans (server/ItemSpawner l'écarte un peu).
 		local point = makePart("SpawnPoint", Vector3.new(1, 1, 1), binCFrame * CFrame.new(0, BaseLayout.BIN_SIZE.Y + 1.5, 0), color, spawnPoints)

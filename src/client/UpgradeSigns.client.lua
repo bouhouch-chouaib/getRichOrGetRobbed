@@ -1,7 +1,7 @@
 --!strict
--- UpgradeSigns : bulle [E] « Améliorer » sur les panneaux d'amélioration du tapis et du banc de SA base
--- (créés par server/MapGenerator, textes écrits par server/TrainingController). Elle n'existe que chez le
--- propriétaire : les autres joueurs voient le panneau, sans bulle. Le serveur valide le prix (Remotes.BuyUpgrade).
+-- UpgradeSigns : bulle [E] « Acheter » / « Améliorer » sur le tapis et le banc de SA base (sur leur pièce « Zone »,
+-- posée par server/MapGenerator ; les panneaux « Amélioration » à côté ont été retirés le 29 oct.). Elle n'existe que
+-- chez le propriétaire. Le serveur valide le prix (Remotes.BuyUpgrade).
 -- Quand une station passe à un nouveau modèle (bois -> acier...), un message le célèbre.
 
 local Players = game:GetService("Players")
@@ -63,10 +63,9 @@ local function attachPrompts()
 	end
 	for _, station in ipairs(STATIONS) do
 		local model = base:WaitForChild(station.model, 5)
-		local sign = model and model:WaitForChild("UpgradeSign", 5)
-		local board = sign and sign:WaitForChild("Board", 5)
-		local id = sign and sign:GetAttribute("UpgradeId")
-		if board and board:IsA("BasePart") and type(id) == "string" then
+		local board = model and model:WaitForChild("Zone", 5)
+		local id = station.model -- l'amélioration de la Boutique porte le nom de la station (Treadmill, Bench)
+		if board and board:IsA("BasePart") then
 			local prompt = Instance.new("ProximityPrompt")
 			prompt.Name = "UpgradePrompt"
 			prompt.KeyboardKeyCode = Enum.KeyCode.E

@@ -2,7 +2,7 @@
 -- ItemSpawner : objets à jeter dans le trou noir, posés dans les bacs des bases occupées.
 --   - À l'arrivée d'un joueur : Config.Items.StarterCount objets au hasard dans ses bacs.
 --   - Pendant le Feeding : un objet toutes les SpawnInterval secondes dans chaque base (max MaxPerBase).
--- Les objets tombent dans les 2 bacs posés dehors contre les côtés de la base (shared/BaseLayout.Bins, le moins rempli
+-- Les objets tombent dans les 2 bacs posés dehors devant la base (shared/BaseLayout.Bins, le moins rempli
 -- d'abord), et aussi dans l'arène (objets "sauvages", ramassables par tout le monde et un peu plus précieux en moyenne).
 -- Le rang (Config.ItemTiers) est tiré au hasard ; l'amélioration "ItemQuality" (affichée "Chance") du propriétaire rend
 -- les objets précieux plus fréquents. L'objet lui-même vient du monde du propriétaire (Config.WorldItems : modèle en
