@@ -61,6 +61,21 @@ Ce qui manque, par ordre d'effet attendu :
    « TON ŒUF EST PRÊT ! », « ON T'A VOLÉ UN FAMILIER ! », « TON BOUCLIER EST FINI ». Le jeu a passé les 100 visites
    demandées. Envoi par l'API Open Cloud (à vérifier pendant la mise en place : depuis le serveur du jeu ou par un
    petit outil à part).
+   **Codé le 29 oct.** (`Config.Notifications`, `shared/NotifyPlan`, `server/Notifications`, test `check-notify`) :
+   le serveur du jeu envoie lui-même (Open Cloud par HttpService). Au départ d'un joueur, une notification est prévue :
+   « tes œufs sont prêts » si un œuf finit dans les 8 h (à l'heure où il est prêt), sinon « ton cadeau du jour
+   t'attend » 22 h plus tard ; annulée s'il revient avant. Le vol et le bouclier n'en ont pas : ils arrivent quand
+   le joueur est déjà là. Fenêtre d'accord de Roblox juste après le cadeau du jour. Vérifié dans Studio : désactivé
+   tant qu'aucun texte n'existe ; file d'attente prise, envoi tenté (refusé faute de clé, normal), puis retirée.
+   **Pour l'activer (Chouaib, Creator Hub)** :
+   1. Le jeu → Engagement → Notifications → « Create a Notification String », 4 textes (99 caractères au plus) :
+      `🥚 Your eggs are ready to hatch! Come see what's inside.` ;
+      `🥚 Tes œufs sont prêts à éclore ! Viens voir ce qui en sort.` ;
+      `🎁 Your daily gift is waiting: day {day}!` ; `🎁 Ton cadeau du jour t'attend : jour {day} !`.
+      Pour chacun : ⋯ → « Copy Asset ID », et me donner les 4 numéros (je les mets dans `Config.Notifications.Strings`).
+   2. Open Cloud → API Keys → « Create API Key » : accès « user-notification » (écriture) pour ce jeu. **Ne jamais
+      me donner la clé** : la ranger soi-même dans le jeu → Secrets, sous le nom `NotifyKey`.
+   3. Studio → Paramètres du jeu → Sécurité → « Allow HTTP Requests » activé, puis Publier.
 3. **Rendez-vous à heure fixe dans le jeu.** Toutes les heures pile, 5 minutes de « PLUIE D'ŒUFS » ou « TROU NOIR
    DORÉ » (points x2), annoncées 1 minute avant. Les joueurs apprennent l'heure et restent jusqu'à elle.
 4. **Événements Roblox** (Creator Hub → Engagement → Événements et mises à jour) : un événement par mise à jour et par

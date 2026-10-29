@@ -57,6 +57,7 @@ TradeController.Init()
 ProgressionController.Init()
 require(script.Parent.BadgeController).Init()
 require(script.Parent.MarketController).Init()
+require(script.Parent.Notifications).Init()
 
 GameLoopManager.Start()
 print("[Main] Serveur prêt.")

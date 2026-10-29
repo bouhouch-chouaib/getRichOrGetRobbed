@@ -11,6 +11,7 @@
 -- Ce script relie tout aux attributs répliqués et aux messages du serveur.
 
 local ContentProvider = game:GetService("ContentProvider")
+local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -865,10 +866,31 @@ local function rewardSummary(money: number?, pulls: number?): string
 	end
 	return table.concat(parts, "  •  ")
 end
+-- Notifications Roblox (Config.Notifications) : la fenêtre d'accord de Roblox s'ouvre juste après le cadeau du jour
+-- (« reviens demain »), une fois par partie. Roblox ne l'affiche qu'aux 13 ans et plus, pas à qui a déjà accepté, et au
+-- plus une fois tous les 30 jours.
+local notifyAsked = false
+local function askNotifications()
+	if notifyAsked then
+		return
+	end
+	notifyAsked = true
+	task.delay(2.5, function()
+		local ok, allowed = pcall(function()
+			return ExperienceNotificationService:CanPromptOptInAsync()
+		end)
+		if ok and allowed then
+			pcall(function()
+				ExperienceNotificationService:PromptOptIn()
+			end)
+		end
+	end)
+end
 Remotes.BonusResult.OnClientEvent:Connect(function(kind: string, a: any, b: any, c: any, d: any)
 	if kind == "Daily" then
 		Sounds.play("Coins")
 		Toast.show(string.format("CADEAU DU JOUR %d : %s !", a, rewardSummary(b, c)), UiStyle.Colors.Gold)
+		askNotifications()
 	elseif kind == "Quest" then
 		Sounds.play("Coins")
 		Toast.show("QUÊTE TERMINÉE : " .. rewardSummary(b, c) .. " !", MONEY)

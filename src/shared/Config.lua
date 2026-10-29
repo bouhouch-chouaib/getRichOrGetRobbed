@@ -1149,6 +1149,28 @@ Config.Invite = {
 	MaxRewards = 5,
 }
 
+-- Notifications Roblox (29 oct., docs/STRATEGIE_JOUEURS.md B2 ; shared/NotifyPlan, server/Notifications) : au départ
+-- d'un joueur, le serveur prévoit UNE notification (Roblox en laisse passer une par jour et par jeu) : « tes œufs
+-- sont prêts » si un œuf finit dans les EggWindow secondes, sinon « ton cadeau du jour t'attend » DailyDelay secondes
+-- plus tard. Un serveur du jeu ouvert à ce moment-là l'envoie (MemoryStore) ; si le joueur revient avant, elle est
+-- annulée. Le joueur doit avoir accepté (fenêtre de Roblox ouverte par client/HUD après le cadeau du jour).
+-- Pour l'activer (Chouaib, Creator Hub) : créer les 4 textes (Engagement → Notifications), copier leurs Asset ID
+-- dans Strings ; créer une clé API Open Cloud (droit user.user-notification:write sur ce jeu) et la ranger dans les
+-- Secrets du jeu sous le nom Secret ; autoriser les requêtes HTTP (Paramètres du jeu → Sécurité). Tant qu'un Asset
+-- ID manque, rien n'est envoyé.
+Config.Notifications = {
+	Secret = "NotifyKey",
+	-- Asset ID des textes (Engagement → Notifications → ⋯ → Copy Asset ID), un par langue ; "" = pas encore créé.
+	Strings = {
+		EggReady = { fr = "", en = "" }, -- « 🥚 Tes œufs sont prêts à éclore ! Viens voir ce qui en sort. »
+		Daily = { fr = "", en = "" }, -- « 🎁 Ton cadeau du jour t'attend : jour {day} ! »
+	} :: { [string]: { fr: string, en: string } },
+	EggWindow = 8 * 3600, -- un œuf qui finit au plus 8 h après le départ : notification quand il est prêt
+	DailyDelay = 22 * 3600, -- sinon le cadeau du jour, 22 h après le départ (à peu près la même heure le lendemain)
+	MinAway = 15 * 60, -- jamais moins de 15 min après le départ
+	PollSeconds = 60, -- chaque serveur regarde les notifications à envoyer toutes les minutes
+}
+
 -- Bonus d'amis : +10 % de revenu par ami Roblox présent sur le même serveur, jusqu'à 5 amis (+50 %).
 Config.Friends = {
 	BonusPerFriend = 0.1,
