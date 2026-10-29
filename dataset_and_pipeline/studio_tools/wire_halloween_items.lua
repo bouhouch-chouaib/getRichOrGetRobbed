@@ -1,4 +1,4 @@
--- Généré par dataset_and_pipeline/tools/make_items_wire.py : range les objets à jeter importés dans ArtModels.Items.
+-- GÃ©nÃ©rÃ© par dataset_and_pipeline/tools/make_items_wire.py : range les objets Ã  jeter importÃ©s dans ArtModels.Items.
 local SETS = {
 	["Objets_Halloween"] = { ["world"] = "Halloween", ["parts"] = { ["Citrouille"] = { 1.8808, 1.8808, 1.59159 }, ["Lanterne"] = { 3.39345, 3.47645, 2.73541 }, ["Tombe"] = { 1.5, 0.9, 2.09 } } },
 }
@@ -52,16 +52,16 @@ for asset, info in SETS do
 		table.insert(report, asset .. " : import introuvable (" .. asset .. "__...)")
 	end
 end
--- La collision en boîte se règle en différé : on attend, puis on vérifie (sinon elle reste en Default).
+-- La collision en boÃ®te se rÃ¨gle en diffÃ©rÃ© : on attend, puis on vÃ©rifie (sinon elle reste en Default).
 task.wait(4)
 for _, folder in items:GetChildren() do
 	for _, q in folder:GetChildren() do
 		if q:IsA("MeshPart") and q.CollisionFidelity ~= Enum.CollisionFidelity.Box then
-			table.insert(report, "  ! " .. folder.Name .. "." .. q.Name .. " pas en boîte : relancer le script")
+			table.insert(report, "  ! " .. folder.Name .. "." .. q.Name .. " pas en boÃ®te : relancer le script")
 		end
 	end
 end
--- Supprime l'import entier (le lot et ses sous-modèles), y compris s'il a été importé deux fois.
+-- Supprime l'import entier (le lot et ses sous-modÃ¨les), y compris s'il a Ã©tÃ© importÃ© deux fois.
 for item in imports do
 	local top = item
 	while top.Parent and top.Parent ~= workspace do

@@ -134,6 +134,8 @@ local function art(name: string, height: number): Model?
 		model = Instance.new("Model")
 		model.Name = name
 		local copy = piece:Clone()
+		copy.CFrame = CFrame.new(copy.Position)
+		copy.PivotOffset = CFrame.new() -- l'import laisse un pivot tourné de 90° : posée par lui, elle serait couchée
 		copy.Parent = model
 		model.PrimaryPart = copy
 	else

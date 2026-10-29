@@ -29,9 +29,11 @@ de l'arène, décor `Workspace.HalloweenDecor`), `client/HalloweenMenu` (bouton 
 familiers limités (`PetCatalog` champ `Event = "Halloween"`, hors tirages ordinaires). Codes HALLOWEEN / BOO, badge
 `Halloween2026` (créé le 29 oct., Id 769970263702372), nouveautés n° 2. Studio : `workspace:SetAttribute("DebugHalloween", true)` avant Play.
 Vérifié en Play (solo) : décor, menu, 2 achats + refus, œufs Citrouille dans la couveuse, sauvegarde des bonbons.
-Modèles Blender faits (`Lot11_Halloween.fbx` : 5 familiers + citrouille à jeter, citrouille sculptée, tombe) mais **pas
-encore importés** : Chouaib importe, puis `studio_tools/wire_halloween_pets.lua` et `wire_halloween_items.lua` (dans cet
-ordre, barre MCP, Édition) et Ctrl+S ; en attendant, formes de secours. Après le 8 nov. : retirer bouton et code.
+Modèles Blender (`Lot11_Halloween.fbx` : 5 familiers + citrouille à jeter, citrouille sculptée, tombe) importés le 30 oct.
+et branchés (`studio_tools/wire_halloween_pets.lua` puis `wire_halloween_items.lua`) dans `ArtModels.<Id>` et
+`ArtModels.Items.Halloween` (fichier du jeu : Ctrl+S). Vérifié en Play : 5 familiers debout et animés, 40 décors debout,
+citrouilles sauvages en briques. Piège : une pièce importée a un PivotOffset tourné de 90° ; la poser par PivotTo la couche
+(`HalloweenController.art` le remet à zéro). Après le 8 nov. : retirer bouton et code.
 **Shorts / TikTok : c'est Chouaib qui les fait** (29 oct. : il a refusé le tournage vertical par Studio) ; ne pas les refaire.
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
