@@ -511,6 +511,10 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 
 ## Duels de familiers (13 oct., `server/DuelController`, `client/DuelClient`, `client/DuelFx`, `shared/DuelStats`, `Config.Duel`)
 
+- **Bases protégées pendant le combat** (29 oct.) : de la téléportation dans l'arène jusqu'au retour (attribut joueur
+  `InDuel`), la base de chaque duelliste est fermée (portail, intrus expulsés, panneau « EN DUEL : PROTÉGÉE », attribut de
+  base `DuelProtected`, `server/LockController`), aucune clé ne l'ouvre, et rien chez lui ne se vole, familiers lâchés
+  compris (`StealController.IsInDuel`). À la fin, la base reprend son état (fermée si le compte à rebours tourne encore).
 - **Défi** : bulle [F] « Défier en duel » (manette Y) créée localement sur les autres joueurs (12 studs). La cible a 15 s
   pour ACCEPTER / REFUSER. 6 s entre deux défis. Pas de duel en portant un familier.
 - **Choix** (60 s) : fenêtre DUEL DE FAMILIERS ; chacun choisit un familier de sa base (pas l'équipé), voit celui de
