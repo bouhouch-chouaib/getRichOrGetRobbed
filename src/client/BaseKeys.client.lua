@@ -40,6 +40,7 @@ local function isOpenable(base: Model): boolean
 	return base:GetAttribute("Locked") == true
 		and base:GetAttribute("BaseIndex") ~= player:GetAttribute("BaseIndex")
 		and base:GetAttribute("ForcedOpenUntil") == nil
+		and base:GetAttribute("DuelProtected") ~= true -- propriétaire en duel : aucune clé (server/LockController)
 		and base:GetAttribute("OwnerName") ~= nil
 		and not (type(protected) == "number" and protected > Workspace:GetServerTimeNow())
 end

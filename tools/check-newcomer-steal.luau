@@ -227,9 +227,14 @@ pick:Fire(thief, loose)
 assert(thief:GetAttribute("CarryingPet") == nil and loose.Parent, "loose-pet remote bypassed protection")
 assert(protected[thief])
 protected[owner] = false
+-- Propriétaire en duel dans l'arène : rien ne se vole chez lui (attribut "InDuel", server/DuelController).
+owner:SetAttribute("InDuel", "A")
+pick:Fire(thief, loose)
+assert(thief:GetAttribute("CarryingPet") == nil and loose.Parent, "loose pet of a dueling owner was stolen")
+owner:SetAttribute("InDuel", nil)
 pick:Fire(thief, loose)
 assert(thief:GetAttribute("CarryingPet") == "Common" and not protected[thief], "valid theft must end thief protection")
 assert(reserved == 1 and not loose.Parent, "loose pickup duplicated the reservation")
 print(
-	"PASS: actual server rejects protected base/loose theft, permits own carry, preserves shield on rejection and removes it on valid theft"
+	"PASS: actual server rejects protected base/loose theft and duel-time theft, permits own carry, preserves shield on rejection and removes it on valid theft"
 )

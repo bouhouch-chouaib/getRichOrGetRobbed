@@ -9,6 +9,8 @@
 -- créée par client/BaseKeys) -> la base est ouverte Config.Keys.Duration secondes (attribut "ForcedOpenUntil") : pas
 -- d'expulsion, vol possible, même si le propriétaire repasse sur le bouton. Ensuite, elle redevient fermée si le compte à
 -- rebours du propriétaire tourne encore, et elle est protégée des clés pendant Config.Keys.ProtectAfter secondes.
+-- Duel (29 oct.) : tant que le propriétaire se bat dans l'arène (attribut joueur "InDuel", server/DuelController), sa base
+-- est fermée et protégée de tout, clés comprises (attribut de base "DuelProtected") ; à la fin, elle reprend son état.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -76,6 +78,24 @@ local function isInsideBase(platform: BasePart, position: Vector3): boolean
 	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -3 and localPosition.Y < 25
 end
 
+-- Expulse les intrus devant l'entrée.
+local function expelIntruders(entry: BaseParts, owner: Player)
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= owner then
+			local root = getRoot(player)
+			local character = player.Character
+			if root and character and isInsideBase(entry.platform, root.Position) then
+				local outside = entry.platform.CFrame * CFrame.new(0, 4, -entry.platform.Size.Z / 2 - 10)
+				character:PivotTo(CFrame.lookAt(outside.Position, outside.Position + outside.LookVector))
+			end
+		end
+	end
+end
+
+local function inDuel(owner: Player?): boolean
+	return owner ~= nil and owner:GetAttribute("InDuel") ~= nil
+end
+
 local function update(entry: BaseParts, now: number)
 	local owner = BaseManager.GetOwner(entry.base)
 	local untilTime: number? = lockedUntil[entry.base]
@@ -94,6 +114,29 @@ local function update(entry: BaseParts, now: number)
 		if untilTime then
 			setLocked(entry, true)
 		end
+	end
+
+	-- Propriétaire en duel : fermée et protégée (même des clés) ; à la fin du duel, elle reprend son état.
+	local dueling = inDuel(owner)
+	if dueling ~= (entry.base:GetAttribute("DuelProtected") == true) then
+		entry.base:SetAttribute("DuelProtected", if dueling then true else nil)
+		if not dueling then
+			if forced then
+				showForcedOpen(entry)
+			else
+				setLocked(entry, untilTime ~= nil)
+			end
+		end
+	end
+	if dueling and owner then
+		entry.base:SetAttribute("Locked", true)
+		entry.gate.Transparency = 0
+		entry.button.Color = COLOR_LOCKED
+		if entry.label then
+			entry.label.Text = "EN DUEL : PROTÉGÉE"
+		end
+		expelIntruders(entry, owner)
+		return
 	end
 
 	if not owner then
@@ -145,17 +188,7 @@ local function update(entry: BaseParts, now: number)
 		entry.label.Text = string.format("FERMÉE : %d S", math.ceil(untilTime - now))
 	end
 
-	-- Expulse les intrus devant l'entrée.
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= owner then
-			local root = getRoot(player)
-			local character = player.Character
-			if root and character and isInsideBase(entry.platform, root.Position) then
-				local outside = entry.platform.CFrame * CFrame.new(0, 4, -entry.platform.Size.Z / 2 - 10)
-				character:PivotTo(CFrame.lookAt(outside.Position, outside.Position + outside.LookVector))
-			end
-		end
-	end
+	expelIntruders(entry, owner)
 end
 
 -- Un joueur utilise une clé sur le portail d'une base fermée : tout est vérifié ici.
@@ -175,7 +208,8 @@ local function useKey(player: Player, base: unknown)
 	local now = Workspace:GetServerTimeNow()
 	local owner = BaseManager.GetOwner(entry.base)
 	local locked = (lockedUntil[entry.base] or 0) > now
-	if not owner or owner == player or not locked or (forcedUntil[entry.base] or 0) > now or (protectedUntil[entry.base] or 0) > now then
+	if not owner or owner == player or not locked or inDuel(owner) or (forcedUntil[entry.base] or 0) > now
+		or (protectedUntil[entry.base] or 0) > now then
 		return
 	end
 	local root = getRoot(player)

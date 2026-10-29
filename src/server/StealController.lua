@@ -156,6 +156,12 @@ function StealController.IsUseful(player: Player, petId: string): boolean
 	return PowerCap.IsUseful(petId, SessionData.GetSelfBest(player), EconomyController.GetBaseMin(player))
 end
 
+-- Pendant un duel (attribut "InDuel", server/DuelController), le joueur est bloqué dans l'arène : rien chez lui ne se vole
+-- (sa base est aussi fermée par server/LockController, clés comprises).
+function StealController.IsInDuel(player: Player): boolean
+	return player:GetAttribute("InDuel") ~= nil
+end
+
 -- Une perte (part de la valeur de la base) : au-delà de ShieldLoss sur ShieldWindow secondes, bouclier.
 local function recordLoss(owner: Player, loss: number)
 	local time = now()
@@ -465,7 +471,9 @@ local function tryStart(anchor: BasePart, player: Player)
 		return
 	end
 	if owner ~= player then
-		if SessionData.IsNewcomerProtected(owner) or StealController.IsShielded(owner) then return end
+		if SessionData.IsNewcomerProtected(owner) or StealController.IsShielded(owner) or StealController.IsInDuel(owner) then
+			return
+		end
 		if STEAL.OnlyDuringDigesting and GameLoopManager.GetState() ~= "Digesting" then
 			return
 		end
@@ -512,7 +520,7 @@ local function tryPickLoose(player: Player, anchor: unknown)
 		return
 	end
 	if player ~= loose.owner and (SessionData.IsNewcomerProtected(loose.owner) or StealController.IsShielded(loose.owner)
-		or not StealController.IsUseful(player, loose.petId)) then
+		or StealController.IsInDuel(loose.owner) or not StealController.IsUseful(player, loose.petId)) then
 		return
 	end
 	local root = getRoot(player)

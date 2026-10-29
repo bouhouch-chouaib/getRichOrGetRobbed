@@ -510,6 +510,10 @@ local function canTake(base: Model): (boolean, string)
 	if type(shieldUntil) == "number" and shieldUntil > Workspace:GetServerTimeNow() then
 		return false, "Protégé"
 	end
+	-- Propriétaire en duel dans l'arène : rien ne se vole chez lui.
+	if (owner and owner:GetAttribute("InDuel") ~= nil) or base:GetAttribute("DuelProtected") == true then
+		return false, "Protégé"
+	end
 	if Config.Steal.OnlyDuringDigesting and ReplicatedStorage:GetAttribute("GameState") ~= "Digesting" then
 		return false, "Voler"
 	end

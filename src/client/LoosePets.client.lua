@@ -152,7 +152,8 @@ RunService:BindToRenderStep("LoosePetsPlacement", Enum.RenderPriority.Last.Value
 		local protectedUntil = owner and owner:GetAttribute("NewcomerProtectedUntil")
 		local shieldUntil = owner and owner:GetAttribute("StealShieldUntil") -- bouclier (Config.StealShield)
 		local protected = not walker.mine and ((type(protectedUntil) == "number" and protectedUntil > now)
-			or (type(shieldUntil) == "number" and shieldUntil > now))
+			or (type(shieldUntil) == "number" and shieldUntil > now)
+			or (owner ~= nil and owner:GetAttribute("InDuel") ~= nil)) -- en duel dans l'arène
 		-- Vol utile : chez un autre, seulement un familier qui ferait monter ton revenu.
 		local petId = walker.anchor:GetAttribute("PetId")
 		local baseMin = player:GetAttribute("BaseMin")
