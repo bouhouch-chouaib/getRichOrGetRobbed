@@ -958,6 +958,25 @@ task.spawn(function()
 	end
 end)
 
+-- Nouvelle mise à jour depuis la dernière visite (server/UpdateBoard, Config.Updates) : le titre puis la 1re nouveauté.
+local function announceUpdate()
+	local number = player:GetAttribute("NewUpdate")
+	if type(number) ~= "number" then
+		return
+	end
+	task.delay(4, function()
+		Sounds.play("LevelUp")
+		Toast.show(string.format("MISE À JOUR %d ! VA VOIR LE PANNEAU DES NOUVEAUTÉS", number), UiStyle.Colors.Gold)
+		local first = Config.Updates.Lines[1]
+		if first then
+			task.wait(3)
+			Toast.show(first.Text, UiStyle.Colors.Gold)
+		end
+	end)
+end
+player:GetAttributeChangedSignal("NewUpdate"):Connect(announceUpdate)
+announceUpdate()
+
 -- Récompenses d'Index accordées.
 Remotes.IndexClaimed.OnClientEvent:Connect(function(money: number, count: number)
 	local label = if count > 1 then string.format(" (%d FAMILIERS)", count) else ""

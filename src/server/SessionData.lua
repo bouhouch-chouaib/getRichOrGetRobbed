@@ -60,6 +60,7 @@ export type PlayerData = {
 	-- Invitations (Config.Invite) : by = UserId de qui l'a invité (0 = personne, cadeau de bienvenue déjà donné sinon),
 	-- invited = UserIds des nouveaux amis qu'il a fait venir et pour lesquels il a été récompensé.
 	referral: { by: number, invited: { number } },
+	seenUpdate: number, -- dernière mise à jour annoncée au joueur (Config.Updates.Number, server/UpdateBoard)
 	-- Familiers que le joueur a mis lui-même dans la base (dans l'ordre) ou retirés (shared/PetRoster).
 	basePicks: { placed: { string }, removed: { string } },
 	magnetEnabled: boolean,
@@ -153,6 +154,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		quests = { day = data.quests.day, list = table.clone(data.quests.list) },
 		codes = table.clone(data.codes),
 		referral = { by = data.referral.by, invited = table.clone(data.referral.invited) },
+		seenUpdate = data.seenUpdate,
 		basePicks = { placed = table.clone(data.basePicks.placed), removed = table.clone(data.basePicks.removed) },
 		session = session,
 	}
@@ -417,6 +419,7 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 		end
 		data.quests = { day = math.floor(numberOr(saved.quests.day, 0)), list = list }
 	end
+	data.seenUpdate = math.max(0, math.floor(numberOr(saved.seenUpdate, 0)))
 	if type(saved.referral) == "table" then
 		data.referral.by = math.max(0, math.floor(numberOr(saved.referral.by, 0)))
 		if type(saved.referral.invited) == "table" then
@@ -687,6 +690,7 @@ local function onPlayerAdded(player: Player)
 		quests = { day = 0, list = {} },
 		codes = {},
 		referral = { by = 0, invited = {} },
+		seenUpdate = 0,
 		basePicks = { placed = {}, removed = {} },
 		magnetEnabled = false,
 		starter = StarterJourney.Restore(nil, false),

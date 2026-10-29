@@ -15,6 +15,9 @@ dans le Secret `NotifyKey` que Chouaib range lui-même), `shared/NotifyPlan`. Le
 sont dans `Config.Notifications.Strings` ; une vraie notification reçue n'a pas encore été vue (STRATEGIE_JOUEURS.md B2).
 **Trou noir doré (29 oct.)** : 5 premières minutes de chaque heure UTC, points x2 (`Config.GoldenHour`, `shared/GoldenHour`,
 `client/GoldenHour`, ligne « GoldenHour » de la pile sous l'horloge). Studio : attribut `DebugGoldenShift` (secondes).
+**Panneau des nouveautés (29 oct.)** : `Config.Updates` (Number + lignes), `server/UpdateBoard`, champ sauvegardé
+`seenUpdate`. Chaque mise à jour du samedi : Number + 1 et nouvelles lignes (avec leur anglais dans `shared/LangEn`).
+**Shorts / TikTok : c'est Chouaib qui les fait** (29 oct. : il a refusé le tournage vertical par Studio) ; ne pas les refaire.
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
 **Pour tout travail visuel, lire `docs/DIRECTION_ARTISTIQUE.md`** (style Steal an Egg relevé sur captures :

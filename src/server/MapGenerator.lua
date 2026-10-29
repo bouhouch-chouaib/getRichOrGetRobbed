@@ -14,6 +14,7 @@
 --   Paths (Folder, vide : les chemins sont des dalles de couleur), Trees (Folder),
 --   Kiosks (Folder : boutique + machine de fusion entre deux bases)
 --   Leaderboard (Model) : tableau des plus riches (Screen rempli par LeaderboardController)
+--   UpdateBoard (Model) : panneau des nouveautés (Screen rempli par UpdateBoard, Config.Updates)
 --   LooseItems (Folder) : objets ramassés / lancés
 --   Base_1 .. Base_N (Model) : BasePart, Fence (Folder), Gate, LockButton (+ LockSign), SpawnLocation (invisible), Bins
 --                              (2 bacs à objets dehors), SafeZone (invisible), Treadmill + Bench (Models à l'extérieur, cachés tant que non achetés),
@@ -821,6 +822,31 @@ local function createLeaderboard(map: Folder)
 	model.Parent = map
 end
 
+-- Panneau des nouveautés (Config.Updates) : même panneau en bois que le classement, toit vert et étoile au sommet.
+-- Le contenu (SurfaceGui sur Screen) est écrit par server/UpdateBoard.
+local function createUpdateBoard(map: Folder)
+	local settings = Config.Updates
+	local angle = math.rad(settings.Angle)
+	local position = Vector3.new(math.cos(angle) * settings.Radius, 0, math.sin(angle) * settings.Radius)
+	local origin = CFrame.lookAt(position, Vector3.zero)
+	local model = Instance.new("Model")
+	model.Name = "UpdateBoard"
+	makePart("Floor", Vector3.new(40, 0.2, 14), origin * CFrame.new(0, 0.1, 0), COLORS.Stone, model)
+	for _, x in ipairs({ -16.5, 16.5 }) do
+		makePart("Post", Vector3.new(2, 27, 2), origin * CFrame.new(x, 13.5, 0), COLORS.WoodPost, model)
+	end
+	makePart("Frame", Vector3.new(32, 20, 1), origin * CFrame.new(0, 15, 0), COLORS.WoodRail, model)
+	local screen = makePart("Screen", Vector3.new(30, 18, 1.4), origin * CFrame.new(0, 15, 0), Color3.fromRGB(40, 32, 60), model)
+	screen.Material = Enum.Material.SmoothPlastic
+	screen.FrontSurface = Enum.SurfaceType.Smooth
+	screen.BackSurface = Enum.SurfaceType.Smooth
+	makePart("Roof", Vector3.new(36, 1, 4), origin * CFrame.new(0, 25.5, 0), COLORS.WallTop, model)
+	local star = makePart("Star", Vector3.new(3, 3, 1), origin * CFrame.new(0, 27.8, 0) * CFrame.Angles(0, 0, math.rad(45)),
+		Color3.fromRGB(255, 200, 40), model)
+	star.Material = Enum.Material.SmoothPlastic
+	model.Parent = map
+end
+
 -- Bac à objets (shared/BaseLayout.Bins), dehors devant la base : le modèle en briques ArtModels.BacObjets
 -- (Blender, props/BacObjets.py) dont le rebord « Trim » prend la couleur de la base, ou s'il manque une caisse en blocs de
 -- bois. Le fond et les parois sont des volumes (invisibles sous le modèle) qui retiennent les objets.
@@ -1217,6 +1243,7 @@ function MapGenerator.generate(): { Model }
 	createTrees(map)
 	createKiosks(map)
 	createLeaderboard(map)
+	createUpdateBoard(map)
 
 	createFloor(map)
 	createWall(map)

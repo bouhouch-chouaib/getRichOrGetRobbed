@@ -562,6 +562,23 @@ Config.Leaderboard = {
 	Radius = 190, -- distance au trou noir (juste avant les bases)
 }
 
+-- Panneau des nouveautés (29 oct., docs/STRATEGIE_JOUEURS.md B5 ; server/UpdateBoard) : planté dans l'arène comme le
+-- tableau des plus riches, il montre ce que la dernière mise à jour apporte. À chaque mise à jour : Number + 1 et
+-- de nouvelles lignes (phrases courtes en MAJUSCULES, à ajouter aussi dans shared/LangEn). Un joueur déjà venu reçoit
+-- une fois le message « MISE À JOUR n ! » (champ sauvegardé seenUpdate).
+export type UpdateLine = { Icon: string, Text: string }
+Config.Updates = {
+	Number = 1,
+	Angle = 337.5, -- degrés : entre la 8e et la 1re base, place libre (kiosques à 22,5 + 90 x k, classement à 67,5)
+	Radius = 190,
+	Lines = {
+		{ Icon = "Gift", Text = "INVITE TES AMIS : 2 ŒUFS CHACUN !" },
+		{ Icon = "Sun", Text = "CHAQUE HEURE PILE : TROU NOIR DORÉ, POINTS x2 !" },
+		{ Icon = "Egg", Text = "ON TE PRÉVIENT QUAND TES ŒUFS SONT PRÊTS" },
+		{ Icon = "Codes", Text = "NOUVEAUX CODES : LAUNCH, BLACKHOLE, THANKS" },
+	} :: { UpdateLine },
+}
+
 -- Argent : revenu passif des familiers + bonus de fin de digestion.
 Config.Economy = {
 	-- Chaque point marqué rapporte aussi de l'argent à la digestion : MoneyPerPoint, ou IncomeSecondsPerPoint

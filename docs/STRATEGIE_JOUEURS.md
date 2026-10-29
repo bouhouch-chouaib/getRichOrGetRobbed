@@ -86,6 +86,11 @@ Ce qui manque, par ordre d'effet attendu :
 4. **Événements Roblox** (Creator Hub → Engagement → Événements et mises à jour) : un événement par mise à jour et par
    week-end. Les joueurs cliquent « Me prévenir » et reçoivent une notification au début. 10 événements à la fois au plus.
 5. **Tableau des nouveautés** dans l'arène : ce qui a changé cette semaine et le jour de la prochaine mise à jour.
+   **Fait le 29 oct.** : panneau « NOUVEAUTÉS » entre la 8e et la 1re base (`Config.Updates`, `server/UpdateBoard`,
+   modèle dans `MapGenerator.createUpdateBoard`), et message « MISE À JOUR n ! » une fois pour un joueur déjà venu
+   (champ sauvegardé `seenUpdate`). Vérifié dans Studio en français et en anglais (panneau et messages).
+   **À chaque mise à jour du samedi** : `Config.Updates.Number` + 1, nouvelles lignes (et leur anglais dans
+   `shared/LangEn`), puis Publier.
 
 ## 4. Étape C : faire connaître le jeu (à partir de la semaine 2, une fois A1 et A2 faits)
 
