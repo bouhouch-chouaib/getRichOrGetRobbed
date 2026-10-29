@@ -61,6 +61,7 @@ require(script.Parent.BadgeController).Init()
 require(script.Parent.MarketController).Init()
 require(script.Parent.Notifications).Init()
 require(script.Parent.HalloweenController).Init()
+require(script.Parent.Gifts).Init()
 
 GameLoopManager.Start()
 print("[Main] Serveur prêt.")

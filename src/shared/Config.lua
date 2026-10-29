@@ -603,6 +603,14 @@ Config.Leaderboard = {
 -- tableau des plus riches, il montre ce que la dernière mise à jour apporte. À chaque mise à jour : Number + 1 et
 -- de nouvelles lignes (phrases courtes en MAJUSCULES, à ajouter aussi dans shared/LangEn). Un joueur déjà venu reçoit
 -- une fois le message « MISE À JOUR n ! » (champ sauvegardé seenUpdate).
+-- Cadeaux du créateur à des joueurs précis (server/Gifts) : reçus à leur prochaine connexion, une seule fois chacun
+-- (Id unique, noté dans leur sauvegarde). Pour un nouveau cadeau : ajouter une ligne avec un nouvel Id, puis Publier.
+export type Gift = { Id: string, UserId: number, Pets: { string } }
+Config.Gifts = {
+	{ Id = "Sigma-2026-10-29-ishakbnm509", UserId = 5108543821, Pets = { "OuroborosInfini", "CanardTractopelle" } },
+	{ Id = "Sigma-2026-10-29-zakyouss10", UserId = 7963361960, Pets = { "CapybaraZen", "FougereFibonacci" } },
+} :: { Gift }
+
 export type UpdateLine = { Icon: string, Text: string }
 Config.Updates = {
 	Number = 2,

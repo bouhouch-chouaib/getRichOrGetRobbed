@@ -986,6 +986,14 @@ Remotes.BonusResult.OnClientEvent:Connect(function(kind: string, a: any, b: any,
 			Sounds.play("Error")
 			bonus.codeResult(false, tostring(b))
 		end
+	elseif kind == "Gift" and type(a) == "table" then
+		-- Cadeau du créateur (server/Gifts) : ses familiers tombent du ciel dans sa base.
+		Sounds.play("Coins")
+		local names = {}
+		for _, petId in ipairs(a) do
+			table.insert(names, petName(petId))
+		end
+		Toast.show(string.format("CADEAU DU CRÉATEUR : %s !", table.concat(names, " + ")), UiStyle.Colors.Gold)
 	elseif kind == "Invited" then
 		Sounds.play("Coins")
 		Toast.show(if type(a) == "string" and a ~= ""

@@ -352,6 +352,7 @@ local entries: { { any } } = {
 	{ "OUVERTE (CLÉ) : %d S", "OPEN (KEY): %d S" },
 	{ "FERMÉE : %d S", "LOCKED: %d S" },
 	{ "EN DUEL : PROTÉGÉE", "IN A DUEL: PROTECTED" },
+	{ "CADEAU DU CRÉATEUR : %s !", "GIFT FROM THE CREATOR: %s!" },
 	{ "BASE LIBRE", "FREE BASE" },
 	{ "CE SERVEUR EST PLEIN ! RELANCE LE JEU POUR EN TROUVER UN AUTRE.", "THIS SERVER IS FULL! REJOIN TO FIND ANOTHER ONE." },
 	{ "Ta partie a été ouverte sur un autre serveur. Reconnecte-toi pour continuer.", "Your game was opened on another server. Reconnect to keep playing." },
