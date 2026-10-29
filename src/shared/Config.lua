@@ -1149,6 +1149,17 @@ Config.Invite = {
 	MaxRewards = 5,
 }
 
+-- Trou noir doré (29 oct., docs/STRATEGIE_JOUEURS.md B3 ; shared/GoldenHour, client/GoldenHour) : rendez-vous toutes
+-- les heures pile (heure UTC, la même sur tous les serveurs). Pendant les Minutes premières minutes de chaque heure,
+-- les points des objets jetés dans le trou noir sont multipliés par PointsMultiplier (donc plus d'œufs) ; WarnSeconds
+-- avant, un compte à rebours s'affiche sous l'horloge. Environ +8 % de points pour qui joue une heure entière.
+-- Studio : workspace:SetAttribute("DebugGoldenShift", secondes) avance l'horloge du trou doré (ex. 3600 - os.time() % 3600 - 70).
+Config.GoldenHour = {
+	Minutes = 5,
+	PointsMultiplier = 2,
+	WarnSeconds = 60,
+}
+
 -- Notifications Roblox (29 oct., docs/STRATEGIE_JOUEURS.md B2 ; shared/NotifyPlan, server/Notifications) : au départ
 -- d'un joueur, le serveur prévoit UNE notification (Roblox en laisse passer une par jour et par jeu) : « tes œufs
 -- sont prêts » si un œuf finit dans les EggWindow secondes, sinon « ton cadeau du jour t'attend » DailyDelay secondes

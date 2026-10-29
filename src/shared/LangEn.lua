@@ -941,6 +941,11 @@ local entries: { { any } } = {
 	{ "CADEAU DE BIENVENUE : %s !", "WELCOME GIFT: %s!" },
 	{ "%s EST VENU GRÂCE À TOI : %s !", "%s JOINED THANKS TO YOU: %s!" },
 	{ "Viens voler des familiers avec moi !", "Come steal pets with me!" },
+	-- Trou noir doré
+	{ "DANS 1 MIN : TROU NOIR DORÉ, POINTS x%d !", "IN 1 MIN: GOLDEN BLACK HOLE, POINTS x%d!" },
+	{ "TROU NOIR DORÉ : POINTS x%d PENDANT %d MIN !", "GOLDEN BLACK HOLE: POINTS x%d FOR %d MIN!" },
+	{ "TROU NOIR DORÉ : POINTS x%d  •  %d:%02d", "GOLDEN BLACK HOLE: POINTS x%d  •  %d:%02d" },
+	{ "TROU NOIR DORÉ DANS %d S !", "GOLDEN BLACK HOLE IN %d S!" },
 }
 
 return entries

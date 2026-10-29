@@ -14,6 +14,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local GoldenHour = require(ReplicatedStorage.Shared.GoldenHour)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
@@ -127,10 +128,11 @@ local function consume(item: BasePart, caught: boolean?)
 		local reason = rejectReason(item, owner)
 		if not reason then
 			-- Points = valeur de l'objet (Config.ItemTiers) × multiplicateur des familiers équipés × bonus du palier
-			-- du trou noir (centre, combo, jackpot : server/BlackholeTiers, qui remplit aussi la jauge commune).
+			-- du trou noir (centre, combo, jackpot : server/BlackholeTiers, qui remplit aussi la jauge commune)
+			-- × trou noir doré des premières minutes de chaque heure (Config.GoldenHour, pas compté dans la jauge).
 			local rawValue = item:GetAttribute("Value")
 			local value = if type(rawValue) == "number" then rawValue else 1
-			local bonus = BlackholeTiers.OnScored(owner, item, value)
+			local bonus = BlackholeTiers.OnScored(owner, item, value) * GoldenHour.Multiplier(GoldenHour.Now())
 			SessionData.AddScore(owner, value * SessionData.GetMultiplier(owner) * bonus)
 			OnboardingAnalytics.Mark(owner, "Scored")
 			Quests.Add(owner, "Feed", 1)

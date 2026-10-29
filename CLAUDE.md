@@ -13,6 +13,8 @@ français, un seul des deux). Tester côté serveur : un Script créé à la vol
 **Notifications Roblox (29 oct.)** : `server/Notifications` (MemoryStore `Notify_v1` + Open Cloud par HttpService, clé
 dans le Secret `NotifyKey` que Chouaib range lui-même), `shared/NotifyPlan`. Les 4 textes sont créés et leurs Asset ID
 sont dans `Config.Notifications.Strings` ; une vraie notification reçue n'a pas encore été vue (STRATEGIE_JOUEURS.md B2).
+**Trou noir doré (29 oct.)** : 5 premières minutes de chaque heure UTC, points x2 (`Config.GoldenHour`, `shared/GoldenHour`,
+`client/GoldenHour`, ligne « GoldenHour » de la pile sous l'horloge). Studio : attribut `DebugGoldenShift` (secondes).
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
 **Pour tout travail visuel, lire `docs/DIRECTION_ARTISTIQUE.md`** (style Steal an Egg relevé sur captures :

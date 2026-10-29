@@ -190,7 +190,8 @@ local shownPulls = 0
 
 -- Pile sous la pastille : chaque élément n'apparaît que lorsqu'il sert (pas de blocs vides empilés).
 -- 26 oct. (retour des testeurs : « on ne voit plus rien ») : UNE seule ligne d'information sous l'horloge à la fois.
--- Ordre : consigne du familier porté, carte des tirages, consigne de phase, protection (client/Newcomer), objectif
+-- Ordre : consigne du familier porté, carte des tirages, consigne de phase, trou noir doré (client/GoldenHour),
+-- protection (client/Newcomer), objectif
 -- (client/NextGoals). Ces deux derniers demandent leur place par l'attribut "Wanted" ; le HUD décide de Visible.
 local topStack = Instance.new("Frame")
 topStack.Name = "TopStack"
@@ -546,9 +547,10 @@ local function updatePhase()
 		-- La consigne ne reste que quelques secondes (et laisse la place à la carte des tirages).
 		hintLabel.Visible = os.clock() - phaseChangedAt < HINT_TIME and not rewardCard.Visible
 	end
-	-- Une seule ligne sous l'horloge : la protection puis l'objectif, seulement si la place est libre.
+	-- Une seule ligne sous l'horloge : le trou noir doré (client/GoldenHour), la protection puis l'objectif, seulement
+	-- si la place est libre.
 	local taken = hintLabel.Visible or rewardCard.Visible
-	for _, name in ipairs({ "TheftProtection", "NextGoals" }) do
+	for _, name in ipairs({ "GoldenHour", "TheftProtection", "NextGoals" }) do
 		local line = topStack:FindFirstChild(name)
 		if line and line:IsA("GuiObject") then
 			line.Visible = line:GetAttribute("Wanted") == true and not taken

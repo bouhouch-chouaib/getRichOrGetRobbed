@@ -78,6 +78,11 @@ Ce qui manque, par ordre d'effet attendu :
    3. Studio → Paramètres du jeu → Sécurité → « Allow HTTP Requests » activé, puis Publier.
 3. **Rendez-vous à heure fixe dans le jeu.** Toutes les heures pile, 5 minutes de « PLUIE D'ŒUFS » ou « TROU NOIR
    DORÉ » (points x2), annoncées 1 minute avant. Les joueurs apprennent l'heure et restent jusqu'à elle.
+   **Fait le 29 oct.** : trou noir doré, les 5 premières minutes de chaque heure UTC (la même sur tous les serveurs),
+   points x2 (`Config.GoldenHour`, `shared/GoldenHour`, `client/GoldenHour`, test `check-golden`). Vérifié dans Studio
+   (horloge avancée) : compte à rebours la dernière minute, message et son au début, « POINTS x2 • 4:58 » sous
+   l'horloge, multiplicateur 2 côté serveur. Idée pour plus tard : l'annoncer sur la page du jeu (« Every hour: Golden
+   Black Hole, x2 points! ») et dans les vidéos.
 4. **Événements Roblox** (Creator Hub → Engagement → Événements et mises à jour) : un événement par mise à jour et par
    week-end. Les joueurs cliquent « Me prévenir » et reçoivent une notification au début. 10 événements à la fois au plus.
 5. **Tableau des nouveautés** dans l'arène : ce qui a changé cette semaine et le jour de la prochaine mise à jour.
