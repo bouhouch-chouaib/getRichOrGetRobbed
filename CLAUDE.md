@@ -7,6 +7,9 @@ Contexte de passation pour toute nouvelle session Claude. Lire aussi `GDD.md` (d
 `shared/Lang` pour qui n'a pas Roblox en français. **Tout nouveau texte affiché va aussi dans `shared/LangEn`**
 (`lune run tools/check-lang.luau .` liste les oubliés). Studio : `workspace:SetAttribute("DebugLang", "en")` avant Play.
 Ne jamais comparer un `.Text` / `.ActionText` affiché à une phrase française (il peut être traduit).
+**Invitations récompensées et codes anglais (29 oct.)** : bouton « INVITER +2 » sous les tuiles du HUD, `Config.Invite`,
+champ sauvegardé `referral`, `ProgressionController.ApplyReferral` ; codes LAUNCH / BLACKHOLE / THANKS (`Same` = le code
+français, un seul des deux). Tester côté serveur : un Script créé à la volée (la barre de commande a ses propres modules).
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
 **Pour tout travail visuel, lire `docs/DIRECTION_ARTISTIQUE.md`** (style Steal an Egg relevé sur captures :

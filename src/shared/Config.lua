@@ -1128,12 +1128,26 @@ Config.Quests = {
 
 -- Codes cadeaux : à taper dans la fenêtre Bonus (majuscules / minuscules et espaces ignorés), une fois par joueur.
 -- Until = date de fin (os.time(), UTC) facultative. Ajouter un code ici puis Publier : il marche tout de suite.
-export type GiftCode = { Reward: BonusReward, Until: number? }
+-- Same = le même code dans une autre langue (29 oct. : les codes anglais) : on ne peut prendre que l'un des deux.
+export type GiftCode = { Reward: BonusReward, Until: number?, Same: string? }
 Config.Codes = {
 	LANCEMENT = { Reward = { Seconds = 1800, Pulls = 3 } },
 	TROUNOIR = { Reward = { Pulls = 2 } },
 	MERCI = { Reward = { Seconds = 900 } },
+	LAUNCH = { Reward = { Seconds = 1800, Pulls = 3 }, Same = "LANCEMENT" },
+	BLACKHOLE = { Reward = { Pulls = 2 }, Same = "TROUNOIR" },
+	THANKS = { Reward = { Seconds = 900 }, Same = "MERCI" },
 } :: { [string]: GiftCode }
+
+-- Invitations récompensées (29 oct., docs/STRATEGIE_JOUEURS.md B1) : bouton « INVITE TES AMIS » du HUD
+-- (SocialService). Un joueur qui arrive pour la 1re fois par l'invitation de quelqu'un (Player:GetJoinData().
+-- ReferredByPlayerId) reçoit NewPlayerReward ; celui qui l'a invité, s'il est sur le même serveur, reçoit FriendReward,
+-- une fois par nouvel ami et MaxRewards fois au plus (server/ProgressionController, champ sauvegardé « referral »).
+Config.Invite = {
+	NewPlayerReward = { Pulls = 2 } :: BonusReward,
+	FriendReward = { Pulls = 2 } :: BonusReward,
+	MaxRewards = 5,
+}
 
 -- Bonus d'amis : +10 % de revenu par ami Roblox présent sur le même serveur, jusqu'à 5 amis (+50 %).
 Config.Friends = {

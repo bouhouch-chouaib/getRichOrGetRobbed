@@ -7,6 +7,8 @@
 --   ("Rebirth")         faire un Rebirth (SessionData.Rebirth vérifie monde et argent).
 -- Réponses (Remotes.BonusResult) : au joueur ("Daily", jour, argent, tirages), ("Quest", index, argent, tirages),
 -- ("Code", ok, message, argent, tirages) ; à tout le serveur ("Rebirth", joueur, nombre).
+-- Invitations (Config.Invite) : ("Invited", nom de l'ami, argent, tirages) au nouveau venu, ("Invite", nom du nouveau,
+-- argent, tirages) à celui qui l'a invité.
 -- Amis : l'attribut "FriendsHere" compte les amis Roblox présents sur le serveur (bonus de revenu, EconomyController).
 
 local Players = game:GetService("Players")
@@ -118,15 +120,59 @@ local function redeem(player: Player, text: unknown)
 		Remotes.BonusResult:FireClient(player, "Code", false, "CE CODE NE MARCHE PAS")
 		return
 	end
-	if table.find(data.codes, code) then
+	local key = def.Same or code -- LAUNCH et LANCEMENT comptent comme un seul code
+	if table.find(data.codes, key) then
 		Remotes.BonusResult:FireClient(player, "Code", false, "CODE DÉJÀ UTILISÉ")
 		return
 	end
-	table.insert(data.codes, code)
+	table.insert(data.codes, key)
 	local money, pulls = grant(player, def.Reward, Config.Daily.MinMoney)
 	SessionData.Sync(player)
 	Remotes.BonusResult:FireClient(player, "Code", true, code, money, pulls)
 	print(string.format("[Bonus] %s : code %s (+%d$, %d tirage(s))", player.Name, code, money, pulls))
+end
+
+----------------------------------------------------------------------
+-- Invitations récompensées
+----------------------------------------------------------------------
+
+-- Un joueur arrivé par l'invitation de inviterId : cadeau de bienvenue à sa 1re visite seulement (une fois par
+-- compte), et cadeau à celui qui l'a invité s'il est sur ce serveur (une fois par nouvel ami, Config.Invite.MaxRewards
+-- au plus). Retourne vrai si le nouveau venu a reçu son cadeau.
+function ProgressionController.ApplyReferral(player: Player, inviterId: number): boolean
+	local data = SessionData.Get(player)
+	if not data or not data.loaded or data.referral.by ~= 0 or inviterId <= 0 or inviterId == player.UserId then
+		return false
+	end
+	if not data.onboarding.newPlayer or data.onboarding.visits > 1 then
+		return false -- déjà venu avant : pas un nouveau joueur amené par l'invitation
+	end
+	data.referral.by = inviterId
+	local inviter = Players:GetPlayerByUserId(inviterId)
+	local money, pulls = grant(player, Config.Invite.NewPlayerReward, Config.Daily.MinMoney)
+	SessionData.Sync(player)
+	Remotes.BonusResult:FireClient(player, "Invited", if inviter then inviter.DisplayName else "", money, pulls)
+	print(string.format("[Invite] %s arrive invité par %d (+%d$, %d tirage(s))", player.Name, inviterId, money, pulls))
+	local inviterData = inviter and SessionData.Get(inviter)
+	if inviter and inviterData and inviterData.loaded and #inviterData.referral.invited < Config.Invite.MaxRewards
+		and not table.find(inviterData.referral.invited, player.UserId) then
+		table.insert(inviterData.referral.invited, player.UserId)
+		local friendMoney, friendPulls = grant(inviter, Config.Invite.FriendReward, Config.Daily.MinMoney)
+		SessionData.Sync(inviter)
+		Remotes.BonusResult:FireClient(inviter, "Invite", player.DisplayName, friendMoney, friendPulls)
+		print(string.format("[Invite] %s : ami invité n° %d (+%d$, %d tirage(s))", inviter.Name, #inviterData.referral.invited, friendMoney, friendPulls))
+	end
+	return true
+end
+
+local function checkReferral(player: Player)
+	local ok, joinData = pcall(function()
+		return player:GetJoinData()
+	end)
+	local inviterId = if ok and type(joinData) == "table" then (joinData :: any).ReferredByPlayerId else nil
+	if type(inviterId) == "number" and inviterId > 0 then
+		ProgressionController.ApplyReferral(player, inviterId)
+	end
 end
 
 ----------------------------------------------------------------------
@@ -190,13 +236,17 @@ local function onPlayerAdded(player: Player)
 		end
 	end
 	refreshFriends()
-	-- Les quêtes du jour existent dès l'arrivée (affichées tout de suite dans la fenêtre Bonus).
+	-- Les quêtes du jour existent dès l'arrivée (affichées tout de suite dans la fenêtre Bonus). Puis le cadeau
+	-- d'invitation, s'il est arrivé par l'invitation d'un ami.
 	task.spawn(function()
 		while player.Parent and not SessionData.IsLoaded(player) do
 			task.wait(0.5)
 		end
 		if player.Parent and Quests.Ensure(player) then
 			SessionData.Sync(player)
+		end
+		if player.Parent then
+			checkReferral(player)
 		end
 	end)
 end

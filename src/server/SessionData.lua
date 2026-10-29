@@ -57,6 +57,9 @@ export type PlayerData = {
 	daily: { last: number, streak: number }, -- cadeau du jour : dernier jour réclamé (jour UTC), jour de la série (1 à 7)
 	quests: { day: number, list: { Quest } }, -- quêtes du jour (refaites chaque jour UTC)
 	codes: { string }, -- codes cadeaux déjà utilisés
+	-- Invitations (Config.Invite) : by = UserId de qui l'a invité (0 = personne, cadeau de bienvenue déjà donné sinon),
+	-- invited = UserIds des nouveaux amis qu'il a fait venir et pour lesquels il a été récompensé.
+	referral: { by: number, invited: { number } },
 	-- Familiers que le joueur a mis lui-même dans la base (dans l'ordre) ou retirés (shared/PetRoster).
 	basePicks: { placed: { string }, removed: { string } },
 	magnetEnabled: boolean,
@@ -149,6 +152,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		daily = table.clone(data.daily),
 		quests = { day = data.quests.day, list = table.clone(data.quests.list) },
 		codes = table.clone(data.codes),
+		referral = { by = data.referral.by, invited = table.clone(data.referral.invited) },
 		basePicks = { placed = table.clone(data.basePicks.placed), removed = table.clone(data.basePicks.removed) },
 		session = session,
 	}
@@ -413,6 +417,16 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 		end
 		data.quests = { day = math.floor(numberOr(saved.quests.day, 0)), list = list }
 	end
+	if type(saved.referral) == "table" then
+		data.referral.by = math.max(0, math.floor(numberOr(saved.referral.by, 0)))
+		if type(saved.referral.invited) == "table" then
+			for _, userId in ipairs(saved.referral.invited) do
+				if type(userId) == "number" and not table.find(data.referral.invited, userId) then
+					table.insert(data.referral.invited, userId)
+				end
+			end
+		end
+	end
 	if type(saved.codes) == "table" then
 		for _, code in ipairs(saved.codes) do
 			if type(code) == "string" and not table.find(data.codes, code) then
@@ -672,6 +686,7 @@ local function onPlayerAdded(player: Player)
 		daily = { last = 0, streak = 0 },
 		quests = { day = 0, list = {} },
 		codes = {},
+		referral = { by = 0, invited = {} },
 		basePicks = { placed = {}, removed = {} },
 		magnetEnabled = false,
 		starter = StarterJourney.Restore(nil, false),

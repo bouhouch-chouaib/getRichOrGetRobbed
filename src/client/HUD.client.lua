@@ -14,6 +14,7 @@ local ContentProvider = game:GetService("ContentProvider")
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SocialService = game:GetService("SocialService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
@@ -21,6 +22,7 @@ local Workspace = game:GetService("Workspace")
 local BonusMenu = require(script.Parent.BonusMenu)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
+local Lang = require(ReplicatedStorage.Shared.Lang)
 local LootEngine = require(ReplicatedStorage.Shared.LootEngine)
 local NumberFormat = require(ReplicatedStorage.Shared.NumberFormat)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
@@ -316,6 +318,52 @@ do
 		rainbow.Offset = Vector2.new(-0.25, 0)
 	end
 end
+
+-- Inviter des amis (29 oct., Config.Invite) : bouton large sous les tuiles. Un ami qui arrive pour la 1re fois
+-- rapporte des œufs aux deux (server/ProgressionController) ; chaque ami présent donne aussi +10 % de revenu.
+local inviteButton: TextButton
+do
+	local tilesHeight = menuColumn.Size.Y.Offset
+	local height = if isTouch then 40 else 46
+	menuColumn.Size += UDim2.fromOffset(0, height + 10)
+	inviteButton = UiStyle.button(menuColumn, "INVITER", UDim2.fromOffset(if isTouch then 300 else 202, height),
+		Color3.fromRGB(255, 90, 160), if isTouch then 20 else 22)
+	inviteButton.Name = "Invite"
+	inviteButton.Position = UDim2.fromOffset(0, tilesHeight + 10)
+	-- À droite, la récompense : « +2 » et un œuf (on comprend sans lire).
+	local reward = UiStyle.number(inviteButton, "+" .. (Config.Invite.FriendReward.Pulls or 0), if isTouch then 18 else 20, WHITE)
+	reward.AnchorPoint = Vector2.new(1, 0.5)
+	reward.Position = UDim2.new(1, -(height - 4), 0.5, 0)
+	reward.Size = UDim2.fromOffset(34, height - 12)
+	reward.TextXAlignment = Enum.TextXAlignment.Right
+	reward.ZIndex = 3
+	Icons.image(inviteButton, "Egg", UDim2.fromOffset(height - 14, height - 14), UDim2.new(1, -(height - 8), 0, 5)).ZIndex = 3
+	local caption = inviteButton:FindFirstChild("Caption") :: TextLabel
+	caption.Position = UDim2.fromOffset(8, 6)
+	caption.Size = UDim2.new(1, -height - 48, 1, -12)
+end
+local inviting = false
+inviteButton.Activated:Connect(function()
+	if inviting then
+		return
+	end
+	inviting = true
+	local ok, allowed = pcall(function()
+		return SocialService:CanSendGameInviteAsync(player)
+	end)
+	if ok and allowed then
+		local options = Instance.new("ExperienceInviteOptions")
+		local message = "Viens voler des familiers avec moi !"
+		options.PromptMessage = if Lang.isFrench() then message else Lang.translate(message)
+		pcall(function()
+			SocialService:PromptGameInvite(player, options)
+		end)
+	else
+		Sounds.play("Error")
+		Toast.show("TU NE PEUX PAS INVITER D'AMIS ICI", UiStyle.Colors.Red)
+	end
+	inviting = false
+end)
 
 -- Ranger les tuiles de menu pour dégager la vue (26 oct.) : une poignée collée à droite des tuiles, « « » les fait
 -- glisser hors de l'écran (les offres Robux de droite se cachent aussi), « » » les ramène. Touche M sur PC. Tuiles
@@ -833,6 +881,14 @@ Remotes.BonusResult.OnClientEvent:Connect(function(kind: string, a: any, b: any,
 			Sounds.play("Error")
 			bonus.codeResult(false, tostring(b))
 		end
+	elseif kind == "Invited" then
+		Sounds.play("Coins")
+		Toast.show(if type(a) == "string" and a ~= ""
+			then string.format("%s T'A INVITÉ : %s !", TextFormat.upper(a), rewardSummary(b, c))
+			else "CADEAU DE BIENVENUE : " .. rewardSummary(b, c) .. " !", UiStyle.Colors.Gold)
+	elseif kind == "Invite" then
+		Sounds.play("Coins")
+		Toast.show(string.format("%s EST VENU GRÂCE À TOI : %s !", TextFormat.upper(tostring(a)), rewardSummary(b, c)), UiStyle.Colors.Gold)
 	elseif kind == "Rebirth" and typeof(a) == "Instance" and type(b) == "number" then
 		if a == player then
 			MenuKit.closeAll()

@@ -386,7 +386,7 @@ local entries: { { any } } = {
 	{ "FAIT !", "DONE!" },
 	{ "EN COURS", "IN PROGRESS" },
 	{ "Cadeau du jour", "Daily gift" },
-	{ "Défis", "Quests" },
+	{ "Défis", "Goals" },
 	{ "Bonus", "Bonus", true },
 	{ "BONUS", "BONUS", true },
 	{ "JETTE %d OBJETS DANS LE TROU NOIR", "THROW %d ITEMS INTO THE BLACK HOLE" },
@@ -934,6 +934,13 @@ local entries: { { any } } = {
 	{ "Texte", "Text" },
 	{ "%s ŒUF", "%s EGG" },
 	{ "%s ŒUFS", "%s EGGS" },
+	-- Invitations
+	{ "INVITER", "INVITE" },
+	{ "TU NE PEUX PAS INVITER D'AMIS ICI", "YOU CAN'T INVITE FRIENDS HERE" },
+	{ "%s T'A INVITÉ : %s !", "%s INVITED YOU: %s!" },
+	{ "CADEAU DE BIENVENUE : %s !", "WELCOME GIFT: %s!" },
+	{ "%s EST VENU GRÂCE À TOI : %s !", "%s JOINED THANKS TO YOU: %s!" },
+	{ "Viens voler des familiers avec moi !", "Come steal pets with me!" },
 }
 
 return entries

@@ -35,7 +35,7 @@ Le tableau de bord du Creator Hub (Analytics) montre l'importance de chaque sign
 | A2 | **Test à 2 vrais comptes + un téléphone** dans le jeu publié (`TEST_REEL.md`) | Chouaib + un ami | Le vol, la batte, le grappin et l'échange n'ont jamais été joués à 2 vrais joueurs. |
 | A3 | **Maturité** : la page affiche « Minimum ». Si le questionnaire dit violence « de temps en temps », le refaire avec « répétée » (→ « Léger ») | Chouaib | Une fausse réponse peut faire sanctionner le jeu. |
 | A4 | **Badges et groupe** : créer les 13 badges et le groupe Roblox, donner les numéros | Chouaib crée, Claude branche (`Config.Badges`, `Config.Group`) | Les badges donnent des buts ; le groupe sert à prévenir des mises à jour (et donne déjà +10 % de revenu). |
-| A5 | **Codes cadeaux en anglais** (`LAUNCH`, `BLACKHOLE`, `THANKS`) à côté des codes français | Claude | Les codes circulent dans les vidéos et les commentaires. |
+| A5 | **Codes cadeaux en anglais** (`LAUNCH`, `BLACKHOLE`, `THANKS`) à côté des codes français — **fait le 29 oct.** (champ `Same` de `Config.Codes` : LAUNCH ou LANCEMENT, pas les deux ; vérifié dans Studio). Reste : les écrire dans la description anglaise de la page du jeu | Claude (fait), Chouaib (page) | Les codes circulent dans les vidéos et les commentaires. |
 | A6 | **3 à 5 miniatures actives** (Creator Hub → Miniatures → Accueil) | Chouaib (prompts : `assets/store/PROMPTS.md`) | Roblox teste toutes seules les miniatures et garde la meilleure pour chaque public. Thèmes : un vol en pleine course, une éclosion Divine, le trou noir géant. |
 
 ## 3. Étape B : des raisons de revenir (semaines 1 et 2, dans le jeu)
@@ -50,6 +50,12 @@ Ce qui manque, par ordre d'effet attendu :
    récompense **une fois par ami invité** (par exemple 1 œuf pour chacun), limitée à 3 à 5 amis, enregistrée dans
    la sauvegarde. Bannière « Referral Rewards » à créer dans le Creator Hub (Engagement). C'est le signal
    « co-play » que Roblox aime le plus.
+   **Fait le 29 oct.** : bouton « INVITER +2 🥚 » sous les tuiles (`client/HUD`), `Config.Invite` (2 œufs au nouveau
+   venu à sa 1re visite, 2 œufs à celui qui l'a invité s'il est sur le même serveur, 5 amis au plus), champ sauvegardé
+   `referral` (`server/ProgressionController.ApplyReferral`). Vérifié dans Studio : bouton sur PC et téléphone, cadeau
+   du nouveau venu et refus (ancien joueur, 2e fois, soi-même). Pas vu : la vraie fenêtre d'invitation de Roblox et le
+   cadeau de celui qui invite (il faut 2 vrais comptes dans le jeu publié). Reste à Chouaib : la bannière « Referral
+   Rewards » (Creator Hub → Engagement), texte conseillé : « Invite a friend: you both get 2 eggs! ».
 2. **Notifications Roblox.** Demander l'accord au bon moment (quand un œuf de 30 min part en incubation, pas à
    l'arrivée) avec `ExperienceNotificationService`. Messages (1 par jour au plus, joueurs de 13 ans et plus) :
    « TON ŒUF EST PRÊT ! », « ON T'A VOLÉ UN FAMILIER ! », « TON BOUCLIER EST FINI ». Le jeu a passé les 100 visites
