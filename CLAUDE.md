@@ -1,6 +1,8 @@
 # CLAUDE.md — Get Rich Or Get Robbed (Roblox / Rojo)
 
 Contexte de passation pour toute nouvelle session Claude. Lire aussi `GDD.md` (design + architecture à jour).
+**Le jeu est public depuis le 29 oct. 2026 : la priorité est d'avoir des joueurs qui reviennent. Lire
+`docs/STRATEGIE_JOUEURS.md`** (étapes A à D, calendrier des mises à jour du samedi, qui fait quoi).
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
 **Pour tout travail visuel, lire `docs/DIRECTION_ARTISTIQUE.md`** (style Steal an Egg relevé sur captures :
