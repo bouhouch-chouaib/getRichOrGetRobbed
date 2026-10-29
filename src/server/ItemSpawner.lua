@@ -78,6 +78,7 @@ local function createItem(rank: number, world: number, cframe: CFrame, look: Loo
 	if source then
 		-- Le modèle garde l'orientation de son import (posé debout) ; on le tourne seulement autour de la verticale.
 		item = source:Clone()
+		item.Size = source.Size * Config.Items.ModelScale -- plus gros que le modèle : on le voit de loin
 		item.CFrame = cframe * yaw * source.CFrame.Rotation
 	else
 		-- Objet de secours en blocs tant que le modèle du monde n'est pas dans ArtModels.Items.
@@ -157,12 +158,15 @@ local function spawnInBase(base: Model)
 	local owner = BaseManager.GetOwner(base)
 	local quality = if owner then SessionData.GetUpgradeLevel(owner, "ItemQuality") else 0
 	local world = if owner then SessionData.GetWorld(owner) else 1
+	local item = createItem(rollRank(quality), world, point.CFrame)
 	-- Place libre dans le bac : parmi quelques essais, le point le plus loin des objets déjà dedans (deux objets qui
-	-- apparaissent l'un dans l'autre s'éjectent et peuvent sauter par-dessus le rebord).
-	local spread = BaseLayout.BIN_SIZE / 2 - Vector3.new(1.5, 0, 1.8)
+	-- apparaissent l'un dans l'autre s'éjectent et peuvent sauter par-dessus le rebord), assez loin des parois pour
+	-- la taille de CET objet, quelle que soit sa rotation.
+	local reach = math.max(item.Size.X, item.Size.Z) / 2 + 0.5
+	local spread = Vector3.new(math.max(0, BaseLayout.BIN_SIZE.X / 2 - reach), 0, math.max(0, BaseLayout.BIN_SIZE.Z / 2 - reach))
 	local offset, bestGap = CFrame.new(), -1
 	for _ = 1, 8 do
-		local candidate = CFrame.new(rng:NextNumber(-spread.X, spread.X), rng:NextNumber(0, 0.5), rng:NextNumber(-spread.Z, spread.Z))
+		local candidate = CFrame.new(rng:NextNumber(-spread.X, spread.X), item.Size.Y / 2 + rng:NextNumber(0, 0.5), rng:NextNumber(-spread.Z, spread.Z))
 		local at = (point.CFrame * candidate).Position
 		local gap = math.huge
 		for _, other in ipairs(itemSpawns:GetChildren()) do
@@ -174,7 +178,7 @@ local function spawnInBase(base: Model)
 			offset, bestGap = candidate, gap
 		end
 	end
-	local item = createItem(rollRank(quality), world, point.CFrame * offset)
+	item.CFrame = point.CFrame * offset * point.CFrame:ToObjectSpace(item.CFrame)
 	item.Parent = itemSpawns
 	ItemInteraction.Register(item)
 end

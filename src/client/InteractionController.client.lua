@@ -266,7 +266,9 @@ local function refreshThrowButton()
 	throwButton.Visible = ScreenScale.isTouch() and #stack > 0
 end
 
--- Soude chaque objet à sa place : le premier dans la main, les autres empilés dans le dos.
+-- Soude chaque objet à sa place : le premier dans la main, les autres empilés dans le dos. Les objets n'ont pas tous la
+-- même taille (Config.Items.ModelScale) : la pile monte de la hauteur de chacun, et celui de la main remonte s'il est
+-- grand (il ne passe pas dans le sol).
 local function relayout()
 	refreshThrowButton()
 	local character = player.Character
@@ -275,15 +277,22 @@ local function relayout()
 	end
 	local hand = getHand(character)
 	local torso = getTorso(character)
+	local bottom = -1.3 -- bas du prochain objet du dos, sous le centre du torse
 	for index, entry in ipairs(stack) do
 		local anchor = if index == 1 then hand else torso
 		if anchor then
 			if entry.weld then
 				entry.weld:Destroy()
 			end
-			entry.item.CFrame = if index == 1
-				then anchor.CFrame * CFrame.new(0, -1.5, 0)
-				else anchor.CFrame * CFrame.new(0, (index - 2) * 2.4 - 0.3, 1.8)
+			local size = entry.item.Size
+			local offset: CFrame
+			if index == 1 then
+				offset = CFrame.new(0, -math.clamp(2.5 - size.Y / 2, 0.2, 1.5), 0)
+			else
+				offset = CFrame.new(0, bottom + size.Y / 2, 0.55 + size.Z / 2)
+				bottom += size.Y + 0.1
+			end
+			entry.item.CFrame = anchor.CFrame * offset
 			local weld = Instance.new("WeldConstraint")
 			weld.Part0 = entry.item
 			weld.Part1 = anchor

@@ -149,6 +149,11 @@ Config.Items = {
 	WildMaxRadius = 160, -- avant les bases (bord intérieur à 173) et les kiosques
 	MaxLooseItems = 80, -- au-delà, les plus vieux objets abandonnés sont nettoyés
 	QualityBoost = 0.2, -- par niveau de "Chance" : poids des objets précieux ×(1 + 0.2 × niveau)^rang (0,5 avant le 20 oct. : trop fort)
+	-- 29 oct. (un joueur sur téléphone : « on voit mal les objets par terre ») : sans effet lumineux, les objets des mondes
+	-- sont plus gros que leur modèle (une pomme : 2,8 studs de haut au lieu de 1,85) et cernés d'un trait sombre fin, comme
+	-- un dessin animé, quand ils sont assez près (client/ItemOutline). Highlight : 31 au plus à l'écran pour tout le jeu.
+	ModelScale = 1.5,
+	Outline = { MaxItems = 16, Range = 160, Color = Color3.fromRGB(24, 20, 34), Transparency = 0.05 },
 }
 
 export type ItemTier = {

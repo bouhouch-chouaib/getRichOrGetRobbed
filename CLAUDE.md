@@ -258,6 +258,11 @@ Studio (PC et aperçu téléphone) ; testeurs remis à zéro (sauvegardes v4). R
 **29 oct. : pastille du haut sur téléphone** (Chouaib : au milieu, elle « dérange ») : sur tactile, l'horloge + œufs et la
 ligne du dessous (objectif, aimant, consigne) sont en haut à DROITE, à 80 % (`client/HUD` : `TOP_ANCHOR`,
 `TOUCH_TOP_SCALE`) ; PC inchangé. Vu dans l'aperçu téléphone de Studio ; pas vu sur un vrai téléphone.
+**29 oct. : objets par terre plus visibles, sans lueur** (même joueur : « on les voit mal ») : objets des mondes 1,5 fois
+plus gros que leur modèle (`Config.Items.ModelScale`, `ItemSpawner` ; place dans le bac selon la taille de l'objet) et
+trait sombre fin autour des 16 plus proches que le joueur peut prendre (`client/ItemOutline`, Highlight sans remplissage,
+caché derrière les murs) ; pile du sac à la hauteur de chaque objet (`InteractionController.relayout`). Vérifié en Play
+(solo) : 12 objets dans les bacs, fromage lisible à 24 studs, 5 pommes portées sans chevauchement. Pas vu : téléphone.
 
 **15 oct. : œufs (Codex) puis corrections Claude** (`server/EggController`, `client/Eggs`, `shared/EggIncubation`,
 `docs/INCUBATION.md`) : toutes les récompenses arrivent en œufs qui incubent (15 s à 30 min). Claude : un nid par œuf

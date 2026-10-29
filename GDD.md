@@ -102,6 +102,8 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   d'un joueur du serveur tiré au hasard ; les roches crachées par le trou noir sont la roche de lave du Volcan et la
   météorite d'or du Cosmos.
 - Physique : frottement maximal, aucun rebond, collisions en boîte : un objet s'arrête où il tombe (la Force compte).
+- Visibilité (29 oct.) : les objets sont 1,5 fois plus gros que leur modèle (`Config.Items.ModelScale`) et les 16 plus
+  proches que le joueur peut prendre ont un trait sombre fin, sans lueur (`client/ItemOutline`).
 - Les objets tombent dans **2 bacs** (26 oct., avant : des palettes dans la base) : grandes caisses en bois posées
   DEHORS contre les côtés gauche et droit de la base, près de l'entrée (`shared/BaseLayout.Bins`), rebord aux couleurs de
   la base (`ArtModels.BacObjets`, Blender `props/BacObjets.py`). Le joueur les prend en revenant du trou noir sans
