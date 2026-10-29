@@ -59,14 +59,16 @@ local PHASES = {
 		Clock = "Moon",
 		Next = "Sieste",
 		-- Consignes courtes, en mots simples (UI_UX_GUIDELINES.md §7 : beaucoup de joueurs lisent à peine).
-		Hint = if ScreenScale.isTouch() then "RAMASSE  •  MAINTIENS LANCER, PUIS LÂCHE" else "[E] RAMASSER  •  CLIC : LANCER",
+		Hint = if ScreenScale.isTouch() then "RAMASSE  •  MAINTIENS LANCER, PUIS LÂCHE"
+			elseif ScreenScale.isConsole() then "RAMASSE  •  GÂCHETTE DROITE : LANCER"
+			else "[E] RAMASSER  •  CLIC : LANCER",
 		Color = Color3.fromRGB(200, 120, 255),
 	},
 	Digesting = {
 		Title = "LE TROU NOIR FAIT LA SIESTE",
 		Clock = "Sun",
 		Next = "Repas",
-		Hint = if ScreenScale.isTouch() then "VOLE LES FAMILIERS DES AUTRES !" else "[E] SUR UN FAMILIER : LE VOLER",
+		Hint = if ScreenScale.isTouch() or ScreenScale.isConsole() then "VOLE LES FAMILIERS DES AUTRES !" else "[E] SUR UN FAMILIER : LE VOLER",
 		Color = Color3.fromRGB(255, 90, 70),
 	},
 }
@@ -666,7 +668,7 @@ Remotes.StealResult.OnClientEvent:Connect(function(outcome: string, petId: strin
 end)
 
 -- Vol de familiers : messages pour la victime, et annonce à tout le serveur des vols rares.
-local RECOVER_KEY = if isTouch then "TOUCHE REPRENDRE" else "APPUIE SUR [E]"
+local RECOVER_KEY = if isTouch then "TOUCHE REPRENDRE" elseif ScreenScale.isConsole() then "APPUIE SUR REPRENDRE" else "APPUIE SUR [E]"
 
 Remotes.StealNotice.OnClientEvent:Connect(function(kind: string, thiefName: string, victimName: string, petId: string)
 	local thief = TextFormat.upper(thiefName)

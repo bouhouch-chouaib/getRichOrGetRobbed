@@ -1,5 +1,5 @@
 --!strict
--- Magnet : bouton (et touche G) pour allumer / couper l'aimant de la Boutique ou l'ASPIRATEUR (passe Robux,
+-- Magnet : bouton (et touche G, croix droite de la manette) pour allumer / couper l'aimant de la Boutique ou l'ASPIRATEUR (passe Robux,
 -- Config.Vacuum). Avec l'aspirateur allumé : un tourbillon de vent autour du joueur, et chaque objet aspiré vole jusqu'à
 -- lui (Remotes.VacuumPull : une copie de l'objet part de sa place, tourne et rapetisse en arrivant).
 local Players = game:GetService("Players")
@@ -9,6 +9,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local ScreenScale = require(script.Parent.ScreenScale)
 local UiStyle = require(script.Parent.UiStyle)
 local player = Players.LocalPlayer
 local hud = player:WaitForChild("PlayerGui"):WaitForChild("HUD")
@@ -88,10 +89,24 @@ local function toggle()
 end
 button.Activated:Connect(toggle)
 UserInputService.InputBegan:Connect(function(input, processed)
-	if not processed and input.KeyCode == Enum.KeyCode.G then
+	if not processed and (input.KeyCode == Enum.KeyCode.G or input.KeyCode == Enum.KeyCode.DPadRight) then
 		toggle()
 	end
 end)
+-- Manette : l'image de la croix droite au bout du bouton (seulement quand on joue à la manette).
+local glyph = Instance.new("ImageLabel")
+glyph.Name = "Glyph"
+glyph.BackgroundTransparency = 1
+glyph.AnchorPoint, glyph.Position = Vector2.new(1, 0.5), UDim2.new(1, -4, 0.5, 0)
+glyph.Size = UDim2.fromOffset(26, 26)
+glyph.ZIndex = 4
+glyph.Image = UserInputService:GetImageForKeyCode(Enum.KeyCode.DPadRight)
+glyph.Parent = button
+local function refreshGlyph()
+	glyph.Visible = ScreenScale.usingGamepad() and glyph.Image ~= ""
+end
+UserInputService.LastInputTypeChanged:Connect(refreshGlyph)
+refreshGlyph()
 for _, attribute in ipairs({ "MagnetEnabled", "Upgrade_Magnet", "Pass_" .. Config.Vacuum.PassKey, "DataLoaded" }) do
 	player:GetAttributeChangedSignal(attribute):Connect(refresh)
 end

@@ -58,6 +58,14 @@ local function show(prompt: ProximityPrompt, inputType: Enum.ProximityPromptInpu
 	Typography.Fit(key, 16, 9)
 	UiStyle.corner(key, 5)
 	UiStyle.stroke(key, 1.5)
+	-- Manette : l'image du vrai bouton (X sur Xbox, carré sur PlayStation) à la place de la lettre.
+	local glyph = Instance.new("ImageLabel")
+	glyph.Name = "Glyph"
+	glyph.BackgroundTransparency = 1
+	glyph.AnchorPoint, glyph.Position = Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5)
+	glyph.Size = UDim2.fromScale(0.9, 0.9)
+	glyph.Visible = false
+	glyph.Parent = key
 	local action = UiStyle.text(button, prompt.ActionText, 14)
 	action.Position, action.Size = UDim2.fromOffset(40, 3), UDim2.fromOffset(104, 18)
 	action.TextXAlignment = Enum.TextXAlignment.Left
@@ -106,10 +114,14 @@ local function show(prompt: ProximityPrompt, inputType: Enum.ProximityPromptInpu
 			then UiStyle.Colors.Green
 			else UiStyle.Colors.Cyan
 		key.BackgroundColor3, progress.BackgroundColor3 = color, color
+		glyph.Visible = false
 		if inputType == Enum.ProximityPromptInputType.Touch then
 			key.Text = "ICI"
 		elseif inputType == Enum.ProximityPromptInputType.Gamepad then
-			key.Text = string.gsub(prompt.GamepadKeyCode.Name, "Button", "")
+			local image = UserInputService:GetImageForKeyCode(prompt.GamepadKeyCode)
+			glyph.Image = image
+			glyph.Visible = image ~= ""
+			key.Text = if image ~= "" then "" else string.gsub(prompt.GamepadKeyCode.Name, "Button", "")
 		else
 			local mapped = UserInputService:GetStringForKeyCode(prompt.KeyboardKeyCode)
 			key.Text = if mapped ~= "" then mapped else prompt.KeyboardKeyCode.Name

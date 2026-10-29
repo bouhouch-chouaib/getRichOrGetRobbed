@@ -38,7 +38,7 @@ reward.AnchorPoint = Vector2.new(0.5, 1)
 reward.Position = UDim2.new(0.5, 0, 0, -4)
 reward.Size = UDim2.new(1.4, 0, 0, 24)
 
-local key = if ScreenScale.isTouch() then "" else "  [E]"
+local key = if ScreenScale.isTouch() or ScreenScale.isConsole() then "" else "  [E]"
 local bound = false
 
 local function throw()

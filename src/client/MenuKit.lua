@@ -359,6 +359,11 @@ function MenuKit.anyOpen(): boolean
 	return openWindow ~= nil
 end
 
+-- Cadre de la fenêtre ouverte (client/Gamepad y pose la sélection de la manette).
+function MenuKit.openFrame(): Frame?
+	return if openWindow then openWindow.frame else nil
+end
+
 function MenuKit.closeAll()
 	if openWindow then
 		openWindow.close()

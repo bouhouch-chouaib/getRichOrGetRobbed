@@ -35,6 +35,8 @@ local player = Players.LocalPlayer
 local V, CF, ANG = Vector3.new, CFrame.new, CFrame.Angles
 local WHITE = Color3.new(1, 1, 1)
 local GOLD = Color3.fromRGB(255, 214, 70)
+-- Clavier : les panneaux disent « [E] » ; au doigt et à la manette, la bulle montre déjà quoi toucher.
+local KEYS = not ScreenScale.isTouch() and not ScreenScale.isConsole()
 local PURPLE = Color3.fromRGB(170, 90, 240)
 local SPARK = "rbxasset://textures/particles/sparkles_main.dds"
 local SMOKE = "rbxasset://textures/particles/smoke_main.dds"
@@ -313,7 +315,7 @@ RunService.Heartbeat:Connect(function(dt)
 			machine.stageLabel.Text = string.format("★★ %d %%  •  ★★★ %d %%", math.floor(Eggs.StageChance(1, tier) * 100 + 0.5), ultime)
 				.. (if faster > 0 then string.format("  •  %d %% PLUS RAPIDE", faster) else "")
 			machine.stageLabel.TextColor3 = GOLD
-			machine.status.Text = if mine then "[E] METS UN ŒUF ICI" else ""
+			machine.status.Text = if mine then (if KEYS then "[E] METS UN ŒUF ICI" else "METS UN ŒUF ICI") else ""
 			machine.status.TextColor3 = WHITE
 			machine.hint.Text = "IL DEVIENT PLUS FORT : ★★ PUIS ★★★"
 			machine.gui.Enabled = part:GetAttribute("OwnerUserId") ~= nil
@@ -380,15 +382,15 @@ RunService.Heartbeat:Connect(function(dt)
 			machine.hint.Text = string.format("PUIS ESSAI %s  •  CHANCE %d %%", stars(stage + 1), chance)
 		elseif part:GetAttribute("Done") == true then
 			machine.status.Text = if stage >= #EVOLUTION.Names
-				then "AU MAXIMUM !  [E] OUVRIR"
-				else "IL NE GRANDIRA PLUS  •  [E] OUVRIR"
+				then (if KEYS then "AU MAXIMUM !  [E] OUVRIR" else "AU MAXIMUM !  OUVRE-LE")
+				else (if KEYS then "IL NE GRANDIRA PLUS  •  [E] OUVRIR" else "IL NE GRANDIRA PLUS  •  OUVRE-LE")
 			machine.status.TextColor3 = if stage >= #EVOLUTION.Names then GOLD else Color3.fromRGB(255, 120, 120)
 			machine.hint.Text = if stage >= #EVOLUTION.Names then "LE PLUS FORT POSSIBLE !"
 				else "IL RESTE " .. stars(stage)
 		elseif type(nextAt) == "number" then
 			machine.status.Text = string.format("ESSAI %s DANS %s", stars(stage + 1), Eggs.Time(nextAt - now))
 			machine.status.TextColor3 = WHITE
-			machine.hint.Text = string.format("CHANCE %d %%  •  [E] POUR L'OUVRIR", chance)
+			machine.hint.Text = string.format(if KEYS then "CHANCE %d %%  •  [E] POUR L'OUVRIR" else "CHANCE %d %%  •  TU PEUX L'OUVRIR", chance)
 		end
 		-- Chambres (+1 par Rebirth) : plusieurs œufs évoluent en même temps ; la capsule montre le plus avancé.
 		local chambers, used = part:GetAttribute("Chambers"), part:GetAttribute("ChambersUsed")

@@ -4,6 +4,7 @@
 --
 --   local root = ScreenScale.attach(screenGui)  -- parenter les éléments à "root" au lieu du ScreenGui
 --   ScreenScale.isTouch()                       -- true sur téléphone / tablette
+--   ScreenScale.isConsole()                     -- true sur Xbox / PlayStation (manette)
 --
 -- Astuce : "root" est un Frame plein écran agrandi de 1/scale puis réduit par un UIScale de "scale" :
 -- les positions en pourcentage (0.5 = milieu) restent justes, et les tailles en pixels sont réduites.
@@ -48,6 +49,20 @@ function ScreenScale.isTouch(): boolean
 		return true
 	end
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+end
+
+-- Console (Xbox, PlayStation) : télé + manette, pas de clavier ni de souris. Les consignes parlent alors des boutons
+-- de la manette. Aperçu dans Studio : workspace:SetAttribute("DebugConsole", true) AVANT Play.
+function ScreenScale.isConsole(): boolean
+	if RunService:IsStudio() and Workspace:GetAttribute("DebugConsole") == true then
+		return true
+	end
+	return GuiService:IsTenFootInterface()
+end
+
+-- Le joueur joue-t-il à la manette en ce moment (console, ou manette branchée sur PC) ?
+function ScreenScale.usingGamepad(): boolean
+	return string.sub(UserInputService:GetLastInputType().Name, 1, 7) == "Gamepad" or ScreenScale.isConsole()
 end
 
 local function viewportSize(): Vector2

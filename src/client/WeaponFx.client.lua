@@ -25,6 +25,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Icons = require(ReplicatedStorage.Shared.Icons)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Joints = require(script.Parent.Joints)
+local ScreenScale = require(script.Parent.ScreenScale)
 local Sounds = require(script.Parent.Sounds)
 
 local BAT = Config.Weapons.Bat
@@ -616,18 +617,9 @@ local function inOwnBase(other: Player, position: Vector3): boolean
 	return math.abs(localPosition.X) <= half.X and math.abs(localPosition.Z) <= half.Z and localPosition.Y > -3 and localPosition.Y < 25
 end
 
-local function aimDirection(head: BasePart): Vector3
-	local offset = mouse.Hit.Position - head.Position
-	if offset.Magnitude < 1 then
-		local camera = Workspace.CurrentCamera
-		return if camera then camera.CFrame.LookVector else head.CFrame.LookVector
-	end
-	return offset.Unit
-end
-
 -- Même choix que le serveur (server/WeaponController.onUseGrapple).
-local function findTarget(head: BasePart, aim: Vector3): Player?
-	local cone = math.cos(math.rad(GRAPPLE.AimCone))
+local function findTarget(head: BasePart, aim: Vector3, coneDegrees: number): Player?
+	local cone = math.cos(math.rad(coneDegrees))
 	local best: Player? = nil
 	local bestScore = -math.huge
 	local params = RaycastParams.new()
@@ -654,6 +646,28 @@ local function findTarget(head: BasePart, aim: Vector3): Player?
 	return best
 end
 
+-- Souris : vers le curseur. Manette (pas de curseur) : droit devant la caméra, avec une visée aidée vers le joueur
+-- le plus en face (Config.Weapons.Grapple.GamepadAssistCone) ; le serveur vérifie toujours son propre cône.
+local function aimDirection(head: BasePart): Vector3
+	local offset = mouse.Hit.Position - head.Position
+	local gamepad = ScreenScale.usingGamepad()
+	if not gamepad and offset.Magnitude >= 1 then
+		return offset.Unit
+	end
+	local camera = Workspace.CurrentCamera
+	local look = if camera then camera.CFrame.LookVector else head.CFrame.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	local aim = if flat.Magnitude > 0.01 then flat.Unit else look
+	if gamepad then
+		local target = findTarget(head, aim, GRAPPLE.GamepadAssistCone)
+		local targetRoot = target and rootOf(target.Character)
+		if targetRoot then
+			return (targetRoot.Position - head.Position).Unit
+		end
+	end
+	return aim
+end
+
 local DEFAULT_ICON = ""
 local CROSSHAIR = "rbxasset://textures/GunCursor.png"
 local equippedGrapple: Tool? = nil
@@ -670,7 +684,7 @@ RunService.RenderStepped:Connect(function()
 		highlight.Enabled = false
 		return
 	end
-	local target = findTarget(head, aimDirection(head))
+	local target = findTarget(head, aimDirection(head), GRAPPLE.AimCone)
 	highlight.Adornee = if target then target.Character else nil
 	highlight.Enabled = target ~= nil
 end)

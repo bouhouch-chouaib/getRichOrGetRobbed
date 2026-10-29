@@ -928,6 +928,7 @@ export type BatDef = {
 export type GrappleDef = {
 	Range: number, -- portée du crochet (studs)
 	AimCone: number, -- tolérance de visée (degrés autour de la direction visée)
+	GamepadAssistCone: number, -- manette (pas de curseur) : vise le joueur le plus en face dans ce cône (degrés)
 	HookSpeed: number, -- vitesse du crochet en vol (studs/s), pour l'animation
 	PullSpeed: number, -- vitesse à laquelle la victime est ramenée
 	PullTime: number, -- durée maximale de la traction (s)
@@ -954,6 +955,7 @@ Config.Weapons = {
 	Grapple = {
 		Range = 55,
 		AimCone = 8,
+		GamepadAssistCone = 30,
 		HookSpeed = 220,
 		PullSpeed = 85,
 		PullTime = 1.1,

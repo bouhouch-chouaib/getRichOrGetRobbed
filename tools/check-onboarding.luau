@@ -210,6 +210,9 @@ local modules = {
 		isTouch = function()
 			return false
 		end,
+		isConsole = function()
+			return false
+		end,
 		attach = function(parent)
 			local frame = r.Instance.new("Frame")
 			frame.Parent = parent

@@ -96,6 +96,10 @@ services.UserInputService = {
 	GetStringForKeyCode = function()
 		return "E"
 	end,
+	-- Pas d'image de bouton : la bulle retombe sur la lettre (« X »).
+	GetImageForKeyCode = function()
+		return ""
+	end,
 }
 local tweenDuration = 0
 services.TweenService = {

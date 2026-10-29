@@ -30,6 +30,7 @@ local Toast = require(script.Parent.Toast)
 local player = Players.LocalPlayer
 local GOLD = Color3.fromRGB(255, 220, 60)
 local TOUCH = ScreenScale.isTouch()
+local CONSOLE = ScreenScale.isConsole()
 
 -- 26 oct. (UI_UX_GUIDELINES.md §7) : une grosse image par étape et des phrases courtes en MAJUSCULES (les premières
 -- lettres qu'apprennent les enfants) ; la flèche et le rayon doré montrent où aller, sans avoir à lire.
@@ -37,12 +38,16 @@ type Step = { title: string, hint: string, icon: string }
 local STEPS: { Step } = {
 	{
 		title = "RAMASSE UN OBJET",
-		hint = if TOUCH then "VA PRÈS D'UN OBJET ET TOUCHE RAMASSER" else "VA PRÈS D'UN OBJET ET APPUIE SUR E",
+		hint = if TOUCH then "VA PRÈS D'UN OBJET ET TOUCHE RAMASSER"
+			elseif CONSOLE then "VA PRÈS D'UN OBJET ET APPUIE SUR LE BOUTON"
+			else "VA PRÈS D'UN OBJET ET APPUIE SUR E",
 		icon = "Gem",
 	},
 	{
 		title = "JETTE-LE DANS LE TROU NOIR !",
-		hint = if TOUCH then "SUIS LA FLÈCHE. MAINTIENS LANCER, PUIS LÂCHE" else "SUIS LA FLÈCHE. MAINTIENS LE CLIC, PUIS LÂCHE",
+		hint = if TOUCH then "SUIS LA FLÈCHE. MAINTIENS LANCER, PUIS LÂCHE"
+			elseif CONSOLE then "SUIS LA FLÈCHE. MAINTIENS LA GÂCHETTE DROITE, PUIS LÂCHE"
+			else "SUIS LA FLÈCHE. MAINTIENS LE CLIC, PUIS LÂCHE",
 		icon = "Vortex",
 	},
 	{
