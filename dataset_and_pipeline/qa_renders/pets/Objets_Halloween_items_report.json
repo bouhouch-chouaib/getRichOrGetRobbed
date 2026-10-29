@@ -1,0 +1,120 @@
+{
+  "preview": "C:\\Users\\bouho\\dev\\getRichOrGetRobbed\\dataset_and_pipeline\\qa_renders\\pets\\Objets_Halloween_items.png",
+  "layout": {
+    "rows": [
+      "Citrouille",
+      "Lanterne",
+      "Tombe"
+    ],
+    "columns": [
+      "face",
+      "trois_quarts",
+      "profil"
+    ],
+    "bands": "orange = procédural Blender, vert = cuit (Roblox)"
+  },
+  "rows": [
+    {
+      "label": "Citrouille",
+      "kind": "baked",
+      "triangles": 1100,
+      "views": {
+        "face": {
+          "coverage": 0.224,
+          "lum_mean": 0.438,
+          "lum_std": 0.198,
+          "detail": 0.037,
+          "saturation": 0.532,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.235,
+          "lum_mean": 0.456,
+          "lum_std": 0.191,
+          "detail": 0.0415,
+          "saturation": 0.512,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.218,
+          "lum_mean": 0.451,
+          "lum_std": 0.181,
+          "detail": 0.0392,
+          "saturation": 0.528,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Lanterne",
+      "kind": "baked",
+      "triangles": 2172,
+      "views": {
+        "face": {
+          "coverage": 0.22,
+          "lum_mean": 0.4,
+          "lum_std": 0.205,
+          "detail": 0.044,
+          "saturation": 0.539,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.234,
+          "lum_mean": 0.429,
+          "lum_std": 0.197,
+          "detail": 0.0475,
+          "saturation": 0.533,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.217,
+          "lum_mean": 0.438,
+          "lum_std": 0.185,
+          "detail": 0.0409,
+          "saturation": 0.548,
+          "flags": []
+        }
+      }
+    },
+    {
+      "label": "Tombe",
+      "kind": "baked",
+      "triangles": 312,
+      "views": {
+        "face": {
+          "coverage": 0.272,
+          "lum_mean": 0.497,
+          "lum_std": 0.107,
+          "detail": 0.0169,
+          "saturation": 0.114,
+          "flags": []
+        },
+        "trois_quarts": {
+          "coverage": 0.251,
+          "lum_mean": 0.501,
+          "lum_std": 0.114,
+          "detail": 0.0238,
+          "saturation": 0.126,
+          "flags": []
+        },
+        "profil": {
+          "coverage": 0.142,
+          "lum_mean": 0.503,
+          "lum_std": 0.118,
+          "detail": 0.0221,
+          "saturation": 0.16,
+          "flags": []
+        }
+      }
+    }
+  ],
+  "render": {
+    "engine": "CYCLES",
+    "backend": "CUDA",
+    "samples": 32,
+    "resolution": 360,
+    "view_transform": "Standard",
+    "seconds": 24.3
+  },
+  "ACTION_REQUISE": "Ouvrir preview.png avec l'outil de lecture d'image et juger : silhouette lisible de loin, matières différenciées, arêtes qui accrochent la lumière, cuit fidèle au procédural, rien qui ressemble à un assemblage de primitives. Corriger puis relancer sinon."
+}

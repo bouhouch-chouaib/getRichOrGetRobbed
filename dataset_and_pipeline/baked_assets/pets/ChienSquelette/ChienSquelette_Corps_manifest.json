@@ -1,0 +1,57 @@
+{
+  "asset": "ChienSquelette_Corps",
+  "triangles": 2204,
+  "vertices": 1256,
+  "size_studs": [
+    0.53,
+    1.542,
+    1.3
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 36.7,
+  "source_materials": [
+    "M_ChienSquelette_high_creux",
+    "M_ChienSquelette_high_noir",
+    "M_ChienSquelette_high_or",
+    "M_ChienSquelette_high_os",
+    "M_ChienSquelette_high_os_ombre",
+    "M_ChienSquelette_high_reflet"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0231,
+    "max_ray": 0.0578,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "ChienSquelette_Corps_Color.png",
+    "Roughness": "ChienSquelette_Corps_Roughness.png",
+    "Metalness": "ChienSquelette_Corps_Metalness.png",
+    "Normal": "ChienSquelette_Corps_Normal.png",
+    "AO": "ChienSquelette_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "ChienSquelette_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "ChienSquelette_Corps_Color.png",
+      "NormalMap": "ChienSquelette_Corps_Normal.png",
+      "RoughnessMap": "ChienSquelette_Corps_Roughness.png",
+      "MetalnessMap": "ChienSquelette_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 24.0
+}

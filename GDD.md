@@ -502,6 +502,22 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
 - Modèles : silhouettes sculptées existantes (`PetSculptedModels.Families`) aux couleurs et effets de leur monde, tailles
   dans `PetSizes`. À remplacer par des modèles Blender plus tard. Test : `lune run tools/check-world-pets.luau .`.
 
+## Halloween 2026 (29 oct., événement limité du 30 oct. au 8 nov. ; `Config.Halloween`)
+
+- **Bonbons** (champ sauvegardé `candy`, attribut `Candy`) : +1 par objet avalé par le trou noir (lancer valable), +15 par
+  **citrouille sauvage** (une toutes les 15 s de Feeding dans l'arène, 5 au plus), x2 pendant l'**heure hantée** (5 min à
+  la demie de chaque heure UTC ; le trou noir doré reste à l'heure pile). Codes HALLOWEEN (2 œufs + 100 bonbons), BOO (50).
+- **Chaudron** (arène, angle 157,5°, ou bouton BONBONS du HUD) : 100 bonbons = 1 **œuf Citrouille** (aspect citrouille
+  dans la couveuse, `EggModelBuilder.Build(rareté, "Citrouille")`), qui donne un des 5 familiers limités : Chat-Citrouille
+  (Rare 55 %), Fantôme en Drap (Épique 30 %), Chauve-Souris Vampire (Légendaire 10 %), Chien Squelette (Mythique 4 %),
+  Chaudron Glouton (Sigma 1 %). Comme un tirage gratuit (`PullRewards.GrantChosen` : mutation secrète possible, doublons
+  vendus), sans compter dans le rang de tirage ni la pitié. Hors tirages ordinaires, fusion et effondrement
+  (`PetCatalog.ByEvent`), « ÉDITION LIMITÉE » dans l'Index ; échangeables, vendables et volables.
+- **Ambiance** : 8 grosses citrouilles sculptées autour du trou noir, une de chaque côté de l'entrée des bases, tombes et
+  citrouilles dans l'arène (lumières orange), nuits teintées de violet (effet local). Badge « Halloween 2026 ».
+- Tout s'arrête seul à la fin (`Config.Halloween.End`) : décor retiré, bouton caché, chaudron fermé ; les bonbons restent
+  dans la sauvegarde (sans usage) et les familiers restent à leurs propriétaires.
+
 ## Marché entre joueurs (19 oct., `server/MarketController`, `client/MarketMenu`, `Config.Market`)
 
 - Tuile « Marché » du HUD. Onglets : **Acheter** (ventes des autres joueurs du serveur : aperçu, rareté, revenu, vendeur,

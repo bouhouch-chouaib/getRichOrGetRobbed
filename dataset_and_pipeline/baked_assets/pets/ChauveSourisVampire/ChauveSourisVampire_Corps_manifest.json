@@ -1,0 +1,69 @@
+{
+  "asset": "ChauveSourisVampire_Corps",
+  "triangles": 1116,
+  "vertices": 680,
+  "size_studs": [
+    1.995,
+    0.87,
+    1.26
+  ],
+  "pivot": "sol, au centre",
+  "resolution": 1024,
+  "uv_overlap_pct": 0.0,
+  "uv_coverage_pct": 49.9,
+  "source_materials": [
+    "M_ChauveSourisVampire_high_blanc_oeil",
+    "M_ChauveSourisVampire_high_bouche#2A1418",
+    "M_ChauveSourisVampire_high_cape",
+    "M_ChauveSourisVampire_high_cape_noire",
+    "M_ChauveSourisVampire_high_croc",
+    "M_ChauveSourisVampire_high_iris#FF2A3C",
+    "M_ChauveSourisVampire_high_membrane",
+    "M_ChauveSourisVampire_high_narine#7A2A4A",
+    "M_ChauveSourisVampire_high_or",
+    "M_ChauveSourisVampire_high_pupille",
+    "M_ChauveSourisVampire_high_reflet",
+    "M_ChauveSourisVampire_high_rose",
+    "M_ChauveSourisVampire_high_rubis",
+    "M_ChauveSourisVampire_high_truffe#FF8FB1",
+    "M_ChauveSourisVampire_high_ventre",
+    "M_ChauveSourisVampire_high_violet",
+    "M_ChauveSourisVampire_high_violet_fonce"
+  ],
+  "presets": [
+    "create_etched_metal_or_gold",
+    "create_stylized_crystal_or_gem",
+    "create_stylized_edge_wear_material"
+  ],
+  "bake": {
+    "backend": "CUDA",
+    "samples": 32,
+    "ao_samples": 64,
+    "cage": 0.0299,
+    "max_ray": 0.0748,
+    "ao_distance": 0.06,
+    "ao_strength": 0.35,
+    "from_high": true
+  },
+  "maps": {
+    "Color": "ChauveSourisVampire_Corps_Color.png",
+    "Roughness": "ChauveSourisVampire_Corps_Roughness.png",
+    "Metalness": "ChauveSourisVampire_Corps_Metalness.png",
+    "Normal": "ChauveSourisVampire_Corps_Normal.png",
+    "AO": "ChauveSourisVampire_Corps_AO.png"
+  },
+  "exports": [],
+  "roblox": {
+    "MeshPart": "ChauveSourisVampire_Corps (Fichier > Importer 3D, ou le .fbx)",
+    "SurfaceAppearance": {
+      "ColorMap": "ChauveSourisVampire_Corps_Color.png",
+      "NormalMap": "ChauveSourisVampire_Corps_Normal.png",
+      "RoughnessMap": "ChauveSourisVampire_Corps_Roughness.png",
+      "MetalnessMap": "ChauveSourisVampire_Corps_Metalness.png",
+      "AlphaMode": "Overlay"
+    },
+    "notes": "Normal map OpenGL (+Y) tangent space ; ColorMap opaque (alpha 1) donc la couleur de la MeshPart ne se voit pas ; limite Roblox 20 000 triangles par maillage, budget du pipeline 8 000."
+  },
+  "within_budget": true,
+  "seconds": 72.1
+}

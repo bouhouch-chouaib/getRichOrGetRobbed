@@ -22,6 +22,16 @@ manette y entre seule) ; toute nouvelle consigne « [E] » / « CLIC » a sa ver
 `client/GoldenHour`, ligne « GoldenHour » de la pile sous l'horloge). Studio : attribut `DebugGoldenShift` (secondes).
 **Panneau des nouveautés (29 oct.)** : `Config.Updates` (Number + lignes), `server/UpdateBoard`, champ sauvegardé
 `seenUpdate`. Chaque mise à jour du samedi : Number + 1 et nouvelles lignes (avec leur anglais dans `shared/LangEn`).
+**Halloween 2026 (29 oct., événement du 30 oct. au 8 nov.)** : `Config.Halloween`, `shared/Halloween` (dates, heure hantée
+à la demie, tirage de l'œuf), `server/HalloweenController` (bonbons = champ sauvegardé `candy`, citrouilles sauvages, chaudron
+de l'arène, décor `Workspace.HalloweenDecor`), `client/HalloweenMenu` (bouton BONBONS sous INVITER ou [E] au chaudron),
+`client/Halloween` (heure hantée, nuits violettes). 100 bonbons = 1 œuf Citrouille (orange dans la couveuse) -> un des 5
+familiers limités (`PetCatalog` champ `Event = "Halloween"`, hors tirages ordinaires). Codes HALLOWEEN / BOO, badge
+`Halloween2026` (Id à créer), nouveautés n° 2. Studio : `workspace:SetAttribute("DebugHalloween", true)` avant Play.
+Vérifié en Play (solo) : décor, menu, 2 achats + refus, œufs Citrouille dans la couveuse, sauvegarde des bonbons.
+Modèles Blender faits (`Lot11_Halloween.fbx` : 5 familiers + citrouille à jeter, citrouille sculptée, tombe) mais **pas
+encore importés** : Chouaib importe, puis `studio_tools/wire_halloween_pets.lua` et `wire_halloween_items.lua` (dans cet
+ordre, barre MCP, Édition) et Ctrl+S ; en attendant, formes de secours. Après le 8 nov. : retirer bouton et code.
 **Shorts / TikTok : c'est Chouaib qui les fait** (29 oct. : il a refusé le tournage vertical par Studio) ; ne pas les refaire.
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).

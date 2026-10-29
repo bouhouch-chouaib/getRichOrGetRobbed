@@ -1,0 +1,159 @@
+{
+  "pet": "ChauveSourisVampire",
+  "model_height_blender": 1.2598,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Body": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 432,
+      "center": [
+        0.0,
+        -0.02,
+        0.70743
+      ],
+      "size": [
+        0.6155,
+        0.42,
+        0.88485
+      ],
+      "pivot": null
+    },
+    "Head": {
+      "kind": "Head",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 492,
+      "center": [
+        0.0,
+        -0.0705,
+        1.18739
+      ],
+      "size": [
+        0.44353,
+        0.461,
+        0.67477
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.86
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "WingL": {
+      "kind": "Wing",
+      "phase": 1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 96,
+      "center": [
+        0.54273,
+        0.26733,
+        0.92962
+      ],
+      "size": [
+        0.90956,
+        0.60381,
+        0.43687
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.06
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.74
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "WingR": {
+      "kind": "Wing",
+      "phase": -1.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 96,
+      "center": [
+        -0.54273,
+        0.26733,
+        0.92962
+      ],
+      "size": [
+        0.90956,
+        0.60381,
+        0.43687
+      ],
+      "pivot": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.06
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.74
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "fbx_global_scale": 0.047628
+}

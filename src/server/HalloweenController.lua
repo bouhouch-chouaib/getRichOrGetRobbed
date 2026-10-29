@@ -119,15 +119,26 @@ local function light(parent: BasePart, color: Color3, brightness: number, range:
 	glow.Parent = parent
 end
 
--- Modèle fait dans Blender (ArtModels.Halloween.<name>), mis à la hauteur voulue ; nil s'il manque.
+-- Modèle fait dans Blender, mis à la hauteur voulue ; nil s'il manque. ArtModels.Halloween.<name> (Model), ou la pièce
+-- du lot des objets d'Halloween ArtModels.Items.Halloween.<name> (MeshPart, tools/make_items_wire.py).
 local function art(name: string, height: number): Model?
-	local folder = ReplicatedStorage:FindFirstChild("ArtModels")
-	folder = folder and folder:FindFirstChild("Halloween")
+	local root = ReplicatedStorage:FindFirstChild("ArtModels")
+	local folder = root and root:FindFirstChild("Halloween")
 	local source = folder and folder:FindFirstChild(name)
-	if not source or not source:IsA("Model") then
+	local items = root and root:FindFirstChild("Items")
+	local piece = items and items:FindFirstChild("Halloween") and items.Halloween:FindFirstChild(name)
+	local model: Model
+	if source and source:IsA("Model") then
+		model = source:Clone()
+	elseif piece and piece:IsA("BasePart") then
+		model = Instance.new("Model")
+		model.Name = name
+		local copy = piece:Clone()
+		copy.Parent = model
+		model.PrimaryPart = copy
+	else
 		return nil
 	end
-	local model = source:Clone()
 	local _, size = model:GetBoundingBox()
 	model:ScaleTo(model:GetScale() * height / math.max(size.Y, 0.1))
 	for _, part in ipairs(model:GetDescendants()) do

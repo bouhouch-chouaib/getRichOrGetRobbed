@@ -133,7 +133,7 @@ du temps de modération : seulement si quelqu'un peut s'en occuper.
 
 | Semaine | Mise à jour (samedi) | Pour le faire connaître |
 |---|---|---|
-| 29 oct. - 1er nov. | A1 à A6 (pas de mise à jour visible, trop court pour Halloween) | Rien de payé |
+| 29 oct. - 1er nov. | A1 à A6 + **HALLOWEEN** (29 oct. : bonbons, œuf Citrouille, 5 familiers limités jusqu'au 8 nov.) | Titre et miniature Halloween, événement Roblox |
 | 2 - 8 nov. | **UPDATE 1** : invitations + codes anglais + 3 nouveaux familiers | 3 vidéos, groupe |
 | 9 - 15 nov. | **UPDATE 2** : notifications + rendez-vous d'heure pile | 1re campagne de pub (petite) |
 | 16 - 22 nov. | **UPDATE 3** : familiers limités de la semaine | Créateurs de vidéos, événement Roblox |

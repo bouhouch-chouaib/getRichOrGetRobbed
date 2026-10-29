@@ -1,0 +1,65 @@
+{
+  "pet": "Objets_Halloween",
+  "model_height_blender": 2.7354,
+  "front": "-Y Blender = -Z Roblox",
+  "parts": {
+    "Citrouille": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 1100,
+      "center": [
+        -8.4,
+        0.0,
+        0.79579
+      ],
+      "size": [
+        1.8808,
+        1.8808,
+        1.59159
+      ],
+      "pivot": null
+    },
+    "Lanterne": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 2172,
+      "center": [
+        -2.8,
+        -0.0415,
+        1.3677
+      ],
+      "size": [
+        3.39345,
+        3.47645,
+        2.73541
+      ],
+      "pivot": null
+    },
+    "Tombe": {
+      "kind": "Body",
+      "phase": 0.0,
+      "follows": null,
+      "atlas": "Corps",
+      "emissive_strength": null,
+      "triangles": 312,
+      "center": [
+        2.8,
+        0.0,
+        1.045
+      ],
+      "size": [
+        1.5,
+        0.9,
+        2.09
+      ],
+      "pivot": null
+    }
+  },
+  "fbx_global_scale": 0.021935
+}
