@@ -409,6 +409,8 @@ export type MonetizationItem = {
 	Price: number,
 	Pulls: number?, -- produits "tirages" : nombre de tirages accordés
 	Keys: number?, -- produits "clés" : nombre de clés accordées (Config.Keys)
+	SpeedUp: number?, -- produits "accélérer" : attente maximale de leur palier en secondes (Config.SpeedUp)
+	Hidden: boolean?, -- pas dans la Boutique ni les offres : proposé seulement là où il sert
 }
 
 Config.Monetization = {
@@ -428,6 +430,12 @@ Config.Monetization = {
 		{ Key = "Pull1", Id = 3717917143, Icon = "Dice", Name = "1 ŒUF", Description = "1 œuf de familier. Il éclot plus ou moins vite selon sa rareté.", Price = 49, Pulls = 1 },
 		{ Key = "Key1", Id = 3718327246, Icon = "Key", Name = "CLÉ", Description = "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.", Price = 49, Keys = 1 },
 		{ Key = "Pull10", Id = 3717917239, Icon = "Gift", Name = "10 ŒUFS", Description = "10 œufs de familiers. Ils éclosent tous en même temps, plus ou moins vite selon leur rareté.", Price = 399, Pulls = 10 },
+		-- Accélérer un œuf (Config.SpeedUp) : un produit par palier de temps qui reste, du moins cher au plus cher.
+		-- Id = 0 tant qu'il n'est pas créé sur Roblox : le bouton ACCÉLÉRER n'apparaît pas.
+		{ Key = "Speed1", Id = 0, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 2 min au plus : tout de suite !", Price = 9, SpeedUp = 120, Hidden = true },
+		{ Key = "Speed2", Id = 0, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 10 min au plus : tout de suite !", Price = 19, SpeedUp = 600, Hidden = true },
+		{ Key = "Speed3", Id = 0, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore 30 min au plus : tout de suite !", Price = 39, SpeedUp = 1800, Hidden = true },
+		{ Key = "Speed4", Id = 0, Icon = "Speed", Name = "ACCÉLÉRER", Description = "Un œuf qui attend encore plus de 30 min : tout de suite !", Price = 79, SpeedUp = math.huge, Hidden = true },
 	} :: { MonetizationItem },
 	DoubleMoneyMultiplier = 2,
 	VipMoneyMultiplier = 1.25,
@@ -444,6 +452,29 @@ Config.Monetization = {
 	-- (même partie que ses amis). StudioTestPasses reste utilisable pour tester.
 	CreatorOwnsPasses = false,
 }
+
+-- Accélérer en Robux (29 oct., Chouaib : « payer pour accélérer tout ce qui demande du temps ») : un œuf de la couveuse
+-- éclot tout de suite ; un œuf de la capsule finit son attente et tente sa prochaine évolution tout de suite (sa chance,
+-- affichée, ne change pas). Le prix suit le temps qu'il reste à attendre : produits « SpeedUp » de
+-- Config.Monetization.Products (server/SpeedUpController, client/SpeedUp, client/CapsuleMenu).
+Config.SpeedUp = {
+	MinSeconds = 10, -- en dessous, pas de bouton : il éclot de toute façon
+	PendingSeconds = 900, -- un achat se rapporte à l'œuf demandé pendant ce temps (sinon : celui qui attend le plus)
+}
+
+-- Le produit à proposer pour une attente de `seconds` (nil : rien à accélérer, ou produit pas encore créé).
+function Config.GetSpeedUpProduct(seconds: number): MonetizationItem?
+	if seconds < Config.SpeedUp.MinSeconds then
+		return nil
+	end
+	for _, product in ipairs(Config.Monetization.Products) do
+		local limit = product.SpeedUp
+		if limit and seconds <= limit then
+			return if product.Id ~= 0 then product else nil
+		end
+	end
+	return nil
+end
 
 -- Cosmétique du personnage : produit permanent AstralAura, validé par le serveur.
 -- Le reçu valide le déblocage sauvegardé dans les améliorations.

@@ -8,11 +8,15 @@
 --     Occupée : l'œuf, ses étoiles, « PRÊT DANS 1:23 » avec une barre, puis « ESSAI ★★ DANS 4:10 » et sa chance,
 --     ou « AU MAXIMUM ! » / « IL NE GRANDIRA PLUS » ; gros bouton OUVRIR (ferme le menu pour voir l'éclosion).
 --   - TES ŒUFS : les œufs de la couveuse, du plus rare au moins rare, avec leur temps et un bouton METTRE.
+--   - 29 oct. : pastille violette « R$ » en haut à droite d'une case ou d'un œuf qui attend : ACCÉLÉRER en Robux (prix
+--     selon le temps qui reste, server/SpeedUpController). La case de la capsule tire au sort : pas proposé là où les
+--     objets aléatoires payants sont interdits (PolicyService).
 -- Le serveur revérifie tout (Remotes.Evolution « Insert » / « Hatch » + id de la chambre, server/EggController ;
 -- état des chambres : attribut « ChamberList » de la capsule). Il faut être devant la capsule : le menu se ferme quand
 -- on s'éloigne.
 
 local Players = game:GetService("Players")
+local PolicyService = game:GetService("PolicyService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -45,6 +49,62 @@ local STEPS_HEIGHT = if TOUCH then 250 else 206
 local CHAMBER_HEIGHT = if TOUCH then 352 else 306
 local EGG_HEIGHT = if TOUCH then 330 else 280
 local PICTURE = if TOUCH then 104 else 96
+
+-- Accélérer en Robux (client/SpeedUp) : le texte du prix pour une attente de `left` secondes, nil si rien à proposer.
+local function speedText(left: number): string?
+	if left < Config.SpeedUp.MinSeconds then
+		return nil
+	end
+	local saved = player:GetAttribute("SpeedUps")
+	if type(saved) == "number" and saved > 0 then
+		return "GRATUIT"
+	end
+	local product = Config.GetSpeedUpProduct(left)
+	return if product then string.format("%d R$", product.Price) else nil
+end
+
+-- L'essai de la capsule est tiré au sort : son accélération n'est proposée que si la politique du joueur le permet.
+local capsuleSpeedAllowed = false
+task.spawn(function()
+	local ok, policy = pcall(function(): any
+		return PolicyService:GetPolicyInfoForPlayerAsync(player)
+	end)
+	capsuleSpeedAllowed = ok and type(policy) == "table" and policy.ArePaidRandomItemsRestricted == false
+end)
+
+-- Pastille « ACCÉLÉRER » en haut à droite d'une carte (icône vitesse + prix), cachée tant qu'il n'y a rien à proposer.
+local function speedPill(body: Frame, kind: string, eggId: string): TextButton
+	local pill = UiStyle.button(body, "", UDim2.fromOffset(math.floor(140 * K), math.floor(40 * K)), PURPLE, 17, true)
+	pill.Name = "SpeedUp"
+	pill.AnchorPoint = Vector2.new(1, 0)
+	pill.Position = UDim2.new(1, -8, 0, 8)
+	pill.ZIndex = 6
+	pill.Visible = false
+	local side = math.floor(28 * K)
+	local icon = Icons.image(pill, "Speed", UDim2.fromOffset(side, side), UDim2.new(0, 6, 0.5, -side / 2))
+	icon.ZIndex = 3
+	local caption = pill:FindFirstChild("Caption")
+	if caption and caption:IsA("TextLabel") then
+		caption.Position = UDim2.new(0, side + 8, 0, 4)
+		caption.Size = UDim2.new(1, -(side + 14), 1, -8)
+	end
+	pill.Activated:Connect(function()
+		Remotes.SpeedUp:FireServer(kind, eggId)
+	end)
+	return pill
+end
+
+local function setSpeed(pill: TextButton?, left: number, allowed: boolean)
+	if not pill then
+		return
+	end
+	local text = if allowed then speedText(left) else nil
+	pill.Visible = text ~= nil
+	local caption = pill:FindFirstChild("Caption")
+	if text and caption and caption:IsA("TextLabel") and caption.Text ~= text then
+		caption.Text = text
+	end
+end
 
 local function percent(value: number): number
 	return math.floor(value * 100 + 0.5)
@@ -280,11 +340,11 @@ function CapsuleMenu.create(parent: Instance): Menu
 			{ CanvasPosition = Vector2.new(0, math.clamp(y, 0, maxY)) }):Play()
 	end
 
-	type ChamberUi = { chamber: Chamber?, body: Frame, status: TextLabel?, gauge: ShopKit.Gauge?, button: TextButton }
+	type ChamberUi = { chamber: Chamber?, body: Frame, status: TextLabel?, gauge: ShopKit.Gauge?, button: TextButton, speed: TextButton? }
 	local chamberUis: { ChamberUi } = {}
 	local chamberKey = ""
 
-	type EggUi = { egg: NestEgg, body: Frame, gauge: ShopKit.Gauge, button: TextButton }
+	type EggUi = { egg: NestEgg, body: Frame, gauge: ShopKit.Gauge, button: TextButton, speed: TextButton? }
 	local eggUis: { EggUi } = {}
 	local eggKey = ""
 	local eggCards: { Frame } = {}
@@ -381,7 +441,8 @@ function CapsuleMenu.create(parent: Instance): Menu
 					Remotes.Evolution:FireServer("Hatch", chamberId)
 					window.close() -- l'éclosion se joue au-dessus de la capsule : on la regarde
 				end)
-				table.insert(chamberUis, { chamber = chamber, body = body, status = status, gauge = gauge, button = button })
+				local speed = speedPill(body, "Capsule", chamberId)
+				table.insert(chamberUis, { chamber = chamber, body = body, status = status, gauge = gauge, button = button, speed = speed })
 			end
 		end
 	end
@@ -449,7 +510,9 @@ function CapsuleMenu.create(parent: Instance): Menu
 				UIJuice.purchased(body, button, fxLayer)
 				Remotes.Evolution:FireServer("Insert", eggKeyName)
 			end)
-			table.insert(eggUis, { egg = egg, body = body, gauge = gauge, button = button })
+			local eggId = string.match(eggKeyName, "^(.-)#%d+$")
+			local speed = if eggId then speedPill(body, "Nest", eggId) else nil
+			table.insert(eggUis, { egg = egg, body = body, gauge = gauge, button = button, speed = speed })
 			table.insert(eggCards, body)
 		end
 	end
@@ -487,6 +550,9 @@ function CapsuleMenu.create(parent: Instance): Menu
 			local chamber = ui.chamber
 			local status, gauge = ui.status, ui.gauge
 			if chamber and status and gauge then
+				-- Accélérer : jusqu'à la prochaine tentative (ou la fin de l'incubation s'il n'évoluera plus).
+				local target = if not chamber.done and chamber.nextAt then math.max(chamber.readyAt, chamber.nextAt) else chamber.readyAt
+				setSpeed(ui.speed, target - now, capsuleSpeedAllowed)
 				local left = chamber.readyAt - now
 				if left > 0 then
 					status.Text = "PRÊT DANS " .. Eggs.Time(left)
@@ -526,6 +592,7 @@ function CapsuleMenu.create(parent: Instance): Menu
 			local left = ui.egg.readyAt - now
 			local length = math.max(1, ui.egg.readyAt - ui.egg.startedAt)
 			ShopKit.setGauge(ui.gauge, 1 - left / length, "ÉCLOT DANS " .. Eggs.Time(left))
+			setSpeed(ui.speed, left, true)
 			ShopKit.setButton(ui.button, if free then "METTRE" else "PLEIN", if free then UiStyle.Colors.Green else GREY)
 		end
 	end

@@ -263,6 +263,17 @@ plus gros que leur modèle (`Config.Items.ModelScale`, `ItemSpawner` ; place dan
 trait sombre fin autour des 16 plus proches que le joueur peut prendre (`client/ItemOutline`, Highlight sans remplissage,
 caché derrière les murs) ; pile du sac à la hauteur de chaque objet (`InteractionController.relayout`). Vérifié en Play
 (solo) : 12 objets dans les bacs, fromage lisible à 24 studs, 5 pommes portées sans chevauchement. Pas vu : téléphone.
+**29 oct. : accélérer en Robux** (Chouaib : « payer pour accélérer tout ce qui demande du temps ») : bulle ACCÉLÉRER
+(prix) sur ses œufs de la couveuse (`client/SpeedUp`) et pastille violette « R$ » dans le menu de la capsule
+(`client/CapsuleMenu`) ; un œuf de la couveuse éclot tout de suite, une case de la capsule finit son attente et tente sa
+prochaine évolution tout de suite (chance inchangée et affichée ; pas proposé là où `PolicyService` interdit les objets
+aléatoires payants). 4 produits « ACCÉLÉRER » selon le temps qui reste (`Config.Monetization.Products` Speed1 à Speed4 :
+2 min 9 R$, 10 min 19 R$, 30 min 39 R$, plus 79 R$ ; `Config.SpeedUp`, `Config.GetSpeedUpProduct`), **Id = 0 tant
+que Chouaib ne les a pas créés sur le Creator Hub** (le bouton n'apparaît pas). `server/SpeedUpController` : l'œuf
+demandé, sinon celui qui attend le plus ; rien à accélérer : gardé (champ sauvegardé `speedUps`, attribut `SpeedUps`),
+sert à la prochaine demande, affiché GRATUIT. Vérifié en Play (solo, avec une accélération gardée) : bulle « ACCÉLÉRER /
+GRATUIT », œuf Mythique éclos en 3 s, case de la capsule : essai tout de suite ; test `check-eggs`. Pas vu : un vrai
+achat (produits pas encore créés), téléphone.
 
 **15 oct. : œufs (Codex) puis corrections Claude** (`server/EggController`, `client/Eggs`, `shared/EggIncubation`,
 `docs/INCUBATION.md`) : toutes les récompenses arrivent en œufs qui incubent (15 s à 30 min). Claude : un nid par œuf

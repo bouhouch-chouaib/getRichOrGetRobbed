@@ -247,6 +247,12 @@ Pour tester plus vite dans Studio : `Config.UseStudioDurations = true` (durées 
   Chance Chanceuse (+0,5 de chance). Produits : boost de chance serveur (+1 de chance = raretés au-dessus de Commun x2,
   10 min prolongeables, annoncé à tous : attributs `LuckBoostUntil/By/At` de ReplicatedStorage), 1 et 10 tirages instantanés
   (chance de base 0,5).
+- **Accélérer** (29 oct., produits `Speed1` à `Speed4`, `Hidden` : pas dans la Boutique, proposés sur l'œuf qui attend) :
+  un œuf de la couveuse éclot tout de suite, une case de la capsule finit son attente et tente sa prochaine évolution tout
+  de suite (`EggIncubation.WaitLeft / SpeedUp`). Prix selon le temps qui reste : 2 min 9 R$, 10 min 19 R$, 30 min 39 R$,
+  plus 79 R$ (`Config.GetSpeedUpProduct`). `server/SpeedUpController` retient l'œuf demandé (`Remotes.SpeedUp`) ; à
+  l'achat, l'œuf retenu, sinon celui qui attend le plus, sinon gardé pour plus tard (`speedUps`) : jamais perdu. La
+  capsule tire au sort : pas proposé si `ArePaidRandomItemsRestricted`.
 - Effets centralisés dans `shared/Perks` (lit `Player.Pass_<Key>`) : utilisé par EconomyController (revenu), BlackholeController
   (argent et chance des manches), LockController (verrou), ItemInteraction + SessionData (sac, places d'équipement).
 - `server/MonetizationController` : vérifie les passes à l'arrivée et après achat (`PromptGamePassPurchaseFinished`) ;

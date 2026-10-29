@@ -282,6 +282,12 @@ services.Workspace = {
 }
 services.AnalyticsService = {} -- Studio: no live telemetry calls
 services.MarketplaceService = { PromptGamePassPurchaseFinished = signal() }
+-- server/SpeedUpController : l'accélération de la capsule (tirée au sort) est permise à ce joueur de test.
+services.PolicyService = {
+	GetPolicyInfoForPlayerAsync = function()
+		return { ArePaidRandomItemsRestricted = false }
+	end,
+}
 services.BadgeService = {}
 game.JobId = "test"
 game.BindToClose = function() end
@@ -518,6 +524,51 @@ assert(monetization.ProcessReceipt(paid) == decision.PurchaseGranted)
 assert(records.u_1234.totalPulls == n + 1 and records.u_1234.pets[byRank[4]] == nil)
 assert(session.GetRewardOwned(player)[byRank[4]] == 1)
 assert(monetization.ProcessReceipt(paid) == decision.PurchaseGranted and session.GetTotalPulls(player) == n + 1)
+
+-- Accélérer en Robux (server/SpeedUpController) : un œuf de la couveuse éclot tout de suite, une case de la capsule tente
+-- sa prochaine évolution tout de suite ; sans rien à accélérer, l'achat est gardé et sert à la prochaine demande.
+do
+	local fired = {}
+	cache.Remotes.SpeedUp = {
+		OnServerEvent = signal(),
+		FireClient = function(_, _, result)
+			table.insert(fired, result)
+		end,
+	}
+	local speed = loadModule("SpeedUpController")
+	local time = os.time()
+	assert(config.GetSpeedUpProduct(5) == nil, "nothing to sell for a few seconds")
+	session.AddEggs(player, { [byRank[6]] = 1 })
+	local nestEgg
+	for _, egg in ipairs(session.GetEggs(player)) do
+		if egg.petId == byRank[6] and not egg.evolve and eggs.WaitLeft(egg, time) > 0 then
+			nestEgg = egg
+		end
+	end
+	assert(nestEgg and eggs.WaitLeft(nestEgg, time) <= config.Eggs.Seconds.Mythique, "a waiting nest egg")
+	assert(session.SpeedUpEgg(player, nestEgg.id, time) and eggs.WaitLeft(nestEgg, time) == 0, "the nest egg is ready now")
+	assert(not session.SpeedUpEgg(player, nestEgg.id, time), "nothing left to speed up on it")
+	local hatched = session.HatchEggs(player, time)
+	assert((hatched[byRank[6]] or 0) >= 1, "it hatches on the next tick")
+	-- Capsule : l'essai suivant arrive tout de suite, sa chance ne change pas.
+	local chamber: any = {
+		id = "speed-test", petId = byRank[3], count = 1, startedAt = time, readyAt = time + 60,
+		evolve = { stage = 1, maxStage = 3, nextAt = time + 4000, done = false },
+	}
+	assert(eggs.WaitLeft(chamber, time) == 4000, "a chamber waits for its next attempt")
+	eggs.SpeedUp(chamber, time)
+	assert(chamber.readyAt == time and chamber.evolve.nextAt == time and eggs.WaitLeft(chamber, time) == 0)
+	assert(eggs.TryEvolve(chamber, time, 0) == "Evolved", "the attempt happens right away")
+	-- Payé sans rien à accélérer : gardé (sauvegardé), puis utilisé sans repayer.
+	local data = session.Get(player)
+	local keptEggs = data.eggs
+	data.eggs = {}
+	local saved = session.GetSpeedUps(player)
+	speed.Grant(player)
+	assert(session.GetSpeedUps(player) == saved + 1 and fired[#fired] == "Saved", "kept for later")
+	data.eggs = keptEggs
+	assert(session.SpendSpeedUp(player) and session.GetSpeedUps(player) == saved, "used without paying again")
+end
 
 -- Real profile APIs: world purchase, base capacity and saved magnet preference.
 do

@@ -170,6 +170,24 @@ function Eggs.CanOpen(egg: Egg, time: number): boolean
 	return time >= egg.readyAt
 end
 
+-- Accélérer en Robux (Config.SpeedUp) : ce qu'il reste à attendre pour cet œuf, en secondes. Couveuse : son éclosion ;
+-- capsule : sa prochaine tentative d'évolution (ou la fin de son incubation s'il n'évoluera plus). 0 : rien à attendre.
+function Eggs.WaitLeft(egg: Egg, time: number): number
+	local evolve = egg.evolve
+	local target = if evolve and not evolve.done then math.max(egg.readyAt, evolve.nextAt) else egg.readyAt
+	return math.max(0, target - time)
+end
+
+-- Accélère l'œuf : celui de la couveuse éclot au prochain tour ; celui de la capsule finit son incubation et tente sa
+-- prochaine évolution tout de suite (le tirage au sort, lui, ne change pas).
+function Eggs.SpeedUp(egg: Egg, time: number)
+	egg.readyAt = math.max(egg.startedAt, math.min(egg.readyAt, time))
+	local evolve = egg.evolve
+	if evolve and not evolve.done then
+		evolve.nextAt = math.min(evolve.nextAt, time)
+	end
+end
+
 -- Une tentative d'évolution si c'est l'heure : "Evolved" (stade +1), "Maxed" (ratée : il n'évoluera plus) ou nil.
 -- roll (0 à 1) décide de la réussite (Eggs.StageChance).
 function Eggs.TryEvolve(egg: Egg, time: number, roll: number, tier: number?): string?

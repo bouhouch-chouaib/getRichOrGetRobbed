@@ -254,7 +254,10 @@ function RobuxShop.create(options: Options): Panel
 		makeCard(passes.grid, pass, true, order)
 	end
 	for order, product in ipairs(M.Products) do
-		makeCard(products.grid, product, false, order)
+		-- (« ACCÉLÉRER » n'est proposé que sur l'œuf qui attend : client/SpeedUp, client/CapsuleMenu)
+		if not product.Hidden then
+			makeCard(products.grid, product, false, order)
+		end
 	end
 
 	-- Chances exactes (texte riche qui grandit avec son contenu).

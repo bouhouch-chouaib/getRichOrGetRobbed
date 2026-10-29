@@ -49,6 +49,7 @@ export type PlayerData = {
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
 	keys: number, -- clés en réserve (Config.Keys, achetées en Robux)
+	speedUps: number, -- accélérations payées sans œuf à accélérer : servent à la prochaine demande (Config.SpeedUp)
 	tier: number, -- monde atteint (Config.Worlds), 1 = Prairie : le plus loin débloqué (bonus de revenu)
 	world: number, -- monde où le joueur se trouve (déjà visité, <= tier) : l'apparence et la musique
 	receipts: { string }, -- derniers achats Robux accordés (PurchaseId) : jamais deux fois le même (MonetizationController)
@@ -146,6 +147,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		tutorialDone = data.tutorialDone,
 		receipts = table.clone(data.receipts),
 		keys = data.keys,
+		speedUps = data.speedUps,
 		tier = data.tier,
 		world = data.world,
 		indexClaimed = table.clone(data.indexClaimed),
@@ -335,6 +337,7 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	data.pity = numberOr(saved.pity, 0)
 	data.totalPulls = math.max(0, math.floor(numberOr(saved.totalPulls, -1)))
 	data.keys = math.max(math.floor(numberOr(saved.keys, 0)), 0) + data.keys
+	data.speedUps = math.max(math.floor(numberOr(saved.speedUps, 0)), 0) + data.speedUps
 	data.tier = math.clamp(math.floor(numberOr(saved.tier, 1)), 1, #Config.Worlds)
 	data.world = math.clamp(math.floor(numberOr(saved.world, data.tier)), 1, data.tier)
 	if type(saved.pets) == "table" then
@@ -549,6 +552,7 @@ local function sync(player: Player)
 	player:SetAttribute("BaseCapacity", Config.GetIncomeSlots(data.rebirths))
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("Keys", data.keys)
+	player:SetAttribute("SpeedUps", data.speedUps)
 	player:SetAttribute("Tier", data.tier)
 	player:SetAttribute("World", data.world)
 	player:SetAttribute("IndexClaimed", table.concat(data.indexClaimed, ","))
@@ -681,6 +685,7 @@ local function onPlayerAdded(player: Player)
 		upgrades = {},
 		tutorialDone = false,
 		keys = 0,
+		speedUps = 0,
 		tier = 1,
 		world = 1,
 		receipts = {},
@@ -1071,6 +1076,69 @@ function SessionData.EndNewcomerProtection(player: Player)
 		StarterJourney.EndProtection(data.starter)
 		sync(player)
 	end
+end
+
+-- Accélérer en Robux (Config.SpeedUp, server/SpeedUpController).
+-- L'œuf `eggId` de ce joueur (couveuse ou capsule), nil s'il n'existe plus.
+function SessionData.FindEgg(player: Player, eggId: string): EggIncubation.Egg?
+	local data = storage[player]
+	if not data then return nil end
+	for _, egg in ipairs(data.eggs) do
+		if egg.id == eggId then
+			return egg
+		end
+	end
+	return nil
+end
+
+-- L'œuf qui attend le plus longtemps (withCapsule : ceux de la capsule comptent aussi), nil si aucun n'attend.
+function SessionData.LongestWait(player: Player, time: number, withCapsule: boolean): EggIncubation.Egg?
+	local data = storage[player]
+	if not data then return nil end
+	local best: EggIncubation.Egg? = nil
+	local bestLeft = 0
+	for _, egg in ipairs(data.eggs) do
+		local left = EggIncubation.WaitLeft(egg, time)
+		if left > bestLeft and (withCapsule or not egg.evolve) then
+			best, bestLeft = egg, left
+		end
+	end
+	return best
+end
+
+-- Accélère l'œuf `eggId` (EggIncubation.SpeedUp). false s'il n'existe plus ou n'attend plus rien.
+function SessionData.SpeedUpEgg(player: Player, eggId: string, time: number): boolean
+	local data = storage[player]
+	local egg = SessionData.FindEgg(player, eggId)
+	if not data or not data.loaded or not egg or EggIncubation.WaitLeft(egg, time) <= 0 then
+		return false
+	end
+	EggIncubation.SpeedUp(egg, time)
+	sync(player)
+	return true
+end
+
+function SessionData.GetSpeedUps(player: Player): number
+	local data = storage[player]
+	return if data then data.speedUps else 0
+end
+
+function SessionData.AddSpeedUps(player: Player, amount: number)
+	local data = storage[player]
+	if data then
+		data.speedUps += amount
+		sync(player)
+	end
+end
+
+function SessionData.SpendSpeedUp(player: Player): boolean
+	local data = storage[player]
+	if not data or not data.loaded or data.speedUps < 1 then
+		return false
+	end
+	data.speedUps -= 1
+	sync(player)
+	return true
 end
 
 function SessionData.GetEggs(player: Player): { EggIncubation.Egg }

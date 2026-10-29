@@ -252,6 +252,16 @@ local entries: { { any } } = {
 	{ "1 œuf de familier. Il éclot plus ou moins vite selon sa rareté.", "1 pet egg. It hatches faster or slower depending on its rarity." },
 	{ "CLÉ", "KEY" },
 	{ "Ouvre une base FERMÉE pendant 10 s, même si son propriétaire la referme. [E] devant son portail.", "Opens a LOCKED base for 10 s, even if its owner locks it again. [E] in front of its gate." },
+	-- Accélérer un œuf en Robux (client/SpeedUp, client/CapsuleMenu)
+	{ "ACCÉLÉRER", "SPEED UP" },
+	{ "GRATUIT", "FREE", true },
+	{ "%d R$", "%d R$" },
+	{ "C'EST PARTI : TOUT DE SUITE !", "HERE WE GO: RIGHT NOW!" },
+	{ "GARDÉ POUR TON PROCHAIN ŒUF", "SAVED FOR YOUR NEXT EGG" },
+	{ "Un œuf qui attend encore 2 min au plus : tout de suite !", "An egg with 2 min or less left: right now!" },
+	{ "Un œuf qui attend encore 10 min au plus : tout de suite !", "An egg with 10 min or less left: right now!" },
+	{ "Un œuf qui attend encore 30 min au plus : tout de suite !", "An egg with 30 min or less left: right now!" },
+	{ "Un œuf qui attend encore plus de 30 min : tout de suite !", "An egg with more than 30 min left: right now!" },
 	{ "10 ŒUFS", "10 EGGS" },
 	{ "10 œufs de familiers. Ils éclosent tous en même temps, plus ou moins vite selon leur rareté.", "10 pet eggs. They all hatch at the same time, faster or slower depending on their rarity." },
 

@@ -22,6 +22,7 @@ local Icons = require(ReplicatedStorage.Shared.Icons)
 local Perks = require(ReplicatedStorage.Shared.Perks)
 local PullRewards = require(script.Parent.PullRewards)
 local SessionData = require(script.Parent.SessionData)
+local SpeedUpController = require(script.Parent.SpeedUpController)
 
 local MonetizationController = {}
 
@@ -139,6 +140,8 @@ local function grantProduct(player: Player, product: Config.MonetizationItem)
 		grantPulls(player, product.Pulls)
 	elseif product.Keys then
 		SessionData.AddKeys(player, product.Keys)
+	elseif product.SpeedUp then
+		SpeedUpController.Grant(player)
 	else
 		error("Produit sans effet : " .. product.Key)
 	end

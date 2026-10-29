@@ -56,6 +56,9 @@ return {
 	--   client -> serveur : ("Insert", clé de l'œuf) mettre un de ses œufs, ("Hatch") ouvrir celui de la machine ;
 	--   serveur -> clients : (ownerUserId, "Inserted" | "Evolved" | "Maxed", stade, CFrame de la machine, rareté, clé?).
 	Evolution = remote("Evolution"),
+	-- Accélérer un œuf en Robux (server/SpeedUpController, Config.SpeedUp) :
+	--   client -> serveur : ("Nest" | "Capsule", id de l'œuf) ; serveur -> client : ("Done" | "Saved").
+	SpeedUp = remote("SpeedUp"),
 	-- Client -> serveur : (itemId: string) achat d'une amélioration de Config.Shop.
 	BuyUpgrade = remote("BuyUpgrade"),
 	-- Client -> serveur : (petId: string, equip: boolean) équiper / déséquiper un familier.
