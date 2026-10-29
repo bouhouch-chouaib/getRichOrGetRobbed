@@ -50,23 +50,16 @@ function PullRewards.Floor(player: Player): number
 	return LootEngine.floor(SessionData.GetTotalPulls(player), SessionData.GetDiscovered(player))
 end
 
--- pulls tirages avec cette chance ; extraMoney (argent des points de la manche) et score servent à l'affichage.
--- paid = tirages achetés en Robux : jamais de mutation (leurs chances affichées doivent être complètes).
-function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMoney: number?, score: number?, paid: boolean?): Details
-	local discovered = SessionData.GetDiscovered(player)
-	local owned = SessionData.GetRewardOwned(player) -- pending eggs count toward the duplicate limit
-	local floorIndex = LootEngine.floor(SessionData.GetTotalPulls(player), discovered)
-	local rankIndex = LootEngine.rank(SessionData.GetTotalPulls(player))
-	-- Monde le plus loin atteint : meilleures raretés (Config.Worlds[].RarityBoost).
-	-- Exclusifs du monde où se trouve le joueur (PetCatalog.ByWorld).
-	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), luck, owned, floorIndex, SessionData.GetTier(player),
-		Config.GetWorld(SessionData.GetWorld(player)).Id)
+type Settled = { kept: { [string]: number }, shownKept: { [string]: number }, drops: { Drop }, sold: number }
 
+-- Familiers tirés (rolled) -> gardés en œufs, vers la capsule ou vendus (doublons), avec la mutation secrète.
+local function settle(player: Player, rolled: { string }, discovered: { [string]: boolean }, paid: boolean?): Settled
+	local owned = SessionData.GetRewardOwned(player) -- pending eggs count toward the duplicate limit
 	local kept: { [string]: number } = {}
 	local shownKept: { [string]: number } = {} -- ce que voit le client : l'espèce seulement (mutation secrète)
 	local drops: { Drop } = {}
 	local sold = 0
-	for _, rolledId in ipairs(outcome.drops) do
+	for _, rolledId in ipairs(rolled) do
 		local isNew = not discovered[rolledId]
 		discovered[rolledId] = true
 		-- Mutation secrète, révélée à l'éclosion : un familier muté est un autre familier (jamais vendu comme doublon).
@@ -91,6 +84,34 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 			end
 		end
 	end
+	return { kept = kept, shownKept = shownKept, drops = drops, sold = sold }
+end
+
+-- Envoie le résultat au client (client/PullReveal) sans jamais faire échouer la récompense déjà accordée.
+local function reveal(player: Player, score: number, pulls: number, shownKept: { [string]: number }, money: number, details: Details)
+	task.spawn(function()
+		local ok, err = pcall(function()
+			Remotes.RewardsGranted:FireClient(player, score, pulls, shownKept, money, details)
+		end)
+		if not ok then
+			warn("[PullRewards] affichage : " .. tostring(err))
+		end
+	end)
+end
+
+-- pulls tirages avec cette chance ; extraMoney (argent des points de la manche) et score servent à l'affichage.
+-- paid = tirages achetés en Robux : jamais de mutation (leurs chances affichées doivent être complètes).
+function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMoney: number?, score: number?, paid: boolean?): Details
+	local discovered = SessionData.GetDiscovered(player)
+	local owned = SessionData.GetRewardOwned(player) -- pending eggs count toward the duplicate limit
+	local floorIndex = LootEngine.floor(SessionData.GetTotalPulls(player), discovered)
+	local rankIndex = LootEngine.rank(SessionData.GetTotalPulls(player))
+	-- Monde le plus loin atteint : meilleures raretés (Config.Worlds[].RarityBoost).
+	-- Exclusifs du monde où se trouve le joueur (PetCatalog.ByWorld).
+	local outcome = LootEngine.rollPulls(pulls, SessionData.GetPity(player), luck, owned, floorIndex, SessionData.GetTier(player),
+		Config.GetWorld(SessionData.GetWorld(player)).Id)
+	local settled = settle(player, outcome.drops, discovered, paid)
+	local kept, shownKept, drops, sold = settled.kept, settled.shownKept, settled.drops, settled.sold
 
 	SessionData.SetPity(player, outcome.pity)
 	-- Pitié par palier (Config.Loot.PityPercentile) : rareté garantie et à quel tirage, pour la carte de résultats (client/HUD).
@@ -106,14 +127,7 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 	end
 
 	local details: Details = { drops = drops, sold = sold, floor = floorIndex, rank = rankIndex, eggs = true }
-	task.spawn(function()
-		local ok, err = pcall(function()
-			Remotes.RewardsGranted:FireClient(player, score or 0, outcome.pulls, shownKept, money, details)
-		end)
-		if not ok then
-			warn("[PullRewards] affichage : " .. tostring(err))
-		end
-	end)
+	reveal(player, score or 0, outcome.pulls, shownKept, money, details)
 	local soldCount = 0
 	for _, drop in ipairs(drops) do
 		if drop.Sold then
@@ -122,6 +136,23 @@ function PullRewards.Grant(player: Player, pulls: number, luck: number, extraMon
 	end
 	print(string.format("[PullRewards] %s : %d tirage(s), %d vendu(s) +%d$, plancher %d, rang %d", player.Name,
 		outcome.pulls, soldCount, sold, floorIndex, rankIndex))
+	return details
+end
+
+-- Familiers déjà choisis (œuf Citrouille d'Halloween : server/HalloweenController) : mêmes règles qu'un tirage gratuit
+-- (mutation secrète, doublons vendus au-delà de Config.Loot.KeepCopies), sans compter comme un tirage (rang, pitié).
+function PullRewards.GrantChosen(player: Player, petIds: { string }): Details
+	local discovered = SessionData.GetDiscovered(player)
+	local settled = settle(player, petIds, discovered, false)
+	if next(settled.kept) then
+		SessionData.AddEggs(player, settled.kept)
+	end
+	if settled.sold > 0 then
+		SessionData.AddMoney(player, settled.sold)
+	end
+	local details: Details = { drops = settled.drops, sold = settled.sold, floor = PullRewards.Floor(player),
+		rank = LootEngine.rank(SessionData.GetTotalPulls(player)), eggs = true }
+	reveal(player, 0, #petIds, settled.shownKept, settled.sold, details)
 	return details
 end
 

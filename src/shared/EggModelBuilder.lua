@@ -43,7 +43,57 @@ local colors = {
 	rgb(29, 22, 55),
 }
 
-function EggModel.Build(rarityId: string): Model
+-- Œuf Citrouille d'Halloween (Config.Halloween) : orange à côtes, tige et feuille, visage sculpté. Mêmes étages et
+-- mêmes moitiés (ShellHalf) que les autres pour l'éclosion ; sans lumière ni étincelles (attribut Handmade).
+local function pumpkinEgg(): Model
+	local brick = handmade("Citrouille")
+	if brick then
+		return brick
+	end
+	local m = Instance.new("Model")
+	m.Name = "Egg_Citrouille"
+	local orange, rib, dark = rgb(255, 128, 24), rgb(222, 96, 16), rgb(52, 30, 20)
+	local function part(name: string, size: Vector3, cf: CFrame, color: Color3, wedge: boolean?): BasePart
+		local p = S.part(m, name, size, cf, color, false, wedge)
+		p:SetAttribute("ShellHalf", if cf.Position.Y > 1.9 then 1 else -1)
+		return p
+	end
+	local root = part("Root", V(0.1, 0.1, 0.1), CF(), orange)
+	root.Transparency = 1
+	root:SetAttribute("ShellHalf", 0)
+	m.PrimaryPart = root
+	for i, layer in ipairs({
+		V(1.9, 0.45, 1.8),
+		V(2.55, 0.65, 2.35),
+		V(2.8, 0.7, 2.6),
+		V(2.6, 0.7, 2.4),
+		V(2.05, 0.65, 1.9),
+		V(1.2, 0.45, 1.15),
+	}) do
+		local y = ({ 0.225, 0.775, 1.45, 2.15, 2.825, 3.375 })[i]
+		part("Shell" .. i, layer, CF(0, y, 0), orange)
+		-- Côtes de la citrouille : bandes plus foncées sur les quatre faces.
+		part("Rib" .. i, V(0.22, layer.Y, layer.Z + 0.06), CF(0, y, 0), rib)
+		part("RibSide" .. i, V(layer.X + 0.06, layer.Y, 0.22), CF(0, y, 0), rib)
+	end
+	part("Stem", V(0.32, 0.7, 0.32), CF(0, 3.9, 0) * A(0, 0, -0.25), rgb(86, 104, 40))
+	part("Leaf", V(0.9, 0.16, 0.55), CF(0.45, 3.75, 0.1) * A(0, 0.3, 0.35), rgb(70, 150, 50), true)
+	for _, x in ipairs({ -0.55, 0.55 }) do
+		part("Eye", V(0.5, 0.42, 0.12), CF(x, 2.3, -1.25), dark)
+	end
+	part("Mouth", V(1.4, 0.3, 0.12), CF(0, 1.55, -1.36), dark)
+	for _, x in ipairs({ -0.35, 0.35 }) do
+		part("Tooth", V(0.22, 0.16, 0.14), CF(x, 1.66, -1.38), orange)
+	end
+	m:SetAttribute("Handmade", true)
+	return m
+end
+
+-- look = "Citrouille" : l'œuf d'Halloween (familier d'événement, quelle que soit sa rareté).
+function EggModel.Build(rarityId: string, look: string?): Model
+	if look == "Citrouille" then
+		return pumpkinEgg()
+	end
 	local brick = handmade(rarityId)
 	if brick then
 		return brick

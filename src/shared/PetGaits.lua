@@ -413,6 +413,23 @@ PetGaits.ById = {
 	-- gardien du trou noir : vole lentement, immense, grands battements, rugit
 	GardienTrouNoir = gait({ speed = 5, minWait = 1, maxWait = 3, ease = "Smooth", hover = 4, float = 0.8, floatRate = 0.6,
 		bank = 0.5, turn = 2, airSwing = 0.3, head = "Roar", wing = "Slow", tail = "Flow" }),
+
+	-- Halloween 2026 (familiers limités) --------------------------------------------------------------------------
+	-- chat-citrouille : trottine, s'arrête, puis bondit d'un coup comme un chat qui chasse
+	ChatCitrouille = gait({ speed = 6, minWait = 1, maxWait = 4, ease = "Pounce", roam = 12, step = 0.6, bob = 0.04,
+		turn = 5, stride = 2.6, swing = 1, pounce = 1.6, tail = "Swish" }),
+	-- fantôme en drap : flotte en ondulant, dérive de côté
+	FantomeDrap = gait({ speed = 3, minWait = 1, maxWait = 4, ease = "Smooth", hover = 1.5, float = 0.5, floatRate = 1.2,
+		drift = 0.3, wiggle = 0.08, turn = 3 }),
+	-- chauve-souris vampire : vol en zigzag, battements rapides
+	ChauveSourisVampire = gait({ speed = 8, minWait = 1, maxWait = 3, ease = "Dash", hover = 4, float = 0.6,
+		floatRate = 2, bank = 0.6, turn = 6, wing = "Buzz" }),
+	-- chien squelette : trotte joyeusement, os qui s'entrechoquent
+	ChienSquelette = gait({ speed = 5, minWait = 1, maxWait = 4, ease = "Smooth", roam = 14, step = 1, bob = 0.1,
+		rock = 0.06, turn = 4, stride = 1.8, swing = 1.2, head = "Proud", tail = "Wag" }),
+	-- chaudron glouton : se dandine lourdement sur ses petites pattes
+	ChaudronGlouton = gait({ speed = 2.5, minWait = 2, maxWait = 5, ease = "Smooth", roam = 10, step = 1.2, bob = 0.12,
+		roll = 0.12, turn = 2, stride = 1, swing = 0.8, body = "Squish" }),
 } :: { [string]: Gait }
 
 -- Fiche du familier (formes évoluées et mutations comprises : « <Id>__E2 », « <Id>__MGold »...), ou nil.

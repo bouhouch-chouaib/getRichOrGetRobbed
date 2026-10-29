@@ -20,6 +20,7 @@ local Perks = require(ReplicatedStorage.Shared.Perks)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BlackholeTiers = require(script.Parent.BlackholeTiers)
 local GameLoopManager = require(script.Parent.GameLoopManager)
+local HalloweenController = require(script.Parent.HalloweenController)
 local ItemInteraction = require(script.Parent.ItemInteraction)
 local EconomyController = require(script.Parent.EconomyController)
 local PullRewards = require(script.Parent.PullRewards)
@@ -136,6 +137,7 @@ local function consume(item: BasePart, caught: boolean?)
 			SessionData.AddScore(owner, value * SessionData.GetMultiplier(owner) * bonus)
 			OnboardingAnalytics.Mark(owner, "Scored")
 			Quests.Add(owner, "Feed", 1)
+			HalloweenController.OnScored(owner, item) -- bonbons d'Halloween (Config.Halloween), pendant l'événement
 		elseif reason ~= "jamais lancé" then
 			-- Un objet simplement lâché près du trou n'est pas suspect ; le reste est signalé.
 			warn(string.format("[AntiCheat] %s : objet avalé sans points (%s)", owner.Name, reason))

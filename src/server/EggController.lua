@@ -262,6 +262,8 @@ function EggController.Init(bases: { Model })
 			anchor.Anchored, anchor.CanCollide, anchor.CanTouch, anchor.CanQuery = true, false, false, false
 			anchor.CFrame = nestCFrame(ground, nest)
 			anchor:SetAttribute("Rarity", Catalog.ById[unit.petId].Rarity)
+			-- Œuf Citrouille d'Halloween : le client lui donne son aspect (shared/EggModelBuilder), le familier reste secret.
+			anchor:SetAttribute("Look", if Catalog.ById[unit.petId].Event == "Halloween" then "Citrouille" else nil)
 			anchor:SetAttribute("OwnerUserId", player.UserId)
 			anchor:SetAttribute("StartedAt", unit.startedAt)
 			anchor:SetAttribute("ReadyAt", unit.readyAt)

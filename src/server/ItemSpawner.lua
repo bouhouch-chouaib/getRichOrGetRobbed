@@ -223,18 +223,34 @@ end
 
 -- Objet spécial projeté par le trou noir (server/BlackholeTiers) : "Lava" = roche de lave du Volcan (valeur du rang
 -- x Lava.ValueMultiplier), "Meteor" = météorite d'or du Cosmos tombée du ciel (Gravity.MeteorValue). Il part de
--- `position` à la vitesse `velocity` et devient un objet sauvage.
+-- `position` à la vitesse `velocity` et devient un objet sauvage. "Pumpkin" = citrouille d'Halloween posée dans l'arène
+-- (server/HalloweenController : modèle ArtModels.Items.Halloween.Citrouille, attribut "Candy" = ses bonbons).
 function ItemSpawner.SpawnSpecial(kind: string, position: Vector3, velocity: Vector3): BasePart?
 	local map = Workspace:FindFirstChild("Map")
 	local wild = map and map:FindFirstChild("WildItems")
 	if not wild or #wild:GetChildren() >= Config.Items.WildMax + 15 then
 		return nil
 	end
-	local rank = if kind == "Meteor" then #Config.ItemTiers else rollRank(Config.Items.WildQuality)
+	local rank = if kind == "Meteor" then #Config.ItemTiers elseif kind == "Pumpkin" then 3 else rollRank(Config.Items.WildQuality)
 	local look: Look = if kind == "Lava"
 		then { World = "Volcan", Id = "RocheDeLave", Name = "Roche de lave", Value = Config.ItemTiers[rank].Value * Config.Blackhole.Lava.ValueMultiplier }
+		elseif kind == "Pumpkin" then { World = "Halloween", Id = "Citrouille", Name = "Citrouille", Value = Config.Halloween.Pumpkin.Points }
 		else { World = "Cosmos", Id = "Meteorite", Name = "Météorite", Value = Config.Blackhole.Gravity.MeteorValue }
 	local item = createItem(rank, 1, CFrame.new(position), look)
+	if kind == "Pumpkin" then
+		if item:IsA("Part") then
+			-- objet de secours (pas de modèle) : une citrouille en bloc, sans néon
+			item.Shape = Enum.PartType.Block
+			item.Size = Vector3.new(3, 2.4, 3)
+			item.Color = Color3.fromRGB(255, 128, 24)
+			item.Material = Enum.Material.SmoothPlastic
+		end
+		item:SetAttribute("Special", kind)
+		item:SetAttribute("Candy", Config.Halloween.Pumpkin.Candy)
+		item.Parent = wild
+		ItemInteraction.Register(item)
+		return item
+	end
 	if kind == "Lava" and item:IsA("Part") then
 		-- objet de secours (pas de modèle) : un bloc orange, sans néon
 		item.Shape = Enum.PartType.Block

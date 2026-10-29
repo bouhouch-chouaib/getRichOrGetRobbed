@@ -3,6 +3,8 @@
 -- du Désert au Divin, + le Cerbère Infernal au Volcan le 25 oct. ; champ World = Id de Config.Worlds). Un exclusif ne sort des tirages que si le joueur se trouve
 -- dans son monde (LootEngine, monde actuel) ; il est dans List / ByRarity (Index, revenu) mais PAS dans BaseByRarity
 -- (tirages ordinaires, rang de tirage, fusion, effondrement du trou noir). ByWorld[monde] = ses exclusifs.
+-- Familiers d'ÉVÉNEMENT (champ Event, 29 oct. : les 5 d'Halloween 2026, Config.Halloween) : comme les exclusifs, pas dans
+-- BaseByRarity ; ils ne sortent que de l'œuf de leur événement (server/HalloweenController). ByEvent[événement] = eux.
 -- Id      : clé unique sans espace ni accent (utilisée dans les attributs et pour le modèle 3D).
 -- Rarity  : Id d'une rareté de Config.Rarities.
 -- Look    : description simplifiée pour le modèle de remplacement (PetModelBuilder).
@@ -36,6 +38,7 @@ export type Pet = {
 	Mutation: string?, -- "Gold" | "Diamond" | "Rainbow" (Config.Mutations) ; nil = sans mutation
 	BaseId: string?, -- l'espèce de départ d'un familier évolué ou muté
 	World: string?, -- familier exclusif de ce monde (Id de Config.Worlds) ; nil = familier de base
+	Event: string?, -- familier limité d'un événement ("Halloween") ; nil = familier de base
 }
 
 local rgb = Color3.fromRGB
@@ -53,6 +56,11 @@ local A, M, P, H, B = "Animaux", "Fantastiques", "Plantes", "Hybrides", "Absurde
 -- Familier exclusif d'un monde (catégorie = le monde).
 local function worldPet(id: string, name: string, rarity: string, world: string, description: string, look: Look): Pet
 	return { Id = id, Name = name, Rarity = rarity, Category = "Monde", Description = description, Look = look, World = world }
+end
+
+-- Familier limité d'un événement (catégorie = l'événement).
+local function eventPet(id: string, name: string, rarity: string, event: string, description: string, look: Look): Pet
+	return { Id = id, Name = name, Rarity = rarity, Category = event, Description = description, Look = look, Event = event }
 end
 
 local list: { Pet } = {
@@ -179,6 +187,12 @@ local list: { Pet } = {
 	worldPet("LicorneCeleste", "Licorne Céleste", "Mythique", "Divin", "Licorne blanche qui galope sur les nuages.", { Shape = "Quadruped", Body = rgb(250, 245, 255), Detail = rgb(255, 200, 90), Extra = "Horn", Effect = "Sparkles", EffectColor = rgb(255, 230, 150) }),
 	worldPet("GriffonDore", "Griffon Doré", "Divin", "Divin", "Gardien du paradis aux plumes d'or pur.", { Shape = "Bird", Body = rgb(255, 205, 60), Detail = rgb(255, 250, 230), Extra = "Wings", Effect = "Aura", EffectColor = rgb(255, 220, 100) }),
 	worldPet("TitanAureole", "Titan Auréole", "Sigma", "Divin", "Colosse de lumière, une auréole au-dessus de la tête.", { Shape = "Humanoid", Body = rgb(255, 250, 235), Detail = rgb(255, 205, 50), Neon = true, Effect = "Aura", EffectColor = rgb(255, 220, 90) }),
+	-- Halloween 2026 (Config.Halloween) : œuf Citrouille du chaudron, édition limitée, sans aura.
+	eventPet("ChatCitrouille", "Chat-Citrouille", "Rare", "Halloween", "Chat noir qui a fait sa maison dans une citrouille.", { Shape = "Quadruped", Body = rgb(35, 30, 45), Detail = rgb(255, 130, 20) }),
+	eventPet("FantomeDrap", "Fantôme en Drap", "Epique", "Halloween", "Un drap qui fait « bouh ». Il a peur du noir.", { Shape = "Blob", Body = rgb(245, 245, 250), Detail = rgb(30, 30, 40), Float = true }),
+	eventPet("ChauveSourisVampire", "Chauve-Souris Vampire", "Legendaire", "Halloween", "Elle ne boit que du jus de tomate, promis.", { Shape = "Bird", Body = rgb(70, 40, 90), Detail = rgb(200, 30, 40), Extra = "Wings" }),
+	eventPet("ChienSquelette", "Chien Squelette", "Mythique", "Halloween", "Il enterre ses propres os pour plus tard.", { Shape = "Quadruped", Body = rgb(240, 235, 220), Detail = rgb(40, 35, 45) }),
+	eventPet("ChaudronGlouton", "Chaudron Glouton", "Sigma", "Halloween", "Un chaudron de sorcière sur pattes qui avale tous les bonbons.", { Shape = "Object", Body = rgb(40, 40, 50), Detail = rgb(120, 230, 80) }),
 	worldPet("GardienTrouNoir", "Gardien du Trou Noir", "Sigma", "Divin", "Le dragon qui veille sur le trou noir depuis le début des temps.", { Shape = "Dragon", Body = rgb(30, 20, 50), Detail = rgb(255, 200, 60), Float = true, Effect = "Aura", EffectColor = rgb(255, 200, 60) }),
 }
 
@@ -216,6 +230,7 @@ end
 PetCatalog.ByRarity = {} :: { [string]: { Pet } } -- tous (Index, revenu)
 PetCatalog.BaseByRarity = {} :: { [string]: { Pet } } -- sans les exclusifs des mondes (tirages ordinaires, fusion)
 PetCatalog.ByWorld = {} :: { [string]: { Pet } } -- exclusifs de chaque monde
+PetCatalog.ByEvent = {} :: { [string]: { Pet } } -- familiers limités de chaque événement
 
 local function add(map: { [string]: { Pet } }, key: string, entry: Pet)
 	local bucket = map[key]
@@ -231,6 +246,8 @@ for _, entry in ipairs(list) do
 	add(PetCatalog.ByRarity, entry.Rarity, entry)
 	if entry.World then
 		add(PetCatalog.ByWorld, entry.World, entry)
+	elseif entry.Event then
+		add(PetCatalog.ByEvent, entry.Event, entry)
 	else
 		add(PetCatalog.BaseByRarity, entry.Rarity, entry)
 	end
@@ -284,6 +301,7 @@ for _, entry in ipairs(list) do
 				Mutation = if mutation then mutation.Id else nil,
 				BaseId = entry.Id,
 				World = entry.World,
+				Event = entry.Event,
 			}
 			PetCatalog.ById[variant.Id] = variant
 			table.insert(PetCatalog.Everything, variant)

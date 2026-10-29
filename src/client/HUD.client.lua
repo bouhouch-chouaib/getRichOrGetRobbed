@@ -33,6 +33,8 @@ local MarketMenu = require(script.Parent.MarketMenu)
 local RebirthMenu = require(script.Parent.RebirthMenu)
 local TextFormat = require(ReplicatedStorage.Shared.TextFormat)
 local FusionMenu = require(script.Parent.FusionMenu)
+local Halloween = require(ReplicatedStorage.Shared.Halloween)
+local HalloweenMenu = require(script.Parent.HalloweenMenu)
 local IndexMenu = require(script.Parent.IndexMenu)
 local MenuKit = require(script.Parent.MenuKit)
 local OffersPanel = require(script.Parent.OffersPanel)
@@ -372,6 +374,32 @@ do
 	caption.Position = UDim2.fromOffset(8, 6)
 	caption.Size = UDim2.new(1, -height - 48, 1, -12)
 end
+-- Halloween 2026 (Config.Halloween) : bouton BONBONS sous INVITER, seulement pendant l'événement. Il montre les bonbons
+-- et ouvre le chaudron (client/HalloweenMenu), comme [E] devant le chaudron de l'arène.
+local candyButton: TextButton
+local candyCount: TextLabel
+do
+	local top = menuColumn.Size.Y.Offset
+	local height = if isTouch then 40 else 46
+	menuColumn.Size += UDim2.fromOffset(0, height + 10)
+	candyButton = UiStyle.button(menuColumn, "BONBONS", UDim2.fromOffset(if isTouch then 300 else 202, height),
+		Color3.fromRGB(255, 128, 24), if isTouch then 20 else 22)
+	candyButton.Name = "Halloween"
+	candyButton.Position = UDim2.fromOffset(0, top + 10)
+	candyButton.Visible = false
+	candyCount = UiStyle.number(candyButton, "0", if isTouch then 18 else 20, WHITE)
+	candyCount.AnchorPoint = Vector2.new(1, 0.5)
+	candyCount.Position = UDim2.new(1, -(height - 4), 0.5, 0)
+	candyCount.Size = UDim2.fromOffset(60, height - 12)
+	candyCount.TextXAlignment = Enum.TextXAlignment.Right
+	candyCount.ZIndex = 3
+	Icons.image(candyButton, "Ghost", UDim2.fromOffset(height - 14, height - 14), UDim2.new(1, -(height - 8), 0, 5)).ZIndex = 3
+	local caption = candyButton:FindFirstChild("Caption") :: TextLabel
+	caption.Position = UDim2.fromOffset(8, 6)
+	caption.Size = UDim2.new(1, -height - 74, 1, -12)
+	UIJuice.button(candyButton)
+end
+
 local inviting = false
 inviteButton.Activated:Connect(function()
 	if inviting then
@@ -470,6 +498,26 @@ worldsButton.Activated:Connect(worlds.window.toggle)
 bonusButton.Activated:Connect(bonus.window.toggle)
 rebirthButton.Activated:Connect(rebirth.window.toggle)
 marketButton.Activated:Connect(market.window.toggle)
+
+-- Halloween : le chaudron (bouton BONBONS ou [E] devant le chaudron de l'arène, server/HalloweenController).
+local halloween = HalloweenMenu.create(gui)
+candyButton.Activated:Connect(halloween.window.toggle)
+ProximityPromptService.PromptTriggered:Connect(function(prompt: ProximityPrompt)
+	if prompt.Name == "CauldronPrompt" then
+		halloween.window.open()
+	end
+end)
+local function refreshCandy()
+	candyCount.Text = NumberFormat.short(numberAttribute("Candy"))
+end
+player:GetAttributeChangedSignal("Candy"):Connect(refreshCandy)
+refreshCandy()
+task.spawn(function()
+	while true do
+		candyButton.Visible = Halloween.Active(Halloween.Now())
+		task.wait(2)
+	end
+end)
 
 ----------------------------------------------------------------------
 -- Carte de résultats des tirages (fin de manche)
@@ -578,7 +626,7 @@ local function updatePhase()
 	-- Une seule ligne sous l'horloge : le trou noir doré (client/GoldenHour), la protection puis l'objectif, seulement
 	-- si la place est libre.
 	local taken = hintLabel.Visible or rewardCard.Visible
-	for _, name in ipairs({ "GoldenHour", "TheftProtection", "NextGoals" }) do
+	for _, name in ipairs({ "GoldenHour", "Haunted", "TheftProtection", "NextGoals" }) do
 		local line = topStack:FindFirstChild(name)
 		if line and line:IsA("GuiObject") then
 			line.Visible = line:GetAttribute("Wanted") == true and not taken
@@ -886,13 +934,16 @@ Remotes.TierReached.OnClientEvent:Connect(function(traveller: Player, tier: numb
 end)
 
 -- Bonus (server/ProgressionController) : cadeau du jour, quêtes, codes, et Rebirths de tout le serveur.
-local function rewardSummary(money: number?, pulls: number?): string
+local function rewardSummary(money: number?, pulls: number?, candy: number?): string
 	local parts = {}
 	if money and money > 0 then
 		table.insert(parts, "+" .. NumberFormat.money(money))
 	end
 	if pulls and pulls > 0 then
 		table.insert(parts, string.format("+%d ŒUF%s", pulls, if pulls > 1 then "S" else ""))
+	end
+	if candy and candy > 0 then
+		table.insert(parts, string.format("+%d BONBONS", candy))
 	end
 	return table.concat(parts, "  •  ")
 end
@@ -916,7 +967,7 @@ local function askNotifications()
 		end
 	end)
 end
-Remotes.BonusResult.OnClientEvent:Connect(function(kind: string, a: any, b: any, c: any, d: any)
+Remotes.BonusResult.OnClientEvent:Connect(function(kind: string, a: any, b: any, c: any, d: any, e: any)
 	if kind == "Daily" then
 		Sounds.play("Coins")
 		Toast.show(string.format("CADEAU DU JOUR %d : %s !", a, rewardSummary(b, c)), UiStyle.Colors.Gold)
@@ -927,8 +978,9 @@ Remotes.BonusResult.OnClientEvent:Connect(function(kind: string, a: any, b: any,
 	elseif kind == "Code" then
 		if a == true then
 			Sounds.play("Coins")
-			bonus.codeResult(true, "CODE " .. tostring(b) .. " : " .. rewardSummary(c, d) .. " !")
-			Toast.show("CODE " .. tostring(b) .. " : " .. rewardSummary(c, d) .. " !", MONEY)
+			local candy = if type(e) == "number" then e else nil
+			bonus.codeResult(true, "CODE " .. tostring(b) .. " : " .. rewardSummary(c, d, candy) .. " !")
+			Toast.show("CODE " .. tostring(b) .. " : " .. rewardSummary(c, d, candy) .. " !", MONEY)
 		else
 			Sounds.play("Error")
 			bonus.codeResult(false, tostring(b))

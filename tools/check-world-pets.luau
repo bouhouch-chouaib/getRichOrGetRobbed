@@ -48,7 +48,7 @@ for worldIndex, world in ipairs(Config.Worlds) do
 		assert(Catalog.ById[Catalog.Compose(entry.Id, 3, "Gold")].World == world.Id, "les formes gardent leur monde")
 	end
 end
-assert(count == 31 and #Catalog.List == 106)
+assert(count == 31 and #Catalog.List == 111) -- + 5 familiers limités d'Halloween 2026 (hors mondes)
 
 -- 20 000 tirages dans chaque monde : les exclusifs d'un AUTRE monde ne sortent jamais, ceux du monde oui.
 for worldIndex, world in ipairs(Config.Worlds) do

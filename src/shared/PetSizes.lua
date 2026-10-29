@@ -166,6 +166,12 @@ PetSizes.Heights = {
 	GriffonDore = 2.1, -- Divin (Divin)
 	TitanAureole = 2.6, -- Sigma (Divin)
 	GardienTrouNoir = 2.85, -- Sigma (Divin)
+	-- Halloween 2026 (familiers limités)
+	ChatCitrouille = 0.85, -- Rare
+	FantomeDrap = 1.05, -- Epique
+	ChauveSourisVampire = 1.2, -- Legendaire (ailes déployées)
+	ChienSquelette = 1.5, -- Mythique
+	ChaudronGlouton = 2.4, -- Sigma
 } :: { [string]: number }
 
 -- Taille d'un familier en J (milieu de la tranche de sa rareté s'il n'est pas dans la table). Un familier évolué

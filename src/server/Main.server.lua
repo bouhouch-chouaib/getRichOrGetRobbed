@@ -60,6 +60,7 @@ ProgressionController.Init()
 require(script.Parent.BadgeController).Init()
 require(script.Parent.MarketController).Init()
 require(script.Parent.Notifications).Init()
+require(script.Parent.HalloweenController).Init()
 
 GameLoopManager.Start()
 print("[Main] Serveur prêt.")

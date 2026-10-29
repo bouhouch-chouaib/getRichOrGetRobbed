@@ -92,6 +92,9 @@ local function rewardText(reward: Config.BonusReward, minimum: number, short: bo
 	if reward.Pulls then
 		table.insert(parts, if short then "x" .. reward.Pulls else string.format("%d ŒUF%s", reward.Pulls, if reward.Pulls > 1 then "S" else ""))
 	end
+	if reward.Candy then
+		table.insert(parts, string.format("%d BONBONS", reward.Candy))
+	end
 	return table.concat(parts, "\n")
 end
 

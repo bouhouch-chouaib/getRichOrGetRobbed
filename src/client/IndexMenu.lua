@@ -322,6 +322,7 @@ function IndexMenu.create(gui: Instance): Index
 		-- Exclusif d'un monde : il ne sort des tirages que dans ce monde.
 		detailRarity.Text = if entry.World
 			then rarity.Name .. "  •  EXCLUSIF " .. TextFormat.upper(Config.Worlds[Config.WorldIndex[entry.World] or 1].Name)
+			elseif entry.Event then rarity.Name .. "  •  ÉDITION LIMITÉE"
 			else rarity.Name
 		detailRarity.TextColor3 = UiStyle.lighter(rarity.Color, 0.4)
 		-- Trop fort pour toi (Config.PowerCap) : il rapporte bridé tant que tu n'as pas obtenu toi-même la rareté du dessous.
@@ -573,10 +574,12 @@ function IndexMenu.create(gui: Instance): Index
 			name.Size = UDim2.new(1, -16, 0, 32)
 			name.TextWrapped = true
 			name.ZIndex = 4
-			if entry.World then
-				-- Pastille du monde : ce familier ne sort des tirages que là-bas.
-				local world = UiStyle.text(button, TextFormat.upper(Config.Worlds[Config.WorldIndex[entry.World] or 1].Name), 12,
-					Color3.fromRGB(255, 225, 120), UiStyle.BODY_FONT)
+			if entry.World or entry.Event then
+				-- Pastille du monde : ce familier ne sort des tirages que là-bas. Familier d'événement : son événement.
+				local world = UiStyle.text(button, if entry.World
+					then TextFormat.upper(Config.Worlds[Config.WorldIndex[entry.World] or 1].Name)
+					else TextFormat.upper(entry.Event or ""), 12,
+					if entry.World then Color3.fromRGB(255, 225, 120) else Color3.fromRGB(255, 150, 40), UiStyle.BODY_FONT)
 				world.Name = "World"
 				world.Position = UDim2.fromOffset(6, 36)
 				world.Size = UDim2.new(1, -12, 0, 14)

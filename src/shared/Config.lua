@@ -555,6 +555,7 @@ Config.Badges = {
 	{ Key = "Index75", Id = 0, Name = "Index complet", Description = "Découvrir les 75 familiers." },
 	{ Key = "Ultime", Id = 0, Name = "Évolution ultime", Description = "Obtenir un familier Ultime dans la capsule d'évolution." },
 	{ Key = "Sigma", Id = 0, Name = "Légende Sigma", Description = "Obtenir un familier Sigma." },
+	{ Key = "Halloween2026", Id = 0, Name = "Halloween 2026", Description = "Ouvrir un œuf Citrouille pendant Halloween 2026." },
 } :: { BadgeDef }
 
 -- Groupe Roblox : les membres gagnent IncomeBonus de revenu en plus (server/ProgressionController, attribut "InGroup").
@@ -604,14 +605,14 @@ Config.Leaderboard = {
 -- une fois le message « MISE À JOUR n ! » (champ sauvegardé seenUpdate).
 export type UpdateLine = { Icon: string, Text: string }
 Config.Updates = {
-	Number = 1,
+	Number = 2,
 	Angle = 337.5, -- degrés : entre la 8e et la 1re base, place libre (kiosques à 22,5 + 90 x k, classement à 67,5)
 	Radius = 190,
 	Lines = {
-		{ Icon = "Gift", Text = "INVITE TES AMIS : 2 ŒUFS CHACUN !" },
-		{ Icon = "Sun", Text = "CHAQUE HEURE PILE : TROU NOIR DORÉ, POINTS x2 !" },
-		{ Icon = "Egg", Text = "ON TE PRÉVIENT QUAND TES ŒUFS SONT PRÊTS" },
-		{ Icon = "Codes", Text = "NOUVEAUX CODES : LAUNCH, BLACKHOLE, THANKS" },
+		{ Icon = "Ghost", Text = "HALLOWEEN : RAMASSE DES BONBONS !" },
+		{ Icon = "Egg", Text = "ŒUF CITROUILLE : 5 FAMILIERS LIMITÉS" },
+		{ Icon = "Moon", Text = "À LA DEMIE : HEURE HANTÉE, BONBONS x2 !" },
+		{ Icon = "Codes", Text = "NOUVEAU CODE : HALLOWEEN" },
 	} :: { UpdateLine },
 }
 
@@ -1144,7 +1145,7 @@ Config.Blackhole = {
 -- Les tirages donnés sont des tirages gratuits (server/PullRewards) : des œufs, comme au trou noir.
 ----------------------------------------------------------------------
 
-export type BonusReward = { Seconds: number?, Pulls: number? }
+export type BonusReward = { Seconds: number?, Pulls: number?, Candy: number? } -- Candy : bonbons d'Halloween
 
 -- Cadeau du jour : un par jour (jour UTC), 7 jours d'affilée puis on recommence au jour 1. Un jour manqué = retour au jour 1.
 Config.Daily = {
@@ -1192,6 +1193,9 @@ Config.Codes = {
 	LAUNCH = { Reward = { Seconds = 1800, Pulls = 3 }, Same = "LANCEMENT" },
 	BLACKHOLE = { Reward = { Pulls = 2 }, Same = "TROUNOIR" },
 	THANKS = { Reward = { Seconds = 900 }, Same = "MERCI" },
+	-- Halloween 2026 (Config.Halloween) : le même mot dans les deux langues.
+	HALLOWEEN = { Reward = { Pulls = 2, Candy = 100 }, Until = 1794200400 },
+	BOO = { Reward = { Candy = 50 }, Until = 1794200400 },
 } :: { [string]: GiftCode }
 
 -- Invitations récompensées (29 oct., docs/STRATEGIE_JOUEURS.md B1) : bouton « INVITE TES AMIS » du HUD
@@ -1213,6 +1217,30 @@ Config.GoldenHour = {
 	Minutes = 5,
 	PointsMultiplier = 2,
 	WarnSeconds = 60,
+}
+
+-- Halloween 2026 (29 oct., demande de Chouaib : « être dans le thème du moment ») : événement limité, du vendredi
+-- 30 oct. au dimanche 8 nov. au soir (heure de New York). shared/Halloween (dates, heure hantée), server/HalloweenController
+-- (bonbons, citrouilles, chaudron, décor), client/HalloweenMenu (le chaudron), client/Halloween (heure hantée, ambiance).
+--   - Bonbons (champ sauvegardé « candy », attribut « Candy ») : CandyPerItem par objet avalé par le trou noir (lancer
+--     valable), Pumpkin.Candy pour une citrouille sauvage de l'arène, x HauntedHour.CandyMultiplier pendant l'heure hantée.
+--   - Chaudron (dans l'arène, ou bouton BONBONS du HUD) : EggPrice bonbons = un œuf Citrouille, qui donne un des 5
+--     familiers limités de PetCatalog (Event = "Halloween"), tiré selon Chances (en %, affichées dans le menu).
+--     Ils ne sortent de rien d'autre et plus du tout après End : on les garde (échanges, marché, vols).
+--   - Heure hantée : HauntedHour.Minutes minutes à partir de la demi-heure (Offset) de chaque heure UTC, bonbons x2
+--     (le trou noir doré reste à l'heure pile).
+-- Studio : workspace:SetAttribute("DebugHalloween", true / false) force l'événement ; DebugGoldenShift avance l'heure.
+Config.Halloween = {
+	Start = 1793318400, -- 30 oct. 2026 à 0 h UTC
+	End = 1794200400, -- 9 nov. 2026 à 5 h UTC (dimanche 8 nov., minuit à New York)
+	CandyPerItem = 1,
+	Pumpkin = { Interval = 15, Max = 5, Candy = 15, Points = 2 }, -- une citrouille sauvage toutes les 15 s de Feeding
+	EggPrice = 100,
+	Chances = { ChatCitrouille = 55, FantomeDrap = 30, ChauveSourisVampire = 10, ChienSquelette = 4, ChaudronGlouton = 1 } :: { [string]: number },
+	Order = { "ChatCitrouille", "FantomeDrap", "ChauveSourisVampire", "ChienSquelette", "ChaudronGlouton" },
+	HauntedHour = { Offset = 30 * 60, Minutes = 5, CandyMultiplier = 2, WarnSeconds = 60 },
+	Cauldron = { Angle = 157.5, Radius = 190 }, -- place libre de l'arène (kiosques, classement, nouveautés ailleurs)
+	Badge = "Halloween2026",
 }
 
 -- Notifications Roblox (29 oct., docs/STRATEGIE_JOUEURS.md B2 ; shared/NotifyPlan, server/Notifications) : au départ

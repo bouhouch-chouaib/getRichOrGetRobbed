@@ -6,7 +6,7 @@
 --   ("Code", texte)     utiliser un code cadeau (une fois par joueur) ;
 --   ("Rebirth")         faire un Rebirth (SessionData.Rebirth vérifie monde et argent).
 -- Réponses (Remotes.BonusResult) : au joueur ("Daily", jour, argent, tirages), ("Quest", index, argent, tirages),
--- ("Code", ok, message, argent, tirages) ; à tout le serveur ("Rebirth", joueur, nombre).
+-- ("Code", ok, message, argent, tirages, bonbons?) ; à tout le serveur ("Rebirth", joueur, nombre).
 -- Invitations (Config.Invite) : ("Invited", nom de l'ami, argent, tirages) au nouveau venu, ("Invite", nom du nouveau,
 -- argent, tirages) à celui qui l'a invité.
 -- Amis : l'attribut "FriendsHere" compte les amis Roblox présents sur le serveur (bonus de revenu, EconomyController).
@@ -40,6 +40,9 @@ local function grant(player: Player, reward: Config.BonusReward, minimum: number
 	local pulls = reward.Pulls or 0
 	if pulls > 0 then
 		PullRewards.Grant(player, pulls, Perks.LuckBonus(player))
+	end
+	if reward.Candy then
+		SessionData.AddCandy(player, reward.Candy) -- bonbons d'Halloween (codes HALLOWEEN, BOO)
 	end
 	return money, pulls
 end
@@ -128,7 +131,7 @@ local function redeem(player: Player, text: unknown)
 	table.insert(data.codes, key)
 	local money, pulls = grant(player, def.Reward, Config.Daily.MinMoney)
 	SessionData.Sync(player)
-	Remotes.BonusResult:FireClient(player, "Code", true, code, money, pulls)
+	Remotes.BonusResult:FireClient(player, "Code", true, code, money, pulls, def.Reward.Candy)
 	print(string.format("[Bonus] %s : code %s (+%d$, %d tirage(s))", player.Name, code, money, pulls))
 end
 

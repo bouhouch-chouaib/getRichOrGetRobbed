@@ -291,7 +291,7 @@ for _, e in catalog.List do
 	table.insert(meshes, { id = e.Id, name = e.Name, rarity = e.Rarity, parts = geo, size = vec(size) })
 	m:Destroy()
 end
-assert(#report == #catalog.List and #catalog.List == 106, "Catalogue count (75 de base + 31 exclusifs des mondes)")
+assert(#report == #catalog.List and #catalog.List == 111, "Catalogue count (75 de base + 31 exclusifs des mondes + 5 d'Halloween)")
 assert(builder.Build("UnknownPet") == nil, "Unknown id")
 for old, new in catalog.Renamed do
 	local m = assert(builder.Build(old))

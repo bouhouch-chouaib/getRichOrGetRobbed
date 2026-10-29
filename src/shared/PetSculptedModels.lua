@@ -123,6 +123,12 @@ local families: { [string]: string } = {
 	GriffonDore = "Bird",
 	TitanAureole = "Golem",
 	GardienTrouNoir = "Dragon",
+	-- Halloween 2026 : formes de secours tant que les modèles Blender ne sont pas dans ArtModels
+	ChatCitrouille = "Beast",
+	FantomeDrap = "Spirit",
+	ChauveSourisVampire = "Bird",
+	ChienSquelette = "Beast",
+	ChaudronGlouton = "Mug",
 }
 Models.Families = families
 

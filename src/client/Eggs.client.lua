@@ -141,7 +141,8 @@ local function add(instance: Instance)
 	local rank = Config.RarityIndex[rarityId]
 	local rarity = Config.Rarities[rank]
 	local scale = eggScale(rank)
-	local model = Builder.Build(rarityId)
+	local look = instance:GetAttribute("Look")
+	local model = Builder.Build(rarityId, if type(look) == "string" then look else nil)
 	model:ScaleTo(scale)
 	model:PivotTo(instance.CFrame * CF(0, DROP_HEIGHT, 0))
 	model.Parent = visuals
@@ -832,7 +833,7 @@ Remotes.EggHatched.OnClientEvent:Connect(function(ownerId: number, key: string, 
 		shell = egg.model
 		eggPivot = egg.pivot
 	else
-		shell = Builder.Build(rarityId)
+		shell = Builder.Build(rarityId, if entry.Event == "Halloween" then "Citrouille" else nil)
 		shell:ScaleTo(eggScale(rank))
 		shell:PivotTo(eggPivot)
 		shell.Parent = visuals

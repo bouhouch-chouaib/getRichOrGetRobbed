@@ -49,6 +49,7 @@ export type PlayerData = {
 	upgrades: { [string]: number }, -- Id d'amélioration -> niveau acheté
 	tutorialDone: boolean, -- tutoriel terminé (ou passé) : ne plus l'afficher
 	keys: number, -- clés en réserve (Config.Keys, achetées en Robux)
+	candy: number, -- bonbons d'Halloween (Config.Halloween) : s'échangent au chaudron contre des œufs Citrouille
 	speedUps: number, -- accélérations payées sans œuf à accélérer : servent à la prochaine demande (Config.SpeedUp)
 	tier: number, -- monde atteint (Config.Worlds), 1 = Prairie : le plus loin débloqué (bonus de revenu)
 	world: number, -- monde où le joueur se trouve (déjà visité, <= tier) : l'apparence et la musique
@@ -147,6 +148,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		tutorialDone = data.tutorialDone,
 		receipts = table.clone(data.receipts),
 		keys = data.keys,
+		candy = data.candy,
 		speedUps = data.speedUps,
 		tier = data.tier,
 		world = data.world,
@@ -337,6 +339,7 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 	data.pity = numberOr(saved.pity, 0)
 	data.totalPulls = math.max(0, math.floor(numberOr(saved.totalPulls, -1)))
 	data.keys = math.max(math.floor(numberOr(saved.keys, 0)), 0) + data.keys
+	data.candy = math.max(math.floor(numberOr(saved.candy, 0)), 0) + data.candy
 	data.speedUps = math.max(math.floor(numberOr(saved.speedUps, 0)), 0) + data.speedUps
 	data.tier = math.clamp(math.floor(numberOr(saved.tier, 1)), 1, #Config.Worlds)
 	data.world = math.clamp(math.floor(numberOr(saved.world, data.tier)), 1, data.tier)
@@ -552,6 +555,7 @@ local function sync(player: Player)
 	player:SetAttribute("BaseCapacity", Config.GetIncomeSlots(data.rebirths))
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("Keys", data.keys)
+	player:SetAttribute("Candy", data.candy)
 	player:SetAttribute("SpeedUps", data.speedUps)
 	player:SetAttribute("Tier", data.tier)
 	player:SetAttribute("World", data.world)
@@ -685,6 +689,7 @@ local function onPlayerAdded(player: Player)
 		upgrades = {},
 		tutorialDone = false,
 		keys = 0,
+		candy = 0,
 		speedUps = 0,
 		tier = 1,
 		world = 1,
@@ -972,6 +977,31 @@ function SessionData.AddKeys(player: Player, amount: number)
 		data.keys += amount
 		sync(player)
 	end
+end
+
+-- Bonbons d'Halloween (Config.Halloween, server/HalloweenController).
+function SessionData.GetCandy(player: Player): number
+	local data = storage[player]
+	return if data then data.candy else 0
+end
+
+function SessionData.AddCandy(player: Player, amount: number)
+	local data = storage[player]
+	if data and amount > 0 then
+		data.candy += math.floor(amount)
+		sync(player)
+	end
+end
+
+-- Retire amount bonbons si le joueur les a (sauvegarde chargée) : true si c'est fait.
+function SessionData.SpendCandy(player: Player, amount: number): boolean
+	local data = storage[player]
+	if not data or not data.loaded or data.candy < amount then
+		return false
+	end
+	data.candy -= amount
+	sync(player)
+	return true
 end
 
 function SessionData.SpendKey(player: Player): boolean

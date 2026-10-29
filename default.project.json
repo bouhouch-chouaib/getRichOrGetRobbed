@@ -19,6 +19,7 @@
         "MarketUpdate": { "$className": "RemoteEvent" },
         "VacuumPull": { "$className": "RemoteEvent" },
         "BonusResult": { "$className": "RemoteEvent" },
+        "Halloween": { "$className": "RemoteEvent" },
         "ThrowItem": { "$className": "RemoteEvent" },
         "SetMagnet": { "$className": "RemoteEvent" },
         "Knockback": { "$className": "RemoteEvent" },

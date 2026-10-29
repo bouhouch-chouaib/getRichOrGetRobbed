@@ -152,4 +152,7 @@ return {
 	-- Serveur -> client(s) : ("Daily", jour, argent, tirages), ("Quest", index, argent, tirages),
 	-- ("Code", ok, message, argent?, tirages?), et à tous : ("Rebirth", joueur, nombre de Rebirths).
 	BonusResult = remote("BonusResult"),
+	-- Halloween (server/HalloweenController) : client -> serveur ("Buy") ; serveur -> client ("Bought", petId) ou
+	-- ("NoCandy").
+	Halloween = remote("Halloween"),
 }
