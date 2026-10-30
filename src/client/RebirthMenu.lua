@@ -1,7 +1,7 @@
 --!strict
 -- RebirthMenu : fenêtre REBIRTH (Config.Rebirth, validé par server/ProgressionController -> SessionData.Rebirth).
 -- À gauche : ce qu'on gagne (revenu x(1+n) -> x(1+n+1), familiers dans la base), à droite : les deux conditions
--- (dernier monde atteint, argent) avec une barre, et ce qu'on garde / perd. Le bouton demande une 2e pression
+-- (monde Config.Rebirth.RequiredTier atteint, argent) avec une barre, l'entraînement plus rapide, ce qu'on garde / perd. Le bouton demande une 2e pression
 -- (« SÛR ? ») pour éviter un Rebirth par erreur. Célébration en grand quand c'est fait (RebirthMenu.celebrate).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -87,10 +87,13 @@ function RebirthMenu.create(gui: Instance): Menu
 	local percent = UiStyle.number(bar, "", 18, WHITE)
 	percent.Size = UDim2.fromScale(1, 1)
 	percent.ZIndex = 3
-	local keep = text(side, "TU GARDES : FAMILIERS, ŒUFS, VITESSE, FORCE, ARMES ET ACHATS ROBUX", 20, MONEY, 110, 80)
+	-- 30 oct. : la Vitesse et la Force repartent de zéro, mais l'entraînement va plus vite à vie.
+	local trainingLine = text(side, "", 22, UiStyle.Colors.Cyan, 108, 28)
+	trainingLine.TextXAlignment = Enum.TextXAlignment.Left
+	local keep = text(side, "TU GARDES : FAMILIERS, ŒUFS, ARMES ET ACHATS ROBUX", 20, MONEY, 142, 56)
 	keep.TextXAlignment = Enum.TextXAlignment.Left
-	local lose = text(side, "TU PERDS : TON ARGENT, TES MONDES ET LA BOUTIQUE", 20,
-		Color3.fromRGB(255, 120, 120), 196, 70)
+	local lose = text(side, "TU PERDS : ARGENT, MONDES, BOUTIQUE, VITESSE ET FORCE", 20,
+		Color3.fromRGB(255, 120, 120), 204, 56)
 	lose.TextXAlignment = Enum.TextXAlignment.Left
 
 	local button = UiStyle.button(window.content, "REBIRTH !", UDim2.new(1, 0, 0, 66), GREY, 36)
@@ -113,6 +116,13 @@ function RebirthMenu.create(gui: Instance): Menu
 		local chambers, nextChambers = Config.GetCapsuleSlots(count), Config.GetCapsuleSlots(count + 1)
 		capsuleLine.Text = if nextChambers > chambers then string.format("%d  →  %d", chambers, nextChambers)
 			else string.format("%d (MAX)", chambers)
+		local function factor(value: number): string
+			local shown = string.gsub(string.format("%.1f", value), "%.0$", "")
+			shown = string.gsub(shown, "%.", ",")
+			return "x" .. shown
+		end
+		trainingLine.Text = string.format("ENTRAÎNEMENT %s  →  %s", factor(Config.GetRebirthTrainingMultiplier(count)),
+			factor(Config.GetRebirthTrainingMultiplier(count + 1)))
 		worldLine.Text = (if tierOk then "OK  " else "") .. "VA DANS LE MONDE " .. worldName
 		worldLine.TextColor3 = if tierOk then MONEY else WHITE
 		moneyLine.Text = string.format("IL TE FAUT %s  (TU AS %s)", NumberFormat.money(price), NumberFormat.money(money))

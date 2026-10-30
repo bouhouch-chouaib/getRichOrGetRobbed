@@ -291,7 +291,7 @@ services.PolicyService = {
 services.BadgeService = {}
 game.JobId = "test"
 game.BindToClose = function() end
-cache.Remotes = { TutorialDone = { OnServerEvent = signal() }, RewardsGranted = { FireClient = function() end } }
+cache.Remotes = { TutorialDone = { OnServerEvent = signal() }, GuideSeen = { OnServerEvent = signal() }, RewardsGranted = { FireClient = function() end } }
 cache.PetStats = {
 	Sum = function()
 		return { Speed = 0, Strength = 0 }
@@ -403,7 +403,8 @@ assert(next((session.HatchEggs(player, os.time() + 10000))) == nil, "unloaded pr
 local early = session.GetEggs(player)[1]
 records.u_1234 = { pets = { [byRank[2]] = 1 }, eggs = { eggs.Create(byRank[3], 1, 0, "saved") }, money = 100 }
 tasks[1].f(table.unpack(tasks[1].args)) -- actual loadPlayer, no autosave loop
-assert(session.IsLoaded(player) and #session.GetEggs(player) == 2, "merge pending rewards during async load")
+-- 30 oct. : un œuf par exemplaire (places de la couveuse) : 2 œufs reçus + 1 sauvegardé.
+assert(session.IsLoaded(player) and #session.GetEggs(player) == 3, "merge pending rewards during async load")
 assert(session.GetOwnedPets(player)[byRank[2]] == 1, "old pets untouched")
 assert(
 	not session.Get(player).starter.eligible and not session.GrantStarterEgg(player),
@@ -418,13 +419,13 @@ assert(
 local firstHatch = session.HatchEggs(player, os.time())
 assert(firstHatch[byRank[3]] == 1 and firstHatch[byRank[1]] == nil, "due offline eggs hatch once")
 assert(session.Save(player))
-assert(#records.u_1234.eggs == 1 and records.u_1234.pets[byRank[3]] == 1, "hatch saved atomically")
+assert(#records.u_1234.eggs == 2 and records.u_1234.pets[byRank[3]] == 1, "hatch saved atomically")
 snapshotHook = function()
 	session.HatchEggs(player, early.readyAt)
 end
 assert(session.Save(player))
 assert(
-	#records.u_1234.eggs == 1 and records.u_1234.pets[byRank[1]] == nil,
+	#records.u_1234.eggs == 2 and records.u_1234.pets[byRank[1]] == nil,
 	"save snapshot cannot contain both egg and hatched credit"
 )
 assert(session.Save(player))
@@ -545,7 +546,8 @@ do
 			nestEgg = egg
 		end
 	end
-	assert(nestEgg and eggs.WaitLeft(nestEgg, time) <= config.Eggs.Seconds.Mythique, "a waiting nest egg")
+	-- (30 oct. : il peut attendre sa place dans la couveuse en plus de son incubation ; accéléré, il éclot quand même.)
+	assert(nestEgg and eggs.WaitLeft(nestEgg, time) >= config.Eggs.Seconds.Mythique, "a waiting nest egg")
 	assert(session.SpeedUpEgg(player, nestEgg.id, time) and eggs.WaitLeft(nestEgg, time) == 0, "the nest egg is ready now")
 	assert(not session.SpeedUpEgg(player, nestEgg.id, time), "nothing left to speed up on it")
 	local hatched = session.HatchEggs(player, time)
@@ -758,7 +760,8 @@ cache.Remotes.Evolution = { FireAllClients = function() end, OnServerEvent = sig
 -- Evolution machine (Config.Evolution): one egg leaves the nests, never hatches on its own, evolves up to its
 -- secret limit, then hatches as the evolved form chosen by the player.
 local now = os.time()
-rejoined.AddEggs(player, { [byRank[3]] = 2 })
+-- (30 oct. : AddEggs crée un œuf par exemplaire ; les lots de 2 viennent des vieilles sauvegardes.)
+table.insert(assert(rejoined.Get(player)).eggs, assert(eggs.Create(byRank[3], 2, now, "legacy-lot")))
 local lot
 for _, egg in ipairs(rejoined.GetEggs(player)) do
 	if egg.petId == byRank[3] and egg.count == 2 then
@@ -793,7 +796,7 @@ assert(rejoined.GetEvolving(player) == nil and rejoined.Get(player).pets[evolved
 -- (Config.Evolution.DuplicatesToCapsule) n'y entre plus ; chaque chambre tente sa chance ; on ouvre l'une puis l'autre.
 profile.rebirths = 1
 assert(rejoined.GetCapsuleSlots(player) == 2, "one more chamber after a Rebirth")
-rejoined.AddEggs(player, { [byRank[4]] = 2 })
+table.insert(assert(rejoined.Get(player)).eggs, assert(eggs.Create(byRank[4], 2, now, "legacy-pair")))
 local pair
 for _, egg in ipairs(rejoined.GetEggs(player)) do
 	if egg.petId == byRank[4] and egg.count == 2 and not egg.evolve then
@@ -886,7 +889,9 @@ for _, anchor in ipairs(folder:GetChildren()) do
 end
 rejoined.AddEggs(player, { [byRank[2]] = 1 })
 assert(coroutine.resume(loop))
-assert(#folder:GetChildren() == 5)
+-- 30 oct. : 4 places dans la couveuse ; le 5e œuf attend la sienne (pas de nid, compté dans « Waiting »).
+assert(#folder:GetChildren() == 4 and folder:GetAttribute("Waiting") == 1 and folder:GetAttribute("Slots") == 4,
+	"a 5th egg waits for its place")
 for name, nest in pairs(before) do
 	assert(folder:FindFirstChild(name):GetAttribute("Nest") == nest, "nests are kept until the hatch")
 end
@@ -895,13 +900,14 @@ for _, egg in ipairs(rejoined.GetEggs(player)) do
 end
 assert(coroutine.resume(loop))
 assert(#folder:GetChildren() == 0 and hatchEvents == 5 and celebrated == 3)
-assert(inBaseEvents == 3, "one pet per species walks out of its nest")
+-- (le 5e œuf attendait sa place : sans nid, son familier n'en sort pas)
+assert(inBaseEvents == 2, "one pet per species walks out of its nest")
 assert(coroutine.resume(loop))
 assert(hatchEvents == 5 and celebrated == 3, "subsequent ticks do not replay hatches")
--- More eggs than nests: the rest wait for a free nest.
+-- More eggs than places: the rest wait for a free place (4 places, Config.Eggs.Slots).
 rejoined.AddEggs(player, { [byRank[1]] = layout.MAX_NESTS + 3 })
 assert(coroutine.resume(loop))
-assert(#folder:GetChildren() == layout.MAX_NESTS and folder:GetAttribute("Waiting") == 3)
+assert(#folder:GetChildren() == config.Eggs.Slots and folder:GetAttribute("Waiting") == layout.MAX_NESTS + 3 - config.Eggs.Slots)
 owner = nil
 assert(coroutine.resume(loop))
 assert(#folder:GetChildren() == 0, "vacated bases remove all egg visuals")
@@ -935,5 +941,43 @@ for _, feet in ipairs({ { "LeftFoot", "RightFoot" }, { "Left Leg", "Right Leg" }
 	assert(not rig.particles[1].Enabled and rig.shards[1].Transparency == 1)
 	aura.Destroy(rig)
 	assert(not character:FindFirstChild("AstralAura"))
+end
+-- Places de la couveuse (30 oct., EggIncubation.Schedule) : 4 places, les suivants attendent dans leur ordre d'arrivée.
+do
+	local queue, fresh = {}, {}
+	for index = 1, 6 do
+		local egg = assert(eggs.Create("ChienSaucisse", 1, 1000, "slot" .. index)) -- Commun : 15 s
+		table.insert(queue, egg)
+		fresh[egg] = true
+	end
+	eggs.Schedule(queue, 4, 1000, fresh)
+	for index = 1, 4 do
+		assert(queue[index].startedAt == 1000 and queue[index].readyAt == 1015, "les 4 premiers chauffent tout de suite")
+	end
+	assert(queue[5].startedAt == 1015 and queue[5].readyAt == 1030, "le 5e attend une place")
+	assert(queue[6].startedAt == 1015 and eggs.IsWaiting(queue[6], 1010), "le 6e aussi")
+	-- Accélérer un œuf qui attend : il éclot tout de suite ; un qui chauffe : sa place se libère pour le suivant.
+	eggs.SpeedUp(queue[6], 1005)
+	assert(queue[6].readyAt == 1005 and not eggs.IsWaiting(queue[6], 1005), "accéléré : éclot tout de suite")
+	eggs.SpeedUp(queue[1], 1006)
+	eggs.Schedule(queue, 4, 1006)
+	assert(queue[5].startedAt == 1006 and queue[5].readyAt == 1021, "la place libérée sert au suivant")
+	-- Une place achetée : le premier qui attend part tout de suite.
+	local late = assert(eggs.Create("ChienSaucisse", 1, 1006, "slot7"))
+	table.insert(queue, late)
+	eggs.Schedule(queue, 4, 1006, { [late] = true })
+	assert(late.startedAt == 1015, "plein : il attend")
+	eggs.Schedule(queue, 5, 1007)
+	assert(late.startedAt == 1007 and late.readyAt == 1022, "5e place : il part")
+	-- Vieille sauvegarde avec 6 œufs qui chauffent : un nouveau attend qu'il en reste moins de 4.
+	local old = {}
+	for index = 1, 6 do
+		table.insert(old, { id = "old" .. index, petId = "ChienSaucisse", count = 1, startedAt = 0, readyAt = 2000 + index })
+	end
+	local extra = assert(eggs.Create("ChienSaucisse", 1, 1000, "extra"))
+	table.insert(old, extra)
+	eggs.Schedule(old, 4, 1000, { [extra] = true })
+	assert(extra.startedAt == 2003, "il attend la fin du 3e (il en reste 3 qui chauffent)")
+	print("PASS: egg slots queue (4 places, order, speed-up, bought place, old saves)")
 end
 print("PASS: eggs, persistence, rewards, receipts, replication and R6/R15 player aura")

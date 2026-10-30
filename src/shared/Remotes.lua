@@ -105,6 +105,8 @@ return {
 	StealNotice = remote("StealNotice"),
 	-- Client -> serveur : () tutoriel terminé ou passé (enregistré dans la sauvegarde).
 	TutorialDone = remote("TutorialDone"),
+	-- Client -> serveur : (nom) palier de guidage montré (client/GuideArrows), gardé dans la sauvegarde.
+	GuideSeen = remote("GuideSeen"),
 	-- Serveur -> tous : événements des paliers du trou noir (server/BlackholeTiers -> client/BlackholeFx) :
 	--   ("TierUp", palier)              le trou noir monte d'un palier
 	--   ("Spit")                        il recrache des roches de lave (palier 2)

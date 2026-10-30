@@ -36,7 +36,7 @@ type Category = { title: string, subtitle: string, pill: string, icon: string, c
 
 local CATEGORIES: { Category } = {
 	{ title = "Entraînement", subtitle = "Plus vite, plus fort", pill = "SPORT", icon = "Treadmill", color = UiStyle.Colors.Speed, ids = { "Treadmill", "Bench" } },
-	{ title = "Bonus", subtitle = "Plus d'objets, plus de place", pill = "BONUS", icon = "Clover", color = UiStyle.Colors.Green, ids = { "ItemQuality", "Backpack", "Magnet", "LongLock" } },
+	{ title = "Bonus", subtitle = "Plus d'objets, plus de place", pill = "BONUS", icon = "Clover", color = UiStyle.Colors.Green, ids = { "EggSlots", "ItemQuality", "Backpack", "Magnet", "LongLock" } },
 	{ title = "Combat", subtitle = "Arrête les voleurs", pill = "COMBAT", icon = "Bat", color = Color3.fromRGB(240, 70, 90), ids = { "WeaponBat", "WeaponGrapple", "PowerInvisible" } },
 }
 
@@ -48,6 +48,7 @@ local CARD_COLORS: { [string]: Color3 } = {
 	Backpack = Color3.fromRGB(40, 190, 150),
 	Magnet = Color3.fromRGB(150, 210, 40),
 	LongLock = Color3.fromRGB(150, 80, 255),
+	EggSlots = Color3.fromRGB(255, 170, 40),
 	WeaponBat = Color3.fromRGB(230, 100, 50),
 	WeaponGrapple = Color3.fromRGB(235, 60, 90),
 	PowerInvisible = Color3.fromRGB(150, 90, 240),
@@ -61,6 +62,7 @@ local SHORT: { [string]: string } = {
 	Backpack = "Porte plus d'objets à la fois",
 	Magnet = "Les objets sautent vers toi",
 	LongLock = "Ta base reste fermée plus longtemps",
+	EggSlots = "Plus d'œufs chauffent en même temps",
 	WeaponBat = "Fais tout lâcher à un voleur",
 	WeaponGrapple = "Ramène un joueur jusqu'à toi",
 	PowerInvisible = string.format("%d s presque invisible", Config.Weapons.Invisibility.Duration),
@@ -98,6 +100,8 @@ local function effectAt(id: string, level: number): string?
 		return if level > 0 then "Portée " .. Config.Magnet.Radius[math.min(level, #Config.Magnet.Radius)] .. " studs" else "Aucun aimant"
 	elseif id == "LongLock" then
 		return "Verrou " .. Config.GetLockDuration(level > 0, 0) .. " s"
+	elseif id == "EggSlots" then
+		return Config.GetEggSlots(level) .. " places"
 	end
 	return nil
 end

@@ -54,13 +54,14 @@ BaseLayout.Spawn = Vector2.new(0, 6)
 BaseLayout.PetZoneCenter = Vector2.new(0, -3)
 BaseLayout.PetZoneHalf = Vector2.new(HALF - 9, 19)
 
--- Couveuse au fond : un sol de paille, un rebord ouvert au milieu, 2 rangées de 6 nids.
+-- Couveuse au fond : un sol de paille, un rebord ouvert au milieu, 2 rangées de 4 nids (30 oct. : une place de la
+-- couveuse par nid, Config.Eggs.MaxSlots ; avant 2 x 6).
 BaseLayout.IncubatorCenter = Vector2.new(0, HALF - 11)
 BaseLayout.IncubatorHalf = Vector2.new(HALF - 8, 8)
-BaseLayout.NEST_COLUMNS = 6
+BaseLayout.NEST_COLUMNS = 4
 BaseLayout.NEST_ROWS = 2
 BaseLayout.MAX_NESTS = BaseLayout.NEST_COLUMNS * BaseLayout.NEST_ROWS
-local NEST_SPACING = Vector2.new(11, 8)
+local NEST_SPACING = Vector2.new(13, 8)
 local NESTS_OFFSET_X = 0
 
 -- Capsule d'évolution (Config.Evolution) : DEHORS, derrière la clôture du fond, côté droit (au sol de l'arène).

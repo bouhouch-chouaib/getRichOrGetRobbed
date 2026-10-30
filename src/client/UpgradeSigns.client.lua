@@ -96,7 +96,7 @@ for _, station in ipairs(STATIONS) do
 	player:GetAttributeChangedSignal("Upgrade_" .. id):Connect(function()
 		local level = levelOf(id)
 		refreshPrompt(id)
-		-- Nouveau modèle débloqué (niveaux 6, 11, 16, 21) : on le fête.
+		-- Nouveau modèle débloqué (niveaux 11, 21, 31... : un modèle tous les 10 niveaux) : on le fête.
 		if level > previous and Config.IsNewStationModel(level) then
 			local tier = Config.GetStationTier(level)
 			Toast.show(string.format("%s : MODÈLE %s !", TextFormat.upper(station.title), TextFormat.upper(tier.Title or tier.Name)), tier.Accent)

@@ -1,7 +1,8 @@
 --!strict
 -- Toast : message temporaire en bandeau (16 oct., façon packs « Studs UI ») : une bande de couleur qui s'efface sur les
 -- côtés, texte blanc épais à contour noir. Il arrive en grossissant, les plus anciens remontent et s'effacent (3 au
--- plus à l'écran). Utilisable par tous les scripts client : Toast.show("Texte", couleur?)
+-- plus à l'écran). Utilisable par tous les scripts client : Toast.show("Texte", couleur?, secondes?)
+-- 30 oct. (playtest) : 2,6 s -> 6 s par défaut, les jeunes joueurs n'avaient pas le temps de lire.
 
 local Typography = require(game:GetService("ReplicatedStorage").Shared.Typography)
 local Players = game:GetService("Players")
@@ -25,7 +26,7 @@ local BLACK = Color3.new(0, 0, 0)
 local HEIGHT = 50
 local GAP = 6
 local MAX_SHOWN = 3
-local LIFETIME = 2.6
+local LIFETIME = 6
 -- Au milieu de l'écran : au-dessus du panneau du tutoriel et des capsules de tirage, sous le bandeau d'éclosion.
 local BASE_Y = 0.44
 
@@ -61,7 +62,7 @@ local function remove(banner: Banner)
 	end)
 end
 
-function Toast.show(message: string, color: Color3?)
+function Toast.show(message: string, color: Color3?, seconds: number?)
 	local tint = color or WHITE
 	-- Les anciens montent d'une place ; au-delà de MAX_SHOWN, le plus vieux s'en va.
 	for _, banner in ipairs(banners) do
@@ -116,7 +117,7 @@ function Toast.show(message: string, color: Color3?)
 
 	local banner: Banner = { frame = frame, scale = scale, slot = 1, alive = true }
 	table.insert(banners, 1, banner)
-	task.delay(LIFETIME, function()
+	task.delay(seconds or LIFETIME, function()
 		remove(banner)
 	end)
 end

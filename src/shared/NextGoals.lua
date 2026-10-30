@@ -32,10 +32,10 @@ local ROUND = Config.Durations.Feeding + Config.Durations.Digesting
 
 function NextGoals.List(state: State): { Goal }
 	local goals: { Goal } = {}
-	-- Prochain monde, ou le Rebirth au dernier monde.
+	-- Prochain monde, ou le Rebirth (dernier monde, ou monde suivant qui demande plus de Rebirths : Config.Worlds[].Rebirths).
 	local nextWorld = Config.Worlds[state.tier + 1]
 	local price, label
-	if nextWorld then
+	if nextWorld and state.rebirths >= Config.GetWorldRebirths(nextWorld) then
 		price, label = nextWorld.Price, "MONDE " .. TextFormat.upper(nextWorld.Name)
 	elseif state.tier >= Config.Rebirth.RequiredTier then
 		price, label = Config.GetRebirthPrice(state.rebirths), "REBIRTH " .. (state.rebirths + 1)

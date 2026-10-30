@@ -63,6 +63,7 @@ export type PlayerData = {
 	-- invited = UserIds des nouveaux amis qu'il a fait venir et pour lesquels il a été récompensé.
 	referral: { by: number, invited: { number } },
 	seenUpdate: number, -- dernière mise à jour annoncée au joueur (Config.Updates.Number, server/UpdateBoard)
+	guides: { string }, -- paliers de guidage déjà montrés (30 oct., client/GuideArrows : une seule fois chacun)
 	-- Familiers que le joueur a mis lui-même dans la base (dans l'ordre) ou retirés (shared/PetRoster).
 	basePicks: { placed: { string }, removed: { string } },
 	magnetEnabled: boolean,
@@ -73,6 +74,7 @@ export type PlayerData = {
 
 local MAX_STAT = 2 ^ 53 -- valeur max affichée dans la liste des joueurs
 local MAX_RECEIPTS = 100 -- on garde les 100 derniers achats (largement assez pour repérer un doublon)
+local MAX_GUIDES, MAX_GUIDE_ID = 40, 24 -- paliers de guidage gardés, longueur d'un nom
 
 local SessionData = {}
 
@@ -144,7 +146,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		selfBest = data.selfBest,
 		totalPulls = data.totalPulls,
 		upgrades = table.clone(data.upgrades),
-		stationScale = 25, -- tapis et banc sur 25 niveaux (avant : 8, converti à la lecture)
+		stationScale = 100, -- tapis et banc sur 100 niveaux (avant : 25, et encore avant 8 ; convertis à la lecture)
 		tutorialDone = data.tutorialDone,
 		receipts = table.clone(data.receipts),
 		keys = data.keys,
@@ -159,6 +161,7 @@ local function serialize(data: PlayerData, session: SessionLock?): { [string]: a
 		codes = table.clone(data.codes),
 		referral = { by = data.referral.by, invited = table.clone(data.referral.invited) },
 		seenUpdate = data.seenUpdate,
+		guides = table.clone(data.guides),
 		basePicks = { placed = table.clone(data.basePicks.placed), removed = table.clone(data.basePicks.removed) },
 		session = session,
 	}
@@ -368,9 +371,12 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 		for id, level in pairs(saved.upgrades) do
 			if type(id) == "string" and type(level) == "number" then
 				local value = math.floor(level)
-				-- Ancienne échelle des stations (8 niveaux) : convertie vers les 25 niveaux actuels.
-				if saved.stationScale == nil and (id == "Treadmill" or id == "Bench") and value > 0 then
-					value = Config.Training.OldStationLevels[math.min(value, #Config.Training.OldStationLevels)]
+				-- Anciennes échelles des stations (8 puis 25 niveaux) : converties vers les 100 niveaux actuels.
+				if (id == "Treadmill" or id == "Bench") and value > 0 and saved.stationScale ~= 100 then
+					if saved.stationScale == nil then
+						value = Config.Training.OldStationLevels[math.min(value, #Config.Training.OldStationLevels)]
+					end
+					value = Config.StationLevelFrom25(math.min(value, 25))
 				end
 				data.upgrades[id] = math.max(data.upgrades[id] or 0, value)
 			end
@@ -426,6 +432,13 @@ local function applySaved(data: PlayerData, saved: { [string]: any })
 		data.quests = { day = math.floor(numberOr(saved.quests.day, 0)), list = list }
 	end
 	data.seenUpdate = math.max(0, math.floor(numberOr(saved.seenUpdate, 0)))
+	if type(saved.guides) == "table" then
+		for _, id in ipairs(saved.guides) do
+			if type(id) == "string" and #id <= MAX_GUIDE_ID and #data.guides < MAX_GUIDES and not table.find(data.guides, id) then
+				table.insert(data.guides, id)
+			end
+		end
+	end
 	if type(saved.referral) == "table" then
 		data.referral.by = math.max(0, math.floor(numberOr(saved.referral.by, 0)))
 		if type(saved.referral.invited) == "table" then
@@ -554,6 +567,7 @@ local function sync(player: Player)
 	player:SetAttribute("MagnetEnabled", data.magnetEnabled)
 	player:SetAttribute("BaseCapacity", Config.GetIncomeSlots(data.rebirths))
 	player:SetAttribute("TutorialDone", data.tutorialDone)
+	player:SetAttribute("GuidesSeen", table.concat(data.guides, ","))
 	player:SetAttribute("Keys", data.keys)
 	player:SetAttribute("Candy", data.candy)
 	player:SetAttribute("SpeedUps", data.speedUps)
@@ -701,6 +715,7 @@ local function onPlayerAdded(player: Player)
 		codes = {},
 		referral = { by = 0, invited = {} },
 		seenUpdate = 0,
+		guides = {},
 		basePicks = { placed = {}, removed = {} },
 		magnetEnabled = false,
 		starter = StarterJourney.Restore(nil, false),
@@ -740,6 +755,17 @@ function SessionData.Init()
 		if player:GetAttribute("DataLoaded") ~= true then return end
 		OnboardingAnalytics.Dismissed(player, skipped)
 		SessionData.SetTutorialDone(player)
+	end)
+	-- Palier de guidage montré (client/GuideArrows) : sans enjeu, on note juste son nom pour ne plus le remontrer.
+	Remotes.GuideSeen.OnServerEvent:Connect(function(player: Player, id: unknown)
+		local data = storage[player]
+		if not data or not data.loaded or type(id) ~= "string" or #id > MAX_GUIDE_ID or not string.match(id, "^%a+$") then
+			return
+		end
+		if #data.guides < MAX_GUIDES and not table.find(data.guides, id) then
+			table.insert(data.guides, id)
+			sync(player)
+		end
 	end)
 	Players.PlayerAdded:Connect(onPlayerAdded)
 	Players.PlayerRemoving:Connect(function(player)
@@ -914,7 +940,12 @@ function SessionData.AdvanceTier(player: Player): number?
 	if not data or not data.loaded or data.tier >= #Config.Worlds then
 		return nil
 	end
-	local price = Config.Worlds[data.tier + 1].Price
+	local world = Config.Worlds[data.tier + 1]
+	-- 30 oct. : les derniers mondes demandent des Rebirths (Config.Worlds[].Rebirths).
+	if data.rebirths < Config.GetWorldRebirths(world) then
+		return nil
+	end
+	local price = world.Price
 	if data.money < price then
 		return nil
 	end
@@ -925,9 +956,10 @@ function SessionData.AdvanceTier(player: Player): number?
 	return data.tier
 end
 
--- Rebirth (Config.Rebirth) : il faut avoir atteint le dernier monde et payer le prix. On repart en Prairie avec 0 $ et
--- les améliorations de la Boutique à zéro (sauf Config.Rebirth.KeepShopItems) ; familiers, œufs, entraînement, clés
--- et achats Robux restent. Sans attente. Retourne le nouveau nombre de Rebirths, ou nil si impossible.
+-- Rebirth (Config.Rebirth) : il faut avoir atteint le monde RequiredTier et payer le prix. On repart en Prairie avec 0 $,
+-- les améliorations de la Boutique à zéro (sauf Config.Rebirth.KeepShopItems) et (30 oct.) la Vitesse et la Force à
+-- zéro ; l'entraînement ira ensuite plus vite à vie (Config.GetRebirthTrainingMultiplier). Familiers, œufs, clés et
+-- achats Robux restent. Sans attente. Retourne le nouveau nombre de Rebirths, ou nil si impossible.
 function SessionData.Rebirth(player: Player): number?
 	local data = storage[player]
 	if not data or not data.loaded or data.tier < Config.Rebirth.RequiredTier then
@@ -940,6 +972,11 @@ function SessionData.Rebirth(player: Player): number?
 	data.money = 0
 	data.tier = 1
 	data.world = 1
+	for _, stat in ipairs({ "Speed", "Strength" }) do
+		data.levels[stat] = 0
+		data.xp[stat] = 0
+	end
+	applySpeed(player, statValue(data, "Speed"))
 	for _, item in ipairs(Config.Shop) do
 		if not Config.Rebirth.KeepShopItems[item.Id] and (data.upgrades[item.Id] or 0) > 0 then
 			data.upgrades[item.Id] = 0
@@ -1068,18 +1105,35 @@ function SessionData.ResetRoundScores()
 	end
 end
 
+-- Places de la couveuse (Config.GetEggSlots : 4 + amélioration « EggSlots », 8 au plus).
+function SessionData.GetEggSlots(player: Player): number
+	local data = storage[player]
+	return Config.GetEggSlots(if data then data.upgrades.EggSlots or 0 else 0)
+end
+
+-- Recalcule la file de la couveuse (EggIncubation.Schedule) : fresh = œufs qui viennent d'arriver.
+local function scheduleEggs(data: PlayerData, time: number, fresh: { [EggIncubation.Egg]: boolean }?)
+	EggIncubation.Schedule(data.eggs, Config.GetEggSlots(data.upgrades.EggSlots or 0), time, fresh)
+end
+
 -- These methods never yield: a hatch removes eggs and credits pets in one transaction.
+-- Un œuf par exemplaire : chacun prend sa place dans la couveuse (ou attend son tour).
 function SessionData.AddEggs(player: Player, rewards: { [string]: number })
 	local data = storage[player]
 	if not data then return end
 	local time = os.time()
+	local fresh: { [EggIncubation.Egg]: boolean } = {}
 	for petId, count in pairs(rewards) do
-		local egg = EggIncubation.Create(petId, count, time, HttpService:GenerateGUID(false))
-		if egg then
-			table.insert(data.eggs, egg)
-			OnboardingAnalytics.Mark(player, "EggReceived")
+		for _ = 1, math.max(0, math.floor(count)) do
+			local egg = EggIncubation.Create(petId, 1, time, HttpService:GenerateGUID(false))
+			if egg then
+				table.insert(data.eggs, egg)
+				fresh[egg] = true
+				OnboardingAnalytics.Mark(player, "EggReceived")
+			end
 		end
 	end
+	scheduleEggs(data, time, fresh)
 	sync(player)
 end
 
@@ -1090,6 +1144,7 @@ function SessionData.GrantStarterEgg(player: Player): boolean
 	local egg = StarterJourney.Grant(data.starter, os.time(), HttpService:GenerateGUID(false))
 	if not egg then return false end
 	table.insert(data.eggs, egg)
+	scheduleEggs(data, os.time(), { [egg] = true })
 	OnboardingAnalytics.Mark(player, "EggReceived")
 	sync(player)
 	return true
@@ -1144,6 +1199,7 @@ function SessionData.SpeedUpEgg(player: Player, eggId: string, time: number): bo
 		return false
 	end
 	EggIncubation.SpeedUp(egg, time)
+	scheduleEggs(data, time) -- sa place se libère : les œufs qui attendaient avancent
 	sync(player)
 	return true
 end
@@ -1265,21 +1321,28 @@ function SessionData.StartEvolution(player: Player, key: string, time: number): 
 	end
 	for position, egg in ipairs(data.eggs) do
 		if egg.id == lotId and not egg.evolve and unit >= 1 and unit <= egg.count and egg.readyAt > time then
-			local evolve = newEvolve(egg, time, data.tier)
+			-- Un œuf qui attendait sa place dans la couveuse commence à chauffer dans la capsule.
+			local startedAt, readyAt = egg.startedAt, egg.readyAt
+			if startedAt > time then
+				startedAt, readyAt = time, time + (readyAt - startedAt)
+			end
 			if egg.count == 1 then
-				egg.evolve = evolve
+				egg.startedAt, egg.readyAt = startedAt, readyAt
+				egg.evolve = newEvolve(egg, time, data.tier)
 			else
 				-- Un seul exemplaire du lot entre dans la machine.
 				egg.count -= 1
-				table.insert(data.eggs, position + 1, {
+				local single: EggIncubation.Egg = {
 					id = HttpService:GenerateGUID(false),
 					petId = egg.petId,
 					count = 1,
-					startedAt = egg.startedAt,
-					readyAt = egg.readyAt,
-					evolve = evolve,
-				})
+					startedAt = startedAt,
+					readyAt = readyAt,
+				}
+				single.evolve = newEvolve(single, time, data.tier)
+				table.insert(data.eggs, position + 1, single)
 			end
+			scheduleEggs(data, time) -- sa place dans la couveuse se libère
 			sync(player)
 			return true
 		end
@@ -1593,6 +1656,9 @@ function SessionData.SetUpgradeLevel(player: Player, id: string, level: number)
 	local data = storage[player]
 	if data then
 		data.upgrades[id] = level
+		if id == "EggSlots" then
+			scheduleEggs(data, os.time()) -- une place de plus : le premier œuf qui attendait commence à chauffer
+		end
 		sync(player)
 	end
 end

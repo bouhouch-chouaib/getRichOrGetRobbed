@@ -439,6 +439,7 @@ end
 -- Résultat d'une tentative, après le suspense : gerbe et message, ou nuage gris si elle a raté (l'œuf garde son stade
 -- et reste dans la capsule jusqu'à ce que le joueur l'ouvre).
 local ROLL_TIME = 1.6
+local EVOLUTION_TOAST = 8 -- secondes des messages de la capsule (30 oct. : ils partaient trop vite pour être lus)
 local function showResult(ownerId: number, kind: string, stage: number, cf: CFrame, rarityId: string)
 	local mine = ownerId == player.UserId
 	local eggSpot = cf * CF(0, EGG_HEIGHT, 0)
@@ -449,7 +450,7 @@ local function showResult(ownerId: number, kind: string, stage: number, cf: CFra
 		ring(cf * CF(0, 0.2, 0), WHITE, 6 + stage * 3)
 		if mine then
 			Sounds.play("RareDrop")
-			Toast.show(string.format("BRAVO ! TON ŒUF EST %s %s !", stars(stage), STAGE_NAMES[stage]), color)
+			Toast.show(string.format("BRAVO ! TON ŒUF EST %s %s !", stars(stage), STAGE_NAMES[stage]), color, EVOLUTION_TOAST)
 		else
 			Sounds.playAt("HoleBonus", eggSpot.Position)
 		end
@@ -458,7 +459,7 @@ local function showResult(ownerId: number, kind: string, stage: number, cf: CFra
 		if mine then
 			Sounds.play("Error")
 			Toast.show(string.format("RATÉ ! IL RESTE %s. OUVRE-LE QUAND TU VEUX", stars(stage)),
-				Color3.fromRGB(255, 140, 140))
+				Color3.fromRGB(255, 140, 140), EVOLUTION_TOAST)
 		end
 	end
 end
@@ -503,7 +504,7 @@ Remotes.Evolution.OnClientEvent:Connect(function(ownerId: number, kind: string, 
 		end
 		if mine then
 			Sounds.play("Purchase")
-			Toast.show("ŒUF DANS LA CAPSULE ! ATTENDS, IL VA GRANDIR", PURPLE)
+			Toast.show("ŒUF DANS LA CAPSULE ! ATTENDS, IL VA GRANDIR", PURPLE, EVOLUTION_TOAST)
 		end
 	elseif kind == "Evolved" or kind == "Maxed" then
 		-- Suspense : le panneau montre le tirage au sort (« TENTATIVE EN COURS... »), puis le résultat.

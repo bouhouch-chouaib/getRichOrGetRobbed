@@ -1,8 +1,9 @@
 --!strict
 -- EggController : les œufs de chaque base, au rythme de l'horloge du SERVEUR (aucun client ne peut faire éclore).
 --   - Chaque œuf (un exemplaire d'un lot) a SON nid dans la couveuse au fond de la base (shared/BaseLayout,
---     10 nids). Les 10 premiers à éclore sont posés ; les suivants attendent qu'un nid se libère (attribut
---     "Waiting" du dossier Base_N.Eggs, affiché « +N ŒUFS » par client/Eggs).
+--     8 nids = 8 places au plus). 30 oct. : seuls les œufs qui chauffent ont un nid (Config.GetEggSlots places, 4 au
+--     départ) ; ceux qui attendent leur place (shared/EggIncubation.Schedule) sont comptés dans l'attribut "Waiting" du
+--     dossier Base_N.Eggs, affiché « +N ŒUFS EN ATTENTE » par client/Eggs. Attribut "Slots" : places achetées.
 --   - Un nid garde son œuf jusqu'à l'éclosion : l'arrivée de nouveaux œufs ne déplace pas les anciens.
 --   - Repère invisible Base_N.Eggs.<clé> (tag "IncubatingEgg") : Rarity, OwnerUserId, StartedAt, ReadyAt, Nest.
 --     Le familier reste secret jusqu'à l'éclosion (seule la rareté est visible).
@@ -115,6 +116,7 @@ function EggController.Init(bases: { Model })
 				folder:SetAttribute("Waiting", nil)
 				nests[base] = { byKey = {}, byNest = {} }
 			end
+			folder:SetAttribute("Slots", nil)
 			publishMachine(base, nil)
 			return
 		end
@@ -214,6 +216,8 @@ function EggController.Init(bases: { Model })
 
 		-- 3. Les nids : chaque œuf garde le sien, les nouveaux prennent les nids libres dans l'ordre d'éclosion.
 		local units = Eggs.Units(SessionData.GetEggs(player))
+		local now = os.time()
+		folder:SetAttribute("Slots", SessionData.GetEggSlots(player))
 		local pending: { [string]: Eggs.Unit } = {}
 		for _, unit in ipairs(units) do
 			pending[unit.key] = unit
@@ -227,6 +231,10 @@ function EggController.Init(bases: { Model })
 		local waiting = 0
 		for _, unit in ipairs(units) do
 			if not state.byKey[unit.key] then
+				if unit.startedAt > now then
+					waiting += 1 -- il attend sa place dans la couveuse
+					continue
+				end
 				local free: number? = nil
 				for nest = 1, BaseLayout.MAX_NESTS do
 					if not state.byNest[nest] then

@@ -16,11 +16,21 @@ Config.Newcomer = {
 -- Chaque œuf a son nid dans la couveuse de la base (shared/BaseLayout : 10 nids, les premiers à éclore d'abord).
 -- BuildUp : secondes de montée en tension avant l'éclosion (tremble, s'élève, brille), par rareté (Commun -> Sigma).
 -- L'éclosion elle-même est de plus en plus spectaculaire avec la rareté (client/Eggs).
+-- 30 oct. : places de la couveuse. Au plus Slots œufs chauffent en même temps (+1 par niveau de l'amélioration
+-- « EggSlots » de la Boutique, MaxSlots au plus) ; les suivants attendent leur tour, dans leur ordre d'arrivée
+-- (shared/EggIncubation.Schedule : dates absolues, la file avance aussi hors ligne).
 Config.Eggs = {
 	Seconds = { Commun = 15, Inhabituel = 30, Rare = 60, Epique = 180, Legendaire = 300, Mythique = 600, Divin = 1200, Sigma = 1800 } :: { [string]: number },
 	BuildUp = { 2, 2.5, 3, 3.5, 4, 5, 6, 7 },
 	ViewDistance = 140,
+	Slots = 4,
+	MaxSlots = 8,
 }
+
+-- Places de la couveuse pour ce niveau de l'amélioration « EggSlots ».
+function Config.GetEggSlots(upgradeLevel: number): number
+	return math.clamp(Config.Eggs.Slots + math.max(0, math.floor(upgradeLevel)), Config.Eggs.Slots, Config.Eggs.MaxSlots)
+end
 
 -- Mutations (16 oct.) : SECRET. Rien dans le jeu n'en parle (pas d'Index, pas de chances affichées) : un familier qui
 -- sort d'un tirage GRATUIT (trou noir, duel ; jamais un tirage acheté en Robux, dont les chances doivent être affichées)
@@ -113,7 +123,8 @@ Config.Evolution = {
 -- Durées des phases (secondes).
 Config.Durations = {
 	Feeding = 45, -- trou noir ouvert
-	Digesting = 60, -- trou noir fermé
+	-- 30 oct. (playtest avant les publicités) : 60 -> 30 s, on attendait trop longtemps de pouvoir relancer.
+	Digesting = 30, -- trou noir fermé
 }
 
 -- Dans Roblox Studio, on raccourcit les phases pour tester vite.
@@ -289,9 +300,14 @@ Config.Training = {
 	Strength = { Base = 70, PerLevel = 3, MaxLevel = 60 } :: StatConfig, -- vitesse de lancer max
 	XPBase = 5,
 	XPGrowth = 1.12,
-	StationRateGrowth = 1.17, -- niveau 25 : x43 (l'ancien niveau 8 donnait x40)
-	ModelStarts = { 1, 3, 6, 8, 11, 13, 16, 18, 21, 23 }, -- 1er niveau de chacun des 10 modèles
-	StationLevels = 25,
+	-- 30 oct. : 100 niveaux (avant 25) pour des achats petits et fréquents. Même courbe qu'avant : le nouveau niveau
+	-- 4 x N - 3 entraîne aussi vite que l'ancien niveau N (1,04^4 = 1,17), niveau 97 : x43, niveau 100 : x48.
+	StationRateGrowth = 1.04,
+	StationLevels = 100,
+	-- L'aspect ne change que tous les LevelsPerLook niveaux (math.floor((niveau - 1) / 5)) : 20 aspects, LooksPerModel
+	-- par modèle (10 modèles) ; le 2e aspect d'un modèle allume le 2e voyant et pose l'étoile dorée (server/StationLooks).
+	LevelsPerLook = 5,
+	LooksPerModel = 2,
 	-- Tapis de course (19 oct.) : taille par rapport aux premières mesures (trop grand à côté de l'avatar) ; tout le tapis
 	-- (zone, décor, modèles de ReplicatedStorage.ArtModels) est réduit d'autant. Flèches sur la bande qui défilent vers
 	-- l'arrière (client/TreadmillBelt) : Length = studs entre deux flèches, vitesses en studs / s (à vide / quelqu'un court).
@@ -309,12 +325,13 @@ Config.Training = {
 		{ Name = "Cosmique", Main = Color3.fromRGB(44, 24, 76), Dark = Color3.fromRGB(20, 10, 36), Accent = Color3.fromRGB(190, 90, 255), Belt = Color3.fromRGB(12, 6, 24), Trim = Color3.fromRGB(255, 130, 235) },
 		{ Name = "Celeste", Title = "Céleste", Main = Color3.fromRGB(246, 248, 255), Dark = Color3.fromRGB(200, 210, 230), Accent = Color3.fromRGB(122, 200, 255), Belt = Color3.fromRGB(220, 228, 244), Trim = Color3.fromRGB(255, 198, 40) },
 	} :: { StationTier },
-	-- Sauvegardes d'avant les 25 niveaux (8 niveaux) : ancien niveau -> nouveau (même XP par seconde à peu près).
+	-- Sauvegardes d'avant les 25 niveaux (8 niveaux) : ancien niveau -> niveau sur 25 (même XP par seconde à peu près),
+	-- puis Config.StationLevelFrom25 vers les 100 niveaux.
 	OldStationLevels = { 1, 5, 9, 12, 16, 19, 22, 25 },
 	-- Animations (client/TrainingFx) : course sur place et développé couché.
 	RunAnimSpeed = 1.3, -- vitesse de l'animation de course sur le tapis (niveau 1)
 	BenchRepTime = 1.6, -- secondes par répétition au banc (niveau 1 ; un grognement d'effort à chaque poussée)
-	AnimSpeedPerLevel = 0.04, -- chaque niveau de station au-dessus de 1 : on court / pousse 4 % plus vite
+	AnimSpeedPerLevel = 0.01, -- chaque niveau de station au-dessus de 1 : on court / pousse 1 % plus vite
 }
 
 -- XP par seconde d'une station de ce niveau.
@@ -322,23 +339,29 @@ function Config.GetStationRate(level: number): number
 	return Config.Training.StationRateGrowth ^ (math.max(level, 1) - 1)
 end
 
--- Modèle (StationTiers) d'une station de ce niveau, rang du niveau dans ce modèle et nombre de niveaux du modèle.
+-- Sauvegarde d'avant les 100 niveaux (25 niveaux) : niveau qui entraîne aussi vite (1 -> 1, 25 -> 97).
+function Config.StationLevelFrom25(level: number): number
+	return if level > 0 then math.min(4 * level - 3, Config.Training.StationLevels) else 0
+end
+
+-- Aspect (0 à 19) d'une station de ce niveau : il ne change que tous les LevelsPerLook niveaux.
+function Config.GetStationLook(level: number): number
+	return math.floor((math.clamp(level, 1, Config.Training.StationLevels) - 1) / Config.Training.LevelsPerLook)
+end
+
+-- Modèle (StationTiers) d'une station de ce niveau, rang de son aspect dans ce modèle et nombre d'aspects du modèle.
 function Config.GetStationTier(level: number): (StationTier, number, number)
-	local starts = Config.Training.ModelStarts
-	level = math.clamp(level, 1, Config.Training.StationLevels)
-	local index = 1
-	for i, first in ipairs(starts) do
-		if level >= first then
-			index = i
-		end
-	end
-	local nextStart = starts[index + 1] or (Config.Training.StationLevels + 1)
-	return Config.Training.StationTiers[index], level - starts[index] + 1, nextStart - starts[index]
+	local perModel = Config.Training.LooksPerModel
+	local look = Config.GetStationLook(level)
+	local tiers = Config.Training.StationTiers
+	local index = math.min(math.floor(look / perModel) + 1, #tiers)
+	return tiers[index], look - (index - 1) * perModel + 1, perModel
 end
 
 -- Vrai si ce niveau de station est le premier d'un nouveau modèle (son « MODÈLE ... ! », client/UpgradeSigns).
 function Config.IsNewStationModel(level: number): boolean
-	return level > 1 and table.find(Config.Training.ModelStarts, level) ~= nil
+	return level > 1 and Config.GetStationLook(level) % Config.Training.LooksPerModel == 0
+		and Config.GetStationLook(level) ~= Config.GetStationLook(level - 1)
 end
 
 -- Tirages : un objet avalé rapporte sa valeur (Config.ItemTiers) × multiplicateur des familiers équipés.
@@ -638,10 +661,11 @@ Config.Economy = {
 -- (Cycle secondes après le passage). On ferme donc une fois par manche (45 s + 60 s = Feeding + digestion), au moment
 -- choisi. La base reste ouverte au moins MinOpen secondes par cycle, même avec tous les bonus (le temps d'un débutant pour
 -- voler chez son voisin). Avant : 5 s relancées tant qu'on restait sur le bouton, donc fermée pour toujours.
+-- 30 oct. (playtest) : Duration 45 -> 20 s, trop long en début de partie (les bases restaient fermées toute la nuit).
 Config.Lock = {
-	Duration = 45, -- = la durée du Feeding : on peut aller lancer pendant que la base est fermée
+	Duration = 20,
 	LongBonus = 10, -- avec l'amélioration "LongLock"
-	Cycle = 105, -- = une manche (Feeding + digestion)
+	Cycle = Config.Durations.Feeding + Config.Durations.Digesting, -- = une manche (75 s)
 	MinOpen = 30,
 	ButtonRadius = 4,
 }
@@ -694,15 +718,17 @@ Config.Crown = {
 -- Les couleurs et décors de chaque monde sont dans shared/Worlds (pur visuel).
 -- RarityBoost (20 oct., docs/PLAN_EQUILIBRAGE.md) : les tirages sont meilleurs dans les mondes plus loin (le plus loin
 -- atteint) : le poids de chaque rareté est multiplié par RarityBoost ^ (rang - 1) (Commun x1, Inhabituel x boost...).
-export type WorldDef = { Id: string, Name: string, Price: number, IncomeMultiplier: number, RarityBoost: number? }
+-- Rebirths (30 oct.) : Rebirths qu'il faut avoir faits pour acheter ce monde. Les 3 derniers mondes sont aussi bien plus
+-- chers (Abysses 14B -> 40B, Cosmos 300B -> 2T, Divin 1,4T -> 25T) : on y arrive avec le revenu x(1 + n) des Rebirths.
+export type WorldDef = { Id: string, Name: string, Price: number, IncomeMultiplier: number, RarityBoost: number?, Rebirths: number? }
 Config.Worlds = {
 	{ Id = "Prairie", Name = "Prairie", Price = 0, IncomeMultiplier = 1, RarityBoost = 1 },
 	{ Id = "Desert", Name = "Désert", Price = 200e3, IncomeMultiplier = 1.6, RarityBoost = 1.08 },
 	{ Id = "Volcan", Name = "Volcan", Price = 14e6, IncomeMultiplier = 2.5, RarityBoost = 1.17 },
 	{ Id = "Glace", Name = "Glace", Price = 450e6, IncomeMultiplier = 4, RarityBoost = 1.27 },
-	{ Id = "Abysses", Name = "Abysses", Price = 14e9, IncomeMultiplier = 6.5, RarityBoost = 1.38 },
-	{ Id = "Cosmos", Name = "Cosmos", Price = 300e9, IncomeMultiplier = 10, RarityBoost = 1.5 },
-	{ Id = "Divin", Name = "Divin", Price = 1.4e12, IncomeMultiplier = 16, RarityBoost = 1.8 },
+	{ Id = "Abysses", Name = "Abysses", Price = 40e9, IncomeMultiplier = 6.5, RarityBoost = 1.38, Rebirths = 1 },
+	{ Id = "Cosmos", Name = "Cosmos", Price = 2e12, IncomeMultiplier = 10, RarityBoost = 1.5, Rebirths = 2 },
+	{ Id = "Divin", Name = "Divin", Price = 25e12, IncomeMultiplier = 16, RarityBoost = 1.8, Rebirths = 3 },
 } :: { WorldDef }
 
 -- Monde (1 à #Config.Worlds) d'un palier quelconque, borné.
@@ -714,6 +740,11 @@ end
 
 function Config.GetWorld(tier: number): WorldDef
 	return Config.Worlds[math.clamp(math.floor(tier), 1, #Config.Worlds)]
+end
+
+-- Rebirths qu'il faut avoir faits pour acheter ce monde (0 : aucun).
+function Config.GetWorldRebirths(world: WorldDef): number
+	return world.Rebirths or 0
 end
 
 -- Clés (achat en Robux uniquement, produit "Key1" à 49 R$) : ouvrent une base adverse FERMÉE pendant Duration secondes,
@@ -948,12 +979,16 @@ export type ShopItem = {
 
 -- Boutique : améliorations à niveaux. Le niveau est écrit dans l'attribut "Upgrade_<Id>" du Player.
 Config.Shop = {
-	{ Id = "Treadmill", Icon = "Treadmill", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 25 niveaux et 10 modèles, du tapis en bois au tapis céleste : chaque niveau entraîne plus vite.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 2.44 },
-	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 25 niveaux et 10 modèles, du banc en bois au banc céleste.", MaxLevel = 25, BasePrice = 500, PriceGrowth = 2.44 },
+	-- 30 oct. : tapis et banc sur 100 niveaux (avant 25 niveaux, 500 x 2,44^n) : chaque niveau coûte 25 % de plus que le
+	-- précédent, même prix total qu'avant pour la même vitesse d'entraînement (Config.Training.StationRateGrowth).
+	{ Id = "Treadmill", Icon = "Treadmill", Name = "Tapis de course", Description = "À côté de ta base. Monte dessus : +vitesse. 100 niveaux et 10 modèles, du tapis en bois au tapis céleste : chaque niveau entraîne plus vite.", MaxLevel = 100, BasePrice = 200, PriceGrowth = 1.25 },
+	{ Id = "Bench", Icon = "Bench", Name = "Banc de muscu", Description = "À côté de ta base. Allonge-toi dessus : +force (lancers plus loin). 100 niveaux et 10 modèles, du banc en bois au banc céleste.", MaxLevel = 100, BasePrice = 200, PriceGrowth = 1.25 },
+	-- 30 oct. : places de la couveuse (Config.Eggs.Slots, Config.GetEggSlots), gardées au Rebirth.
+	{ Id = "EggSlots", Icon = "Egg", Name = "Couveuse", Description = "Une place de plus dans ta couveuse : un œuf de plus chauffe en même temps. 4 places au départ, 8 au plus.", MaxLevel = 4, BasePrice = 3000, PriceGrowth = 10 },
 	{ Id = "ItemQuality", Icon = "Clover", Name = "Chance", Description = "Plus de lingots, diamants et météorites sur tes palettes (+20 % de chance par niveau sur les objets rares).", MaxLevel = 10, BasePrice = 2000, PriceGrowth = 7.7 },
 	{ Id = "Backpack", Icon = "Backpack", Name = "Sac à dos", Description = "Porte un objet de plus à chaque niveau.", MaxLevel = 4, BasePrice = 25e3, PriceGrowth = 150 },
 	{ Id = "Magnet", Icon = "Magnet", Name = "Aimant à objets", Description = "Active ou coupe l’aimant avec son bouton. Priorité aux objets qui rapportent le plus. Plus de portée à chaque niveau.", MaxLevel = 5, BasePrice = 20e3, PriceGrowth = 9 },
-	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 55 s au lieu de 45 s quand tu passes sur le bouton (une fois par manche).", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
+	{ Id = "LongLock", Icon = "Lock", Name = "Verrou renforcé", Description = "Ta base reste fermée 30 s au lieu de 20 s quand tu passes sur le bouton (une fois par manche).", MaxLevel = 1, BasePrice = 5e6, PriceGrowth = 1 },
 	-- Armes (achat unique, voir Config.Weapons) : rangées dans l'inventaire en bas de l'écran (touches 1, 2).
 	{ Id = "WeaponBat", Icon = "Bat", Name = "Batte", Description = "ARME : un grand coup de batte qui envoie valser un joueur et lui fait TOUT lâcher (objets, familier volé).", MaxLevel = 1, BasePrice = 2000, PriceGrowth = 1 },
 	{ Id = "PowerInvisible", Icon = "Ghost", Name = "Invisibilité", Description = "POUVOIR : 6 s presque invisible pour t'approcher en douce. Se brise dès que tu ramasses, voles, frappes ou te fais toucher. Recharge 45 s.", MaxLevel = 1, BasePrice = 500e3, PriceGrowth = 1 },
@@ -1289,26 +1324,30 @@ Config.Friends = {
 	CheckTimeout = 3, -- secondes au plus pour vérifier les amitiés d'un joueur qui arrive (avant de choisir sa base)
 }
 
--- Rebirth : quand on a atteint le dernier monde, on paie Price(n) pour recommencer en Prairie avec 0 $ et les
--- améliorations de la Boutique à zéro (armes et pouvoir gardés). On GARDE familiers, œufs, mutations, entraînement,
--- clés et achats Robux. En échange, à vie : revenu x(1 + IncomeBonus x rebirths), +ExtraPets familier(s) dans la base
+-- Rebirth : quand on a atteint le monde RequiredTier, on paie Price(n) pour recommencer en Prairie avec 0 $ et les
+-- améliorations de la Boutique à zéro (armes, pouvoir et places de la couveuse gardés). On GARDE familiers, œufs,
+-- mutations, clés et achats Robux. 30 oct. : la Vitesse et la Force repartent aussi de zéro, mais l'entraînement va
+-- x(1 + TrainingBonus x rebirths) plus vite à vie. En échange, à vie : revenu x(1 + IncomeBonus x rebirths), +ExtraPets familier(s) dans la base
 -- (ceux qui rapportent, Config.Pets.IncomeSlots), jusqu'à MaxExtraPets, et +ExtraCapsules chambre(s) dans la capsule
 -- d'évolution, jusqu'à MaxExtraCapsules (25 oct., ECONOMY_REPORT.md règle 15 : ce qui fait encore monter le revenu en
 -- fin de partie ; la place de base en plus ne rapporte que +2 %).
+-- 30 oct. (playtest) : Rebirth dès la Glace (avant : le Divin, vers 9 h de jeu), 1er à $1,2B ; les 3 derniers mondes
+-- demandent 1, 2 puis 3 Rebirths (Config.Worlds[].Rebirths).
 Config.Rebirth = {
-	RequiredTier = 7, -- monde à avoir atteint (7 = Divin, le dernier)
-	BasePrice = 4e12, -- prix du 1er Rebirth ($4T) : vers 9 h de jeu (tools/sim-economy.luau)
+	RequiredTier = 4, -- monde à avoir atteint (4 = Glace)
+	BasePrice = 1.2e9, -- prix du 1er Rebirth ($1,2B, avant $4T)
 	-- 25 oct. (ECONOMY_REPORT.md règle 16) : prix(n) = BasePrice x (n + 1) x PriceGrowth^n. Le (n + 1) suit le
 	-- multiplicateur de revenu ; 1,62 = croissance de la base par cycle avec les chambres (x1,47, mesurée) x 1,1 (chaque
 	-- cycle un peu plus long que le précédent). Cycles simulés : 3,7 h, 3,6 h, 3,7 h, 4,4 h, 5,2 h, 6,4 h (avant : x2,7,
 	-- cycles de 6 h puis 9 h dès le 5e Rebirth).
 	PriceGrowth = 1.62,
 	IncomeBonus = 1, -- +100 % de revenu par Rebirth : x2, x3, x4...
+	TrainingBonus = 0.5, -- +50 % d'XP d'entraînement par Rebirth (tapis, banc) : x1,5, x2, x2,5...
 	ExtraPets = 1, -- +1 familier qui rapporte dans la base par Rebirth
 	MaxExtraPets = 5,
 	ExtraCapsules = 1, -- +1 chambre de capsule d'évolution par Rebirth
 	MaxExtraCapsules = 5, -- 6 chambres au plus
-	KeepShopItems = { WeaponBat = true, WeaponGrapple = true, PowerInvisible = true }, -- pas remis à zéro
+	KeepShopItems = { WeaponBat = true, WeaponGrapple = true, PowerInvisible = true, EggSlots = true }, -- pas remis à zéro
 }
 
 function Config.GetRebirthPrice(rebirths: number): number
@@ -1322,6 +1361,11 @@ end
 
 function Config.GetRebirthMultiplier(rebirths: number): number
 	return 1 + Config.Rebirth.IncomeBonus * rebirths
+end
+
+-- XP d'entraînement (tapis, banc) selon le nombre de Rebirths.
+function Config.GetRebirthTrainingMultiplier(rebirths: number): number
+	return 1 + Config.Rebirth.TrainingBonus * rebirths
 end
 
 -- Familiers qui rapportent (et se baladent) dans la base selon le nombre de Rebirths.

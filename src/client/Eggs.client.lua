@@ -20,6 +20,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Eggs = require(ReplicatedStorage.Shared.EggIncubation)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local Builder = require(ReplicatedStorage.Shared.EggModelBuilder)
 local Catalog = require(ReplicatedStorage.Shared.PetCatalog)
 local PetModelBuilder = require(ReplicatedStorage.Shared.PetModelBuilder)
@@ -367,6 +368,30 @@ local function watchBase(base: Instance)
 	end
 	folder:GetAttributeChangedSignal("Waiting"):Connect(refresh)
 	refresh()
+
+	-- Places de la couveuse pas encore achetées (Boutique, « Couveuse ») : un cadenas sur leur nid.
+	local locks: { [number]: BillboardGui } = {}
+	for index = 1, Config.Eggs.MaxSlots do
+		local nest = (incubator :: Instance):FindFirstChild("Nest_" .. index)
+		if nest and nest:IsA("BasePart") then
+			local lock = Instance.new("BillboardGui")
+			lock.Name, lock.Adornee = "NestLock", nest
+			lock.Size, lock.StudsOffsetWorldSpace = UDim2.fromScale(3, 3), V(0, 2.2, 0)
+			lock.MaxDistance, lock.LightInfluence = 90, 0
+			lock.Enabled = false
+			Icons.image(lock, "Lock", UDim2.fromScale(1, 1))
+			lock.Parent = nest
+			locks[index] = lock
+		end
+	end
+	local function refreshLocks()
+		local slots = folder:GetAttribute("Slots")
+		for index, lock in pairs(locks) do
+			lock.Enabled = type(slots) == "number" and index > slots
+		end
+	end
+	folder:GetAttributeChangedSignal("Slots"):Connect(refreshLocks)
+	refreshLocks()
 end
 task.spawn(function()
 	local map = Workspace:WaitForChild("Map")

@@ -55,11 +55,11 @@ assert(PowerCap.IsUseful(sigma, rarity("Sigma"), Catalog.GetIncome(divin)), "un 
 -- Un Sigma bridé en Légendaire n'apporte rien à quelqu'un dont la base est pleine de Mythiques.
 assert(not PowerCap.IsUseful(sigma, rarity("Rare"), Config.Rarities[rarity("Mythique")].Income), "bridé : inutile")
 
--- Verrou à cycle : 45 s, +10 s (Verrou renforcé), +10 s (VIP), jamais moins de MinOpen secondes ouvertes par cycle.
+-- Verrou à cycle : 20 s (30 oct.), +10 s (Verrou renforcé), +10 s (VIP), jamais moins de MinOpen secondes ouvertes par cycle.
 local lock = Config.Lock
 assert(Config.GetLockDuration(false, 0) == lock.Duration, "durée de base")
 assert(Config.GetLockDuration(true, 0) == lock.Duration + lock.LongBonus, "Verrou renforcé")
-assert(Config.GetLockDuration(true, 10) == 65, "Verrou renforcé + VIP = 65 s")
+assert(Config.GetLockDuration(true, 10) == lock.Duration + lock.LongBonus + 10, "Verrou renforcé + VIP")
 assert(Config.GetLockDuration(true, 1000) == lock.Cycle - lock.MinOpen, "plafonné pour laisser la base ouverte")
 assert(lock.Cycle == Config.Durations.Feeding + Config.Durations.Digesting, "un cycle = une manche")
 

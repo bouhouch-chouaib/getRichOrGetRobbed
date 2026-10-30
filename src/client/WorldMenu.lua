@@ -42,6 +42,7 @@ local WHITE = Color3.new(1, 1, 1)
 local BLACK = Color3.new(0, 0, 0)
 local GREY = Color3.fromRGB(150, 150, 160)
 local ORANGE = Color3.fromRGB(255, 150, 40)
+local PURPLE_REBIRTH = Color3.fromRGB(190, 120, 255)
 local PRAIRIE = Worlds.Looks.Prairie
 local K = ShopKit.K
 local TOUCH = ShopKit.TOUCH
@@ -370,13 +371,24 @@ function WorldMenu.create(gui: Instance): Menu
 		pagePadding.PaddingBottom = UDim.new(0, 16)
 	end
 
-	-- Voyage vers le monde suivant (le serveur revérifie le prix).
+	-- Rebirths qui manquent pour ce monde (30 oct. : les derniers mondes en demandent, Config.Worlds[].Rebirths).
+	local function rebirthsMissing(world: Config.WorldDef): number
+		return math.max(0, Config.GetWorldRebirths(world) - MenuKit.number("Rebirths"))
+	end
+
+	-- Voyage vers le monde suivant (le serveur revérifie le prix et les Rebirths).
 	local function travel(body: GuiObject)
 		local nextWorld = Config.Worlds[tier() + 1]
 		if not nextWorld then
 			return
 		end
 		local money = MenuKit.number("Money")
+		if rebirthsMissing(nextWorld) > 0 then
+			UIJuice.denied(body)
+			Toast.show(string.format("IL FAUT %d REBIRTH%s POUR CE MONDE !", Config.GetWorldRebirths(nextWorld),
+				if Config.GetWorldRebirths(nextWorld) > 1 then "S" else ""), PURPLE_REBIRTH)
+			return
+		end
 		if money < nextWorld.Price then
 			UIJuice.denied(body)
 			Toast.show("IL TE MANQUE " .. NumberFormat.money(nextWorld.Price - money) .. " !", UiStyle.Colors.Red)
@@ -626,9 +638,12 @@ function WorldMenu.create(gui: Instance): Menu
 			elseif row.index <= current then
 				row.status.Text = "DÉJÀ VISITÉ"
 				ShopKit.setButton(row.button, "Y ALLER", UiStyle.Colors.Green)
-			elseif row.index == current + 1 then
+			elseif row.index == current + 1 and rebirthsMissing(world) == 0 then
 				row.status.Text = "VOYAGER POUR"
 				ShopKit.setButton(row.button, NumberFormat.money(world.Price), if money >= world.Price then UiStyle.Colors.Green else UiStyle.Colors.Red)
+			elseif rebirthsMissing(world) > 0 then
+				row.status.Text = string.format("REBIRTH %d REQUIS", Config.GetWorldRebirths(world))
+				ShopKit.setButton(row.button, NumberFormat.money(world.Price), GREY)
 			else
 				row.status.Text = "VERROUILLÉ"
 				ShopKit.setButton(row.button, NumberFormat.money(world.Price), GREY)
@@ -654,9 +669,12 @@ function WorldMenu.create(gui: Instance): Menu
 			end
 			ShopKit.setGauge(featuredGauge, money / nextWorld.Price, NumberFormat.money(money) .. " / " .. NumberFormat.money(nextWorld.Price))
 			local affordable = money >= nextWorld.Price
-			featuredMissing.Text = if affordable then "TU PEUX Y ALLER !" else "IL TE MANQUE " .. NumberFormat.money(nextWorld.Price - money)
-			featuredMissing.TextColor3 = if affordable then UiStyle.Colors.Money else WHITE
-			ShopKit.setButton(featuredButton, NumberFormat.money(nextWorld.Price), if affordable then UiStyle.Colors.Green else UiStyle.Colors.Red)
+			local needRebirths = rebirthsMissing(nextWorld) > 0
+			featuredMissing.Text = if needRebirths then string.format("REBIRTH %d REQUIS : VA AU MENU REBIRTH", Config.GetWorldRebirths(nextWorld))
+				elseif affordable then "TU PEUX Y ALLER !" else "IL TE MANQUE " .. NumberFormat.money(nextWorld.Price - money)
+			featuredMissing.TextColor3 = if needRebirths then PURPLE_REBIRTH elseif affordable then UiStyle.Colors.Money else WHITE
+			ShopKit.setButton(featuredButton, NumberFormat.money(nextWorld.Price),
+				if needRebirths then GREY elseif affordable then UiStyle.Colors.Green else UiStyle.Colors.Red)
 		end
 
 		updatePets(built and not building, false)
@@ -679,7 +697,7 @@ function WorldMenu.create(gui: Instance): Menu
 		refresh = refresh,
 		canTravel = function()
 			local nextWorld = Config.Worlds[tier() + 1]
-			return nextWorld ~= nil and MenuKit.number("Money") >= nextWorld.Price
+			return nextWorld ~= nil and rebirthsMissing(nextWorld) == 0 and MenuKit.number("Money") >= nextWorld.Price
 		end,
 	}
 end

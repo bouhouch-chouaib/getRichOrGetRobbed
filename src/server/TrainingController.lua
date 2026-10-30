@@ -176,7 +176,8 @@ local function update()
 			local session = sessions[owner]
 			local root = getRoot(owner)
 			if session and session.station == station then
-				local gain = Config.GetStationRate(level) * TICK
+				-- Rebirth : l'entraînement va plus vite à vie (Config.Rebirth.TrainingBonus).
+				local gain = Config.GetStationRate(level) * TICK * Config.GetRebirthTrainingMultiplier(SessionData.GetRebirths(owner))
 				Quests.Add(owner, "Train", SessionData.AddTrainingXP(owner, station.kind.stat, gain))
 				session.gained += gain
 				if now >= session.nextPulse then

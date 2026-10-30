@@ -178,9 +178,10 @@ function Eggs.WaitLeft(egg: Egg, time: number): number
 	return math.max(0, target - time)
 end
 
--- Accélère l'œuf : celui de la couveuse éclot au prochain tour ; celui de la capsule finit son incubation et tente sa
--- prochaine évolution tout de suite (le tirage au sort, lui, ne change pas).
+-- Accélère l'œuf : celui de la couveuse éclot au prochain tour (même s'il attendait sa place) ; celui de la capsule
+-- finit son incubation et tente sa prochaine évolution tout de suite (le tirage au sort, lui, ne change pas).
 function Eggs.SpeedUp(egg: Egg, time: number)
+	egg.startedAt = math.min(egg.startedAt, time)
 	egg.readyAt = math.max(egg.startedAt, math.min(egg.readyAt, time))
 	local evolve = egg.evolve
 	if evolve and not evolve.done then
@@ -207,6 +208,60 @@ function Eggs.TryEvolve(egg: Egg, time: number, roll: number, tier: number?): st
 	end
 	evolve.done = true
 	return "Maxed"
+end
+
+-- Places de la couveuse (30 oct., Config.GetEggSlots) : au plus `slots` œufs chauffent en même temps. Un œuf qui attend
+-- sa place a un départ dans le futur (startedAt > time) ; sa durée (readyAt - startedAt) ne change jamais. Recalcule le
+-- départ des œufs qui attendent, dans leur ordre d'arrivée (ordre de la liste) : chacun prend la première place libre,
+-- jamais avant celui d'avant. Les œufs qui chauffent déjà ne bougent pas (une vieille sauvegarde peut en avoir plus que
+-- `slots` : les suivants attendent qu'il en reste moins). fresh : œufs qui viennent d'arriver, à placer aussi.
+-- Dates absolues : la file avance aussi hors ligne, il suffit de recalculer quand une place se libère plus tôt
+-- (accélération, œuf mis dans la capsule) ou quand on achète une place.
+function Eggs.Schedule(queue: { Egg }, slots: number, time: number, fresh: { [Egg]: boolean }?)
+	slots = math.max(1, math.floor(slots))
+	local ends: { number } = {} -- fins des œufs qui chauffent (une par exemplaire)
+	local waiting: { Egg } = {}
+	for _, egg in ipairs(queue) do
+		if egg.evolve then
+			continue -- la capsule a ses propres chambres
+		end
+		if (fresh and fresh[egg]) or egg.startedAt > time then
+			table.insert(waiting, egg)
+		elseif egg.readyAt > time then
+			for _ = 1, egg.count do
+				table.insert(ends, egg.readyAt)
+			end
+		end
+	end
+	local cursor = time
+	for _, egg in ipairs(waiting) do
+		table.sort(ends)
+		local need = math.min(egg.count, slots)
+		local start = cursor
+		local over = #ends + need - slots -- places à attendre
+		if over > 0 then
+			start = math.max(cursor, ends[over])
+		end
+		-- Les œufs finis à ce moment libèrent leur place.
+		local kept: { number } = {}
+		for _, finish in ipairs(ends) do
+			if finish > start then
+				table.insert(kept, finish)
+			end
+		end
+		ends = kept
+		local duration = math.max(0, egg.readyAt - egg.startedAt)
+		egg.startedAt, egg.readyAt = start, start + duration
+		for _ = 1, egg.count do
+			table.insert(ends, egg.readyAt)
+		end
+		cursor = start
+	end
+end
+
+-- L'œuf attend-il sa place dans la couveuse ?
+function Eggs.IsWaiting(egg: Egg, time: number): boolean
+	return not egg.evolve and egg.startedAt > time
 end
 
 -- Un exemplaire d'un lot : chaque œuf a son propre nid (server/EggController). La clé reste la même jusqu'à

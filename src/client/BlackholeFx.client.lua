@@ -611,6 +611,7 @@ fillGradient.Parent = fill
 local amount = label(bar, "", 0.08, 0.84, Color3.new(1, 1, 1))
 amount.ZIndex = 2
 local hint = label(board, "", 0.54, 0.24, Color3.new(1, 1, 1))
+local DIGEST_COLOR = Color3.fromRGB(255, 140, 40)
 -- Les 3 meilleurs contributeurs du cycle (attribut HoleTop, server/BlackholeTiers) : ils gagnent les cadeaux de
 -- l'effondrement (Config.Blackhole.Collapse.Rewards).
 local top = label(board, "", 0.8, 0.2, Color3.fromRGB(255, 210, 60))
@@ -628,7 +629,13 @@ local function refreshGauge()
 	local f = math.clamp(gauge / math.max(need, 1), 0, 1)
 	TweenService:Create(fill, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { Size = UDim2.fromScale(math.max(f, 0.04), 1) }):Play()
 	local left = jackpotUntil - Workspace:GetServerTimeNow()
-	if collapse then
+	if ReplicatedStorage:GetAttribute("GameState") == "Digesting" then
+		-- 30 oct. (playtest) : sous le dôme rouge, on ne peut plus le nourrir ; on le dit, avec le compte à rebours.
+		local wait = (ReplicatedStorage:GetAttribute("TimeRemaining") or 0) :: number
+		amount.Text = string.format("%d / %d", math.floor(gauge), need)
+		hint.Text = string.format("⏳ IL DIGÈRE... ATTENDS %d s !", math.max(0, math.ceil(wait)))
+		hint.TextColor3 = DIGEST_COLOR
+	elseif collapse then
 		amount.Text = "PLEIN !"
 		hint.Text = "IL VA EXPLOSER À LA PROCHAINE SIESTE !"
 		hint.TextColor3 = Color3.fromRGB(255, 90, 90)
@@ -648,7 +655,7 @@ local function refreshGauge()
 	top.Text = if #entries > 0 then "TOP 3 (CADEAUX QUAND IL EXPLOSE) : " .. table.concat(entries, "  ") else ""
 end
 
-for _, name in ipairs({ "HoleTier", "HoleGauge", "HoleNeed", "HoleCollapse", "HoleJackpotUntil", "HoleTop" }) do
+for _, name in ipairs({ "HoleTier", "HoleGauge", "HoleNeed", "HoleCollapse", "HoleJackpotUntil", "HoleTop", "GameState", "TimeRemaining" }) do
 	ReplicatedStorage:GetAttributeChangedSignal(name):Connect(refreshGauge)
 end
 ReplicatedStorage:GetAttributeChangedSignal("HoleTier"):Connect(function()

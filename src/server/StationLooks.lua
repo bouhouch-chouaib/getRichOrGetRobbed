@@ -1,8 +1,9 @@
 --!strict
 -- StationLooks : habillage du tapis de course et du banc selon leur niveau (style briques à tenons).
--- 25 niveaux = 10 modèles (Config.Training.StationTiers, Training.ModelStarts) : Bois, Acier, Sport, Or, Jade, Cristal,
--- Lave, Royal, Cosmique, Céleste.
--- Dans un modèle, chaque niveau allume un voyant de plus ; au 5e, une étoile dorée coiffe la station.
+-- 100 niveaux = 20 aspects (un tous les 5 niveaux, Config.GetStationLook) = 10 modèles (Config.Training.StationTiers) :
+-- Bois, Acier, Sport, Or, Jade, Cristal, Lave, Royal, Cosmique, Céleste.
+-- Dans un modèle, le 1er aspect allume un voyant, le 2e les deux et pose une étoile dorée sur la station.
+-- Entre deux aspects, rien n'est reconstruit (attribut "LookStep" du modèle).
 --
 -- La station garde ses pièces « utiles » créées par MapGenerator (Zone, Bar, Plate, Seat... marquées "Tint") :
 -- on ne fait que les recolorer. Tout le décor est reconstruit dans le dossier "Look" à chaque changement de niveau.
@@ -269,12 +270,17 @@ local function originOf(zone: BasePart): CFrame
 	return zone.CFrame * CFrame.new(0, -zone.Size.Y / 2, 0)
 end
 
--- Applique le modèle du niveau (1 à 25) à la station. kind = "Treadmill" ou "Bench".
+-- Applique le modèle du niveau (1 à 100) à la station. kind = "Treadmill" ou "Bench".
 function StationLooks.Apply(model: Model, kind: string, level: number)
 	local zone = model:FindFirstChild("Zone")
 	if not zone or not zone:IsA("BasePart") then
 		return
 	end
+	local step = if level > 0 then Config.GetStationLook(level) else -1
+	if model:GetAttribute("LookStep") == step and (level <= 0) == (model:FindFirstChild("Look") == nil) then
+		return -- même aspect qu'avant : rien à refaire
+	end
+	model:SetAttribute("LookStep", step)
 	local old = model:FindFirstChild("Look")
 	if old then
 		old:Destroy()
