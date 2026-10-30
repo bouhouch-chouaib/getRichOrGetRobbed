@@ -34,6 +34,15 @@ et branchés (`studio_tools/wire_halloween_pets.lua` puis `wire_halloween_items.
 `ArtModels.Items.Halloween` (fichier du jeu : Ctrl+S). Vérifié en Play : 5 familiers debout et animés, 40 décors debout,
 citrouilles sauvages en briques. Piège : une pièce importée a un PivotOffset tourné de 90° ; la poser par PivotTo la couche
 (`HalloweenController.art` le remet à zéro). Après le 8 nov. : retirer bouton et code.
+**Sprint pré-publicités (30 oct.)** : sieste du trou noir 30 s (`Config.Durations`) + panneau « ⏳ IL DIGÈRE... ATTENDS XX s ! »
+(`client/BlackholeFx`) ; tapis / banc sur **100 niveaux** (200 x 1,25^n, aspect tous les 5 niveaux : `Config.GetStationLook`,
+sauvegardes `stationScale` 25 -> 100 converties N -> 4N-3) ; **couveuse 4 places -> 8** (amélioration `EggSlots`,
+`EggIncubation.Schedule` : file d'attente aux dates absolues, 8 nids, cadenas) ; verrou 20 s ; **Rebirth dès la Glace** ($1,2B),
+Abysses / Cosmos / Divin demandent 1 / 2 / 3 Rebirths (`Config.Worlds[].Rebirths`), le Rebirth remet Vitesse / Force à 0
+(entraînement x(1 + 0,5n)) ; **guides par paliers** (`client/GuideArrows` : carte 8 s + OK, traînée de chevrons au sol + rayon,
+une fois chacun, champ sauvegardé `guides`, `Remotes.GuideSeen`) ; Toast 6 s (capsule 8 s). Vérifié en Play (solo) : sieste 30 s
+et panneau, carte « batte », traînée, 8 nids / 4 places, aspects des stations 1 à 100. Pas vu : achat d'une place, file d'œufs en
+jeu, Rebirth réel, téléphone. Économie non resimulée (`economy_simulator.py`) : à refaire.
 **Shorts / TikTok : c'est Chouaib qui les fait** (29 oct. : il a refusé le tournage vertical par Studio) ; ne pas les refaire.
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
