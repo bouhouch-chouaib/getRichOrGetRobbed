@@ -26,6 +26,7 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local BasePetsController = require(script.Parent.BasePetsController)
 local SessionData = require(script.Parent.SessionData)
+local TradePolicy = require(script.Parent.TradePolicy)
 
 local TradeController = {}
 
@@ -162,6 +163,10 @@ local function execute(trade: Trade)
 		cancel(trade, "PetGone")
 		return
 	end
+	if not TradePolicy.Allowed(a.player) or not TradePolicy.Allowed(b.player) then
+		cancel(trade, "Restricted")
+		return
+	end
 	-- Une seule étape, sans aucune attente entre les retraits et les ajouts.
 	if next(a.offer) and not SessionData.RemovePets(a.player, a.offer) then
 		cancel(trade, "PetGone")
@@ -213,6 +218,15 @@ local function onRequest(player: Player, target: unknown)
 	end
 	if not isFree(target) then
 		send(player, "Cancelled", "Busy")
+		return
+	end
+	-- Règle Roblox : pas d'échange d'objets payants là où c'est interdit (server/TradePolicy).
+	if not TradePolicy.Allowed(player) then
+		send(player, "Cancelled", "Restricted")
+		return
+	end
+	if not TradePolicy.Allowed(target) then
+		send(player, "Cancelled", "TargetRestricted")
 		return
 	end
 	local myRoot, theirRoot = getRoot(player), getRoot(target)

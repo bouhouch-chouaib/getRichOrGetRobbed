@@ -1038,6 +1038,10 @@ local entries: { { any } } = {
 	{ "Un chaudron de sorcière sur pattes qui avale tous les bonbons.", "A witch's cauldron on legs that gobbles up all the candy." },
 	{ "Halloween 2026", "Halloween 2026", true },
 	{ "Ouvrir un œuf Citrouille pendant Halloween 2026.", "Open a Pumpkin Egg during Halloween 2026." },
+	-- Règle Roblox sur l'échange d'objets payants
+	{ "TU NE PEUX PAS ÉCHANGER DE FAMILIERS", "YOU CAN'T TRADE PETS" },
+	{ "CE JOUEUR NE PEUT PAS ÉCHANGER", "THIS PLAYER CAN'T TRADE" },
+	{ "LE MARCHÉ N'EST PAS DISPONIBLE POUR TOI", "THE MARKET ISN'T AVAILABLE FOR YOU" },
 }
 
 return entries

@@ -483,6 +483,9 @@ local CANCEL_MESSAGES: { [string]: string } = {
 	Cancelled = "ÉCHANGE ANNULÉ",
 	Left = "L'AUTRE JOUEUR EST PARTI : ÉCHANGE ANNULÉ",
 	PetGone = "UN FAMILIER N'EST PLUS LÀ : ÉCHANGE ANNULÉ",
+	-- Règle Roblox sur l'échange d'objets payants (server/TradePolicy).
+	Restricted = "TU NE PEUX PAS ÉCHANGER DE FAMILIERS",
+	TargetRestricted = "CE JOUEUR NE PEUT PAS ÉCHANGER",
 }
 local SOFT_MESSAGES: { [string]: string } = {
 	Full = string.format("%d FAMILIERS MAX !", TRADE.MaxPets),

@@ -21,6 +21,7 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local BaseManager = require(script.Parent.BaseManager)
 local BasePetsController = require(script.Parent.BasePetsController)
 local SessionData = require(script.Parent.SessionData)
+local TradePolicy = require(script.Parent.TradePolicy)
 
 local MarketController = {}
 
@@ -79,6 +80,10 @@ function MarketController.List(player: Player, petId: unknown, price: unknown): 
 	if type(petId) ~= "string" or not PetCatalog.ById[petId] or type(price) ~= "number" then
 		return false, "VENTE IMPOSSIBLE"
 	end
+	-- Règle Roblox : pas d'échange d'objets payants là où c'est interdit (server/TradePolicy).
+	if not TradePolicy.Allowed(player) then
+		return false, "LE MARCHÉ N'EST PAS DISPONIBLE POUR TOI"
+	end
 	if price ~= price or price < Config.Market.MinPrice or price > Config.Market.MaxPrice then
 		return false, "CE PRIX NE MARCHE PAS"
 	end
@@ -125,6 +130,12 @@ function MarketController.Buy(buyer: Player, id: unknown): (boolean, string)
 	local seller = listing.seller
 	if seller == buyer then
 		return false, "C'EST TA PROPRE VENTE"
+	end
+	if not TradePolicy.Allowed(buyer) then
+		return false, "LE MARCHÉ N'EST PAS DISPONIBLE POUR TOI"
+	end
+	if not TradePolicy.Allowed(seller) then
+		return false, "PAS POSSIBLE POUR L'INSTANT"
 	end
 	if not seller.Parent or not SessionData.IsLoaded(seller) or not SessionData.IsLoaded(buyer) then
 		return false, "PAS POSSIBLE POUR L'INSTANT"

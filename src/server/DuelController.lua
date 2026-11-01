@@ -37,6 +37,7 @@ local PowerController = require(script.Parent.PowerController)
 local PullRewards = require(script.Parent.PullRewards)
 local BadgeController = require(script.Parent.BadgeController)
 local SessionData = require(script.Parent.SessionData)
+local TradePolicy = require(script.Parent.TradePolicy)
 
 local DuelController = {}
 
@@ -231,6 +232,8 @@ local function grant(duel: Duel, winner: Side, loser: Side, index: number): (str
 		local ok = loser.player.Parent ~= nil
 			and SessionData.IsLoaded(loser.player)
 			and SessionData.IsLoaded(player)
+			and TradePolicy.Allowed(player)
+			and TradePolicy.Allowed(loser.player)
 			and SessionData.RemovePets(loser.player, { [petId] = 1 })
 		if ok then
 			-- Le familier quitte la base du perdant : sa réservation n'a plus lieu d'être.
@@ -248,7 +251,8 @@ local function grant(duel: Duel, winner: Side, loser: Side, index: number): (str
 			Remotes.DuelEvent:FireAllClients("PetWon", player.DisplayName, loser.player.DisplayName, petId)
 			return string.format("%s EST À TOI !", if entry then string.upper(entry.Name) else petId), true
 		end
-		-- Le perdant est parti ou n'a plus ce familier : la plus grosse case d'argent à la place.
+		-- Le perdant est parti, n'a plus ce familier, ou Roblox interdit l'échange d'objets payants à l'un des deux
+		-- (server/TradePolicy) : la plus grosse case d'argent à la place.
 		slot = { Kind = "Money", Label = "10 MIN D'ARGENT", Color = slot.Color, Seconds = 600 }
 	end
 	if slot.Kind == "Pulls" then

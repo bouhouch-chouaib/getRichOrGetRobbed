@@ -24,6 +24,7 @@ local function newPlayer(name, userId)
 	return { Name = name, DisplayName = name, UserId = userId, Parent = "Players" }
 end
 local seller, buyer = newPlayer("Seller", 1), newPlayer("Buyer", 2)
+local restricted = {} -- joueurs à qui Roblox interdit l'échange d'objets payants (server/TradePolicy)
 local data = {
 	[seller] = { loaded = true, money = 0, pets = { Rex = 2, Fish = 1 }, equipped = { Fish = 1 } },
 	[buyer] = { loaded = true, money = 1000, pets = {}, equipped = {} },
@@ -107,6 +108,9 @@ local modules = {
 		end,
 	},
 	SessionData = SessionData,
+	TradePolicy = { Allowed = function(player)
+		return not restricted[player]
+	end },
 }
 local guid = 0
 local services = {
@@ -179,6 +183,17 @@ data[seller].equipped.Rex = nil
 data[seller].loaded = false
 assert(not Market.Buy(buyer, second.id), "bought from an unloaded profile")
 data[seller].loaded = true
+
+-- Règle Roblox IsPaidItemTradingAllowed : un joueur à qui c'est interdit ne vend ni n'achète, et on ne lui achète rien.
+restricted[buyer] = true
+assert(not Market.Buy(buyer, second.id), "restricted buyer bought")
+assert(not Market.List(buyer, "Rex", 50), "restricted player listed")
+restricted[buyer] = nil
+restricted[seller] = true
+data[seller].equipped.Rex = nil
+assert(not Market.Buy(buyer, second.id), "bought from a restricted seller")
+assert(data[buyer].pets.Rex == 1, "state changed on restricted buy")
+restricted[seller] = nil
 
 -- Retirer : seulement le vendeur.
 assert(not Market.Cancel(buyer, second.id), "cancelled someone else's listing")
