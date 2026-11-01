@@ -44,6 +44,9 @@ une fois chacun, champ sauvegardé `guides`, `Remotes.GuideSeen`) ; Toast 6 s (c
 et panneau, carte « batte », traînée, 8 nids / 4 places, aspects des stations 1 à 100. Pas vu : achat d'une place, file d'œufs en
 jeu, Rebirth réel, téléphone. Économie non resimulée (`economy_simulator.py`) : à refaire.
 **Shorts / TikTok : c'est Chouaib qui les fait** (29 oct. : il a refusé le tournage vertical par Studio) ; ne pas les refaire.
+**Questionnaire de maturité (1er nov.)** : déclaré « respecte `ArePaidRandomItemsRestricted` » (RobuxShop, capsule) et
+« respecte `IsPaidItemTradingAllowed` » (`server/TradePolicy` : échange, Marché et familier de la roue du duel refusés là
+où Roblox l'interdit). **Toute nouvelle façon de passer un familier d'un joueur à l'autre doit appeler `TradePolicy.Allowed`.**
 **Lire aussi `docs/ROADMAP.md`** : écarts avec les jeux de référence, feuille de route priorisée (P0/P1/P2),
 spec du vol de familiers (prochaine feature) et notes techniques de passation (§7).
 **Pour tout travail visuel, lire `docs/DIRECTION_ARTISTIQUE.md`** (style Steal an Egg relevé sur captures :
